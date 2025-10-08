@@ -53,7 +53,7 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             select new
             {
                 problem.Id,
-                TagIds = problem.Tags.Select(tag => tag.Id).ToImmutableHashSet(),
+                TagIds = problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Select(pt => pt.TagId).ToImmutableHashSet(),
                 problem.RoundInstance.Round.CompetitionId,
                 problem.RoundInstance.Round.CompositeSlug,
                 problem.StatementEmbedding,

@@ -82,7 +82,7 @@ public class ProblemSimilarityService(
                 && relevantCompetitionSlug.Contains(problem.RoundInstance.Round.CompositeSlug));
 
         // The candidate must have at least one tag in common with the source problem if it has any tags
-        candidatesQuery = candidatesQuery.Where(problem => problem.Tags.Any(tag => sourceProblemData.TagsIds.Contains(tag.Id)));
+        candidatesQuery = candidatesQuery.Where(problem => problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Any(pt => sourceProblemData.TagsIds.Contains(pt.TagId)));
 
         // The candidate's statement must exist...
         candidatesQuery = candidatesQuery.Where(problem => problem.StatementEmbedding != null &&
@@ -122,7 +122,7 @@ public class ProblemSimilarityService(
                     : null,
 
                 // Tags
-                TagIds = problem.Tags.Select(tag => tag.Id).ToImmutableHashSet(),
+                TagIds = problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Select(pt => pt.TagId).ToImmutableHashSet(),
 
                 // The 'competiton-category-round' slug
                 Slug = problem.RoundInstance.Round.CompositeSlug,

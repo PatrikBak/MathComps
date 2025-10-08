@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared.Cli;
 using Spectre.Console;
+using System.Collections.Immutable;
 using System.ComponentModel;
 
 namespace MathComps.Cli.Tagging.Commands;
@@ -43,6 +44,10 @@ public class InteractiveTagManagerCommand(
             // Remove a tag from a problem
             case "remove":
                 await HandleRemove(commandParts);
+                break;
+
+            case "cleartag":
+                await HandleClearTag(commandParts);
                 break;
 
             // Clear the tags from a problem
@@ -100,16 +105,13 @@ public class InteractiveTagManagerCommand(
 
         // Construct tag collection in the format expected by the database service.
         // The existing service requires categorized collections rather than individual tags.
-        var tagCollection = tagType switch
+        var tagsDict = new Dictionary<string, ProblemTagData>
         {
-            TagType.Area => new TagCollection(Area: [tagName], Type: null, Technique: null),
-            TagType.Type => new TagCollection(Area: null, Type: [tagName], Technique: null),
-            TagType.Technique => new TagCollection(Area: null, Type: null, Technique: [tagName]),
-            _ => throw new ArgumentException($"Unsupported tag type: {tagType}"),
+            [tagName] = new ProblemTagData(tagType, 1.0f)
         };
 
         // Execute the database update using single-problem operation.
-        await databaseService.UpdateTagsForProblemAsync(problemId.Value, tagCollection);
+        await databaseService.AddTagsForProblemAsync(problemId.Value, tagsDict.ToImmutableDictionary());
 
         // Confirm successful operation with clear visual feedback.
         AnsiConsole.MarkupLine($"[green]✓[/] Added [yellow]{Markup.Escape(tagName)}[/] ([dim]{tagType.ToString().ToLower()}[/]) to [cyan]{Markup.Escape(problemSlug)}[/]");
@@ -151,6 +153,33 @@ public class InteractiveTagManagerCommand(
     }
 
     /// <summary>
+    /// Handles the 'clearTag' command to disassociate a specific tag from all problems.
+    /// Expected format: clearTag "<tag-name>"
+    /// </summary>
+    /// <param name="parts">Parsed command components from user input.</param>
+    private async Task HandleClearTag(string[] parts)
+    {
+        // Validate command structure for required parameters.
+        if (parts.Length != 2)
+            throw new ArgumentException("Remove command requires: clearTag \"<tag-name>\"");
+
+        // Parse args
+        var tagName = parts[1];
+
+        // Load usage for all tags; this is our decision surface.
+        var usages = await databaseService.GetAllTagUsageAsync();
+        var usage = usages.FirstOrDefault(u => u.Name == tagName);
+        if (usage is null)
+        {
+            AnsiConsole.MarkupLine($"[red]Tag not found:[/] {Markup.Escape(tagName)}");
+            return;
+        }
+
+        await databaseService.RemoveTagFromAllProblemsAsync(usage.Id);
+        AnsiConsole.MarkupLine($"[green]✓[/] Removed [yellow]{Markup.Escape(tagName)}[/] from {usage.ProblemCount} problems");
+    }
+
+    /// <summary>
     /// Handles the 'clear' command to remove all tags from a specified problem.
     /// This is a bulk operation that removes all tag associations for the problem.
     /// Expected format: clear <problem-slug>
@@ -177,10 +206,7 @@ public class InteractiveTagManagerCommand(
             return;
         }
 
-        // Execute tag removal by providing empty tag collection.
-        // The service interprets empty collections as a complete clear operation.
-        var emptyTagCollection = new TagCollection(Area: null, Type: null, Technique: null);
-        await databaseService.UpdateTagsForProblemAsync(problemId.Value, emptyTagCollection);
+        await databaseService.ClearTagsForProblemAsync(problemId.Value);
 
         // Confirm successful operation with clear visual feedback.
         AnsiConsole.MarkupLine($"[green]✓[/] Cleared all tags from [cyan]{Markup.Escape(problemSlug)}[/]");
@@ -215,24 +241,23 @@ public class InteractiveTagManagerCommand(
 
         // Retrieve current tags for the problem from the database service.
         var tagCollection = await databaseService.GetTagsForProblemAsync(problemId.Value);
+        var tagsByCategory = tagCollection.GroupBy(kv => kv.Value.TagType)
+            .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(kv => kv.Key, kv => kv.Value));
 
         // Display the tags organized by category for clear presentation.
         AnsiConsole.MarkupLine($"[bold]Tags for problem [cyan]{Markup.Escape(problemSlug)}[/]:[/]");
 
-        // Display Area tags if they exist.
-        if (tagCollection?.Area != null && tagCollection.Area.Length > 0)
-            AnsiConsole.MarkupLine($"  [dim]Area:[/] {string.Join(", ", tagCollection.Area.Select(Markup.Escape))}");
-
-        // Display Type tags if they exist.
-        if (tagCollection?.Type != null && tagCollection.Type.Length > 0)
-            AnsiConsole.MarkupLine($"  [dim]Type:[/] {string.Join(", ", tagCollection.Type.Select(Markup.Escape))}");
-
-        // Display Technique tags if they exist.
-        if (tagCollection?.Technique != null && tagCollection.Technique.Length > 0)
-            AnsiConsole.MarkupLine($"  [dim]Technique:[/] {string.Join(", ", tagCollection.Technique.Select(Markup.Escape))}");
+        foreach (var kv0 in tagsByCategory)
+        {
+            AnsiConsole.MarkupLine($"  [dim]{kv0.Key}:[/]");
+            foreach (var kv in kv0.Value)
+            {
+                AnsiConsole.MarkupLine($"    [green]{kv.Key}[/] (\"{kv.Value.Justification}\", GoodnessOfFit = {kv.Value.GoodnessOfFit})");
+            }
+        }
 
         // If no tags were found, show appropriate message.
-        if (tagCollection?.GetAllTags().IsEmpty ?? false)
+        if (tagCollection.Count == 0)
             AnsiConsole.MarkupLine("  [dim]No tags assigned[/]");
 
     }
@@ -253,6 +278,10 @@ public class InteractiveTagManagerCommand(
         AnsiConsole.MarkupLine("[cyan]clear[/] <problem-slug>");
         AnsiConsole.MarkupLine("  Remove all tags from a problem");
         AnsiConsole.MarkupLine("  Example: [dim]clear csmo-2023-a-1[/]");
+        AnsiConsole.MarkupLine("");
+        AnsiConsole.MarkupLine("[cyan]clearTag[/] <tag-name>");
+        AnsiConsole.MarkupLine("  Remove the tag from all problems");
+        AnsiConsole.MarkupLine("  Example: [dim]clearTag \"Teória kúzel\"[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]list[/] <problem-slug>");
         AnsiConsole.MarkupLine("  Show all tags currently assigned to a problem");

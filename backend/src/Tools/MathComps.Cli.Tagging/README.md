@@ -8,9 +8,9 @@ The tagging process is a workflow that combines AI suggestions with human oversi
 
 ### 1. Define the Official Vocabulary
 
-- All approved tags are stored in `Data/approved-tags.txt`.
+- All approved tags are stored in `Data/approved-tags.json`.
 - This file is the single source of truth, managed by a human, and is version-controlled.
-- Tags are organized into three categories: **Area** (e.g., Algebra), **Type** (e.g., Inequality), and **Technique** (e.g., Mathematical Induction).
+- Tags are organized into four categories: **Area** (e.g., Algebra), **Goal** (e.g. Geometric construction), **Type** (e.g., Inequality), and **Technique** (e.g., Mathematical Induction).
 
 ### 2. Brainstorming New Tags with AI
 
@@ -21,18 +21,35 @@ The tagging process is a workflow that combines AI suggestions with human oversi
 ### 3. Curate and Approve Suggestions
 
 - Review the AI's suggestions in `Data/SuggestedTags/`.
-- If a suggestion feel right, manually add it to `Data/approved-tags.txt`. This ensures a human is always in control of the tag vocabulary.
+- If a suggestion feel right, manually add it to `Data/approved-tags.json`. This ensures a human is always in control of the tag vocabulary.
 
 ### 4. Apply Tags with AI Assistance
 
 - The `tag-problems` command applies the official tags to problems.
 - For each problem, it sends the text and the _entire list of approved tags_ to the LLM.
-- The AI then selects the most appropriate tags from the list.
+- The AI then selects the most appropriate tags from the list. For each of the tags, it assigns a *goodness of fit* and a justification for that tag. Tags are considered approved if their goodness of fit is at least 0.5, otherwise they are considered rejected.
 - **Note**: If a problem has no solution, the AI is forbidden from assigning **Technique** tags.
+- You can choose to apply tags only from some subset using the `--tag-selection-file` command line option. This is useful e.g. when re-tagging a select few tags (e.g. you find out the AI doesn't process them well, adjust the description in `approved-tags.json` and want to apply the changes).
+- You can use `--clear-tags` to clear all the tags from the tag selection file before doing the tagging. (If no tag selection file is provided, it clears *all* tags.)
+- The database stores not only the approved tags, but also the rejected tags. This is so that the next time `tag-problems` is called, it ignores problems that have all the tags already processed. This is useful especially together with `--tag-selection-file`.
 
-### 5. Clean Up Unused Tags
+### 5. Filter bad AI tags
+
+- The `veto-problem-tags` command can be used to filter out AI derived tags which have poor justification.
+- For each problem, it sends the LLM the tags of that problem together with the justification for those
+  tags (these have been stored previously during the `tag-problems` command). The LLM then filters out
+  those tags where the justification is poor.
+- After each use of `veto-problem-tags`, the tags that have been approved (i.e. haven't been rejected)
+  by the LLM have their *confidence* increased by 1. The confidence is essentially a number saying how many
+  times a problem-tag assignment survived the vetoing process. The `veto-problem-tags` has a command line option
+  that limits the problem-tags considered for vetoing to those with small confidence. (Defaults to max 0 confidence,
+  i.e. those tags that haven't been through vetoing process yet.)
+- The removed tags are still kept in the database, just their goodness-of-fit is set to 0. This is so that when you later call `tag-problems` (e.g. when new problems are added), it doesn't try to assign the vetoed problem-tags.
+
+### 6. Review, clean up, redo
 
 - The `prune-tags` command helps maintain the vocabulary by removing tags that are rarely used, keeping the system clean and relevant.
+- Certain tags are more prone to AI errors than others. It is a good idea to review the AI changes, take note of any error-prone tags, and then redo them: remove the tag from the database (using the interactive tool `clearTag`), then create a tag selection file containing the tags to redo, then run `tag-problems --tag-selection <tag-selection-file> ...` again, then run `veto-problem-tags --tag-selection <tag-selection-file> ...`.
 
 ## Command Reference
 
@@ -92,7 +109,8 @@ Starts an interactive session to manually manage tags.
 dotnet run -- interactive
 ```
 
-- **Commands**: `remove <problem> <tag>`, `clear <problem>`, `list <problem>`, `help`, `exit`
+- **Commands**: `remove <problem> <tag>`, `clearTag <tag>`, `clear <problem>`, `list <problem>`, `help`, `exit`
+- Note that `clearTag` removes the tag from the database; it *does not* merely set the goodness-of-fit to 0.
 
 ## Setup
 
@@ -112,7 +130,4 @@ For database connection setup, see the [main backend README](../../../README.md)
 
 ### AI Prompts
 
-The prompts that guide the AI are located in the `Prompts/` directory:
-
-- `suggest-tags-prompt.txt`: Tells the AI how to brainstorm new tags.
-- `tag-problems-prompt.txt`: Tells the AI how to apply existing tags.
+The prompts that guide the AI are located in the `Prompts/` directory.

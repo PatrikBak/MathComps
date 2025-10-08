@@ -34,5 +34,5 @@ public class Tag
     /// <summary>
     /// Problems associated with this tag.
     /// </summary>
-    public ICollection<Problem> Problems { get; } = [];
+    public ICollection<ProblemTag> ProblemTagsAll { get; } = [];
 }

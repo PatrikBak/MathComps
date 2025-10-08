@@ -22,7 +22,7 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
     };
 
     /// <inheritdoc />
-    public async Task<string> GenerateContentAsync(string model, string systemPrompt, string userPrompt, CancellationToken cancellationToken = default)
+    public async Task<string> GenerateContentAsync(string model, string systemPrompt, string userPrompt, int thinkingBudget, CancellationToken cancellationToken = default)
     {
         // The API key is essential for authenticating with the Gemini API.
         var apiKey = geminiSettings.Value.ApiKey;
@@ -44,6 +44,10 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
             Contents = new[]
             {
                 new { Parts = new[] { new { Text = userPrompt } } }
+            },
+            GenerationConfig = new
+            {
+                ThinkingConfig = new { ThinkingBudget = thinkingBudget }
             }
         };
 

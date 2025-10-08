@@ -77,9 +77,10 @@ public class Problem
     public ICollection<ProblemImage> Images { get; } = [];
 
     /// <summary>
-    /// Associated tags (many-to-many).
+    /// Associated tags via the ordered join entity. This includes all tags processed
+    /// by the LLM, even the rejected ones (i.e. ones with goodness of fit < 0.5).
     /// </summary>
-    public ICollection<Tag> Tags { get; } = [];
+    public ICollection<ProblemTag> ProblemTagsAll { get; } = [];
 
     /// <summary>
     /// Similarity edges to other problems where this problem is the source.

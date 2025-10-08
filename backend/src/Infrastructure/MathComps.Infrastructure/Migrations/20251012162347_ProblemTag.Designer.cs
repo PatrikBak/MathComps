@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -13,9 +14,11 @@ using Pgvector;
 namespace MathComps.Infrastructure.Migrations
 {
     [DbContext(typeof(MathCompsDbContext))]
-    partial class MathCompsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251012162347_ProblemTag")]
+    partial class ProblemTag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -351,7 +354,7 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("confidence");
 
-                    b.Property<float>("GoodnessOfFit")
+                    b.Property<float?>("GoodnessOfFit")
                         .HasColumnType("real")
                         .HasColumnName("goodness_of_fit");
 
@@ -633,7 +636,7 @@ namespace MathComps.Infrastructure.Migrations
 
                             b1.HasKey("ProblemSimilaritySourceProblemId", "ProblemSimilaritySimilarProblemId");
 
-                            b1.ToTable("problem_similarities", (string)null);
+                            b1.ToTable("problem_similarities");
 
                             b1.ToJson("components");
 
@@ -652,14 +655,14 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemTag", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
-                        .WithMany("ProblemTagsAll")
+                        .WithMany("ProblemTags")
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_problem_tag_problems_problem_id");
 
                     b.HasOne("MathComps.Domain.EfCoreEntities.Tag", "Tag")
-                        .WithMany("ProblemTagsAll")
+                        .WithMany("ProblemTags")
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -735,7 +738,7 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.Navigation("ProblemAuthors");
 
-                    b.Navigation("ProblemTagsAll");
+                    b.Navigation("ProblemTags");
 
                     b.Navigation("SimilarProblems");
                 });
@@ -757,7 +760,7 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Tag", b =>
                 {
-                    b.Navigation("ProblemTagsAll");
+                    b.Navigation("ProblemTags");
                 });
 #pragma warning restore 612, 618
         }

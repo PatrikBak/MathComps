@@ -1,4 +1,5 @@
 using MathComps.Cli.Tagging.Dtos;
+using System.Collections.Immutable;
 using System.Text.Json;
 
 namespace MathComps.Cli.Tagging.Commands;
@@ -10,7 +11,7 @@ namespace MathComps.Cli.Tagging.Commands;
 public static class TaggingHelpers
 {
     /// <summary>
-    /// Parses a raw assistant response produced by the tagging tools into a structured <see cref="TagCollection"/>.
+    /// Parses a raw assistant response produced by the tagging tools into a structured <see cref="TagsByCategory"/>.
     /// Cleans markdown code fences, handles the sentinel "NONE", and deserializes JSON.
     /// Throws when the response cannot be parsed into the expected shape.
     /// </summary>
@@ -19,21 +20,48 @@ public static class TaggingHelpers
     /// or the sentinel "NONE" when no tags are suggested.
     /// </param>
     /// <returns>
-    /// A <see cref="TagCollection"/> when parsing succeeds; an empty <see cref="TagCollection"/> when the response is "NONE".
+    /// A <see cref="SimpleTagsByCategory"/> when parsing succeeds; an empty <see cref="SimpleTagsByCategory"/> when the response is "NONE".
     /// </returns>
-    public static TagCollection? ParseAiResponse(string response)
+    public static SimpleTagsByCategory ParseSuggestedTags(string response)
     {
-        // No tags
-        if (response.Trim().ToUpperInvariant() is "NONE")
-            return new([], [], []);
-
         // Clean up AI response - remove markdown code blocks if present.
-        var aiResponseJson = CleanJsonResponse(response);
+        var cleanedResponse = CleanJsonResponse(response);
 
         // Attempt to parse the JSON response to validate format and count suggestions.
-        return JsonSerializer.Deserialize<TagCollection>(aiResponseJson)
-            // Forbid null
-            ?? throw new Exception("AI response parsed to null");
+        var result = JsonSerializer.Deserialize<SimpleTagsByCategory>(cleanedResponse);
+        if (result == null)
+        {
+            var exc = new Exception("AI response parsed to null");
+            exc.Data["aiResponse"] = response;
+            throw exc;
+        }
+        return result;
+    }
+
+    public static ImmutableDictionary<string, TagApprovalDecision> ParseTagApprovals(string response)
+    {
+        var cleanedResponse = CleanJsonResponse(response);
+        var result = JsonSerializer.Deserialize<ImmutableDictionary<string, TagApprovalDecision>>(cleanedResponse);
+        if (result == null)
+        {
+            var exc = new Exception("AI response parsed to null");
+            exc.Data["aiResponse"] = response;
+            throw exc;
+        }
+        return result;
+    }
+
+    public static ImmutableDictionary<string, TagFitness> ParseTagFitnesses(string response)
+    {
+        var cleanedResponse = CleanJsonResponse(response);
+        var result = JsonSerializer.Deserialize<ImmutableDictionary<string, TagFitness>>(cleanedResponse);
+        if (result == null)
+        {
+            var exc = new Exception("AI response parsed to null");
+            exc.Data["aiResponse"] = response;
+            throw exc;
+        }
+        return result;
     }
 
     /// <summary>

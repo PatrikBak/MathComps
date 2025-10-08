@@ -1,0 +1,45 @@
+Classify a math problem using only tags from the JSON below ("CANDIDATE TAGS").
+Both the tags and the problem are in Slovak. The format of
+the JSON is as follows:
+
+{[tag]: {"category": string, "description": string}}
+
+where 'category' is the category of the tag, and the description is optional
+(it can be an empty string). The meaning of categories is as follows:
+- Area: Mathematical fields
+- Goal: What is the problem asking of us
+- Type: What the problem is about. This is similar to the Area category, except it is
+  more in detail. Acceptable use is to flag the use of a certain term / mathematical object
+  in the problem statement.
+
+CANDIDATE TAGS:
+{candidate_tags}
+
+PROBLEM: {problem_statement}
+
+{already_assigned_tags_text}
+
+Rules:
+- Use ONLY candidate tags (exact spelling, case-insensitive match). Do not create new tags
+- Exactly 1 Area tag must be selected (approved) - prefer most specific (e.g., "Kombinatorická geometria" not "Geometria" + "Kombinatorika")
+- Any number of Type tags may be approved, but they must be relevant.
+- For most problems there should be exactly 1 approved goal tag. There may be exceptions, but there should be good reason for them;
+  in rare cases it may happen that none of the known goal tags match, but otherwise there should always be at least 1 goal tag.
+  Prefer most specific goal tag.
+- Each tag must trivially follow from the problem statement, i.e. there must be no non-trivial
+  inference. Otherwise, it could give away a part of the solution, which we want to avoid.
+- If there are two tags from the same category such that one is more specific than the other,
+  only the more specific tag should be used. (E.g. if the only purpose of
+  a tag is that "another relevant tag is defined in terms of it", then it
+  should be rejected.)
+
+You must output a JSON (and only this JSON) with the following format:
+{[tag]: {"goodnessOfFit": float, "justification": string}}
+
+It must be a valid JSON (i.e. no C-like comments, ...).
+
+Each tag from among the candidate tags must be exactly once in the output JSON.
+Do not use escaped TeX (e.g. "\angle", "\perp", etc.) in the "justification" field.
+The field "goodnessOfFit" must be a real number between 0 and 1, and it should be
+a numerical value representing how good of a fit the tag is (0 meaning no fit at all,
+1 meaning perfect fit).

@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -13,9 +14,11 @@ using Pgvector;
 namespace MathComps.Infrastructure.Migrations
 {
     [DbContext(typeof(MathCompsDbContext))]
-    partial class MathCompsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251008195523_newTagType")]
+    partial class newTagType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -337,40 +340,6 @@ namespace MathComps.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemTag", b =>
-                {
-                    b.Property<Guid>("ProblemId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("problem_id");
-
-                    b.Property<Guid>("TagId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("tag_id");
-
-                    b.Property<int?>("Confidence")
-                        .HasColumnType("integer")
-                        .HasColumnName("confidence");
-
-                    b.Property<float>("GoodnessOfFit")
-                        .HasColumnType("real")
-                        .HasColumnName("goodness_of_fit");
-
-                    b.Property<string>("Justification")
-                        .HasColumnType("text")
-                        .HasColumnName("justification");
-
-                    b.HasKey("ProblemId", "TagId")
-                        .HasName("pk_problem_tag");
-
-                    b.HasIndex("ProblemId")
-                        .HasDatabaseName("ix_problem_tag_problem_id");
-
-                    b.HasIndex("TagId")
-                        .HasDatabaseName("ix_problem_tag_tag_id");
-
-                    b.ToTable("problem_tag", (string)null);
-                });
-
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>
                 {
                     b.Property<Guid>("Id")
@@ -545,6 +514,25 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("tags", (string)null);
                 });
 
+            modelBuilder.Entity("problem_tag", b =>
+                {
+                    b.Property<Guid>("problem_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.Property<Guid>("tag_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tag_id");
+
+                    b.HasKey("problem_id", "tag_id")
+                        .HasName("pk_problem_tag");
+
+                    b.HasIndex("tag_id", "problem_id")
+                        .HasDatabaseName("ix_problem_tag_tag_problem");
+
+                    b.ToTable("problem_tag", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Category", null)
@@ -633,7 +621,7 @@ namespace MathComps.Infrastructure.Migrations
 
                             b1.HasKey("ProblemSimilaritySourceProblemId", "ProblemSimilaritySimilarProblemId");
 
-                            b1.ToTable("problem_similarities", (string)null);
+                            b1.ToTable("problem_similarities");
 
                             b1.ToJson("components");
 
@@ -647,27 +635,6 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("SimilarProblem");
 
                     b.Navigation("SourceProblem");
-                });
-
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemTag", b =>
-                {
-                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
-                        .WithMany("ProblemTagsAll")
-                        .HasForeignKey("ProblemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_problem_tag_problems_problem_id");
-
-                    b.HasOne("MathComps.Domain.EfCoreEntities.Tag", "Tag")
-                        .WithMany("ProblemTagsAll")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_problem_tag_tags_tag_id");
-
-                    b.Navigation("Problem");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>
@@ -710,6 +677,23 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Season");
                 });
 
+            modelBuilder.Entity("problem_tag", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", null)
+                        .WithMany()
+                        .HasForeignKey("problem_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_tag_problems_problem_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("tag_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_tag_tags_tag_id");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Author", b =>
                 {
                     b.Navigation("ProblemAuthors");
@@ -735,8 +719,6 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.Navigation("ProblemAuthors");
 
-                    b.Navigation("ProblemTagsAll");
-
                     b.Navigation("SimilarProblems");
                 });
 
@@ -753,11 +735,6 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Season", b =>
                 {
                     b.Navigation("RoundInstances");
-                });
-
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Tag", b =>
-                {
-                    b.Navigation("ProblemTagsAll");
                 });
 #pragma warning restore 612, 618
         }

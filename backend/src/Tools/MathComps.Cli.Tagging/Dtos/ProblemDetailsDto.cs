@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace MathComps.Cli.Tagging.Dtos;
 
 /// <summary>
@@ -11,4 +13,12 @@ public record ProblemDetailsDto(
     Guid Id,
     string Slug,
     string Statement,
-    string? Solution);
+    string? Solution,
+    ImmutableDictionary<string, ProblemTagData> TagsData)
+{
+    /// <summary>
+    /// Returns only tag with goodness-of-fit at least 0.5.
+    /// </summary>
+    public ImmutableDictionary<string, ProblemTagData> ApprovedTags() =>
+        TagsData.Where(kv => kv.Value.GoodnessOfFit >= 0.5f).ToImmutableDictionary();
+}

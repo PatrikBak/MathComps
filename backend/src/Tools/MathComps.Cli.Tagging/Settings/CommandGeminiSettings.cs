@@ -14,4 +14,6 @@ public class CommandGeminiSettings
     /// The path to the system prompt file.
     /// </summary>
     public required string SystemPromptPath { get; set; }
+
+    public required int ThinkingBudget { get; set; }
 }

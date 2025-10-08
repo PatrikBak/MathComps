@@ -5,6 +5,7 @@ using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
@@ -13,7 +14,6 @@ var services = new ServiceCollection();
 
 // Configuration is built manually to support both appsettings.json and user secrets.
 var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false)
     .AddJsonFile("appsettings.json", optional: false)
     .AddUserSecrets<Program>(optional: true)
     .AddEnvironmentVariables()
@@ -35,7 +35,11 @@ services.AddHttpClient<IGeminiService, GeminiService>();
 
 // Command-specific Gemini settings are configured for each CLI command.
 services.AddOptions<CommandGeminiSettings>("SuggestTags").Bind(configuration.GetSection("SuggestTags"));
-services.AddOptions<CommandGeminiSettings>("TagProblems").Bind(configuration.GetSection("TagProblems"));
+services.AddOptions<CommandGeminiSettings>("VetoTags").Bind(configuration.GetSection("VetoTags"));
+services.AddOptions<CommandGeminiSettings>("TagProblemStatement").Bind(configuration.GetSection("TagProblemStatement"));
+services.AddOptions<CommandGeminiSettings>("TagProblemSolution").Bind(configuration.GetSection("TagProblemSolution"));
+services.AddOptions<CommandGeminiSettings>("VetoProblemStatementTags").Bind(configuration.GetSection("VetoProblemStatementTags"));
+services.AddOptions<CommandGeminiSettings>("VetoProblemSolutionTags").Bind(configuration.GetSection("VetoProblemSolutionTags"));
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
@@ -56,6 +60,7 @@ app.Configure(config =>
     // Commands
     config.AddCommand<SuggestTagsCommand>("suggest-tags");
     config.AddCommand<TagProblemsCommand>("tag-problems");
+    config.AddCommand<VetoProblemTagsCommand>("veto-problem-tags");
     config.AddCommand<PruneTagsCommand>("prune-tags");
     config.AddCommand<InteractiveTagManagerCommand>("interactive");
 

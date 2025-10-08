@@ -92,7 +92,7 @@ public class ProblemFilterService(
                     problem.Number
                 ),
                 // Tags
-                problem.Tags.Select(tag => new TagDto(tag.Slug, tag.Name, tag.TagType)).ToImmutableList(),
+                problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Select(pt => new TagDto(pt.Tag.Slug, pt.Tag.Name, pt.Tag.TagType)).ToImmutableList(),
                 // Authors
                 problem.ProblemAuthors
                     // Maintain author order by ordinal
@@ -278,7 +278,7 @@ public class ProblemFilterService(
 
                     // We want any tags
                     problems = problems.Where(problem =>
-                        problem.Tags.Any(tag => parameters.TagSlugs.Contains(tag.Slug)));
+                        problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Any(pt => parameters.TagSlugs.Contains(pt.Tag.Slug)));
 
                     break;
 
@@ -290,7 +290,7 @@ public class ProblemFilterService(
                     {
                         // Each iteration adds one more required tag
                         problems = problems.Where(problem =>
-                            problem.Tags.Any(tag => tag.Slug == tagSlug));
+                            problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Any(pt => pt.Tag.Slug == tagSlug));
                     }
 
                     break;
@@ -408,7 +408,8 @@ public class ProblemFilterService(
         // Build tag facet options sorted by popularity then alphabetically
         var tagGroups = await tagsScope
             // Extract tags for grouping
-            .SelectMany(problem => problem.Tags)
+            .SelectMany(problem => problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f))
+            .Select(pt => pt.Tag)
             // Group by unique tag (name + slug)
             .GroupBy(tag => new { tag.Name, tag.Slug })
             // Project to intermediate structure with counts
