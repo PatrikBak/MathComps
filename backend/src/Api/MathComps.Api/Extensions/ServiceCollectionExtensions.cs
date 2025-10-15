@@ -56,6 +56,8 @@ public static class ServiceCollectionExtensions
             .AddPolicy("default", policyBuilder => policyBuilder
                 // Get the allowed hosts from the config
                 .WithOrigins(configuration.GetSection("Cors:Origins").Get<string[]>() ?? [])
+                // Needed for wildcard subdomains, e.g. *.example.app. Good for preview branches
+                .SetIsOriginAllowedToAllowWildcardSubdomains()
                 // Allow common headers for browser requests
                 .WithHeaders("Content-Type", "X-Requested-With")
                 // Only required HTTP methods
