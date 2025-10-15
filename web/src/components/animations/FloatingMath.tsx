@@ -238,7 +238,6 @@ const FloatingMathStyles = () => (
       pointer-events: none;
       z-index: 1;
       animation: containerPulse 8s ease-in-out infinite;
-      will-change: opacity;
       transition: opacity 0.3s ease-in-out;
     }
 
@@ -248,7 +247,7 @@ const FloatingMathStyles = () => (
       font-weight: 400;
       pointer-events: none;
       user-select: none;
-      will-change: transform, opacity;
+      will-change: transform;
       transform: translateY(90vh);
       animation-timing-function: linear;
       animation-fill-mode: forwards;
