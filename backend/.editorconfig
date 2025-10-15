@@ -1,0 +1,142 @@
+root = true
+
+# General settings
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+# XML/MSBuild files follow existing 2-space indentation in this repo
+[*.{sln,csproj,props,targets,nuspec,config}]
+indent_style = space
+indent_size = 2
+
+# C# formatting and code-style
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# Prefer modern C# styles
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+csharp_style_expression_bodied_indexers = when_on_single_line:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_prefer_pattern_matching = true:suggestion
+csharp_style_prefer_utf8_string_literals = true:suggestion
+csharp_style_prefer_top_level_statements = true:suggestion
+csharp_style_prefer_extended_property_pattern = true:suggestion
+
+# Qualification and member preferences
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_readonly_field = true:warning
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_prefer_collection_initializer = true:suggestion
+
+# Using directives
+csharp_using_directive_placement = outside_namespace:suggestion
+
+# New line preferences
+csharp_new_line_before_open_brace = all
+
+# Naming: constants are PascalCase
+dotnet_naming_rule.constant_fields_rule.symbols = constant_fields
+dotnet_naming_rule.constant_fields_rule.style = pascal_case_style
+dotnet_naming_rule.constant_fields_rule.severity = warning
+
+dotnet_naming_symbols.constant_fields.applicable_kinds = field
+dotnet_naming_symbols.constant_fields.applicable_accessibilities = *
+dotnet_naming_symbols.constant_fields.required_modifiers = const
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Naming: private fields start with _ and are camelCase
+dotnet_naming_rule.private_fields_rule.symbols = private_fields
+dotnet_naming_rule.private_fields_rule.style = private_prefix_underscore
+dotnet_naming_rule.private_fields_rule.severity = suggestion
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.required_modifiers = !const
+
+dotnet_naming_style.private_prefix_underscore.capitalization = camel_case
+dotnet_naming_style.private_prefix_underscore.required_prefix = _
+
+# Analyzer severity defaults (built-in .NET analyzers)
+dotnet_analyzer_diagnostic.severity = none
+dotnet_analyzer_diagnostic.category-Style.severity = warning
+dotnet_analyzer_diagnostic.category-Design.severity = warning
+dotnet_analyzer_diagnostic.category-Performance.severity = warning
+dotnet_analyzer_diagnostic.category-Reliability.severity = warning
+
+# Documentation: warn if public APIs lack XML docs (keep as warning to avoid breaking builds)
+dotnet_diagnostic.CS1591.severity = warning
+
+# IDE0058: Expression value is never used
+dotnet_diagnostic.IDE0058.severity = none
+
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = none
+
+# CA1062: Validate arguments of public methods
+dotnet_diagnostic.CA1062.severity = none
+
+# IDE0011: Add braces
+dotnet_diagnostic.IDE0011.severity = none
+
+# SYSLIB1045: Convert to 'GeneratedRegexAttribute'.
+dotnet_diagnostic.SYSLIB1045.severity = none
+
+# CA1859: Use concrete types when possible for improved performance
+dotnet_diagnostic.CA1859.severity = none
+
+# CA1310: Specify StringComparison for correctness
+dotnet_diagnostic.CA1310.severity = none
+
+# CA1307: Specify StringComparison for clarity
+dotnet_diagnostic.CA1307.severity = none
+
+# CA2201: Do not raise reserved exception types
+dotnet_diagnostic.CA2201.severity = none
+
+# IDE0061: Use block body for local function
+dotnet_diagnostic.IDE0061.severity = none
+
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none
+
+# IDE0072: Add missing cases
+dotnet_diagnostic.IDE0072.severity = none
+
+# CA1308: Normalize strings to uppercase
+dotnet_diagnostic.CA1308.severity = none
+
+# CA1861: Avoid constant arrays as arguments
+dotnet_diagnostic.CA1861.severity = none
+
+# IDE0320: Make anonymous function static
+dotnet_diagnostic.IDE0320.severity = none
+
+[**/Migrations/*.cs]
+dotnet_diagnostic.IDE0005.severity = none  # Unnecessary using directives
+dotnet_diagnostic.IDE0161.severity = none  # Convert to file-scoped namespace
+dotnet_diagnostic.IDE0300.severity = none  # Collection initialization can be simplified
+
+# CA1008: Enums should have zero value - disable, we don't care
+dotnet_diagnostic.CA1008.severity = none
+
+# CA1861: Prefer 'static readonly' fields over constant array arguments - disable, performance micro-optimization
+dotnet_diagnostic.CA1861.severity = none
+
+# CA1515: Consider making public types internal - disable, we decide accessibility ourselves
+dotnet_diagnostic.CA1515.severity = none

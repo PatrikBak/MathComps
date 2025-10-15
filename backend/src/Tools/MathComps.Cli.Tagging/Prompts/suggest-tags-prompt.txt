@@ -1,0 +1,30 @@
+Suggest NEW tags (in Slovak) for math problems. Propose only generally useful tags that apply to many problems.
+
+Categories:
+- Area: Mathematical fields (Algebra, Geometria, etc.)
+- Type: Problem structures (Sústava rovníc, Nerovnosť, etc.)  
+- Technique: Solution methods (Indukcia, Dirichletov princíp, etc.)
+
+DISALLOWED TAGS:
+{disallowed_tags}
+
+PROBLEMS:
+{problems}
+
+Rules:
+- Use ONLY tags NOT in disallowed list
+- Prefer established Slovak mathematical terms
+- No difficulty levels or competition names
+- No problem-specific tags
+- No restatements of disallowed tags (e.g., if "Matematická indukcia" disallowed, don't suggest "Dôkaz matematickou indukciou", "Indukčný dôkaz", etc.)
+
+Before responding, verify:
+✓ No tag appears in disallowed list (including restatements/variations)
+✓ Tags apply to multiple problems (not problem-specific)
+✓ Uses established Slovak terms
+✓ Each tag fits clearly in one category
+
+Output JSON:
+{"area": ["tag"], "type": ["tag"], "technique": ["tag"]}
+
+If no new tags: NONE

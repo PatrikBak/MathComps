@@ -1,0 +1,73 @@
+%!PS
+%%BoundingBox: -1 -1 57 57 
+%%HiResBoundingBox: -0.25 -0.25 56.94281 56.94281 
+%%Creator: MetaPost 1.803
+%%CreationDate: 2020.09.11:1156
+%%Pages: 1
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+gsave newpath 0 0 moveto
+42.5196 0 lineto
+42.5196 14.1732 lineto
+56.69281 14.1732 lineto
+56.69281 56.69281 lineto
+14.1732 56.69281 lineto
+14.1732 42.5196 lineto
+0 42.5196 lineto
+ closepath clip
+ 0.7 0.98 0.98 setrgbcolor
+newpath 0 0 moveto
+56.69281 0 lineto
+56.69281 56.69281 lineto
+0 56.69281 lineto
+ closepath fill
+ 0.4 0.4 0.4 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth [] 0 setdash
+ 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 14.1732 0 moveto
+14.1732 56.69281 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 14.1732 moveto
+56.69281 14.1732 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 28.3464 0 moveto
+28.3464 56.69281 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 28.3464 moveto
+56.69281 28.3464 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 42.5196 0 moveto
+42.5196 56.69281 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 42.5196 moveto
+56.69281 42.5196 lineto stroke
+ 0 0 0 setrgbcolor
+newpath 0 0 moveto
+0 56.69281 lineto
+56.69281 56.69281 lineto
+56.69281 0 lineto
+ closepath stroke
+grestore
+ 0 0 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+42.5196 0 lineto
+42.5196 14.1732 lineto
+56.69281 14.1732 lineto
+56.69281 56.69281 lineto
+14.1732 56.69281 lineto
+14.1732 42.5196 lineto
+0 42.5196 lineto
+ closepath stroke
+ 0 1 dtransform truncate idtransform setlinewidth pop 1 setlinecap
+newpath 17.00781 17.00781 moveto
+19.04697 20.53973 21.97989 23.47266 25.51181 25.51181 curveto stroke
+newpath 17.00781 25.51181 moveto
+25.51181 17.00781 lineto stroke
+newpath 31.18102 31.18102 moveto
+33.22017 34.71294 36.15309 37.64586 39.68501 39.68501 curveto stroke
+newpath 31.18102 39.68501 moveto
+39.68501 31.18102 lineto stroke
+showpage
+%%EOF

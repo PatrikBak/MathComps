@@ -1,0 +1,37 @@
+%!PS
+%%BoundingBox: -1 -1 39 39 
+%%HiResBoundingBox: -0.5 -0.5 38.76767 38.76767 
+%%Creator: MetaPost 2.00
+%%CreationDate: 2023.03.05:1103
+%%Pages: 1
+%*Font: cs-lmr12 11.95517 11.95517 41:e
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 0 0 setrgbcolor 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 12.75589 0 moveto
+12.75589 38.26767 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 12.75589 moveto
+38.26767 12.75589 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 25.51178 0 moveto
+25.51178 38.26767 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 25.51178 moveto
+38.26767 25.51178 lineto stroke
+ 0 1 dtransform truncate idtransform setlinewidth pop
+newpath 0 0 moveto
+38.26767 0 lineto
+38.26767 38.26767 lineto
+0 38.26767 lineto
+ closepath stroke
+14.98888 27.71336 moveto
+(B) cs-lmr12 11.95517 fshow
+14.74628 14.95747 moveto
+(A) cs-lmr12 11.95517 fshow
+27.66257 14.95747 moveto
+(C) cs-lmr12 11.95517 fshow
+showpage
+%%EOF

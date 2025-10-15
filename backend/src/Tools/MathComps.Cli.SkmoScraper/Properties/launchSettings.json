@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "Scrape All": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "scrape"
+    },
+    "Scrape One Year": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "scrape --start-year 70 --end-year 70 --output test.json"
+    },
+    "Update Database": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "update-solution-links"
+    }
+  }
+}

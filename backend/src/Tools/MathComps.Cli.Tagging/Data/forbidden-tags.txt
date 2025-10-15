@@ -1,0 +1,24 @@
+# Not very useful
+Rovnoramenný trojuholník
+Vnútorné uhly
+Vonkajší uhol
+Mocniny
+Kubická rovnica
+Lineárna rovnica
+Riešenie grafu
+Rovnobežka
+Tetiva
+Úsečka
+Rovnoramenný lichobežník
+Symetria
+Osi strán
+Osi uhlov
+Symetria
+Obvod
+Zlomok
+
+# Already restated / specified
+Dolná celá časť
+Horná celá časť
+Súmernosť
+Teória hier

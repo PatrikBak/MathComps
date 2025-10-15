@@ -1,0 +1,27 @@
+# Helper HTML preview files
+ArchiveHtml/*.html
+
+# Ignore all files in Archive directory except for relevant TeX files and images
+Archive/**
+
+# Un-ignore year directories so we can specify rules within them
+!Archive/*/
+
+# Keep only specific TeX files in year directories
+!Archive/*/zadania.tex
+!Archive/*/zadaniaz.tex
+!Archive/*/riesenia.tex
+!Archive/*/rieseniaz.tex
+
+# Un-ignore obr directories and all their contents
+!Archive/*/obr/
+!Archive/*/obr/**
+
+# But ignore specific file types in obr directories
+Archive/*/obr/**/*.tex
+Archive/*/obr/**/*.bak
+Archive/*/obr/**/*.log
+Archive/*/obr/**/*.mp
+Archive/*/obr/**/*.sav
+Archive/*/obr/**/*.mpx
+Archive/*/obr/**/*.dvi

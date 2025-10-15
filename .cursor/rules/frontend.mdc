@@ -1,0 +1,24 @@
+---
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+
+- Always use `cn` from `@/components/shared/utils/css-utils` for class concatenation instead of string concatenation or template literals
+- Write descriptive JSDoc that helps the reader understand context and intent, not just what types are involved.
+- When adding JSDoc comments, always include:
+  - `@param` for each parameter
+  - `@returns` for the return value
+- Always write useful inline comments
+- Prefer comments above code rather than at the end of lines for better readability
+- Make sure that both JSDoc and inline comments tell a story, not restate code
+- Avoid abbreviated variables, even in lambdas
+- Run tests from the web directory using `npm run test:run` for non-interactive test execution
+- Avoid ternary operators for discriminated unions. Instead, use config objects to map variant to values, or use switch statements when that's clearer.
+
+  ```ts
+  // ❌ Bad
+  variant === "info" ? "text-blue-500" : "text-red-500";
+
+  // ✅ Good
+  const color = { info: "text-blue-500", error: "text-red-500" }[variant];
+  ```

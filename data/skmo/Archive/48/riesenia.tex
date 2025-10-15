@@ -1,0 +1,771 @@
+﻿{%%%%%   A-I-1
+...}
+
+{%%%%%   A-I-2
+...}
+
+{%%%%%   A-I-3
+...}
+
+{%%%%%   A-I-4
+Ak rozklad čísla~ $n$ na prvočinitele je
+$n=\prod\limits_{i=1}^{k}p_{i}^{s_{i}}$,
+kde $p_{1},\dots,p_{k}$ sú rôzne prvočísla
+a~$s_{1},\dots,s_{k}$ nezáporné celé čísla, platí pre počet jeho
+kladných deliteľov vzorec
+$\tau(n)=\prod\limits_{i=1}^{k}(s_i+1)$.
+
+Aby daná rovnica mala vôbec zmysel, musí byť jej riešenie~ $n$
+také prirodzené číslo, pre ktoré je aj~$1{,}6n=\frac85n$
+prirodzené, takže $n=2^\a5^\b n'$, kde $\b\ge1$ a~$n'$ je
+nesúdeliteľné s~$2\cdot5$. Danú rovnicu potom môžeme prepísať ako
+$$
+(\a+4)\b\tau(n')=\frac85(\a+1)(\b+1)\tau(n'),
+$$
+čo po krátení kladným číslom $\tau(n')$ a~ďalšej úprave dá rovnicu
+% $$
+% 3\b(\a-4)+8(\a+1)=3\b(\a-4)+8(\a-4)+40=(3\b+8)(\a-4)+40=0.
+% $$
+% Odtiaľ vychádza, že
+$$
+(3\b+8)(4-\a)=40.
+$$
+Vzhľadom k~tomu, že $3\b+8\ge11$ a~číslo $3\b+8$ dáva pri
+delení tromi zvyšok~2, vyhovuje zo všetkých rozkladov čísla~ 40 na súčin
+jedine
+$$
+3\b+8=20,\qquad 4-\a=2,
+$$
+teda $\a=2$, $\b=4$, $n=2^2\cdot5^4n'$.
+
+Pre podiel $\tau(0{,}16n):\tau(n)$ tak vychádza
+$$
+{\tau\bigl(\frac4{25}n\bigr)\over\tau(n)}
+={\tau(2^4\cdot5^2)\tau(n')\over\tau(2^2\cdot5^4)\tau(n')}
+={5\cdot3\over3\cdot5}=1.
+$$
+}
+
+{%%%%%   A-I-5
+...}
+
+{%%%%%   A-I-6
+...}
+
+{%%%%%   B-I-1
+...}
+
+{%%%%%   B-I-2
+...}
+
+{%%%%%   B-I-3
+...}
+
+{%%%%%   B-I-4
+...}
+
+{%%%%%   B-I-5
+...}
+
+{%%%%%   B-I-6
+ Hľadáme vlastne všetky tie hodnoty parametra~ $s$, pre
+ktoré má sústava rovníc
+$$
+\align
+ x^{3} + y^{3} =& 3 xy ,\\
+        x +  y =&s
+\endalign
+$$
+ riešenie v~obore reálnych čísel. Z~druhej rovnice vyjadríme $y =
+s~-x$ a~dosadíme do prvej rovnice, ktorú budeme riešiť
+vzhľadom na~neznámu $x$:
+$$
+\gather
+ x^{3} + ( s~- x)^{3} = 3 x( s~- x),  \\
+ x^{3} + s^{3} - 3 s^{2} x + 3 sx^{2} - x^{3} = 3 sx - 3x^{2},\\
+ 3( s~+ 1) x^{2} - 3 s( s~+ 1) x + s^{3} = 0.
+\endgather
+$$
+ Táto rovnica zrejme nemá riešenie pre $s = -1$. Pre $s\ne-1$ dostávame
+kvadratickú rovnicu, ktorá má v~obore reálnych čísel
+riešenie, práve keď je jej diskriminant~ $D$ nezáporný.
+Výpočtom
+$$
+ D = 9 s^{2}(s + 1)^{2} - 12( s~+ 1) s^{3} = 3 s^{2}( s~+ 1)(3 - s)
+$$
+ zisťujeme, že $D\ge 0$, práve keď $-1\le s\le3$, čo spolu
+s~podmienku $s\ne -1$ dáva hľadanú množinu možných hodnôt
+súčtov~ $s$: je to polouzavretý interval $\(-1,3\>$.
+
+ Spätne je vidieť, že pre každé $s$ z~intervalu $\(-1,3\>$
+existuje číslo $x$, ktoré je koreňom vyššie uvedenej kvadratickej
+rovnice, a~že toto číslo $x$ a~zodpovedajúca hodnota $y= s~- x$
+spĺňajú rovnicu $x^{3} + y^{3} = 3 xy$.
+
+ Pre úplnosť vypočítame tie čísla $x$, $y$, ktoré sú
+pre ľubovoľné $s\in \(-1,3\>$ riešením uvažovanej sústavy:
+$$
+x_{1,2}={3 s( s~+ 1)\pm s\sqrt{3( s~+ 1)(3-s)}\over6(s+1)}=
+    \frac s2\pm s\sqrt{3-s\over12(s+1)} .
+$$
+ Po dosadení do $y = s~- x$ zisťujeme, že danému $s$
+prináležia dve dvojice
+$$
+\align
+ [x,y] =&\left\{\frac s2+s\sqrt{3-s\over12(s+1)},
+              \frac s2-s\sqrt{3-s\over12(s+1)} \right\}\cr
+\intext{či}
+[x,y] =&\left\{\frac s2-s\sqrt{3-s\over12(s+1)},
+                 \frac s2+s\sqrt{3-s\over12(s+1)} \right\}.
+\endalign
+$$
+ Rovnosť $x^{3} + y^{3} = 3 xy$ možno pre nájdené $x$ a~$y$ buď
+overiť dosadením a~priamym výpočtom, alebo pomocou Vi\`etových
+vzorcov pre korene uvedenej kvadratickej rovnice
+$$
+ x + y = s,\quad  xy ={s^3\over3(s+1)} ,
+$$
+ podľa ktorých
+$$
+ x^{3} + y^{3} = ( x + y)^{3} - 3 xy( x + y) =
+    s^{3}-3s\,{s^3\over3(s+1)}={s^3\over s+1} =3 xy.
+$$
+}
+
+{%%%%%   C-I-1
+Najprv zistíme, koľko štvorciferných čísel je možné
+zostaviť z~pevne zvolenej štvorice číslic. V~ďalších úvahách
+budeme nenulové cifry označovať malými písmenami. Rôzne písmená nikdy
+neoznačujú rovnakú číslicu, symbol~ 0 označuje nulu.
+
+ Štvorice číslic $(a,a,a,a)$ a~$(a,0,0,0)$ určujú každá
+len jedno štvorciferné číslo, cifry $a$, $a$, $a$, 0 tri:
+$a\,aa0$, $a\,a0a$, $a\,0aa$. Z~číslic $a$,$a$,$a$,$b$ ($a\ne
+b$) je možné zostaviť len štyri štvorciferné čísla: $a\,aab$,
+$a\,aba$, $a\,baa$, $b\,aaa$.
+
+ Z~cifier $a$, $a$, 0, 0 zostavíme len tri čísla $a\,a00$, $a\,0a0$,
+$a\,00a$. Pre cifry $a$, $a$, $b$, $b$ ($a\ne b$) máme spolu
+šesť možností: $a\,abb$, $a\,bab$, $a\,bba$, $b\,aab$, $b\,aba$,
+$b\,baa$. To je stále málo.
+
+ Číslice $a$, $a$, $b$, 0 určujú práve deväť čísel: $a\,ab0$,
+$a\,a0b$, $a\,ba0$, $a\,b0a$, $a\,0ab$, $a\,0ba$, $b\,aa0$,
+$b\,a0a$, $b\,0aa$. Analogickým postupom zistíme, že vyšetrovanie
+ďalších možností už k~počtu~ 9 nevedie. Prehľad všetkých možných
+výsledkov je uvedený v~nasledujúcej tabuľke.
+$$
+\vbox{  \offinterlineskip
+\spaceskip .29em
+\halign{\strut\vrule#&\ #\hss\ \vrule&&\hss\ $#$ \hss\vrule\cr
+\noalign{\hrule}%
+ & Typ  &a\,000&a\,aaa&a\,aa0&a\,aab&a\,a00&a\,abb&a\,ab0&a\,b00&a\,abc&a\,bc0&a\,bcd \cr
+\noalign{\hrule}%
+ & Počet & 1  & 1  & 3  & 4  & 3  & 6  & 9  & 6  & 12  & 18  & 24 \cr
+\noalign{\hrule}%
+}}
+$$
+
+ Dané číslo má teda cifry $a$, $a$, $b$, 0, kde $a$, $b$
+sú rôzne nenulové číslice.
+
+  Rozlíšme dve situácie a~zapíšme v~každej z~nich písomné
+sčítanie troch najmenších čísel:
+$$
+\vbox{\let\par\cr
+\def\AAAAA{\omit\kern-.5em\vrule width 4em
+height.4pt\relax\kern-.5em}
+\halign{&\hss#\ &\hss$#$&\qquad\qquad# \cr
+           I.& a~< b            &&       II.&  a~> b \cr
+\noalign{\smallskip}%
+             & a\,0ab           &&          &   b\,0aa \cr
+             & a\,0ba           &&          &   b\,a0a \cr
+             & a\,a0b           &&          &   b\,aa0 \cr
+\noalign{\nointerlineskip\vskip2pt}%
+             &\AAAAA            &&          &\AAAAA \cr
+             &12\,528           &&          &  12\,528 \cr
+}}
+$$
+
+  V~prípade I~je z~ľavých dvoch stĺpcov zrejmé, že $a = 4$,
+a~z~pravého stĺpca dostaneme $2b + 4 = 8$ alebo $2b + 4 = 18$.
+Podmienke $a < b$ vyhovuje len $b = 7$. Ľahko sa presvedčíme, že
+cifry $a = 4$ a~$b = 7$ sú riešením úlohy.
+
+ V II. prípade je z~pravých dvoch stĺpcov vidieť, že číslo $2a$ má
+poslednú číslicu~ 8 a~zároveň~ 2 alebo~ 1. To však nie je možné.
+
+ Iná možnosť vyšetrenia situácie~ I: Naznačený súčet môžeme
+prepísať v tvare $3\,000a + 100a + 10(a+b) + a~+ 2b = 12\,528$.
+Úpravou ľahko zistíme, že $a = 4 + (28-4b)/1\,037$.
+Z~podmienky, že posledný zlomok je celé číslo $k$, vyjde $b = 7 -
+1\,037k/4$, $ a~= 4 + k$. Je zrejmé, že $a$, $b$ budú
+číslice len pre $k = 0$. Analogicky možno postupovať aj~v~prípade~II.
+
+  {\it Záver\/}: Číslice hľadaného čísla sú~ 4, 4, 7 a~0.
+}
+
+{%%%%%   C-I-2
+...}
+
+{%%%%%   C-I-3
+...}
+
+{%%%%%   C-I-4
+...}
+
+{%%%%%   C-I-5
+...}
+
+{%%%%%   C-I-6
+Najprv je nutné overiť, či sú dané výrazy definované
+pre všetky reálne čísla $a$, $b$. Stačí dokázať, že pre
+každé reálne $u$ je výraz $U= u^{2} + u~+ 1$ nezáporný.
+
+  {\it 1. spôsob\/}:
+$$
+ U~= u^{2} + 2\cdot\frac12 u~+\Bigl(\frac12\Bigr)^{\!2} -
+      \Bigl(\frac12\Bigr)^{\!2} + 1
+   = \Bigl(u~+ \frac12\Bigr)^{\!2} + \frac34.
+$$
+ Odtiaľ vidíme, že je dokonca
+$$
+ U~= u^{2} + u~+ 1 \ge \frac34,      \tag3
+$$
+ pretože druhá mocnina reálneho výrazu je vždy nezáporná.
+
+ {\it 2. spôsob\/}:
+  Pre  $u~\ge 0$  je  zrejme  výraz  $U$ kladný.  Ak je
+$u< 0$, je
+$$
+ U~> u^{2} + u~+ 1 + u~= (u~+ 1)^{2} \ge 0.
+$$
+
+
+{\it 3. spôsob\/}:
+  Predstavme  si rovnosť  $U~= u^{2} + u~+ 1$ ako
+kvadratickú rovnicu $u^{2} + u~+ (1-U) = 0$ s~parametrom~ $U$.
+Tento vzťah je splnený pre nejaké reálne $u$, len keď je
+príslušný diskriminant nezáporný, t\.j\.~ $1 - 4(1-U) \ge 0$, a~odtiaľ
+$U~\ge \frac34$.
+
+  Ďalej je možné skúšať výraz
+$$
+V~= \sqrt{a^{2} + a~+ 1} + \sqrt{b^{2} + b + 1}   \tag4
+$$
+ upravovať, aby sme ho mohli odhadnúť. Ako asi budú
+postupovať? Uvedieme niekoľko možností:
+
+ I. Dosadením $b = 1 - a$ do (3) dostaneme
+$$
+V~= \sqrt{a^{2} + a~+ 1} + \sqrt{a^{2} - 3a + 3}.  \tag5
+$$
+
+ Tým sme sa však k~cieľu veľmi nepriblížili. Skúsme ešte obidve strany
+ rovnosti~ (5) umocniť:
+ $$
+\align
+ V^{2} =& a^{2} + a^{2} - 2a + 1 + 3 + 2\sqrt{a^{2} + a~+ 1}
+          \sqrt{a^{2} - 3a + 3} =\\
+       =& a^{2} +  (a~- 1)^{2} + 3 + 2\sqrt{a^{4} - 2a^{3} +a^{2}+3}.
+\endalign
+$$
+
+ Výraz pod odmocninou sa dá ešte po vyňatí $a$ z~prvých troch členov
+ upraviť, takže dostaneme
+$$
+V^{2} = 3 + a^{2} +(a~- 1)^{2} + 2\sqrt{3 + a^{2} (a- 1)^{2}}
+\tag6
+$$
+
+ II. Rovnosť  (4) umocníme priamo a~pri ďalších úpravách
+opakovane nahrádzame súčty $a~+ b$ jednotkami:
+$$
+\align
+ V^{2} =& a^{2} + b^{2} + 3 + 2\sqrt{a^{2}b^{2} + ab (a~+ b +
+         1) + a^{2}+ b^{2} + a~+ b + 1}= \\
+       =&3 + a^{2} + 2\sqrt{3 + a^{2}b^{2}}+ b^{2}. \tag7
+\endalign
+$$
+
+ Dôkaz nerovnosti (1).
+
+  {\smc 1\. riešenie} (bez umocňovania výrazu $V$):
+  Ak sú $a$, $b$ nezáporné, je $V~> \sqrt{1}+\sqrt{1}= 2$.
+Ak je $b < 0$, potom musí byť $a~> 1$. Položme teda na pravej
+strane vzťahu~ (4) $a~= 1$ a~druhú odmocninu odhadneme pomocou~
+(3). Dostaneme tak silnejší odhad, ako sa požaduje: $V~>
+\sqrt3 + \sqrt{\frac34}= \frac32\sqrt3 > \frac52$.
+
+  {\smc 2\. riešenie}.
+  Keď uvážime, že druhá mocnina každého reálneho čísla je
+nezáporná, odhadneme z~(6), že $V^{2} \ge 3 + 2\sqrt3 > 4$, a~po
+odmocnení dostaneme $V~> 2$.
+
+  {\smc 3\. riešenie}.
+  Zo vzťahu (7) vidíme, že
+$$
+\postdisplaypenalty 10000
+\align
+V^{2} >& 3 +\bigl(a^{2} +2\sqrt{a^{2}}\sqrt{b^{2}} + b^{2}\bigr)=\\
+      =& 3 +\bigl(\sqrt{a^{2}}+\sqrt{b^{2}}\bigr)^{2}=3+(|a|+|b|)^2 \ge 4,
+\endalign
+$$
+ a~teda $V~> 2$.
+
+\medskip
+ Dôkaz nerovnosti (2).
+
+  {\smc 1\. riešenie}.
+  Pretože $a$, $b$ sú nezáporné a~nemôže platiť $a=b=0$, platí
+$$
+ V~< \sqrt{a^{2} + 2a + 1}+ \sqrt{b^{2} + 2b + 1}=
+   (a~+ 1) + (b + 1) = 3.
+$$
+
+  {\smc 2\. riešenie}.
+  Z~podmienky $a~+ b = 1$ pre nezáporné  čísla $a$, $b$ máme $0
+\le a~\le 1$, $ 0 \le b \le 1$ a~hodnotu výrazu $V$ môžeme
+odhadnúť dosadením $a~= b = 1$ do~ (7): $V^{2} < 3 + 1 +2\sqrt 4
++ 1 = 9$, takže $V~< 3$.
+}
+
+{%%%%%   A-S-1
+...}
+
+{%%%%%   A-S-2
+...}
+
+{%%%%%   A-S-3
+...}
+
+{%%%%%   A-II-1
+Označme $\mm P$ skúmanú množinu prvočísel a~ukážme
+najprv, že $2\notin\mm P$. Číslo 2 je jediné prvočíslo, ktoré nie je
+nepárne. Keby teda platilo $2\in\mm P$, bol by
+súčet {\it nepárneho\/} počtu prvočísel z~$\mm P$ {\it párny},
+a~súčet {\it párneho\/} počtu naopak {\it nepárny}, takže uvažovaný
+aritmetický priemer
+by nemohol byť rovný nepárnemu číslu 27.
+Preto $2\notin\mm P$.
+
+Pretože číslo 27 nie je prvočíslo, platí pre najväčší prvok $p^\ast$
+množiny $\mm P$ odhad $p^\ast>27$. Teraz využijeme tento zrejmý poznatok:
+{\it Aritmetický priemer $A$ skupiny reálnych čísel sa zmenší,
+kedykoľvek k~tejto skupine pridáme číslo menšie ako $A$ alebo
+z~nej odstránime číslo väčšie ako $A$}. Doplňme preto do danej množiny
+$\mm P$ všetky chýbajúce prvočísla $p$, $2<p<27$, a~odstráňme z~nej
+všetky prvočísla $p$, $27<p<p^\ast$. Dostaneme tak množinu deviatich
+prvočísel $\{3,5,7,11,13,17,19,23,p^\ast\}$, pre ktorých aritmetický priemer
+(ktorý už nemusí byť celým číslom!) platí odhad
+$$
+\frac{3+5+7+11+13+17+19+23+p^*}{9}\leqq27.
+$$
+(Rovnosť nastane, pokiaľ sme ani žiadne prvočíslo nepridali, ani
+žiadne neodstránili.)  Odtiaľ vychádza $p^\ast\leqq145$.
+Najväčšie prvočíslo, ktoré spĺňa poslednú nerovnosť, je číslo~ 139.
+
+Hodnota $p^\ast=139$ je možná, ako ukazuje príklad
+$$
+\mm P=\{3,5,7,11,13,17,19,29,139\},
+$$
+ktorý objavíme, keď v~súčte $3+5+7+11+13+17+19+23$ zameníme
+prvočíslo 23 prvočíslom o~$145-139=6$ väčším. (Keby sme si vopred
+neuvedomili, že $2\notin\mm P$, dostali by sme z~nerovnosti
+$$
+\frac{2+3+5+7+11+13+17+19+23+p^*}{10}\leqq27
+$$
+slabší odhad $p^*\leqq170$. Potom by bolo nutné postupne
+vylúčiť hodnoty $p^\ast=167$, 163, 157, 151, 149. Pritom si asi
+uvedomíme, prečo $2\notin\mm P$.)
+}
+
+{%%%%%   A-II-2
+...}
+
+{%%%%%   A-II-3
+...}
+
+{%%%%%   A-II-4
+Danú nerovnicu ekvivalentne upravíme na
+$$
+{2x^{3}+(a-2d)x^2+(b-2a)x+c\over x^2-dx-a}\ge0.   \tag1
+$$
+
+Nerovnicu tvaru $\dfrac{A(x)}{B(x)}\ge0$ vieme vyriešiť, ak poznáme
+reálne korene oboch mnohočlenov $A(x)$, $B(x)$. Odpovedajúce
+množiny ich reálnych koreňov označme $\mm A$, $\mm B$.
+Ak označíme $\mm R$ množinu riešení nerovnice
+$\dfrac{A(x)}{B(x)}>0$, ktorá je zrejme ekvivalentná nerovnici
+${A(x)}{B(x)}>0$, bude množinou riešení pôvodnej nerovnice
+$\dfrac{A(x)}{B(x)}\ge0$ množina
+$$(\mm R\cup\mm A)\setminus\mm B\,.$$
+
+Na riešenie nerovnice ${A(x)}{B(x)}>0$ nemajú zrejme vplyv prípadné
+kvadratické trojčleny so  záporným diskriminantom, ktoré nemajú
+reálne korene. A~pretože nás zaujíma riešenie nerovnice
+${A(x)}{B(x)}>0$ najmä pre $x\notin\mm A\cup\mm B$, budeme
+miesto nej riešiť nerovnicu, ktorú dostaneme vydelením všetkými
+možnými párnymi mocninami koreňových činiteľov. Miesto
+nerovnice ${A(x)}{B(x)}>0$ tak budeme riešiť nerovnicu
+$$
+(x-\a_1)(x-\a_2)\dots(x-\a_k)>0 ,
+$$
+kde $\a_1<\a_2<\dots<\a_k$ sú zvyšné (všetky jednoduché)
+reálne korene mnohočlena ${A(x)}{B(x)}$. Riešením poslednej
+nerovnice je pre $k=1$ interval $(\a_1,+\infty)$, pre $k=2$
+zjednotenie $(-\infty,\a_1)\cup(\a_2,+\infty)$, pre $k\ge3$ nepárne
+zjednotenie
+$(\a_1,\a_2)\cup\dots\cup(\a_{k-2},\a_{k-1})\cup(\a_k,+\infty)$
+a~pre $k>2$ párne zjednotenie
+$(-\infty,\a_1)\cup\dots\cup(\a_{k-2},\a_{k-1})\cup(\a_k,+\infty)$.
+
+Vráťme sa teraz k~nerovnici~(1).
+Pretože $x=0$ je jej riešením, musí byť nula koreňom čitateľa, nie však
+koreňom menovateľa, preto $c=0$ a~$a\ne0$. Naviac z~toho, že nula
+je "izolovaným" bodom riešenia, vyplýva podľa našich predchádzajúcich
+úvah, že
+nula je koreňom párnej násobnosti, teda dvojnásobným. Preto je tiež
+$b-2a=0$.
+
+Pretože naopak krajný bod druhého intervalu $x = 4$ do množiny
+riešení nepatrí, je koreňom menovateľa, takže $a+4d=16$.
+Po dosadení $a=16-4d$ a~rozklade menovateľa dostaneme
+ekvivalentnú nerovnicu
+$$
+{x^2(x+8-3d) \over (x-4)(x-d+4)}\ge 0 .
+$$
+Odtiaľ však vyplýva, že riešením nerovnice
+$$
+(x-4)(x+8-3d)(x-d+4)>0
+$$
+musí byť interval $(4,\infty)$, preto
+$3d-8=d-4$, alebo $d=2$, $a=8$, $b=16$, $c=0$.
+Pre tieto hodnoty tak dostávame nerovnicu
+$$
+{x^2(x +2) \over (x-4)(x+2)}\ge  0,
+$$
+ktorej množinou riešení je skutočne $\{0\}\cup(4,+\infty)$.
+}
+
+{%%%%%   A-III-1
+...}
+
+{%%%%%   A-III-2
+\fontplace
+\rpoint A; \tpoint B; \lpoint C; \bpoint D;
+\lpoint K; \rBpoint L;
+\rBpoint E; \rBpoint F; \rBpoint\toright.5mm G;
+\tpoint\toleft.5mm D_0; \lbpoint\down1mm A_0;
+[12] \hfil\Obr
+
+Označme $K$ a~$L$ stredy hrán $BC$ a~$AD$ a~$A_0$, $D_0$
+príslušné ťažiská stien oproti vrcholom $A$, $D$ (\obr). Obe
+ťažnice $AA_0$, $DD_0$ ležia v~rovine $AKD$, pričom ich
+priesečník $T$ (ťažisko štvorstena) ich delí v~pomere $3:1$ a~zároveň
+je stredom spojnice~ $KL$ (to je zrejmé z~vlastností ťažiska:
+$T=\frac14(A+B+C+D)=\frac12\bigl(\frac12(A+D)
++\frac12(B+C)\bigr)=\frac12(K+L)$). Odtiaľ vyplýva, že je
+$|ET|:|AT|=|FT|:|DT|=1:3$, takže $|EF|=\frac13|AD|$.
+
+\inspicture c
+
+Rovina $BCL$ rozpoľuje obidve úsečky
+$AD$ aj~$EF$, a~preto tiež rozdeľuje obidva uvažované štvorsteny
+$ABC\!D$ aj~$BCEF$ na časti rovnakého objemu. Označme $G$
+stred úsečky $EF$, pre príslušné objemy potom platí
+$$
+\align
+{V(BCEF)\over V(ABC\!D)}=&{V(BCGF)\over V(BCLD)}=
+{|GF|\over |LD|}\cdot{S(BCG)\over S(BCL)}=\\
+=&\frac13{|KG|\over |KL|}=\frac13\cdot\frac23=\frac29.
+\endalign
+$$
+}
+
+{%%%%%   A-III-3
+...}
+
+{%%%%%   A-III-4
+...}
+
+{%%%%%   A-III-5
+...}
+
+{%%%%%   A-III-6
+...}
+
+{%%%%%   B-S-1
+...}
+
+{%%%%%   B-S-2
+...}
+
+{%%%%%   B-S-3
+...}
+
+{%%%%%   B-II-1
+Po odčítaní druhej rovnice od prvej a~tretej rovnice od druhej
+dostaneme dve rovnice, ktoré majú po jednoduchej úprave tvar
+$$
+(a~- d)(b - c) = 0, \qquad
+(a~- b)(c - d) = 0.
+$$
+Odtiaľ vyplýva, že zo štyroch čísel $a$, $b$, $c$, $d$ sú aspoň tri
+rovnaké. Nech je napr\. $a = b = c$. Po dosadení do prvej rovnice
+pôvodnej sústavy dostaneme
+$$
+a^{2}+ad =a(a+d) = 1\,999.
+$$
+Nakoľko 1\,999 je prvočíslo, vyhovuje jedine $a = 1$ a~$a+d =
+1\,999$. Odtiaľ vyplýva, že
+$$
+a~= b = c = 1,\qquad d = 1\,998.
+$$
+Zámenou dostaneme ďalšie tri riešenia
+$$
+a~= b = d = 1,\ c = 1\,998;\quad
+a~= c = d = 1,\ b = 1\,998;\quad
+b = c = d = 1,\ a~= 1\,998.
+$$
+Dosadením sa ľahko presvedčíme, že všetky štyri štvorice vyhovujú
+zadaniu.
+}
+
+{%%%%%   B-II-2
+...}
+
+{%%%%%   B-II-3
+...}
+
+{%%%%%   B-II-4
+...}
+
+{%%%%%   C-S-1
+...}
+
+{%%%%%   C-S-2
+...}
+
+{%%%%%   C-S-3
+...}
+
+{%%%%%   C-II-1
+...}
+
+{%%%%%   C-II-2
+...}
+
+{%%%%%   C-II-3
+...}
+
+{%%%%%   C-II-4
+...}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+Položme $x=b+2c$, $y=c+2a$, $z=a+2b$. Potom
+$a=\frac19(4y+z-2x)$, $b=\frac19(4z+x-2y)$, $c=\frac19(4x+y-2z)$,
+takže dokazovaná nerovnosť získava tvar
+$$
+\frac{4y+z-2x}{9x}+\frac{4z+x-2y}{9y}+\frac{4x+y-2z}{9z}\geq1.
+$$
+Ekvivalentnými úpravami dostaneme nerovnosť
+$$
+\Bigl(\frac xy+\frac yx\Bigr)+
+\Bigl(\frac yz+\frac zy\Bigr)+
+\Bigl(\frac zx+\frac xz\Bigr)+
+3\cdot\Bigl(\frac yx+\frac xz+\frac zy\Bigr)\geqq 15,
+$$
+ktorá platí, lebo každý z~výrazov v~prvých troch
+zátvorkách je aspoň~2, zatiaľčo výraz vo štvrtej zátvorke je aspoň~3
+(podľa nerovností medzi aritmetickým a~geometrickým
+priemerom pre príslušné dvojice či trojice kladných čísel). Dodajme,
+že upravená nerovnosť rovnako vyplýva z~jedinej AG-nerovnosti pre
+skupinu 15~ čísel, ktorej výber je podľa tvaru ľavej strany zrejmý.
+
+\medskip
+{\bf Iné riešenie}. Z~Cauchyho nerovnosti
+$$
+(u_1v_1+u_2v_2+u_3v_3)^2\leqq(u_1^2+u_2^2+u_3^2)(v_1^2+v_2^2+v_3^2)
+$$
+vyplýva odhad
+$$
+(a+b+c)^2\leqq
+\Bigl(\frac{a}{b+2c}+\frac{b}{c+2a}+\frac{c}{a+2b}\Bigr)
+[a(b+2c)+b(c+2a)+c(a+2b)];
+\tag1$$
+z~nerovnosti $(a-b)^2+(b-c)^2+(c-a)^2\geqq0$ zase vyplýva odhad
+$$
+a(b+2c)+b(c+2a)+c(a+2b)\leqq(a+b+c)^2.
+$$
+Dôsledkom oboch odhadov je nerovnosť
+$$
+\align
+a(b+2c)+&b(c+2a)+c(a+2b)\leqq\\
+\leqq&\Bigl(\frac{a}{b+2c}+\frac{b}{c+2a}+\frac{c}{a+2b}\Bigr)
+[a(b+2c)+b(c+2a)+c(a+2b)],
+\endalign
+$$
+z~ktorej po delení (kladným) výrazom $a(b+2c)+b(c+2a)+c(a+2b)$ vyjde
+dokazovaná nerovnosť.
+}
+
+{%%%%%   trojstretnutie, priklad 2
+...}
+
+{%%%%%   trojstretnutie, priklad 3
+...}
+
+{%%%%%   trojstretnutie, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 5
+...}
+
+{%%%%%   trojstretnutie, priklad 6
+...}
+
+{%%%%%   IMO, priklad 1
+...}
+
+{%%%%%   IMO, priklad 2
+...}
+
+{%%%%%   IMO, priklad 3
+...}
+
+{%%%%%   IMO, priklad 4
+...}
+
+{%%%%%   IMO, priklad 5
+...}
+
+{%%%%%   IMO, priklad 6
+Označme  $ A = \{ f(x) \mid x\in\Bbb R \} $ a~$c=f(0)$.
+Dosadením $x=y=0$ do rovnice zo zadania dostávame
+$ f(-c) = f(c) + c - 1 $, čo znamená, že $c\ne0$.
+Ak položíme $x=f(y)$ dostávame, že pre každé $x\in A$ platí
+$$
+  f(x) = \frac{c+1}2 - \frac{x^2}2 \,.  \tag1
+$$
+Ukážeme, že $A-A=\Bbb R$ (kde $X-Y=\{x-y \mid x\in X,\,y\in Y\}$ znamená
+tzv.\ {\it algebraický rozdiel\/} množín $X$ a~$Y$). Dosadením
+$y=0$ a~využitím $c\ne0$ dostávame
+$$
+  \{ f(x-c) - f(x) \mid x\in\Bbb R \} =
+  \{ cx + f(c) - 1 \mid x\in\Bbb R \} = \Bbb R \,.
+$$
+Teraz už môžeme vypočítať hodnotu $f(x)$ pre ľubovoľné $x\in\Bbb R$.
+Ak zvolíme $y_1,y_2\in A$ také, že $x=y_1-y_2$, využitím (1) dostávame
+$$
+  \align
+    f(x) &= f(y_1-y_2)
+          = f(y_2) + y_1y_2 + f(y_1) - 1 = \\
+         &= \frac{c+1}2 - \frac{y_2^2}2 + y_1y_2 +
+            \frac{c+1}2 - \frac{y_1^2}2 - 1 = \\
+         &= c - \frac{(y_1-y_2)^2}2
+          = c - \frac{x^2}2 \,.  \tag2
+  \endalign
+$$
+Porovnaním (1) a~(2) tiež dostávame $c=1$, takže
+$$
+  f(x) = 1 - \frac{x^2}2 \,.
+$$
+Ľahko sa overí, že táto funkcia je naozaj riešením úlohy.
+}
+
+{%%%%%   MEMO, priklad 1
+...}
+
+{%%%%%   MEMO, priklad 2
+...}
+
+{%%%%%   MEMO, priklad 3
+...}
+
+{%%%%%   MEMO, priklad 4
+...}
+
+{%%%%%   MEMO, priklad t1
+...}
+
+{%%%%%   MEMO, priklad t2
+...}
+
+{%%%%%   MEMO, priklad t3
+...}
+
+{%%%%%   MEMO, priklad t4
+...}
+
+{%%%%%   MEMO, priklad t5
+...}
+
+{%%%%%   MEMO, priklad t6
+...}
+
+{%%%%%   MEMO, priklad t7
+...}
+
+{%%%%%   MEMO, priklad t8
+...} 

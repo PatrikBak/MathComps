@@ -1,0 +1,27 @@
+.glassCard {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.glassCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+  transition: left 0.8s ease;
+}
+
+.glassCard:hover::before {
+  left: 100%;
+}
+
+.iconGlow {
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+}

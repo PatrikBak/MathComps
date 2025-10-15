@@ -1,0 +1,107 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -60 -53 137 53 
+%%HiResBoundingBox: -59.24423 -52.39777 136.63126 52.39777 
+%%Creator: MetaPost 1.999
+%%CreationDate: 2017.04.09:1158
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font csr10 CMSY10
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font csr10 CMSY10
+%%IncludeResource: font csr10
+%%IncludeResource: font CMSY10
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /csr10 /csr10 def
+ /cmsy10 /CMSY10 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 0.56696 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 0 -52.11429 moveto
+52.11429 0 lineto
+0 52.11429 lineto
+-52.11429 0 lineto
+ closepath stroke
+ [3.20001 2.8 ] 0.20001 setdash 1 setlinecap
+newpath -58.96075 0 moveto
+58.96075 0 lineto stroke
+ [] 0 setdash
+newpath -49.65764 -2.45665 moveto
+49.65764 -2.45665 lineto
+49.65764 2.45665 lineto
+-49.65764 2.45665 lineto
+ closepath stroke
+28.1577 28.1577 moveto
+(30) csr10 9.96265 fshow
+-20.20201 -14.495 moveto
+(30) csr10 9.96265 fshow
+-10.2393 -6.2537 moveto
+(p) cmsy10 9.96265 fshow
+ 0 0.3985 dtransform truncate idtransform setlinewidth pop 0 setlinecap
+newpath -1.93712 -6.0544 moveto
+3.04419 -6.0544 lineto stroke
+-1.93712 -14.495 moveto
+(2) csr10 9.96265 fshow
+5.25809 -14.495 moveto
+(\000) cmsy10 9.96265 fshow
+15.22069 -14.495 moveto
+(2) csr10 9.96265 fshow
+gsave newpath 136.34778 0 moveto
+136.34778 8.79689 132.85275 17.23247 126.63284 23.45238 curveto
+120.41293 29.67229 111.97736 33.16731 103.18047 33.16731 curveto
+94.38358 33.16731 85.948 29.67229 79.72809 23.45238 curveto
+73.50818 17.23247 70.01315 8.79689 70.01315 0 curveto
+70.01315 -8.79689 73.50818 -17.23247 79.72809 -23.45238 curveto
+85.948 -29.67229 94.38358 -33.16731 103.18047 -33.16731 curveto
+111.97736 -33.16731 120.41293 -29.67229 126.63284 -23.45238 curveto
+132.85275 -17.23247 136.34778 -8.79689 136.34778 0 curveto closepath clip
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop
+newpath -349.9071 -469.0286 moveto
+-193.56657 -312.68806 -37.21904 -156.34053 119.12149 0 curveto
+-37.21904 156.34053 -193.56657 312.68806 -349.9071 469.0286 curveto
+-506.24763 312.68806 -662.59517 156.34053 -818.9357 0 curveto
+-662.59517 -156.34053 -506.24763 -312.68806 -349.9071 -469.0286 curveto closepath stroke
+ [28.80011 25.20003 ] 1.80011 setdash 1 setlinecap
+newpath -880.5539 0 moveto
+-526.78671 0 -173.0275 0 180.73969 0 curveto stroke
+ [] 0 setdash
+newpath -796.82585 -22.10985 moveto
+-498.88446 -22.10985 -200.92975 -22.10985 97.01164 -22.10985 curveto
+97.01164 22.10985 lineto
+-200.92975 22.10985 -498.88446 22.10985 -796.82585 22.10985 curveto
+ closepath stroke
+grestore
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop
+newpath 136.34778 0 moveto
+136.34778 8.79689 132.85275 17.23247 126.63284 23.45238 curveto
+120.41293 29.67229 111.97736 33.16731 103.18047 33.16731 curveto
+94.38358 33.16731 85.948 29.67229 79.72809 23.45238 curveto
+73.50818 17.23247 70.01315 8.79689 70.01315 0 curveto
+70.01315 -8.79689 73.50818 -17.23247 79.72809 -23.45238 curveto
+85.948 -29.67229 94.38358 -33.16731 103.18047 -33.16731 curveto
+111.97736 -33.16731 120.41293 -29.67229 126.63284 -23.45238 curveto
+132.85275 -17.23247 136.34778 -8.79689 136.34778 0 curveto closepath stroke
+89.63469 7.84492 moveto
+(1) csr10 9.96265 fshow
+89.63469 -14.26534 moveto
+(1) csr10 9.96265 fshow
+106.28046 22.71922 moveto
+(p) cmsy10 9.96265 fshow
+ 0 0.3985 dtransform truncate idtransform setlinewidth pop
+newpath 114.58266 22.91852 moveto
+119.56406 22.91852 lineto stroke
+114.58266 14.47792 moveto
+(2) csr10 9.96265 fshow
+showpage
+%%EOF

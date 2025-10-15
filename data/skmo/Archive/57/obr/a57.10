@@ -1,0 +1,101 @@
+%!PS
+%%BoundingBox: -10 -9 181 112 
+%%Creator: MetaPost
+%%CreationDate: 2006.04.29:1629
+%%Pages: 1
+%*Font: cmmi10 9.96265 9.96265 41:e000300000001
+%*Font: cmr7 6.97385 6.97385 32:c
+%*Font: cmmi7 6.97385 6.97385 41:c0000000c0001
+%*Font: cmmi5 4.98132 4.98132 61:c
+%%EndProlog
+%%Page: 1 1
+ 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+170.07843 0 lineto
+119.0549 102.04706 lineto
+ closepath stroke
+ 1 setlinecap
+newpath 0 0 moveto
+144.56667 51.02353 lineto stroke
+newpath 170.07843 0 moveto
+59.52745 51.02353 lineto stroke
+-9.57199 -8.90779 moveto
+(A) cmmi10 9.96265 fshow
+172.17842 -8.90779 moveto
+(B) cmmi10 9.96265 fshow
+115.13835 105.04706 moveto
+(C) cmmi10 9.96265 fshow
+147.56667 48.36684 moveto
+(S) cmmi10 9.96265 fshow
+153.67566 46.87244 moveto
+(A) cmmi7 6.97385 fshow
+44.46117 54.61792 moveto
+(S) cmmi10 9.96265 fshow
+50.57016 53.12352 moveto
+(B) cmmi7 6.97385 fshow
+92.77498 24.20789 moveto
+(T) cmmi10 9.96265 fshow
+23.73083 33.96986 moveto
+(b) cmmi7 6.97385 fshow
+ 0 0.3985 dtransform truncate idtransform setlinewidth pop 0 setlinecap
+newpath 23.49693 32.53796 moveto
+27.46823 32.53796 lineto stroke
+23.49693 26.61176 moveto
+(2) cmr7 6.97385 fshow
+83.25829 84.9934 moveto
+(b) cmmi7 6.97385 fshow
+newpath 83.02438 83.5615 moveto
+86.99568 83.5615 lineto stroke
+83.02438 77.63528 moveto
+(2) cmr7 6.97385 fshow
+161.51804 27.68953 moveto
+(a) cmmi7 6.97385 fshow
+newpath 161.51804 26.25763 moveto
+165.83954 26.25763 lineto stroke
+161.69315 20.33142 moveto
+(2) cmr7 6.97385 fshow
+136.00627 78.71306 moveto
+(a) cmmi7 6.97385 fshow
+newpath 136.00627 77.28116 moveto
+140.32777 77.28116 lineto stroke
+136.18138 71.35495 moveto
+(2) cmr7 6.97385 fshow
+79.2481 51.20059 moveto
+(t) cmmi7 6.97385 fshow
+82.25769 50.1435 moveto
+(b) cmmi5 4.98132 fshow
+newpath 79.2481 49.5458 moveto
+85.9106 49.5458 lineto stroke
+80.5938 43.6196 moveto
+(3) cmr7 6.97385 fshow
+132.52359 26.46594 moveto
+(2) cmr7 6.97385 fshow
+newpath 132.52359 25.03404 moveto
+136.49489 25.03404 lineto stroke
+132.52359 19.10783 moveto
+(3) cmr7 6.97385 fshow
+137.6904 22.54333 moveto
+(t) cmmi10 9.96265 fshow
+141.288 21.04893 moveto
+(b) cmmi7 6.97385 fshow
+116.78952 52.03983 moveto
+(t) cmmi7 6.97385 fshow
+119.79912 51.04352 moveto
+(a) cmmi5 4.98132 fshow
+newpath 116.78952 50.44583 moveto
+124.15492 50.44583 lineto stroke
+118.48662 44.51962 moveto
+(3) cmr7 6.97385 fshow
+47.99463 28.36597 moveto
+(2) cmr7 6.97385 fshow
+newpath 47.99463 26.93407 moveto
+51.96593 26.93407 lineto stroke
+47.99463 21.00786 moveto
+(3) cmr7 6.97385 fshow
+53.16144 24.44336 moveto
+(t) cmmi10 9.96265 fshow
+56.75903 22.94896 moveto
+(a) cmmi7 6.97385 fshow
+showpage
+%%EOF

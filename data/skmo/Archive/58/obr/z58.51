@@ -1,0 +1,77 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -1 -57 56 24 
+%%HiResBoundingBox: -0.25 -56.94293 55.51332 23.23233 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2012.01.26:1415
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%DocumentSuppliedResources: procset mpost-minimal
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%EndSetup
+%%Page: 1 1
+ 0.6 1 0.6 setrgbcolor
+newpath 14.17323 0 moveto
+28.34647 0 lineto
+28.34647 14.17323 lineto
+14.17323 14.17323 lineto
+ closepath fill
+ 0 setgray 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+14.17323 0 lineto
+14.17323 14.17323 lineto
+0 14.17323 lineto
+ closepath stroke
+newpath 14.17323 0 moveto
+28.34647 0 lineto
+28.34647 14.17323 lineto
+14.17323 14.17323 lineto
+ closepath stroke
+newpath 28.34647 0 moveto
+42.5197 0 lineto
+42.5197 14.17323 lineto
+28.34647 14.17323 lineto
+ closepath stroke
+newpath 28.34647 -14.17323 moveto
+42.5197 -14.17323 lineto
+42.5197 0 lineto
+28.34647 0 lineto
+ closepath stroke
+newpath 28.34647 -28.34647 moveto
+42.5197 -28.34647 lineto
+42.5197 -14.17323 lineto
+28.34647 -14.17323 lineto
+ closepath stroke
+newpath 28.34647 -42.5197 moveto
+42.5197 -42.5197 lineto
+42.5197 -28.34647 lineto
+28.34647 -28.34647 lineto
+ closepath stroke
+newpath 28.34647 -56.69293 moveto
+42.5197 -56.69293 lineto
+42.5197 -42.5197 lineto
+28.34647 -42.5197 lineto
+ closepath stroke
+ 1 setlinecap
+newpath 7.08662 15.59064 moveto
+24.35493 21.87585 44.17026 29.10854 49.60632 14.17323 curveto
+57.2591 -6.85233 57.92064 -30.29578 46.77171 -49.60632 curveto stroke
+newpath 47.6902 -44.01205 moveto
+47.47261 -45.87689 47.16785 -47.74263 46.77171 -49.60632 curveto
+48.18765 -48.3314 49.5309 -47.00116 50.80305 -45.62039 curveto
+48.55862 -46.27591 lineto
+ closepath
+gsave fill grestore stroke
+showpage
+%%EOF

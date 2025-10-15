@@ -1,0 +1,3283 @@
+﻿{%%%%%   A-I-1
+Zistíme najskôr, ako vyzerajú všetky konečné neprázdne množiny~$\mm M$
+prirodzených čísel s~(kľúčovou) vlastnosťou zo záveru zadania.
+Až potom posúdime, ktoré z~týchto množín sú malé a~určíme
+počet tých z~nich, ktoré sú zostavené z~čísel od~$1$ do~$100$.
+
+Nech $\mm M$ je teda ľubovoľná konečná neprázdna množina prirodzených
+čísel s~vlastnosťou: ak $x,y\in\mm M$ a~$x\ne y$, tak 
+aj $|x-y|\in\mm M$. Predpokladajme, že $\mm M$ má práve $k$~prvkov a~usporiadajme ich
+podľa veľkosti od najmenšieho čísla po najväčšie:
+$$
+x_1<x_2<x_3<\dots<x_k.
+$$
+V~prípade $k=1$ spĺňa množina $\mm M=\{x_1\}$ danú vlastnosť
+triviálne, predpokladajme preto ďalej, že $k>1$. Potom číslo
+$x_2-x_1=|x_2-x_1|$ podľa posudzovanej vlastnosti patrí do $\mm M$
+a~je menšie ako $x_2$, takže sa musí rovnať číslu~$x_1$.
+Z~rovnosti $x_2-x_1=x_1$ dostávame $x_2=2x_1$. Analogicky platí, že
+čísla $x_3-x_2$, $x_3-x_1$ sú dve čísla z~$\mm M$, ktoré sú
+menšie ako $x_3$. Pritom $x_3-x_2<x_3-x_1$, takže musí platiť
+$x_3-x_2=x_1$ a~$x_3-x_1=x_2$. To
+spolu s~dokázanou rovnosťou $x_2=2x_1$ vedie k~záveru, že
+$x_3=x_1+x_2=3x_1$. V~rovnakých úvahách môžeme pokračovať 
+a~získavať rovnosti $x_4=4x_1$,~\dots, $x_k=kx_1$. Formálne možno
+tieto rovnosti dokázať indukciou: ak platí rovnosť $x_n=nx_1$ pre
+niektoré $n$, $1\leqq n<k$, tak úvahou o~$n$~číslach
+$$
+x_{n+1}-x_n<x_{n+1}-x_{n-1}<\dots<x_{n+1}-x_1,
+$$
+ktoré podľa posudzovanej vlastnosti patria do $\mm M$ a~sú menšie ako
+$x_{n+1}$, prichádzame k~záveru, že $x_{n+1}-x_n=x_1$, odkiaľ
+$x_{n+1}=x_n+x_1=nx_1+x_1=(n+1)x_1$. Dôkaz indukciou je hotový.
+Ak označíme $x_1=m$, vyplýva z~našich úvah, že skúmaná $k$-prvková
+množina~$\mm M$ má nutne tvar
+$$
+M=\{m,2m,3m,\dots,km\}.                       \tag1
+$$
+Na druhej strane je zrejmé, že taká množina~$\mm M$ má požadovanú
+vlastnosť, nech sú prirodzené čísla $m$ a~$k$ vybrané akokoľvek.
+
+Množina~$\mm M$ zapísaná v~\thetag{1} má $k$~prvkov, pričom najmenší
+z~nich je číslo~$m$. Podľa zadania úlohy je taká množina malá
+práve vtedy, keď platí nerovnosť $k<m$. Zároveň je jasné, že taká
+množina~$\mm M$ je podmnožinou množiny $\{1,2,3,\dots,100\}$
+práve vtedy, keď platí nerovnosť $km\leqq 100$. Našou úlohou je teda
+nájsť počet všetkých dvojíc prirodzených čísel $k$, $m$, pre ktoré
+platí $k<m$ a~$km\leqq100$. Ako býva pri riešení podobných
+kombinatorických úloh zvykom, hľadaný počet určíme, keď
+vyhovujúce dvojice $(k,m)$ vhodne rozdelíme do menších skupín
+a~určíme počty dvojíc v~jednotlivých skupinách. V~našej úlohe sa
+ponúka jednak rozdelenie do skupín dvojíc $(k,m)$ s~rovnakou
+hodnotou~$k$, jednak rozdelenie do skupín dvojíc $(k,m)$ s~rovnakou
+hodnotou~$m$. (To zodpovedá tomu, že pôvodné objekty
+(množiny~$\mm M$ vyhovujúce úlohe) rozdelíme do skupín buď podľa
+počtu ich prvkov, alebo podľa veľkosti ich najmenších
+prvkov.)
+
+Uveďme oba výpočty. Kvôli tomu označme $p(k)$, $q(m)$ počty
+vyhovujúcich dvojíc $(k,m)$ s~daným~$k$, resp\. s~daným~$m$.
+Uvedomme si, že z~nerovností $k<m$ a~$km\leqq100$ vyplývajú odhady
+$1\leqq k\leqq 9$ a~$2\leqq m\leqq 100$, ktoré naznačujú, že
+výpočet pomocou hodnôt $p(k)$ bude menej náročný ako výpočet pomocou
+hodnôt~$q(m)$.
+
+Pri pevnom $k$ sú vyhovujúce čísla~$m$ určené nerovnosťami $k+1\leqq
+m\leqq 100/k$. Dosadením jednotlivých hodnôt~$k$
+zistíme, že $p(1)=99$, $p(2)=48$, $p(3)=30$, $p(4)=21$, $p(5)=15$,
+$p(6)=10$, $p(7)=7$, $p(8)=4$ a~$p(9)=2$.
+Hľadaný celkový počet je teda rovný
+$$
+99+48+30+21+15+10+7+4+2=236.
+$$
+
+Naopak, pri pevnom $m$ je číslo $k$ ohraničené takto:
+$1\leqq k\leqq\min\{m-1,100/m\}$. Odtiaľ vypočítame,
+že $q(2)=1$, $q(3)=2$, $q(4)=3$,\dots, $q(9)=8$,
+$q(10)=q(11)=9$, $q(12)=8$, $q(13)=q(14)=7$,
+$q(15)=q(16)=6$, $q(17)=\dots=q(20)=5$,
+$q(21)=\dots=q(25)=4$, $q(26)=\dots=q(33)=3$,
+$q(34)=\dots=q(50)=2$, $q(51)=\dots=q(100)=1$. Hľadaný počet
+je teda rovný
+$$
+1+2+\dots+8+2\cdot9+8+2\cdot7+2\cdot6+4\cdot5+5\cdot4+8\cdot3+
+17\cdot2+50=236.
+$$
+
+Pri výpočte jednotlivých hodnôt $q(m)$ je výhodné si uvedomiť, že
+pre každé prirodzené $m\leqq10$ platí nerovnosť $m-1<100/m$,
+zatiaľ čo pre každé $m\geqq11$ platí opačná nerovnosť
+$m-1>100/m$.
+
+\návody
+Koľko je všetkých malých množín (v~zmysle úlohy MO), ktoré možno
+vybrať z~množiny $\{1,2,3,\dots,10\}$? [9 jednoprvkových,
+$\binom82$ dvojprvkových, $\binom73$ trojprvkových, $\binom64$
+štvorprvkových a~1~päťprvková, spolu 88 malých množín.]
+
+Nájdite všetky konečné neprázdne množiny~$\mm M$ prirodzených
+čísel s~vlastnosťou: ak $x,y\in\mm M$ a~$x\ne y$, tak
+aj $|x-y|\in\mm M$. [$\mm M=\{m,2m,3m,\dots,km\}$. Návod: poz\. vyššie
+prvú časť riešenia úlohy MO.]
+
+Nájdite všetky neprázdne množiny~$\mm M$ celých čísel
+s~vlastnosťou: ak $x,y\in\mm M$, tak aj $x-y\in\mm M$. [Každá množina~$\mm M$
+je tvorená všetkými celými násobkami niektorého nezáporného
+celého čísla~$m$. Návod: Najskôr ukážte, že $0\in M$ a~$x\in\mm
+M\Leftrightarrow {-x}\in\mm M$. V~prípade, keď $\mm M\ne \{0\}$,
+definujte $m$ ako najmenší kladný prvok $\mm M$ a~ukážte pomocou
+vety o~delení celých čísel so zvyškom, že pre každé celé~$x$
+platí: $x\in\mm M\Leftrightarrow m\deli x$.]
+\endnávod}
+
+{%%%%%   A-I-2
+\fontplace
+\trpoint A; \tlpoint B; \blpoint C; \brpoint D;
+\bpoint M; \rpoint O;
+\rpoint\down\unit P; \lpoint\down.5\unit Q;
+\rbpoint R; \lbpoint S;
+[1] \hfil\Obr
+
+Označme $O$ stred daného štvorca $ABDC$ (\obr).
+Pretože bod~$M$ leží na spomenutom oblúku, má uhol $AMB$ veľkosť
+rovnú polovici veľkosti stredového (pravého) uhla $AOB$,
+teda $45^{\circ}$.
+\inspicture{}
+Pretože rovnakú veľkosť má vo štvorci $ABCD$ uhol~$BDC$,
+je pod uhlom
+$45^{\circ}$ z~bodov $D$, $M$ vidno tú istú úsečku~$PS$.
+Pretože navyše
+oba body $D$, $M$ ležia v~rovnakej polrovine s~hraničnou priamkou~$PS$,
+je $PSMD$ tetivový štvoruholník. Jeho vnútorný uhol $DMS$ je pravý
+(bod~$M$ totiž leží na Tálesovej kružnici nad priemerom~$BD$),
+takže je pravý aj vnútorný uhol $DPS$. Tak sme dokázali, že
+$PS\perp BD$. Zrejme podobne vieme ukázať, že $QR\perp AC$.
+Z~posledných dvoch vzťahov už vyplýva, že $PS\perp QR$ (lebo
+$AC\perp BD$).
+
+\návody
+Pripomeňte si a~dokážte vety o~obvodových, stredových a~úsekových
+uhloch na kružnici.
+
+Nech $L$ je ľubovoľný vnútorný bod kratšieho oblúka~$CD$ kružnice
+opísanej štvorcu $ABCD$. Označme $K$ priesečník priamok $AL$ a~$C\!D$,
+$M$ priesečník priamok $AD$ a~$CL$ a~$N$ priesečník priamok $MK$
+a~$BC$. Dokážte, že body $B$, $L$, $M$, $N$ ležia na jednej
+kružnici. [MO 53--A--III--5, poz\. internetové stránky MO.]
+
+V~rovnoramennom lichobežníku $ABCD$ platia rovnosti
+$|BC|=|CD|=|DA|$ a $|\uhol DAB|=|\uhol ABC|=36\st$. Na základni~$AB$
+je daný bod~$K$ tak, že $|AK|=|AD|$. Dokážte, že kružnice
+opísané trojuholníkom $AKD$ a~$KBC$ majú vonkajší dotyk. [MO 53--B--I--2, poz\.
+internetové stránky MO.]
+\endnávod}
+
+{%%%%%   A-I-3
+Úpravou rovníc doplnením na štvorce
+$$
+(x-a)^2=a^2-b,\qquad
+(y+a)^2=a^2-b                         \tag1
+$$
+(alebo priamym použitím známeho vzorca s~diskriminantom)
+zisťujeme, že
+dané rovnice majú v~obore~$\Bbb R$ korene práve vtedy, keď celé
+čísla $a$, $b$ spĺňajú podmienku $a^2-b\geqq0$. Tieto korene potom tvoria
+dvojice
+$$
+\align
+\{x_1,x_2\}&=\bigl\{a+\sqrt{a^2-b},
+a-\sqrt{a^2-b}\bigr\},\\
+\{y_1,y_2\}&=\bigl\{-a+\sqrt{a^2-b},
+-a-\sqrt{a^2-b}\bigr\}.
+\endalign
+$$
+
+Teraz stojíme pred otázkou, ako efektívne (\tj. bez
+stereotypného opakovania navzájom podobných výpočtov) určiť
+všetky štyri hodnoty výrazu $V=x_1y_1-x_2y_2$. Ten možno
+zapísať neurčitým spôsobom ako
+$$
+\bigl(a\pm\sqrt{a^2-b}\bigr)\bigl(-a\pm\sqrt{a^2-b}\bigr)-
+\bigl(a\pm\sqrt{a^2-b}\bigr)\bigl(-a\pm\sqrt{a^2-b}\bigr),
+$$
+pričom pri prvom a~treťom výskyte znaku $\pm$, rovnako ako pri
+druhom a~štvrtom, vyberáme navzájom opačné znamienka. Naznačíme
+tri možné prístupy. (Celá diskusia bude síce dlhšia, ako keby sme
+vypísali výpočet všetkých štyroch rôznych výrazov, ale o~to nám
+v~komentári nejde.)
+
+(i) Ak zvolíme pevne označenie $x_1$, $x_2$, $y_1$, $y_2$, stačí vypočítať
+dve hodnoty $V_1={x_1y_1-x_2y_2}$, $V_2=x_1y_2-x_2y_1$, ostatné dve
+hodnoty sú k~nim opačné čísla $V_3=x_2y_2-x_1y_1={\m V_1}$
+a~$V_4=x_2y_1-x_1y_2={\m V_2}$. Oddelený výpočet oboch hodnôt $V_1$, $V_2$
+však nie je nutný, ako ihneď uvidíme.
+
+(ii) Výber znamienok pre čísla $x_1$ a~$y_1$ možno zapísať v~tvare
+$x_1=a+\ep\sqrt{a^2-b}$ a~$y_1=\m a+\de\sqrt{a^2-b}$, pričom
+koeficienty $\ep$ a~$\de$ sú čísla z~množiny $\{\m1,1\}$.
+Potom $x_2=a-\ep\sqrt{a^2-b}$,
+$y_2={-a}-\de\sqrt{a^2-b}$ a~stačí urobiť jediný výpočet
+so všeobecnými $\ep$, $\de$
+(pre stručnosť zápisu označíme ešte $c=\sqrt{a^2-b}$):
+$$\align
+x_1y_1-x_2y_2&=(a+\ep c)(- a+\de c)-(a-\ep c)(-a-\de c)=\\
+             &=\bigl(-a^2-\ep ac+\de ac+\ep\de c^2)-
+               \bigl(-a^2+\ep ac-\de ac+\ep\de c^2)=\\
+             &=- 2a(\ep-\de)c.
+\endalign
+$$
+Pretože $\ep-\de$ nadobúda hodnoty $\m2$, $0$ a~$2$, hodnoty výrazu
+$V=x_1y_1-x_2y_2$ sú práve čísla $4a\sqrt{a^2-b}$, $0$  
+a~$\m4a\sqrt{a^2-b}$.
+
+(iii) Výber znamienok pre čísla $x_1$ a~$y_1$ môžeme vyriešiť
+zápismi $x_1=a+u$ a~$y_1=\m a+v$, pričom $u$ a~$v$ sú reálne čísla
+spĺňajúce rovnosti $u^2=v^2=a^2-b$. (Dodajme, že čísla $u$, $v$ sú
+vlastne základy druhých mocnín v~rovniciach~\thetag{1},
+alebo tiež čísla $\ep\sqrt{a^2-b}$, $\de\sqrt{a^2-b}$
+z~predchádzajúceho odstavca.) Potom platí $x_2=a-u$,
+$y_2=\m a-v$ a
+$$
+V=x_1y_1-x_2y_2=(a+u)(\m a+v)-(a-u)(\m a-v)=\m2a(u-v).
+$$
+Pretože hodnoty $u-v$ pri podmienke $u^2=v^2=a^2-b$ sú
+$\m2\sqrt{a^2-b}$, $0$ a~$2\sqrt{a^2-b}$, prichádzame k~rovnakému
+záveru ako v~(ii).
+
+Po~výpočte hodnôt výrazu~$V$ zisťujeme, že rovnosť
+$x_1y_1-x_2y_2=4k$ nastane práve vtedy, keď
+$4k\in\{\m4a\sqrt{a^2-b}, 0, 4a\sqrt{a^2-b}\}$. Pretože $k$ je
+prirodzené číslo, platí $a\ne0$ a~posledná podmienka je ekvivalentná
+s~rovnosťou
+$$
+k=|a|\sqrt{a^2-b},           \tag2
+$$
+ktorá je rozkladom čísla~$k$ na súčin dvoch
+činiteľov, ktoré musia byť tiež prirodzené čísla. (Číslo
+$\sqrt{a^2-b}$
+je rovné zlomku $k/|a|$, takže je to číslo racionálne, a~teda
+číslo celé.) Preto môžeme všetky celočíselné riešenia $(a,b)$
+rovnice~\thetag{2} ľahko popísať: vezmeme ľubovoľný rozklad $k=m\cdot n$
+daného čísla~$k$ na dva (kladné) činitele $m$, $n$  
+a~z~rovností $|a|=m$ a~$\sqrt{a^2-b}=n$ jednoducho určíme obe vyhovujúce
+dvojice $(a,b)$:
+$$
+a=\pm m,\quad b=m^2-n^2.
+\tag3
+$$
+Teraz už máme všetko pripravené na riešenie otázok pôvodnej úlohy.
+
+\cast{a)}
+Pretože pre činitele $m$, $n$ z~ľubovoľného
+rozkladu $k=m\cdot n$ platí $m\leqq k$ a~$n\geqq 1$, vyplýva zo
+vzťahu~\thetag{3} odhad $b\leqq m^2-1$. Pritom rovnosť nastane, keď
+zvolíme $m=k$ a~$n=1$. Pre dané $k$ je teda najväčšia hodnota~$b$
+rovná $b_{\max}=k^2-1$.
+
+\cast{b)}
+Pre $k=2\,004$ existuje práve 12 usporiadaných dvojíc
+$(m,n)$, pre ktoré $2\,004=m\cdot n$, lebo všetkých rozkladov čísla
+$2\,004$ na dva činitele (keď nezohľadníme ich poradie) je práve
+šesť: $1\cdot2\,004=2\cdot1\,002=3\cdot668=4\cdot551=
+6\cdot334=12\cdot167$. Pretože môžeme dvoma spôsobmi zvoliť znamienko
+čísla~$a$ vo vzťahu~\thetag{3}, hľadaný počet dvojíc $(a,b)$ je rovný
+dvojnásobku počtu dvojíc $(m,n)$, teda číslu $2\cdot12=24$.
+
+\cast{c)}
+Našou úlohou je určiť súčet čísel~$b$ z~dvojíc
+$(a,b)$ určených vzťahmi~\thetag{3}, keď dvojice $(m,n)$ prebiehajú
+všetkými rozkladmi $k=m\cdot n$ daného čísla~$k$. Ak $m=n$,
+podľa~\thetag{3} platí $b=0$, preto môžeme uvažovať len také dvojice
+činiteľov $(m,n)$, v~ktorých $m\ne n$, a~zoskupiť ich do párov
+$(m,n)$ a~$(n,m)$. Pretože v~každom páre pre súčet príslušných
+hodnôt~$b$ platí $(m^2-n^2)+(n^2-m^2)=0$ (ako pre jednu, tak pre
+druhú voľbu znamienka čísla~$a$), je hľadaný súčet čísel~$b$ zo
+všetkých uvažovaných dvojíc $(a,b)$ rovný nule (pre každé pevné
+$k$).
+
+\návody
+Rovnica $x^2+px+q=0$ má korene $x_1$ a~$x_2$. Vyjadrite
+pomocou čísel $p$, $q$ hodnoty výrazov
+$$
+x_1^2+x_2^2,\quad\frac{1}{x_1}+\frac{1}{x_2},\quad |x_1-x_2|.
+$$
+[$p^2-2q$, ${- p/q}$, $\sqrt{p^2-4q}$.]
+
+Určte koeficient~$p$ rovnice $x^2+px+12=0$, keď viete, že
+v~obore~$\Bbb R$ má dva korene, ktoré možno označiť $x_{1,2}$ tak,
+že platí $2x_1+3x_2=18$. [Návod: riešte sústavu rovníc
+$2x_1+3x_2=18$ a~$x_1x_2=12$. Vyhovuje $p=\m7$ a~$p=\m8$.]
+\endnávod}
+
+{%%%%%   A-I-4
+Označme $c$, $d$
+diferenciu prvej, resp\. druhej z~daných aritmetických postupností.
+Pretože podľa zadania platí $y_1=x_1$, majú členy oboch
+postupností všeobecné vyjadrenia
+$$
+x_i=x_1+(i-1)c\quad\text{a}\quad
+y_i=x_1+(i-1)d
+$$
+pre každý index~$i$.
+Rozdiel $x_i^2-y_i^2$ možno preto upraviť na tvar
+$$
+\align
+x_i^2-y_i^2&=\left(x_1^2+2x_1(i-1)c+(i-1)^2c^2\right)-
+             \left(x_1^2+2x_1(i-1)d+(i-1)^2d^2\right)=\\
+           &=2x_1(i-1)(c-d)+(i-1)^2(c^2-d^2).
+\endalign
+$$
+Pre index~$k$ podľa zadania úlohy platia rovnosti
+$$
+\align
+53&=2x_1(k-1)(c-d)+(k-1)^2(c^2-d^2),\tag1\\
+78&=2x_1(k-2)(c-d)+(k-2)^2(c^2-d^2),\tag2\\
+27&=2x_1k(c-d)+k^2(c^2-d^2).        \tag3
+\endalign
+$$
+Tieto rovnosti alebo ich násobky teraz vhodne navzájom sčítame.
+Aby sme sa zbavili členov s~$x_1$, odčítame od dvojnásobku
+rovnosti~\thetag{1} súčet rovností \thetag{2} a~\thetag{3}. Pri člene $2x_1(c-d)$ tak
+zostane koeficient $2(k-1)-(k-2+k)=0$. Pretože
+$2\cdot53-(78+27)=1$ a~$2(k-1)^2-(k-2)^2-k^2={-2}$, dostaneme
+spomenutou kombináciou jednoduchú rovnosť $1=\m2(c^2-d^2)$, z~ktorej
+určíme $c^2-d^2={\m1/2}$. To dosadíme do rovností \thetag{2} 
+a~\thetag{3}, ktoré tak prejdú na tvar
+$$
+\align
+78&=2x_1(k-2)(c-d)-\frac12(k-2)^2,\tag4\\
+27&=2x_1k(c-d)-\frac12k^2.\tag5
+\endalign
+$$
+Členov s~$x_1$ sa opäť zbavíme, keď od $k$-násobku rovnosti~\thetag{4}
+odčítame $(k-2)$-násobok rovnosti~\thetag{5}. Získanú rovnicu
+s~neznámou~$k$ potom vyriešime:
+$$
+\align
+78k-27(k-2)&=\m\frac12(k-2)^2\cdot k+\frac12k^2\cdot(k-2),\\
+51k+54&=\m\frac12(k^3-4k^2+4k)+\frac12(k^3-2k^2),\\
+0&=k^2-53k-54,\\
+0&=(k+1)(k-54).
+\endalign
+$$
+Pretože index~$k$ je prirodzené číslo, platí nutne $k=54$. Tým je
+úloha vyriešená.
+
+Dodajme, že zadanie úlohy nevyžaduje skúmať, či pre nájdenú
+(jedinú) hodnotu indexu~$k$ dvojica postupností spĺňajúcich
+podmienky úlohy existuje. Pre zaujímavosť uveďme, že takých
+dvojíc postupností je dokonca nekonečne veľa. Je nutné a~stačí,
+aby ich spoločný prvý člen~$x_1$ a~diferencie $c$, $d$
+spĺňali podmienky $c^2-d^2=\m1/2$ a~$x_1(c-d)=55/4$.
+Vyplýva to jednoducho z~ktorejkoľvek z~rovností \thetag{1} až \thetag{3} po dosadení hodnôt
+$k=54$ a~$c^2-d^2=\m1/2$.
+
+\návody
+Pre členy dvoch aritmetických postupností $(x_i)_{i=1}^{\infty}$
+a~$(y_i)_{i=1}^{\infty}$ platia rovnosti $x_1=y_1$ 
+a~$x_{9}=y_{13}$. Dokážte, že existuje index~$k$ taký, že
+$x_{k}=y_{100}$. Ktoré ďalšie rovnosti $x_{i}=y_{j}$ sú
+zaručené? [$k=67$, všeobecne $x_{2n+1}=y_{3n+1}$.]
+
+Nájdite všetky aritmetické postupnosti
+$(x_i)_{i=1}^{\infty}$, pre ktoré platí
+$$
+x_1^2=x_2^2=x_5^2-48.
+$$
+[Dve postupnosti so všeobecnými členmi $x_i=2i-3$, resp\. $x_i=3-2i$.]
+
+Nájdite všetky aritmetické postupnosti $(x_i)_{i=1}^{\infty}$,
+pre ktoré platí $x_4^2-x_3^2=15$ a~zároveň $x_7^2-x_5^2=120$.
+[Dve postupnosti s~o všeobecnými členmi $x_i=3i-8$, resp\. $x_i=8-3i$.]
+
+Ak pre nekonštantnú
+aritmetickú postupnosť $(x_i)_{i=1}^{\infty}$ platí rovnosť
+$x_{k}^2=x_{2k}^2$ pre niektorý index~$k$, tak
+$x_{3k-1}=\m x_{1}$. Dokážte. [Návod: Zdôvodnite, prečo
+$x_{2k}=\m x_{k}$. Odtiaľ $x_{2k+i}={-x_{k-i}}$ pre každé
+$i<k$.]
+
+Ktoré aritmetické postupnosti $(x_i)_{i=1}^{\infty}$
+a~$(y_i)_{i=1}^{\infty}$ spĺňajú rovnosti $x_1=y_1=1$,
+$x_{5}^2-y_{5}^2=9$ a~$x_{13}^2-y_{13}^2=45$? [$x_i=(1+i)/2$
+a~$y_i=(5-i)/4$.]
+\endnávod}
+
+{%%%%%   A-I-5
+\fontplace
+\tpoint A; \tpoint B; \lBpoint C; \rBpoint D;
+\rpoint F;
+\tpoint a=2c; \lBpoint b; \bpoint c; \rBpoint d;
+\lBpoint b; \rBpoint d;
+[2] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \lBpoint C; \rBpoint D;
+\lBpoint E; \rpoint F;
+\tpoint 2c; \point ; \tpoint c; \rBpoint d;
+\lBpoint 2c; \rBpoint d;
+\lBpoint c; \lBpoint c;
+[3] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \lBpoint C; \rBpoint D;
+\lBpoint E; \rpoint F;
+\tpoint 2c; \point ; \bpoint c; \rBpoint d;
+\lBpoint b; \rBpoint d;
+\lBpoint \frac12b; \lBpoint \frac12b;
+\tpoint x;
+[4] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \bpoint C;
+\tpoint C_1;
+\lBpoint a; \rBpoint b;
+\tpoint \frac12c; \tpoint \frac12c; \lBpoint t_c;
+\cpoint\omega;
+[7] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \lBpoint C; \rBpoint D;
+\tpoint S;
+\tpoint\xy-1.5,-1 E;
+\tpoint c; \tpoint c; \point b; \bpoint c; \rBpoint d;
+\rBpoint u; \rBpoint d; \tpoint x;
+[5] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \blpoint C; \brpoint D;
+\rBpoint E; \rpoint F; \tpoint G;
+\tpoint 2c; \point ; \bpoint c; \rBpoint d;
+\lBpoint b; \rBpoint d;
+\lBpoint \frac12b; \lBpoint \frac12b;
+\tpoint x; \tpoint x;
+[6] \hfil\Obr
+
+Označme zvyčajným spôsobom $a$, $b$, $c$, $d$ dĺžky
+strán daného lichobežníka. Podľa zadania platí rovnosť $a=2c$,
+ktorá znamená, že základňa~$CD$ je strednou priečkou trojuholníka $ABF$,
+pričom $F$ je priesečník ramien $BC$ a~$AD$ predĺžených za vrchol
+$C$ resp\. $D$ (\obr). Preto platí aj $|CF|=b$ a~$|DF|=d$.
+
+V~prvej časti riešenia predpokladajme, že $|AB|=|BC|$, čiže $2c=b$
+(\obr). Potom $|CF|=b=2c$ a~$|EB|=|EC|=b/2=c$, takže trojuholníky
+$ABE$ a~$FCD$ sú zhodné podľa
+vety $sus$ (ich strany dĺžok $2c$ a~$c$ zvierajú súhlasné
+uhly určené priamkou~$BC$ medzi rovnobežkami $AB$ a~$CD$). Zo
+zhodnosti tretích strán $AE$ a~$FD$ potom vyplýva rovnosť $|AE|=d$.
+Tak prichádzame k~záveru, že strany štvoruholníka $AECD$ majú dĺžky
+$d$, $c$, $c$, $d$. Je to teda dotyčnicový štvoruholník (dokonca
+deltoid, prípadne kosoštvorec).
+
+\midinsert
+\centerline{\inspicture-!\hss\inspicture-!\hss\inspicture-!}
+\endinsert
+
+V~druhej časti riešenia predpokladajme, že štvoruholník $AECD$ je
+dotyčnicový, takže podľa známej vety pre dĺžky jeho strán platí
+rovnosť $|AE|+|CD|=|EC|+|AD|$, čiže $x+c=b/2+d$, pričom $x=|AE|$
+(\obr). Odtiaľ vyjadríme dĺžku~$x$, s~ktorou budeme ďalej
+pracovať, v~tvare
+$$
+x=\frac{b}{2}-c+d.
+\tag1
+$$
+Všimnime si teraz, že úsečky $CD$, $AC$ a~$AE$ delia
+trojuholník $ABF$ na štyri trojuholníky s~rovnakým obsahom. (Podrobnejšie:
+z~$|AD|=|DF|$, $|BC|=|CF|$ a~$|BE|=|EC|$ vyplýva sled rovností
+$S_{ADC}=S_{CDF}=S_{ACF}/2=S_{ABC}/2=S_{ABE}=S_{ACE}$.)
+Preto pre obsahy štvoruholníka $AECD$ a~trojuholníka $AEF$ platí
+$S_{AECD}:S_{AEF}=2:3$. Tieto dva mnohouholníky však majú
+spoločnú vpísanú kružnicu, takže v~rovnakom pomere $2:3$ musia
+byť aj ich odvody (pripomeňme, že obsah mnohouholníka
+s~obvodom~$o$ a~vpísanou kružnicou s~polomerom~$\rho$ je rovný
+$o\cdot\rho/2$). Pretože tieto obvody majú vyjadrenia
+$$
+o_{AECD}=x+\frac{b}{2}+c+d,\quad
+o_{AEF}=x+\frac{3b}{2}+2d,
+$$
+platí $(x+b/2+c+d):(x+3b/2+2d)=2:3$. Odtiaľ ľahko
+vyjadríme neznámu~$x$ ako
+$$
+x=\frac{3b}{2}-3c+d.                 \tag2
+$$
+Porovnaním \thetag{1} a~\thetag{2} dostaneme rovnosť $b=2c$, čiže $b=a$. Tým
+je rovnosť $|AB|=|BC|$ dokázaná.
+
+\ineriesenie
+\podla{Pavla Novotného} %Je tak senzační, že by se aspoň v ročence mělo uvést jméno autora: dr. Pavel Novotný
+Pripomeňme najskôr vyjadrenie dĺžok ťažníc
+trojuholníka pomocou dĺžok jeho strán: vo všeobecnom trojuholníku $ABC$ pri zvyčajnom
+označení platí vzťah
+$$
+4t_c^2=2a^2+2b^2-c^2.
+\tag1
+$$
+Odvodenie~\thetag{1} je jednoduché: stačí sčítať rovnosti
+$$
+b^2=\Bigl(\frac12c\Bigr)^{\!2}+t_c^2-ct_c\cos\om,\quad
+a^2=\Bigl(\frac12c\Bigr)^{\!2}+t_c^2+ct_c\cos\om,
+$$
+ktoré platia podľa kosínusovej vety pre trojuholníky $ACC_1$ a~$BCC_1$, pričom
+$C_1$ je stred strany~$AB$ a~$\om=|\uhol AC_1C|$ (\obr).
+
+\midinsert
+\centerline{\inspicture-!\hss\inspicture-!}
+\endinsert
+
+
+V~danom lichobežníku $ABCD$ (v~ktorom platí $a=2c$) uvažujme
+okrem stredu~$E$ ramena~$BC$  ešte stred~$S$ základne~$AB$ 
+a~označme $x=|AE|$ a~$u=|AC|$ (\obr). Pretože  $|AS|=|SB|=a/2=c$,
+je $ASCD$ rovnobežník, teda $|CS|=d$. Teraz podľa vzťahu~\thetag{1}
+vyjadríme dĺžky ťažníc $AE$ a~$CS$ trojuholníka $ABC$:
+$$
+4x^2=2u^2+2(2c)^2-b^2\quad\text{a}\quad
+4d^2=2u^2+2b^2-(2c)^2.
+$$
+Vzájomným odčítaním týchto rovností vylúčime veličinu~$u$ 
+a~dostaneme
+$$
+4(x^2-d^2)=3(4c^2-b^2),\quad\text{čiže}\quad
+4(x-d)(x+d)=3(2c-b)(2c+b).
+$$
+Odtiaľ vyplýva, že znamienko rozdielu $x-d$ je vždy rovnaké ako
+znamienko rozdielu $2c-b$. Ukážme, že z~tohto poznatku vyplýva celé
+riešenie našej úlohy. Použijeme k~tomu známe kritérium pre dotyčnicové
+štvoruholníky: štvoruholník $AECD$ je dotyčnicový práve vtedy, keď sa
+rovnajú oba súčty dĺžok jeho protiľahlých strán, \tj. práve vtedy, keď
+$x+c=d+b/2$.
+
+Ak $b=2c$, tak podľa nášho poznatku $x=d$, a~teda
+$AECD$ je deltoid (pripadne kosoštvorec). (Rovnosť
+$x+c=d+b/2$ vtedy platí dokonca sčítanec po sčítanci.)
+
+Ak $b>2c$, tak podľa nášho poznatku $x<d$, a~teda
+$x+c<d+b/2$, takže štvoruholník
+$AECD$ nie je dotyčnicový.
+
+Ak $b<2c$, tak podľa nášho poznatku $x>d$, a~teda
+$x+c>d+b/2$, takže štvoruholník $AECD$ nie je dotyčnicový.
+
+\ineriesenie
+V~lichobežníku $ABCD$, v~ktorom platí $a=2c$,
+uvažujme okrem stredu~$E$ ramena~$BC$ a~priesečníku~$F$
+predĺžených ramien $BC$, $AD$ ešte priesečník~$G$ priamok $AE$,
+$CD$ (\obr). Ľahko vysvetlíme, že úsečky $EF$ a~$DG$ sú
+\inspicture{}
+ťažnice trojuholníka $AFG$ (a~bod~$C$ jeho ťažisko).
+Ak platí rovnosť $b=2c$, sú tieto ťažnice
+zhodné, a~preto je trojuholník $AFG$ rovnoramenný so základňou~$FG$,
+teda $AECD$ je deltoid (alebo kosoštvorec). Ak sa naopak
+štvoruholníku $AECD$ dá vpísať kružnica, je táto kružnica vpísaná 
+aj obom trojuholníkom $AEF$ a~$ADG$, ktoré majú zhodné obsahy (rovné
+vždy polovici obsahu trojuholníka $AFG$).
+Potom sa však musia rovnať aj ich obvody,
+čo pre dĺžku $x=|AE|=|EG|$ dáva rovnicu
+$$
+x+\frac{3b}{2}+2d=2x+3c+d,
+$$
+z~ktorej vychádza vyjadrenie neznámej~$x$ v~tvaru~\thetag{2} z~prvého
+riešenia. Rovnako ako tam potom dôjdeme k~rovnosti $b=2c$.
+
+Nad \obrr1{} možno uvažovať aj takto: štvoruholník
+$AECD$ bude dotyčnicový práve vtedy, keď splynú kružnice vpísané trojuholníkom
+$AEF$ a~$ADG$. Tieto trojuholníky majú totožné ramená vnútorných uhlov pri
+spoločnom vrchole~$A$, takže ich vpísané kružnice splynú
+práve vtedy, keď budú mať zhodné polomery. To je však ekvivalentné
+s~tým, že oba trojuholníky majú rovnaký obvod (vždy totiž majú rovnaký
+obsah). Pretože spoločná časť hraníc trojuholníkov $AEF$ a~$ADG$ je
+tvorená lomenou čiarou $EAD$, rovnajú sa ich obvody práve vtedy, keď
+platí rovnosť $|DF|+|FE|=|DG|+|GE|$. Pretože $DE\parallel FG$, je
+z~úvahy o~elipse s~ohniskami $D$, $E$ jasné, že odvodená rovnosť
+nastane práve vtedy, keď úsečky $DE$ a~$FG$ majú spoločnú os
+súmernosti (a~$AECD$ je potom deltoid, prípadne kosoštvorec).
+
+\návody
+Pripomeňte si a~dokážte {\it kritérium pre dotyčnicové
+štvoruholníky\/}: Konvexný štvoruholník $ABCD$ je dotyčnicový
+práve vtedy, keď sa rovnajú oba súčty dĺžok jeho protiľahlých strán,
+\tj. práve vtedy, keď $|AB|+|CD|=|BC|+|AD|$.
+
+Nech $D$, $E$ sú body dotyku strany~$AB$ 
+a~kružnice vpísanej trojuholníku $ABC$, resp\. kružnice pripísanej jeho
+strane~$AB$ (\tj. kružnice dotýkajúcej sa
+strany~$AB$ a~polpriamok opačných k~polpriamkam $AC$ a~$BC$).
+Dokážte, že body~$D$, $E$ majú vzdialenosti od vrcholov $A$, $B$
+dané vzťahmi
+$$
+|AD|=|BE|=\frac{|AB|+|AC|-|BC|}{2},\quad
+|BD|=|AE|=\frac{|AB|+|BC|-|AC|}{2}.
+$$
+[Návod: Využite niekoľkokrát, že pre body dotyku $T_{1,2}$
+oboch dotyčníc zostrojených z~ľubovoľného vonkajšieho bodu~$X$ k~danej
+kružnici platí $|XT_1|=|XT_2|$.]
+
+Vnútri strán $AB$, $BC$, $CD$ a~$DA$ konvexného štvoruholníka
+$ABCD$ sú postupne zvolené body $K$, $L$, $M$ a~$N$. Označme $S$
+priesečník priamok $KM$ a~$LN$. Ak možno vpísať kružnice
+štvoruholníkom $AKSN$, $BLSK$, $CMSL$ a~$DNSM$, tak možno vpísať
+kružnicu aj štvoruholníku $ABCD$. Dokážte.
+[MO 51--B--II--3, poz\. internetové stránky MO.]
+\endnávod}
+
+{%%%%%   A-I-6
+V~prvej časti riešenia predpokladajme,
+že $f:\langle0,+\infty)\to\langle0,+\infty)$
+je ľubovoľná z~hľadaných funkcií.
+Keď dosadíme do danej rovnice hodnotu $y=1$ a~číslo $x\geqq0$
+ponecháme ľubovoľné, dostaneme
+$$
+f\bigl(x f(1)\bigr)f(1)=f\Bigl(\frac{x}{x+1}\Bigr).
+$$
+Vzhľadom na to, že podľa podmienky~b) platí $f(1)=0$ , posledná
+rovnosť znamená, že
+$$
+f\Bigl(\frac{x}{x+1}\Bigr)=0\quad\text{pre každé}\ x\geqq0.
+$$
+Vidíme, že funkcia~$f$ nadobúda hodnoty nula vo všetkých bodoch
+definičného oboru, ktoré možno vyjadriť v~tvare zlomku
+$x/(x+1)$ s~vhodným $x\geqq0$. Každý taký zlomok určite
+leží v~intervale $\langle0,1)$. Naopak, pre každé reálne číslo
+$t\in\langle0,1)$ má zrejme rovnica $t=x/(x+1)$ nezáporné
+riešenie $x=t/(1-t)$.
+
+Zistený poznatok spolu s~podmienkou~c) zo zadania úlohy vedie 
+k~záveru, že rovnosť $f(t)=0$ platí práve vtedy, keď
+$t\in\langle0,1\rangle$.
+Aby sme určili (kladnú) hodnotu $f(t)$ pre pevné $t>1$,
+budeme uvažovať dve rovnice s~takým parametrom~$t$ a~neznámou~$x$:
+$$
+f\bigl(x\, f(t)\bigr)f(t)=0\qquad\text{a}\qquad
+f\Bigl(\frac{xt}{x+t}\Bigr)=0.
+$$
+Pretože podľa zadania úlohy sa ľavé strany oboch rovníc rovnajú
+(zvoľme $y=t$ v~danej funkcionálnej rovnici)
+a~$f(t)>0$, musia mať obe rovnice rovnaké množiny riešení. Pre
+prvú z~nich je táto množina určená sústavou nerovníc
+$0\leqq x\,f(t)\leqq1$, takže tvorí interval
+$\langle0,1/f(t)\rangle$. Druhá rovnica je
+ekvivalentná so sústavou nerovníc $0\leqq xt/(x+t)\leqq1$,
+ktorej riešenia (vzhľadom na $x+t>0$) tvoria interval
+$\langle0,t/(t-1)\rangle$. Z~totožnosti oboch
+intervalov vyplýva rovnosť
+$$
+\frac{1}{f(t)}=\dfrac{t}{t-1},\quad\text{čiže}\quad
+f(t)=\frac{t-1}{t}.
+$$
+
+Našli sme hodnotu $f(t)$ pre každé $t>1$. Môžeme teda zhrnúť,
+že hľadaná funkcia~$f$ musí mať tvar
+$$
+f(t)=\cases 0 & (0\leqq t\leqq 1),\\
+\vspace{10pt}
+            \dfrac{t-1}{t} & (t>1).
+\endcases
+$$
+
+V~druhej časti riešenia ukážeme, že funkcia~$f$ určená ostatným
+predpisom má naozaj vlastnosť~a) zo zadania úlohy (vlastnosti~b)
+a~c) sú zrejmé). Rovnosti oboch strán
+$$
+L=f\bigl(x\,f(y)\bigr)f(y),\quad
+P=f\Bigl(\frac{xy}{x+y}\Bigr)
+$$
+danej funkcionálnej rovnice dokážeme v~každom zo štyroch prípadov
+rozlíšených podľa možných hodnôt premennej~$y$ a~zlomku
+$xy/(x+y)$:
+$$
+\vbox{\openup\jot
+\halign{&\quad\hss#&\quad$#$\hss\quad\cr
+  {(i)} &y=0\ (\text{a}\ x>0),               &{(ii)}&0<y\leqq1,\cr
+{(iii)} &y>1\ \text{a}\ \dfrac{xy}{x+y}\leqq1,&{(iv)}&y>1\
+                                     \text{a}\ \dfrac{xy}{x+y}>1.\cr
+}}
+$$
+
+Prípad (i). Z~$y=0$ vyplýva $f(y)=0$ a~$xy/(x+y)=0$, takže
+tiež $f(xy/(x+y))=0$, teda $L=P=0$.
+
+Prípad (ii). Z~$0<y\leqq1$ vyplýva $xy/(x+y)<1$, takže opäť
+$L=P=0$.
+
+Prípad (iii). Z~$y>1$ a~$xy/(x+y)\leqq1$ vyplýva
+$x\leqq y/(y-1)$, takže vzhľadom na hodnotu
+$f(y)=(y-1)/y$ platí nerovnosť $xf(y)\leqq1$, teda opäť
+$L=P=0$.
+
+Prípad (iv). Z~$y>1$ a~$xy/(x+y)>1$ vyplýva
+$x>y/(y-1)$, takže vzhľadom na hodnotu $f(y)=(y-1)/y$
+platí nerovnosť $xf(y)>1$, teda
+$$
+\align
+L&=\frac{x\cdot\dfrac{y-1}{y}-1}{x\cdot\dfrac{y-1}{y}}\cdot
+\frac{y-1}{y}=\frac{xy-x-y}{xy},\\
+P&=\frac{\dfrac{xy}{x+y}-1}{\dfrac{xy}{x+y}}=\frac{xy-x-y}{xy}.
+\endalign
+$$
+Rovnosť $L=P$ je tak dokázaná vo všetkých prípadoch.
+
+\návody
+{\everypar{}%
+K~zoznámeniu s~témou a~riešenými príkladmi funkcionálnych rovníc
+odporúčame knižku {L\. Davidov}: {\it Funkcionální rovnice}, ŠMM č\.~55, Mladá fronta, Praha 1984.\endgraf}
+
+Nech $\ssize\Bbb R^{+}$ označuje množinu všetkých kladných reálnych čísel.
+Určte všetky funkcie \hbox{$f:\ \ssize\Bbb R^{+}\to \ssize\Bbb R^{+}$}, ktoré
+pre ľubovoľné kladné čísla $x$, $y$ spĺňajú rovnosť
+$$
+x^2\big(f(x)+f(y)\big)=(x+y)f\big(f(x)y\big).
+$$
+[MO 53--A--III--6, poz\. internetové stránky MO.]
+
+Nech $\ssize\Bbb R^{+}$ označuje množinu všetkých kladných reálnych čísel.
+Nájdite všetky funkcie \hbox{$f:\ \ssize\Bbb R^{+}\to\ssize\Bbb R^{+}$} spĺňajúce pre
+ľubovoľné $x,y\in\ssize\Bbb R^{+}$ rovnosť
+$$
+f(xf(y))=f(xy)+x.
+$$
+[MO 51--A--III--6, poz\. internetové stránky MO.]
+\endnávod}
+
+{%%%%%   B-I-1
+Nech $x_1$, $x_2$ sú korene prvej rovnice. Potom
+$$
+x_1+x_2=\m a,\qquad x_1x_2=b,
+$$
+a~pretože druhá rovnica má korene $\frc{1}{x_1}$ a~$\frc{1}{x_2}$, platí
+$$
+\frac{1}{x_1}+\frac{1}{x_2}=\m(2a+1), \qquad
+\frac{1}{x_1}\cdot\frac{1}{x_2}=2b+1.
+$$
+Platí teda $\frc{1}{b}=2b+1$, z~čoho dostaneme kvadratickú rovnicu
+$2b^2+b-1=0$, ktorá má korene $b=\m1$ a~$b=\frc{1}{2}$.
+
+Pre $b=\m1$ máme
+$$
+\m(2a+1)= \frac{1}{x_1}+\frac{1}{x_2}= \frac{x_1+x_2}{x_1x_2}=
+\frac{\m a}{\m1},
+$$
+čo je pre neznámu~$a$ lineárna rovnica s~riešením
+$a=\m\frc{1}{3}$.
+
+Podobne pre $b= \frc{1}{2}$ dostávame $\m(2a+1)=\m2a$, táto
+rovnica však nemá riešenie. Skúškou (treba overiť, že korene
+sú reálne) sa presvedčíme, že dvojica $a={\m\frc13}$, $b={\m1}$
+je (jediným) riešením úlohy.
+
+
+\návody
+Zistite, pre ktoré hodnoty parametra~$a$ má
+rovnica $x^2+3ax+16a=0$ dva rôzne korene, z~ktorých jeden je
+druhou mocninou druhého. [$a=\m4$, $a=\m\frc{4}{27}$. Návod:
+Z~rovníc $x_1+x_1^2=\m3a$, $x_1\cdot x_1^2=16a$ vyplýva
+$\frc{x_1^2}{(x_1+1)}=- \frc{16}{3}$.]
+
+Zistite, pre ktoré hodnoty parametrov $a$, $b$ má rovnica
+$x^2-(a^2+3)x+b=0$ dva rôzne korene, ktoré sú druhými mocninami
+koreňov rovnice $x^2-(a+3)x+b=0$. [$(a,b)=(-1,0)$ 
+a~$(a,b)=(\m\frc{2}{3},1)$.]
+
+Zistite, pre ktoré hodnoty parametrov $a$, $b$ má rovnica
+$x^2+bx+b=0$ dva rôzne korene, pričom každý z~nich je o~$1$ väčší
+ako koreň rovnice $x^2+ax+b=0$. [$(a,b)=(-1,-3)$.]
+\endnávod}
+
+{%%%%%   B-I-2
+\fontplace
+\tpoint A; \tpoint B; \bpoint C; \bpoint D;
+\tpoint\xy-.8,0 E; \lpoint\up.4\unit F; \bpoint\xy.5,.3 G;
+\tpoint a; \rBpoint b;
+\lBpoint x; \rBpoint y; \rBpoint z;
+[1] \hfil\Obr
+
+Z~\obr{} vidno, že trojuholníky $AGD$ a~$CGF$ sú podobné
+\inspicture{}
+podľa vety~$uu$. Príslušný pomer podobnosti~$k$ je rovný
+hľadanému pomeru $|AG|:|GC|$. Ak teda označíme $b=|AD|$,
+$x=|DG|$ a~$y=|CG|$, platí $|GF|=\frc{x}{k}$ a~$|CF|=\frc{b}{k}$,
+odkiaľ
+$$
+|FB|=|BC|-|FB|=b-\frac{b}{k}=(k-1)\frac{b}{k}
+$$
+a~$$
+|DF|=|DG|+|GF|=x+\frac{x}{k}=(k+1)\frac{x}{k}.
+$$
+Z~podobnosti trojuholníkov $BEF$ a~$CDF$ dostávame
+$$
+|EF|=\frac{|DF|\cdot|BF|}{|CF|}=\frac{k^2-1}{k}\cdot x.
+$$
+Z~rovnosti obsahov trojuholníkov $BEF$ a~$CGF$ vyplýva
+$$
+|FB|\cdot|FE|=|FC|\cdot|FG|,
+$$
+odkiaľ po dosadení vyjde
+$$
+\frac{k-1}{k}\cdot b\cdot \frac{k^2-1}{k} \cdot x
+=\frac {b}{k}\cdot \frac{x}{k}.
+$$
+Teda $k^3-k^2-k+1=1$, a~pretože $k\ne 0$, dostávame pre
+hľadané~$k$ kvadratickú rovnicu $k^2-k-1=0$. Úlohe vyhovuje jej
+kladný koreň $k=(1+\sqrt{5})/2$.
+
+\ineriesenie
+Označme $|AG|=z$, $|GC|=y$. Pretože trojuholníky $BEF$ a~$CGF$
+majú rovnaký obsah, majú rovnaký obsah aj trojuholníky $GBE$ a~$GBC$. Preto
+platí $EC\parallel BG$. Z~podobností trojuholníkov
+$$
+ABG\sim AEC,\quad DFC\sim EFB,\quad CFE\sim BFG\quad\text{a}\quad AEC\sim ABG
+$$
+postupne vyplýva
+$$
+\frac{z}{y}=\frac{|AG|}{|GC|}=\frac{|AB|}{|BE|}=\frac{|DC|}{|BE|}=
+\frac{|FC|}{|BF|}=
+\frac{|CE|}{|BG|}=
+\frac{|AC|}{|AG|}=\frac{z+y}{z}.
+$$
+Z~výslednej rovnosti $\frc{z}{y}=1+\frc{y}{z}$ dostávame
+$$
+\Bigl(\frac{z}{y}\Bigr)^{\!2}-\frac{z}{y}-1=0,
+$$
+a~pretože $\frc{z}{y}>0$, platí
+$$
+\frac{z}{y}=\frac{1+\sqrt{5}}{2}.
+$$
+
+
+\návody
+Označme $P$ priesečník uhlopriečok konvexného
+štvoruholníka $ABCD$. Dokážte, že trojuholníky $APD$ a~$CPB$ majú
+rovnaký obsah práve vtedy, keď $AB\parallel CD$.
+
+Označme $P$ priesečník uhlopriečok konvexného štvoruholníka $ABCD$
+a~$K$, $L$ priesečníky priamky vedenej bodom~$P$ rovnobežne so
+stranou~$AB$. Dokážte, že rovnosť $|KP|=|PL|$ platí práve vtedy, keď
+$AB\parallel CD$.
+\endnávod}
+
+{%%%%%   B-I-3
+V~každom kroku sa počet hromádok zmenší o~dva.
+Aby vznikla jedna hromádka, musí byť na začiatku nepárny počet
+hromádok, teda $k=2m+1$. Na zmenšenie počtu hromádok o~$2m$ potrebujeme
+$m$~krokov. Pri každom pribudne jeden kameň, a~preto je
+výsledný počet kameňov
+$$
+p=1+2+3+\dots+(2m+1)+m=
+\frac{(2m+1)(2m+2)}{2}+m=2m^2+4m+1.
+$$
+Číslo~$m$ má jeden z~tvarov $m=3n$, $m=3n+1$, $m=3n+2$. V~prvom
+prípade $p=18n^2+12n+1=3(6n^2+2n)+1$, v~druhom
+$18n^2+24n+7=3(6n^2+8n+2)+1$ a~v~treťom
+$p=18n^2+36n+17=3(6n^2+12n+5)+2$. Žiadne z~týchto čísel nie je
+deliteľné tromi.
+
+\poznamka
+Stačí overiť, že $p$ nie je deliteľné tromi pre $m=0$,
+$m=1$ a~$m=2$ [návodná úloha~1].
+
+\návody
+Nech $p$ je mnohočlen s~celočíselnými koeficientmi, $n$ je celé
+a~$k$ prirodzené číslo. Dokážte, že čísla $p(n+k)$ a~$p(n)$ dávajú
+po delení číslom~$k$ rovnaký zvyšok.
+
+Nech $n$ je celé číslo. Dokážte, že číslo $n^3+n+1$ nie je
+deliteľné siedmimi.
+
+Na stole leží $k$~hromádok o~$1,2,3,\dots,k$ kameňoch, $k\geq5$. 
+V~každom kroku vyberieme $4$~ľubovoľné hromádky, spojíme ich do jednej
+a~ešte k~nej pridáme jeden kameň z~ktorejkoľvek ďalšej hromádky.
+Určte všetky~$k$, pre ktoré po konečnom počte krokov môže
+vzniknúť jediná hromádka. [$k\in\{5,8,11,12,14,15,17,18\}$
+a~všetky $k\ge20$.]
+\endnávod}
+
+{%%%%%   B-I-4
+\fontplace
+\tpoint A; \tpoint B; \bpoint C; \lBpoint D;
+\lBpoint V; \rBpoint P; \tpoint S;
+[2] \hfil\Obr
+
+\fontplace
+\tpoint V=A; \tpoint B; \bpoint C; \lBpoint S;
+[3] \hfil\Obr
+
+Nech napríklad $|AC|<|BC|$. Predpokladajme najskôr, že
+trojuholník~$ABC$ je ostrouhlý. Označme $D$ stred strany~$BC$
+a~$P$ pätu výšky z~vrcholu~$B$ na stranu~$AC$ (\obr). Platí
+$|CP|=|BC|\cdot \cos60^{\circ}= \frc{|BC|}2=|CD|$, $|\uhol
+CPV|=|\uhol CDS|=90^{\circ}$, $|\uhol CVP|=|\uhol CAB|=|\uhol
+CSD|$ (obvodový uhol a~polovica stredového). Zo~zhodnosti
+trojuholníkov $CPV$ a~$CDS$ vyplýva $|CV|=|CS|$, $|\uhol
+PCV|=|\uhol DCS|$. Trojuholník $VSC$ je teda rovnoramenný a~os
+uhla $ACB$ je tak aj osou uhla $VCS$ a~súčasne osou strany~$VS$.
+
+Ak je trojuholník $ABC$ pravouhlý (\obr), je trojuholník~$VSC$
+rovnostranný a~os uhla $VCS$ je aj osou strany~$VS$.
+
+Ak je trojuholník $ABC$ tupouhlý, dokážeme tvrdenie úlohy
+rovnako ako v~prípade ostrouhlého trojuholníka s~tým rozdielom,
+že bude platiť $|\uhol CVP|=|\uhol CSD|=180^{\circ}-|\uhol CAB|$.
+
+%\twocpictures
+\midinsert
+\centerline{\inspicture-!\hss\inspicture-!}
+\endinsert
+
+\návody
+Označme $V$ priesečník výšok a~$S$ stred kružnice opísanej
+trojuholníku $ABC$. Vypočítajte veľkosť uhla $ACB$, keď
+platí $|VC|=|SC|$.
+
+Nech $V$ je priesečník výšok trojuholníka $ABC$. Dokážte, že body
+súmerne združené s~bodom~$V$ podľa strán trojuholníka $ABC$
+ležia na kružnici opísanej tomuto trojuholníku.
+\endnávod}
+
+{%%%%%   B-I-5
+Každé reálne číslo~$x$ môžeme zapísať v~tvare $x=\lfloor x
+\rfloor+ \{x\}$, kde $\lfloor x \rfloor$ je {\it celá časť\/}
+a~$\{x\}$ tzv\. {\it zlomková časť\/} čísla~$x$. Zrejme platí $0\leq \{x\}<1$,
+pričom $\{x\}=0$ práve vtedy, keď $x$ je celé. Odtiaľ vyplýva, že
+$\lfloor x \rfloor \leq x <\lfloor x \rfloor+1$, pričom rovnosť
+$\lfloor x \rfloor=x$ platí práve vtedy, keď $x$ je celé. Tieto
+nerovnosti často používame pri riešení úloh s~celou časťou.
+Keď označíme $\lfloor x \rfloor=k$, dostaneme z~danej rovnice po
+odstránení zlomku a~roznásobení
+$$
+7kx-5x=5kx+20k-7x-28
+$$
+a~odtiaľ
+$$
+x=\frac{10k-14}{k+1}.      \tag1
+$$
+Pretože
+$k=\lfloor x \rfloor$, musí platiť
+$$
+k\leq \frac{10k-14}{k+1}<k+1.
+$$
+
+Každou z~nerovníc vyriešime samostatne:
+$$
+\align
+0\ge&\frac{k(k+1)-(10k-14)}{k+1}=\frac{(k-7)(k-2)}{k+1},\qquad
+k\in (\m\infty, \m1)\cup \langle2,7\rangle;\\
+0<&\frac{{(k+1)}^2-(10k-14)}{k+1}=\frac{(k-3)(k-5)}{k+1},\qquad
+k\in(\m1,3)\cup (5,\infty).
+\endalign
+$$
+Pretože $k$ je celé, máme $k\in \{2,6,7\}$. Rovnica má teda tri
+riešenia, ktoré dostaneme dosadením do vzťahu~\thetag{1}: $x_1=2$,
+$x_2=\frc{46}{7}$, $x_3=7$.
+
+\poznamky
+Niektoré ďalšie vlastnosti celej časti: Ak $k$ je
+celé, tak $\lfloor {x+k} \rfloor=\lfloor x \rfloor + k$.
+
+Ak $\{x\}+\{y\}< 1$, platí $\lfloor {x+y} \rfloor=\lfloor x
+\rfloor+\lfloor y \rfloor$; ak $\{x\}+\{y\}\geq 1$, platí
+$\lfloor {x+y} \rfloor=\lfloor x \rfloor + \lfloor y \rfloor+1$.
+
+Nech $k$ je prirodzené číslo, $k>1$. Ku každému reálnemu číslu~$x$
+existuje práve jedno $i\in \{1,2,\dots,k\}$ také, že $\{x\} \in
+\langle \frc{(i-1)}{k},\frc{i}{k})$. Potom $k \lfloor x
+\rfloor+i-1 \leq kx < k~\lfloor x \rfloor+i$, a~preto $\lfloor kx
+\rfloor=k \lfloor x \rfloor+i-1$.
+
+
+\návody
+Vyriešte rovnicu $\lfloor x \rfloor+ \lfloor
+{x+1} \rfloor =x+2$. [$x=1$.]
+
+Vyriešte rovnicu $2x=\lfloor x \rfloor+1$. [$x\in\{\frc12,1\}$.]
+
+Vyriešte rovnicu $\lfloor x \rfloor+ \lfloor {2x} \rfloor=4x-1$.
+[$x\in\{\m\frc14,\frc14,\frc12,1\}$.]
+
+Vyriešte sústavu rovníc $\lfloor x \rfloor=2y+ \frc{1}{3}$,
+$\lfloor y \rfloor=3x-\frc{1}{2}$. [$x=\m\frc16$, $y=\m\frc23$.]
+\endnávod}
+
+{%%%%%   B-I-6
+\fontplace
+\tpoint A; \tpoint B; \rpoint C; \bpoint D;
+\ltpoint S;
+\rBpoint k; \tpoint k_1; \tpoint k_2;
+\rpoint \ell; \lpoint m;
+[4] \hfil\Obr
+
+Označme $S$, $A$, $B$, $C$, $D$ stredy kružníc $k$, $k_1$, $k_2$, $\ell$, $m$
+a~$x$, $y$ polomery kružníc $\ell$ a~$m$. Bod~$C$ leží na priamke,
+ktorá prechádza bodom~$S$ a~je kolmá na $AB$ (\obr). Z~pravouhlého
+trojuholníka $BCS$ máme podľa Pytagorovej vety
+$$
+\Bigl(\frac{r}{2}+x\Bigr)^{\!2}=\Bigl(\frac{r}{2}\Bigr)^{\!2}+(r-x)^2
+$$
+a~odtiaľ $x=\frc{r}3$. Označme $P$, $Q$ päty kolmíc z~bodu~$D$
+na priamky $AB$ a~$SC$ a~$u=|SP|$, $v=|SQ|$. Ak $u \ne
+\frc{r}2$, tak $BPD$ je pravouhlý trojuholník a~podľa Pytagorovej vety
+$$
+\left( {\frac{r}{2}+y} \right)^{\!2}
+=v^2+ \left( {u-\frac{r}{2}} \right)^{\!2}.    \tag1
+$$
+Táto rovnosť platí aj v~prípade $u=\frc{r}2$.
+\inspicture{}
+
+Podobne z~pravouhlého trojuholníka $QCD$ (keď $Q \ne C$) alebo
+porovnaním protiľahlých strán obdĺžnika (keď $Q=C$) dostaneme
+$$
+\left( {\frac{r}{3}+y} \right)^{\!2}
+=u^2+\Bigl({v-\frac{2r}{3}} \Bigr)^{\!2}.              \tag2
+$$
+Navyše z~pravouhlého trojuholníka $SPD$ máme
+$$
+(r-y)^2=u^2+v^2.                    \tag3
+$$
+
+Odčítaním rovností \thetag{3} a~\thetag{2} dostaneme
+$\frc{4r^2}3- \frc{8ry}3= \frc{4vr}3$, teda $v=r-2y$.
+Podobne odčítaním rovností~\thetag{3} a~\thetag{1} vyjde $r^2-3ry=ur$
+a~odtiaľ $u=r-3y$. Dosadením do~\thetag{3} a~úpravou postupne dostaneme
+$$
+\gather
+(r-y)^2=(r-3y)^2+(r-2y)^2,\\
+r^2-8ry+12y^2=0,\\
+(r-6y)(r-2y)=0.
+\endgather
+$$
+Odtiaľ vyplýva, že $y=\frc{r}2$ alebo $y=\frc{r}6$. Polomer
+$\frc{r}2$ má kružnica~$k_1$, polomer $\frc{r}6$ kružnica~$m$
+znázornená na \obrr1{}. Každá z~týchto dvoch kružníc sa dotýka
+kružníc~$k$, $k_2$ a~$\ell$ požadovaným spôsobom.
+
+\návody
+Kružnica~$k_2$ s~polomerom $\frc{1}{2}$ sa dotýka zvnútra
+kružnice~$k_1$ s~polomerom~$1$. Priamka~$p$ prechádza stredmi kružníc
+$k_1$ a~$k_2$. Vypočítajte polomer kružnice, ktorá sa dotýka
+priamky~$p$ a~obidvoch kružníc $k_1$ a~$k_2$. [$\frc49$.]
+
+Každá z~kružníc $k_1$, $k_2$, $k_3$ sa dotýka zvonka dvoch
+ostatných. Kružnice $k_1$ a~$k_2$ majú rovnaký polomer~$r$,
+kružnica~$k_3$ má polomer $\frc{8r}{5}$. Všetky kružnice $k_1$,
+$k_2$, $k_3$ majú vnútorný dotyk s~kružnicou~$k$ s~polomerom~$1$.
+Vypočítajte polomer~$r$. [$\frc38$.]
+
+Každá z~kružníc $k_1$, $k_2$, $k_3$ sa dotýka zvonka dvoch
+ostatných. Kružnica~$k_1$ má polomer~$1$, kružnica~$k_2$ má
+polomer~$2$ a~kružnica~$k_3$ má polomer~$3$. Vypočítajte polomery
+kružníc, ktoré sa dotýkajú všetkých troch kružníc $k_1$, $k_2$,
+$k_3$. [$\frc6{23}$ a~6.]
+\endnávod}
+
+{%%%%%   C-I-1
+Keď vyjadríme z~rovnosti v~predpoklade napr\. $d=b+c-a$ a~dosadíme túto
+hodnotu do ľavej strany dokazovanej nerovnosti, postupne dostaneme
+$$
+\align
+&(a-b)(a-b)+(a-c)(a-c)+(b+c-2a)(b-c)=\\
+&=a^2-2ab+b^2+a^2-2ac+c^2+b^2+bc-2ab-bc-c^2+2ac=\\
+&=2a^2-4ab+2b^2=2(a^2-2ab+b^2)=2(a-b)^2.
+\endalign
+$$
+Tento výraz je nezáporný pre všetky reálne čísla $a$, $b$, čím
+je daná nerovnosť dokázaná.
+
+\ineriesenie
+Najskôr ponecháme podmienku $a+d=b+c$ bokom a~ukážeme, že výraz
+na ľavej strane dokazovanej nerovnosti možno upraviť na súčin. Prvá
+časť výrazu, súčin $(a-b)(c-d)$, je rovný nule v~prípadoch, keď
+$a=b$ alebo $c=d$. Druhá časť výrazu, súčet
+$(a-c)(b-d)+(d-a)(b-c)$, má tiež v~oboch prípadoch $a=b$, $c=d$
+nulovú hodnotu. Takže výraz musí byť deliteľný súčinom $(a-b)(c-d)$.
+Presvedčíme sa o~tom roznásobením a~následným postupným
+vynímaním:
+$$
+\align
+(a-c)(b-d)+(d-a)(b-c)=&(ab-bc-ad+cd)+(bd-ab-cd+ac)=\\
+=&(\m bc+bd)+(\m ad+ac)=\m b(c-d)+a(c-d)=\\
+=&(a-b)(c-d).
+\endalign
+$$
+Dokazovaná nerovnosť má preto tvar
+$$
+2(a-b)(c-d)\ge0,
+$$
+do ktorého teraz dosadíme $c-d=a-b$. Dostaneme tak nerovnosť
+$$
+2(a-b)^2\ge0,
+$$
+ktorá platí pre všetky reálne čísla $a$, $b$. Tým je daná
+nerovnosť dokázaná.
+
+
+\návody
+Nech pre reálne čísla $a$, $b$, $c$ platí $a+b+c=0$.
+Dokážte rovnosť $$a^3+b^3+c^3=3abc.$$
+[$a^3+b^3-(a+b)^3=a^3+b^3-a^3-3a^2b-3ab^2-b^3=-3ab(a+b)=3abc$.]
+
+Dokážte, že pre všetky reálne čísla $a$, $b$, $c$ platí
+$$
+bc(c-b)+ac(a-c)+ab(b-a)=(a-b)(b-c)(c-a).
+$$
+\endnávod}
+
+{%%%%%   C-I-2
+Ak je $n$ párne a~v~danej množine sú párne čísla $2$ a~$n-2$,
+pričom $2<n-2$, je ich súčet $2+(n-2)=n$ deliteľný
+číslom~$n$. Z~podmienky $2<n-2$ tak dostávame, že všetky párne čísla
+$n>4$ vyhovujú podmienke úlohy.
+
+Z~množín $\{1\}$ (pre $n=2$) a~$\{1,2,3\}$ (pre $n=4$) zrejme
+nemožno požadovaný výber uskutočniť.
+
+Ak je $n$ nepárne, môžeme pre $n>7$ z~danej množiny
+vybrať tri párne čísla $4$, $n-3$, $n-1$, pričom $4<n-3<n-1$,
+so súčtom $4+(n-3)+(n-1)=2n$, ktorý je deliteľný číslom~$n$.
+
+Z~množín $\{1,2\}$ (pre $n=3$), $\{1,2,3,4\}$ (pre $n=5$) 
+a~$\{1,2,3,4,5,6\}$ (pre $n=7$) zrejme nemožno vybrať ani dve, ani
+tri rôzne párne čísla s~požadovanou vlastnosťou.
+
+Podmienke úlohy vyhovuje číslo $n=6$ a~všetky prirodzené čísla
+$n\ge8$.
+
+
+\návody
+%% Ukažte, že pro každé přirozené číslo $n\ge2$ lze z~množiny
+%% $\{1,2,\dots,n\}$ vybrat libovolný počet navzájem různých čísel,
+%% jejichž součin je dělitelný číslem $n$. [triviální!?]
+
+Nájdite všetky prirodzené čísla~$n$, pre ktoré možno z~množiny
+$\{1,2,\dots,n\}$ vybrať niekoľko navzájom rôznych čísel, ktorých
+súčet je deliteľný číslom~$2n$. [$n\ge3$.]
+
+Pre ktoré prirodzené čísla~$n$ možno z~množiny $\{1,2,\dots,n\}$
+vybrať niekoľko navzájom rôznych čísel, ktorých súčin je
+deliteľný číslom~$n^2$? [Všetky zložené čísla $n>4$.]
+\endnávod}
+
+{%%%%%   C-I-3
+\fontplace
+\tpoint A; \tpoint B; \bpoint C; \bpoint D;
+\lBpoint E; \rBpoint F;
+[1] \hfil\Obr
+
+Priečka~$EF$ daného štvoruholníka $ABCD$ je v~každom z~trojuholníkov $AED$
+aj $BFC$ ťažnicou (\obr), čo znamená, že pre ich obsahy platí
+$$
+\aligned
+S_{AED}=&2S_{FED}=2S_{FEA},\\
+S_{BFC}=&2S_{FEC}=2S_{FEB}.
+\endaligned                  \tag1
+$$
+
+\inspicture{}
+
+Oba trojuholníky $FED$, $FEC$ majú spoločnú stranu~$FE$ a~ich obsahy
+sú rovnaké práve vtedy, keď $CD\parallel FE$. Podobne aj trojuholníky $FEA$,
+$FEB$ majú spoločnú stranu~$FE$ a~ich obsahy sú rovnaké
+práve vtedy, keď $AB\parallel FE$. Ak teda majú trojuholníky $AED$ a~$BFC$
+rovnaký obsah, tak $CD\parallel FE$ a~$AB\parallel FE$, čiže
+$AB\parallel CD$.
+
+Ak naopak $AB\parallel CD$, je stredná priečka~$EF$
+lichobežníka $ABCD$ rovnobežná s~oboma základňami $AB$ a~$CD$,
+takže podľa prechádzajúcej úvahy $S_{FED}=S_{FEC}$ a~podľa~\thetag{1} tiež
+$S_{AED}=S_{BFC}$. Tým je tvrdenie úlohy dokázané.
+
+
+\návody
+Dokážte, že v~každom lichobežníku $ABCD$ so základňami
+$AB$ a~$CD$ sú si rovné obsahy trojuholníkov $ADP$ a~$BCP$, pričom
+$P$ je priesečník uhlopriečok lichobežníka. [Uvedomte si, že práve
+o~spomenuté trojuholníky sa líšia trojuholníky $ABC$ a~$ABD$.]
+
+Dokážte, že v~každom trojuholníku $ABC$ sú obsahy trojuholníkov
+$ABP$, $BCP$ a~$CAP$ rovnaké práve vtedy, keď $P$ je ťažiskom
+trojuholníka $ABC$. [$S_{APC}=S_{BPC}$ práve vtedy, keď bod~$P$ leží na
+ťažnici z~vrcholu~$C$.]
+\endnávod}
+
+{%%%%%   C-I-4
+Aby bolo číslo $m=\overline{CDCD}$ deliteľné deviatimi, musí byť
+súčet $2(C+D)$ jeho číslic deliteľný deviatimi, teda aj súčet
+$C+D$ musí byť deliteľný deviatimi, čiže číslo $\overline{CD}$
+musí byť deliteľné deviatimi.
+
+Ak má číslo~$k$ číslice $A$, $B$, $A$, $B$, má číslo~$\ell$ číslice
+$A-1$, $B+2$, $A-1$, $B+2$. Keďže číslo $B+(B+2)=2B+2$ je párne,
+je číslica~$D$ čísla $m=k+\ell$ párna. Preto prichádzajú vzhľadom 
+na deliteľnosť deviatimi do úvahy len tieto čísla~$m$: 1\,818, 3\,636, 5\,454,
+7\,272, 9\,090. Pretože číslica~$C$ je vo všetkých prípadoch nepárna 
+a~súčet číslic $A+(A-1)=2A-1$ je tiež nepárny, nemôže byť
+$B+(B+2)>10$, teda $B+(B+2)=D$ a~$A+(A-1)=C$. Odtiaľ už ľahko
+určíme zodpovedajúce číslice $C$, $D$ a~čísla $k$, $\ell$ zapíšeme
+do nasledujúcej tabuľky:
+$$
+\vbox{\let\par\cr\offinterlineskip
+\everycr{\noalign{\hrule}}
+\halign{\vrule#\strut&\ \hss$#$ \hss\vrule&&\ \hss# \hss\vrule\cr
+&m &1\,818 &3\,636 &5\,454 &7\,272 &9\,090\cr
+&k &1\,313 &2\,222 &3\,131 &4\,040 &neexistuje\cr
+&\ell &0\,505 &1\,414 &2\,323 &3\,232 &neexistuje\cr
+}}
+$$
+
+Číslo 0505 nie je štvormiestne, preto sú riešením úlohy iba
+čísla $k\in\{2\,222,3\,131,\allowbreak 4\,040\}$.
+
+
+\návody
+Trojmiestne číslo~$m$ je deliteľné číslom~18 a~dá sa napísať ako
+súčet dvojmiestneho čísla a~jeho päťdesiatnásobku. Určte všetky
+čísla~$m$ s~touto vlastnosťou. [$m=51\cdot18$.]
+
+Nájdite všetky trojmiestne čísla, ktoré majú tú vlastnosť, že
+súčet druhých mocnín ich číslic je 118 a~súčet ich číslic
+sa rovná poslednému dvojčísliu uvažovaného trojmiestneho čísla.
+[916.]
+
+K~prirodzenému číslu~$m$ zapísanému rovnakými číslicami sme pripočítali
+štvormiestne prirodzené číslo~$n$. Získali sme štvormiestne číslo
+s~opačným poradím číslic, ako má číslo~$n$. Určte všetky také
+dvojice čísel $m$ a~$n$. [MO 52--C--I--5.]
+\endnávod}
+
+{%%%%%   C-I-5
+Pre dvojmiestne čísla $a$, $b$, $c$ je súčin $abc$ číslo
+štvormiestne, alebo päťmiestne, alebo šesťmiestne. Ak sú teda
+všetky číslice čísla $abc$ rovné jednej číslici~$k$, platí jedna
+z~rovností $abc=k\cdot1\,111$, $abc=k\cdot11\,111$ alebo
+$abc=k\cdot111\,111$, $k\in\{1,2,\dots,9\}$.
+
+Čísla $1\,111=11\cdot101$ a~$11\cdot111=41\cdot271$ však majú vo
+svojom rozklade trojmiestne prvočísla, takže nemôžu byť súčinom
+dvojmiestnych čísel. Ostáva preto jediná možnosť:
+$$
+abc=k\cdot111\,111=k\cdot3\cdot7\cdot11\cdot13\cdot37.
+$$
+
+Pozrime sa, ako môžu byť prvočísla 3, 7, 11, 13, 37 rozdelené
+medzi jednotlivé činitele $a$, $b$, $c$. Pretože súčiny
+$37\cdot3$ a~$3\cdot7\cdot11$ sú väčšie ako 100, musí byť
+prvočíslo~37 samo ako jeden činiteľ a~zvyšné štyri prvočísla 3,
+7, 11, 13 musia byť rozdelené do dvojíc. Keďže aj súčin
+$11\cdot13$ je väčší ako 100, prichádzajú do úvahy iba rozdelenia
+na činitele $3\cdot11$, $7\cdot13$ a~37, alebo na činitele
+$3\cdot13$, $7\cdot11$ a~37. K~týmto činiteľom ešte pripojíme
+možné činitele z~rozkladu číslice~$k$ a~dostaneme riešenia dvoch
+typov:
+$$
+\align
+a=&33k_1,\ b=91,\ c=37k_2,\quad
+   \text{pričom $k_1\in\{1,2,3\}$, $k_2\in\{1,2\}$},  \\
+a=&39k_1,\ b=77,\ c=37k_2,\quad
+   \text{pričom $k_1\in\{1,2\}$, $k_2\in\{1,2\}$},
+\endalign
+$$
+
+Hľadaný počet trojíc čísel $a$, $b$, $c$ je teda
+$3\cdot2+2\cdot2=10$.
+
+\návody
+Určte počet všetkých dvojíc dvojmiestnych prirodzených čísel $a$,
+$b$, ktorých súčin~$ab$ má zápis, v~ktorom sú všetky číslice
+párne a~rovnaké. Dvojice líšiace sa iba poradím čísel považujeme
+za rovnaké, \tj. započítavame ich iba raz. [6.]
+
+Určte počet všetkých dvojíc trojmiestnych prirodzených čísel $a$, $b$,
+ktorých súčin~$ab$ má zápis, v~ktorom sú všetky číslice
+rovnaké. Dvojice líšiace sa iba poradím čísel považujeme za
+rovnaké, \tj. započítavame ich iba raz. [26.]
+\endnávod}
+
+{%%%%%   C-I-6
+\fontplace
+\tpoint A; \tpoint B; \bpoint C;
+\tpoint K; \bpoint L; \bpoint M; \bpoint O;
+[2] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \bpoint C;
+\tpoint K; \bpoint L; \bpoint M; \bpoint O;
+[3] \hfil\Obr
+
+\fontplace
+\tpoint A; \tpoint B; \bpoint C;
+\tpoint K; \bpoint L; \bpoint M; \bpoint O;
+[4] \hfil\Obr
+
+Body $L$ a~$M$  na strane~$AC$ zvolíme tak, aby $|AM|=|ML|=|LC|$.
+Ťažnica~$KO$ trojuholníka $KLM$ je strednou priečkou trojuholníka
+$ABC$, platí teda $|KO|=|BC|/2$, $|AC|=6|MO|$ a~$|AB|=2|AK|$.
+Rozoberieme tri možnosti.
+
+(a) Nech $|KL|=|KM|$ (\obr). Potom $|\uhol MKL|=|\uhol MOK|=90\st$
+\inspicture{}
+a~$|MO|=|KO|$. Z~Pytagorovej vety pre trojuholník $AKO$ vyplýva
+$$
+|AK|=\sqrt{(3|MO|)^2+|KO|^2}=\sqrt{10|KO|^2}=\sqrt{10}|KO|
+=\tfrac12\sqrt{10}|BC|,
+$$
+takže
+$$
+\gather
+|AB|=2|AK|=\sqrt{10}|BC|=2\sqrt{10}\cm,\\
+|AC|=6|MO|=6|KO|=3|BC|=6\cm.
+\endgather
+$$
+
+(b) Nech $|ML|=|MK|$ (\obr). Potom $|\uhol KML|=90\st$ 
+\inspicture{}
+a~$|AM|=|ML|=|MK|=2|MO|$. Z~Pytagorovej vety pre trojuholník $KMO$
+vyplýva
+$$
+|KO|=\sqrt{|MO|^2+(2|MO|)^2}=\sqrt5|MO|,
+$$
+takže
+$$
+|AC|=6|MO|={3\over\sqrt5}|BC|={6\sqrt5\over5}\cm.
+$$
+Z~Pytagorovej vety pre trojuholník $AKM$ vyplýva
+$$
+|AK|=\sqrt{|AM|^2+|MK|^2}=\sqrt2|MK|=2\sqrt2|MO|={2\sqrt{10}\over5}|KO|
+={\sqrt{10}\over5}|BC|,
+$$
+takže
+$$
+|AB|=2|AK|={2\sqrt{10}\over5}|BC|={4\sqrt{10}\over5}\cm.
+$$
+
+(c) Nech $|ML|=|KL|$ (\obr). Potom $|\uhol MLK|=90\st$, takže
+\inspicture{}
+$|KL|=|ML|=2|LO|=2|MO|$ a~$|AL|=|AM|+|ML|=4|MO|$.
+Z~Pytagorovej vety pre trojuholník $KLO$ tak vyplýva
+$$
+|KO|=\sqrt{|LO|^2+(2|LO|)^2}=\sqrt5|LO|,
+$$
+takže
+$$
+|AC|=6|MO|=6|LO|={3\over\sqrt5}|BC|={6\sqrt5\over5}\cm.
+$$
+Z~Pytagorovej vety pre trojuholník $AKL$ vyplýva
+$$
+\align
+|AK|&=\sqrt{|AL|^2+|LK|^2}=\sqrt{(4|LO|)^2+(2|LO|)^2}=\\
+    &=2\sqrt5|LO|=2|KO|=|BC|=2\cm,
+\endalign
+$$
+takže
+$$
+|AB|=2|AK|=2|BC|=4\cm.
+$$
+
+\návody
+Trojuholník má dĺžky strán 4\,cm, 5\,cm, 6\,cm. Určte veľkosti
+výšok a~ťažníc tohto trojuholníka. [Návod: Označme $x$
+vzdialenosť päty výšky od stredu strany dĺžky~4, potom podľa
+Pytagorovej vety $(2+x)^2+6^2=(2-x)^2+5^2$, atď.]
+
+Obdĺžnik $ABCD$ má strany dĺžok $a$, $b$. Bod~$M$ je pätou
+kolmice vedenej z~vrcholu~$B$ na uhlopriečku~$AC$. Vypočítajte dĺžky
+úsečiek $AM$, $CM$, $BM$. [$|MB|=ab/\sqrt{a^2+b^2}$,
+$|AM|=\sqrt{a^2-|MB|^2}$.]
+\endnávod}
+
+{%%%%%   A-S-1
+Zaoberajme sa otázkou, pre ktoré celočíselné aritmetické postupnosti
+$\left(a_i\right)_{i=1}^{\infty}$  existujú indexy
+$i,j\in\{1,2,\dots,10\}$ také, že $a_i=1$ a~$a_j=2\,005$.
+Zdôraznime, že ak taká dvojica indexov $(i,j)$ existuje, potom je jediná,
+pretože v~nekonštantnej aritmetickej postupnosti sa každé číslo vyskytuje najviac raz.
+
+Predpokladajme, že uvedené indexy $i$ a~$j$ poznáme a~pomocou nich
+vyjadrime prvý člen~$a_1$ a~diferenciu~$d$ príslušnej postupnosti.
+Pretože všeobecný člen aritmetickej postupnosti
+má vyjadrenie $a_k=a_1+(k-1)d$, dostávame sústavu rovníc
+$$
+a_i=a_1+(i-1)d=1\qquad\text{a}\qquad a_j=a_1+(j-1)d=2\,005,
+$$
+ktorú ľahko vyriešime vzhľadom na neznáme $a_1$, $d$:
+$$
+d=\frac{2\,004}{j-i}\quad\text{a}\quad a_1=1-\frac{2\,004(i-1)}{j-i}.
+$$
+Také hodnoty $a_1$, $d$ sú celé čísla práve vtedy, keď je
+prirodzené číslo $|j-i|$ deliteľom čísla 2\,004, takže $|j-i|$
+musí byť jedno z~čísel 1, 2, 3, 4 alebo 6 (z~podmienky
+$i,j\in\{1,2,\dots,10\}$ totiž vyplýva $|j-i|<10$ a~číslo 2\,004
+iné jednomiestne delitele nemá). Hľadaný počet postupností je
+preto rovný počtu dvojíc indexov $(i,j)$ vybraných z~množiny
+$\{1,2,\dots,10\}$, pre ktoré platí $|j-i|\in\{1,2,3,4,6\}$.
+Takých dvojíc $(i,j)$ je postupne $2\cdot9$, $2\cdot8$,
+$2\cdot7$, $2\cdot6$ a~$2\cdot4$, takže všetkých postupností je
+$18+16+14+12+8=68$.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov.
+Za také považujte aj riešenie, v~ktorom nie je výslovne uvedené,
+že v~danej aritmetickej postupnosti sú podmienkami $a_i=1$,
+$a_j=2\,005$ indexy $i$, $j$ určené jednoznačne. Ak riešiteľ
+určí správne počet 34~postupností s~kladnou diferenciou~$d$,
+ale možnost $d<0$ nespomenie, strhnite 2~body.
+\endpetit
+\bigbreak}
+
+{%%%%%   A-S-2
+\fontplace
+\tpoint A; \tpoint B; \bpoint C; \bpoint D;
+\tpoint K; \tpoint L; \bpoint M; \bpoint\ N;
+\tpoint\xy-.5,0 S;
+[8] \hfil\Obr
+
+\fontplace
+\tpoint E; \tpoint F; \bpoint G;
+\lBpoint P; \rBpoint Q; \tpoint R;
+\tpoint x; \tpoint y; \lBpoint y; \lBpoint z;
+\rBpoint z; \rBpoint x;
+[9] \hfil\Obr
+
+Rovnobežník~$ABCD$ je stredovo súmerný podľa priesečníka~$S$
+uhlopriečok $AC$, $BD$ (\obr). Preto sú podľa stredu~$S$
+súmerne združené trojuholníky $ACD$ a~$CAB$, a teda aj ich vpísané kružnice
+\inspicture{}
+a~zodpovedajúce si body dotyku $K$ a~$M$. To isté platí
+aj pre dvojicu bodov $L$ a~$N$. Prichádzame tak k~záveru, že $KLMN$ je
+rovnobežník. (Možnosti $K=M=S$ alebo $L=N=S$ vylučuje
+podmienka $|AB|>|BC|$, ktorá zabezpečuje, že spomenuté trojuholníky nie sú
+rovnoramenné so základňou $AC$ alebo $BD$, takže vpísané
+kružnice sa nedotýkajú týchto strán v~ich strede.)
+
+Uvedená úvaha o~stredovej súmernosti však nestačí na dôkaz
+toho, že rovnobežník $KLMN$ je obdĺžnik, t.\,j.~že má zhodné
+uhlopriečky~$KM$ a~$LN$. Na to musíme urobiť výpočet
+založený na známych vzťahoch, ktoré vyjadrujú vzdialenosti vrcholov
+všeobecného trojuholníka od bodov dotyku vpísanej kružnice pomocou dĺžok
+strán tohto trojuholníka (\obr).
+$$
+\vcenter{\hbox{\inspicture-!}}\qquad\qquad
+\aligned
+x&=|ER|=|EQ|=\frac{|EF|+|EG|-|FG|}{2},\\
+y&=|FP|=|FR|=\frac{|FG|+|FE|-|EG|}{2},\\
+z&=|GP|=|GQ|=\frac{|GF|+|GE|-|EF|}{2}.
+\endaligned
+$$
+Pripomeňme, že tieto vzťahy možno odvodiť zo sústavy rovníc
+$$
+x+y=|EF|,\quad y+z=|FG|,\quad x+z=|EG|.
+$$
+
+Vráťme sa k~našej úlohe a~v~danom štvoruholníku~$ABCD$ označme
+ešte dĺžky $a=|AB|=|CD|$, $b=|BC|=|AD|$, $e=|AC|$ a~$f=|BD|$.
+Podľa vzťahov uvedených vedľa obr.~2 platia rovnosti
+$$
+|AK|=\frac{e+b-a}{2}=|CM|\qquad\text{a}\qquad
+|BL|=\frac{f+b-a}{2}=|DN|.
+$$
+Z~predpokladu úlohy $a>b$ preto vyplýva $|AK|<e/2=|AS|$,
+takže bod~$K$ leží medzi bodmi $A$ a~$S$ a~má od stredu~$S$
+vzdialenosť       %$|KS|=|AS|-|AK|=\frac12(a-b)$.
+$$
+|KS|=|AS|-|AK|=\frac{e}{2}-\frac{e+b-a}{2}=\frac{a-b}{2}.
+$$
+Podobne vyjde, že body $L$, $M$, $N$ ležia postupne na úsečkách
+$BS$, $CS$, $DS$ a~platia rovnosti $|LS|=|MS|=|NS|=(a-b)/2$.
+To spolu znamená, že štvoruholník~$KLMN$ má zhodné uhlopriečky,
+ktoré se navzájom rozpoľujú, a teda je to obdĺžnik. (Keby to bol
+štvorec, muselo by platiť $KM\perp LN$, teda $AC\perp BD$, čo je
+v~spore s~tým, že $a\ne b$.)
+
+Dodajme, že v~predchádzajúcom odstavci sme podali úplné riešenie, ktoré
+nevyžaduje úvahy o~stredovej súmernosti z~úvodného odstavca.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov (absenciu zdôvodnenia, prečo
+pravouholník~$KLMN$ nie je štvorec, tolerujte). Ak riešiteľ dokáže iba to,
+že $KLMN$ je rovnobežník, dajte mu 2~body. Ak v~inak
+úplnom riešení chýba potrebné zdôvodnenie, v~ktorých "poloviciach"
+uhlopriečok $AC$, $BD$ body $K$, $L$, $M$, $N$ ležia, dajte 5~bodov.
+
+\endpetit
+\bigbreak}
+
+{%%%%%   A-S-3
+Po vydelení (kladným) číslom $k+1/k$
+a~úprave zlomkov dostaneme ekvivalentnú sústavu nerovníc
+$$
+\frac{k^2(k-2)}{k^2+1}\leqq x\leqq \frac{k^3(k+3)}{k^2+1}.
+\tag1
+$$
+Pre $k=1$ má táto sústava tvar $\m1/2\leqq x\leqq 2$, takže má v~celých číslach práve tri
+riešenia, čo je menej ako $(1+1)^2=4$. Teda $k=1$ nevyhovuje. Dosadením hodnôt $k=2$, $k=3$ ľahko zistíme, že obe vyhovujú.
+Pokúsme sa preto zistiť, či okrem $k=1$ nebudú vyhovovať všetky hodnoty.
+
+Aby sme určili, medzi ktorými celými číslami ležia oba
+zlomky z~\thetag{1}, vydelíme najskôr (so~zvyškom) mnohočleny
+z~ich čitateľov mnohočlenom z~menovateľa.
+$$
+\align
+(k^3-2k^2):(k^2+1)&=k-2,\hphantom{k^2+3}\quad\text{zvyšok }-k+2,\\
+(k^4+3k^3):(k^2+1)&=k^2+3k-1,           \quad\text{zvyšok }-3k+1.
+\endalign
+$$
+Oba výsledky delenia dosadíme do~\thetag{1}.
+$$
+k-2-\frac{k-2}{k^2+1}\leqq x\leqq
+k^2+3k-1-\frac{3k-1}{k^2+1}.
+\tag2
+$$
+Ak pre "zvyškové členy" z~oboch krajných výrazov budú
+platiť nerovnosti
+$$
+0\leqq \frac{k-2}{k^2+1}<1\qquad\text{a}\qquad
+0<\frac{3k-1}{k^2+1}\leqq1,
+\tag3
+$$
+budú riešeniami sústavy~\thetag{1} práve tie celé čísla~$x$, pre
+ktoré platí $k-2\leqq x\leqq k^2+3k-2$. Takých $x$
+je
+$$
+(k^2+3k-2)-(k-2)+1=(k+1)^2,
+$$
+čo je práve počet uvedený v~zadaní úlohy.
+
+Ľahko zdôvodníme, že nerovnosti~\thetag{3} platia pre každé $k\geqq2$. Vtedy totiž máme $0\leqq
+k-2<k+1<k^2+1$, odkiaľ vyplýva ľavá časť~\thetag{3}. Pravá časť~\thetag{3} je
+zrejmá pre každé $k\geqq3$
+(lebo vtedy $0<3k-1\leqq k^2-1<k^2+1$); pre $k=2$ platí
+$3k-1=5=k^2+1$, takže v~\thetag{3} úplne napravo nastane rovnosť.
+
+\zaver
+Hľadanými $k$ sú všetky prirodzené čísla
+väčšie ako~1.
+
+\poznamka
+Presný počet celých čísel~$x$, ktoré ležia
+v~intervale~\thetag{1}, nemožno určit len z~{\it dĺžky\/} tohto intervalu,
+lebo ani táto dĺžka, ani žiadny z~krajných bodov intervalu
+nie je celé číslo.
+Nie je ťažké overiť ekvivalentnými úpravami,
+že pre dĺžku intervalu~\thetag{1} pri každom $k>2$ platia nerovnosti
+$$
+(k+1)^2-1<\frac{k^3(k+3)}{k^2+1}-\frac{k^2(k-2)}{k^2+1}<(k+1)^2.
+\tag4
+$$
+Z~nich však vyplýva iba to, že počet celých čísel v~intervale~\thetag{1} je
+rovný buď číslu $(k+1)^2-1$, alebo číslu $(k+1)^2$. K~presnému
+určeniu tohto počtu sa zdá byť nevyhnutné určiť najmenšie celé
+číslo ($k-2$) a najväčšie celé číslo ($k^2+3k-2$), ktoré v~danom
+intervale ležia.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov, z~toho 1~bod za určenie
+intervalu~\thetag{1}, 3~body za rozklady~\thetag{2} a~2~body za diskusiu
+o~nerovnostiach~\thetag{3}. Ak riešiteľ určí interval~\thetag{1} a~ďalej len dokáže,
+medzi ktorými celými číslami leží jeho {\it dĺžka\/}
+(nerovnosti~\thetag{4}), dajte celkom 4~body.
+
+\endpetit
+\bigbreak}
+
+{%%%%%   A-II-1
+Po vynásobení kladným číslom $4(a+1)(b+1)(c+1)$
+postupnými ekvivalentnými úpravami dostaneme
+$$\align
+4a(c+1)+4b(a+1)+4c(b+1)&\geqq 3(a+1)(b+1)(c+1),\\
+4(ac+c)+4(ab+b)+4(bc+c)&\geqq 3(ab+a+b+1)(c+1),\\
+4(ab+ac+bc+a+b+c)&\geqq 3(abc+ab+ac+bc+a+b+c+1),\\
+ab+ac+bc+a+b+c&\geqq 3(abc+1).
+\endalign$$
+Pretože $abc=1$, dostaneme po dosadení do pravej strany poslednej
+nerovnosti nerovnosť
+$$
+ab+ac+bc+a+b+c\geqq 6.
+\tag1
+$$
+Ak ešte dosadíme do ľavej strany $ab=1/c$,
+$ac=1/b$ a~$bc=1/a$, dostaneme nerovnosť
+$$
+\left(a+\frac{1}{a}\right)+\left(b+\frac{1}{b}\right)+
+\left(c+\frac{1}{c}\right)\geqq6,
+$$
+ktorá platí, lebo hodnota každej zátvorky na ľavej strane je
+aspoň~2. Pre každé $t>0$ je totiž splnená nerovnosť
+$t+t^{-1}\geqq2$, v~ktorej nastane rovnosť práve vtedy, keď
+$t=1$. (Tento známy fakt možno zdôvodniť napr.~úpravou nerovnosti
+$(\sqrt{t}-\sqrt{t^{-1}})^2\geqq0$, alebo sa možno
+odvolať na nerovnosť medzi aritmetickým a~geometrickým priemerom
+dvoch navzájom prevrátených čísel.) Zároveň vidíme, že rovnosť
+v~nerovnosti~(1), a~teda aj v~nerovnosti z~textu úlohy, nastane
+práve vtedy, keď platí $a=b=c=1$. Tým je riešenie celej úlohy ukončené.
+
+\poznamka
+Dodajme, že za predpokladu $abc=1$
+nerovnosť~(1) vyplýva priamo z~nerovnosti medzi aritmetickým
+a~geometrickým priemerom šestice čísel $ab$, $ac$, $bc$, $a$, $b$,
+$c$:
+$$
+\frac{ab+ac+bc+a+b+c}{6}\geqq
+\root{6}\of{ab\cdot ac\cdot bc\cdot a\cdot b\cdot c}=
+\sqrt{abc}=1.
+$$
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Ak riešiteľ
+získa ekvivalentnú nerovnosť~(1) alebo eliminuje jednu
+z~premenných~$a$, $b$, $c$, avšak ďalší pokrok nedosiahne, dajte
+najviac 2~body. Ak podmienka rovnosti $a=b=c=1$ v~riešení chýba
+alebo nie je zdôvodnená, dajte najviac 5~bodov. Za poznatok
+o~rovnosti v~prípade $a=b=c=1$ dajte 1~bod len v~prípade, že
+riešiteľ nezíska žiadne iné čiastkové body. Známu
+nerovnosť $t+t^{-1}\geqq2$ je možné použiť v~riešení bez dôkazu.
+\endpetit
+\bigbreak}
+
+{%%%%%   A-II-2
+Keď odčítame od prvej rovnice druhú,
+dostaneme postupnými úpravami
+$$\align
+(xy+xz+x)-(yz+xy+y)&=(y^2+z^2-5)-(z^2+x^2-5),\\
+ (x-y)z+x-y&=(y-x)(y+x),\\
+(x-y)(x+y+z+1)&=0.
+\endalign$$
+Analogicky odvodíme rovnosti
+$$
+(y-z)(x+y+z+1)=0\quad\text{a}\quad (x-z)(x+y+z+1)=0.
+\tag1$$
+Vo všetkých troch odvodených rovnostiach
+vystupuje činiteľ $x+y+z+1$. Rozlíšime preto, či je rovný
+nule, alebo nie.
+
+\smallskip
+A. Nech $x+y+z+1=0$. Potom môžeme pôvodnú sústavu rovníc prepísať na
+$$
+x\cdot(-x)=y^2+z^2-5,\quad
+y\cdot(-y)=z^2+x^2-5,\quad
+z\cdot(-z)=x^2+y^2-5.
+$$
+Vidíme, že sústava je ekvivalentná s~jedinou rovnicou
+$x^2+y^2+z^2=5$, ktorá (vzhľadom k~nezápornosti druhých mocnín)
+má v~obore celých čísel iba také riešenia, že trojica
+$(x^2,y^2,z^2)$ je (až na poradie) trojicou $(4,1,0)$, takže
+$(x,y,z)$ je permutácia niektorej z~trojíc $(\pm2,\pm1,0)$.
+Znamienka čísel~$x$, $y$, $z$ ľahko určíme z~podmienky
+$x+y+z+1=0$ -- vyhovuje jedine trojica $(\m2,1,0)$ a~ľubovoľná jej
+permutácia. V~prípade~A teda dostávame práve šesť riešení danej
+sústavy.
+
+\smallskip
+B. Nech $x+y+z+1\ne0$. Potom z~rovníc odvodených v~úvode riešenia
+vyplýva, že platí $x=y=z$. Daná sústava je teda ekvivalentná
+s~jedinou rovnicou $x(2x+1)=2x^2-5$, ktorej vyhovuje iba
+$x=\m5$. V~prípade~B preto máme jediné riešenie $x=y=z=\m5$.
+
+\smallskip
+Dodajme, že v~prvej časti riešenia sme mohli
+pôvodnú sústavu rovníc upraviť aj na tvar
+$$
+x^2+y^2+z^2-5=x(x+y+z+1)=y(x+y+z+1)=z(x+y+z+1).
+\tag2
+$$
+Odtiaľ opäť dostávame, že platí buď $x+y+z+1=0$, alebo $x=y=z$.
+
+\odpoved
+Sústava má sedem riešení -- trojicu $(\m5,\m5,\m5)$,
+trojicu $(\m2,1,0)$ a~jej ľubovoľnú permutáciu.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Ak riešiteľ
+pôvodné rovnice vhodne odčíta, avšak nedokáže výsledok rozložiť
+do súčinového tvaru~(1), dajte 1~bod, za nájdenie rozkladov~(1)
+alebo sústavy~(2) dajte 3~body, ďalšie body dajte podľa
+úplnosti následnej diskusie. Zrejmý poznatok o~riešení rovnice
+$x^2+y^2+z^2=5$ v~obore celých čísel a následné určenie
+znamienok v~rovnosti $\pm2\pm1+0+1=0$ môžu byť uvedené bez
+vysvetlenia.
+\endpetit
+\bigbreak}
+
+{%%%%%   A-II-3
+\fontplace
+\rBpoint K; \lBpoint L; \bpoint M; \Blpoint K'; \Brpoint L';
+\lpoint m;
+[10] \hfil\Obr
+
+\fontplace
+\rpoint K; \lpoint L; \bpoint M; \rpoint T;
+\tpoint k; \tpoint \ell;
+[11] \hfil\Obr
+
+\fontplace
+\rpoint\down\unit K; \lBpoint L; \tpoint M; \lBpoint K'; \rBpoint L';
+\blpoint T; \rpoint k; \lpoint \ell;
+[12] \hfil\Obr
+
+Ukážeme, že hľadanú množinu tvoria body $K$ a~$L$ a~ďalej vnútorné
+body kratšieho oblúka~$KL$ kružnice $m(M,|MK|)$ a~oblúka~$K'L'$
+súmerne združeného s~oblúkom~$KL$ v~stredovej súmernosti podľa stredu~$M$ (\obr).
+
+\inspicture{}
+
+Dokážme najskôr, že priamka~$MT$ (\obr) je (vnútornou) spoločnou dotyčnicou
+kružníc $k$ a~$\ell$.
+\inspicture{}
+Pripusťme, že priamka~$MT$ pretne
+kružnicu~$k$ v~bodoch $T$, $T_1$ a~kružnicu~$\ell$ v~bodoch $T$,
+$T_2$. Pre mocnosti bodu~$M$ (je to bod dotyčnice, preto leží vo
+vonkajšej oblasti každej z~oboch kružníc $k$ a~$\ell$) k~obom kružniciam platí
+$$
+|MT|\cdot|MT_1|=|MK|^2=|ML|^2=|MT|\cdot|MT_2|,
+$$
+odkiaľ $|MT_1|=|MT_2|$. Pretože oba body $T_1$, $T_2$ ležia na
+polpriamke $MT$, vyplýva odtiaľ $T_1=T_2$. Obe kružnice $k$ a~$\ell$
+však majú spoločný jediný bod, takže $T_1=T_2=T$. Preto je $MT$
+spoločná dotyčnica oboch kružníc a~navyše $|MT|=|MK|=|ML|$, bod~$T$
+teda leží na kružnici~$m(M,|MK|)$.
+
+Pretože priamka~$MT$ obe kružnice oddeľuje, neležia body $K$ a~$L$
+vnútri tej istej polroviny určenej priamkou~$MT$. Priamka~$MT$ pretína
+stranu~$KL$ trojuholníka~$KLM$, a~preto bod~$T$ leží na jednom
+z~kratších oblúkov $KL$, $K'L'$ kružnice~$m$.
+
+Ak je naopak $T$ ľubovoľný vnútorný bod jedného z~týchto oblúkov
+(\obr), ležia konvexné uhly $KMT$ a~$LMT$ na opačných
+stranách spoločného ramena~$MT$. Z~rovností $|MK|=|MT|$
+a~$|ML|=|MT|$ potom vyplýva, že do spomenutých uhlov možno vpísať kružnice
+tak, aby sa dotkli ramien príslušného uhla v~bodoch $K$ a~$T$,
+resp.~$L$ a~$T$. To sú vyhovujúce kružnice $k$, $\ell$ s~dotykovým
+bodom~$T$.
+
+\inspicture{}
+
+Ak $T=K$, vyhovuje ľubovoľná kružnica~$k$ dotýkajúca sa priamky~$MK$
+v~bode~$K$ a~ležiaca v~polrovine~$MKL'$ a~kružnica~$\ell$
+dotýkajúca sa ramien uhla~$KML$ v~bodoch $K$ a~$L$ (tá je určená
+jednoznačne). Analogicky zostrojíme vyhovujúce kružnice $k$ a~$\ell$
+pre bod $T=L$.
+
+Bod~$K'$ ani bod~$L'$ do hľadanej množiny patriť nemôžu, pretože
+$K'$ leží na dotyčnici~$KM$ k~ľubovoľnej z~kružníc~$k$ a~analogicky
+bod~$L'$ leží na dotyčnici~$LM$ k~ľubovoľnej z~kružníc~$\ell$.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Ak riešiteľ dokáže, že bod~$T$
+leží na spomenutých oblúkoch, avšak neoverí, že naopak každý
+ich bod je bodom dotyku niektorej vyhovujúcej dvojice kružníc,
+strhnite 2~body. Pokiaľ riešiteľ nespomenie existenciu bodov~$T$ na
+oblúku~$K'L'$, strhnite tiež 2~body. Pokiaľ riešiteľ zabudne
+aspoň na jednu z~možností $T=K$, $T=L$, strhnite 1~bod.
+\endpetit
+\bigbreak}
+
+{%%%%%   A-II-4
+Označme $x$ a~$y$ hľadané čísla, pričom $x>y$. Pretože $p=x-y$
+je prvočíslo a~pre najväčší spoločný deliteľ~$d$ čísel $x$ a~$y$
+platí $d\deli (x-y)$, čiže $d\deli p$, platí buď $d=p$, alebo $d=1$.
+
+Keby platilo $d=p$, mali by sme $y=kp$ a~$x=y+p=(k+1)p$ pre
+vhodné prirodzené~$k$, takže súčin~$xy$ by sa rovnal číslu
+$k(k+1)p^2$. To ale nie je druhá mocnina prirodzeného čísla (ďalej
+stručnejšie "štvorec") pre žiadne~$k$, lebo číslo $k(k+1)$ nie je
+nikdy štvorec.\footnote{Platí totiž $k^2<k(k+1)<(k+1)^2$, takže
+číslo $k(k+1)$ leží medzi dvoma susednými štvorcami. Iné
+vysvetlenie možno založiť na tom, že čísla $k$, $k+1$ sú navzájom
+nesúdeliteľné, takže by obe museli byť štvorcami líšiacimi sa o~1.
+Také štvorce však neexistujú.} Preto nutne $d=1$, takže
+čísla $x$ a~$y$ sú nesúdeliteľné. Ich súčin~$xy$ je potom
+štvorcom jedine v~prípade, keď oba činitele sú štvorce, teda
+$x=u^2$ a~$y=v^2$ pre vhodné $u,v\in\Bbb N$, $u>v$, odkiaľ
+$p=x-y=(u-v)(u+v)$. Taký rozklad prvočísla~$p$ na súčin má
+jediné možné činitele $u-v=1$ a~$u+v=p$. Odtiaľ jednoducho vyplývajú
+rovnosti $u=(p+1)/2$ a~$v=(p-1)/2$, z~ktorých pre
+súčet $s=x+y$ získame vyjadrenie
+$$
+s=x+y=u^2+v^2=
+\left(\frac{p+1}{2}\right)^{\!2}+\left(\frac{p-1}{2}\right)^{\!2}=
+\frac{p^2+1}{2}.
+$$
+Dekadický zápis čísla~$s$ podľa zadania končí číslicou~3, takže
+zápis čísla $p^2+1$ (rovného číslu~$2s$) končí číslicou~6. Zápis
+čísla~$p^2$ preto končí číslicou~5, je teda násobkom piatich, čo
+nastane jedine pre prvočíslo $p=5$. Dosadením tejto hodnoty do odvodených
+vzťahov dostaneme $u=3$, $v=2$, $x=9$ a~$y=4$.
+Skúška je triviálna: $9-4=5$, $9+4=13$, $9\cdot4=6^2$.
+
+\odpoved
+Podmienkam úlohy vyhovuje jediná dvojica čísel 9
+a~4.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Za zdôvodnenie, že hľadané čísla
+$x$ a~$y$ sú nesúdeliteľné, dajte 2~body, 1~bod dajte za
+konštatovanie, že z~nesúdeliteľnosti čísel $x$, $y$ vyplýva vyjadrenie
+$x=u^2$ a~$y=v^2$, 1~bod za zdôvodnenie vzťahu $u-v=1$ a~konečne
+2~body za diskusiu o~deliteľnosti číslom~5 vedúcu k~určeniu
+hodnoty prvočísla $p=5$. Ak riešiteľ nezíska žiadne čiastkové body za
+vyššie uvedené položky, avšak uhádne výsledok, dajte 1~bod. Zrejmý
+poznatok, že číslo $k(k+1)$ nie je štvorec, je možné použiť bez
+dôkazu. Pokiaľ ale chýba akákoľvek zmienka o~nutnosti skúšky,
+dajte najviac 5~bodov.
+
+\endpetit}
+
+{%%%%%   A-III-1
+Označme $c$, resp.\ $d$ diferencie hľadaných postupností. 
+Z~vyjadrenia $x_i=x_1+(i-1)c$ a~$y_i=x_1+(i-1)d$ dostaneme pre
+každé~$i$ rovnosť
+$$
+x_iy_i=x_1^2+(i-1)x_1(c+d)+(i-1)^2cd.
+$$
+Budeme sa teda zaoberať otázkou, kedy pre niektorý index $k>1$
+platia rovnosti
+$$\align
+x_1^2+(k-2)x_1(c+d)+(k-2)^2cd&=42,\tag1\\
+x_1^2+(k-1)x_1(c+d)+(k-1)^2cd&=30,\tag2\\
+x_1^2+kx_1(c+d)+k^2cd&=16.        \tag3
+\endalign
+$$
+Keď odčítame od dvojnásobku rovnosti~(2) súčet rovností (1) a~(3),
+dostaneme po úprave rovnosť $cd={-1}$. Keď odčítame od rovnosti~(3)
+rovnosť~(2), získame vzťah
+$$
+x_1(c+d)+(2k-1)cd=14,
+$$
+z~ktorého po dosadení hodnoty $cd={-1}$ dôjdeme k~rovnosti
+$$
+x_1(c+d)=2k-15.
+\tag4
+$$
+Dosadením tohto výsledku do rovnice~(3) dostaneme vzťah
+$$
+x_1^2+k(2k-15)-k^2=16,
+$$
+z~ktorého vyjadríme $x_1^2$ ako kvadratickú funkciu indexu~$k$:
+$$
+x_1^2=16-k(2k-15)+k^2=16+15k-k^2=(k+1)(16-k).
+$$
+Pretože $x_1^2\geqq0$ a~$k>1$, vyplýva z~posledného vzťahu odhad
+$k\leqq16$. V~prípade $k=16$ však vychádza $x_1=0$ a~rovnosť~(4)
+tak prejde na tvar $0(c+d)=2$, čo nie je možné. Pre $k=15$
+dostaneme $x_1^2=16$, takže $x_1=\pm4$. Pre $x_1=4$ (a~$k=15$) z~(4)
+vyplýva $c+d=15/4$, čo spolu s~rovnosťou $cd={-1}$ vedie k~záveru, že
+$\{c,d\}=\{4,{\m1/4}\}$. To znamená, že obe postupnosti sú (až
+na poradie) určené vzťahmi
+$$
+x_i=4+(i-1)4\quad\text{a}\quad
+y_i=4-\frac{i-1}{4}\quad\text{pre každé }i.
+\tag5
+$$
+Pre takú dvojicu postupností naozaj platí
+$$
+x_{14}y_{14}=56\cdot\tfrac34=42,\quad
+x_{15}y_{15}=60\cdot\tfrac12=30\quad\text{a}\quad
+x_{16}y_{16}=64\cdot\tfrac14=16.
+$$
+Podobne pre druhú možnú hodnotu $x_1={-4}$ dostaneme
+postupnosti, ktorých členy sú
+opačné k~členom postupností~(5), teda postupnosti
+$$
+x_i=-4-(i-1)4\quad\text{a}\quad
+y_i=-4+\frac{i-1}{4}\quad\text{pre každé }i.
+\tag6
+$$
+
+\odpoved
+Najväčšia hodnota indexu~$k$ je 15 a~všetky
+vyhovujúce postupnosti sú (až na možnú zámenu poradia
+vo dvojici) určené vzťahmi (5) a~(6).}
+
+{%%%%%   A-III-2
+Najprv v~závislosti od daného čísla~$m$ ($1\leqq m\leqq 47$)
+vyjadríme, koľko množín~$\mm X$ popísanej vlastnosti má najmenší
+prvok rovný zvolenému číslu~$m$. Na to vydelíme číslo~$47$
+číslom~$m$ so zvyškom,
+$$
+47=qm+r\quad (q\geqq1,\ 0\leqq r<m),
+$$
+a~ukážeme, že existuje práve $(q+1)^rq^{m-1-r}$ vyhovujúcich
+množín~$\mm X$ s~najmenším prvkom~$m$.
+Pretože každá taká množina~$\mm X$ je
+podmnožinou množiny
+$$
+\mm T_m=\{m,m+1,\dots,47\},
+$$
+rozdelíme množinu~$\mm T_m$ na najviac $m$~skupín čísel tak, aby
+sa čísla v~rovnakej skupine navzájom líšili o~násobky čísla~$m$.
+Dostaneme tak $q$-prvkovú skupinu
+$$
+\mm P_0=\{m,2m,\dots,qm\},
+$$
+v~prípade $r>0$ ďalších $r$~skupín
+s~$q$~prvkami
+$$
+\mm P_i=\{m+i,2m+i,\dots,qm+i\}\quad (1\leqq i\leqq r),
+$$
+a v~prípade $r<m-1$ a~$q>1$ ešte $m-r-1$ skupín
+s~$q-1$ prvkami
+$$
+\mm P_i=\{m+i,2m+i,\dots,(q-1)m+i\}\quad(r+1\leqq i\leqq m-1).
+$$
+Vo všeobecnosti možno povedať, že každú skupinu~$\mm P_i$ tvoria práve tie
+čísla z~$\mm T_m$, ktoré pri delení číslom~$m$ dávajú zvyšok~$i$;
+ako sme uviedli, niektoré z~týchto $m$~skupín $\mm P_0,\dots,\mm
+P_{m-1}$ môžu byť prázdne.
+
+Množina $\mm X\subseteq \mm T_m=\mm P_0\cup \mm P_1\cup\dots\cup
+\mm P_{m-1}$ s~najmenším prvkom~$m$ má zrejme požadovanú
+vlastnosť práve vtedy, keď obsahuje celú skupinu $\mm P_0$ a~zároveň
+pre každé $i\in\{1,2,\dots,m-1\}$ buď neobsahuje žiadny prvok
+z~$\mm P_i$, alebo obsahuje všetky prvky z~$\mm P_i$ {\it od
+určitého prvku počnúc}. Pre každú z~$r$ skupín $\mm
+P_1,\dots,\mm P_{r}$ tak máme $q+1$ možností a~pre každú
+z~$m-r-1$ skupín $\mm P_{r+1},\dots,\mm P_{m-1}$ máme $q$~možností,
+ako vybrať prvky pre~$\mm X$. Pretože tieto výbery
+môžeme kombinovať nezávisle, je počet množín~$\mm X$ naozaj
+rovný číslu $(q+1)^rq^{m-1-r}$. (Platí to aj pre prípady $r=0$,
+$r=m-1$ alebo $q=1$, keď niektoré zo skupín~$\mm P_i$ sú
+prázdne.)
+
+Teraz zistíme, kedy pre neúplný podiel~$q$ a~zvyšok~$r$
+z~rovnosti $47=qm+r$ platí
+$$
+(q+1)^rq^{m-1-r}=2^{15}.         \tag1
+$$
+
+V~prípade $q=1$ dostávame z~\thetag{1} rovnosť $2^r=2^{15}$, odkiaľ
+$r=15$, a~z~rovnosti $47=m+r$ potom vychádza $m=32$.
+
+V~prípade $q>1$ musí byť v~rovnici~\thetag{1} jedna z~mocnín
+$(q+1)^r$, $q^{m-1-r}$ rovná $2^{15}$ a~druhá rovná jednej, teda
+musí mať nulový exponent. Rozoberieme teraz možné hodnoty $q>1$
+v~rastúcom poradí a~pri každej z~nich overíme, či príslušné
+riešenie rovnice~\thetag{1} spĺňa podmienku $47=qm+r$:
+
+a) $q=2^1$, $m-1-r=15$ a~$r=0$. Potom $m=16$ a~$qm+r=32$~--
+nevyhovuje.
+
+b) $q=2^3-1$, $r=5$ a~$m-1-r=0$. Potom $m=6$ a~$qm+r=47$~--
+vyhovuje.
+
+c) $q=2^3$, $m-1-r=5$ a~$r=0$. Potom $m=6$ a~$qm+r=48$~--
+nevyhovuje.
+
+Z~podmienky $47=qm+r$ vyplýva, že najväčšie možné hodnoty~$q$ sú 47
+(pre $m=1$) a~23 (pre $m=2$). Zostávajúce možnosti
+($q=2^5-1$, $q=2^5$, $q=2^{15}-1$, $q=2^{15}$)
+už preto nie je nutné detailne preberať.
+
+\odpoved
+Hľadané hodnoty~$m$ sú dve: $m=6$ a~$m=32$.}
+
+{%%%%%   A-III-3
+\fontplace
+\tpoint A; \tpoint B; \bpoint C; \bpoint D;
+\lbpoint\up\unit E; \tpoint X; \bpoint Y;
+\tpoint a; \tpoint c; \bpoint a; \bpoint c;
+\lpoint\frac12b; \lpoint\frac12b;
+\rpoint d; \rpoint d; \rBpoint x; \rBpoint x;
+\lBpoint y; \lBpoint y;
+\lpoint\rho_1; \lpoint\rho_2;
+[13] \hfil\Obr
+
+Označme $x=|AE|$, $y=|DE|$ a~doplňme lichobežník
+$ABCD$ na rovnobežník $AXYD$ tak, aby bod~$E$ bol priesečníkom jeho
+uhlopriečok $AY$ a~$DX$ (\obr).
+Zrejme platí $|AX|=|DY|=a+c$, $|AY|=2x$ a~$|DX|=2y$.
+
+\inspicture
+
+Označme $\rho_1$ (resp.~ $\rho_2$) polomer kružnice vpísanej
+dotyčnicovému štvoruholníku $ABED$ (resp.~$AECD$), ktorá je zároveň
+vpísaná trojuholníku~$AXD$ (resp.~ $AYD$). Pre dĺžky strán týchto
+štvoruholníkov podľa známeho kritéria platia rovnosti
+$$
+a+y=\frac{b}{2}+d=c+x,
+$$
+čiže
+$$
+a+y=c+x,          \tag1
+$$
+takže oba štvoruholníky majú rovnaký obvod. Trojuholníky $AXD$ a~$AYD$
+majú zasa rovnaký obsah (rovný $S_{AXYD}/2$, teda rovný
+$S_{ABCD}$). Pomer $\rho_1:\rho_2$ sa preto rovná jednak pomeru obsahov
+$S_{ABED}:S_{AECD}$, jednak pomeru obvodov $o_{AYD}:o_{AXD}$ (tie sme
+zapísali v~opačnom poradí ako príslušné polomery). Oba tieto pomery
+teraz vyjadríme a~potom porovnáme ($v$~označuje výšku lichobežníka
+$ABCD$):
+$$
+\gather
+\frac{S_{ABED}}{S_{AECD}}=\frac{S_{ABCD}-S_{CDE}}{S_{ABCD}-S_{ABE}}=
+\frac{\frac12(a+c)v-\frac12c\cdot\frac12{v}}
+{\frac12(a+c)v-\frac12a\cdot\frac12{v}}=\frac{2a+c}{a+2c},\\
+\frac{o_{AYD}}{o_{AXD}}=\frac{2x+(a+c)+d}{2y+(a+c)+d}.
+\endgather
+$$
+Spolu s~(1) tak pre neznáme $x$, $y$ dostávame sústavu
+lineárnych rovníc
+$$
+\frac{2a+c}{a+2c}=\frac{2x+a+c+d}{2y+a+c+d}
+\qquad\text{a}\qquad
+x-y=a-c,
+$$
+ktorá má pri podmienke
+$a\ne c$ (zaručenej tým, že $ABCD$ je {\it licho\/}bežník) jediné
+riešenie
+$$
+x=\frac{3a+c-d}2     \qquad\text{a}\qquad
+y=\frac{a+3c-d}2.
+\tag2
+$$
+Dosadením (2) do rovnosti~(1) dostaneme prvý dokazovaný vzťah
+$3(a+c)=b+3d$. S~jeho pomocou možno (2) prepísať do tvaru
+$$
+x=a+\frac{b}{6}   \qquad\text{a}\qquad
+y=c+\frac{b}{6}.
+$$
+S~týmto vyjadrením dĺžok $x$, $y$ využijeme kosínusové vety pre
+trojuholníky $ABE$, $CDE$ k~výpočtu kosínusu uhla~$ABE$ resp.~ $DCE$:
+$$\align
+\cos|\uhol ABE|&=
+\frac{a^2+(\frac12 b)^2-(a+\frac16 b)^2}{2a\cdot\frac12 b}=
+\frac{2b}{9a}-\frac13,\\
+\cos|\uhol DCE|&=
+\frac{c^2+(\frac12 b)^2-(c+\frac16 b)^2}{2c\cdot\frac12 b}=
+\frac{2b}{9c}-\frac13.
+\endalign
+$$
+Pretože sa uhly $ABE$ a~$DCE$ dopĺňajú do $180^{\circ}$, je
+súčet ich kosínusov rovný nule:
+$$
+\Bigl(\frac{2b}{9a}-\frac13\Bigr)+
+\Bigl(\frac{2b}{9c}-\frac13\Bigr)=0.
+$$
+Odtiaľ už jednoduchou úpravou dostaneme druhý dokazovaný vzťah
+$$
+\frac{1}{a}+\frac{1}{c}=\frac{3}{b}.
+$$}
+
+{%%%%%   A-III-4
+\fontplace
+\trpoint A; \tlpoint B; \blpoint C; \brpoint D;
+\lBpoint\down2\unit K; \bpoint L;
+\tpoint\xy-1.4,0 M; \rpoint N;
+\blpoint P; \lBpoint Q; \bpoint S;
+\tpoint L_1; \rBpoint K_1;
+\bpoint\tau;
+[14] \hfil\Obr
+
+Označme $K_1$ stred strany~$AL$ a~$L_1$ stred strany~$AK$.
+Ukážeme, že hľadanou množinou bodov~$S$ je oblúk~$MN$, ktorý je
+časťou polkružnice zostrojenej nad priemerom~$K_1L_1$ v~polrovine
+opačnej k~polrovine~$K_1L_1A$, pritom krajné body $M$, $N$
+spomenutého oblúka sú určené podmienkami $ML_1\perp AK$
+a~$NK_1\perp AL$ (\obr).
+
+\inspicture
+
+Pretože priesečník~$S$ uhlopriečok $AC$, $BD$ je stredom úsečky~$AC$,
+množinu všetkých bodov~$S$ dostaneme, keď najprv určíme
+množinu vrcholov~$C$ a~tú potom zobrazíme v~rovnoľahlosti so
+stredom~$A$ a~koeficientom~$1/2$. Pretože uhol~$KCL$ je pravý
+(nemôže byť ani $C=K$, ani $C=L$) a~priamka~$KL$ body $A$ a~$C$
+oddeľuje, leží bod~$C$ na polkružnici~$\tau$ zostrojenej nad
+priemerom~$KL$ v~polrovine opačnej k~polrovine~$KLA$. Ktoré body
+$C\in\tau$ sú skutočne vrcholy vyhovujúcich pravouholníkov
+$ABCD$? Zrejme práve tie, pre ktoré polpriamky $CK$ a~$CL$ pretnú
+analogicky zostrojené polkružnice nad priemermi $AK$ a~$AL$
+(v~bodoch, ktoré budú vrcholmi $B$ a~$D$). Sú to body
+oblúka $PQ\subset\tau$, ktorého krajné body $P$, $Q$ sú určené
+podmienkami $PK\perp AK$ a~$QL\perp AL$. Hľadaná množina bodov~$S$
+je preto obrazom oblúka~$PQ$ v~spomenutej rovnoľahlosti, takže to
+je naozaj oblúk~$MN$ opísaný v~úvode riešenia (body $M$, $N$
+sú obrazmi bodov $P$ a~$Q$, lebo bod~$L_1$ je obrazom bodu~$K$
+a~bod~$K_1$ je obrazom bodu~$L$).}
+
+{%%%%%   A-III-5
+V~prvej časti riešenia predpokladajme, že prvá z~daných
+kvadratických rovníc má korene $u$, $v$ a~druhá z~nich
+má korene $u$, $v^{-1}$. Potom platia vzťahy
+$$
+p=-(u+v),\quad q=uv,\quad r=-\Bigl(u+\frac{1}{v}\Bigr),\quad
+s=u\cdot\frac{1}{v}.
+\tag1
+$$
+Po ich dosadení
+do jednotlivých strán rovností, ktoré máme dokázať, dostaneme
+$$
+\vbox{\openup\jot \let\\=\cr \everymath{\dsize}
+\halign{\hfil$#{}$&\hfil$#$\hfil&${}#$\hfil\cr
+         pr=&(u+v)\Bigl(u+\frac{1}{v}\Bigr)&=\frac{(u+v)(uv+1)}{v},\\
+(q+1)(s+1)=&(uv+1)\Bigl(\frac{u}{v}+1\Bigr)&=\frac{(uv+1)(u+v)}{v},\\
+      p(q+1)s=&-(u+v)(uv+1)\cdot\frac{u}{v}&=-\frac{(u+v)(uv+1)u}{v},\\
+r(s+1)q=&-\Bigl(u+\frac{1}{v}\Bigr)\Bigl(\frac{u}{v}+1\Bigr)\cdot uv
+                                           &=-\frac{(uv+1)(u+v)u}{v},\\
+}}
+$$
+takže vidíme, že naozaj platia rovnosti
+$$
+     pr=(q+1)(s+1)     \quad\text{a}\quad
+p(q+1)s=r(s+1)q.
+\tag2
+$$
+
+Všimnime si ešte, že rovnako platia rovnosti
+$$
+\postdisplaypenalty 10000
+-\frac{ps}{s+1}=\frac{(u+v)\cdot\dfrac{u}{v}}{\dfrac{u}{v}+1}=u
+\qquad\text{a}\qquad
+-\frac{p}{s+1}=\frac{u+v}{\dfrac{u}{v}+1}=v,
+$$
+ktoré nám naznačujú, ako postupovať pri dôkaze opačnej implikácie.
+
+\smallskip
+V~druhej časti riešenia predpokladajme,
+že čísla $p$, $q$, $r$, $s$ spĺňajú rovnosti~(2) a~navyše
+platí $q\ne{-1}$ a~$s\ne{-1}$.  Z~prvej rovnosti~(2) potom vyplýva
+$p\ne0$ a~$r\ne0$, takže rovnosti~(2) možno upraviť na tvar
+$$
+\frac{p}{s+1}=\frac{q+1}{r}\quad\text{a}\quad
+\frac{ps}{s+1}=\frac{rq}{q+1}.
+\tag3
+$$
+{\it Definujme\/} reálne čísla $u$, $v$ pomocou vzťahov
+$$
+u=-\frac{ps}{s+1}\quad\text{a}\quad
+v=-\frac{p}{s+1}.
+\tag4
+$$
+Potom platí $v\ne0$ a~podľa~(4) možno rovnako písať
+$$
+u=-\frac{rq}{q+1}\quad\text{a}\quad
+v=-\frac{q+1}{r}.
+\tag5
+$$
+Ak overíme, že čísla $u$, $v$ spĺňajú všetky
+štyri vzťahy~(1), bude to znamenať,
+že $(u,v)$ a~$(u,v^{-1})$ sú dvojice koreňov
+kvadratických rovníc z~textu úlohy a~riešenie úlohy bude hotové.
+Podľa (4) a~(5) je ale overenie vzťahov~(1) ľahké:
+$$
+\vbox{\openup\jot \let\\=\cr \everymath{\dsize}
+\halign{\hfil$#{}$&\hfil$#$\hfil&${}#$\hfil\cr
+-(u+v)=&\frac{ps}{s+1}+\frac{p}{s+1}&=p,\\
+uv=&\frac{- rq}{q+1}\cdot\frac{-(q+1)}{r}&=q,\\
+-\Bigl(u+\frac{1}{v}\Bigr)=&\frac{rq}{q+1}+\frac{r}{q+1}&=r,\\
+u\cdot\frac{1}{v}=&\frac{- ps}{s+1}\cdot\frac{-(s+1)}{p}&=s.\\
+}}
+$$}
+
+{%%%%%   A-III-6
+Ukážeme, že požadovaným spôsobom nemožno ofarbiť
+pätnásticu čísel
+$$
+\underbrace{5,4,3,2,1}_{\text{I}},
+\underbrace{9,8,7,6}_{\text{II}},
+\underbrace{12,11,10}_{\text{III}},
+\underbrace{14,13}_{\text{IV}},
+\underbrace{15\phantom{,}}_{\text{V}},
+$$
+pod ktorou sme vyznačili rozdelenie na päť skupín susedných čísel
+(tvoriacich klesajúce postupnosti).
+
+Pripusťme, že uvedenú pätnásticu sme zapísali štyrmi farbami tak,
+že čísla s~rovnakou farbou tvoria monotónne postupnosti. V~skupine~I
+je päť čísel, dve z~nich preto majú rovnakú farbu;
+pretože tvoria klesajúcu postupnosť, farbu týchto dvoch čísel
+nemá žiadne z~čísel skupín~II až V. V~nich sú teda iba čísla
+troch farieb; farbu dvoch čísel zo skupiny~II nemá žiadne z~čísel
+skupín~III až V, v~ktorých sú teda iba čísla dvoch farieb.
+Ešte jedným opakovaním predchádzajúcej úvahy zistíme, že čísla 14, 13
+a~15 zo skupín~IV a~V~sú jednej farby, a~to je spor.
+
+\ineriesenie
+Ukážeme, že požadovaným spôsobom nemožno ofarbiť
+pätnásticu čísel
+$$
+\underbrace{6,9,4,5,8,7}_{\text{I}},
+\underbrace{1,3,2}_{\text{II}},
+\underbrace{13,15,14}_{\text{III}},
+\underbrace{10,12,11}_{\text{IV}},
+$$
+pod ktorou sme vyznačili rozdelenie na štyri skupiny susedných čísel.
+
+Pripusťme, že uvedenú pätnásticu sme zapísali štyrmi farbami tak,
+že čísla s~rovnakou farbou tvoria monotónne postupnosti. 
+Vyskúšaním možno ľahko overiť, že v~skupine~I musia byť použité aspoň 3~farby. Zrejme v~každej
+zo skupín II, III a~IV musia byť použité aspoň 2~farby. Z~Dirichletovho princípu potom vyplýva,
+že niektorá farba je použitá v~troch skupinách. A~to je spor, pretože neexistuje monotónna
+postupnosť troch čísel, z~ktorých je každé v~inej skupine.}
+
+{%%%%%   B-S-1
+Ak v~každom kroku zvolíme kôpku s~najväčším počtom kameňov,
+budeme postupne odoberať kôpky s~54, 53, 52,~\dots{} kameňmi
+a~po 53.\,kroku zostane na stole jediná kôpka s~jedným kameňom.
+
+Dokážeme, že pri ľubovoľnom postupe zostane v~poslednej kôpke
+jediný kameň. Ukážeme totiž, že po každom kroku, po ktorom na stole
+zostáva aspoň jedna kôpka, tvoria počty kameňov v~jednotlivých
+kôpkach vždy {\it celú\/} množinu $\{1,2,\dots,n\}$ pre
+nejaké prirodzené~$n$ (nevylučujeme však, že k~niektorým číslam
+existuje viac kôpok s~daným počtom kameňov). To teda znamená, že
+na stole je vždy aspoň jedna kôpka s~práve jedným kameňom.
+
+Na začiatku tvoria počty kameňov v~kôpkach množinu
+$\{1,2,\dots,54\}$. Predpokladajme, že po určitom počte krokov
+tvoria počty kameňov v~jednotlivých kôpkach množinu
+$\{1,2,\dots,n\}$ ($n\ge2$). Ak teraz zvolíme kôpku
+s~$n$~kameňmi alebo kôpku s~jedným kameňom, budú v~ďalšom kroku
+počty kameňov v~kôpkach tvoriť množinu $\{1,2,\dots,n-1\}$.
+Ak zvolíme kôpku s~$m$~kameňmi, kde $m\notin\{1,n\}$, budú
+počty kameňov v~ďalšom kroku tvoriť množinu
+$\{1,2,\dots,m-1\}\cup\{1,2,\dots,n-m\}=\{1,2,\dots,p\}$, kde
+$p=\max\{m-1, n-m\}$. Tým je tvrdenie o~počte kameňov
+v~jednotlivých kôpkach dokázané.
+
+\odpoved
+Posledná kôpka bude bez ohľadu na zvolený
+postup vždy obsahovať jediný kameň.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov, z~toho 4~body za formuláciu
+hypotézy, že po každom kroku tvoria počty kameňov v~kôpkach
+celú množinu $\{1,2,\dots,n\}$.
+\endpetit
+\bigbreak}
+
+{%%%%%   B-S-2
+\fontplace
+\tpoint A; \rpoint B; \rtpoint C;
+\lBpoint S; \tpoint R; \rpoint Q;
+\tpoint x; \tpoint y;
+\rpoint\frac12a; \lBpoint\frac12c;
+[5] \hfil\Obr
+
+\fontplace
+\tpoint A; \rpoint B; \rtpoint C;
+\lBpoint S; \tpoint T; \tpoint R; \rpoint Q;
+[6] \hfil\Obr
+
+Podľa Pytagorovej vety je v~pravouhlom trojuholníku rovnosť
+$a^2:b^2=1:2$ splnená práve vtedy, keď $b^2:c^2=2:3$. Požadovanú
+ekvivalenciu teda stačí dokázať len pre jednu z~rovností
+$a^2:b^2=1:2$, $b^2:c^2=2:3$.
+
+\inspicture
+Trojuholníky $ASR$ a~$ACB$ (\obr) majú spoločný uhol pri vrchole~$A$
+a~zhodujú sa v~pravých uhloch $ASR$ a~$ACB$, takže sú
+podobné podľa vety~$uu$. Odtiaľ vyplýva rovnosť
+$$
+{|AR|\over|AS|}={|AB|\over|AC|},
+$$
+čiže
+$$
+x=|AR|={|AB|\cdot|AS|\over|AC|}={c^2\over2b}.    \tag1
+$$
+Podľa Pytagorovej vety máme $|RS|^2=|AR|^2-|AS|^2=x^2-c^2/4$
+a~$|RQ|^2=|QC|^2+|CR|^2=a^2/4+(b-x)^2=a^2/4+b^2-2bx+x^2$,
+takže $|RQ|=|RS|$ práve vtedy, keď $a^2/4+c^2/4+b^2=2bx$,
+čo po dosadení z~\thetag{1} a~$a^2=c^2-b^2$ po úprave dáva
+$3b^2/4=c^2/2$, čiže $b^2:c^2=2:3$. Tým je požadovaná
+ekvivalencia dokázaná.
+
+\ineriesenie
+Podľa Pytagorovej vety platí (\obrr1)
+$|BR|^2=|BC|^2+|CR|^2=a^2+y^2$,
+$|RS|^2=|BR|^2-|BS|^2=a^2+y^2-c^2/4$,
+$|RQ|^2=|QC|^2+|CR|^2=a^2/4+y^2$. Rovnosť $|RQ|=|RS|$ teda
+platí práve vtedy, keď $a^2+y^2-c^2/4=a^2/4+y^2$, čiže
+$3a^2=c^2$. V~pravouhlom trojuholníku je táto rovnosť ekvivalentná
+s~rovnosťou $3b^2=2c^2$, čiže $a^2:b^2:c^2=1:2:3$.
+
+\ineriesenie
+Označme $T$ stred strany~$AC$ (\obr).
+Pretože $|QC|=|ST|$ a~$|\uh QCR|=|\uh STR|=90\st$, sú trojuholníky $QCR$ a~$STR$ zhodné práve vtedy, keď
+$|RQ|=|RS|$ a~zároveň práve vtedy, keď $|RC|=|RT|$. Rovnosť $|RQ|=|RS|$
+je teda ekvivalentná s~tým, že bod~$R$ je stred úsečky~$CT$, \tj. $x=|RA|=3b/4$.
+\inspicture
+Z~podobnosti trojuholníkov $ABC$ a~$ARS$ máme
+(rovnako ako v~prvom riešení)
+$$
+x={c^2\over2b},
+$$
+takže $|RQ|=|RS|$ práve vtedy, keď
+$$
+{3b\over4}={c^2\over2b}, \quad\text{čiže}\quad 3b^2=2c^2.
+$$
+V~pravouhlom trojuholníku je to podľa Pytagorovej vety ekvivalentné
+s~rovnosťou $3a^2=c^2$, čiže $a^2:b^2:c^2=1:2:3$.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. 1~bod dajte za zistenie, že stačí
+dokazovať len jednu z~rovností $a^2:b^2=1:2$, $b^2:c^2=2:3$,
+3~body za vyjadrenie dĺžok $|RQ|$, $|RS|$ pomocou strán trojuholníka~$ABC$.
+Zostávajúce 2~body dajte za dokončenie ekvivalencie.
+
+\endpetit
+\bigbreak}
+
+{%%%%%   B-S-3
+Výraz $\floor{x/(1-x)}$ je celé číslo, preto
+aj
+$$
+\dfrac{\floor{x}}{1-\floor{x}}=\dfrac1{1-\floor{x}}-1
+$$
+je celé, čo
+znamená, že $1-\floor{x}\in\{-1,1\}$, čiže $\floor x\in\{0,2\}$.
+
+Nech $\floor x=0$. Potom $0\le x<1$ a~daná rovnica má tvar
+$$
+\floor{\dfrac{x}{1-x}}=0,
+$$
+takže je splnená práve vtedy, keď $0\le x/(1-x)<1$, čo je
+vzhľadom na predpoklad $1-x>0$ ekvivalentné s~nerovnosťami $0\le
+x<1/2$. V~tomto prípade danej rovnici vyhovujú všetky~$x$
+z~intervalu $\<0,1/2\)$.
+
+Nech $\floor x=2$. Potom $2\le x<3$ a~daná rovnica má tvar
+$$
+\floor{\dfrac{x}{1-x}}=-2,
+$$
+takže je splnená práve vtedy, keď $-2\le x/(1-x)<-1$. To je
+vzhľadom na predpoklad $2\le x$ (a~z~neho vyplývajúcu nerovnosť $1-x<0$) ekvivalentné
+s~nerovnosťami $-2+2x\ge x>-1+x$, čiže $x\ge2$. V~tomto prípade
+danej rovnici vyhovujú všetky~$x$ z~intervalu $\<2,3\)$.
+
+\zaver
+Všetky riešenia danej rovnice tvoria množinu
+$\<0,1/2\)\cup\<2,3\)$.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. 1~bod dajte za zistenie, že
+$\floor x/(1-\floor{x})$ je celé číslo, ďalší bod za $\floor
+x\in\{0,2\}$. Za odvodenie sústavy nerovností a~jej vyriešenie v~každom
+z~oboch prípadov dajte po 2~bodoch. Ak chýba správny
+záver, že vyhovujú všetky $x\in\<0,1/2\)\cup\<2,3\)$,
+strhnite 1~bod.
+
+\endpetit
+\bigbreak}
+
+{%%%%%   B-II-1
+\fontplace
+\lBpoint S; \tpoint S_1; \tpoint S_2; \tpoint S_3;
+\lBpoint k; \tpoint k_1; \tpoint k_2;
+\trpoint\up\unit k_3;
+\rBpoint r; \trpoint r; \lBpoint r; \trpoint r;
+\bpoint1; \bpoint1; \bpoint1; \lBpoint2;
+[7] \hfil\Obr
+
+\fontplace
+\bpoint S; \tpoint S_1; \tpoint S_2; \tpoint S_3;
+\tpoint P;
+\medmuskip2mu
+\tpoint x; \tpoint 2-x; \tpoint1;
+\rBpoint1+r; \lpoint y;
+\lBpoint\down.5\unit3-r; \lBpoint2+r;
+[9] \hfil\Obr
+
+Pretože sa súčet priemerov kružníc $k_1$ a~$k_2$ rovná priemeru
+kružnice~$k_3$, ležia ich stredy $S_1$, $S_2$ a~$S_3$ na priamke.
+Existujú dve zhodné kružnice, ktoré spĺňajú podmienky úlohy,
+a~sú súmerne združené podľa priamky~$S_1S_2$. Označme $k$ jednu
+z~nich (\obr), $S$~jej stred a~$r$ zodpovedajúci polomer.
+
+\medskip
+\line{\hss\inspicture-!\hss\inspicture-!\hss}
+\medskip
+
+Pre veľkosti strán trojuholníka~$S_1S_2S$ platí $|S_1S|=1+r$,
+$|S_2S|=2+r$, $|S_1S_2|=3$ a~$|S_3S|=3-r$. Pre bod~$S_3$ zároveň
+platí $|S_3S_1|=2$ a~$|S_3S_2|=1$. Keď označíme $P$ pravouhlý priemet
+bodu~$S$ na priamku~$S_1S_2$ (\obr) a~$x=|S_1P|$, $y=|SP|$, môžeme podľa
+Pytagorovej vety písať
+$$
+\aligned
+(1+r)^2=&x^2+y^2,\\
+(2+r)^2=&(3-x)^2+y^2,\\
+(3-r)^2=&(2-x)^2+y^2.
+\endaligned
+$$
+Odčítaním prvej rovnice od druhej dostaneme $3+2r=9-6x$, čiže
+$2r=6-6x$. Odčítanie prvej rovnice od tretej dá $8-8r=4-4x$, čiže $2r=1+x$.
+Porovnaním oboch dôsledkov vyjde rovnica $6-6x=1+x$, odkiaľ
+$x=5/7$, $r=3-3x=6/7$.
+
+\poznamka
+So znalosťou kosínusovej vety sa zaobídeme bez pomocného bodu~$P$.
+Keď napíšeme kosínusové vety pre trojuholníky $S_1S_3S$ a~$S_1S_2S$,
+dostaneme dve rovnice
+$$
+\align
+(3-r)^2&=4+(1+r)^2-2\cdot2(1+r)\cos\omega,\\
+(2+r)^2&=9+(1+r)^2-2\cdot3(1+r)\cos\omega,\\
+\endalign
+$$
+kde $\omega=|\uh S_2S_1S|$. Po úprave a~vyjadrení
+$(1+r)\cos\omega$ z~oboch rovníc dostaneme rovnicu
+$2r-1=1-r/3$, z~ktorej vyplýva $r=6/7$.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Za zistenie, že stredy kružníc
+$k_1$, $k_2$, $k_3$ ležia na~priamke, dajte 1~bod, zostavenie
+kvadratických rovníc pre hľadaný polomer~$r$ oceňte 3~bodmi,
+2~body dajte za výpočet polomeru~$r$.
+\endpetit
+\bigbreak}
+
+{%%%%%   B-II-2
+Označme $p$ počet účastníkov ankety vrátane Jožka a~$j$ počet hlasov
+pre Šatana. Na celých 7\,\% sa zaokrúhlia čísla z~intervalu
+$\<6{,}5\,\%;7{,}5\,\%\)$, čiže $\<0{,}065;0{,}075\)$. Pred
+Jožkovým hlasovaním mal Šatan $j-1$ hlasov a~po ňom $j$~hlasov. Musí
+preto platiť
+$$
+0{,}065\le{j-1\over p-1}<0{,}075, \quad
+0{,}065\le{j\over p}<0{,}075.
+$$
+Pretože z~nerovnosti $0<j<p$ vyplýva $(j-1)/(p-1)<j/p$,
+stačí riešiť dve nerovnice
+$$
+0{,}065\le{j-1\over p-1} \quad\text{a}\quad
+{j\over p}<0{,}075.                            \tag1
+$$
+
+Prvá z~nich je ekvivalentná s~nerovnicou $0{,}065p-0{,}065+1\le j$
+a~druhá s~nerovnicou $j<0{,}075p$, preto musí platiť
+$0{,}065p+0{,}935<0{,}075p$, odkiaľ vyplýva $p>93{,}5$. Pretože $p$
+je celé číslo, dostávame $p\ge94$. Musíme však ešte zistiť,
+pre ktoré najmenšie $p\ge94$ existuje celé číslo~$j$, ktoré vyhovuje
+nerovniciam~\thetag{1}. Z~podmienky $p\ge94$ dostaneme
+$j\ge0{,}065\cdot94+0{,}935=7{,}045$, a~teda $j\ge8$.
+Z~nerovnice $j<0{,}075p$ potom máme $p>320/3$, čiže $p\ge107$.
+Pretože $0{,}065\cdot107+0{,}935<8$, je dvojica $j=8$, $p=107$
+riešením sústavy~\thetag{1}, takže $p=107$ je najmenší možný počet ľudí,
+ktorí v~ankete hlasovali.
+
+\ineriesenie
+Nerovnice $0{,}065p+0{,}935\le j<0{,}075p$, ekvivalentné
+s~nerovnicami~\thetag{1}, upravíme na tvar
+$$
+{j\over0{,}075}<p\le{j-0{,}935\over0{,}065},
+$$
+čo dáva podmienku $0{,}065j<0{,}075j-0{,}075\cdot0{,}935$, čiže
+$j>7{,}5\cdot0{,}935>7$, takže $j\ge8$. Z~nerovnosti
+$p>j/0{,}075$ tak dostávame nerovnosť $p\ge107$. Teraz stačí
+overiť, že $p=107$ vyhovuje pre $j=8$ aj druhej podmienke, t.\,j.~že
+platí $107\le(8-0{,}935)/{0{,}065}$.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Za odvodenie takej sústavy dvoch nerovníc,
+ktorá je analogická sústave~\thetag{1}, dajte 2~body, za postupné odvodenie
+odhadov pre celé čísla $p$ a~$j$ dajte 3~body, za overenie, že
+$p=107$ je najmenšie hľadané~$p$, dajte 1~bod.
+\endpetit
+\bigbreak}
+
+{%%%%%   B-II-3
+\fontplace
+\tpoint A; \tpoint B; \bpoint C;
+\lBpoint K; \rBpoint L; \tpoint M;
+\tpoint V; \lBpoint S;
+[10] \hfil\Obr
+
+Označme $S$ stred úsečky~$CV$ (\obr). Body $K$ a~$L$ ležia na
+Tálesovej kružnici s~priemerom~$AB$, takže $|ML|=|MK|$. Body $K$
+a~$L$ zároveň ležia aj na Tálesovej kružnici s~priemerom~$CV$,
+takže $|SL|=|SK|$. Trojuholníky $SLM$ a~$SKM$ sú teda
+zhodné ($sss$), takže $|\uh SML|=|\uh SMK|$, čiže os uhla~$LMK$
+prechádza stredom~$S$ úsečky~$VC$.
+
+\inspicture
+
+%\nobreak
+\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Po dvoch bodoch oceňte odvodenie
+každej z~rovností $|ML|=|MK|$ a~$|SL|=|SK|$, zostávajúce dva body dajte
+za dokončenie dôkazu (argumentovať možno napr.\ tiež tým, že oba
+trojuholníky $LKM$ a~$LKS$ sú rovnoramenné, a~teda $LMKS$ je deltoid).
+\endpetit
+\bigbreak}
+
+{%%%%%   B-II-4
+Danú sústavu rovníc prepíšeme na ekvivalentný tvar
+$$
+\thinmuskip 0mu
+\aligned
+y=&\floor x-\alpha,\\
+z=&2\floor y-\alpha,\\
+x=&3\floor z-\alpha,
+\endaligned          \tag1
+$$
+pričom $\alpha$ sme označili číslo $2004/2005$
+z~intervalu $(0,1)$. Zo sústavy~\thetag{1} vyplývajú postupne rovnosti
+$$
+\thinmuskip 0mu
+\aligned
+\floor y=&\floor x-1,\\
+\floor z=&2\floor y-1=2\floor x-3,\\
+\floor x=&3\floor z-1=6\floor x-10.
+\endaligned
+$$
+Z~poslednej rovnice dostávame $\floor x=2$ a~zo zostávajúcich dvoch rovníc
+dopočítame $\floor y=\floor z=1$. Dosadením do~\thetag{1} tak máme
+$$
+x=3-\frac{2004}{2005}=2+\frac1{2005},\quad
+y=2-\frac{2004}{2005}=1+\frac1{2005},\quad
+z=2-\frac{2004}{2005}=1+\frac1{2005}.
+$$
+Vyšli necelé čísla $x$, $y$ a~$z$, ktoré majú práve také celé
+časti, aké sme dosadzovali do pravých strán rovností~\thetag{1}. Tak
+sme zároveň urobili skúšku (ktorú však možno urobiť aj priamym
+dosadením do pôvodnej sústavy). Uvedená trojica je (jediným)
+riešením danej úlohy.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov, z~toho 4~body za odvodenie vzťahu
+pre jednu celú časť. Dokončenie výpočtu oceňte 2~bodmi, za
+chýbajúcu zmienku o~skúške 1~bod strhnite.
+\endpetit}
+
+{%%%%%   C-S-1
+Odčítaním prvej rovnice od druhej dostaneme
+$$
+(x-y)(z-1)=1,
+$$
+odkiaľ vyplýva, že buď platí $x-y=z-1=1$, alebo $x-y=z-1=-1$.
+
+V~prvom prípade máme $z=2$, $y=x-1$ a~po dosadení do ktorejkoľvek
+z~pôvodných rovníc určíme $x=669$, takže $y=668$.
+
+V~druhom prípade máme $z=0$, $y=x+1$, takže $x=2\,005$ a~$y=2\,006$.
+
+Riešením sú dve trojice $x=669$, $y=668$, $z=2$ a~$x=2\,005$,
+$y=2\,006$, $z=0$.
+
+\ineriesenie
+Z~prvej rovnice vyjadríme $x=2\,005-yz$ a~tento vzťah dosadíme
+do druhej rovnice, ktorú upravíme na
+$$
+\gather
+y+2\,005z-yz^2=2\,006,\\
+y(1-z^2)=2\,005(1-z)+1.
+\endgather
+$$
+Z~danej sústavy je zrejmé, že $z\ne1$, takže môžeme písať
+$$
+y(1+z)=2\,005+\frac{1}{1-z}.
+$$
+Ľavá strana poslednej rovnosti je celé číslo, preto musí byť celé číslo
+aj pravá strana. Tejto podmienke vyhovuje jedine $z=0$ a~$z=2$.
+
+Rovnako ako v~predchádzajúcom riešení dosadením do ktorejkoľvek rovnice
+pôvodnej sústavy dopočítame $x=669$, $y=668$ pre $z=2$ a~$x=2\,005$,
+$y=2\,006$ pre $z=0$.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Za každé chýbajúce riešenie strhnite
+2~body.
+\endpetit
+\bigbreak}
+
+{%%%%%   C-S-2
+Pre $n=1$ a~$n=2$ má daná množina menej ako štyri prvky.
+
+Keďže pre každé prirodzené číslo~$n$ platí
+$$
+n(2n+2)=2n(n+1),
+$$
+mohli by sme zvoliť $a=n$, $b=2n+2$, $c=2n$, $d=n+1$. Tieto čísla
+sú navzájom rôzne pre každé $n>1$, lebo pre také~$n$ platí
+$n<n+1<2n<2n+2$. Ešte zostáva overiť, pre ktoré čísla~$n$ platí
+$2n+2\leq n^2$, aby takto zvolené štyri čísla $a$, $b$, $c$, $d$
+boli z~danej množiny. Je vidieť, že táto nerovnosť platí
+pre každé $n>2$, lebo je ekvivalentná s~nerovnosťou $3\leq
+(n-1)^2$.
+
+Môžeme teda zhrnúť, že požadované čísla $a$, $b$, $c$, $d$ možno
+z~danej množiny vybrať pre každé prirodzené číslo $n>2$.
+
+\ineriesenie
+Pre $n=1$ a~$n=2$ má daná množina menej ako štyri prvky.
+
+Keďže pre každé prirodzené číslo~$n$ platí
+$$
+n\cdot6n=2n\cdot3n,
+$$
+mohli by sme zvoliť $a=n$, $b=6n$, $c=2n$, $d=3n$. Tieto čísla
+sú navzájom rôzne pre každé~$n$, lebo $n<2n<3n<6n$. Ešte
+zostáva overiť, pre ktoré čísla~$n$ platí $6n\leq
+n^2$, aby zvolené štyri čísla $a$, $b$, $c$, $d$ boli z~danej
+množiny. Je vidieť, že táto nerovnosť platí pre
+každé $n>5$.
+
+Pre $n=3$ vyberieme $a=3$, $b=8$, $c=6$, $d=4$, pre $n=4$ vyberieme
+$a=4$, $b=10$, $c=8$, $d=5$ alebo $a=5$, $b=12$, $c=6$, $d=10$,
+pre $n=5$ vyberieme $a=5$, $b=12$, $c=10$, $d=6$.
+
+Môžeme teda zhrnúť, že požadované čísla $a$, $b$, $c$, $d$ možno
+z~danej množiny vybrať pre každé prirodzené číslo $n>2$.
+
+\poznamka
+Štvoríc navzájom rôznych čísel $a$, $b$, $c$, $d$, ktoré spĺňajú
+dané podmienky, je veľa. Vždy je ale treba pri takej štvorici
+určiť, od ktorého najmenšieho čísla~$n$ dané podmienky platia a~pre
+zostávajúce prirodzené čísla~$n$ je treba určiť konkrétne hodnoty čísel
+$a$, $b$, $c$, $d$.
+
+Tak je možné voliť napríklad $a=n$, $b=3n+3$, $c=3n$, $d=n+1$ pre
+$n>3$, alebo $a=n+1$, $b=2n+4$, $c=2(n+1)$, $d=n+2$ pre $n>3$ a~podobne.
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Za nezdôvodnenie rôznosti čísel
+$a$, $b$, $c$, $d$ strhnite 1~bod. Za nezdôvodnenie, že čísla
+$a$, $b$, $c$, $d$ patria do danej množiny, strhnite 1~bod. Pri
+voľbe takej všeobecnej štvorice čísel $a$, $b$, $c$, $d$, že je
+treba nájsť konkrétne čísla $a$, $b$, $c$, $d$ pre niekoľko
+prvých čísel~$n$, strhnite 2~body, ak tieto počiatočné
+konkrétne čísla chýbajú.
+
+\endpetit
+\bigbreak}
+
+{%%%%%   C-S-3
+\fontplace
+\rpoint A; \lpoint B; \blpoint C; \brpoint C';
+\trpoint C''; \tlpoint C''';
+[5] \hfil\Obr
+
+Podmienka, že obsah trojuholníka~$ABC$ sa má rovnať $1/8$
+obsahu~$S$ štvorca so stranou~$AB$ znamená, že výška trojuholníka~$ABC$
+na stranu~$AB$ má dĺžku $|AB|/4$, takže bod~$C$
+musí ležať na jednej z~dvoch rovnobežiek s~priamkou~$AB$ vzdialených
+$|AB|/4$ od priamky~$AB$.
+
+Podmienka, že súčet obsahov štvorcov so stranami $AC$ a~$BC$ sa má
+rovnať obsahu štvorca so stranou~$AB$ znamená podľa Pytagorovej
+vety pre trojuholník~$ABC$, že tento trojuholník je pravouhlý
+s~preponou~$AB$, takže bod~$C$ musí ležať na Tálesovej kružnici so stredom
+v~strede prepony~$AB$ a~polomerom $|AB|/2$.
+
+Konštrukcia bodu~$C$ je teda jednoduchá. Obe spomenuté rovnobežky
+zrejme pretnú kružnicu nad priemerom~$AB$ v~štyroch bodoch (\obr).
+Vzhľadom na to, že sa jedná o~polohovú úlohu, má úloha štyri
+riešenia.
+
+\inspicture{}
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie je 6~bodov, z~toho 2~body za správne určenie počtu
+riešení. Za zistenie, že bod~$C$ leží na určených rovnobežkách
+s~priamkou~$AB$, dajte 2~body. Za dôkaz, že bod~$C$ leží na
+Tálesovej kružnici nad priemerom~$AB$, dajte 2~body. Za uvedenie,
+že úloha má dve riešenia, dajte 1~bod, za uvedenie, že úloha má
+štyri riešenia, dajte 2~body. Pokiaľ nebude uvedený žiadny počet
+riešení, nedajte žiadny z~2~bodov určených na tento účel.
+
+\endpetit
+\bigbreak}
+
+{%%%%%   C-II-1
+Z~danej rovnosti pre $z\ne0$ postupnými úpravami dostávame
+$$
+\align
+\frac{x+y}{z}=&\overline{z,yx},\\
+\frac{x+y}{z}=&z+\frac{y}{10}+\frac{x}{100},\\
+     100(x+y)=&(100z+10y+x) \cdot z.
+\endalign
+$$
+Keďže $x$, $y$, $z$ sú číslice, platia nerovnosti
+$100 \cdot (9+9) \geq 100(x+y)$\linebreak a~$(100z+10y+x)\cdot z\geq100z
+\cdot z$; odtiaľ $18 \geq z^2$. To znamená, že $z \in \{1,2,3,4 \}$, lebo
+hodnota $z=0$ nie je prípustná.
+
+Pre $z=1$ má daná rovnosť tvar
+$$
+\align
+100(x+y)=&100+10y+x,\qquad\text{teda}\\
+ 99x+90y=&100.
+\endalign
+$$
+Úvahou o~deliteľnosti desiatimi zistíme, že musí byť
+$x=0$. Potom ale neexistuje žiadne celé~$y$ spĺňajúce
+rovnosť $90y=100$. Preto nemôže byť $z=1$.
+
+Pre $z=2$ má daná rovnosť tvar
+$$
+\align
+100(x+y)=&(200+10y+x)\cdot 2,\qquad\text{teda}\\
+ 49x+40y=&200.
+\endalign
+$$
+Úvahou o~deliteľnosti desiatimi zistíme, že musí byť
+$x=0$. Potom $y=5$, takže v~tomto prípade spĺňajú danú
+rovnosť číslice $x=0$, $y=5$, $z=2$.
+
+Pre $z=3$ má daná rovnosť tvar
+$$
+\align
+100(x+y)=&(300+10y+x) \cdot 3,\qquad\text{teda}\\
+ 97x+70y=&900.
+\endalign
+$$
+Úvahou o~deliteľnosti desiatimi zistíme, že musí byť
+$x=0$. Potom ale neexistuje žiadne celé~$y$ spĺňajúce rovnosť
+$70y=900$. Preto nemôže byť $z=3$.
+
+Pre $z=4$ má daná rovnosť tvar
+$$
+\align
+100(x+y)=&(400+10y+x) \cdot 4,\qquad\text{teda}\\
+ 24x+15y=&400.
+\endalign
+$$
+Tu máme $400=24x+15y \leq 24 \cdot 9 + 15 \cdot 9 =351$, teda
+nemôže byť $z=4$.
+
+Daná rovnosť je splnená jedine pre $x=0$, $y=5$, $z=2$. Naozaj
+platí $(0+5)/2=2{,}50$.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov. Pokiaľ bude riešenie urobené
+uvedeným spôsobom, tak za ohraničenie $z<5$ dajte 2~body, za
+vyriešenie rovnice pre jednotlivé hodnoty $z \in \{1,2,3,4 \}$
+dajte po jednom bode.
+\endpetit
+\bigbreak}
+
+{%%%%%   C-II-2
+K~ľubovoľne zvolenému prirodzenému číslu $n>2$ hľadáme príklad takých
+rôznych prirodzených čísel $p$, $q$ závislých na čísle~$n$,
+aby platilo
+$$
+\frac{1}{n}=\frac{1}{2}\Bigl(\frac{1}{p}+\frac{1}{q}\Bigr).
+$$
+Po úpravách má táto rovnosť tvar
+$$
+2pq=n(p+q),\quad\text{čiže}\quad
+p(2q-n)=nq.
+$$
+Keďže stačí nájsť jedinú dvojicu čísel $p$, $q$, je možné ju
+hľadať skúšaním niekoľkých jednoduchých možností v~poslednej
+rovnici.
+
+Keď položíme $2q-n=1$, bude $q=(n+1)/2$
+a~$p=n(n+1)/2$. Tieto čísla sú prirodzené a~navzájom rôzne pre
+ľubovoľné nepárne číslo $n>2$.
+
+Ďalej skúsme položiť $2q-n=2$. Získame tak $q=(n+2)/2$
+a~$p=n(n+2)/4$. Tieto čísla sú prirodzené a~navzájom rôzne
+pre ľubovoľné párne číslo $n>2$.
+
+Pre nepárne číslo $n>2$ teda môžeme položiť $q=(n+1)/2$ 
+a~$p=n(n+1)/2$ a~pre párne číslo $n>2$ zasa $q=(n+2)/2$
+a~$p=n(n+2)/4$.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov, z~toho za vytvorenie rovnosti
+$p(2q-n)=nq$ alebo inej vhodnej rovnosti, ktorá poslúži pri
+konštrukcii čísel $p$ a~$q$, dajte 2~body.
+\endpetit
+\bigbreak}
+
+{%%%%%   C-II-3
+\fontplace
+\tpoint A; \tpoint B; \bpoint C; \bpoint D;
+\rtpoint K; \lbpoint L; \rbpoint M; \rbpoint N;
+\lbpoint\xy-.8,.5 P; \bpoint X; \bpoint Y;
+[6] \hfil\Obr
+
+a) $AC$ a~$BD$ sú uhlopriečky obdĺžnika~$ABCD$, preto sú uhly
+$ABD$ a~$BAC$ zhodné. $AP$ a~$KN$ sú uhlopriečky pravouholníka~$AKPN$,
+preto sú uhly $AKN$, $KAP$ a~$APN$ zhodné (\obr). $PC$
+a~$LM$ sú uhlopriečky pravouholníka~$PLCM$, preto sú uhly
+$PLM$ a~$LPC$ zhodné. Uhly $APN$ a~$LPC$ sú zhodné (vrcholové
+uhly), preto sú zhodné aj uhly $AKN$, $PLM$ a~$ABD$. Priamky $LM$
+a~$KN$ sú teda rovnobežné s~uhlopriečkou~$BD$ daného obdĺžnika,
+a~preto sú rovnobežné aj navzájom.
+\inspicture{}
+
+b) Ak $X$ a~$Y$ sú priesečníky priamok $LM$ a~$KN$ s~uhlopriečkou~$AC$,
+platí $|XY|=|XP|+|PY|=|CP|/2+|PA|/2
+=(|CP|+|PA|)/2=|CA|/2$. Úsečka~$XY$ má teda
+dĺžku nezávislú na polohe bodu~$P$. Podľa~a) zviera priamka~$XY$
+s~priamkami $KN$ a~$LM$ rovnaký uhol ako s~priamkou~$BD$, takže
+tento uhol tiež nezávisí na polohe bodu~$P$. Preto je
+aj vzdialenosť priamok $LM$ a~$KN$ nezávislá na polohe bodu~$P$ (a~je
+jednoznačne určená veľkosťou~$|XY|$ a~uhlom~$MXP$, pričom
+$|\uh MXP|=2|\uh ABD|$).
+
+c) $KL$ a~$BP$ sú uhlopriečky pravouholníka~$KBLP$, sú preto
+zhodné. Podobne sú $MN$ a~$PD$ zhodné uhlopriečky pravouholníka~$NPMD$,
+$LM$ a~$PC$ zhodné uhlopriečky pravouholníka~$PLCM$ a~$NK$
+a~$AP$ zhodné uhlopriečky pravouholníka~$AKPN$.
+Pre obvod štvoruholníka~$KLMN$ tak platí
+$$
+\align
+o=&|KL|+|LM|+|MN|+|NK|=(|KL|+|MN|)+(|LM|+|NK|)=\\
+ =&(|BP|+|PD|)+(|PC|+|AP|) \geq |BD|+|AC|=2|AC|,
+\endalign
+$$
+pričom sme využili trojuholníkovú nerovnosť $|BP|+|PD| \geq |BD|$
+pre trojicu bodov $B$, $D$, $P$.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov, z~toho 2~body za dôkaz tvrdenia a),
+2~body za dôkaz tvrdenia b) a~2~body za dôkaz tvrdenia~c).
+\endpetit
+\bigbreak}
+
+{%%%%%   C-II-4
+\fontplace
+\trpoint A; \tlpoint B; \blpoint C; \brpoint D;
+\lpoint P; \lpoint\xy-.5,-.8 S; \rBpoint k;
+\cpoint\down\unit\ssize70\st; \cpoint\ssize20\st;
+[7] \hfil\Obr
+
+Všimnime si lichobežník~$ABCD$, ktorému možno opísať kružnicu. Priamka
+prechádzajúca jej stredom~$S$ kolmo na obe základne $AB$ a~$CD$ je
+osou súmernosti oboch tetív $AB$ a~$CD$, teda aj osou súmernosti
+celého lichobežníka~$ABCD$. Jeho ramená $AD$ a~$BC$ sú preto
+zhodné a~priesečník~$P$ uhlopriečok $AC$ a~$BD$ leží tiež na osi
+úsečiek $AB$ a~$CD$. Keďže podľa zadania $|\uh BAC|=70^\circ$,
+platí $|\uh APS|=20^\circ$ (\obr).
+\inspicture{}
+
+\konstrukcia
+Zostrojíme úsečku~$SP$, pričom $|SP|=d=2$\,cm, a~kružnicu $k(S;
+5\text{\,cm})$. Bodom~$P$ vedieme polpriamky $PX$ a~$PY$ tak, aby
+$|\uh SPX|=|\uh SPY|=20^\circ$. Priesečníky polpriamok $PX$
+a~$PY$ s~kružnicou~$k$ sú body $A$ a~$B$. Potom priesečníky vnútier
+polpriamok $AP$ a~$BP$ s~kružnicou~$k$ sú body $C$ a~$D$.
+
+Úloha má jediné riešenie.
+
+
+\nobreak\medskip\petit\noindent
+Za úplné riešenie dajte 6~bodov, z~toho 2~body za zdôvodnenie toho, že
+body $S$ a~$P$ ležia na osi strany~$AB$, 3~body za popis
+konštrukcie a~1~bod za určenie počtu riešení.
+\endpetit}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+Predpokladajme, že $x_1,x_2,\dots,x_n$ sú riešením zadanej sústavy. 
+Premiestnením všetkých členov na ľavú stranu a~odčítaním druhej rovnice od prvej dostaneme
+$$
+\align
+0&=x_1+x_2^2+x_3^3+\cdots+x_n^n-n-(x_1+2x_2+3x_3+\cdots+nx_n-\tfrac{1}{2}n(n+1))=\\
+ &=(x_2^2-2x_2+2-1)+(x_3^3-3x_3+3-1)+\cdots+(x_n^n-nx_n+n-1).\tag1
+\endalign
+$$
+Podľa nerovnosti medzi aritmetickým a~geometrickým priemerom pre $k\geq 2$ a~$x\geq 0$
+platí
+$$
+x^k+k-1=x^k+1+1+\cdots+1\ge k\cdot\root k\of{x^k}=kx,
+$$
+pričom rovnosť nastáva práve vtedy, keď $x=1$. Každá zo zátvoriek v~\thetag{1} je teda nezáporná
+a~súčet týchto zátvoriek bude nulový len v~prípade, keď $x_2=x_3=\ldots=x_n=1$. Z~prvej rovnice
+sústavy potom nutne vyplýva, že $x_1=1$. Skúškou ľahko overíme, že uvedená $n$-tica je (jediným)
+riešením.}
+
+{%%%%%   trojstretnutie, priklad 2
+Označme priesečníky priamok $AI$, $BI$, $CI$, $DI$ s~kružnicou opísanou štvoruholníku $ABCD$ postupne
+$E$, $F$, $G$, $H$ (\obr). Keďže priamky $AI$, $BI$, $CI$, $DI$ sú osi príslušných vnútorných uhlov štvoruholníka
+$ABCD$, priamky $EG$ a~$FH$ sú priemery kružnice opísanej štvoruholníku $ABCD$ a~teda sa pretínajú v~bode~$O$.
+Označme $X$ priesečník priamok $EB$ a~$CH$. Podľa Pascalovej vety pre "šesťuholník" $ACHDBE$ ležia body
+$P$, $X$ a~$I$ na jednej priamke. Podobne podľa Pascalovej vety pre "šesťuholník" $GCHFBE$ ležia na jednej priamke 
+body $O$, $X$ a~$I$. Preto ležia na jednej priamke aj body $O$, $I$ a~$P$, čo sme chceli dokázať.
+\insp{cps.1}%
+
+\ineriesenie
+\podla{Františka Simančíka}
+Body $E$, $F$, $G$, $H$ z~predošlého riešenia označme $A'$, $B'$, $C'$, $D'$ a~kružnicu opísanú štvoruholníku $ABCD$ označme~$k$. Z~mocnosti bodu~$I$ ku $k$ máme
+$$
+|IA|\cdot|IA'|=|IB|\cdot|IB'|=|IC|\cdot|IC'|=|ID|\cdot|ID'|.
+$$
+Preto existuje taká kružnicová inverzia~$\psi$ so stredom~$I$, že zobrazenie $\varphi\equiv\Cal S_I{\ssize\circ}\psi$ zobrazí body $A$, $B$, $C$, $D$ v~tomto poradí na body $A'$, $B'$, $C'$, $D'$ (pričom $\Cal S_I$ je stredová súmernosť so stredom v~bode~$I$). Označme $\varphi(P)=P'$. Stačí ukázať, že body $O$, $I$ a~$P'$ ležia na jednej priamke (keďže priamky $PI$ a~$P'I$ sú totožné). Zobrazenie~$\varphi$ zobrazí priamku~$AC$ do kružnice~$k_1$ prechádzajúcej bodmi $A'$, $C'$, $I$ a~priamku~$BD$ do kružnice~$k_2$ prechádzajúcej bodmi $B'$, $D'$, $I$ (\obr). Bod~$P'$ je preto druhým priesečníkom kružníc $k_1$, $k_2$ (rôznym od $I$).
+\insp{cps.2}%
+
+Priamka~$P'I$ je chordálou kružníc $k_1$, $k_2$. Stačí teda ukázať že bod~$O$ má ku kružniciam $k_1$, $k_2$ rovnakú mocnosť. Avšak už v~prvom riešení sme ukázali, že $A'C'$ a~$B'D'$ sú priemery kružnice~$k$, ktorej stredom je~$O$. Preto mocnosť bodu~$O$ ku $k_1$ aj ku $k_2$ má hodnotu $r^2=|OA'|\cdot|OC'|=|OB'|\cdot|OD'|$, kde $r$ je veľkosť polomeru kružnice~$k$. Teda $O$ naozaj leží na chordále~$P'I$.}
+
+{%%%%%   trojstretnutie, priklad 3
+Ľahko overíme, že pre $n=3$ platí
+$$
+x^3-3x^2+2x+6=(x+1)(x^2-4x+6).
+$$
+Ak by sme pre $n=4$ mali
+$$
+x^4-3x^3+2x^2+6=(x^2+ax+b)(x^2+cx+d),
+$$
+porovnaním koeficientov by sme dostali
+$$
+a+c=\m3,\qquad ac+b+d=2,\qquad bd=6.
+$$
+Z~prvej rovnosti vyplýva, že $a$ a~$c$ majú rôznu paritu. 
+Preto z~druhej rovnosti vyplýva, že $b$ a~$d$ majú rovnakú paritu.
+To je v~spore s~treťou rovnosťou.
+
+Predpokladajme ďalej, že $n\ge5$. Nech platí
+$$
+P(x)=Q(x)R(x),
+\tag1
+$$
+pričom
+$$
+\align
+Q(x)&=a_k x^k+a_{k-1}x^{k-1}+\cdots+a_1x+a_0,\\
+R(x)&=b_{n-k} x^{n-k}+b_{n-k-1}x^{k-1}+\cdots+b_1x+b_0,
+\endalign
+$$
+sú polynómy s~celočíselnými koeficientmi
+a~$a_k=b_{n-k}=\pm1$. Bez ujmy na všeobecnosti môžeme predpokladať,
+že $k\le\lfloor n/2\rfloor<n-2$
+(pretože $n\ge5$). Porovnaním koeficientov na oboch stranách v~\thetag{1} získame
+rovnosti
+$$
+\align
+a_0b_0&=6,\\
+a_0b_1+a_1b_0&=0,\\
+\vdots\\
+a_0b_k+a_1b_{k-1}+\cdots+a_{k-1}b_1+a_kb_1&=0.
+\endalign$$
+Teraz indukciou dokážeme, že $a_0$ delí $a_1, a_2, \dots, a_k$. Predpokladajme, že sme toto tvrdenie dokázali pre
+$a_1, a_2, \dots, a_\ell$. Máme
+$$
+0=a_0(a_0b_{\ell+1}+a_1b_\ell+\cdots+a_\ell b_1+a_{\ell+1}b_0)=
+  a_0^2b_{\ell+1}+a_0a_1b_\ell+\cdots+a_0a_\ell b_1+6a_{\ell+1},
+$$
+a~teda
+$$
+6a_{\ell+1}=\m(a_0^2b_{\ell+1}+a_0a_1b_\ell+\cdots+a_0a_\ell b_1).
+$$
+Vieme, že všetky sčítance na pravej strane sú deliteľné členom~$a_0^2$,
+preto aj ľavá strana je ním deliteľná a~nutne $a_0 \mid a_{\ell+1}$.
+
+Ale keďže $a_k=\pm 1$, dostávame $a_0=\pm 1$. Bez ujmy na všeobecnosti môžeme predpokladať,
+že $a_0=1$; potom $b_0=6$.
+
+Teraz zopakujeme rovnaké argumenty na koeficienty polynómu~$R$. Dostaneme,
+že $b_0=6$ delí $b_1, b_2, \dots, b_{n-3}$ (ak je to potrebné, položíme $b_\ell=0$ pre $\ell > n-k$).
+Dostaneme tak spor ($b_{n-k}={\pm 1}$) okrem prípadu, keď $n-k> n-3$. Zostali tak dva prípady.
+
+\prip{$k=2$}
+Porovnaním koeficientov pri $x^{n-2}$ v~\thetag{1} máme
+$$
+a_0b_{n-2}+a_1b_{n-3}+a_2b_{n-4}=2.
+$$
+Z~predošlého vieme, že na ľavej strane sú okrem prvého člena všetky deliteľné šiestimi,
+\tj. sú párne, zatiaľ čo prvý člen je rovný $\pm 1$. Tým dostávame spor.
+
+\prip{$k=1$}
+Úloha sa tak zjednodušuje na nájdenie celočíselných koreňov polynómu~$P$;
+ľahko možno nahliadnuť, že ak $n$ je párne, také korene neexistujú, zatiaľ čo pre 
+$n$ nepárne máme $P(-1)=0$.
+
+Preto podmienky zadania spĺňajú práve nepárne čísla~$n$.}
+
+{%%%%%   trojstretnutie, priklad 4
+Uvažujme polynóm
+$$
+\align
+(x&+2)^{2n}=(x^2+4x+4)^n=\\
+&=(x^2+x+x+x+x+1+1+1+1)\cdots(x^2+x+x+x+x+1+1+1+1)
+\endalign
+$$
+a~predstavme si, že sme roznásobili zátvorky a~získali $9^n$~sčítancov. Ukážeme, že existuje
+bijektívne zobrazenie medzi sčítancami~$x^n$ a~rozdeleniami spĺňajúcimi podmienky zadania.
+
+Majme ľubovoľné rozdelenie guliek. Ak $k$-tu guľku dostane~$A$, zvolíme z~$k$-tej zátvorky~$x^2$.
+Ak ju dostane $B$, $C$, $D$, resp.\ $E$, zvolíme z~$k$-tej zátvorky prvú, druhú, tretiu, resp.\ štvrtú jednotku.
+A~ak ju dostane $F$, $G$, $H$, resp.\ $I$, zvolíme z~$k$-tej zátvorky prvý, druhý, tretí, resp.\ štvrtý člen~$x$.
+Ak teraz vynásobíme členy, ktoré sme zvolili, vidíme, že výsledok je rovný~$x^n$ práve vtedy, keď
+$A$ dostane rovnaký počet guliek ako $B$, $C$, $D$, $E$ spolu.
+
+Počet vyhovujúcich rozdelení je teda rovnaký ako koeficient pri $x^n$ v~polynóme $(x+2)^{2n}$, \tj.
+$$
+{2n \choose n}\cdot 2^n.
+$$}
+
+{%%%%%   trojstretnutie, priklad 5
+Ak $P$ leží na niektorej z~uhlopriečok, povedzme na $AC$, tak
+$$
+{S_{PAB}\over S_{PBC}}={|AP|\over|PC|}={S_{PDA}\over S_{PCD}},
+$$
+teda rovnosť zo zadania platí. Dokážeme, že pre body~$P$ ležiace
+vnútri štvoruholníka $ABCD$ mimo uhlopriečok zadaná rovnosť neplatí.
+
+Označme $O$ priesečník uhlopriečok a~bez ujmy na všeobecnosti predpokladajme,
+že $P$ leží vnútri trojuholníka $ABO$ (\obr).
+\insp{cps.3}%
+Označme ešte $Q$ priesečník priamok $BP$ a~$AC$ a~$R$ priesečník priamok
+$DP$ a~$AC$.
+Potom ľahko možno odvodiť rovnosti
+$$
+{S_{PAB}\over S_{PBC}}={|AQ|\over |QC|}
+\qquad\text{a}\qquad
+{S_{PDA}\over S_{PCD}}={|AR|\over |RC|}.
+$$
+Keďže $Q\ne R$, skúmaná rovnosť nemôže platiť.
+
+\odpoved
+Hľadanou množinou bodov~$P$ sú vnútorné body uhlopriečok $AC$ a~$BD$.}
+
+{%%%%%   trojstretnutie, priklad 6
+Vynásobením uvažovanej rovnice štyrmi a~jednoduchou úpravou dostaneme ekvivalentnú rovnicu
+$$
+\align
+(2y+x)^2&=4x^3-27x^2+44x-12=(x-2)(4x^2-19x+6)=\tag1\\
+&=(x-2)\bigl[(x-2)(4x-11)-16\bigr].
+\endalign
+$$
+Výraz na pravej strane musí byť štvorcom. Preto $(x-2)=ks^2$ pre nejaké
+$k\in\{\m2,\m1,1,2\}$ a~$s\in\Bbb N$ (totiž ak pre nejaké prvočíslo~$p$
+a~nezáporné celé číslo $m$ je $(x-2)$ deliteľné výrazom $p^{2m+1}$, ale nie výrazom $p^{2m+2}$, tak máme
+$p\mid(x-2)(4x-11)-16$, teda $p\mid16$ a~$p=2$).
+
+Rozoberieme osobitne tri prípady.
+
+\prip{$k=\pm 2$}
+Z~\thetag{1} máme $4x^2-19x+6=\pm 2u^2$ pre nejaké celé číslo~$u$, z~čoho úpravou dostaneme
+$$
+(8x-19)^2-265=\pm 32u^2.
+$$
+Túto rovnosť však nespĺňajú žiadne celé čísla $x$, $u$, pretože ľavá strana dáva po delení piatimi zvyšok 0, 1 alebo 4, zatiaľ čo pravá strana zvyšok 0, 2 alebo 3. Jedinou možnosťou je teda zvyšok~0, avšak v~takom prípade by pravá strana bola deliteľná číslom~25 a~ľavá strana nie. 
+
+\prip{$k=1$}
+Potom $4x^2-19x+6=u^2$ pre nejaké celé číslo~$u$,
+odkiaľ po vynásobení šestnástimi po úprave dostaneme
+$$
+265=(8x-19)^2-16u^2=(8x-19-4u)(8x-19+4u).
+$$
+Ľahko overíme, že $x=6$ je jediná možnosť, pre ktorú dostaneme vyhovujúce
+riešenie pôvodnej rovnice (stačí
+uvažovať všetky možné rozklady $265={1\cdot 265}=5\cdot
+53=\dots$ a~brať do úvahy fakt, že $x-2=s^2$).
+Po dosadení do \thetag{1} tak získame dvojice $(6,3)$ a~$(6,\m9)$.
+
+\prip{$k=\m1$}
+Podobne ako v~predošlom prípade máme $4x^2-19x+6=-u^2$, odkiaľ
+$$
+265=(8x-19)^2+(4u)^2.
+$$
+Overíme všetky možnosti. Pre $u=0, 1, 2$ nezískame žiadne riešenie. Pre
+$u=3$ dostaneme $(8x-19)^2=121=11^2$, z~čoho $x=1$; získame tak dvojice
+$(1,1)$, $(1,\m2)$. Napokon pre $u=4$
+máme $(8x-19)^2=9=3^2$, \tj. $x=2$, odkiaľ získame dvojicu $(2,\m1)$.
+
+\smallskip
+Zadanú rovnosť spĺňajú dvojice $(6,3)$, $(6, \m9)$, $(1,1)$, $(1,\m2)$ a~$(2,\m1)$.}
+
+{%%%%%   IMO, priklad 1
+\podla{Jakuba Závodného}
+Označme vnútorné uhly pri základniach rovnoramenných trojuholníkov $C_1B_1B_2$, $A_1C_1C_2$, $B_1A_1A_2$ postupne $\al$, $\be$, $\ga$ (\obr).
+\insp{mmo.1}%
+Dopočítaním uhlov do $180\st$ postupne pri bode~$C_2$, v~trojuholníku $C_2BA_1$ a~v rovnoramennom trojuholníku $A_2C_2A_1$ dostaneme
+$$
+|\uh BC_2A_1|=2\be,\qquad |\uh C_2A_1B|=120\st-2\be,\qquad |\uh C_2A_2A_1|=60\st-\be.
+$$
+Podobne
+$$
+|\uh CA_2B_1|=2\ga,\qquad |\uh A_2B_1C|=120\st-2\ga,\qquad |\uh B_1A_2B_2|=60\st-\ga.
+$$
+Preto
+$$
+\align
+|\uh B_1A_1C_1|&=180\st-(120\st-2\be)-\be-\ga=60\st+\be-\ga,\\
+|\uh B_2A_2C_2|&=180\st-2\ga-(60\st-\ga)-(60\st-\be)=60\st+\be-\ga,
+\endalign
+$$
+čiže $|\uh B_1A_1C_1|=|\uh B_2A_2C_2|$. Zrejme rovnakým spôsobom možno odvodiť aj rovnosti 
+$$
+|\uh C_1B_1A_1|=|\uh C_2B_2A_2|\qquad\text{a}\qquad|\uh A_1C_1B_1|=|\uh A_2C_2B_2|.
+$$
+Trojuholníky $A_1B_1C_1$ a~$A_2B_2C_2$ sú teda podobné. Uvažujme (jednoznačne určené) podobné zobrazenie, ktoré zobrazí prvý z~týchto trojuholníkov na druhý. Možno ho dostať zložením otočenia okolo stredu~$S$ o~uhol~$\varphi$ a~rovnoľahlosti s~tým istým stredom~$S$ a~koeficientom~$k$ (používame známe tvrdenie, že taký rozklad na dve zobrazenia s~rovnakým stredom existuje).
+\insp{mmo.2}%
+Trojuholníky $SA_1A_2$, $SB_1B_2$, $SC_1C_2$ sú navzájom podobné, pretože pri vrchole~$S$ majú rovnaký uhol (\obr) a~navyše $|SA_2|:|SA_1|=|SB_2|:|SB_1|=|SC_2|:|SC_1|=k$. Podľa zadania však $|A_1A_2|=|B_1B_2|=|C_1C_2|$, uvedené trojuholníky sú tak zhodné a~majú zhodné výšky z~vrcholu~$S$. Z~toho vyplýva, že $S$ má rovnakú vzdialenosť od všetkých strán trojuholníka $ABC$ a~je to nutne stred vpísanej kružnice (stredy pripísaných kružníc ľahko vylúčime). No z~odvodenej zhodnosti máme aj $|SA_1|=|SB_1|=|SC_1|$ a~keďže trojuholník $ABC$ je rovnostranný (so stredom~$S$), je kvôli symetrii rovnostranný aj trojuholník $A_1B_1C_1$.
+
+Teraz už ľahko dokážeme zadané tvrdenie. Štvoruholník $C_1A_1B_1B_2$ je deltoid ($|C_1A_1|=|A_1B_1|$ a~$|B_1B_2|=|B_2C_1|$), takže jeho uhlopriečka~$A_1B_2$ je zároveň osou úsečky~$B_1C_1$. Podobne je $B_1C_2$ osou úsečky~$C_1A_1$ a~$C_1A_2$ osou úsečky~$A_1B_1$. Vidíme, že zadané tri priamky sú osami strán trojuholníka $A_1B_1C_1$, pretínajú sa teda v~jednom bode.
+
+\ineriesenie
+\podla{Ondreja Budáča}
+\insp{mmo.3}%
+Označme $a$ dĺžku strany šesťuholníka $A_1A_2B_1B_2C_1C_2$. Položme $|AB|-a=m$. Ďalej nech $|AC_1|=x$, $|BA_1|=y$, $|CB_1|=z$. Potom $|BC_2|=m-x$, $|CA_2|=m-y$, $|AB_2|=m-z$ (\obr). Použitím kosínusovej vety v~trojuholníkoch $AC_1B_2$ a~$BA_1C_2$ (keďže $\cos 60\st=\frac12$) dostaneme
+$$
+a^2=x^2+(m-z)^2-x(m-z)=y^2+(m-x)^2-y(m-x).
+$$
+Po roznásobení zátvoriek a~úprave získame
+$$
+m(-2z+x+y)=(y-z)(y+z+x).
+$$
+Zrejme analogicky vieme dostať (použitím kosínusovej vety pre trojuholníky $AC_1B_2$ a~$CB_1A_2$) rovnosť
+$$
+(x-y)(x+y+z)=m(-2y+z+x).
+$$
+Po vynásobení uvedených dvoch rovností, vykrátení nenulových činiteľov~$m$ a~$(x+y+z)$, roznásobení a~následnými úpravami obdržíme
+$$
+\align
+   (x-y)(-2z+x+y) &= (y-z)(-2y+z+x),\\
+  x^2-y^2-2zx+2yz &= -2y^2-z^2+xy+3yz-zx,\\
+  x^2+y^2+z^2     &= xy+yz+zx,\\
+  \tfrac12\left[(x-y)^2+(y-z)^2+(z-x)^2\right]&=0.
+\endalign
+$$
+Na ľavej strane ostatnej rovnosti máme súčet nezáporných výrazov, ktorý je nulový len v~prípade, že všetky tri sčítance sú nulové. Nutne teda $x=y=z$, čiže trojuholník $A_1B_1C_1$ je rovnostranný (kvôli symetrii). Zadané tvrdenie už teraz dokážeme rovnakým spôsobom, ako v~závere prvého riešenia.
+}
+
+{%%%%%   IMO, priklad 2
+Zrejme žiadne číslo sa v~postupnosti nevyskytuje viac ako raz, ak by totiž pre $i<j$ bolo $a_i=a_j$, pre každé $n\ge j$ by medzi číslami $a_1,a_2,\dots,a_n$ boli aj $a_i$, $a_j$ a~dávali by ten istý zvyšok po delení~$n$. Navyše pre každé prirodzené číslo~$n$ je rozdiel ľubovoľných dvoch čísel spomedzi $a_1,a_2,\dots,a_n$ nanajvýš $n-1$, lebo v~opačnom prípade by sme mali indexy $i<j\le n$ také, že $m=|a_i-a_j|\ge n$ a~medzi číslami $a_1,a_2,\dots,a_m$ by boli dve s~rovnakým zvyškom po delení~$m$.
+
+Uvažujme množinu $\mm M=\{a_1,a_2,\dots,a_n\}$ pre ľubovoľné prirodzené~$n$. Ak $c$ je najmenšie a~$d$ najväčšie číslo z~$\mm M$, tak z~uvedeného vyplýva, že $d-c\ge n-1$ (keďže všetky prvky $\mm M$ sú rôzne) a~zároveň $d-c\le n-1$ (keďže $c,d\in\mm M$). Nutne teda $d-c=n-1$ a~množina~$\mm M$ pozostáva zo všetkých celých čísel nachádzajúcich sa medzi $c$ a~$d$.
+
+Nech $x$ je ľubovoľné celé číslo. Keďže zadaná postupnosť má nekonečne veľa kladných aj záporných členov a~všetky jej členy sú rôzne, existuje index~$i$ taký, že $a_i<x$ a~zároveň index~$j$ taký, že $x<a_j$. Pre $n=\max\{i,j\}$ sú medzi číslami $a_1,a_2,\dots,a_n$ okrem iných všetky celé čísla medzi $a_i$ a~$a_j$, teda aj $x$.
+}
+
+{%%%%%   IMO, priklad 3
+\podla{Iurieho Boreica}
+Keďže 
+$$
+\frac{x^5-x^2}{x^5+y^2+z^2}-\frac{x^5-x^2}{x^3(x^2+y^2+z^2)}=
+\frac{x^2(y^2+z^2)(x^3-1)^2}{x^3(x^5+y^2+z^2)(x^2+y^2+z^2)}\ge0
+$$
+(a~podobná nerovnosť platí pre zlomky, ktoré dostaneme cyklickou zámenou premenných), stačí namiesto zadanej nerovnosti dokázať nerovnosť
+$$
+\frac{x^5-x^2}{x^3(x^2+y^2+z^2)}+\frac{y^5-y^2}{y^3(x^2+y^2+z^2)}+\frac{z^5-z^2}{z^3(x^2+y^2+z^2)}\ge0,
+\tag1
+$$
+ktorá je ekvivalentná s~nerovnosťou
+$$
+\frac1{x^2+y^2+z^2}\left(x^2-\frac1x+y^2-\frac1y+z^2-\frac1z\right)\ge0.
+$$
+Z~podmienky $xyz\ge1$ máme $1/x\le yz$, $1/y\le zx$, $1/z\le xy$, pre výraz v~zátvorke preto platí
+$$
+\align
+x^2-\frac1x+y^2-\frac1y+z^2-\frac1z &\ge x^2+y^2+z^2-xy-yz-zx = \\
+                                    &=\tfrac12\left[(x-y)^2+(y-z)^2+(z-x)^2\right]\ge0.
+\endalign
+$$ 
+Tým je nerovnosť~\thetag1 dokázaná.
+
+\ineriesenie
+Prvý zlomok na ľavej strane vieme upraviť na tvar
+$$
+\frac{x^5-x^2}{x^5+y^2+z^2}=\frac{x^5+y^2+z^2-(x^2+y^2+z^2)}{x^5+y^2+z^2}=1-\frac{x^2+y^2+z^2}{x^5+y^2+z^2}
+$$
+a~podobne možno prepísať aj zvyšné zlomky. Zadaná nerovnosť je preto ekvivalentná s~nerovnosťou
+$$
+\frac{x^2+y^2+z^2}{x^5+y^2+z^2}+\frac{x^2+y^2+z^2}{y^5+z^2+x^2}+\frac{x^2+y^2+z^2}{z^5+x^2+y^2}\le3.
+$$
+Použitím Cauchy-Schwarzovej nerovnosti a~podmienky $xyz\ge1$ dostaneme
+$$
+(x^5+y^2+z^2)(yz+y^2+z^2)\ge\left(x^{5/2}(yz)^{1/2}+y^2+z^2\right)^2\ge(x^2+y^2+z^2)^2,
+$$
+čiže
+$$
+\frac{x^2+y^2+z^2}{x^5+y^2+z^2}\le\frac{yz+y^2+z^2}{x^2+y^2+z^2}.
+$$
+Analogické nerovnosti platia aj pre ďalšie dva zlomky, preto
+$$
+\frac{x^2+y^2+z^2}{x^5+y^2+z^2}+\frac{x^2+y^2+z^2}{y^5+z^2+x^2}+\frac{x^2+y^2+z^2}{z^5+x^2+y^2}\le
+2+\frac{yz+zx+xy}{x^2+y^2+z^2}\le3,
+$$
+čo sme chceli dokázať. Využili sme (podobne ako v~závere prvého riešenia) známy fakt, že $x^2+y^2+z^2\ge yz+zx+xy$.
+}
+
+{%%%%%   IMO, priklad 4
+Ukážeme, že každé prvočíslo~$p$ má v~danej postupnosti svoj násobok. Keďže $a_2=48$ je násobkom dvoch aj troch, stačí uvažovať $p>3$. V~takom prípade z~malej Fermatovej vety máme (všetky kongruencie uvažujeme modulo~$p$) $2^{p-1}\equiv1$, $3^{p-1}\equiv1$, a~teda aj $6^{p-1}\equiv1$. Odtiaľ
+$$
+6a_{p-2}=6\cdot2^{p-2}+6\cdot3^{p-2}+6\cdot6^{p-2}-6 = 3\cdot2^{p-1}+2\cdot3^{p-1}+6^{p-1}-6 \equiv 
+3+2+1-6 = 0,
+$$
+čiže $6a_{p-2}$ je násobkom~$p$ a~keďže $p>3$, nutne $p\mid a_{p-2}$.
+
+Jediné kladné číslo, ktoré je nesúdeliteľné so všetkými členmi danej postupnosti, je 1.   
+}
+
+{%%%%%   IMO, priklad 5
+\podla{Františka Simančíka}
+Uvažujme kružnice opísané trojuholníkom $BCP$ a~$ADP$.
+\insp{mmo.4}%
+Predpokladajme, že sa v~bode~$P$ dotýkajú a~že ich spoločná dotyčnica vedená týmto bodom pretína stranu~$CD$ v~bode~$X$ (\obr). Z~rovnosti obvodového a~úsekového uhla pri tetivách $DP$ a~$CP$ dostávame $|\uh DAP|=|\uh DPX|$ a~$|\uh CBP|=|\uh CPX|$. Navyše
+$$
+|\uh CPX|=180\st-|\uh APD|-|\uh DPX|=|\uh DAP|+|\uh PDA|-|\uh DPX|=|\uh PDA|.
+$$
+Teda $|\uh CBP|=|\uh PDA|$ a~strany $BC$ a~$AD$ sú rovnobežné (rovnajú sa príslušné striedavé uhly), čo je v~rozpore so zadaním úlohy. Uvažované kružnice sa preto nedotýkajú a~pretínajú sa okrem bodu~$P$ ešte v~bode, ktorý označíme~$S$. Keďže $|BC|=|AD|$ a~$|\uh BPC|=|\uh APD|$, tak tieto kružnice majú rovnaké polomery a~všetky obvodové uhly prislúchajúce spoločnej tetive~$PS$ majú rovnakú veľkosť (\obr).
+\instwop{mmo.5}{mmo.6}{6}
+Z~toho vyplýva, že trojuholníky $CAS$ a~$BDS$ sú rovnoramenné, čiže $|SA|=|SC|$, $|SB|=|SD|$. Takže trojuholníky $SAD$ a~$SCB$ sú zhodné podľa vety {\it sss} a~keďže $|EC|=|AF|$, sú zhodné aj trojuholníky $SAF$ a~$SCE$. Odtiaľ $|\uh ASF|=|\uh CSE|$ a~teda $|\uh FSE|=|\uh ASC|$ a~rovnoramenné trojuholníky $FSE$ a~$ASC$ sú podobné. Preto $|\uh SFE|=|\uh SAC|=|\uh SAR|$ a~štvoruholník $ASRF$ je tetivový (\obr).
+
+Označme $|\uh ADB|=\al$, $|\uh DFE|=\be$. V~tetivovom štvoruholníku $ASRF$ máme $|\uh ASR|=180\st-|\uh AFR|=\be$. V~tetivovom štvoruholníku $ASPD$ zasa $|\uh ASP|=180\st-\al$, \tj.
+$$
+|\uh RSP|=180\st-\al-\be.
+$$
+Rovnako však z~trojuholníka $FQD$ máme
+$$
+|\uh RQP|=180\st-\al-\be.
+$$
+Spolu $|\uh RSP|=|\uh RQP|$ a~štvoruholník $PRSQ$ je tetivový (\obr). Bod~$S$ preto leží na kružnici opísanej trojuholníku $PQR$. Keďže poloha bodu~$S$ nezávisí na voľbe bodov $E$, $F$, úloha je vyriešená.
+\insp{mmo.7}%
+}
+
+{%%%%%   IMO, priklad 6
+Označme $n$ počet všetkých súťažiacich a~$N$ počet všetkých vyriešených dvojíc úloh (pre každého súťažiaceho do $N$ započítame každú dvojicu úloh, ktorú vyriešil, \tj. ak vyriešil $r$~úloh, do $N$ započítame~$\binom r2$). Každú z~15~dvojíc vyriešili viac ako $2/5$~všetkých súťažiacich, čiže aspoň $(2n+1)/5$ súťažiacich, preto
+$$
+N \ge 15\cdot\frac{2n+1}5 = 6n+3.
+\tag1
+$$
+Predpokladajme, že 5~úloh vyriešilo $k$~účastníkov. Každý z~nich vyriešil 10~dvojíc úloh, zatiaľ čo každý zo zvyšných $n-k$ účastníkov vyriešil nanajvýš 6~dvojíc úloh, takže
+$$
+N \le 10k + 6(n-k) = 6n+4k.
+$$
+Z~uvedených dvoch odhadov je zrejmé, že $k\ge1$. Ak by navyše $(2n+1)/5$ nebolo celé číslo, každú dvojicu úloh by vyriešilo aspoň $(2n+2)/5$ účastníkov a~prvý odhad by mal tvar $N\ge6n+6$, čo by viedlo k~nerovnosti $k\ge2$ a~úloha by bola vyriešená. Podobne, ak by niektorý účastník vyriešil menej ako 4~úlohy, vyriešil by nanajvýš 3~dvojice úloh a~druhý odhad by mal tvar $N\le6n+4k-3$, čo spolu s~\thetag1 takisto dáva $k\ge2$.
+
+Ostáva teda vylúčiť prípad, že $2n+1$ je deliteľné piatimi, jeden účastník (nazvime ho {\it víťaz}) vyriešil 5~úloh a~každý iný účastník vyriešil práve 4~úlohy. Predpokladajme, že taká situácia nastala. V~takom prípade $N=6n+4$ (víťaz vyriešil 10~dvojíc úloh, zvyšní účastníci po 6~dvojíc úloh). Máme tak jednu dvojicu úloh (nazvime ju {\it špeciálna}), ktorú vyriešilo práve $(2n+1)/5+1$ účastníkov a~14~dvojíc úloh, ktoré vyriešilo práve $(2n+1)/5$ účastníkov (inak by sme pri odhade~\thetag1 dostali buď $N\ge6n+5$ alebo $N=6n+3$, čo je v~rozpore s~práve odvodenou hodnotou~$N$).
+
+Nazvime úlohu, ktorú víťaz nevyriešil, {\it ťažká}. Označme $M$ počet vyriešených dvojíc úloh, z~ktorých jedna je ťažká. Pre každú z~piatich dvojíc obsahujúcich ťažkú úlohu máme buď $(2n+1)/5$ alebo $(2n+1)/5+1$ účastníkov, ktorí obe úlohy z~dvojice vyriešili. Takže $M=2n+1$ alebo $M=2n+2$ (druhá možnosť nastane, ak špeciálna dvojica obsahuje ťažkú úlohu). Na druhej strane, ak ťažkú úlohu vyriešilo $m$~účastníkov, tak $M=3m$, pretože každý z~nich vyriešil okrem ťažkej úlohy práve 3~ďalšie. Spolu dostávame, že $2n+1\equiv0$ alebo $2\pmod3$.
+
+Zvoľme teraz ľubovoľnú úlohu~$u$, ktorá nie je ťažká a~nie je ani v~špeciálnej dvojici (také sú aspoň tri). Označme $L$ počet vyriešených dvojíc úloh, z~ktorých jedna je~$u$. Zrejme $L=2n+1$ (každú z~piatich dvojíc úloh obsahujúcich~$u$ vyriešilo práve $(2n+1)/5$ účastníkov). Na druhej strane, ak úlohu~$u$ okrem víťaza vyriešilo ešte $\ell$ ďalších účastníkov, tak $L=3\ell+4$ (víťaz okrem $u$ vyriešil 4 ďalšie úlohy, \tj. vyriešil 4~dvojice obsahujúce $u$, ostatných~$\ell$ vyriešilo 3~dvojice obsahujúce~$u$). Dostávame $2n+1\equiv1\pmod3$, čo je v~spore s~predchádzajúcimi možnosťami.
+}
+

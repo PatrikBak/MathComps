@@ -1,0 +1,213 @@
+\input amstex 
+\input opmac
+
+\fontfam[LM fonts]
+\typosize[13/16]
+\frenchspacing
+
+\parskip10pt
+\parindent0pt
+\abovedisplayskip12pt
+\abovedisplayshortskip0pt
+\belowdisplayskip12pt
+\belowdisplayshortskip12pt
+\medskipamount10pt
+\raggedbottom
+
+\TagsOnRight
+
+\hyperlinks{\Green}{\Blue}
+
+\newif\ifDisplayTexts
+\DisplayTextstrue
+
+\def\definecaptionsCS{%
+	\cslang%
+    \def\captionExercise{Cvičení}%
+    \def\captionTheorem{Tvrzení}%
+    \def\captionProof{Důkaz}%
+    \def\captionDefinition{Definice}%
+    \def\captionExample{Příklad}%
+    \def\captionSolution{Řešení}%
+    \def\captionProblem{Úloha}%
+}
+
+\def\definecaptionsSK{%
+	\sklang%
+    \def\captionExercise{Cvičenie}%
+    \def\captionTheorem{Tvrdenie}%
+    \def\captionProof{Dôkaz}%
+    \def\captionDefinition{Definícia}%
+    \def\captionExample{Príklad}%
+    \def\captionSolution{Riešenie}%
+    \def\captionProblem{Úloha}%
+}
+
+\def\definecaptionsEN{%
+	\uslang%
+    \def\captionExercise{Exercise}%
+    \def\captionTheorem{Theorem}%
+    \def\captionProof{Proof}%
+    \def\captionDefinition{Definition}%
+    \def\captionExample{Example}%
+    \def\captionSolution{Solution}%
+    \def\captionProblem{Problem}%
+}
+
+\def\setlanguage#1{%
+    \csname definecaptions#1\endcsname
+}
+
+\setlanguage{SK}
+
+\def\({\left(}
+\def\){\right)}
+
+\newif\ifDisplayTexts
+\DisplayTextstrue
+\long\def\CollapsibleText#1{%
+  \ifDisplayTexts
+    #1%
+  \fi
+  \ignorespaces
+}
+
+\let\i\startitem
+
+\def\flushright#1{{\unskip\nobreak\hskip\parfillskip\penalty50
+  \hskip0.5em\hbox{}\nobreak\hfil #1
+  \parfillskip=0pt \finalhyphendemerits=0 \par}}
+
+\def\qedsquare{\flushright{\vrule height 5pt width 5pt depth 0pt\relax}}
+
+\def\defbb #1{\expandafter\long\expandafter\def\csname#1\endcsname{{\bbchar #1}}}
+\defbb N
+\defbb Z 
+\defbb Q 
+\defbb C
+\defbb R
+
+\def\textbf#1{\begingroup\bf #1\endgroup}
+\def\textit#1{\begingroup\it #1\endgroup}
+\def\textrm#1{\begingroup\rm #1\endgroup}
+\def\texttt#1{\begingroup\tt #1\endgroup}
+\def\textsf#1{\begingroup\sf #1\endgroup}
+\def\textsl#1{\begingroup\sl #1\endgroup}
+
+\long\def\saferead#1{\ignorespaces#1}
+\long\def\safepar{\par\removelastskip}
+
+\newcount\exercises
+\newcount\theorems
+\newcount\problems
+\newcount\examples
+\newcount\definition
+
+% #1 - Source (might be empty)
+% #2 - Statement
+% #3 - Solution
+\long\def\Exercise#1#2#3{%
+	\advance\exercises by 1\relax%
+	\expandafter\long\expandafter\def\csname e\the\exercises-solution\endcsname{#3}%
+	{\bf \captionExercise\ \the\exercises}%
+	\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
+	\enskip\saferead{#2}\safepar\medskip%
+}
+
+% #1 - Source (might be empty)
+% #2 - Statement
+% #3 - Solution
+\long\def\Theorem#1#2#3{%
+	\advance\theorems by 1\relax%
+	{\bf \captionTheorem\ \the\theorems}%
+	\def\temp{#1}\ifx\temp\empty\else(\temp) \fi.%
+	\enskip\saferead{#2}%
+	\safepar{\em \captionProof.}\enskip\saferead{#3}\qedsquare%
+	\safepar\medskip%
+}
+
+% #1 - Source (might be empty)
+% #2 - Statement
+% #3 - Solution
+\long\def\Example#1#2#3{%
+	\advance\examples by 1\relax%
+	{\bf \captionExample\ \the\examples}%
+	\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
+	\enskip\saferead{#2}%
+	\ifDisplayTexts\safepar{\em \captionSolution.}\enskip\saferead{#3}\fi%
+	\safepar\medskip%
+}
+
+\newcount\starcount
+\def\Stars#1{%
+  \ifnum#1>0
+    \def\starholder{} 
+    \starcount=#1
+    \loop\ifnum\starcount>0
+      \expandafter\def\expandafter\starholder\expandafter{\starholder\star}%
+      \advance\starcount by-1
+    \repeat
+    ${}^{\starholder}$%
+  \fi
+}
+
+% #1 - Number Of Stars
+% #2 - Source (might be empty)
+% #3 - Statement
+% #4 - Hint 1
+% #5 - Hint 2
+% #6 - Solution
+\long\def\Problem#1#2#3#4#5#6{%
+	\advance\problems by 1\relax%
+	\expandafter\def\csname p\the\problems-difficulty\endcsname{#1}%
+	\expandafter\def\csname p\the\problems-hint1\endcsname{#4}%
+	\expandafter\def\csname p\the\problems-hint2\endcsname{#5}%
+	\expandafter\long\expandafter\def\csname p\the\problems-solution\endcsname{#6}%
+	{\bf \captionProblem\ \the\problems\Stars{#1}.}%
+	\def\temp{#2}\ifx\temp\empty\else\ (\temp)\fi%
+	\enskip\saferead{#3}\safepar\medskip%
+}
+
+\newcount\displayedFirstHints
+\newcount\displayedSecondHints
+\newcount\displayedProblemSolutions
+\newcount\displayedExerciseSolutions
+
+\def\DisplayProblemSolutions{%
+	\loop\ifnum\displayedProblemSolutions<\problems%
+		\advance\displayedProblemSolutions by 1\relax%
+		{\bf \captionProblem\ \the\displayedProblemSolutions.} %
+		\csname p\the\displayedProblemSolutions-solution\endcsname\endgraf%
+	\repeat%	
+}
+
+\def\DisplayExerciseSolutions{%
+	\loop\ifnum\displayedExerciseSolutions<\exercises%
+		\advance\displayedExerciseSolutions by 1\relax%
+		{\bf \captionExercise\ \the\displayedExerciseSolutions.}\enskip%
+		\csname e\the\displayedExerciseSolutions-solution\endcsname\endgraf%
+	\repeat%	
+}
+
+\def\DisplayFirstHints{%
+	\loop\ifnum\displayedFirstHints<\problems%
+		\advance\displayedFirstHints by 1\relax%
+		\HintText{\the\displayedFirstHints}{1}%
+	\repeat%
+}
+
+\def\DisplaySecondHints{%
+	\loop\ifnum\displayedSecondHints<\problems%
+		\advance\displayedSecondHints by 1\relax%
+		\HintText{\the\displayedSecondHints}{2}%
+	\repeat%
+}
+
+\def\HintText#1#2{%
+	{\bf \captionProblem\ #1.}\enskip%
+	\csname p#1-hint#2\endcsname\safepar%
+}
+
+\def\Title#1{\centerline{\typosize[18/]\bf #1}\medskip}
+\def\Subtitle#1{\centerline{\typosize[15/]\caps\rm #1}\medskip}
+\def\Author#1{\centerline{\typosize[14/]{\em #1}}\bigskip}

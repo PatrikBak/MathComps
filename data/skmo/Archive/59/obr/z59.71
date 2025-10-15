@@ -1,0 +1,63 @@
+%!PS
+%%BoundingBox: -1 -14 284 4 
+%%Creator: MetaPost
+%%CreationDate: 2006.04.29:1629
+%%Pages: 1
+%*Font: csr10 9.96265 9.96265 30:f88
+%*Font: cmsy10 9.96265 9.96265 00:8
+%*Font: cmmi10 9.96265 9.96265 78:8
+%%EndProlog
+%%Page: 1 1
+ 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+94.48657 0 188.97748 0 283.46405 0 curveto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 15.748 -2.83464 moveto
+15.748 2.83464 lineto stroke
+newpath 78.74 -2.83464 moveto
+78.74 2.83464 lineto stroke
+newpath 141.73201 -2.83464 moveto
+141.73201 2.83464 lineto stroke
+newpath 157.48001 -2.83464 moveto
+157.48001 2.83464 lineto stroke
+newpath 173.22801 -2.83464 moveto
+173.22801 2.83464 lineto stroke
+newpath 188.97601 -2.83464 moveto
+188.97601 2.83464 lineto stroke
+newpath 204.72401 -2.83464 moveto
+204.72401 2.83464 lineto stroke
+newpath 267.71602 -2.83464 moveto
+267.71602 2.83464 lineto stroke
+7.9197 -12.25504 moveto
+(12) csr10 9.96265 fshow
+17.8824 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+73.40237 -12.25504 moveto
+(8) csr10 9.96265 fshow
+78.38367 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+136.39438 -12.25504 moveto
+(4) csr10 9.96265 fshow
+141.37567 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+152.14238 -12.25504 moveto
+(3) csr10 9.96265 fshow
+157.12367 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+167.89038 -12.25504 moveto
+(2) csr10 9.96265 fshow
+172.87167 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+188.61967 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+202.23338 -12.25504 moveto
+(0) csr10 9.96265 fshow
+258.50404 -12.25504 moveto
+(\000) cmsy10 9.96265 fshow
+266.25275 -12.25504 moveto
+(4) csr10 9.96265 fshow
+271.23415 -12.25504 moveto
+(x) cmmi10 9.96265 fshow
+showpage
+%%EOF

@@ -1,0 +1,54 @@
+%!PS
+%%BoundingBox: -1 -1 57 57 
+%%HiResBoundingBox: -0.25 -0.25 56.94281 56.94281 
+%%Creator: MetaPost 1.803
+%%CreationDate: 2020.09.11:1156
+%%Pages: 1
+%*Font: csr12 11.95517 11.95517 31:f
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0.4 0.4 0.4 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth [] 0 setdash
+ 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 14.1732 0 moveto
+14.1732 56.69281 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 14.1732 moveto
+56.69281 14.1732 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 28.3464 0 moveto
+28.3464 56.69281 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 28.3464 moveto
+56.69281 28.3464 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 42.5196 0 moveto
+42.5196 56.69281 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 42.5196 moveto
+56.69281 42.5196 lineto stroke
+ 0 0 0 setrgbcolor
+newpath 0 0 moveto
+0 56.69281 lineto
+56.69281 56.69281 lineto
+56.69281 0 lineto
+ closepath stroke
+18.33331 45.75401 moveto
+(1) csr12 11.95517 fshow
+32.50652 45.75401 moveto
+(1) csr12 11.95517 fshow
+46.67972 31.58081 moveto
+(2) csr12 11.95517 fshow
+46.67972 17.40761 moveto
+(2) csr12 11.95517 fshow
+18.33331 3.2344 moveto
+(3) csr12 11.95517 fshow
+32.50652 3.2344 moveto
+(3) csr12 11.95517 fshow
+4.16011 31.58081 moveto
+(4) csr12 11.95517 fshow
+4.16011 17.40761 moveto
+(4) csr12 11.95517 fshow
+showpage
+%%EOF

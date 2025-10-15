@@ -1,0 +1,541 @@
+﻿{%%%%%   A-I-1
+...}
+
+{%%%%%   A-I-2
+...}
+
+{%%%%%   A-I-3
+...}
+
+{%%%%%   A-I-4
+...}
+
+{%%%%%   A-I-5
+...}
+
+{%%%%%   A-I-6
+...}
+
+{%%%%%   B-I-1
+Dokážeme, že hľadanú uzavretú lomenú čiaru možno nájsť vždy v
+pravidelnom $(2n+1)$-uholníku ($n\ge 2$), a že je nemožno nájsť
+v pravidelnom $2n$-uholníku ($n\ge 2$).
+
+Uvažujme teda na začiatok $(2n+1)$-uholník
+a označme jeho vrcholy po~rade $A_0, A_1, \dots, A_{2n}$.
+Ďalej nech pre $k>2n$ platí $A_k\equiv A_i$, kde
+$i\in \{ 0, 1, \dots, 2n\}$ je zvyšok čísla $k$ po delení číslom $2n+1$.
+Uvažujme uzavretú lomenú čiaru
+$A_0A_nA_{2n}\dots A_{(2n+1)n}$, spojené sú vždy vrcholy, ktorých
+indexy sa líšia o~$n$. Zrejme pre $n\ge 2$ je každá
+úsečka $A_{kn}A_{(k+1)n}$ uhlopriečka, rovnako je zrejmé, že
+všetky body tejto lomenej čiary sú navzájom rôzne (až na prvý a~posledný).
+Ak by totiž platilo $kn \equiv ln \pmod {2n+1}$,
+$0\le k, l \le 2n$, tak $k\equiv l \pmod {2n+1}$,
+pretože čísla $n$ a $2n+1$ sú nesúdeliteľné.
+
+Každá z uvedených uhlopriečok rozdeľuje všetky vrcholy
+$(2n+1)$-uholníka s~vý\-nim\-kou svojich koncových bodov do dvoch skupín.
+Vo vnútri oboch týchto skupín sa indexy bodov líšia najviac o $n-1$, z
+čoho potom vyplýva, že ľubovoľné dve uhlopriečky uvažovanej lomenej čiary sa
+pretínajú (vzdialenosť susedných vrcholov v nej je vždy práve $n$).
+
+Teraz dokážeme, že pre pravidelný $2n$-uholník ($n\ge 2$)
+hľadaná lomená čiara neexistuje. Označme jeho vrcholy $A_1, A_2,
+\dots, A_{2n}$.
+Nech $A_1A_k$ je jedna z uhlopriečok tvoriacich hľadanú lomenú čiaru.
+Nech druhá uhlopriečka  (patriaca lomenej čiare)
+vychádzajúca z vrcholu $A_1$ vedie do~bodu~$A_l$
+a druhá vychádzajúca z vrcholu $A_k$ nech vedie do vrcholu $A_m$.
+Ak by $l<k<m$, potom by sa tieto dve uhlopriečky nepretínali (rovnako v
+prípade $l>k>m$), preto zrejme musia ležať "na jednej strane", čiže buď
+$m, l \in {\Cal A}= \{2,3,\dots, k-1\}$ alebo
+$m, l \in {\Cal B}= \{k+1, k+2, \dots, 2n\}$.
+Bez~ujmy na~vše\-obec\-nos\-ti nech $m$ a $l$ patria do $\Cal A$. Pokračujme
+v lomenej čiare z~bodu~$A_l$,
+zrejme druhý koniec tejto uhlopriečky musí ležať
+v $\Cal B$, inak by táto uhlopriečka nepretínala uhlo\-prieč\-ku~$A_1A_k$.
+Z koncového vrcholu vedieme opäť uhlopriečku do $\Cal A$ atď\.
+Časom musíme skončiť vo vrchole $A_m$, a to tak, že navštívime postupne
+všetky vrcholy množín~$\Cal A$ aj $\Cal B$. Keďže však sa táto časť
+lomenej čiary začína aj končí v~mno\-ži\-ne~$\Cal A$ a~jej vrcholy ležia
+striedavo v~mno\-ži\-nách~$\Cal A$ a~$\Cal B$ musí $\Cal A$ obsahovať
+o~jeden vrchol viac ako~$\Cal B$. Preto je počet vrcholov celého
+$2n$-uholníka rovný $|A|+|B|+2$ (vrcholy $A_1$ a $A_k$), čo je zrejme nepárne
+číslo.
+}
+
+{%%%%%   B-I-2
+...}
+
+{%%%%%   B-I-3
+...}
+
+{%%%%%   B-I-4
+Označme rovnice
+$$
+\align
+x+y+z&=3, \tag 1\\
+\frac1x+\frac1y+\frac1z&=0, \tag 2\\
+\frac xy+\frac yz+\frac zx&=\frac yx+\frac zy+\frac xz. \tag 3
+\endalign
+$$
+Uvažujme rovnicu (3). Po jej úprave na spoločného me\-no\-va\-teľa,
+vynásobení a prenesení všetkých členov na jednu stranu rovnice
+dostaneme
+$$(x-z)xz + (z-y)zy+(y-x)yx=0,$$
+čo dáva ďalej
+$$(y-x)(x-z)(z-y)=0.$$
+
+Bez ujmy na všeobecnosti nech $x=y$. Po dosadení do (1) a (2)
+dostávame sústavu:
+$$2x+z=3\quad (4)  \qquad \dfrac 2x + \frac 1z = 0 \quad (5)$$
+Po vyjadrení $z$ z (5) a dosadení do (4) máme $x=y=2, z= - 1$.
+Vzhľadom na~ekvi\-va\-lent\-nosť použitých úprav sú zrejme táto usporiadaná
+trojica a~jej permutácie $[2,- 1,2]$ a $[- 1, 2, 2]$ jedinými
+riešeniami sústavy.
+}
+
+{%%%%%   B-I-5
+...}
+
+{%%%%%   B-I-6
+...}
+
+{%%%%%   C-I-1
+...}
+
+{%%%%%   C-I-2
+...}
+
+{%%%%%   C-I-3
+...}
+
+{%%%%%   C-I-4
+...}
+
+{%%%%%   C-I-5
+...}
+
+{%%%%%   C-I-6
+Odčítaním druhej a~tretej rovnice od prvej dostaneme nutné
+podmienky  $(x-y)(1-z)=0$, $(x-z)(1-y)=0$, takže buď je $x=y=z$,
+alebo $x=y=1$, alebo $x=z=1$, alebo $y=z=1$. Ak je $x=y=z$, musí
+ešte platiť $x(x+1)=6$, preto $x=2$ alebo $x=-3$. Ak je $x=y=1$,
+je nutne $z=5$. Riešením sú práve tieto usporiadané trojice:
+$(2,2,2)$, $(-3,-3,-3)$, $(1,1,5)$, $(1,5,1)$ a~$(5,1,1)$.
+}
+
+{%%%%%   A-S-1
+...}
+
+{%%%%%   A-S-2
+...}
+
+{%%%%%   A-S-3
+...}
+
+{%%%%%   A-II-1
+Zrejme $S_n=5^n+3^n+1\geq9$ pre každé prirodzené $n$. Z~tabuliek
+zvyškov mocnín $5^n$ a~$3^n$ po delení číslami $3$, $5$ a~$7$
+zistíme, že $3\deli S_n$ pre každé $n=2k+1$, $5\deli S_n$ pre
+každé $n=4k+2$ a~$7\deli S_n$ pre každé $n=6k+2$ a~každé $n=6k+4$.
+Preto ak je $S_n$ prvočíslo, nemôžu po delení čísla~$n$
+dvanástimi vyjsť zvyšky 1, 3, 5, 7, 9, 11, ani zvyšky 2, 6, 10, ani
+zvyšky 2, 4, 8, 10, takže toto delenie vyjde bezo zvyšku.
+
+(Dodajme pre zaujímavosť, že číslo $S_{12}=244\,672\,067$
+je prvočíslo.)
+}
+
+{%%%%%   A-II-2
+...}
+
+{%%%%%   A-II-3
+...}
+
+{%%%%%   A-II-4
+...}
+
+{%%%%%   A-III-1
+...}
+
+{%%%%%   A-III-2
+Nazvime vrcholy $n$-uholníka nasledovne:
+
+{\it párny} -- ak z neho vychádza párny počet
+modrých úsečiek (teda aj párny počet červených);
+
+{\it nepárny} -- ak z neho vychádza nepárny počet modrých úsečiek
+(a nepárny počet červených).
+
+Susedom vrcholu $n$-uholníka nazvime
+každý ďalší vrchol $n$-uholníka, s ktorým je spojený úsečkou, teda
+každý jeho ďalší vrchol.
+Počet nepárnych vrcholov v začiatočnom ofarbení je zrejme párny,
+pretože do počtu modrých úsečiek vychádzajúcich z vrcholov $n$-uholníka
+je každá modrá úsečka započítaná dvakrát (keďže $n$ je nepárne, počet
+párnych vrcholov je potom nepárny).
+
+Ďalej si uvedomíme, že výsledok prefarbovania nezávisí od poradia
+vrcholov, podľa ktorých prefarbujeme, ale len od toho, koľkokrát
+podľa ktorého vrcholu prefarbujeme (stačí uvážiť, že vlastne záleží len
+na počte prefarbení každej úsečky a nie na poradí prefarbovania).
+Keďže farba každej úsečky závisí len od parity počtu zmien jej
+ofarbenia, nemá zmysel v žiadnom vrchole prefarbovať úsečky viac ako raz.
+Pretože $n$ je nepárne,
+párny vrchol zostane aj po~jeho prefarbení párny a nepárny zostane nepárny.
+Na~druhej strane, pri~prefarbovaní každého vrcholu počet modrých úsečiek
+vychádzajúcich zo~všetkých jeho susedov zmení paritu, a teda všetky
+ostatné párne vrcholy sa zmenia na nepárne, kým
+všetky nepárne sa zmenia na párne.
+
+Preto na dosiahnutie ofarbenia, pri ktorom budú všetky vrcholy párne,
+potrebujeme prefarbiť nepárny počet susedov každého nepárneho vrcholu a
+párny počet susedov každého párneho vrcholu.
+Ľubovoľné dva párne resp\. nepárne vrcholy teda musia mať rovnakú
+paritu počtu prefarbených susedov, teda buď prefarbíme obidva alebo ani
+jeden. Preto možno dosiahnuť potrebné ofarbenie len tak, že prefarbíme
+buď všetky párne vrcholy, všetky nepárne vrcholy, alebo úplne všetky
+vrcholy (už sme dokázali, že párnych vrcholov je nepárny počet
+a~nepárnych je párny počet). Z týchto možností vyhovujú prvé dve. Ak
+napríklad prefarbíme všetky nepárne vrcholy, každý párny
+vrchol má párny počet prefarbených susedov (nepárne vrcholy), čiže
+zostane párny, a každý nepárny vrchol má nepárny počet prefarbených
+susedov (nepárne vrcholy okrem neho), čiže sa zmení na párny.
+Podobnú úvahu možno použiť aj keď prefarbíme všetky párne vrcholy.
+
+V druhej časti zrejme stačí ukázať, že žiadne ofarbenie, v ktorom sú
+všetky vrcholy párne, nemožno prefarbiť na iné takéto ofarbenie.
+Na základe úvah z prvej časti vieme, že sa to dá dosiahnuť len tak, že
+prefarbíme všetky párne alebo všetky nepárne vrcholy. Kým v prvom
+prípade prefarbíme všetky vrcholy, a teda dostaneme pôvodné ofarbenie,
+v druhom prípade neprefarbíme nič.
+Preto je výsledné ofarbenie len s párnymi
+vrcholmi jednoznačne určené začiatočným ofarbením.
+
+\ineriesenie
+Znovu si najprv uvedomíme, že výsledok prefarbovania nezávisí od~poradia
+vrcholov, podľa ktorých prefarbujeme, ale len od toho, koľkokrát
+podľa ktorého vrcholu prefarbujeme. Ak sú $A_1,A_2,\ldots,A_n$
+vrcholy daného $n$-uholníka, označme $p_i$ počet prevedených
+prefarbení vzhľadom na~vrchol $A_i$ a~$p=\tsum_{i=1}^np_i$ ich
+celkový súčet. Úsečka $A_iA_j$ zmení
+farbu, práve keď prevedieme prefarbenie vzhľadom k~jednému
+z~vrcholov $A_i$ alebo $A_j$. Vo~výslednom prefarbení teda úsečka
+$A_iA_j$ zmení farbu, práve keď $p_i+p_j\equiv 1\pmod 2$. Počet
+modrých úsečiek vychádzajúcich z~vrcholu~$A_i$ má vo~výslednom
+ofarbení rovnakú paritu ako v~počiatočnom ofarbení, práve keď
+$$
+\sum\limits_{j\ne i}(p_i+p_j)=(n-1)p_i+\sum\limits_{j\ne
+i}p_j\equiv p-p_i\equiv 0\pmod 2.
+$$
+%%(využívame skutočnosť, že $n$ je nepárne).
+Ukážeme, že každé počiatočné ofarbenie možno prefarbiť tak, aby
+z~každého vrchola vychádzal párny počet modrých úsečiek: Budeme
+postupne prefarbovať $n$-uholník
+vzhľadom k~tým vrcholom, z~ktorých v~pôvodnom
+ofarbení vychádzal nepárny počet modrých úsečiek (bude teda $p_i=1$,
+pokiaľ v~pôvodnom ofarbení vychádzal z~vrcholu~$A_i$ nepárny počet
+modrých úsečiek, $p_i=0$ v~opačnom prípade).
+
+Označme $a_i$ počet modrých úsečiek vychádzajúcich
+z~vrcholu~$A_i$, potom $\sum\limits_{i=1}^na_i$ je
+rovné dvojnásobku celkového
+počtu modrých úsečiek, čiže nepárnych $a_i$ je párny počet.
+Pre~práve popísané prefarbovanie je $p_i=1$ pre párny počet vrcholov
+$A_i$ a~$p=\sum\limits_{i=1}^np_{i}$ je párne. Pre~vrchol $A_i$,
+z~ktorého v~pôvodnom ofarbení vychádzal párny počet modrých úsečiek, je
+$p_i=0$, teda parita počtu modrých úsečiek z~neho vychádzajúcich sa
+po~prefarbení nezmení. Pre vrchol $A_i$, z~ktorého
+v~pôvodnom ofarbení vychádzal nepárny počet modrých úsečiek, však je
+$p_i=1$, takže $p-p_i\equiv 1\pmod 2$, t.j.~nepárny počet modrých
+úsečiek z~neho vychádzajúcich sa po~prefarbení zmení na párny, čo sme
+chceli dosiahnuť.
+
+Keby sa niektoré počiatočné ofarbenie dalo prefarbiť na dve rôzne
+ofarbenia, v~ktorých by z~každého vrcholu vychádzal párny počet
+modrých úsečiek, bolo by tiež možné jedno z~týchto "párnych"
+ofarbení prefarbiť na druhé. Ukážeme, že to nejde. Predpokladajme
+teda, že máme ofarbenie $\varPi$, v~ktorom z~každého vrcholu
+vychádza párny počet modrých úsečiek. Predpokladajme ďalej, že
+po~prefarbení, pri ktorom voči vrcholu~$A_i$ prefarbujeme $p_i$-krát
+($i=1,2,\ldots,n$), dostaneme iné ofarbenie $\varOmega$, v~ktorom
+opäť z~každého vrcholu vychádza párny počet modrých úsečiek. Je teda
+$p-p_i\equiv 0\pmod 2$, pre~každé $i=1,2,\ldots,n$, a~teda
+$p_i\equiv p_j\pmod 2$, alebo $p_i+p_j\equiv 0\pmod 2$ pre~každé
+$i,j=1,2,\ldots,n$. Potom ale žiadna úsečka po~prefarbení
+nezmenila farbu. Ofarbenia $\varPi$ a~$\varOmega$ sú teda totožné,
+čiže ku~každému ofarbeniu existuje jediné, ktoré z~neho
+možno dostať popísaným spôsobom, a~v~ktorom z~každého vrcholu vychádza
+párny počet modrých úsečiek.
+}
+
+{%%%%%   A-III-3
+...}
+
+{%%%%%   A-III-4
+Stačí zvoliť postupnosť $a_n=(n!)^3$. Pre $k\ge 2$ rovnako ako
+pre $k=0$ tvrdenie o~postupnosti $(k+a_n)$ zrejme
+platí, pre $k=1$ stačí využiť vzťah $x^3+1=(x+1)(x^2-x+1)$.
+}
+
+{%%%%%   A-III-5
+Ak odhadneme zhora každý sčítanec súčtu $V_n$ podľa
+nerovnosti $ab\le\frac12(a^2+b^2)$, ktorá zrejme platí pre
+ľubovoľné reálne čísla $a$, $b$, dostaneme odhad
+$$
+V_n\leqq\frac{\sin^2x_1+\cos^2x_2}{2}+
+        \frac{\sin^2x_2+\cos^2x_3}{2}+\dots+
+        \frac{\sin^2x_n+\cos^2x_1}{2}=\frac{n}{2}.
+$$
+
+Skúmaný výraz nadobúda najväčšiu hodnotu~$\frac12 n$, lebo ako
+ľahko nahliadneme, pre~hod\-no\-ty $x_1=x_2=\dots=x_n=\frac14\pi$ vyjde
+$V_n=\frac12n$.
+}
+
+{%%%%%   A-III-6
+...}
+
+{%%%%%   B-S-1
+Najprv nájdeme všetky čísla tvaru $6A\,B73$, ktoré sú deliteľné 99-timi.
+Potom uká\-že\-me, že všetky tieto čísla sú deliteľné 19-timi
+(ukáže sa, že takéto číslo je len jedno).
+
+Číslo $6A\,B73$ môžeme zapísať ako
+$$6A\,B73 = 60\,073+1\,000\cdot A+100\cdot B =
+60\,073+100\cdot (10\cdot A+B).$$
+Toto číslo je deliteľné 99-mi práve
+vtedy, keď je deliteľné 99-mi číslo $10\cdot A + B + 79$, pretože
+$$60\,073+100\cdot (10\cdot A+B) =
+99\cdot (606 + (10\cdot A + B)) + 10\cdot A + B + 79 .$$
+Číslo $10\cdot A + B + 79$ je prirodzené číslo z intervalu
+$\langle 79,\, 178 \rangle$. Ak má byť deliteľné 99-timi, musí zrejme byť
+rovné 99, čo nastáva len v prípade $A=2$ a $B=0$. Vtedy však
+$6A\,B73=62\,073 = 19\cdot 3\,267$, a tým je tvrdenie v zadaní dokázané.
+}
+
+{%%%%%   B-S-2
+Po dosadení čísla $x=1 - \sqrt 2$ do danej rovnice a jednoduchej úprave
+dostávame
+$$(5 + 2a + b) \cdot \sqrt 2 = 7 + 3a + b + c .$$
+Potom musí platiť:
+$$(5 + 2a + b) =  0; \qquad \qquad 7 + 3a + b + c = 0.$$
+(Ak by $5+2a+b\ne 0$, tak číslo $\sqrt 2$ je rovné podielu dvoch celých
+čísel, čiže je racionálne, to však nie je pravda.)
+Z týchto dvoch rovníc vyjadríme $b$ a $c$ pomocou $a$:
+$b=\m 5 - 2a$ a~$c=\m 2 - a$. Potom
+$$a-2b+ 5c = a - 2\cdot(\m 5 - 2a) + 5\cdot(\m 2 - a) = 0 .$$
+Tým je tvrdenie dokázané.
+}
+
+{%%%%%   B-S-3
+...}
+
+{%%%%%   B-II-1
+Odčítaním prvej rovnice od druhej a~druhej rovnice od tretej dostaneme
+po~úprave
+$$
+(x-y)(3+x+y) = 0, \qquad
+(y-z)(3+y+z) = 0 .
+$$
+Z~týchto dvoch rovníc vyplýva, že musí platiť $x = y$ alebo $3+x+y =
+0$, a~zároveň $y = z$ alebo $3+y+z = 0$. Prebratím jednotlivých
+možností zistíme, že môžu nastať len nasledujúce dva prípady:
+buď sa všetky tri čísla $x$, $y$ a~$z$ navzájom rovnajú, alebo
+sú dve z~nich rovnaké (bez ujmy na všeobecnosti napr.~$x=y$); tretie
+číslo potom vypočítame zo vzťahu $z={-y}-3$. Ostatné riešenia dostaneme
+permutáciou takto nájdenej trojice $(x,y,z)$.
+
+$\bullet$~
+Ak $x = y = z$, tak je daná sústava ekvivalentná s~(jedinou)
+kvadratickou rovnicou $2x^2-3x-14=0$ s~koreňmi $x_1=\frac 72$
+a~$x_2={-2}$. Odtiaľ vychádzajú dve riešenia: $x = y = z~= \frac 72$
+a~$x = y = z~= {-2} $.
+
+$\bullet$~
+Ak $x = y$ a~$z = {-y}- 3$, tak je daná sústava ekvivalentná s~(jedinou)
+kvadratickou rovnicou $2y^2+3y-5=0$ s~koreňmi $y_1={-\frac52}$ a~$y_2=1$.
+Odtiaľ vychádzajú dve riešenia
+$x = y = {-\frac 52}$, $z = {-\frac 12}$
+a~$x = y = 1$, $z = {-4} $ a~permutáciou trojice $(x,y,z)$
+dostaneme ďalšie štyri riešenia
+$x = z~= {-\frac 52}$, $y = {-\frac 12}$;
+$x = z~= 1$, $y = {-4}$;
+$y = z~= {-\frac 52}$, $x = {-\frac 12}$;
+$y = z~= 1$, $x = {-4}$.
+
+Všetkých osem nájdených riešení spĺňa dané rovnice (skúška nie je
+potrebná, pretože z~uvedeného postupu vidno, že nájdené trojice
+$x$, $y$ a~$z$ danej sústave skutočne vyhovujú).
+}
+
+{%%%%%   B-II-2
+...}
+
+{%%%%%   B-II-3
+...}
+
+{%%%%%   B-II-4
+...}
+
+{%%%%%   C-S-1
+...}
+
+{%%%%%   C-S-2
+...}
+
+{%%%%%   C-S-3
+...}
+
+{%%%%%   C-II-1
+Číslo  $1\,000a+ 100a+10b +b= 11(100a+b)$ má
+byť druhou mocninou, preto  musí byť číslo  $100a+b$
+deliteľné číslom~ 11  a~podiel $\frac1{11}(100a+b) = 9a+
+\frac1{11}(a+b)$ musí byť druhou mocninou prirodzeného čísla.
+Vzhľadom na~to, že $a$ a~$b$ ($a\ne0$) sú číslice, musí
+byť $a+b = 11$, a~pretože $9a + 1$ má byť druhou mocninou, vyjde
+$a = 7$. Hľadané číslo je $7\,744 = 88^{2}$.
+}
+
+{%%%%%   C-II-2
+...}
+
+{%%%%%   C-II-3
+...}
+
+{%%%%%   C-II-4
+...}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+...}
+
+{%%%%%   trojstretnutie, priklad 2
+...}
+
+{%%%%%   trojstretnutie, priklad 3
+...}
+
+{%%%%%   trojstretnutie, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 5
+...}
+
+{%%%%%   trojstretnutie, priklad 6
+...}
+
+{%%%%%   IMO, priklad 1
+...}
+
+{%%%%%   IMO, priklad 2
+...}
+
+{%%%%%   IMO, priklad 3
+...}
+
+{%%%%%   IMO, priklad 4
+...}
+
+{%%%%%   IMO, priklad 5
+...}
+
+{%%%%%   IMO, priklad 6
+...}
+
+{%%%%%   MEMO, priklad 1
+...}
+
+{%%%%%   MEMO, priklad 2
+...}
+
+{%%%%%   MEMO, priklad 3
+...}
+
+{%%%%%   MEMO, priklad 4
+...}
+
+{%%%%%   MEMO, priklad t1
+...}
+
+{%%%%%   MEMO, priklad t2
+...}
+
+{%%%%%   MEMO, priklad t3
+...}
+
+{%%%%%   MEMO, priklad t4
+...}
+
+{%%%%%   MEMO, priklad t5
+...}
+
+{%%%%%   MEMO, priklad t6
+...}
+
+{%%%%%   MEMO, priklad t7
+...}
+
+{%%%%%   MEMO, priklad t8
+...} 

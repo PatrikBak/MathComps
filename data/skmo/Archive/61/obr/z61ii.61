@@ -1,0 +1,86 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -1 -1 97 97 
+%%HiResBoundingBox: -0.28348 -0.28348 96.20465 96.20465 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2014.01.05:1520
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%DocumentSuppliedResources: procset mpost-minimal
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%EndSetup
+%%Page: 1 1
+ 0.8 setgray
+newpath 70.86617 0 moveto
+95.92117 25.05501 lineto
+95.92117 95.92117 lineto
+70.86617 70.86617 lineto
+ closepath fill
+ 0 setgray 0 0.56696 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+0 70.86617 lineto
+25.05501 95.92117 lineto stroke
+newpath 0 0 moveto
+70.86617 0 lineto
+95.92117 25.05501 lineto stroke
+newpath 0 70.86617 moveto
+70.86617 70.86617 lineto
+70.86617 0 lineto stroke
+newpath 14.17323 0 moveto
+14.17323 70.86617 lineto
+39.22824 95.92117 lineto stroke
+newpath 0 14.17323 moveto
+70.86617 14.17323 lineto
+95.92117 39.22824 lineto stroke
+newpath 5.011 75.87717 moveto
+75.87717 75.87717 lineto
+75.87717 5.011 lineto stroke
+newpath 28.34647 0 moveto
+28.34647 70.86617 lineto
+53.40147 95.92117 lineto stroke
+newpath 0 28.34647 moveto
+70.86617 28.34647 lineto
+95.92117 53.40147 lineto stroke
+newpath 10.022 80.88817 moveto
+80.88817 80.88817 lineto
+80.88817 10.022 lineto stroke
+newpath 42.5197 0 moveto
+42.5197 70.86617 lineto
+67.5747 95.92117 lineto stroke
+newpath 0 42.5197 moveto
+70.86617 42.5197 lineto
+95.92117 67.5747 lineto stroke
+newpath 15.033 85.89917 moveto
+85.89917 85.89917 lineto
+85.89917 15.033 lineto stroke
+newpath 56.69293 0 moveto
+56.69293 70.86617 lineto
+81.74794 95.92117 lineto stroke
+newpath 0 56.69293 moveto
+70.86617 56.69293 lineto
+95.92117 81.74794 lineto stroke
+newpath 20.044 90.91017 moveto
+90.91017 90.91017 lineto
+90.91017 20.044 lineto stroke
+newpath 70.86617 0 moveto
+70.86617 70.86617 lineto
+95.92117 95.92117 lineto stroke
+newpath 0 70.86617 moveto
+70.86617 70.86617 lineto
+95.92117 95.92117 lineto stroke
+newpath 25.05501 95.92117 moveto
+95.92117 95.92117 lineto
+95.92117 25.05501 lineto stroke
+showpage
+%%EOF

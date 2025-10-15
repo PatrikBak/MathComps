@@ -1,0 +1,66 @@
+%!PS
+%%BoundingBox: -92 -15 92 97 
+%%HiResBoundingBox: -91.34181 -14.28171 91.34181 96.7697 
+%%Creator: MetaPost 2.02
+%%CreationDate: 2024.03.25:1928
+%%Pages: 1
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 1 1 setrgbcolor
+newpath 85.03935 0 moveto
+0 34.7276 lineto
+60.72787 59.52724 lineto
+ closepath fill
+ 0.9 0.9 0.9 setrgbcolor
+newpath -85.03935 0 moveto
+0 34.7276 lineto
+-60.72787 59.52724 lineto
+ closepath fill
+ 0.6 1 1 setrgbcolor
+newpath 85.03935 0 moveto
+0 34.7276 lineto
+-85.03935 0 lineto
+ closepath fill
+ 0 0 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 54.27164 56.89066 moveto
+55.72778 53.32489 59.799 51.61475 63.36467 53.0711 curveto stroke
+ 0 1 dtransform truncate idtransform setlinewidth pop
+newpath 59.20006 55.8901 moveto 0 0 rlineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -63.36467 53.0711 moveto
+-59.799 51.61485 -55.72778 53.32489 -54.27164 56.89066 curveto stroke
+ 0 1 dtransform truncate idtransform setlinewidth pop
+newpath -59.20006 55.8901 moveto 0 0 rlineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 15.24112 -3.43393 moveto
+16.45209 3.43393 lineto stroke
+newpath 17.56573 -3.43393 moveto
+18.7767 3.43393 lineto stroke
+newpath 10.37852 56.0933 moveto
+11.5895 62.96117 lineto stroke
+newpath 12.70314 56.0933 moveto
+13.91411 62.96117 lineto stroke
+newpath 85.03935 0 moveto
+-85.03935 0 lineto
+-60.72787 59.52724 lineto
+85.03935 0 lineto
+60.72787 59.52724 lineto
+-85.03935 0 lineto stroke
+newpath 83.97983 -13.38348 moveto
+84.68091 -8.98474 85.03935 -4.5109 85.03935 0 curveto
+85.03935 22.55484 76.07814 44.1832 60.13068 60.13068 curveto
+44.1832 76.07814 22.55484 85.03935 0 85.03935 curveto
+-22.55484 85.03935 -44.1832 76.07814 -60.13068 60.13068 curveto
+-76.07814 44.1832 -85.03935 22.55484 -85.03935 0 curveto
+-85.03935 -4.5109 -84.68091 -8.98474 -83.97983 -13.38348 curveto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+ [0 1.5 6 1.5 ] 4.5 setdash
+newpath 0 -14.03171 moveto
+0 96.5197 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+newpath -91.09181 59.52724 moveto
+91.09181 59.52724 lineto stroke
+showpage
+%%EOF

@@ -1,0 +1,656 @@
+﻿{%%%%%   A-I-1
+Vzhľadom na~to, že rovnica $P\bigl(Q(x)\bigr)=0$ má reálny koreň,
+má kvadratická rovnica
+$P(x)=0$ dva reálne korene
+$r_1$, $r_2$ (nevylučujeme, že $r_1=r_2$).
+Mnohočlen $P\bigl(Q(x)\bigr)$ možno preto zapísať v tvare
+$$
+P\bigl(Q(x)\bigr)=a\bigl(Q(x)-r_1\bigr)\bigl(Q(x)-r_2\bigr),
+$$
+kde $a$ je reálne číslo $a\ne0$.
+Rovnica $P\bigl(Q(x)\bigr)=0$ má podľa zadania štyri reálne korene, preto
+každá z~kvadratických rovníc $Q(x)-r_1=0$, $Q(x)-r_2=0$ musí mať
+dva reálne
+korene. Z~Vi\`etových vzťahov vyplýva, že súčet koreňov
+v~oboch kvadratických rovniciach je rovnaký, lebo obidve rovnice majú
+rovnaký koeficient
+pri~lineárnom člene. Pritom tri zo štyroch
+reálnych koreňov oboch kvadratických rovníc $Q(x)-r_1=0$, $Q(x)-r_2=0$
+sú podľa zadania čísla $-22$, $7$,
+$13$, štvrtý koreň označme $q$. Ďalej môže nastať jedna z troch možností:
+\item{(i)} Jedna z~kvadratických
+rovníc má korene $-22$, $7$, druhá má korene $13$ a~$q$. Potom
+platí $-22+7=13+q$, teda $q=-28$.
+\item{(ii)} Jedna z~kvadratických
+rovníc má korene $-22$, $13$, druhá má korene $7$ a~$q$. Potom
+platí $-22+13=7+q$, teda $q=-16$.
+\item{(iii)} Jedna z~kvadratických
+rovníc má korene $13$, $7$, druhá má korene $-22$ a~$q$. Potom
+platí $13+7=-22+q$, teda $q=42$.
+
+Je zrejmé, že v~každom z~prípadov (i), (ii), (iii) existujú príslušné
+kvadratické trojčleny $P(x)$ a~$Q(x)$.
+Ak má mať jedna z~kvadratických rovníc $Q(x)-r_1=0$,
+$Q(x)-r_2=0$
+korene $-22$, $7$ a~druhá $13$, $-28$, položíme $Q(x)=x^2+15 x$,
+$r_1=(-22)\cdot7=-154$, $r_2=13\cdot(-28)=-364$,
+$P(x)=(x+154)(x+364)=x^2+518 x+56\,056$. Obdobne možno postupovať v
+zvyšných prípadoch.
+
+Štvrtým koreňom rovnice $P\bigl(Q(x)\bigr)=0$ môže byť ktorékoľvek
+z~čísel $-28$,
+$-16$, $42$.
+
+\ineriesenie
+Úvahy o~koeficiente pri~lineárnom člene s~využitím Vi\`etových vzťahov možno
+nahradiť nasledujúcou úvahou o~grafoch kvadratických funkcií.
+
+Pretože grafy kvadratických funkcií $f_1\colon\ y=Q(x)-r_1$
+a~$f_2\colon\ y=Q(x)-r_2$ majú spoločnú os súmernosti, a~pritom existujú štyri
+reálne korene rovnice $P(Q(x))=0$, sú tieto korene na osi $x$ po dvoch
+stredovo súmerné podľa priesečníka osi súmernosti grafov oboch funkcií
+$f_1$ a~$f_2$ s~osou $x$.
+Vzhľadom k~polohe daných troch
+koreňov na osi $x$ možno ďalej uvažovať tri možnosti -- rovnako ako
+v~predchádzajúcom riešení. Napríklad
+\item{(i)} Stred súmernosti je $-7{,}5=\frac{-22+7}2$. Štvrtý
+koreň leží potom na osi $x$ a~je obrazom čísla $13$ v stredovej
+súmernosti podľa stredu v~bode $-7{,}5$. Štvrtým hľadaným koreňom
+je teda číslo $-28$.
+
+Podobne možno postupovať vo zvyšných dvoch prípadoch. Takýmto postupom
+dospejeme k~rovnakému výsledku.
+}
+
+{%%%%%   A-I-2
+...}
+
+{%%%%%   A-I-3
+Z textu úlohy vyplýva, že neznáme $x$, $y$, $z$ sú kladné čísla. Preto
+môžeme danú sústavu upraviť do nasledujúceho tvaru
+$$
+\eqalign{
+-\sqrt{x}+\sqrt{y}+\sqrt{z}&= \frac{a}{\sqrt{x}},\cr
+\sqrt{x}-\sqrt{y}+\sqrt{z}&= \frac{b}{\sqrt{y}},\cr
+\sqrt{x}+\sqrt{y}-\sqrt{z}&= \frac{c}{\sqrt{z}}.\cr
+}
+$$
+Ak po dvojiciach sčítame jednotlivé rovnice predošlej sústavy,
+dostaneme tak sústavu
+$$
+\eqalign{
+\frac{b}{\sqrt{y}}+\frac{c}{\sqrt{z}}&= 2\sqrt{x},\cr
+\frac{c}{\sqrt{z}}+\frac{a}{\sqrt{x}}&= 2\sqrt{y},\cr
+\frac{a}{\sqrt{x}}+\frac{b}{\sqrt{y}}&= 2\sqrt{z}.\cr
+}
+$$
+Ďalej po ľahkej úprave
+$$
+\eqalign{
+b\sqrt{z} + c\sqrt{y} &= 2\sqrt{xyz},\cr
+c\sqrt{x} + a\sqrt{z} &= 2\sqrt{xyz},\cr
+a\sqrt{y} + b\sqrt{x} &= 2\sqrt{xyz}.\cr
+}
+$$
+Odčítaním prvej a~tretej, resp\. druhej a~tretej, rovnice poslednej
+sústavy ďalej získame
+$$
+\eqalign{
+b\sqrt{z} + (c-a)\sqrt{y} &= b\sqrt{x},\cr
+a\sqrt{z} - a\sqrt{y} &= (b-c)\sqrt{x}.\cr
+}
+$$
+Obe strany prvej rovnice predchádzajúcej sústavy vynásobíme číslom $a$,
+obe strany druhej rovnice potom vynásobíme číslom $-b$.
+Po sčítaní obidvoch takto upravených rovníc, dostaneme
+$$
+a(b+c-a)\sqrt{y}= b(c+a-b)\sqrt{x},
+$$
+podobným spôsobom dostaneme tiež
+$$
+a(b+c-a)\sqrt{z}=c(a+b-c)\sqrt{x}.
+$$
+Ak by pre kladné čísla $a$, $b$, $c$, platil vzťah $b+c-a=0$,
+potom z~predošlých dvoch rovníc vyplýva, že tiež
+$a+b-c=0$, $c+a-b=0$.  Potom však
+$a=b=c=0$, čo však nie je možné. Je teda
+$b+c-a\ne 0$. Z~poslednej dvojice rovníc
+vyjadríme
+$\sqrt{y}$ a~$\sqrt{z}$ pomocou $\sqrt{x}$ nasledujúcim spôsobom:
+$$
+\eqalign{
+\sqrt{y}&= \frac{b(c+a-b)}{a(b+c-a)}\sqrt{x},\cr
+\sqrt{z}&= \frac{c(a+b-c)}{a(b+c-a)}\sqrt{x}.\cr
+}
+$$
+Odtiaľ sa ľahko sa vidí, že výrazy $b+c-a$, $c+a-b$, $a+b-c$
+sú súčasne všetky kladné alebo všetky záporné.
+Po dosadení $\sqrt{y}$ a~$\sqrt{z}$ do pôvodnej sústavy rovníc
+získame (po úpravách) riešenie $(x,y,z)$, kde
+$$
+\eqalign{
+x&= \frac{a^2(b+c-a)}{(c+a-b)(a+b-c)},\cr
+y&= \frac{b^2(c+a-b)}{(b+c-a)(a+b-c)},\cr
+z&= \frac{c^2(a+b-c)}{(c+a-b)(b+c-a)}.\cr
+}
+$$
+Vzhľadom k~tomu, že k~riešeniu sústavy rovníc sme dospeli výhradne po
+ekvivalentných úpravách, nie je potrebné robiť skúšku správnosti.
+
+Sústava má pritom vyššie uvedené riešenie v~obore kladných čísel práve
+vtedy, keď súčasne platia nasledujúce podmienky $b+c-a>0$, $c+a-b>0$,
+$a+b-c>0$, t\.j\. práve vtedy, keď kladné čísla $a$, $b$, $c$ sú
+dĺžkami strán trojuholníka.
+}
+
+{%%%%%   A-I-4
+Nech $A_sB_sC_s$, kde  $s\in \{1,2,\dots ,1999\}$, sú
+trojuholníky vyhovujúce podmienkam úlohy
+a~$(XYZ)$ nech označuje polrovinu s~hraničnou priamkou~$XY$ a~vnútorným
+bodom $Z$. Každý z~daných trojuholníkov $A_sB_sC_s$ je prienikom vždy
+troch polrovín $(A_sB_sC_s)$, $(B_sC_sA_s)$ a~$(C_sA_sB_s)$, preto je
+(neprázdna)
+množina $\mm M$ prienikom $3\cdot1\,999=5\,997$ takých polrovín. Vzhľadom
+k~tomu, že polroviny $(A_sB_sC_s)$, kde $s\in \{1,2,\dots ,1999\}$, sa
+navzájom líšia len posunutím, je ich prienikom polrovina $(A_iB_iC_i)$,
+kde $i$ je pevný index z~množiny $\{1,2,\dots ,1999\}$. Podobne prienikom
+všetkých polrovín $(B_sC_sA_s)$ je určitá polrovina $(B_jC_jA_j)$
+a~prienikom všetkých polrovín $(C_sA_sB_s)$ je určitá polrovina
+$(C_kA_kB_k)$, kde $j,k\in \{1,2,\dots ,1999\}$.
+
+Množina $\mm M$ je preto prienikom troch vyššie
+spomínaných polrovín $(A_iB_iC_i)$,
+$(B_jC_jA_j)$ a~$(C_kA_kB_k)$, $\mm M$ je teda trojuholník $ABC$,
+kde $A$ je priesečník priamok $A_iB_i$ a~$C_kA_k$, $B$ je priesečník priamok
+$A_iB_i$ a~$B_jC_j$ a~napokon $C$ je priesečník priamok $B_jC_j$ a~$C_kA_k$.
+Tento trojuholník je podobný všetkým trojuholníkom $A_sB_sC_s$, pričom pre
+pomer podobnosti $\lambda$ platí $0<\lambda \leq 1$. (Prípad $A=B=C$ možno
+podľa zadania úlohy vylúčiť.)
+
+Vzhľadom k~tomu, že obsah trojuholníka $ABC$ je $\lambda^2$, stačí
+dokázať, že $\lambda \geq \frac13$. Označme $v$ výšku z~vrcholu
+$C_i$ na stranu $A_iB_i$ v~trojuholníku $A_iB_iC_i$. Pretože priamka
+$A_iB_i$ je totožná s~priamkou $AB$, je vzdialenosť ťažiska $T_i$
+trojuholníka $A_iB_iC_i$ od priam\-ky $AB$ rovná $\frac13v$. Podľa zadaní
+obsahuje množina $\mm M$ ťažisko všetkých trojuholníkov $A_sB_sC_s$, musí
+teda obsahovať ťažisko $T_i$ trojuholníka $A_iB_iC_i$.
+
+Vzdialenosť vrcholu $C$ trojuholníka $ABC$ od jeho strany $AB$ je teda
+aspoň~$\frac13v$. Porovnaním veľkostí výšok z~vrcholov $C_i$ a~$C$
+v~podobných trojuholníkoch $A_iB_iC_i$ a~$ABC$ dostávame už priamo
+žiadanú
+nerovnosť $\lambda \geq \frac13$, t\.j\.~$\lambda^2 \geq \frac19$, čo sme
+chceli dokázať.
+}
+
+{%%%%%   A-I-5
+Označme
+$$
+S(n)=f(1)+f(2)+\cdots+f(n).
+$$
+Zo zadania vyplýva $S(1)=1$. Pretože $f(n)\geq 1$ pre všetky prirodzené
+čísla $n$, je $S:\Bbb N\to\Bbb N$ rastúca funkcia. Ak je $n$ prirodzené
+číslo
+tvaru $n=2^k$, kde $k$ je prirodzené, určíme súčet $S(n)$
+nasledujúcim spôsobom: Počet nepárnych
+čísel, ktoré nie sú väčšie ako $n$, je $2^{k-1}$. Každé nepárne číslo
+sa na súčte $S(n)$ podieľa hodnotou $1$. Počet párnych
+čísel, ktoré nie sú väčšie ako $n$, je tiež
+$2^{k-1}$, pritom každé párne číslo sa na súčte $S(n)$
+podieľa hodnotou minimálne~$1$. Ak je naviac toto číslo deliteľné
+štyrmi, podieľa sa na súčte ďalšou~$1$. Ak je ďalej číslo
+deliteľné ôsmimi, podieľa sa ďalšou~$1$, atď\. (Hodnotu $S(n)$ tak
+tvoríme sčítaním hodnôt $1$ \uv{po vrstvách}).
+Spolu je teda
+$$
+\align
+S(2^k)=&2^{k-1}+2^{k-1}+2^{k-2}+\cdots+2+1=2^{k-1}+
+\frac{2^k-1}{2-1}=\\
+=&2^k+2^{k-1}-1=3\cdot 2^{k-1}-1.
+\endalign
+$$
+
+Nech $p$ je prirodzené číslo, ktoré sa dá zapísať v tvare $p=2^m s$,
+kde $m$ je celé nezáporné číslo a~$s$ nepárne prirodzené číslo. Nech $k$
+je prirodzené číslo také, že $p<2^k$ (teda $m<k$), a~nech $l$ je
+nepárne prirodzené číslo. Potom
+$$
+f(2^k l+p)=f(2^k l+2^m s)=f\big(2^m(2^{k-m} l +s)\big).
+$$
+Číslo $2^{k-m} l +s$ je nepárne, preto
+$f\big(2^m(2^{k-m}l+s)\big)=f(2^m s)=f(p)$.
+Spolu teda dostávame
+$f(2^k l+p)=f(p)$.
+
+Ak sú $k$, $m$ nezáporné celé čísla, $k>m$, a~$l$ nepárne číslo, platí
+podľa predchádzajúceho odstavca
+$$
+\align
+S(2^k l+2^m)=&f(1)+f(2)+\cdots+f(2^k l)+f(2^k l +1)+f(2^k l+2)+\cdots+\\
+             &+f(2^k l +2^m)=\cr
+=&f(1)+f(2)+\cdots+f(2^k l)+f(1)+f(2)+\cdots+f(2^m)=\cr
+=&S(2^k l)+S(2^m).
+\endalign
+$$
+A~odtiaľ už matematickou indukciou ľahko dokážeme, že ak sú
+$k_1>k_2>\cdots>k_i$ nezáporné celé čísla, potom platí
+$$
+S(2^{k_1}+2^{k_2}+\cdots+2^{k_i})=S(2^{k_1})+S(2^{k_2})+\cdots+
+S(2^{k_i}).
+$$
+
+Najväčšie nezáporné celé číslo $k_1$ také, že
+$3\cdot2^{k_1-1}-1=S(2^{k_1})\leq123\,456$, je $k_1=16$. Pritom
+$S(2^{16})=98\,303$.
+
+Najväčšie nezáporné celé číslo $k_2$ také, že
+$3\cdot2^{k_2-1}-1=S(2^{k_2})\leq123\,456-98\,303=25\,153$, je $k_2=14$.
+Pritom $S(2^{14})=24\,575$.
+
+Najväčšie nezáporné celé číslo $k_3$ také, že
+$3\cdot2^{k_3-1}-1=S(2^{k_3})\leq25\,153-24\,575=578$, je $k_3=8$.
+Pritom $S(2^{8})=383$.
+
+Najväčšie nezáporné celé číslo $k_4$ také, že
+$3\cdot2^{k_4-1}-1=S(2^{k_4})\leq578-383=195$, je $k_4=7$. Pritom
+$S(2^{7})=191$.
+
+Najväčšie nezáporné celé číslo $k_5$ také, že
+$3\cdot2^{k_5-1}-1=S(2^{k_5})\leq195-191=4$, je $k_5=1$. Pritom
+$S(2^{1})=2$.
+
+Najväčšie nezáporné celé číslo $k_6$ také, že
+$S(2^{k_6})\leq4-2=2$, je $k_6=0$. Pritom
+$S(2^{0})=1$.
+
+Teda
+$$
+\align
+S(82\,307)=&S(2^{16}+2^{14}+2^8+2^7+2+1)=\\
+          =&S(2^{16})+S(2^{14})+S(2^8)+S(2^7)+S(2)+S(1)=\cr
+          =&123\,455\leq123\,456.
+\endalign
+$$
+Pritom $S(82\,308)=S(82\,307)+f(82\,308)=123\,455+2=123\,457>123\,456$.
+
+Najväčšie prirodzené číslo $n$, pre ktoré platí $S(n)\leq123\,456$ je
+$n=82\,307$.
+
+
+\ineriesenie
+\def\cel#1#2{\left\lfloor\frac{#1}{#2}\right\rfloor}%
+\def\hcel#1{\cel{82\,304}{#1}}%
+Na základe úvahy o~sčítaní hodnôt "po vrstvách" (ako v~predošlom
+riešení) zistíme, že
+$$
+S(n)=n+\cel{n}4+\cel{n}8+\cel{n}{16}+\cdots.
+$$
+Pritom $\lfloor r\rfloor$ znamená celú časť reálneho čísla $r$,
+čo je najväčšie celé číslo, ktoré nie je väčšie ako $r$.
+
+Pretože pre každé reálne číslo $r$ platí
+$\lfloor r\rfloor\leq r$, platí tiež
+$$
+S(n)\leq n+\frac{n}4+\frac{n}8+\cdots=\frac{n}2+
+\frac{n}2\left(1+\frac12+\frac14+\cdots\right)=
+\frac{n}2+n=\frac{3n}2.
+$$
+Najväčšie prirodzené číslo $n$ pre ktoré platí, že $\frac{3n}2\leq123
+456$, je $n=82\,304$.
+Pritom
+$$
+\align
+S(82\,304)=&82\,304+\hcel{4}+\hcel{8}+\hcel{16}+\cdots+\\
+           &+\hcel{65\,536}+\hcel{131\,072}+\cdots=\cr
+ =&82\,304+20\,576+10\,288+5\,144+2\,572+1\,286+643+\cr
+  &+321+160+80+40+20+10+5+2+1+0+0+\cdots=\cr
+ =&123\,452.
+\endalign
+$$
+Ďalej
+$$
+\eqalign{
+S(82\,305)&=S(82\,304)+f(82\,305)=123\,452+1=123\,453,\cr
+S(82\,306)&=S(82\,305)+f(82\,306)=123\,453+1=123\,454,\cr
+S(82\,307)&=S(82\,306)+f(82\,307)=123\,454+1=123\,455,\cr
+S(82\,308)&=S(82\,307)+f(82\,308)=123\,455+2=123\,457.}
+$$
+
+Najväčšie prirodzené číslo $n$, pre ktoré $S(n)\leq123\,456$, je
+teda $n=82\,307$.
+}
+
+{%%%%%   A-I-6
+...}
+
+{%%%%%   B-I-1
+...}
+
+{%%%%%   B-I-2
+...}
+
+{%%%%%   B-I-3
+...}
+
+{%%%%%   B-I-4
+...}
+
+{%%%%%   B-I-5
+...}
+
+{%%%%%   B-I-6
+...}
+
+{%%%%%   C-I-1
+Obe delenia hľadaného
+čísla $N$ vyjadríme rovnosťami
+$$
+N=19a+p\quad\text{a}\quad N=99b+q,
+$$
+kde $a$, $b$ sú príslušné neúplné podiely a~$p$, $q$
+príslušné zvyšky.
+Podľa zadania sú čísla $p$, $q$ prvočísla,
+pričom ako zvyšky
+spĺňajú nerovnosti $p<19$ a~$q<99$. Nezáporné celé
+čísla $a$, $b$
+sú podľa zadania zase také, že ich súčet sa rovná
+číslu
+1\,999. Preto platí $b=1\,999-a$ a~z~dvojitého vyjadrenia
+čísla $N$,
+$$
+N=19a+p=99\cdot(1\,999-a)+q,
+$$
+odvodíme rovnosť $118a+(p-q)=197\,901$. Pretože rozdiel
+zvyškov
+$p-q$ je "malé" číslo, presnejšie ${-99}<p-q<19$, je podľa
+poslednej rovnosti číslo $118a$ taký násobok
+čísla 118, ktorý
+leží medzi číslami $197\,901-19$ a~$197\,901+99$.
+Delením $197\,901:118$
+zistíme, že $197\,901=1\,677\cdot118+15$. Preto nutne
+platí $a=1\,677$ (takže $b=322$) a~$p-q=15$. Z~poslednej
+rovnosti vyplýva, že jedno
+z~prvočísel $p,q$ je nepárne a~druhé párne, teda $q=2$ a~$p=17$.
+Ostáva vypočítať hodnotu $N$:
+$$
+N=19\cdot1\,677+17=99\cdot322+2=31\,880.
+$$
+
+{\it Odpoveď\/}: Hľadané číslo je rovné 31\,880.
+}
+
+{%%%%%   C-I-2
+...}
+
+{%%%%%   C-I-3
+...}
+
+{%%%%%   C-I-4
+...}
+
+{%%%%%   C-I-5
+...}
+
+{%%%%%   C-I-6
+...}
+
+{%%%%%   A-S-1
+...}
+
+{%%%%%   A-S-2
+...}
+
+{%%%%%   A-S-3
+...}
+
+{%%%%%   A-II-1
+...}
+
+{%%%%%   A-II-2
+...}
+
+{%%%%%   A-II-3
+...}
+
+{%%%%%   A-II-4
+...}
+
+{%%%%%   A-III-1
+...}
+
+{%%%%%   A-III-2
+...}
+
+{%%%%%   A-III-3
+...}
+
+{%%%%%   A-III-4
+...}
+
+{%%%%%   A-III-5
+...}
+
+{%%%%%   A-III-6
+...}
+
+{%%%%%   B-S-1
+Uvažovaná funkcia $f$ je po častiach lineárna, preto je ohraničená na
+každom ohraničenom intervale. Stačí teda funkciu $f$ vyšetriť zvlášť pre
+$x\le\min(1,b)$ a~zvlášť pre $x\ge\max(1,b)$, keď majú oba výrazy
+v~absolútnych hodnotách rovnaké znamienko.
+
+a) Ak je $x\le\min(1,b)$, je
+$$
+f(x)=a(1-x)+b(x-3)+b-x+x-1=(b-a)x-2b+a-1.
+$$
+Funkcia $f$ bude na tomto intervale ohraničená práve vtedy,
+keď tu bude konštantná, t\.j\.~práve vtedy, keď $a=b$.
+
+a) Ak je $x\ge\max(1,b)$, je
+$$
+f(x)=a(x-1)+b(x-3)+x-b+x-1=(a+b+2)x-a+4b-1.
+$$
+Funkcia $f$ bude na tomto intervale ohraničená práve vtedy,
+keď tu bude konštantná, t\.j\.~práve vtedy, keď $a+b=-2$.
+
+Spojením oboch podmienok dostávame, že funkcia $f$ bude ohraničená
+práve vtedy, keď bude ohraničená na oboch uvedených neohraničených
+intervaloch, t\.j\.~práve keď $a=b=-1$. Pre funkciu $f$ potom
+dostaneme vyjadrenie
+$$
+f(x)=|x+1|-|x-1|+2.
+$$
+Jej graf vidíme na obr.\,33.
+
+\line{\hss\inspicture-!\hss\hss\hss\inspicture-!\hss}
+\bigskip
+}
+
+{%%%%%   B-S-2
+...}
+
+{%%%%%   B-S-3
+...}
+
+{%%%%%   B-II-1
+...}
+
+{%%%%%   B-II-2
+...}
+
+{%%%%%   B-II-3
+...}
+
+{%%%%%   B-II-4
+...}
+
+{%%%%%   C-S-1
+...}
+
+{%%%%%   C-S-2
+...}
+
+{%%%%%   C-S-3
+...}
+
+{%%%%%   C-II-1
+...}
+
+{%%%%%   C-II-2
+...}
+
+{%%%%%   C-II-3
+...}
+
+{%%%%%   C-II-4
+...}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+...}
+
+{%%%%%   trojstretnutie, priklad 2
+...}
+
+{%%%%%   trojstretnutie, priklad 3
+...}
+
+{%%%%%   trojstretnutie, priklad 4
+Všimnime si, že pre celé číslo $n$ platí
+$ n^3 \equiv n \pmod3 $.
+Jednoducho to môžeme na\-hliad\-nuť overením všetkých zvyškových tried modulo 3,
+alebo priamo z~{\it Malej Fermatovej vety}. Potom tiež
+$ n^4 \equiv n^2 \pmod3 $.
+Avšak, ak $P(x)$ je polynóm s~celočíselnými koeficientami, tak aj
+$ P(n^3) \equiv P(n) \pmod3 $
+a~$ P(n^4) \equiv P(n^2) \pmod3 $.
+Polynóm $Q(x)$ má zrejme celočíselné koeficienty. Z~posledných dvoch
+kongruencií dostávame
+$$
+  Q(n) \equiv \big( P(n)P(n^2) \big)^2  + 1 \pmod3 .
+$$
+Ale ľahko sa overí, že pre každé celé číslo $m$ platí
+$m^2+1\not\equiv 0 \pmod3$.
+Takže pre každé celé číslo $n$ platí $Q(n)\not\equiv 0 \pmod3$,
+z~čoho vyplýva, že polynóm $Q(x)$ nemôže mať celočíselný koreň.
+Tým sme dokázali, čo bolo treba.
+}
+
+{%%%%%   trojstretnutie, priklad 5
+...}
+
+{%%%%%   trojstretnutie, priklad 6
+...}
+
+{%%%%%   IMO, priklad 1
+...}
+
+{%%%%%   IMO, priklad 2
+...}
+
+{%%%%%   IMO, priklad 3
+...}
+
+{%%%%%   IMO, priklad 4
+...}
+
+{%%%%%   IMO, priklad 5
+...}
+
+{%%%%%   IMO, priklad 6
+...}
+
+{%%%%%   MEMO, priklad 1
+...}
+
+{%%%%%   MEMO, priklad 2
+...}
+
+{%%%%%   MEMO, priklad 3
+...}
+
+{%%%%%   MEMO, priklad 4
+...}
+
+{%%%%%   MEMO, priklad t1
+...}
+
+{%%%%%   MEMO, priklad t2
+...}
+
+{%%%%%   MEMO, priklad t3
+...}
+
+{%%%%%   MEMO, priklad t4
+...}
+
+{%%%%%   MEMO, priklad t5
+...}
+
+{%%%%%   MEMO, priklad t6
+...}
+
+{%%%%%   MEMO, priklad t7
+...}
+
+{%%%%%   MEMO, priklad t8
+...} 

@@ -1,0 +1,60 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -5 -10 103 67 
+%%HiResBoundingBox: -4.2625 -9.8078 102.22339 66.50061 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2012.10.12:1034
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font csr10 CMMI10 CMSY7
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font csr10 CMMI10 CMSY7
+%%IncludeResource: font csr10
+%%IncludeResource: font CMMI10
+%%IncludeResource: font CMSY7
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /csr10 /csr10 def
+ /cmmi10 /CMMI10 def
+ /cmsy7 /CMSY7 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 0.28348 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 0 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 27.00365 41.1023 moveto
+23.62042 35.24237 22.70438 28.27896 24.45554 21.74358 curveto
+25.03761 19.57123 25.89854 17.50528 27.00386 15.59076 curveto stroke
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop 1 setlinecap
+newpath 0 0 moveto
+98.1951 0 lineto
+98.1951 56.69281 lineto
+0 56.69281 lineto
+98.1951 0 lineto
+98.1951 56.69281 lineto
+0 0 lineto
+0 56.69281 lineto stroke
+-3.73601 -9.8078 moveto
+(A) cmmi10 9.96265 fshow
+94.1668 -9.8078 moveto
+(B) cmmi10 9.96265 fshow
+94.27855 59.69281 moveto
+(C) cmmi10 9.96265 fshow
+-4.2625 59.69281 moveto
+(D) cmmi10 9.96265 fshow
+45.75589 18.5386 moveto
+(S) cmmi10 9.96265 fshow
+27.653 24.91635 moveto
+(60) csr10 9.96265 fshow
+37.6157 28.53175 moveto
+(\016) cmsy7 6.97385 fshow
+showpage
+%%EOF

@@ -1,0 +1,254 @@
+# Lines starting with # are comments
+
+[substitute]
+
+\\N(?![A-Za-z]) => \mathbb{N}
+\\Z(?![A-Za-z]) => \mathbb{Z}
+\\Q(?![A-Za-z]) => \mathbb{Q}
+\\R(?![A-Za-z]) => \mathbb{R}
+\\C(?![A-Za-z]) => \mathbb{C}
+
+\\\( => \left(
+\\\) => \right)
+
+\\st(?![A-Za-z]) => ^\circ
+
+\\uh(?![A-Za-z]) => \angle
+\\uhel(?![A-Za-z]) => \angle
+\\uhol(?![A-Za-z]) => \angle
+\\measuredangle(?![A-Za-z]) => \angle
+
+\\cm(?![A-Za-z]) => \text{ cm}
+
+\\tj\. => t. j.
+
+\\m(?![A-Za-z]) => {-}
+\\p(?![A-Za-z]) => {+}
+
+\\Bbb(?![A-Za-z]) => \mathbb
+\\mm(?![A-Za-z]) => \mathrm
+\\mn(?![A-Za-z]) => \mathrm
+\\Cal(?![A-Za-z]) => \mathcal
+
+\\inspdf(?![A-Za-z]) => \Image
+\\inspsc(?![A-Za-z]) => \Image
+\\insp(?![A-Za-z]) => \Image
+
+\\ifobrazkyvedla(?:\{\})?.*\\else(.*)\\fi(?:\{\})? => $1
+\\obr(\{\})?(?![A-Za-z]) => obrázku
+
+\\ite\{ => \item{
+\\ite(?!\w)\s?(.*?)\s => \item{$1} 
+\\itemitem\{\$\\bullet\$\} => \item 
+\\itemitem\{(.*)\} => \item{$1}
+\\iitem(?![A-Za-z]) => \item
+\\itemvar\{(.*)\} => \item{$1}
+
+\{\s*\\it\s(.*?)(?:\\\/)?\} => \textit{$1}
+\\emph\{(.*?)\} => \textit{$1}
+
+\\geqq(?![A-Za-z]) => \ge
+\\leqq(?![A-Za-z]) => \le
+
+\\nsd(?![A-Za-z]) => \text{nsd}
+\\nsn(?![A-Za-z]) => \text{nsn}
+
+\\poznamka(?![A-Za-z]) => \textit{Poznámka.}
+
+\\align(?![A-Za-z]) => \begin{align*}
+\\endalign(?![A-Za-z]) => \end{align*}
+
+\\aligned(?![A-Za-z]) => \begin{align*}
+\\endaligned(?![A-Za-z]) => \end{align*}
+
+\\gather(?![A-Za-z]) => \begin{gather*}
+\\endgather(?![A-Za-z]) => \end{gather*}
+
+\\gathered(?![A-Za-z]) => \begin{gather*}
+\\endgathered(?![A-Za-z]) => \end{gather*}
+
+(?s)\$\$\s*\\eqalign\{\s*(.*?)\s*\}\s*\$\$ => $$$$ \begin{align*} $1 \end{align*} $$$$
+
+\\root(.*?)\\of => \sqrt[$1]
+
+\\l\{\} => ł
+\\L\{\} => Ł
+\\ą\{\} => ą
+\\Ą\{\} => Ą
+\\ę\{\} => ę
+\\Ę\{\} => Ę
+\\ś\{\} => ś
+\\Ś\{\} => Ś
+\\ć\{\} => ć
+\\Ć\{\} => Ć
+\\ź\{\} => ź
+\\Ź\{\} => Ź
+\\ż\{\} => ż
+\\Ż\{\} => Ż
+
+[remove]
+
+\\hskip(?![A-Za-z])\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
+\\vskip(?![A-Za-z])\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
+
+\\abovedisplayskip(?![A-Za-z])\s*=?\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
+\\belowdisplayskip(?![A-Za-z])\s*=?\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
+
+\\abovedisplayshortskip(?![A-Za-z])\s*=?\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
+\\belowdisplayshortskip(?![A-Za-z])\s*=?\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
+
+\\postdisplaypenalty\s*=?\s*10000
+
+\\nomathbreak(?![A-Za-z])
+\\nopagebreak(?![A-Za-z])
+\\noindent(?![A-Za-z])
+
+\\smallskip(?![A-Za-z])
+\\medskip(?![A-Za-z])
+\\bigskip(?![A-Za-z])
+
+\\sec Riešenia k cvičeniam(?![A-Za-z])
+\\sec Prvé návody k úlohám(?![A-Za-z])
+\\sec Druhé návody k úlohám(?![A-Za-z])
+\\sec Riešenia k úlohám(?![A-Za-z])
+
+\\DisplayExerciseSolutions(?![A-Za-z])
+\\DisplayFirstHints(?![A-Za-z])
+\\DisplaySecondHints(?![A-Za-z])
+\\DisplayProblemSolutions(?![A-Za-z])
+
+\\bye(?![A-Za-z])
+
+[leave]
+
+alpha
+angle
+ast
+begin
+beta
+big
+Big
+biggl
+biggr
+Bigl
+bigl
+Bigr
+bigr
+binom
+bm
+bold
+boxed
+cap
+cdot
+cdots
+choose
+circ
+clubsuit
+colon
+cos
+cotg
+cr
+cup
+delta
+dfrac
+displaystyle
+dots
+ell
+emptyset
+end
+equiv
+forall
+frac
+Gamma
+gamma
+gcd
+ge
+geq
+hbox
+heartsuit
+hline
+hphantom
+hspace
+i
+implies
+in
+infty
+kern
+lambda
+langle
+lceil
+ldots
+le
+left
+leq
+lfloor
+log
+mathbb
+mathcal
+mathrm
+mathsf
+mathsfit
+max
+mid
+min
+mskip
+mu
+ne
+neq
+not
+notin
+nparallel
+Omega
+omega
+over
+overbrace
+overline
+overrightarrow
+parallel
+parskip
+perp
+phantom
+pi
+pm
+pmod
+prime
+prod
+psi
+qquad
+quad
+rangle
+rceil
+rfloor
+rho
+right
+Rightarrow
+rightarrow
+setminus
+sigma
+sim
+sin
+sqrt
+square
+subset
+subseteq
+sum
+tag
+tau
+text
+textdollar
+textit
+tfrac
+tg
+times
+to
+triangle
+tt
+underbrace
+underline
+varepsilon
+varOmega
+varphi
+varrho
+vdots
+vee
+vphantom

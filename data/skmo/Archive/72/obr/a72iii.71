@@ -1,0 +1,160 @@
+%!PS
+%%BoundingBox: -1 -12 81 65 
+%%HiResBoundingBox: -0.25 -11.48022 80.27827 64.02945 
+%%Creator: MetaPost 2.00
+%%CreationDate: 2023.03.05:1103
+%%Pages: 1
+%*Font: cs-lmr12 11.95517 11.95517 2e:b8001c
+%*Font: lmsy10 11.95514 9.96265 01:8
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 0 0 setrgbcolor 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 0 -6.37794 moveto
+0 63.77945 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 0 moveto
+70.1574 0 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 12.75589 -6.37794 moveto
+12.75589 63.77945 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 12.75589 moveto
+70.1574 12.75589 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 25.51178 -6.37794 moveto
+25.51178 63.77945 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 25.51178 moveto
+70.1574 25.51178 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 38.26767 -6.37794 moveto
+38.26767 63.77945 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 38.26767 moveto
+70.1574 38.26767 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 51.02356 -6.37794 moveto
+51.02356 63.77945 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 51.02356 moveto
+70.1574 51.02356 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 63.77945 -6.37794 moveto
+63.77945 63.77945 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 0 63.77945 moveto
+70.1574 63.77945 lineto stroke
+2.55113 2.55113 moveto
+(0) cs-lmr12 11.95517 fshow
+15.30702 2.55113 moveto
+(1) cs-lmr12 11.95517 fshow
+28.06291 2.55113 moveto
+(2) cs-lmr12 11.95517 fshow
+40.8188 2.55113 moveto
+(0) cs-lmr12 11.95517 fshow
+53.57469 2.55113 moveto
+(1) cs-lmr12 11.95517 fshow
+66.33058 3.82681 moveto
+(\001) lmsy10 11.95514 fshow
+71.64398 3.82681 moveto
+(\001) lmsy10 11.95514 fshow
+76.95738 3.82681 moveto
+(\001) lmsy10 11.95514 fshow
+4.46465 -3.51013 moveto
+(.) cs-lmr12 11.95517 fshow
+4.46465 -7.49512 moveto
+(.) cs-lmr12 11.95517 fshow
+4.46465 -11.48022 moveto
+(.) cs-lmr12 11.95517 fshow
+2.55113 15.30702 moveto
+(0) cs-lmr12 11.95517 fshow
+15.30702 15.30702 moveto
+(1) cs-lmr12 11.95517 fshow
+28.06291 15.30702 moveto
+(2) cs-lmr12 11.95517 fshow
+40.8188 15.30702 moveto
+(0) cs-lmr12 11.95517 fshow
+53.57469 15.30702 moveto
+(1) cs-lmr12 11.95517 fshow
+66.33058 16.5827 moveto
+(\001) lmsy10 11.95514 fshow
+71.64398 16.5827 moveto
+(\001) lmsy10 11.95514 fshow
+76.95738 16.5827 moveto
+(\001) lmsy10 11.95514 fshow
+17.22054 -3.51013 moveto
+(.) cs-lmr12 11.95517 fshow
+17.22054 -7.49512 moveto
+(.) cs-lmr12 11.95517 fshow
+17.22054 -11.48022 moveto
+(.) cs-lmr12 11.95517 fshow
+2.55113 28.06291 moveto
+(0) cs-lmr12 11.95517 fshow
+15.30702 28.06291 moveto
+(1) cs-lmr12 11.95517 fshow
+28.06291 28.06291 moveto
+(2) cs-lmr12 11.95517 fshow
+40.8188 28.06291 moveto
+(0) cs-lmr12 11.95517 fshow
+53.57469 28.06291 moveto
+(1) cs-lmr12 11.95517 fshow
+66.33058 29.3386 moveto
+(\001) lmsy10 11.95514 fshow
+71.64398 29.3386 moveto
+(\001) lmsy10 11.95514 fshow
+76.95738 29.3386 moveto
+(\001) lmsy10 11.95514 fshow
+29.97643 -3.51013 moveto
+(.) cs-lmr12 11.95517 fshow
+29.97643 -7.49512 moveto
+(.) cs-lmr12 11.95517 fshow
+29.97643 -11.48022 moveto
+(.) cs-lmr12 11.95517 fshow
+2.55113 40.8188 moveto
+(0) cs-lmr12 11.95517 fshow
+15.30702 40.8188 moveto
+(1) cs-lmr12 11.95517 fshow
+28.06291 40.8188 moveto
+(2) cs-lmr12 11.95517 fshow
+40.8188 40.8188 moveto
+(0) cs-lmr12 11.95517 fshow
+53.57469 40.8188 moveto
+(1) cs-lmr12 11.95517 fshow
+66.33058 42.09448 moveto
+(\001) lmsy10 11.95514 fshow
+71.64398 42.09448 moveto
+(\001) lmsy10 11.95514 fshow
+76.95738 42.09448 moveto
+(\001) lmsy10 11.95514 fshow
+42.73232 -3.51013 moveto
+(.) cs-lmr12 11.95517 fshow
+42.73232 -7.49512 moveto
+(.) cs-lmr12 11.95517 fshow
+42.73232 -11.48022 moveto
+(.) cs-lmr12 11.95517 fshow
+2.55113 53.57469 moveto
+(0) cs-lmr12 11.95517 fshow
+15.30702 53.57469 moveto
+(1) cs-lmr12 11.95517 fshow
+28.06291 53.57469 moveto
+(2) cs-lmr12 11.95517 fshow
+40.8188 53.57469 moveto
+(0) cs-lmr12 11.95517 fshow
+53.57469 53.57469 moveto
+(1) cs-lmr12 11.95517 fshow
+66.33058 54.85037 moveto
+(\001) lmsy10 11.95514 fshow
+71.64398 54.85037 moveto
+(\001) lmsy10 11.95514 fshow
+76.95738 54.85037 moveto
+(\001) lmsy10 11.95514 fshow
+55.4882 -3.51013 moveto
+(.) cs-lmr12 11.95517 fshow
+55.4882 -7.49512 moveto
+(.) cs-lmr12 11.95517 fshow
+55.4882 -11.48022 moveto
+(.) cs-lmr12 11.95517 fshow
+showpage
+%%EOF

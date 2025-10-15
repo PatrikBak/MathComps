@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Default</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- This UserSecretsId is shared by all projects in the solution -->
+    <UserSecretsId>MathComps-5e6a7c60-3b41-4c8d-9e7f-9ad5b3c2a8e9</UserSecretsId>
+
+  </PropertyGroup>
+
+  <!-- Suppress specific analyzer warnings -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="NoWarn" />
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- CA1848: Use LoggerMessage delegates - we prefer simple logging for readability -->
+    <!-- CA1852: Type can be sealed - we decide when to seal classes -->
+    <NoWarn>$(NoWarn);CA1848;CA1852</NoWarn>
+  </PropertyGroup>
+
+</Project>

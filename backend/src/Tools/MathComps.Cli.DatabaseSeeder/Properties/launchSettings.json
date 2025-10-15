@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Seed": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+    },
+    "Seed And Skip Existing": {
+      "commandName": "Project",
+      "commandLineArgs": "--skip-existing",
+      "workingDirectory": ".",
+    }
+  }
+}

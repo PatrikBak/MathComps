@@ -1,0 +1,59 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -4 -10 203 95 
+%%HiResBoundingBox: -3.73601 -9.8078 202.45313 94.84702 
+%%Creator: MetaPost 0.993
+%%CreationDate: 2011.02.27:2221
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font CMMI10
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font CMMI10
+%%IncludeResource: font CMMI10
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /cmmi10 /CMMI10 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+198.42484 0 lineto
+133.22931 85.03922 lineto
+19.84369 85.03922 lineto
+ closepath stroke
+ 1 setlinecap
+newpath 0 0 moveto
+133.22931 85.03922 lineto stroke
+newpath 198.42484 0 moveto
+19.84369 85.03922 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+ [0 1.5 ] 0 setdash
+newpath 133.22931 85.03922 moveto
+133.22931 0 lineto stroke
+newpath 84.78268 54.11597 moveto
+84.78268 85.03922 lineto stroke
+-3.73601 -9.8078 moveto
+(A) cmmi10 9.96265 fshow
+194.39653 -9.8078 moveto
+(B) cmmi10 9.96265 fshow
+129.31276 88.03922 moveto
+(C) cmmi10 9.96265 fshow
+15.58119 88.03922 moveto
+(D) cmmi10 9.96265 fshow
+79.40703 44.30817 moveto
+(M) cmmi10 9.96265 fshow
+136.22931 40.37485 moveto
+(v) cmmi10 9.96265 fshow
+87.78268 67.43283 moveto
+(x) cmmi10 9.96265 fshow
+showpage
+%%EOF

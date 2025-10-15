@@ -1,0 +1,150 @@
+%!PS
+%%BoundingBox: -79 -76 76 102 
+%%Creator: MetaPost
+%%CreationDate: 2006.04.29:1629
+%%Pages: 1
+%*Font: cmmi10 9.96265 9.96265 41:fffe4
+%%EndProlog
+%%Page: 1 1
+ 0 1 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+65.19673 0 lineto stroke
+ 0 0 1 setrgbcolor
+newpath 45.63751 32.59837 moveto
+0 32.59837 lineto stroke
+ 1 0 0 setrgbcolor
+newpath 65.19673 0 moveto
+45.63751 32.59837 lineto stroke
+ 1 0.8 0 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 0 32.59837 moveto
+0 0 lineto stroke
+ 0 1 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath 55.41713 -0.49814 moveto
+-9.7796 -0.49814 lineto
+-1 -1 scale stroke grestore
+ 0 0 1 setrgbcolor
+gsave newpath 9.77962 -33.09651 moveto
+55.41713 -33.09651 lineto
+-1 -1 scale stroke grestore
+ 1 0 0 setrgbcolor
+gsave newpath -9.7796 -0.49814 moveto
+9.77962 -33.09651 lineto
+-1 -1 scale stroke grestore
+ 1 0.8 0 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath 55.41713 -33.09651 moveto
+55.41713 -0.49814 lineto
+-1 -1 scale stroke grestore
+ 0 1 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath 55.41713 -33.59465 moveto
+-9.7796 -33.59465 lineto
+-1 -1 scale stroke grestore
+ 0 0 1 setrgbcolor
+gsave newpath 9.77962 -66.19302 moveto
+55.41713 -66.19302 lineto
+-1 -1 scale stroke grestore
+ 1 0 0 setrgbcolor
+gsave newpath -9.7796 -33.59465 moveto
+9.77962 -66.19302 lineto
+-1 -1 scale stroke grestore
+ 1 0.8 0 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath 55.41713 -66.19302 moveto
+55.41713 -33.59465 lineto
+-1 -1 scale stroke grestore
+ 0 1 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath -0.49814 0 moveto
+-65.69487 0 lineto
+-1 1 scale stroke grestore
+ 0 0 1 setrgbcolor
+gsave newpath -46.13565 32.59837 moveto
+-0.49814 32.59837 lineto
+-1 1 scale stroke grestore
+ 1 0 0 setrgbcolor
+gsave newpath -65.69487 0 moveto
+-46.13565 32.59837 lineto
+-1 1 scale stroke grestore
+ 1 0.8 0 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath -0.49814 32.59837 moveto
+-0.49814 0 lineto
+-1 1 scale stroke grestore
+ 0 1 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -55.91527 -33.09651 moveto
+9.28146 -33.09651 lineto stroke
+ 0 0 1 setrgbcolor
+newpath -10.27776 -0.49814 moveto
+-55.91527 -0.49814 lineto stroke
+ 1 0 0 setrgbcolor
+newpath 9.28146 -33.09651 moveto
+-10.27776 -0.49814 lineto stroke
+ 1 0.8 0 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -55.91527 -0.49814 moveto
+-55.91527 -33.09651 lineto stroke
+ 0 1 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -55.91527 -66.19302 moveto
+9.28146 -66.19302 lineto stroke
+ 0 0 1 setrgbcolor
+newpath -10.27776 -33.59465 moveto
+-55.91527 -33.59465 lineto stroke
+ 1 0 0 setrgbcolor
+newpath 9.28146 -66.19302 moveto
+-10.27776 -33.59465 lineto stroke
+ 1 0.8 0 setrgbcolor 0.5
+ 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -55.91527 -33.59465 moveto
+-55.91527 -66.19302 lineto stroke
+ 0 1 0 setrgbcolor
+gsave newpath 0 33.09651 moveto
+0 98.29324 lineto
+[0 1 1 0 0 0] concat stroke grestore
+ 0 0 1 setrgbcolor
+gsave newpath 32.59837 78.73402 moveto
+32.59837 33.09651 lineto
+[0 1 1 0 0 0] concat stroke grestore
+ 1 0 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath 0 98.29324 moveto
+32.59837 78.73402 lineto
+[0 1 1 0 0 0] concat stroke grestore
+ 1 0.8 0 setrgbcolor
+gsave newpath 32.59837 33.09651 moveto
+0 33.09651 lineto
+[0 1 1 0 0 0] concat stroke grestore
+ 0 setgray
+-64.98912 -74.10454 moveto
+(A) cmmi10 9.96265 fshow
+5.75131 -75.00455 moveto
+(B) cmmi10 9.96265 fshow
+57.51712 -74.10454 moveto
+(C) cmmi10 9.96265 fshow
+58.41713 -36.00227 moveto
+(D) cmmi10 9.96265 fshow
+57.51712 -8.90779 moveto
+(E) cmmi10 9.96265 fshow
+68.19673 -3.4039 moveto
+(F) cmmi10 9.96265 fshow
+47.7375 34.69836 moveto
+(G) cmmi10 9.96265 fshow
+28.05292 22.79057 moveto
+(H) cmmi10 9.96265 fshow
+35.59837 74.83199 moveto
+(I) cmmi10 9.96265 fshow
+-9.4826 94.3912 moveto
+(J) cmmi10 9.96265 fshow
+-11.2739 34.69836 moveto
+(K) cmmi10 9.96265 fshow
+-54.51761 34.69836 moveto
+(L) cmmi10 9.96265 fshow
+-78.94803 -3.4039 moveto
+(M) cmmi10 9.96265 fshow
+-66.60802 -8.90779 moveto
+(N) cmmi10 9.96265 fshow
+-66.29314 -36.00227 moveto
+(O) cmmi10 9.96265 fshow
+-13.60037 3 moveto
+(R) cmmi10 9.96265 fshow
+showpage
+%%EOF

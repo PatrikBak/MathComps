@@ -1,0 +1,34 @@
+# Ignore build artifacts and dependencies
+**/bin/
+**/obj/
+**/node_modules/
+**/.next/
+**/out/
+
+# Ignore git and IDE files
+.git/
+.gitignore
+.gitattributes
+**/.vs/
+**/.vscode/
+**/.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore data and documentation files
+data/
+docs/
+README.md
+
+# Ignore Docker files themselves
+Dockerfile
+docker-compose.yml
+.dockerignore
+.env
+.env.example
+
+# Ignore test projects
+**/tests/
+

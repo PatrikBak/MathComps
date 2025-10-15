@@ -1,0 +1,2354 @@
+﻿{%%%%%   Z4-I-1
+Ak by sme do prvého políčka doplnili číslo~$1$, tak do druhého by malo ísť ${1:2}$, čo však nevyjde celé číslo. Podobne do prvého políčka nepasujú ani ostatné nepárne čísla $3$, $5$ a~$7$. Stačí to teda skúšať s~párnymi číslami $2$, $4$ a~$6$, ktoré sa dajú vydeliť dvoma:
+\begin{itemize}
+  \item Keď doplníme do prvého políčka číslo $2$, do druhého musíme dať $2:2=1$. Potom do tretieho pôjde $1+5=6$, do štvrtého $6-1=5$, a~piate políčko sa nedá doplniť, lebo $5:2$ nevyjde celé číslo.
+  \item Keď doplníme do prvého políčka číslo $4$, do druhého musíme dať $4:2=2$. Potom do tretieho pôjde $2+5=7$, do štvrtého $7-1=6$, do piateho $6:2=3$, do šiesteho $3+2=5$ a~do posledného siedmeho $5-4=1$. Na \obr{} vidíme, že sme každé číslo od $1$ do $7$ naozaj raz použili, ako vyžadovalo zadanie.
+      \insp{z60.43}%
+  \item Keď doplníme do prvého políčka číslo $6$, do druhého musíme dať $6:2=3$. Potom do tretieho pôjde $3+5=8$, čo nevyhovuje, lebo to nie je číslo od $1$ do $7$. Ďalej už teda dopĺňať nemusíme (ale aj v~prípade, že by sme to skúsili, do štvrtého by vyšlo $8-1=7$ a~piate políčko by sme nevedeli vyplniť, lebo $7:2$ nevyjde celé číslo).
+\end{itemize}
+\noindent
+Jediné riešenie je teda to, ktoré je uvedené na \obrr1.
+}
+
+{%%%%%   Z4-I-2
+Pri listovaní kalendárom pre rok 2010 rýchlo zistíme, že 13.~januára bola streda, 13.~februára bola sobota a~aj 13.~marca bola sobota\footnote{Aj na 13.~novembra vychádza sobota, ale úlohu to už nijako neovplyvní.}. Miško sa určite nemohol narodiť v~januári, lebo v~takom prípade by medzi Jarkinými a~jeho narodeninami nebol buď žiadny dátum trinásteho (ak by sa obaja narodili pred alebo obaja po 13. januári), alebo by to bola januárová streda, nie sobota (ak by sa Jarka narodila pred a~Miško po 13. januári).
+
+Vo februári sa Miško narodiť mohol, a to hocikedy medzi 14. a~28. februárom. Medzi Jarkinými a~jeho narodeninami by v~takom prípade bola určite sobota 13.~februára a~iná sobota trinásteho by medzi nimi určite nebola (bez ohľadu na to, v~ktorý januárový deň sa Jarka narodila, keďže 13.~január bola streda).
+
+Miško sa mohol narodiť aj medzi 1. a~12. marcom. Medzi Jarkinými a~jeho narodeninami by opäť bola iba sobota 13. februára.
+
+Neskôr ako 13. marca, a~teda v~žiadnom neskoršom mesiaci sa Miško narodiť nemohol, lebo inak by medzi Jarkinými a~jeho narodeninami boli už aspoň dve soboty trinásteho: februárová aj marcová. Narodiť sa preto mohol iba vo februári alebo v~marci.
+}
+
+{%%%%%   Z4-I-3
+Prvá cifra musí byť trojnásobkom druhej a~zároveň nemôže byť nulová, čiže to môže byť iba $3$, $6$ alebo $9$. K~týmto možnostiam prislúcha na druhej pozícii postupne $1$, $2$ a~$3$. Ale ak by bola na prvej pozícii trojka, tretia cifra by nemohla byť od nej o~$4$ menšia. Na prvej pozícii tak môže byť iba $6$ alebo $9$. Potom tretia cifra bude $2$, resp. $5$. Opísanú vlastnosť majú teda iba dve trojciferné čísla: $622$ a~$935$.}
+
+{%%%%%   Z4-I-4
+Pre jednoduchšie vyjadrovanie označme každý zo siedmich kúskov čokolády písmenom ako na \obr.
+\insp{z60.44}%
+
+Aby sme vedeli čokoládu spravodlivo rozdeliť, potrebujeme vedieť, aké veľké sú jednotlivé kúsky. Celá čokoláda sa skladá z~$4\cdot6=24$ malých obdĺžnikových dielikov. Pre niektoré kúsky je to jednoduché. Napríklad kúsok~$B$ je presnou polovicou obdĺžnika tvoreného dvoma pôvodnými dielikmi, je v~ňom preto presne toľko čokolády ako v~jednom dieliku (\obr{}a).
+\inspnspab{z60.45}{z60.46}{\hskip 3cm}%
+Podobne je to s~kúskom~$G$, ktorý je polovicou obdĺžnika tvoreného štyrmi dielikmi a~je v~ňom teda toľko čokolády ako v~dvoch dielikoch (\obrr1b).
+
+Celkom ľahko vieme určiť aj veľkosť kúskov $A$ a~$F$. Kúsok~$A$ obsahuje dva celé dieliky a~zvyšná jeho časť je rovnaká ako kúsok~$B$ -- je polovicou obdĺžnika tvoreného dvoma dielikmi. Spolu $A$ obsahuje toľko čokolády ako tri dieliky (\obr{}a).
+\inspnspab{z60.47}{z60.48}{\hskip 2cm}%
+Kúsok~$F$ sa dá rozdeliť zvislou čiarou na dve časti rovnako veľké ako kúsok~$G$, čiže je od neho dvakrát väčší a~obsahuje toľko čokolády ako štyri dieliky (\obrr1b).
+
+Teraz určíme veľkosť kúska~$C$. Ten spolu s~kúskami $A$, $B$ veľkostí 1 a~3 dieliky vytvára trojuholník, ktorý je presnou polovicou obdĺžnika zloženého z~20~dielikov (\obr). Takže spolu tie tri kúsky obsahujú toľko čokolády ako 10~dielikov a~na kúsok~$C$ vychádza 6~dielikov (${10-1-3=6}$).
+\insp{z60.410}%
+
+Zistené veľkosti kúskov doplníme namiesto písmen do \obr.
+Úlohu už teraz vyriešime aj bez zistenia veľkostí zvyšných kúskov $D$ a~$E$.
+\insp{z60.49}%
+
+Medzi dvoch kamarátov rozdelíme čokoládu z~24~dielikov spravodlivo tak, že každý dostane kúsky, ktoré budú mať spolu $24:2=12$ dielikov. Jeden môže dostať napríklad kúsky $C$, $F$ a~$G$, ktoré majú spolu $6+4+2$ dielikov, a~druhý zvyšné kúsky $A$, $B$, $D$, $E$ (ktoré tým pádom musia mať spolu tiež 12~dielikov). Inou možnosťou je dať jednému $A$, $B$, $C$, $G$ ($3+1+6+2=12$) a~druhému zvyšné $D$, $E$, $F$ ($24-12=12$).
+
+Pri troch kamarátoch musíme dať každému $24:3=8$ dielikov. Prvému dáme $C$ a~$G$ ($6+2=8$), druhému $A$, $B$ a~$F$ ($3+1+4=8$) a~tretiemu zvyšné $D$ a~$E$ ($24-8-8=8$).
+
+V~oboch prípadoch sa teda čokoláda dá spravodlivo rozdeliť.
+
+\poznamka
+Kúsky $D$ a~$E$, ktorých veľkosť sme v~riešení presne nevyjadrili, lebo sme to nepotrebovali, sú rovnako veľké: každý z~nich má toľko čokolády ako 4~dieliky.
+\insp{z60.411}%
+Ukázať sa to dá napríklad tak, že kúsok $D$ rozdelíme zvislou čiarou na dva menšie trojuholníky. Z~nich každý je presne polovicou jedného obdĺžnika a~oba obdĺžniky majú spolu 8~dielikov (\obr), takže $D$ musí mať 4~dieliky. Kúsok~$E$ potom má zvyšné 4~dieliky, ktoré chýbajú do celej čokolády ($24-3-1-6-4-4-2=4$). Existuje preto niekoľko ďalších možností, ako rozdeliť čokoládu spravodlivo medzi dvoch, resp. troch kamarátov. Presnejšie, kúsok~$F$ môžeme vo vyššie uvedených rozdeleniach vymeniť s~kúskom~$D$ alebo $E$.
+}
+
+{%%%%%   Z4-I-5
+V~miske ostalo 45~guľôčok hrachu. Ak to bola presne polovica, znamená to, že dievčatá zjedli druhú polovicu, ktorú tvorilo taktiež 45~guľôčok. Začnime od začiatku a~sledujme, ako hrášky ubúdali. Do posledného stĺpca budeme písať, koľko dokopy obe zjedli, aby sme ustrážili, kedy ubudne 45. guľôčka. Priebežne tiež budeme počítať, koľko zjedlo každé z~dievčat.
+$$
+\tabIII{
+kolo & Danka & Janka & zjedených celkom\\
+\vkern\\
+1. & 2 & 2 & 4\\
+2. & 2 & 4 & 10\\
+3. & 2 & 1 & 13\\
+4. & 2 & 1 & 16\\
+\vkern\\
+spolu & 8 & 8 &\\
+}
+$$
+Počas prvých štyroch "kôl" zjedla každá zo sestier 8~hráškov. Rovnako prebehli aj ďalšie 4~kolá:
+$$
+\tabIII{
+kolo & Danka & Janka & zjedených celkom\\
+\vkern\\
+doteraz & 8 & 8 & 16\\
+\vkern\\
+5. & 2 & 2 & 20\\
+6. & 2 & 4 & 26\\
+7. & 2 & 1 & 29\\
+8. & 2 & 1 & 32\\
+\vkern\\
+spolu & 16 & 16 &\\
+}
+$$
+Po ôsmich kolách mali obe zjedené po 16~hráškov. Pokračujme ďalej:
+$$
+\tabIII{
+kolo & Danka & Janka & zjedených celkom\\
+\vkern\\
+doteraz & 16 & 16 & 32\\
+\vkern\\
+9.  & 2 & 2 & 36\\
+10. & 2 & 4 & 42\\
+11. & 2 & 1 & 45\\
+\vkern\\
+spolu & 22 & 23 &\\
+}
+$$
+Po jedenástich kolách dievčatá zjedli spolu presne 45~guľôčok. Za posledné tri kolá pribudlo Danke 6~guľôčok a~Janke 7~guľôčok. Janka teda zjedla viac hráškov. Danka ich zjedla 22 a~Janka 23.
+}
+
+{%%%%%   Z4-I-6
+Úvahy budeme robiť podľa počtu bytov s~dvoma oknami, ktorých je podľa zadania najviac.
+\begin{itemize}
+  \item Určite nemôžu mať všetky byty len po dve okná, lebo to by okien bolo spolu iba $10\cdot2=20$, nie 27 (\obr).
+  \insp{z60.412}%
+  \item Keby bolo dvojoknových bytov 9, bolo by v~nich spolu $9\cdot2=18$ okien. A~zvyšných 9~okien ($27-18=9$) by bolo príliš veľa na jeden byt (\obr).
+  \insp{z60.413}%
+  \item Keby ich bolo 8, tak by v~nich bolo $8\cdot2=16$ okien, a~zvyšných 11~okien (${27-16}=11$) by bolo príliš veľa na dva byty (\obr).
+  \insp{z60.414}%
+  \item Keby ich bolo 7, tak by v~nich bolo $7\cdot2=14$ okien, a~zvyšných 13~okien (${27-14}=13$) by bolo stále príliš veľa na tri byty (\obr, v~každom byte sú najviac štyri okná, teda spolu sa dá doplniť najviac $3\cdot4=12$ okien).
+  \insp{z60.415}%
+  \item Ak je bytov s~dvoma oknami 6, je v~nich spolu $6\cdot2=12$ okien. Vo zvyšných štyroch bytoch musí byť spolu $27-12=15$ okien a~v~každom z~nich musia byť buď tri alebo štyri okná. Dá sa to urobiť len tak, že do troch bytov dáme po štyri okná a~do štvrtého tri okná ($4+4+4+3=15$). Dostávame tým prvé vyhovujúce riešenie: bytov s~dvoma oknami je šesť, byt s~tromi oknami je jeden a~byty so štyrmi oknami sú tri (\obr).
+  \insp{z60.416}%
+  \item Ak je bytov s~dvoma oknami 5, je v~nich spolu $5\cdot2=10$ okien. Vo zvyšných piatich bytoch musí byť spolu $27-10=17$ okien a~v~každom z~nich musia byť buď tri alebo štyri okná. Dá sa to urobiť len tak, že do troch bytov dáme po tri okná a~do dvoch po štyri okná ($3+3+3+4+4=17$). Dostávame druhé riešenie: bytov s~dvoma oknami je päť, byty s~tromi oknami sú tri a~byty so štyrmi oknami sú dva (\obr).
+  \insp{z60.417}%
+  \item Ak by byty s~dvoma oknami boli 4, bolo by v~nich spolu $4\cdot2=8$ okien. Vo zvyšných šiestich bytoch by muselo byť spolu $27-8=19$ okien a~v~každom z~nich by museli byť buď tri alebo štyri okná. Jediná možnosť je dať 5 bytov s~tromi oknami a~1~byt so štyrmi oknami ($3+3+3+3+3+4=19$). To však nevyhovuje zadaniu, lebo bytov s~tromi oknami by bolo viac ako bytov s~dvoma oknami.
+  \item Byty s~dvoma oknami nemôžu byť menej ako štyri, v~takom prípade už by totiž nutne muselo byť buď bytov s~tromi alebo bytov so štyrmi oknami viac, takže bytov s~dvoma oknami by nebolo najviac.
+\end{itemize}
+Úloha má teda dve riešenia, sú znázornené na \obrr2{} a~\obrrnum1.
+
+\ineriesenie
+V~každom z~desiatich bytov sú aspoň dve okná. Spolu je to $10\cdot2=20$ okien. Teraz už len musíme pridať zvyšných 7~okien do niektorých bytov, pričom do každého bytu môžeme pridať najviac dve okná.
+\begin{itemize}
+  \item Ak by sme každé zo siedmich okien pridali do iného bytu, dostali by sme 7~bytov s~tromi oknami a~len 3~byty s~dvoma oknami, teda bytov s~dvoma oknami by nebolo najviac.
+  \item Ďalšou možnosťou je pridať dve okná do jedného bytu a~zvyšných 5~okien po jednom do ďalších piatich bytov. Opäť by však nebolo najviac bytov s~dvoma oknami (boli by len 4, zatiaľ čo bytov s~tromi oknami by bolo 5).
+  \item Ak pridáme po dve okná do dvoch bytov a~zvyšné tri okná po jednom do troch bytov, dostaneme vyhovujúce riešenie ako na \obrr1.
+  \item Ak pridáme po dve okná do troch bytov a~zvyšné jedno okno do jedného bytu, dostaneme vyhovujúce riešenie ako na \obrr2.
+\end{itemize}
+Iné možnosti nie sú, keďže na štyri alebo viac bytov s~dvoma oknami by sme potrebovali navyše aspoň 8~okien.
+}
+
+{%%%%%   Z5-I-1
+Najskôr budeme škrtať cifry tak, aby bol súčet čo najväčší.
+Buď môžeme dve cifry vyškrtnúť z~prvého čísla, alebo môžeme dve cifry
+vyškrtnúť z~druhého, alebo môžeme vyškrtnúť z~každého čísla po jednej
+cifre.
+V~každom prípade škrtáme cifry tak, aby bol výsledný súčet čo najväčší.
+Dostávame tieto súčty:
+\begin{itemize}
+  \item škrtneme 4 a~1, zostane 5 a~293: súčet 298,
+  \item škrtneme 2 a~3, zostane 541 a~9: súčet 550,
+  \item škrtneme 1 a~2, zostane 54 a~93: súčet 147.
+\end{itemize}
+Vidíme, že najväčší súčet (550) získame po vyškrtnutí cifier 2 a~3 z~druhého čísla.
+
+Teraz budeme hľadať najmenší možný rozdiel.
+Opäť môžeme škrtnúť  dve cifry z~prvého čísla, alebo dve cifry
+z~druhého, alebo  z~každého čísla po jednej cifre.
+Keby sme škrtali dve cifry z~jedného čísla, bol by rozdiel vždy trojmiestne číslo.
+Keď škrtáme z~každého čísla po jednej cifre, dostaneme tieto čísla:
+\begin{itemize}
+  \item škrtneme 5 a~2, zostane 41 a~93: rozdiel 52,
+  \item škrtneme 5 a~9, zostane 41 a~23: rozdiel 18,
+  \item škrtneme 5 a~3, zostane 41 a~29: rozdiel 12,
+  \item škrtneme 4 a~2, zostane 51 a~93: rozdiel 42,
+  \item škrtneme 4 a~9, zostane 51 a~23: rozdiel 28,
+  \item škrtneme 4 a~3, zostane 51 a~29: rozdiel 22,
+  \item škrtneme 1 a~2, zostane 54 a~93: rozdiel 39,
+  \item škrtneme 1 a~9, zostane 54 a~23: rozdiel 31,
+  \item škrtneme 1 a~3, zostane 54 a~29: rozdiel 25.
+\end{itemize}
+Vidíme, že najmenší rozdiel (12) získame vyškrtnutím 5 z~prvého čísla a~3 z~druhého čísla.
+}
+
+{%%%%%   Z5-I-2
+Najskôr prevedieme rozprávkové miery napríklad na centimetre:
+$$
+1\,\text{rm}=385\cm,\ 1\,\text{rs}=105\cm,\ 1\,\text{rl}=25\cm.
+$$
+
+%\noindent
+Teraz vyjadríme v~centimetroch vzdialenosti namerané jednotlivými zememeračmi:
+
+1. zememerač nameral 4\,rm~4\,rs~18\,rl, \tj.
+$$
+4\cdot385+4\cdot105+18\cdot25 =1\,540+420+450 =2\,410\,(\Cm).
+$$
+
+2. zememerač nameral 3\,rm~2\,rs~43\,rl, \tj.
+$$
+3\cdot385+2\cdot105+43\cdot25 = 1\,155+210+1\,075=2\,440\,(\Cm).
+$$
+
+3. zememerač nameral 6\,rm~1\,rs~1\,rl, \tj.
+$$
+6\cdot385+1\cdot105+1\cdot25 =2\,310+105+25 =2\,440\,(\Cm).
+$$
+
+Vzdialenosť od zámockej brány k~rozprávkovému jazierku je teda $2\,440\cm =24{,}4\,\text{m}$.
+Prvý zememerač sa pomýlil o~$2\,440-2\,410 =30\,(\Cm)$.
+}
+
+{%%%%%   Z5-I-3
+Všetkých smajlíkov dokopy je 52, pričom dvojčatá ich získali dokopy 33 a~Adam aspoň jeden.
+Pre Mojmíra zostáva najviac $52-33-1 =18$ smajlákov. Aby ich mal najviac zo všetkých,
+musí mať každé z dvojčiat nanajvýš 17 smajlíkov.
+To ale znamená, že ich Petr získal práve  17 a~Pavel 16, alebo naopak.
+Keby mal totiž niektorý z nich menej než 16, druhý by musel mať viac ako 17, aby mali dokopy 33.
+Z toho tiež vyplýva, že Mojmír nemohol získať menej ako 18 smajlíkov (aby mal viac než hociktoré
+dvojča).
+Preto Mojmír získal práve 18 smajlíkov a na Adama zostáva iba jeden smajlík :-).
+
+\ineriesenie
+Vieme, že dvojčatá získali dokopy 33~smajlíkov a~pritom každý aspoň jeden.
+Keby Peter získal 32~smajlíkov a Pavol jeden, musel by mať Mojmír aspoň 33, aby mal
+zo všetkých najviac.
+Potom by ale mali všetci dokopy aj s~Adamom aspoň ${33+33+1}=67$ smajlíkov,
+čo nie je možné, pretože zo zadania vieme, že dokopy mali~52.
+Podobne, keby Peter získal 31 smajlíkov a~Pavol 2, musel by mať Mojmír aspoň 32, dohromady s~Adamom by
+mali aspoň $33+32+1=66$, čo je stále veľa\dots{}
+Podobnou úvahou sa dajú vylúčiť všetky možnosti rozdelenia smajlíkov medzi
+dvojčatami až na nasledujúci prípad:
+Peter 17, Pavol 16 (alebo naopak), potom Mojmír 18 a~Adam~1.
+}
+
+{%%%%%   Z5-I-4
+Z~Takovej informácie vieme, že ak počet budíkov predaných v predajni Za Rohom predstavuje
+jeden diel, tak počet budíkov predaných v predajni Pred Rohom predstavuje
+tri takéto diely.
+Z~Tikovej informácie potom vyplýva, že dvom takýmto dielom zodpovedá rozdiel 30 budíkov.
+Počet budíkov v oboch predajniach zodpovedá štyrom dielom. Dokopy teda museli predať
+$30+30=60$ budíkov.
+
+\poznamka
+Jednému dielu zodpovedá 15 budíkov ($30 : 2 = 15$), takže v~predajni Za Rohom sa predalo 15 budíkov. V~predajni
+Pred Rohom predali 45 budíkov, pretože $3\cdot 15=45$.
+V~oboch predajniach predali teda dokopy $15 + 45 = 60$ budíkov.
+}
+
+{%%%%%   Z5-I-5
+Skúšaním nachádzame tieto tri riešenia:\obrc3+
+\inspinspinsp{z60.10}{z60.11}{z60.12}{\qquad}
+
+Skúšanie môžeme začínať napr. vyplnením dvoch krúžkov na zvislej línii vpravo.
+Táto línia ako jediná obsahuje dve políčka, preto do nej patria skôr väčšie čísla.
+
+\hodnotenied
+Aj jediné správne riešenie bez komentára ohodnoťte "výborne".
+
+\poznamka
+Súčet všetkých použitých čísel je $1 + 2 + 3+4+ 5 + 6 + 7 = 28$.
+Všimnime si krúžok v ľavom dolnom rohu. Vychádzajú z neho tri čiary a na každej z nich
+ležia ďalšie dva krúžky.  Týmito čiarami máme pospájané všetky krúžky.
+
+Zistíme, že číslo v ľavom dolnom rohu nemôže byť ľubovoľné.
+Súčet čísel vo zvyšných dvoch krúžkoch na každej z troch spomínaných čiar musí byť rovnaký.
+Trojnásobok tohto súčtu je preto rovnaký ako rozdiel medzi 28 a číslom v ľavom dolnom rohu.
+Preto v ľavom dolnom rohu môže byť jedine 1, 4 alebo 7.
+
+Potom súčet zvyšných dvoch čísel na spomínaných čiarach musí byť po rade 9, 8 alebo 7
+a~súčet všetkých čísel na jednej čiare musí byť po rade 10, 12 alebo 14.
+Na základe týchto súčtov rozdelíme ostávajúce čísla do dvojíc a z každej dvojice vyberieme
+jedno tak, aby účet týchto troch bol takisto 10, 12 alebo 14. Tieto tri čísla budú ležať na zatiaľ
+neurčenej uhlopriečke. Podobným spôsobom vyberieme dvojicu čísel na pravú stranu štvorca.
+Takto získavame tri vyššie uvedené riešenia a zároveň máme overené, že žiadne ďalšie riešenie už nie je.
+}
+
+{%%%%%   Z5-I-6
+Najskôr pracujme s tou časťou zadania, kde sa uvažuje o~25 chlebíčkoch. Podľa nej
+pani Šikovná očakávala nanajvýš 12 hostí, pretože $25 : 2 = 12$, zvyšok 1, čo
+znamená, že 12 ľudí by si mohlo zobrať po dvoch chlebíčkoch, no ostal by už iba jediný.
+Takisto sa dá z tejto časti zistiť, že pani Šikovná čakala viac ako 8 hostí, pretože
+$25 : 3 = 8$, zvyšok 1, čo znamená, že pri 8 hosťoch by si všetci ôsmi mohli zobrať po
+troch chlebíčkoch. Zatiaľ teda pripadá do úvahy, že malo prísť 9, 10, 11 alebo 12 hostí.
+
+Teraz uvažujme o tej časti zadania, v ktorej sa hovorí o~35~chlebíčkoch. Určíme,
+že pani Šikovná počítala maximálne s~11~hosťami, lebo $35 : 3 = 11$, zvyšok~2,
+a~viac ako~8~hosťami, lebo $35 : 4 = 8$, zvyšok~3. Teda pani Šikovná mohla
+čakať 9, 10 alebo 11 hostí.
+
+Ďalej pracujme len s~úvahou s~52 chlebíčkami.  Podľa nej pani Široká čakala
+nanajvýš 13 hostí, pretože $52 : 4 = 13$. Takisto vieme, že čakala viac ako 10 hostí, pretože
+$52 : 5 = 10$, zvyšok~2. Rátala teda s~11, 12 alebo 13 hosťami.
+
+Vidíme, že so všetkými údajmi v zadaní sa zhoduje iba jediný počet hostí, a~to 11.
+
+\ineriesenie
+Rovnako ako v~prvom odseku predchádzajúceho riešenia určíme, že pani Šikovná
+mohla očakávať 9, 10, 11 alebo 12 hostí. Pre každý počet zistíme, či vyhovuje aj ďalším
+údajom z zadaní.
+
+9 hostí:
+Pri 35 chlebíčkoch by si všetci mohli zobrať po tri chlebíčky, nevyšli by im štyri, lebo $9\cdot3 < 35$ a~$9\cdot4 > 35$. Pri 52 chlebíčkoch by si
+každý mohol zobrať po štyri chlebíčky ale dokonca i po päť, pretože $9\cdot4 < 52$ i~$9\cdot5 < 52$. Tento počet hostí preto zavrhneme.
+
+10 hostí:
+Pri 35 chlebíčkoch by si všetci mohli zobrať po tri chlebíčky, ale nie štyri, lebo $10\cdot3 < 35$ a~$10\cdot4 > 35$. Pri 52~chlebíčkoch by
+si každý mohol zobrať štyri chlebíčky, ale dokonca aj päť, lebo $10\cdot4 < 52$ i~$10\cdot5 < 52$. Tento počet hostí tiež zavrhneme.
+
+11 hostí:
+Pri 35 chlebíčkoch by si každý mohol zobrať po tri chlebíčky, ale nie po štyri, pretože $11\cdot3 < 35$ a~$11\cdot4 > 35$. Pri 52~chlebíčkoch by
+si všetci mohli zobrať po štyri chlebíčky, no nie po päť, lebo $11\cdot4 < 52$ a~$11\cdot5 > 52$. Tento počet hostí vyhovuje všetkým požiadavkam zadania.
+
+12 hostí:
+Pri 35 chlebíčkoch by si nemohli všetci zobrať po troch chlebíčkoch, pretože $12\cdot3 > 35$. Tento počet hostí zavrhneme.
+
+Pani Šikovná teda čakala 11 hostí.
+}
+
+{%%%%%   Z6-I-1
+Pri 18\st{C} ukazuje teplomer 23 bernardov. Keď teplota klesne na 9\st{C}, teda
+o~9\st{C}, ukazuje teplomer 8 bernardov, teda o~15 bernardov menej než v~prvom
+prípade. Zmena teploty o~15 bernardov zodpovedá zmene o~9\st{C}, teda zmena o~10
+bernardov predstavuje zmenu o~6\st{C}.
+Teplota $13$~bernardov, na ktorú sa pýta úloha, je o~10~bernardov menšia ako teplota
+uvedená v~úvode nášho riešenia. Teplota $13$~bernardov je preto v stupňoch
+Celsia rovná
+$$
+18-6 = 12.
+$$
+
+\ineriesenie
+Úloha sa dá riešiť aj~graficky napr. na milimetrovom papieri ako na \obr.
+\insp{z60.5}
+}
+
+{%%%%%   Z6-I-2
+Najprv sa pokúsime priradiť jednotlivé sumy ku dňom. Štvrtková tržba musí
+byť násobkom ôsmich, sobotná násobkom šiestich. Čísla 720 a~840 sú obe násobkami
+šiestich a~ôsmich. Číslo 590 nie je násobkom šiestich ani ôsmich. Firma teda
+utŕžila a) vo štvrtok 720€ a~v~sobotu 840€ alebo b) naopak. V~piatok získala
+určite 590€. Preverme obe možnosti.
+
+\smallskip
+a) Cena starej mikrovlnky by bola $720 : 8 = 90$~(\euro) a~cena novej $840 : 6 =
+140$~(\euro). Overíme, či sa z~uvedených dvoch cien dá zložiť piatkových 590€.
+Uvažujme postupne rôzne počty nových mikrovlniek, ich celkovú cenu vždy odčítame
+od 590€ a~sledujme, či je výsledný rozdiel deliteľný číslom 90.
+$$
+\tabV{
+za novú mikrovlnku &0 &$1\cdot140$ &$2\cdot140$ &$3\cdot140$ &$4\cdot140$\\
+za starú mikrovlnku &590 &450 &310 &170 &30\\
+}
+$$
+Tabuľka ukazuje, že z~cien 90€ a~140€ ide zložiť čiastku 590€, a~to
+jediným spôsobom: $1\cdot140 + 5\cdot90$.
+
+\smallskip
+b) Cena starej mikrovlnky by bola $840 : 8 = 105$~(\euro) a~cena novej $720 : 6 =
+120$~(\euro). Podobne ako v~predchádzajúcom prípade overíme, či z~uvedených
+dvoch cien ide zložiť piatkových 590€. (Tabuľka bude jednoduchšia, ak vezmeme do úvahy,
+že piatková tržba za staré mikrovlnky musí mať na mieste jednotiek nulu,
+aby aj tržba za nové mikrovlnky mala na mieste jednotiek nulu.)
+$$
+\tabIII{
+za starú mikrovlnku &0 &$2\cdot105$ &$4\cdot105$\\
+za novú mirkovlnku &590 &380 &170\\
+}
+$$
+Tabuľka ukazuje, že z~cien 105€ a~120€ sa nedá zložiť 590€.
+
+Úloha má teda jediné riešenie: stará mikrovlnka stála 90€ a~v~piatok firma predala jednu novú mikrovlnku.
+}
+
+{%%%%%   Z6-I-3
+Vojtov zápis začína takto: 2010201020102010\dots{}
+Keby Vojto napísal 2010 dvakrát za sebou, bolo by v~zápise jedno päťmiestne súmerné
+číslo 20102 a~jedno päťmiestne súmerné číslo 10201.
+Keby napísal 2010 trikrát za sebou, bolo by v~zápise každé z~vyššie uvedených
+súmerných čísel dvakrát.
+Ak by sme pokračovali v tejto úvahe ďalej, zistíme, že
+keď Vojto napísal 2010 stokrát za sebou, bolo v~zápise každé uvedené súmerné
+číslo 99-krát, \tj. 99-krát číslo 20102 a~99-krát číslo 10201.
+
+V~zápise teda bolo skrytých $2\cdot99=198$ päťmiestnych súmerných čísel.
+Štvormiestne súmerné čísla v~zápise nie sú.
+}
+
+{%%%%%   Z6-I-4
+Prvočíselný rozklad čísla $2010$ je $2\cdot3\cdot5\cdot67$.
+Možnosť, že by mal dedo ${2\cdot67=134}$ alebo dokonca viacej rokov, môžeme hneď
+zavrhnúť (a~aj keby sme taký vysoký vek deda pripustili, neviedlo by to k~riešeniu úlohy).
+Dedo musí mať teda 67~rokov a súčin vekov jeho vnúčat je rovný
+$2\cdot3\cdot5=30$. Nájdime všetky rozklady čísla~30 na súčin rôznych
+prirodzených čísel a~preverme, kedy tieto čísla majú súčet 12:
+$$
+1\cdot30 = 2\cdot15 = 3\cdot10 = 5\cdot6 = 1\cdot2\cdot15 = 1\cdot3\cdot10
+  = 1\cdot5\cdot6 = 2\cdot3\cdot5 = 1\cdot2\cdot3\cdot5.
+$$
+Potrebný súčet (12) je jedine v súčine $1\cdot5\cdot6$. Dedo Vendelín má
+teda tri vnúčatá, ktoré majú 1 rok, 5 rokov a 6 rokov.
+}
+
+{%%%%%   Z6-I-5
+Najskôr sa prevezú obaja chlapci (1),
+jeden sa vráti späť (2),
+potom pôjde na druhý breh vedúci (3),
+späť sa prepraví druhý chlapec (4),
+opäť sa obaja chlapci prevezú na opačný breh~(5),
+jeden z~nich pôjde späť (6),
+prevezie sa druhý vedúci (7),
+druhý chlapec pôjde späť (8),
+teraz jeden z chlapcov vezme psa a prevezie ho (9),
+vráti sa po kamaráta (10)
+a~nakoniec sa obaja chlapci prevezú na druhý breh (11) a~už sú tam všetci.
+
+\poznamka
+Dá sa nájsť aj iné riešenie, ale riešenie s menej ako 11~cestami nie je.
+To je spôsobené najmä tým, že s vedúcim v loďke už nikto iný nemôže ísť.
+Preto napr. podobná úloha s~jedným vedúcim a~jedným táborníkom by vôbec nebola
+riešiteľná a~na prevoz jedného vedúceho a~dvoch táborníkov by bolo
+treba 5~prevezení\dots
+}
+
+{%%%%%   Z6-I-6
+Okrem štyroch rohových kocôčok sa všetky dotýkajú celou svojou stenou niektorej steny krabice
+a~každá stena krabice je bez medzier obstavaná radom kocôčok.
+Dno krabice má teda obvod $22-4=18$\,(dm), a~keďže
+$18=2\cdot9$ a~$9={1+8}=2+7=3+6=4+5$ sú všetky celočíselné rozklady
+čísla~$9$ na dva sčítance, má dno krabice niektorý z~nasledujúcich rozmerov (v~dm):
+$1\times8$, $2\times7$, $3\times6$,  $4\times5$.
+}
+
+{%%%%%   Z7-I-1
+1.
+V~zadaní nie je povedané, že v~tomto prípade nesmieme použiť nulu. Ak je jedna
+z~cifier nulová, znamená to, že súčin v~prvom kroku je takisto nula a~teda perzistencia je~$1$.
+Stačí preto zostaviť najväčšie nepárne číslo s~navzájom rôznymi ciframi; je ním číslo $9\,876\,543\,201$.
+
+\smallskip
+2.
+Teraz nulu použiť nemôžeme. Znamená to, že ciferný súčin hľadaného čísla musí byť číslo jednociferné,
+pričom sa snažíme získať čo najväčší počet navzájom rôznych činiteľov (počet činiteľov určuje počet cifier tohto
+čísla, teda čím viac činiteľov, tým väčšie číslo).
+Uvažujme teda všetky možné rozklady jednociferných čísel na súčiny prirodzených čísel.
+
+Keďže hľadáme párne číslo, potrebujeme, aby aspoň jeden činiteľ ciferného súčinu bol párny.
+To znamená, že ciferný súčin je takisto párne číslo, takže sa pri rozklade stačí obmedziť na čísla $2$, $4$, $6$ a~$8$.
+Ďalej sa môžeme zamerať iba na také rozklady, ktoré majú číslo~$1$ ako činiteľa. Prislúchajúce celé čísla sú vtedy
+vždy o~jeden rád väčšie ako čísla, ktoré prislúchajú rozkladom bez~$1$.
+\begin{itemize}
+    \item $2=1\cdot2$, možnosti: 12,
+    \item $4=1\cdot4$, možnosti: 14,
+    \item $4=1\cdot2\cdot2$, vylúčime, lebo sú tam rovnaké činitele,
+    \item $6=1\cdot6$, možnosti: 16,
+    \item $6=1\cdot2\cdot3$, možnosti: 132, 312,
+    \item $8=1\cdot8$, možnosti: 18,
+    \item $8=1\cdot2\cdot4$, možnosti: 124, 142, 214, 412,
+    \item $8=1\cdot2\cdot2\cdot2$, vylúčime, lebo sú tam rovnaké činitele.
+\end{itemize}
+Z~nájdených možností je najväčšie číslo $412$.
+
+\smallskip
+3.
+Túto úlohu môžeme riešiť tak, že prechádzame postupne viacciferné čísla počnúc najmenším z~nich  (\tj. 10) a~zisťujeme ich perzistenciu. Prvé nájdené číslo
+s~perzistenciou 3 je hľadané číslo.
+
+Dvojciferné čísla obsahujúce cifru 1 alebo 0 majú perzistenciu 1, pretože príslušný
+ciferný súčin je nanajvýš 9.
+Podobne, dvojciferné čísla, ktoré obsahujú cifru 2, majú perzistenciu nanajvýš 2,
+pretože príslušný ciferný súčin je nanajvýš 18.
+Na základe týchto úvah stačí začať preverovať čísla až od 33:
+\begin{itemize}
+    \item 33, $3\cdot3=9$, perzistencia 1,
+    \item 34, $3\cdot4=12$, $1\cdot2=2$, perzistencia 2,
+    \item 35, $3\cdot5=15$, $1\cdot5=5$, perzistencia 2,
+    \item 36, $3\cdot6=18$, $1\cdot8=8$, perzistencia 2,
+    \item 37, $3\cdot7=21$, $2\cdot1=2$, perzistencia 2,
+    \item 38, $3\cdot8=24$, $2\cdot4=8$, perzistencia 2,
+    \item 39, $3\cdot9=27$, $2\cdot7=14$, $1\cdot4=4$, perzistencia 3.
+\end{itemize}
+Najmenšie prirodzené číslo s~perzistenciou 3 je 39.
+}
+
+{%%%%%   Z7-I-2
+Počet Ondrových peňazí pred výletom označíme~$x$.
+\begin{itemize}
+\lineskiplimit 1pt
+\lineskip 1pt
+  \item Ondro na výlete utratil $\frac23$ peňazí, zostalo mu teda $\frac13x$ peňazí.
+  \item Na školu v~Tibete dal $\frac23$ zvyšku, potom mu ostalo
+    $\frac13\cdot\frac13x=\frac19x$ peňazí.
+  \item Darček mamine stál $\frac23$ zo zvyšku, teda po jeho kúpe Ondrovi ostala
+    $\frac13\cdot\frac19x=\frac1{27}x$ peňazí.
+  \item Z~toho stratil $\frac45$, čiže mu ostalo $\frac15\cdot\frac1{27}x=\frac1{135}x$ peňazí.
+  \item Polovicu zvyšku dal sestre a~jemu ostala druhá polovica, \tj.
+    $\frac12\cdot\frac1{135}x=\frac1{270}x$, a~to bolo 1€.
+\end{itemize}
+Ak $\frac1{270}x=1$, tak $x=270$.
+Ondrej išiel na výlet so sumou 270€.
+
+\ineriesenie
+Úlohu je možné riešiť takisto odzadu podľa schémy na \obr.
+\insp{z60.6}%
+
+Postupne, sprava doľava, dostávame nasledujúce hodnoty:
+$1\cdot2 = 2$, $2\cdot5 = 10$, $10\cdot3 = 30$, $30\cdot3 = 90$ a~$90\cdot3= 270$.
+Ondro mal pred výletom 270€.
+}
+
+{%%%%%   Z7-I-3
+Ak vek Silvie v~rokoch označíme $x$, tak
+Lívia má $x + 3$, Edita $x + 8$ a~mamka $x + 29$ rokov.
+Vekový priemer všetkých je 21 rokov, takže
+$$
+(x + (x + 3) + (x + 8) + (x + 29)) : 4 = 21,
+$$
+po úprave
+$$
+\align
+4x + 40 &= 84, \\
+x &= 11.
+\endalign
+$$
+Teda Silvia sa narodila pred $11$-timi rokmi.
+}
+
+{%%%%%   Z7-I-4
+Celé zadanie napíšeme ako sčítanie štyroch čísel. Zároveň napíšeme nuly na tie
+miesta, kde musia byť po zaokrúhlení daného čísla. Na ostatné miesta napíšeme
+hviezdičky, ktoré budeme postupne dopĺňať.
+\algg{*&*&*&*\\ *&*&*&0\\ *&*&0&0\\ *&0&0&0}{5&4&4&3}
+Najskôr si všimnime posledný stĺpec, v~ktorom je jediná neznáma cifra.
+Na miesto príslušnej hviezdičky môžeme doplniť jedine cifru~3, takže neznáme číslo má na mieste jednotiek cifru~3.
+\algg{*&*&*&3\\ *&*&*&0\\ *&*&0&0\\ *&0&0&0}{5&4&4&3}
+
+Tretí stĺpec:
+Je zrejmé, že pri zaokrúhľovaní na desiatky sa cifra~$3$ zaokrúhľuje nadol. Preto na mieste desiatok
+prvého a~druhého čísla musí byť rovnaká cifra. Keďže sčítanie na mieste jednotiek nebolo cez desiatku,
+hľadáme číslo, ktorého dvojnásobok má na mieste jednotiek cifru~4. Na mieste desiatok môže byť
+buď a)~cifra~2, alebo b)~cifra~7.
+
+\smallskip
+a) Doplníme cifru~2: Posledné dvojčíslie hľadaného čísla je 23.
+\algg{*&*&2&3\\ *&*&2&0\\ *&*&0&0\\ *&0&0&0}{5&4&4&3}
+Druhý stĺpec:
+Aj~pri zaokrúhľovaní na stovky zaokrúhľujeme nadol, takže na mieste stoviek
+prvého, druhého a~tretieho čísla je rovnaká cifra. Keďže sčítanie desiatok
+nebolo cez desiatku, opäť nič nepripočítavame. Hľadáme teda číslo, ktorého
+trojnásobok končí cifrou~4. Tomu vyhovuje iba cifra~8, takže posledné
+trojčíslie hľadaného čísla je 823.
+\algg{*&8&2&3\\ *&8&2&0\\ *&8&0&0\\ *&0&0&0}{5&4&4&3}
+Prvý stĺpec:
+Keďže $8 + 8 + 8 = 24$, pripočítame~2. Zároveň
+hľadané číslo zaokrúhľujeme na tisíce nahor, takže cifra na mieste tisícok
+v~poslednom čísle je o~1 väčšia ako zostávajúce tri. To znamená, že štvornásobok
+cifry na mieste tisícov je $5 - 2 - 1 = 2$. To sa samozrejme nedá splniť, takže
+táto možnosť nevyhovuje, teda cifra~2 nemôže byť na mieste desiatok.
+
+\smallskip
+b) Doplníme cifru 7: Posledné dvojčíslie hľadaného čísla je 73.
+\algg{*&*&7&3\\ *&*&7&0\\ *&*&0&0\\ *&0&0&0}{5&4&4&3}
+Druhý stĺpec:
+Keďže $7 + 7 = 14$, pripočítavame 1 z~predchádzajúceho súčtu. Zároveň hľadané
+číslo zaokrúhľujeme na stovky nahor, takže cifra na mieste stoviek
+pri treťom čísle je o~1 väčšia ako zostávajúce dve (resp. môžu byť prvé dve 9
+a~tretia 0). To znamená, že trojnásobok cifry na mieste stoviek končí na
+cifru $4 - 1 - 1 = 2$. Tomu vyhovuje len cifra~4. Hľadané číslo končí na
+trojčíslie 473.
+\algg{*&4&7&3\\ *&4&7&0\\ *&5&0&0\\ *&0&0&0}{5&4&4&3}
+Prvý stĺpec:
+Hľadané číslo sa zaokrúhľuje na tisíce nadol, takže všetky štyri chýbajúce cifry sú rovnaké.
+Zmysel má doplniť na miesto tisícok len cifru~1.
+Ľahko overíme, že po takomto doplnení je písomné sčítanie správne.
+\algg{1&4&7&3\\ 1&4&7&0\\ 1&5&0&0\\ 1&0&0&0}{5&4&4&3}
+
+Jediným riešením je číslo $1\,473$, takže Juro mal napísané číslo $1\,473$.
+}
+
+{%%%%%   Z7-I-5
+Zo zadania vieme, že $|SC| = |BD|$, navyše $|SC| = |SD|$, pretože je to veľkosť
+polomeru kružnice. Trojuholníky $CSD$ a~$BDS$ sú teda rovnoramenné.
+Označme $|\angle DSB|=|\angle DBS|=\delta$ (\obr).
+\insp{z60.30}%
+
+Súčet vnútorných uhlov v~trojuholníku $BDS$ je $180\st$, z~čoho máme
+$$
+\delta+\delta+|\angle BDS|  = 180\st,
+$$
+a~keďže uhol $BDC$ je priamy, platí
+$$
+|\angle SDC|+|\angle BDS| = 180\st.
+$$
+Z~uvedených dvoch rovníc je zrejmé, že $|\angle SDC|= 2\delta$. Keďže
+trojuholník $CSD$ je rovnoramenný, je aj~$|\angle SCD| = 2\delta$. Súčet
+vnútorných uhlov v~trojuholníku $CSD$ je $180\st$ a~uhol $BSA$ je priamy,
+preto dostávame
+$$
+\align
+2\delta + 2\delta + |\angle CSD| &= 180\st, \\
+|\angle ASC| + |\angle CSD| + \delta &= 180\st.
+\endalign
+$$
+Odtiaľ vyplýva, že  $|\angle ASC|= 3\delta$. Úlohou je zistiť pomer $|\angle
+ASC|:|\angle SCD|$. Po dosadení dostaneme $3\delta :2\delta$, čiže $3:2$.
+}
+
+{%%%%%   Z7-I-6
+Cifry hľadaného čísla označíme takto: $x$ je na mieste stoviek, $y$ na mieste
+desiatok a~$z$ na mieste jednotiek. Prirodzené číslo je deliteľné šiestimi práve vtedy,
+keď je súčet jeho cifier rovný násobku čísla~3 a~cifra na mieste jednotiek je párna.
+
+Najskôr uvažujme len o~prvej časti tejto podmienky. Podľa nej musí byť súčet
+${x + y + z}$ deliteľný tromi. Po vyškrtnutí cifry~$z$ dostaneme
+dvojciferné číslo, ktoré má byť tiež násobkom šiestich. Toto číslo má súčet
+cifier $x + y$ a~ten musí byť tiež deliteľný tromi. Vyškrtnutá cifra~$z$ tak
+mohla byť jedine 0, 3, 6 alebo 9. Podobnou úvahou sa dá dôjsť na to, že takisto cifry
+$x$ a~$y$ môžu byť jedine 0, 3, 6 alebo 9.
+
+Teraz uvažujme o~druhej podmienke deliteľnosti šiestimi. Pôvodné číslo
+a~dvojciferné čísla, ktoré z~neho získame vyškrtnutím jednej cifry, majú na mieste jednotiek
+buď $z$ alebo $y$. Cifry $z$~a $y$ teda musia byť párne.
+Podľa zadania dostaneme po vyškrtnutí akejkoľvek cifry prirodzené číslo. Toto číslo môže začínať
+cifrou $x$ alebo $y$, tieto cifry preto nemôžu byť nulové.
+
+Keď zhrnieme všetko vyššie uvedené, tak zistíme, že $x$ môže byť 3, 6 alebo~9, $y$~musí byť~6, $z$~môže byť
+0 alebo~6. Všetky hľadané čísla sú teda 360, 366, 660, 666, 960 a~966.
+}
+
+{%%%%%   Z8-I-1
+Cifry Martinovho čísla postupne označíme $a$, $b$, $c$, $d$, $e$, číslo
+z~nich utvorené $\overline{abcde}$. Rozoberme postupne všetkých päť podmienok:
+\begin{enumerate}
+  \item  číslo $\overline{acde}$ je deliteľné dvoma, teda
+    cifra~$e$ je 0, 2, 4, 6 alebo 8,
+  \item  číslo $\overline{abde}$ je deliteľné tromi, teda súčet $a + b + d + e$ je deliteľný troma,
+  \item  číslo $\overline{abce}$ je deliteľné štyrmi, teda číslo
+    $\overline{ce}$ je deliteľné štyrmi,
+  \item  číslo $\overline{abcd}$ je deliteľné piatimi, teda cifra~$d$ na konci
+    je 0 alebo 5,
+  \item  číslo $\overline{abcde}$ je deliteľné šiestimi, čo znamená,
+    že je deliteľné dvoma a~tromi zároveň, \tj. číslo~$e$ je párne (vieme už z~prvej podmienky)
+    a~súčet $a + b + c + d + e$ je deliteľný tromi.
+\end{enumerate}
+Keď dáme dokopy druhú a~piatu podmienku, dostávame, že číslo~$c$ je takisto
+deliteľné tromi. Cifra~$c$ je preto 0, 3, 6 alebo 9.
+Vidíme, že na cifry $c$, $d$, $e$ sú kladené samostatné podmienky,
+na cifry $a$ a~$b$ nie.
+Pri hľadaní najväčšieho vyhovujúceho čísla budeme postupne preverovať čísla
+vytvorené podľa nasledujúcich zásad: číslo budeme vytvárať zľava a~vždy
+zvolíme najväčšiu možnú cifru takú, aby cifry boli navzájom rôzne,
+aby platili samostatné podmienky pre cifry $c$, $d$, $e$ a~aby nevzniklo číslo
+už preverené. Na rozhodnutie, či takto vytvorené číslo spĺňa všetky
+zadané podmienky, stačí overiť druhú a~tretiu podmienku:
+\begin{itemize}
+  \item 98\,654:  súčet $9 + 8 + 5 + 4 = 26$ nie je deliteľný tromi (2. podmienka nie je splnená),
+  \item 98\,652:  súčet $9 + 8 + 5 + 2 = 24$ je deliteľný tromi (2. podmienka splnená), ale 62 nie je deliteľné štyrmi (3. podmienka nie je splnená),
+  \item 98\,650: súčet $9 + 8 + 5 + 0 = 22$ nie je deliteľný tromi (2. podmienka nie je splnená),
+  \item 98\,604: súčet $9 + 8 + 0 +4 = 21$ je deliteľný tromi (2. podmienka je splnená) a~64 je deliteľné štyrmi (3. podmienka je taktiež splnená).
+\end{itemize}
+Číslo 98\,604 je teda najväčšie číslo, ktoré môže mať Martin napísané na papieri.
+}
+
+{%%%%%   Z8-I-2
+Súčet všetkých čísel, ktoré máme do obrázka napísať, je
+$$
+1+2+\cdots+13+14=7\cdot 15=105.
+$$
+Priamky na~\obr{} určujú štyri priame línie tak, že
+každé políčko patrí do práve jednej línie.
+Súčet všetkých čísel na každej línii by mal byť rovnaký a~štvornásobok takého súčtu má byť 105.
+Číslo 105 ale nie je deliteľné štyrmi, čo znamená, že vpísať čísla do políčok požadovaným spôsobom naozaj nejde.
+\insp{z60.20}%
+
+\ineriesenie
+Predpokladajme, že súčet všetkých čísel na každej priamej línii je rovnaký a~označme ho~$p$. Na \obrr2{} môžeme pomocou piatich vodorovných priamok
+určiť päť priamych línii tak, že každé políčko bude patriť práve jednej línii.
+Z~toho vidíme, že súčet všetkých doplnených čísel je $5p$. Na \obrr1{}
+je iné rozdelenie na priame línie, podľa neho súčet všetkých doplnených čísel je $4p$.
+To je však spor ($5p\ne4p$), preto sa čísla požadovaným spôsobom do políčok vpísať nedajú.
+}
+
+{%%%%%   Z8-I-3
+Pôvodnú cenu knihy v~\euro{} napíšme v~tvare $10a+b$, pričom $a$ a~$b$ sú
+neznáme nenulové cifry.
+Po zľave bola cena knihy $10b+a$.
+Zníženie bolo o~62,5\,\%, teda na 37,5\,\%, čo znamená, že
+$$
+\frac{37{,}5}{100}\cdot(10a+b)=10b+a.
+$$
+Využijúc rovnosť $37{,}5/100=75/200=3/8$ predchádzajúci vzťah upravíme:
+$$
+\align
+\frac38\cdot(10a+b)&=10b+a, \\
+     30a + 3b &= 80b + 8a, \\
+          22a &= 77b, \\
+      2a &= 7b.
+\endalign
+$$
+Jediné jednociferné prirodzené čísla spĺňajúce túto rovnosť sú $a = 7$ a~$b = 2$.
+Pôvodná cena encyklopédie bola 72~€, po zľave 27~€, encyklopédia bola zľavnená o~45~€.
+}
+
+{%%%%%   Z8-I-4
+Ak $x$ (v~cm) označuje dĺžku hrany malej kocôčky, bude jej povrch $6x^2$.
+Na každej hrane danej kocky bude $8/x$ malých kocôčok, celá kocka
+tak bude rozdelená na
+$$
+\frac8x\cdot\frac8x\cdot\frac8x=\frac{8\cdot64}{x^3}
+$$
+kocôčok.
+Povrch všetkých kocôčok bude
+$$
+\frac{8\cdot64}{x^3}\cdot6x^2=\frac{6\cdot8\cdot64}{x}
+$$
+a~má byť päťkrát väčší ako povrch pôvodnej kocky, ktorý je $6\cdot8^2=6\cdot64$.
+Preto musí platiť
+$$
+\frac{6\cdot8\cdot64}{x}=5\cdot6\cdot64,
+$$
+odkiaľ po úprave dostávame $x=\frac85=1{,}6$.
+Hrana malej kocôčky bude merať $1{,}6\cm$ a~jej objem bude $1{,}6^3\doteq
+4{,}1\,(\text{cm}^3)$.
+}
+
+{%%%%%   Z8-I-5
+Hľadaný deliteľ označíme~$x$ a~Klárin delenec označíme~$k$. Lenkin delenec je
+potom $k + 30$ a~Matejov je $k + 80$. Keď vydelíme číslo~$k$ číslom~$x$, dostaneme
+podľa zadania zvyšok~8. Číslo $k-8$ teda musí byť deliteľné číslom~$x$ bezo
+zvyšku. V~zadaní sa ďalej uvádza, že $k + 30$ dáva po delení číslom~$x$ zvyšok~2
+a~$k + 80$ dáva po delení tým istým~$x$ zvyšok~4. Preto $k + 28$ a~$k + 76$ musia byť bezo
+zvyšku deliteľné číslom~$x$.
+
+Ukázali sme, že čísla $k-8$ a~$k + 28$ sú bezo zvyšku deliteľné číslom~$x$.
+Je zrejmé, že aj ich rozdiel 36 musí byť bezo zvyšku deliteľný číslom~$x$.
+Takisto rozdiel čísel ${k+28}$ a~${k+76}$, ktorý je rovný 48, musí byť bezo
+zvyšku deliteľný číslom~$x$. Ako $x$ teda pripadajú do úvahy len spoločné delitele
+čísel 36 a~48, čo sú čísla 1, 2, 3, 4, 6 a~12. Číslo~$x$ musí
+zároveň byť väčšie ako~8, inak by Klára nemohla dostať po delení týmto
+číslom zvyšok~8. Hľadaný deliteľ~$x$ tak musí byť~12.
+}
+
+{%%%%%   Z8-I-6
+Priesečník uhlopriečok lichobežníka označíme~$J$ a~stredy jeho strán označíme
+$S_1$, $S_2$, $S_3$ a~$S_4$, poz. \obr.
+\insp{z60.7}%
+
+V~stredovej súmernosti so stredom~$S_1$ zobrazíme
+bod~$J$ na bod~$J_1$. Podobne určíme aj body $J_2$, $J_3$ a~$J_4$. Uhlopriečky štvoruholníkov
+$J_1BJA$, $J_2CJB$, $J_3DJC$ a~$J_4AJD$ sa rozpoľujú a~podľa zadania
+platí  $|\angle BJA|=|\angle CJB|=|\angle DJC|=|\angle AJD|=90\st$,
+preto tieto štvoruholníky musia byť obdĺžniky alebo štvorce. Z~toho vyplýva, že
+spojením bodov $A$, $J_1$, $B$, $J_2$, $C$, $J_3$, $D$, $J_4$ a~$A$ vyznačíme
+štvorec $J_1J_2J_3J_4$ so stranou dĺžky $8\cm$. Jeho obsah je
+$8\cdot8 = 64\,(\text{cm}^2)$ a~obsah lichobežníka $ABCD$ je zjavne polovičný, teda $32\cm^2$.
+
+\ineriesenie
+Bodom~$C$ veďme rovnobežku s~uhlopriečkou~$BD$ a~jej priesečník s~priamkou~$AB$ označme~$F$ (\obr).
+\insp{z60.70}%
+
+Trojuholníky $ACD$ a~$CFB$ sú zhodné podľa vety {\it sss}, preto obsah
+lichobežníka $ABCD$ je rovnaký ako obsah trojuholníka $AFC$.
+Z~konštrukcie vyplýva, že tento trojuholník je rovnoramenný
+($|AC|=|FC|=8\cm$) a~pravouhlý (s~pravým uhlom vo vrchole~$C$).
+Jeho obsah je teda $\frac12\cdot8^2=32\,(\text{cm}^2)$.
+
+\poznamka
+Všimnime si, že sme v~predchádzajúcich dvoch riešeniach nepotrebovali dĺžku základne~$AB$; obsah
+lichobežníka $ABCD$ je teda od tejto veličiny nezávislý.
+
+
+\ineriesenie
+Priesečník uhlopriečok označíme~$J$, poz. \obr. Určíme obsahy trojuholníkov $ABD$
+a~$CDB$ a~sčítaním potom dostaneme obsah lichobežníka $ABCD$.
+\insp{z60.71}%
+
+V~oboch trojuholníkoch poznáme jednu stranu, a~síce $BD$. Zo zadania vieme, že úsečky $BD$
+a~$AC$ sú na sebe kolmé. Preto úsečky $JA$ a~$JC$ sú výšky zmienených
+trojuholníkov kolmé na stranu~$BD$. Vypočítajme veľkosti týchto výšok.
+Z~osovej súmernosti celého útvaru vyplýva, že $|AJ|=|BJ|$. Túto veľkosť
+označíme~$x$ a~určíme ju podľa Pytagorovej vety v~trojuholníku $AJB$:
+$$
+\align
+|AJ|^2+|BJ|^2&=|AB|^2, \\
+x^2+x^2&=8^2, \\
+x&=\sqrt{32}\,(\text{cm}).
+\endalign
+$$
+Teda $|AJ|=\sqrt{32}\cm$, a~keďže $|AC|=8\cm$, platí
+$|JC|=(8-\sqrt{32})\cm$. Teraz už môžeme spočítať obsahy trojuholníkov $ABD$
+a~$CDB$, respektíve obsah lichobežníka $ABCD$:
+$$
+S_{ABCD} = S_{ABD} + S_{CDB} = \frac12\cdot8\cdot\sqrt{32}
++\frac12\cdot8\cdot(8-\sqrt{32}).
+$$
+Výraz sa dá výhodne upraviť:
+$$
+S_{ABCD} =\frac12\cdot8\cdot(\sqrt{32}+8-\sqrt{32}) =\frac12\cdot8\cdot8
+=32\,(\text{cm}^2).
+$$
+
+\poznamka
+Pokiaľ žiaci budú priebežne počítať medzivýsledky, dostanú tieto hodnoty:
+$|AJ|\doteq5{,}66\cm$, $|JC|\doteq2{,}34\cm$, $S_{ABD}\doteq22{,}64\cm^2$,
+$S_{CDB}\doteq9{,}36\cm^2$.
+
+
+\ineriesenie
+Priesečník uhlopriečok nazveme opäť~$J$. Stredy základní $AB$ a~$CD$ označíme postupne
+$K$ a~$M$.
+\insp{z60.72}%
+
+Obsah lichobežníka $ABCD$ budeme počítať podľa známeho vzorca
+$$
+S_{ABCD} =\frac12(|AB|+|CD|)\cdot|KM|.
+$$
+Vieme, že $|\angle AJB|= 90\st$, a~z~osovej súmernosti rovnoramenného
+lichobežníka vyplýva, že $|AJ|=|BJ|$. Trojuholník $ABJ$ sa dá preto doplniť na štvorec
+$ALBJ$: v~osovej súmernosti podľa osi~$AB$ zobrazíme bod~$J$ na bod~$L$ (\obr).
+Podobne vytvoríme aj~štvorec $DJCN$. Všeobecne platí, že štvorec so
+stranou~$a$ má uhlopriečku dĺžky $a\sqrt2$. Súčet dĺžok strany~$AJ$ štvorca $ALBJ$ a~strany~$JC$
+štvorca $DJCN$ je $8\cm$. Súčet dĺžok ich uhlopriečok $JL$ a~$NJ$ je
+$8\sqrt2\cm$, teda
+$$
+|NL|=8\sqrt2\cm.
+$$
+Podľa \obrr1{} postupne určíme
+$$
+\align
+&|KM|=\frac12|NL|=4\sqrt2\cm, \\
+&|JL|=|AB|=8\cm, \\
+&|DC|=|JN|=|NL|-|JL|=8\sqrt2-8\,(\text{cm}).
+\endalign
+$$
+Zistené dĺžky dosadíme do vyššie uvedeného vzorca:
+$$
+S_{ABCD} =\frac12(8+8\sqrt2-8)\cdot4\sqrt2 =\frac12\cdot8\sqrt2\cdot4\sqrt2
+=32\,(\text{cm}^2).
+$$
+
+\poznamka
+Ak žiaci budú počítať priebežné medzivýsledky, dostanú tieto
+hodnoty:
+$|KM|\doteq5{,}66\cm$, $|DC|\doteq3{,}31\cm$.
+}
+
+{%%%%%   Z9-I-1
+Premenné $a$ a~$v$ sú prirodzené čísla a~predstavujú hranu podstavy
+pravidelného štvorbokého hranola a~jeho výšku. Pre rozmery, ktoré uvažoval
+hlásiaci sa žiak, platí
+$$
+918 = 2a^2 + 4av = 2a\cdot(a + 2v),
+$$
+po vydelení dvoma dostaneme
+$$
+459 = a\cdot(a + 2v).
+$$
+Budeme hľadať všetky dvojice $a$, $v$, ktoré vyhovujú tomuto vzťahu. Určíme
+teda všetky možné rozklady čísla 459 ($459 = 3^3\cdot17$) na súčin dvoch
+prirodzených čísel, z~nich menšie bude $a$ a~väčšie bude $a + 2v$. Nasledujúca
+tabuľka ukazuje, že takéto rozklady existujú štyri a~každý vedie
+na celočíselné~$v$. Pre všetky nájdené dvojice $a$, $v$ potom spočítame
+objem, ktorý by učiteľ musel zadať, a~jeho prvočíselný rozklad:
+$$
+\tabIV{
+ &$a$ &$a+2v$ &$v$ &$a^2\cdot v$ \\
+\vkern\\
+1. možnosť &1 &459 &229 &$1^2\cdot229=229$\\
+2. možnosť &3 &153 &75 &$3^2\cdot75=3^3\cdot5^2$\\
+3. možnosť &9 &51 &21 &$9^2\cdot21=3^5\cdot7$ \\
+4. možnosť &17 &27 &5 &$17^2\cdot5=17^2\cdot5$ \\
+}
+$$
+
+Učiteľ prezradil, že zadaný objem vedie na štyri riešenia. Pri každom objeme v~tabuľke
+určíme, ku koľkým riešeniam vedie, teda pre každý objem nájdeme
+všetky možné~$a$:
+$$
+\tabII{
+ &$a^2\cdot v$ &možné $a$ \\
+\vkern\\
+1. možnosť &229 &1\\
+2. možnosť &$3^3\cdot5^2$ &1, 3, 5, 15\\
+3. možnosť &$3^5\cdot7$ &1, 3, 9\\
+4. možnosť &$17^2\cdot5$ &1, 17\\
+}
+$$
+Vidíme, že jedine 2.~možnosť vedie na štyri hranoly.
+Učiteľ teda zadal objem $3^3\cdot5^2=675\,(\text{cm}^3)$ a~prvý žiak uvažoval tieto rozmery:
+$a=3\cm$, $v=75\cm$.
+Nižšie uvádzame, aké ďalšie rozmery hranolov mali žiaci nájsť a~aký povrch
+z~nich mali vypočítať:
+$$
+\tabIII{
+$a$ &1 &5 &15\\
+$v$ &675 &27 &3\\
+$2a^2+4av$ &2\,702 &590 &630\\
+}
+$$
+
+Učiteľ čakal na tieto ďalšie tri riešenia:
+$590\cm^2$, $630\cm^2$ a~$2\,702\cm^2$.
+}
+
+{%%%%%   Z9-I-2
+Keď predĺžime na \obrr1{} zvislé hranice zastavanej plochy, rozdelíme na oboch dolných
+parcelách voľnú plochu na dve časti. Obsahy vzniknutých
+obdĺžnikov ľahko odvodíme:
+\insp{z60.40}%
+
+Obdĺžniky s~obsahmi 80\,m$^2$ a~240\,m$^2$ majú spoločnú stranu. Preto zvyšné strany
+obdĺžnikov, na \obr{} označené $a$ a~$b$, musia mať dĺžky v~takom istom pomere,
+v~akom sú obsahy obdĺžnikov:
+$$
+\frac{a}{b}=\frac{80}{240}=\frac13,
+$$
+teda $b = 3a$. V~parcelách, ktoré sú na obrázku hore, označíme obsahy
+zastavaných častí $S_1$ a~$S_2$. Ide o~dva obdĺžniky s~jednou spoločnou stranou
+a~ich ďalšie strany majú dĺžky $a$ a~$3a$. Obsahy obdĺžnikov musia byť v~tom istom pomere
+ako tieto dĺžky, teda ${S_2 = 3S_1}$.
+Parcely na \obrr2{} majú rovnaký obsah, preto
+$$
+480 + S_1= 3S_1 + 200,
+$$
+po úprave dostaneme $S_1 = 140$\,(m$^2$). Obsah jednej parcely je $480 + 140
+= 620$\,(m$^2$) a~obsah všetkých štyroch je $4\cdot620=2\,480$\,(m$^2$).
+Keď z~nej odčítame obsahy všetkých voľných plôch, dostaneme obsah zastavanej plochy:
+$$
+2\,480-480-200-560-440 =800\,(\text{m}^2).
+$$
+}
+
+{%%%%%   Z9-I-3
+Označme počet litrov v~prvom súdku pred prelievaním~$x$, v~druhom~$y$.
+Po preliatí jedného litra by bolo v~prvom súdku $x-1$ litrov, v~druhom
+$y+1$ litrov a~platilo by
+$$
+x-1 =y+1.
+$$
+Po preliatí 9~litrov bolo v~prvom súdku $x + 9$ litrov a~bol plný, v~druhom $y-9$ litrov,
+čo tvorilo tretinu objemu súdka, teda tretinu toho, čo
+bolo v~prvom súdku.
+Preto
+$$
+x + 9 = 3\cdot(y-9).
+$$
+Z~prvej rovnice vyjadríme $x = y + 2$
+a~dosadíme do druhej:
+$y + 2 + 9 = 3y-27$.
+Po úprave dostávame
+$y = 19$ a~$x = 21$.
+
+V~prvom súdku bolo pôvodne 21~litrov a~v~druhom 19~litrov muštu, Vĺčkovci celkom
+vylisovali 40~litrov muštu.
+Objem každého z~oboch súdkov bol 30~litrov.
+}
+
+{%%%%%   Z9-I-4
+Označme rýchlosť (v~km/h) pána Rýchleho~$v_R$ a~pána Ťarbáka~$v_T$.
+Dobu (v~hodinách) od štartu po ich stretnutie označíme~$x$.
+Po stretnutie prešiel pán Rýchly zhora od chaty $x\cdot v_R$\,(km), pán Ťarbák zdola
+od autobusu $x\cdot v_T$\,(km).
+Pán Rýchly potom išiel ešte 2~hodiny dole k~autobusu, prešiel $2\cdot v_R$\,(km),
+pán Ťarbák išiel ešte 8~hodín k~chate nahor, teda prešiel $8\cdot v_T$\,(km).
+
+Porovnaním zodpovedajúcich vzdialeností získame dve rovnice:
+vzdialenosť od miesta, kde sa páni stretli, k~autobusu je
+$x\cdot v_T = 2\cdot v_R$\,(km),
+k~chate $8\cdot v_L = {x\cdot v_R}$\,(km).
+Odtiaľ vyjadríme
+$$
+\frac{v_T}{v_R}=\frac2x=\frac{x}8,
+$$
+teda $x^2 = 16$ a~$x = 4$.
+Od štartu po stretnutie o~10:00 išli obaja páni 4~hodiny, na cestu teda vyrazili o~6:00.
+}
+
+{%%%%%   Z9-I-5
+Kružnicu opísanú v~zadaní nazveme $k$ a jej polomer~$r$, pričom platí $r = 12\cm$.
+Jej vzťahy k~šesťuholníkom sa dajú popísať aj tak, že kružnica~$k$
+je vpísaná pravidelnému šesťuholníku $ABCDEF$ a~opísaná pravidelnému
+šesťuholníku $TUVXYZ$ (\obr). Ďalej si uvedomme, že pri zostrojovaní
+pravidelného šesťuholníka $TUVXYZ$ môžeme podmienke v~zadaní, aby vrchol~$T$
+ležal v~strede strany~$BC$, vyhovieť preto, že práve v~strede strany~$BC$ je
+bod dotyku šesťuholníka $ABCDEF$ a~kružnice~$k$ jemu vpísanej.
+Preto aj ostatné vrcholy šesťuholníka $TUVXYZ$ ležia v~stredoch strán
+šesťuholníka $ABCDEF$.
+\insp{z60.8}%
+
+Pri riešení úlohy budeme vychádzať zo známej vlastnosti pravidelného
+šesťuholníka: ktorékoľvek dva jeho susedné vrcholy a~stred kružnice jemu
+opísanej (resp. vpísanej) tvoria vrcholy rovnostranného trojuholníka. Teda
+trojuholníky $CSB$ a~$CSD$ sú rovnostranné, navyše majú spoločnú stranu~$CS$, podľa ktorej sú osovo súmerné.
+Bod~$T$ je stredom strany~$BC$ trojuholníka $CSB$, a~preto je
+aj pätou jeho výšky kolmej na stranu~$BC$. Trojuholník $CST$ je teda pravouhlý.
+Bod~$U$, ktorý je stredom strany~$DC$, je osovo súmerný s~$T$ podľa
+$CS$, teda trojuholníky $CST$ a~$CSU$ sú zhodné.
+
+K~doriešeniu úlohy stačí poznať veľkosť $|TC|$, ktorú vypočítame podľa
+Pytagorovej vety v~trojuholníku $CST$ (pritom použijeme $|CS|=2|TC|$):
+$$
+\align
+|CS|^2 &=|ST|^2+|TC|^2, \\
+4|TC|^2 &=r^2+|TC|^2, \\
+3|TC|^2 &=r^2, \\
+|TC| &=\frac{r}{\sqrt3} =\frac{r\sqrt3}{3}.
+\endalign
+$$
+Štvoruholník $TCUS$ je tvorený dvoma zhodnými trojuholníkmi, určíme jeho obsah:
+$$
+S_{TCUS} =2\cdot S_{CST} =|TC|\cdot|ST| =\frac{r\sqrt3}3\cdot r
+=\frac{r^2\sqrt3}{3}.
+$$
+Obvod štvoruholníka $TCUS$ je
+$$
+o_{TCUS} =2(|TC|+|ST|) =2\left(\frac{r\sqrt3}{3}+r\right)
+=2r\left(\frac{\sqrt3}3+1\right).
+$$
+Po dosadení $r= 12\cm$ dôjdeme k~výsledkom:
+$$
+\align
+S_{TCUS} &=48\sqrt3 \doteq83,1\,(\text{cm}^2), \\
+o_{TCUS} &=8\sqrt3+24 \doteq37,9\,(\text{cm}).
+\endalign
+$$
+}
+
+{%%%%%   Z9-I-6
+Označme $x$, $y$ počty hrušiek a~jabĺk, ktoré Pavol zjedol v~pondelok.
+Podľa zadania postupne a~trpezlivo zostavíme nasledujúcu tabuľku:
+$$
+\tabII{
+&pondelok &utorok\\
+\vkern\\
+Pavol hrušiek\hfill &$x$ &$x+1$ \\
+Pavol jabĺk\hfill &$y$ &$12-y$ \\
+Peter hrušiek\hfill &$x +2$ &$x-2$ \\
+Peter jabĺk\hfill &$y-2$ &$15-y$ \\
+}
+$$
+Pri vypĺňaní tabuľky sme však zatiaľ nevyužili nasledujúce informácie:
+\begin{varitem}
+\item{a)} Pavol zjedol v~utorok rovnaký počet jabĺk ako hrušiek,
+\item{b)} počet všetkých spoločne zjedených jabĺk je rovnaký ako počet zjedených hrušiek.
+\end{varitem}
+
+Vďaka informácii~b) zostavíme rovnicu,
+z~ktorej po úprave získame hodnotu~$x$:
+$$
+\align
+y + (12-y) + (y-2) + (15-y) &= x + (x + 1) + (x + 2) + (x-2), \\
+25 &= 4x + 1,\\
+x &= 6.
+\endalign
+$$
+Podľa informácie~a) tiež zostavíme rovnicu, upravíme ju a~dosadíme:
+$$
+\align
+x + 1 &= 12-y, \\
+y &= 11-x =5.
+\endalign
+$$
+Dosadením do príslušných políčok tabuľky zistíme, že
+Peter zjedol v~pondelok 3~jablká a~Pavol zjedol v~utorok 7~hrušiek.
+
+Pre kontrolu uvádzame tabuľku so všetkými dosadenými hodnotami:
+$$
+\tabII{
+&pondelok &utorok\\
+\vkern\\
+Pavol hrušiek\hfill &6 &\bf 7 \\
+Pavol jabĺk\hfill &5 &7 \\
+Peter hrušiek\hfill &8 &4 \\
+Peter jabĺk\hfill &\bf 3 &10 \\
+}
+$$
+
+\poznamka
+Pri zostavovaní údajov v~tabuľke sa dá postupovať rôzne a~nepoužité
+informácie môžu byť rôzne od tých v~predchádzajúcom postupe. Pri rovnakom označení
+neznámych tak môžeme získať iné dve rovnice, ktoré však pri správnom počítaní
+vedú k~rovnakému výsledku.
+Navyše neznáme sa tiež dajú voliť rôzne, ale vždy sú aspoň dve.
+Rovnaký počet nepoužitých informácií potom určuje sústavu
+rovníc, ktorú následne riešime.
+
+\ineriesenie
+Ak označíme $x$ počet jabĺk, ktoré Peter zjedol v~pondelok,
+a~$y$ počet hrušiek, ktoré Pavol zjedol v~utorok, potom tabuľka môže vyzerať
+takto:
+$$
+\tabII{
+&pondelok &utorok\\
+\vkern\\
+Pavol hrušiek\hfill &$y-1$ &$y$ \\
+Pavol jabĺk\hfill &$12-y$ &$y$ \\
+Peter hrušiek\hfill &$y+1$ &$y-3$ \\
+Peter jabĺk\hfill &$x$ &$y+3$ \\
+}
+$$
+Pritom sme nepoužili nasledujúce informácie:
+\begin{varitem}
+\item{a)} v~pondelok zjedol Peter o~2~jablká menej ako Pavol,
+\item{b)} počet všetkých spoločne zjedených jabĺk je rovnaký ako počet zjedených hrušiek.
+\end{varitem}
+Zodpovedajúce rovnice (po jednoduchej úprave) sú:
+$$
+\align
+x+y&=10,\\
+-x+3y&=18,\\
+\endalign
+$$
+a~jediným riešením tejto sústavy je $x=3$ a~$y=7$.
+}
+
+{%%%%%   Z4-II-1
+Naším cieľom je doplniť osem po sebe idúcich jednociferných čísel do obrázka tak, aby platili matematické operácie. Do všetkých políčok môžeme skúsiť doplniť ktorékoľvek z~čísel $0$ až $9$, pričom žiadne nemôžeme napísať dvakrát. Jedným z~možných riešení je začať dopĺňať čísla do prvého políčka. Tu má význam napísať iba čísla od $0$ po $5$. Väčšie čísla do prvého políčka dopĺňať nemôžeme, lebo by v druhom políčku vyšlo dvojciferné číslo.
+Výhodnejšie je však začať vypĺňaním druhého políčka. Aby v~treťom políčku vyšlo celé číslo, tak do druhého políčka môžeme skúsiť doplniť iba čísla $0$, $3$, $6$ a~$9$, čiže také čísla, ktoré sa dajú vydeliť tromi:
+\begin{itemize}
+  \item Keď doplníme do druhého políčka číslo $0$, tak do tretieho by sme museli napísať tiež číslo~$0$.
+  \item Keď doplníme do druhého políčka číslo $3$, tak do tretieho pôjde $3:3=1$, do štvrtého $1-1=0$ a do piateho $0\cdot 4=0$, teda by sme opäť použili dve rovnaké čísla.
+  \item Keď doplníme do druhého políčka číslo $6$, do tretieho musíme dať $6:3=2$. Potom do štvrtého pôjde $2-1=1$, do piateho $1\cdot 4 =4$ a do šiesteho $4:2=2$. V~treťom a~šiestom políčku by bolo napísané rovnaké číslo $2$.
+   \item Posledná možnosť je doplniť do druhého políčka číslo~$9$. Potom v~treťom musí byť $9:3=3$, vo~štvrtom
+$3-1=2$, v~piatom $2\cdot 4=8$, v~šiestom $8:2=4$, v~siedmom $4+3=7$ a~v~ôsmom $7-1=6$. V~prvom políčku musí byť také číslo, aby po pričítaní čísla~$4$ vyšlo číslo~$9$, teda $5$. Na \obr{} vidíme, že sme vpísali
+osem po sebe idúcich čísel $2$ až $9$, takže sme našli riešenie.
+\end{itemize}
+\noindent
+Keďže sme vyskúšali všetky možnosti, jediné riešenie je na obrázku \obrr1.
+\insp{z60ii.42}%
+
+\poznamka
+Čísla $0$ a~$3$ môžeme na druhom políčku vylúčiť aj takouto krátkou úvahou: Na druhom políčku je číslo o~$4$ väčšie ako na prvom, teda na druhom políčku musí byť číslo väčšie ako $3$ (inak by nemalo čo byť na prvom políčku). Stačí teda do druhého políčka skúsiť doplniť čísla $6$ a~$9$.
+
+
+\hodnotenie
+Pri postupe ako v~uvedenom riešení $1$ bod za určenie čísel v~druhom políčku; $1$ bod za každú z~prvých troch vetiev; $2$ body za správne vyplnený obrázok s kontrolou po sebe idúcich čísel.
+
+Pri postupe vypĺňania od prvého políčka $1$ za bod určenie, že do prvého políčka nesmie ísť číslo väčšie ako $5$;
+$2$ body za vylúčenie vpísania $0$, $1$, $3$, $4$ (zlyhá už pri delení tromi); $1$ bod za vylúčenie čísla $2$ v~prvom políčku; $2$ body za správne vyplnený obrázok s kontrolou po sebe idúcich čísel.
+\endhodnotenie
+}
+
+{%%%%%   Z4-II-2
+Odoberme jeden bicykel zo~všetkých bicyklov pred školou preč. Na základe prvej informácie vieme,
+že teraz je zostávajúcich bicyklov rovnako veľa ako áut. Keďže bicykel má polovicu kolies čo auto, tak
+tieto zostávajúce bicykle majú dokopy polovicu kolies čo všetky autá pred školou. Na základe druhej
+informácie v~zadaní by sme k~zostávajúcim (o jeden menej) bicyklom museli pridať až šesť bicyklov, aby
+mali všetky bicykle rovnako veľa kolies ako autá. Pridaných šesť bicyklov má druhú polovicu všetkých
+kolies čo majú autá pred školou. Čiže 12 kolies je polovica kolies všetkých áut. To znamená, že autá majú
+dokopy $2\cdot12=24$ kolies. Teda áut je $24:4=6$, zostávajúcich bicyklov je tiež šesť. Pred odobratím
+jedného bicykla ich teda muselo byť~$7$.
+
+%Odoberme jeden bicykel zo~všetkých bicyklov pred školou preč. Na základe prvej informácie vieme, že teraz
+%je bicyklov rovnako veľa ako áut. Keďže bicykel má polovicu kolies čo auto, tak tieto zvyšné bicykle majú dokopy polovicu kolies čo všetky autá pred školou. Na základe druhej informácie v zadaní by sme museli pridať až šesť bicyklov, aby mali všetky bicykle rovnako veľa kolies ako autá. Pridaných šesť bicyklov má druhú polovicu všetkých kolies čo majú autá pred školou. Čiže 12 kolies je polovica kolies všetkých áut, to znamená, že autá majú dokopy $2\cdot12=24$ kolies. Teda áut je $24:4=6$ a bicyklov musí byť o~jeden viac, teda $7$.
+
+\hodnotenie
+$3$ body za určenie že $6$ bicyklov má polovicu celkového počtu kolies áut; $2$ body za dourčenie počtu áut; $1$ bod za určenie počtu bicyklov.
+\endhodnotenie
+}
+
+{%%%%%   Z4-II-3
+Keďže $60$ strán je polovica knihy, Jankovi ostáva prečítať druhá polovica, čiže $60$ strán. Narodeniny má v~ten deň, kedy by dočítal knihu pri rýchlosti čítania $5$ strán za deň. Na prečítanie zvyšných $60$ strán takouto rýchlosťou čítania mu treba $60:5=12$ dní. Deň, keď si to Janko uvedomil, bol posledný január, takže čítať začne od prvého februára, skončí dvanásteho a~narodeniny musí mať teda 12. februára.
+
+\hodnotenie
+$2$ body za to, že ostáva prečítať $60$ strán; $2$ body za počet dní, ktoré na to treba; $2$ body za dourčenie presného dátumu.
+\endhodnotenie
+}
+
+{%%%%%   Z5-II-1
+Miro získal takýto rad cifier:
+$$
+7142128354249566370.
+$$
+Škrtnutím jedenástich cifier mu teda muselo zostať osemciferné číslo. Ak má byť
+toto číslo čo najväčšie (resp. najmenšie), musí mať na prvom mieste zľava,
+prípadne na prvých miestach zľava, čo najväčšie (resp. najmenšie) cifry.
+
+\smallskip
+a) Najväčšie číslo.
+Ak by bola na prvom mieste zľava menšia cifra ako na druhom mieste zľava, prvú
+cifru škrtneme a~číslo tak zväčšíme. Opäť porovnáme prvé dve cifry zľava, a~ak je prvá
+menšia, škrtneme ju, atď. Ak je na prvom mieste zľava väčšia cifra ako na
+druhom mieste zľava, žiadnu cifru neškrtáme a~spôsobom opísaným vyššie
+porovnáme druhú a~tretiu cifru zľava. Po každej škrtnutej cifre začíname
+kontrolu dvojíc cifier úplne zľava. Postup opakujeme tak dlho, kým
+neškrtneme 11~cifier.
+\bgroup
+\thinsize=0pt
+\thicksize=0pt
+$$
+\begintable
+\hfill\uline{71}42128354249566370   | neškrtáme nič\hfill\cr
+\hfill7\uline{14}2128354249566370   | škrtáme 1 (1. škrtnutá cifra)\hfill\cr
+\hfill\uline{74}2128354249566370    | neškrtáme nič\hfill\cr
+\hfill7\uline{42}128354249566370    | neškrtáme nič\hfill\cr
+\hfill74\uline{21}28354249566370    | neškrtáme nič\hfill\cr
+\hfill742\uline{12}8354249566370    | škrtáme 1 (2. škrtnutá cifra)\hfill
+\endtable
+$$
+Ďalší postup je analogický; uvádzame preto len okamihy, keď nejaké cifry škrtáme:
+$$
+\begintable
+\hfill742\uline{28}354249566370 | škrtáme 2 (3. škrtnutá cifra)\hfill\cr
+\hfill74\uline{28}354249566370  | škrtáme 2 (4. škrtnutá cifra)\hfill\cr
+\hfill7\uline{48}354249566370   | škrtáme 4 (5. škrtnutá cifra)\hfill\cr
+\hfill\uline{78}354249566370    | škrtáme 7 (6. škrtnutá cifra)\hfill\cr
+\hfill8\uline{35}4249566370 | škrtáme 3 (7. škrtnutá cifra)\hfill\cr
+\hfill854\uline{24}9566370  | škrtáme 2 (8. škrtnutá cifra)\hfill\cr
+\hfill854\uline{49}566370   | škrtáme 4 (9. škrtnutá cifra)\hfill\cr
+\hfill85\uline{49}566370    | škrtáme 4 (10. škrtnutá cifra)\hfill\cr
+\hfill8\uline{59}566370 | škrtáme 5 (11. škrtnutá cifra)\hfill
+\endtable
+$$
+%\egroup
+Najväčšie číslo, ktoré mohol Miro škrtaním dostať, je $89\,566\,370$.
+
+\smallskip
+b) Najmenšie číslo.
+Postupujeme podobne ako pri hľadaní najväčšieho čísla; škrtáme naopak väčšie
+cifry:
+$$
+\begintable
+\hfill\uline{71}42128354249566370   | škrtáme 7 (1. škrtnutá cifra)\hfill\cr
+\hfill\uline{14}2128354249566370    | neškrtáme nič\hfill\cr
+\hfill1\uline{42}128354249566370    | škrtáme 4 (2. škrtnutá cifra)\hfill
+\endtable
+$$
+Ďalej len skrátene:
+$$
+\begintable
+\hfill1\uline{21}28354249566370 | škrtáme 2 (3. škrtnutá cifra)\hfill\cr
+\hfill112\uline{83}54249566370  | škrtáme 8 (4. škrtnutá cifra)\hfill\cr
+\hfill1123\uline{54}249566370   | škrtáme 5 (5. škrtnutá cifra)\hfill\cr
+\hfill1123\uline{42}49566370    | škrtáme 4 (6. škrtnutá cifra)\hfill\cr
+\hfill112\uline{32}49566370 | škrtáme 3 (7. škrtnutá cifra)\hfill\cr
+\hfill11224\uline{95}66370  | škrtáme 9 (8. škrtnutá cifra)\hfill\cr
+\hfill1122456\uline{63}70   | škrtáme 6 (9. škrtnutá cifra)\hfill\cr
+\hfill112245\uline{63}70    | škrtáme 6 (10. škrtnutá cifra)\hfill\cr
+\hfill11224\uline{53}70 | škrtáme 5 (11. škrtnutá cifra)\hfill
+\endtable
+$$
+%\egroup
+Najmenšie číslo, ktoré mohol Miro dostať, je $11\,224\,370$.
+
+
+\ineriesenie
+Miro získal takýto rad cifier:
+$$
+7142128354249566370.
+$$
+Po škrtnutí jedenástich cifier mu teda muselo ostať osemciferné číslo. Ak má byť toto
+číslo čo najväčšie (resp. najmenšie), musí mať na prvých miestach
+zľava čo najväčšie (resp. najmenšie) cifry.
+Namiesto škrtania nadbytočných cifier budeme vyberať tie vhodné.
+
+\smallskip
+a) Najväčšie číslo.
+Cifra $9$ je v~rade iba raz a~najväčšie vybrané číslo začínajúce
+cifrou $9$ je $9\,566\,370$. Toto číslo je iba sedemciferné, takže hľadané
+číslo nemôže začínať cifrou~$9$.
+Druhá najväčšia cifra je~$8$, ktorá sa v~rade vyskytuje jedenkrát -- niekoľko miest pred cifrou~$9$.
+Najväčšie vybrané osemciferné číslo je teda $89\,566\,370$ (to je jediná možnosť, ako vieme cifru $9$ dostať na druhú pozíciu).
+
+\smallskip
+b) Najmenšie číslo.
+Cifrou $0$ začínať nemôžeme ani nechceme.
+(Navyše, vďaka tomu, že je táto cifra v~rade až na úplne poslednom mieste, môže
+byť vo vybranom čísle jedine na konci, preto ju v~nasledujúcich
+úvahách ignorujeme.)
+Cifra $1$~je v~rade dokopy dvakrát --
+môžeme obe vybrať ako prvé dve cifry hľadaného čísla, pretože v~rade
+máme napravo od druhej cifry $1$ ešte dostatok cifier na vytvorenie
+osemciferného čísla.
+Cifra $2$ sa vyskytuje za druhou cifrou~$1$ dvakrát -- môžeme tieto dve
+dvojky zvoliť ako tretiu a~štvrtú cifru hľadaného čísla, pretože
+v~rade ostáva napravo od poslednej cifry~$2$ ešte dostatok cifier na
+vytvorenie osemciferného čísla.
+Momentálne máme $1122{*}{*}{*}{*}$
+a~potrebujeme doplniť posledné štyri cifry zo zvyšku radu $49566370$.
+
+Cifra~$3$ za poslednou použitou cifrou~$2$ je jediná, ale použiť ju nemôžeme, pretože
+by sme nevedeli doplniť dostatok cifier do osemciferného čísla napravo od cifry~$3$.
+Cifra~$4$ za poslednou použitou cifrou~$2$ je tiež jediná -- vyberieme ju a~hľadáme posledné
+tri cifry.
+Najmenšia cifra za touto cifrou~$4$ je cifra~$3$ na predpredposlednom mieste -- keď ju
+vyberieme, posledné dve cifry sú už jasné.
+Najmenšie vybrané osemciferné číslo je teda $11\,224\,370$.
+
+\poznamka
+Predchádzajúce úvahy pomocou škrtania sa dajú prehľadne zhrnúť.
+
+a) Najväčšie číslo:
+$$
+\begintable
+\hfill\sout{714212}8354249566370\cr
+\hfill8\sout{35424}9566370%
+\endtable
+$$
+
+b) Najmenšie číslo:
+$$
+\begintable
+\hfill\sout{7}142128354249566370\cr
+\hfill1\sout{42}128354249566370\cr
+\hfill112\sout{8354}249566370\cr
+\hfill11224\sout{9566}370%
+\endtable
+$$
+\egroup
+
+\hodnotenie
+Udeľte 1~bod za správne napísaný pôvodný rad cifier (\tj. pred škrtaním).
+Ďalšie 3~body udeľte za nájdenie prvého z~čísel (najväčšieho alebo
+najmenšieho), z~toho 2~body za opísanie spôsobu škrtania cifier a~1~bod za
+správny výsledok.
+Posledné dva body udeľte za nájdenie druhého z~čísel, z~toho 1~bod za postup
+a~1~bod za správny výsledok.
+
+Riešenie, v~ktorom je stručne vysvetlený správny spôsob vyhľadávania škrtaných
+cifier (pri oboch číslach), považujte za správne a~úplné aj v~prípade, že nie je žiadna
+škrtaná cifra odôvodnená samostatne.
+Ak v~riešení nie je nijako naznačený správny postup, ohodnoťte úlohu
+nanajvýš 3~bodmi.
+Ak sa riešiteľ domnieva, že stačí vyškrtať z~celého radu cifier všetky
+najmenšie, resp. najväčšie cifry, udeľte mu nanajvýš 1~bod (za správne
+napísaný rad cifier).
+\endhodnotenie
+}
+
+{%%%%%   Z5-II-2
+Vieme, že v~pondelok skončil Miloslav v~Zubíne a~prešiel 25~míľ.
+Keďže v~piatok prešiel z~Kostína do Rytierova už iba 11~míľ, musí byť Kostín
+bližšie k~Rytierovu ako Zubín.
+
+Teda situáciu zo zadania vieme znázorniť tak, ako na \obr{} a~\obrnum.
+
+Cesta na turnaj:
+\insp{z60ii.1}%
+
+Cesta z~turnaja:
+\insp{z60ii.10}%
+
+Keďže vo štvrtok prešiel rytier o~6~míľ viac ako v~pondelok, musel vo štvrtok
+prejsť z~Veselína do Kostína $25 + 6 = 31$~míľ.
+
+To znamená, že celá vzdialenosť z~Rytierova do Veselína je $11 + 31 = 42$~míľ.
+Keďže je vzdialenosť medzi Rytierovom a~Zubínom 25~míľ, musí byť vzdialenosť
+medzi Zubínom a~Veselínom $42 - 25 = 17$~míľ.
+
+
+\hodnotenie
+2~body za určenie vzdialenosti medzi Kostínom a~Veselínom;
+2~body za určenie vzdialenosti medzi Rytierovom a~Veselínom;
+2~body za určenie vzdialenosti medzi Zubínom a~Veselínom.
+Vždy udeľte jeden bod za číselný údaj a~druhý bod za príslušné vysvetlenie.
+(Pokiaľ v~riešení chýba akékoľvek vysvetlenie postupu, udeľte za túto úlohu
+nanajvýš 3~body.)
+\endhodnotenie
+
+\poznamka
+Riešitelia by mohli pochopiť zadanie tak, že Miloslav musel prechádzať
+mestami Kostín, Zubín presne v~tomto poradí. Preto by vedeli nakresliť obrázok vyššie
+bez toho, aby riešili možné opačné usporiadanie. Kvôli tomu vynechanie akejkoľvek diskusie
+týkajúcej sa poradia miest netrestajte stratou bodov.
+
+\poznamka
+Namiesto výpočtov v~druhom odseku je možné uvažovať nasledovne:
+Keďže je vzdialenosť medzi Rytierovom a~Zubínom 25~míľ a~medzi Rytierovom a~Kostínom 11~míľ, je vzdialenosť medzi Kostínom a~Zubínom $25 - 11 = 14$~míľ.
+Takže vzdialenosť medzi Zubínom a~Veselínom musí byť $31 - 14 = 17$~míľ.
+Hodnotenie je v~tomto prípade obdobné.
+
+\ineriesenie
+V~pondelok Miloslav prešiel dva úseky celej cesty: prvý z~Rytierova do Kostína, druhý z~Kostína do Zubína.
+Vo štvrtok prešiel takisto dva úseky: z~Kostína do Zubína a~zo Zubína do Veselína. (Rytier Miloslav ich síce prešiel v~opačnom smere, ale to
+nemá na túto úvahu vplyv.) To znamená, že úsekom z~Kostína do Zubína prešiel v~oba tieto dni. Ak ale vo štvrtok prešiel o~6~míľ viac, musí byť úsek zo
+Zubína do Veselína o~6~míľ dlhší než úsek z~Ryteirova do Kostína. A~keďže z~Rytierova do Kostína je to 11~míľ, musí byť vzdialenosť medzi Zubínom a~Veselínom $11 + 6 = 17$~míľ.
+
+\hodnotenie
+Za porovnanie pondelkovej a~štvrtkovej cesty a~odôvodnenie, prečo je úsek medzi
+Zubínom a~Veselínom o~6~míľ dlhší ako úsek medzi Rytierovom a~Kostínom, udeľte
+5~bodov (či menej podľa kvality vysvetlenia).
+Posledný 1~bod udeľte za výsledný údaj 17~míľ.
+\endhodnotenie
+}
+
+{%%%%%   Z5-II-3
+Pomocou tabuľky budeme postupovať nasledovne:
+Začneme tým, že zvolíme počet krabíc s~červenými slnečníkmi, \tj. akékoľvek
+celé číslo medzi $0$ a~$6$ (keby bolo krabíc 7~alebo viac, bolo by už
+červených slnečníkov 63 alebo viac).
+Následne určíme, koľko červených slnečníkov je v~týchto krabiciach, \tj.
+deväťnásobok počtu krabíc.
+Potom vypočítame, koľko slnečníkov bude žltých, \tj. od $58$ odčítame počet
+červených slnečníkov.
+Nakoniec ešte zistíme, koľko by malo byť krabíc so žltými slnečníkmi, \tj.
+počet žltých slnečníkov vydelíme štyrmi.
+V~prípade, že počet žltých slnečníkov nie je násobok štyroch, teda nemôžeme
+deliť štyrmi bezo zvyšku, príslušné políčko preškrtneme -- takáto možnosť k~riešeniu úlohy nevedie.
+$$
+\begintable
+krabíc s~červenými slnečníkmi\hfill\|0|1|2|3|4|5|6\cr
+červených slnečníkov\hfill\|0|9|18|27|36|45|54\cr
+žltých slnečníkov\hfill\|58|49|\bf 40|31|22|13|\bf 4\cr
+krabíc so žltými slnečníkmi\hfill\|---|---|10|---|---|---|1%
+\endtable
+$$
+Dostávame dve možnosti:
+Žltých slnečníkov mohlo byť 40 alebo mohli byť 4.
+
+
+\poznamka
+Môžeme postupovať takisto tak, že volíme počet krabíc so žltými slnečníkmi a~dopočítame počty krabíc s~červenými slnečníkmi.
+V~tomto prípade však potrebujeme prebrať všetky možnosti medzi $0$~a~$14$
+($15\cdot 4 =60>58$).
+Dostaneme nasledujúcu tabuľku:
+$$
+\def\ctr#1{\hfil\ #1\ \hfil}
+\begintable
+krabíc so žltými sln.\hfill\|0|1|2|3|4|5|6|7|8|9|10|11|12|13|14\cr
+žltých slnečníkov\hfill\|0|\bf 4|8|12|16|20|24|28|32|36|\bf 40|44|48|52|56\cr
+červených slnečníkov\hfill\|58|54|50|46|42|38|34|30|26|22|18|14|10|6|2\cr
+krabíc s~červenými sln.\hfill\|---|6|---|---|---|---|---|---|---|---|2|---|---|---|---%
+\endtable
+$$
+
+\hodnotenie
+1~bod za vysvetlenie postupu pri jednom zvolenom (ľubovoľnom) počte krabíc
+s~červenými (resp. žltými) slnečníkmi;
+3~body za správne zostavenie a~doplnenie tabuľky alebo obdobný zápis;
+2~body za nájdenie oboch možných počtov slnečníkov.
+
+Ak riešiteľovi chýba z~nepozornosti niektorý stĺpec tabuľky, ale inak je jeho riešenie správne a aj~vysvetlené, udeľte mu 5~bodov.
+Úplný postup, ale bez slovného komentára, ohodnoťte 5~bodmi.
+Keď riešiteľ skončí s~vypisovaním stĺpcov tabuľky po nájdení prvého riešenia, udeľte mu nanajvýš 4~body.
+Ak nájde riešiteľ náhodne jedno riešenie a~neuvedie postup ani overenie, udeľte mu 1~bod; 2~body mu udeľte v~prípade, že svoj výsledok overí.
+\endhodnotenie
+}
+
+{%%%%%   Z6-II-1
+Suma v~{\it centoch}, ktorú pani Hundravá prevolala v~období od 1.\,7. do
+31.\,12., je celé číslo. Za každú začatú minútu sa účtuje
+9~centov, a~preto celá prevolaná suma za uvedené obdobie je bezo zvyšku deliteľná číslom
+deväť.
+
+Keďže počiatočný kredit je menší ako konečný, musela pani Hundravá počas
+sledovaného obdobia aspoň raz dobíjať. Keby dobíjala len raz, prevolaná
+suma by bola $314 + 800 - 706 = 408$~centov. Podľa ciferného súčtu čísla
+$408$ vidíme, že to nie je násobok deviatich, a~tak túto možnosť zavrhujeme. Keby
+dobíjala dvakrát, prevolaná suma by bola o~800 centov väčšia, teda 1208 centov. Túto
+možnosť zavrhujeme, pretože ani $1208$ nie je násobok deviatich. Podobne zamietneme aj možnosť troch dobití vedúcu k~sume 2\,008 centov. Ak by dobíjala štyrikrát, prevolaná suma by bola 2\,808 centov. To je možné, pretože $2\,808$ je násobkom
+deviatich. Pani Hundravá teda počas sledovaného obdobia dobíjala minimálne
+štyrikrát.
+
+\ineriesenie
+Je zrejmé, že pani Hundravá dobíjala svoj kredit aspoň raz. V~tabuľke
+budeme postupne uvažovať o~rôznych počtoch dobíjaní: vždy určíme prevolanú
+sumu za sledované obdobie a~koľkým minútam táto suma prislúcha. Budeme
+pokračovať tak dlho, kým počet účtovaných minút nevyjde celé
+číslo.
+$$
+\begintable
+počet dobíjaní | provolaná suma v~centoch | počet účtovaných minut \crthick
+1 | $314 + 800 - 706 = 408$ | $408 : 9 \doteq45,3$ \cr
+2 | $314 + 2\cdot800 - 706 = 1\,208$ | $1\,208 : 9 \doteq134,2$ \cr
+3 | $314 + 3\cdot800 - 706 = 2\,008$ | $2\,008 : 9 \doteq223,1$ \cr
+4 | $314 + 4\cdot800 - 706 = 2\,808$ | $2\,808 : 9 = 312$
+\endtable
+$$
+Pani Hundravá počas sledovaného obdobia dobíjala minimálne štyrikrát.
+
+\hodnotenie
+4 body za preverenie možností $408$, $1\,208$, $2\,008$, $2\,808$;
+1 bod za vysvetlenie, prečo možnosti zamietame;
+1 bod za správny záver.
+\endhodnotenie
+}
+
+{%%%%%   Z6-II-2
+Priesečník uhlopriečok v~obdĺžniku $KLMN$ označme~$S$.
+Ak je vzdialenosť bodu~$S$ od strany~$KL$ o~$2\cm$ menšia ako od strany~$LM$,
+znamená to, že strana~$KL$ je o~$2+2=4$\,(cm) dlhšia ako strana~$LM$ (\obr).
+\insp{z60ii.4}%
+
+Ak teda skrátime dĺžku obdĺžnika (\tj. strany $KL$ a~$MN$) o~$4\cm$,
+získame tak štvorec, ktorého strana je rovnaká ako šírka pôvodného obdĺžnika (\obr).
+Tento štvorec má obvod $56-2\cdot4 =48$\,(cm).
+\insp{z60ii.5}%
+
+Strana štvorca, a~teda aj strany $LM$ a~$NK$ obdĺžnika merajú $48:4 =12$\,(cm).
+To znamená, že strany $KL$ a~$MN$ merajú $12+4 =16$\,(cm).
+Obsah obdĺžnika je preto $S = 16\cdot12 =192\,(\Cm^2)$.
+
+\hodnotenie
+2~body za určenie vzťahov medzi stranami $KL$ a~$LM$;
+2~body za určenie veľkostí strán $KL$ a~$LM$ pomocou obvodu;
+2~body za určenie obsahu obdĺžnika.
+\endhodnotenie
+}
+
+{%%%%%   Z6-II-3
+Martinka je o~8~rokov staršia ako Tomáško a~o~1~rok staršia ako Jaromír,
+Jaromír je teda o~7~rokov starší ako Tomáško.
+Navyše chlapci majú dokopy 13~rokov.
+Keby bol Tomáško o~7~rokov starší (teda rovnako starý ako Jaromír), spolu by
+mali 20~rokov.
+Jaromír má teda 10~rokov a~Tomáško 3~roky.
+
+Z~toho už ľahko dopočítame vek ostatných vnúčat:
+Martinka je o~8~rokov staršia ako Tomáško, má teda 11~rokov;
+Katka je o~11~rokov staršia ako Tomáško, čiže má 14~rokov;
+Jaromír je o~4~roky starší ako Ivana, ktorá má preto 6~rokov; napokon,
+Vierka je o~7~rokov staršia od Ivany a musí mať 13~rokov.
+
+\hodnotenie
+3~body za určenie vekov oboch chlapcov (z~toho 1~bod je za uvedenie postupu);
+3~body za určenie vekov štyroch vnučiek (z~toho 1~bod je za uvedenie postupu).
+\endhodnotenie
+}
+
+{%%%%%   Z7-II-1
+Cifry vyhovujúceho štvorciferného čísla označme takto:
+$v$ je na mieste tisícok,
+$x$ na mieste stoviek,
+$y$ na mieste desiatok a~$z$ na mieste jednotiek.
+Prirodzené číslo je deliteľné piatimi práve vtedy, keď má na mieste jednotiek cifru $0$
+alebo~$5$.
+Po vyškrtnutí dvoch cifier z~pôvodného čísla sa na miesto jednotiek môžu
+dostať cifry $x$, $y$ alebo $z$, preto tieto cifry môžu byť jedine $0$
+alebo~$5$.
+Podľa zadania dostaneme po vyškrtnutí hociktorých dvoch cifier dvojciferné
+číslo.
+Takto vzniknuté číslo môže mať na mieste desiatok cifry $v$, $x$ alebo $y$,
+tieto cifry teda nemôžu byť~$0$.
+
+Zhrnutím oboch predošlých poznatkov dostávame, že cifra~$v$ môže byť rovná ľubovoľnej
+cifre od $1$ do $9$, cifry $x$ a~$y$ môžu byť jedine $5$ a~cifra $z$~môže
+byť $0$ alebo $5$.
+Spolu tak existuje $9\cdot 2 =18$ štvorciferných čísel vyhovujúcich zadaniu.
+
+\hodnotenie
+1~bod za poznatok, že po škrtaní sa na miesto jednotiek dostávajú cifry $x$,
+$y$, $z$;
+1~bod za podmienku $v,x,y\ne 0$;
+1~bod za zistenie, že $x$ a~$y$ je $5$;
+1~bod za poznatok, že $z$ je $0$ alebo $5$;
+1~bod za počet možností pre cifru~$v$;
+1~bod za výsledok $18$.
+
+Žiaka ohodnoťte plným počtom bodov, aj keď stanoví podmienky a~potom dôjde k~počtu 18 vypísaním všetkých vyhovujúcich čísel.
+Riešenie, v~ktorom sú vypísané všetky možnosti bez akéhokoľvek komentára,
+ohodnoťte nanajvýš 4~bodmi.
+\endhodnotenie
+}
+
+{%%%%%   Z7-II-2
+Hodiny v~kuchyni budú ukazovať presný čas, keď predbehnú skutočný čas
+o~12, 24, 36, \dots{} hodín.
+Prvý raz to bude vtedy, keď predbehnú skutočný čas o~12~hodín, čiže o~720 minút.
+To dosiahnu za $720 : 1{,}5 = 480$ hodín.
+Kuchynské hodiny budú opäť ukazovať presný čas za 480 hodín (čo
+je presne 20~dní), \tj. na poludnie 22.~apríla.
+
+\smallskip
+Hodiny v~spálni budú ukazovať opäť presný čas, keď sa oproti skutočnému
+času omeškajú o~12~hodín, čiže o~720 minút.
+To sa im "podarí" za $720 : 0{,}5 = 1\,440$ hodín.
+Hodiny v~spálni budú opäť ukazovať presný čas za 1\,440 hodín
+(čo je presne 60 dní), teda na poludnie 1.~júna.
+
+\smallskip
+Každú hodinu sa rozdiel času, ktorý ukazujú kuchynské hodiny, oproti času,
+ktorý ukazujú hodiny v~spálni, zvýši o~$1{,}5 + 0{,}5 = 2$ minúty.
+Tento rozdiel musí postupne dosiahnuť 720 minút, a~to sa stane za $720 : 2 =
+360$ hodín.
+Oboje hodiny budú opäť ukazovať rovnaký čas za 360 hodín (čo je presne 15~dní), čiže na poludnie 17.~apríla.
+
+\hodnotenie
+Každá časť úlohy je za 2~body, z~ktorých je vždy 1~bod za zdôvodnenie. Ak žiak uvedie ako odpoveď aj násobky uvedených intervalov (\tj. uvažuje všetky, nie iba najbližšie udalosti, kedy opísaný stav nastane), body nestŕhajte. Takisto body neuberajte, ak žiak nenapíše presné dátumy, ale odpoveď uvedie iba v~hodinách alebo dňoch, ktoré majú uplynúť od poludnia 2.~apríla.
+\endhodnotenie
+}
+
+{%%%%%   Z7-II-3
+Úsečka~$KL$ je v~trojuholníku $ABC$ strednou priečkou rovnobežnou s~$AB$, lebo
+$K$ a~$L$ sú stredy strán $BC$ a~$AC$.
+Platí teda $2|KL|=|AB|$ a~tiež vieme, že $|AL|=|LC|$ a~$|CK|=|KB|$ (\obr).
+\insp{z60ii.7}%
+
+Obvod trojuholníka $KLC$ je $|CK|+|KL|+|LC|=6$.
+Obvod štvoruholníka $ABKL$ je
+$$
+  |AB|+|BK|+|KL|+|LA|=10.
+$$
+Súčet na ľavej strane práve uvedenej rovnosti môžeme podľa
+predchádzajúcich pozorovaní vyjadriť ako $2|KL|+(|CK|+|KL|+|LC|)$, čiže
+$2|KL|+6$.
+Rovnosť tak získava tvar
+$$
+  2|KL|+6=10,
+$$
+odkiaľ dostávame $2|KL|=4$, \tj. $|KL|=2$\,(cm).
+
+\hodnotenie
+2~body za zistenie a~zdôvodnenie, že $|AB|=2|KL|$;
+2~body za úvahy o~obvodoch;
+2~body za výpočet $|KL|$.
+\endhodnotenie
+}
+
+{%%%%%   Z8-II-1
+Cifry mysleného dvojciferného čísla označme takto:
+$x$ je na mieste desiatok a~$y$ na mieste jednotiek.
+V~zadaní sa požaduje, aby súčet $x+y$ bol deliteľný tromi a
+$$
+10x + y -27 =10y + x,
+$$
+čo po úprave dáva
+$$
+\align
+9x - 9y &= 27, \\
+x -y &= 3.
+\endalign
+$$
+Keďže rozdiel cifier má byť tri a~súčasne súčet má byť deliteľný tromi,
+musia byť aj obe cifry $x$ a~$y$ deliteľné tromi.
+(To hneď vidíme, keď súčet cifier $x+y$ vyjadríme v~tvare
+$y+3+y$.)
+Jediné možnosti teda sú $x=9$, $y=6$ alebo $x=6$, $y=3$, \tj. hľadané číslo
+môže byť $96$ alebo $63$.
+(Možnosť $30$ nie je prípustná, lebo $03$ nie je dvojciferné prirodzené
+číslo.)
+
+\hodnotenie
+1~bod za zápis čísla a~čísla s~opačným poradím cifier;
+2~body za nájdenie vzťahu $x - y = 3$;
+2~body za určenie jedného riešenia;
+1~bod za určenie druhého riešenia.
+(Ak žiak uvádza ako riešenie číslo $30$, na bodové ohodnotenie jeho práce to
+nemá žiadny vplyv.)
+\endhodnotenie
+
+\ineriesenie
+Hľadané číslo je väčšie ako to, ktoré získame zámenou cifier, takže cifra
+na mieste jednotiek hľadaného čísla má nižšiu hodnotu ako cifra na mieste
+desiatok.
+Navyše vieme, že súčet týchto dvoch cifier je deliteľný tromi.
+Prejdeme teda všetky dvojciferné čísla, ktoré majú ciferný súčet deliteľný
+tromi a~cifru na mieste desiatok vyššiu ako cifru na mieste jednotiek (na
+mieste jednotiek samozrejme nemôže byť nula).
+Ku každému nájdeme číslo o~$27$ menšie, a~ak je zapísané tými istými
+ciframi, máme riešenie.
+$$
+\begintable
+  $96 - 27 = 69$ | 1. riešenie\hfill\cr
+  $93 - 27 = 66$ | \hfill\cr
+  $87 - 27 = 60$ | \hfill\cr
+  $84 - 27 = 57$ | \hfill\cr
+  $81 - 27 = 54$ | \hfill\cr
+  $75 - 27 = 48$ | \hfill\cr
+  $72 - 27 = 45$ | \hfill\cr
+  $63 - 27 = 36$ | 2. riešenie\hfill\cr
+  $54 - 27 = 27$ | \hfill\cr
+  $51 - 27 = 24$ | \hfill\cr
+  $42 - 27 = 15$ | \hfill\cr
+  $21 - 27 = -6$ | \hfill
+\endtable
+$$
+Hľadaným číslom môže byť $96$ alebo $63$.
+
+\hodnotenie
+3~body za vysvetlenie princípu hľadania čísel;
+3~body za nájdenie oboch riešení a~vylúčenie existencie ďalších riešení.
+\endhodnotenie
+}
+
+{%%%%%   Z8-II-2
+Je zrejmé, že ak sa objaví v~postupnosti niektoré číslo druhýkrát, bude sa
+opakovať celý úsek ohraničený dvoma výskytmi čísla stále dokola.
+Budeme teda vypisovať čísla postupnosti tak dlho, kým
+sa niektoré nezopakuje.
+\begin{itemize}
+  \item 1. číslo: 52,
+  \item 2. číslo: 14,
+  \item 3. číslo: 18,
+  \item 4. číslo: $8^2+2\cdot1=66$,
+  \item 5. číslo: $6^2+2\cdot6=48$,
+  \item 6. číslo: $8^2+2\cdot4=72$,
+  \item 7. číslo: $2^2+2\cdot7=18$,
+  \item 8. číslo: $8^2+2\cdot1=66$,
+  \item atd.
+\end{itemize}
+Od tretieho čísla sa v~postupnosti pravidelne opakujú čísla $18$, $66$, $48$ a~$72$.
+Číslo $18$ je teda na 3., 7., 11., 15., 19., 23. mieste, atď.
+Toto číslo sa bude vyskytovať aj na každom mieste, ktoré sa od ktoréhokoľvek
+už uvedeného miesta líši o~nejaký násobok štyroch.
+Keďže $2011=11+500\cdot4$, bude číslo $18$ aj na 2011.~mieste.
+
+\hodnotenie
+3~body za nájdenie čísel, ktoré sa opakujú;
+1~bod za zistenie, že 2011.~číslo je $18$;
+2~body za vysvetlenie, prečo je na 2011.~mieste práve toto číslo.
+\endhodnotenie
+}
+
+{%%%%%   Z8-II-3
+Stredy tetív $AB$ a~$CD$ označme $E$ a~$F$ (\obr).
+Trojuholníky $AES$, $EXS$ a~$SFD$ sú pravouhlé,
+$|AE|=\frac12|AB|=48\mm$, $|SX|=25\mm$ a~$|SA|=|SD|=52\mm$.
+\insp{z60ii.6}%
+
+Podľa Pytagorovej vety v~trojuholníku $AES$ dostávame
+$$
+|SE|^2=|SA|^2-|AE|^2 =52^2-48^2 =2\,704-2\,304 =400\,(\Mm^2).
+$$
+Podľa Pytagorovej vety v~trojuholníku $EXS$ dostávame
+$$
+|EX|^2=|SX|^2-|SE|^2 =25^2-400 =625-400 =225\,(\Mm^2).
+$$
+Keďže $EXFS$ je obdĺžnik, platí $|SF|=|EX|$;
+podľa Pytagorovej vety v~trojuholníku $SFD$ tak dostávame
+$$
+|FD|^2=|SD|^2-|SF|^2 =52^2-225 =2\,704-225 =2\,479\,(\Mm^2).
+$$
+Odtiaľ vyjadríme $|FD|=\sqrt{2\,479}\doteq 49{,}79$, príp. $|FD|\doteq 50$\,(mm), ak pracujeme s~presnosťou na celé mm.
+Tetiva $CD$ je teda dlhá presne $2\sqrt{2\,479}\mm$ a~približne $100\mm$.
+
+\hodnotenie
+1~bod za určenie $|AE|$;
+1~bod za určenie $|SE|$;
+1~bod za určenie $|EX|$;
+1~bod za určenie $|SF|$;
+1~bod za určenie $|FD|$;
+1~bod za určenie $|CD|$.
+\endhodnotenie
+}
+
+{%%%%%   Z9-II-1
+Označme jednotlivé cifry palindrómu písmenami. Skutočnosť, že dva
+štvorciferné palindrómy majú požadovaný rozdiel, môžeme zapísať takto:
+\algg{A&B&B&A\\ -C&D&D&C}{3&6&7&4}
+
+V~stĺpci tisícok a~v stĺpci jednotiek sa odčítavajú tie isté cifry. V~stĺpci tisícok vidíme,
+že $A>C$. Preto v~stĺpci jednotiek pri odčítaní nedochádza k~prechodu cez desiatku a~platí
+$$
+A-C=4.
+\tag1
+$$
+V~stĺpci desiatok a v~stĺpci stoviek, kde sa odčítajú rovnaké cifry, dochádza
+k~prechodu cez desiatku, pretože vo výsledku je na mieste desiatok
+cifra o~$1$ väčšia ako na mieste stoviek. Platí
+$$
+10 + B - D = 7,
+$$
+po úprave tejto rovnice dostaneme
+$$
+D -B = 3.
+\tag2
+$$
+Ešte urobme rozbor stĺpca tisícov, aby sme sa presvedčili, že zadaný rozdiel
+umožňuje nájsť vyhovujúce dvojice palindrómov. Keďže pri odčítaní
+v~stĺpci stoviek došlo k~prechodu cez desiatku, musí byť vo výsledku na
+mieste tisícov cifra o~$1$ menšia ako na mieste jednotiek. Vidíme, že to je
+v~zadanom rozdiele splnené.
+
+V~zadaní je štvorciferný palindróm definovaný ako štvorciferné prirodzené číslo
+určitých vlastností, preto $A\ne 0$ a~$C\ne 0$. Ak má byť navyše splnený vzťah \thetag1,
+môže byť $A$ jedine jedna z~cifier $9$, $8$, $7$, $6$, $5$~a~$C$ je potom vždy o~$4$ menšie.
+Zo vzťahu \thetag2 dostávame, že $D$ môže byť rovné jedine cifrám $9$, $8$, $7$, $6$, $5$,
+$4$ alebo $3$~a~$B$ je vždy o~$3$~menšie. Písmena $A$ a~$C$ tak môžeme nahradiť piatimi
+rôznymi dvojicami cifier a~písmena $B$ a~$D$ siedmimi rôznymi dvojicami cifier.
+Tieto dvojice môžeme medzi sebou akokoľvek párovať, dohromady teda dostávame
+$5\cdot 7= 35$ rôznych dvojíc palindrómov so~žiadanými vlastnosťami.
+
+\hodnotenie
+2~body za určenie, v~ktorých stĺpcoch dochádza k~prechodom cez desiatku a~v~ktorých nie;
+2~body za počty dvojíc $A$, $C$ a~$B$, $D$;
+2~body za výsledok.
+(Riešenie, v~ktorom sa za $C$ chybne dosadzuje $0$~a~ktoré tak príde k~výsledku $6\cdot 7=42$, môžete ohodnotiť až 5~bodmi.)
+\endhodnotenie
+}
+
+{%%%%%   Z9-II-2
+Pre dva rovnostranné trojuholníky s~dĺžkami strán $a$, $b$ platí, že pomer
+ich obsahov je $a^2:b^2$.
+Naopak, ak je pomer obsahov $a^2:b^2$, potom pomer strán je ${a:b}$.
+Toto tvrdenie sa dá zdôvodniť pravidlom pre dva podobné útvary alebo
+takisto explicitným výpočtom, pričom obsah rovnostranného trojuholníka so stranou
+$a$ je $\frac14{\sqrt3}a^2$.
+
+\smallskip
+1. Ak obsahy trojuholníkov $HIG$ a~$IEF$ sú v~pomere $4:16$, potom
+pomer ${|HI|:|IE|}$ ich strán bude $2:4=1:2$.
+
+\smallskip
+2. Ak zvolíme jednotku $j=\frac12|HI|$, tak $|IE|=|EF|=4j$.
+V~rovnostrannom trojuholníku $HEC$ platí $|HI|+|IE|=|EF|+|FC|$, $|IE|=|EF|$,
+preto $|FC|=|HI|=2j$. Ďalej z~pomeru $9:16$ obsahov trojuholníkov $DBE$ a~$IEF$
+vyplýva, že $|BE|:|EF|=3:4$, teda
+$$
+|BE| = \frac34|EF| = \frac34\cdot 4j = 3j.
+$$
+Preto strana $BC$ trojuholníka $ABC$ má veľkosť
+$$
+|BC|=|BE|+|EF|+|FC|=3j+4j+2j=9j.
+$$
+Podobne dĺžka strany $HE$ trojuholníka $HEC$ je
+$$
+|HE|=|HI|+|IE|=2j+4j=6j.
+$$
+Pomer strán trojuholníka $ABC$ a~$HEC$ je $9:6$, po skrátení $3:2$. Pomer
+obsahov týchto trojuholníkov je $3^2:2^2=9:4$.
+
+\hodnotenie
+1~bod za úvodnú úvahu;
+1~bod za prvú časť úlohy;
+po 1~bode za vyjadrenie strán trojuholníkov $HEC$ a~$ABC$;
+2~body za výpočet pomerov obsahov trojuholníkov $ABC$ a~$HEC$.
+(Výsledné pomery nemusia byť uvedené v~základnom tvare.)
+\endhodnotenie
+
+\ineriesenie
+Rozdeľme trojuholník $ABC$ na rovnostranné trojuholníčky s~dĺžkou strany
+$\frac12|HI|=1j$.
+Pomer $9:16:4$ obsahov trojuholníkov $DBE$, $IEF$, $HIG$ zodpovedá takisto pomeru počtov
+týchto trojuholníčkov v~príslušných trojuholníkoch. Keďže trojuholník $HIG$
+je rozdelený na 4~trojuholníčky, trojuholníky $IEF$ a~$DBE$ musia pozostávať
+zo 16 a~9~trojuholníčkov.
+\insp{z60ii.20}%
+
+Z~\obr{} vyplýva nasledujúce:
+
+1. Pomer $|HI|:|IE|$ je $2j:4j=1:2$.
+
+2. Pomer $S_{ABC}:S_{HEC}$ je zhodný s~pomerom počtov trojuholníčkov
+obsiahnutých v~týchto trojuholníkoch, teda $81:36=9:4$.
+
+\hodnotenie
+1~bod za rozdelenie trojuholníkov $HIG$ a~$IEF$ na trojuholníčky;
+1~bod za výpočet pomeru $|HI|:|IE|$;
+2~body za rozdelení zvyšnej plochy trojuholníka $ABC$ na trojuholníčky;
+2~body za výpočet pomeru $S_{ABC}:S_{HEC}$.
+(Výsledné pomery nemusia byť uvedené v~základnom tvare.)
+\endhodnotenie
+}
+
+{%%%%%   Z9-II-3
+Dĺžku strany štvorca $ABCD$ označíme~$a$ a~dĺžku strany štvorca $KLMN$
+označíme~$b$, obe v~centimetroch, pozri \obr. Cieľom úlohy je nájsť obvod
+šesťuholníka $AKNMCD$, a~ten je rovnaký ako obvod štvorca $ABCD$, \tj. $4a$.
+\insp{z60ii.3}%
+
+Obsah šesťuholníka $AKNMCD$ je rovný
+$$
+a^2 -b^2 = (a~- b)\cdot(a~+ b) = 225.
+$$
+Keďže podľa zadania je bod~$K$ vnútorným bodom úsečky~$AB$ a~$L=B$, je
+jasné, že $b\ne 0$ a~$b < a$. Činitele $a-b$ a~$a+b$ sú teda dve rôzne
+prirodzené čísla. V~tabuľke nižšie uvádzame všetky rozklady čísla $225$ na súčin
+dvoch rôznych prirodzených čísel (pri ich hľadaní nám pomôže rozklad čísla
+$225$ na prvočinitele: $225 = 3^2\cdot 5^2$). V~tabuľke neuvádzame konkrétne
+hodnoty $a$ a~$b$, pretože ich pri riešení úlohy nepotrebujeme. Avšak v~treťom
+stĺpci, kde sčítaním činiteľov $a~- b$ a~$a~+ b$ dostávame $2a$,
+kontrolujeme, či sme získali párne číslo, teda či $a$ je celé číslo.
+Ak $a$ je celé číslo, uvádzame vo štvrtom stĺpci hodnotu $4a$ ako možný
+obvod šesťuholníka $AKNMCD$.
+$$
+\begintable
+$a~- b$ | $a~+ b$ | $2a$ | $4a$ \crthick
+1 | 225 | 226 | 452\cr
+3 | 75 | 78 | 156\cr
+5 | 45 | 50 | 100\cr
+9 | 25 | 34 | 68%
+\endtable
+$$
+
+Úloha má štyri riešenia:
+obvod šesťuholníka $AKNMCD$ môže byť $68\cm$, $100\cm$, $156\cm$ a~$452\cm$.
+
+\ineriesenie
+Dĺžku strany štvorca $ABCD$ označíme~$a$ a~dĺžku strany štvorca
+$KLMN$ označíme~$b$. Šesťuholník $AKNMCD$ sa dá bezo zvyšku rozdeliť na dva
+rovnaké obdĺžniky a~štvorec, ktorého stranu označíme~$c$, všetko v~centimetroch,
+pozri \obr.
+\insp{z60ii.30}%
+
+Keďže podľa zadania je bod~$K$ vnútorným bodom úsečky~$AB$ a~$L = B$, je
+zrejmé, že $b > 0$ a~$c > 0$. Dĺžky $a$, $b$ sú podľa zadania celé čísla,
+dĺžka~$c$ takisto, pretože $c = a~-b$.
+
+Obsah šesťuholníka $AKNMCD$ môžeme vyjadriť takto:
+$$
+225 = 2bc + c^2.
+$$
+Do tejto rovnice budeme za $c$ postupne dosadzovať prirodzené čísla a~vždy
+určíme, či $b$ vychádza takisto prirodzené číslo. Tento postup ukazuje
+nasledujúca tabuľka, v~ktorej vynechávame overovanie všetkých párnych~$c$.
+Ak by totiž $c$ bolo párne, z~vyššie uvedenej rovnice by výraz $2bc$ vyšiel
+nepárny a~$b$ by tak nemohlo byť celé číslo.
+$$
+\begintable
+$c$ | $2bc=225-c^2$ | $b=2bc:2c$ \crthick
+1 | 224 | 112 \cr
+3 | 216 | 36 \cr
+5 | 200 | 20 \cr
+7 | 176 | 176 nie je deliteľné číslom 7 \cr
+9 | 144 | 8 \cr
+11 | 104 | 104 nie je deliteľné číslom 11 \cr
+13 | 56 | 56 nie je deliteľné číslom 13 \cr
+15 | 0 | 0
+\endtable
+$$
+
+Už sme uviedli, že $b > 0$, a~preto posledný riadok nevedie k~riešeniu úlohy.
+V~hľadaní možných riešení ďalej nepokračujeme, pretože $b$ by evidentne
+vychádzalo záporné. Úloha má teda práve štyri riešenia. Požadovaný obvod
+šesťuholníka $AKNMCD$ vypočítame ako $4b + 4c$.
+Obvod daného šesťuholníka teda môže byť $68\cm$, $100\cm$, $156\cm$ alebo
+$452\cm$.
+
+\hodnotenie
+Za každý výsledný obvod 1~bod;
+2~body za vysvetlený postup, ktorý musí ukazovať, že ďalšie riešenia nie sú.
+\endhodnotenie
+}
+
+{%%%%%   Z9-II-4
+Pri vytváraní ďalšieho čísla v~postupnosti využívame z~predchádzajúceho čísla
+iba cifru na mieste jednotiek. Keďže cifier je iba desať, po niekoľkých
+číslach postupnosti sa musia začať čísla opakovať (ale nie nutne od prvého,
+\tj. od čísla $128$).
+
+\smallskip
+1.
+Budeme postupne vypisovať čísla Martininej postupnosti, a~to tak dlho,
+pokiaľ sa nezačnú opakovať:
+\begin{itemize}
+  \item 1. číslo: $128$,
+  \item 2. číslo: $69$,
+  \item 3. číslo: $86$,
+  \item 4. číslo: $6^2+5=41$,
+  \item 5. číslo: $1^2+5=6$,
+  \item 6. číslo: $6^2+5=41$,
+  \item 7. číslo: $1^2+5=6$,
+  \item atď.
+\end{itemize}
+Je zrejmé, že od 4. čísla sa v~postupnosti pravidelne striedajú čísla $41$ a~$6$.
+Číslo $41$ sa vyskytuje vždy na párnom (počnúc
+štvrtým), číslo $6$~vždy na nepárnom mieste (počnúc piatym).
+My hľadáme 2011.~číslo.
+Pretože $2011$ je nepárne, je na tomto mieste číslo~$6$.
+
+\smallskip
+2.
+Číslo $16$ vzniklo ako súčet druhej mocniny jednociferného čísla (číslica na
+mieste jednotiek predchádzajúceho čísla) a~neznámej konštanty.
+Predchádzajúce číslo môže mať na mieste jednotiek jedine číslicu $0$~alebo $1$~alebo $2$~alebo $3$, takže hľadaná konštanta môže byť (postupne) $16$, $15$, $12$ alebo $7$.
+Keby totiž bola na mieste jednotiek predchádzajúceho čísla číslica $4$~alebo väčšia,
+nebola by hľadaná konštanta prirodzené číslo.
+
+Teraz vyskúšame, ktorá z~konštánt $16$, $15$, $12$ a~$7$~vyhovuje zadaniu. Postup je
+analogický postupu z~1.~časti úlohy.
+
+a) Konštanta $16$:
+\begin{itemize}
+  \item 1. číslo: $128$,
+  \item 2. číslo: $8^2+16=80$,
+  \item 3. číslo: $0^2+16=16$,
+  \item 4. číslo: $6^2+16=52$,
+  \item 5. číslo: $2^2+16=20$,
+  \item 6. číslo: $0^2+16=16$,
+  \item 7. číslo: $6^2+16=52$,
+  \item atď.
+\end{itemize}
+Od 3. čísla sa v~postupnosti opakujú čísla $16$, $52$ a~$20$.
+Zameráme sa len na príslušných 2009 čísel (\tj. 3. až 2011.).
+Keďže $2009:3=669$, zvyšok $2$, bude na 2011.~mieste druhé z~opakujúcich
+sa čísel, \tj. číslo $52$.
+Konštanta $16$ teda požiadavkám zo zadania nevyhovuje.
+
+b) Konštanta $15$:
+\begin{itemize}
+  \item 1. číslo: $128$,
+  \item 2. číslo: $8^2+15=79$,
+  \item 3. číslo: $9^2+15=96$,
+  \item 4. číslo: $6^2+15=51$,
+  \item 5. číslo: $1^2+15=16$,
+  \item 6. číslo: $6^2+15=51$,
+  \item atď.
+\end{itemize}
+Od 4. čísla  sa v~postupnosti striedajú čísla $51$ a~$16$; číslo $51$ na párnych
+miestach, číslo $16$ na nepárnych miestach.
+To znamená, že na 2011.~mieste (\tj. nepárnom mieste) bude číslo $16$.
+Číslo $15$ môže byť hľadaná konštanta.
+
+c) Konštanta $12$:
+\begin{itemize}
+  \item 1. číslo: $128$,
+  \item 2. číslo: $8^2+12=76$,
+  \item 3. číslo: $6^2+12=48$,
+  \item 4. číslo: $8^2+12=76$,
+  \item atď.
+\end{itemize}
+Od 2. čísla sa v~postupnosti striedajú čísla $76$ a~$48$, takže číslo $16$ v~tejto
+postupnosti vôbec nie je.
+Konštanta $12$ teda nevyhovuje.
+
+d) Konštanta $7$:
+\begin{itemize}
+  \item 1. číslo: $128$,
+  \item 2. číslo: $8^2+7=71$,
+  \item 3. číslo: $1^2+7=8$,
+  \item 4. číslo: $8^2+7=71$,
+  \item atď.
+\end{itemize}
+Od 2. čísla sa v~postupnosti striedajú čísla $71$ a~$8$, takže číslo $16$ sa
+nevyskytuje ani v~tejto postupnosti. Konštanta $7$~teda takisto nevyhovuje.
+
+\smallskip
+V~priebehu riešenia sme našli len jediné vyhovujúce číslo a~to číslo $15$,
+ktoré si Martina zvolila ako novú konštantu.
+
+
+\medskip\noindent{\bf Iné riešenie 2. časti.}
+Neznáma konštanta je nejaké prirodzené číslo.
+Nemôžeme vyskúšať všetky prirodzené čísla, ale pritom potrebujeme mať
+istotu, že nájdeme všetky riešenia úlohy.
+Ako už bolo predtým spomenuté pri riešení 1.~časti, každé číslo v~postupnosti ovplyvňuje
+len cifra na mieste jednotiek predchádzajúceho čísla a~pripočítaná konštanta.
+Preto napr. pri použití konštánt $1$ a~$11$ dostaneme síce rôzne postupnosti,
+ale zodpovedajúce si čísla budú mať vždy rovnakú cifru na mieste jednotiek.
+Rovnaké cifry na mieste jednotiek budú vychádzať pre ľubovoľné konštanty zo~skupiny
+$1$, $11$, $21$, $31$, \dots{}
+Podobne pri použití konštanty zo skupiny $2$, $12$, $22$, $32$, \dots{} alebo $3$, $13$,
+$23$, $33$, \dots{} atď.
+
+Najprv preto určíme, s~ktorou skupinou konštánt dostávame
+na mieste jednotiek cifru~$6$, preto sa sústredíme na 2011.~číslo v~zodpovedajúcej postupnosti.
+Za týmto účelom stačí preveriť iba postupnosti určené konštantami $1$, $2$,
+$3$, $4$, $5$, $6$, $7$, $8$, $9$~a~$10$.
+$$
+\begintable
+konštanta | postupnosť \hfill\crthick
+1 | 128,\ 65,\ 26,\ 37,\ 50,\ 1,\ 2,\ 5,\ 26,\ \dots \hfill\cr
+2 | 128,\ 66,\ 38,\ 66,\ \dots \hfill\cr
+3 | 128,\ 67,\ 52,\ 7,\ \dots\hfill\cr
+4 | 128,\ 68,\ \dots\hfill\cr
+5 | 128,\ 69,\ 86,\ 41,\ 6,\ 41,\ \dots\hfill\cr
+6 | 128,\ 70,\ 6,\ 42,\ 10,\ \dots\hfill\cr
+7 | 128,\ 71,\ 8,\ \dots\hfill\cr
+8 | 128,\ 72,\ 12,\ \dots\hfill\cr
+9 | 128,\ 73,\ 18,\ \dots\hfill\cr
+10 | 128,\ 74,\ 26,\ 46,\ \dots\hfill
+\endtable
+$$
+Číslica $6$ sa na mieste jednotiek objavuje len v~postupnostiach určených
+konštantou $1$, $2$, $5$, $6$ a~$10$.
+Tieto prípady teraz preberieme podrobnejšie.
+
+a) Konštanta $1$.
+V~tejto postupnosti sa od 3.~čísla na mieste jednotiek opakujú po rade
+cifry $6$, $7$, $0$, $1$, $2$, $5$.
+Zamerajme sa len na príslušných 2009 čísel (\tj. 3. až 2011.).
+Pretože $2009 : 6=334$, zvyšok $5$, bude medzi nimi 334 úplných šestíc čísel
+(končiacich 6, 7, 0, 1, 2, 5) a~z~nasledujúcej šestice prvých päť.
+To znamená, že 2011.~číslo postupnosti má na mieste jednotiek cifru~$2$.
+Takže konštanta, ktorú Martina pripočítala, nebola zo skupiny konštánt
+končiacich cifrou~$1$.
+
+b) Konštanta 2.
+Na mieste jednotiek sa striedajú po rade cifry $8$~a~$6$.
+Keďže číslo $2011$ je nepárne, bude na mieste jednotiek príslušného čísla
+postupnosti cifra $8$.
+Takže konštanta, ktorú Martina pripočítala, nebola ani z~tejto skupiny.
+
+\smallskip
+c) Konštanta $5$.
+Od 3. čísla sa striedajú na mieste jednotiek po rade cifry $6$~a~$1$; cifra~$6$ pri číslach na nepárnych miestach, cifra~$1$ pri číslach na párnych miestach.
+Keďže číslo $2011$ je nepárne, bude na mieste jednotiek príslušného čísla
+postupnosti cifra~$6$.
+Takže konštanta, ktorú Martina pripočítala, mohla byť z~tejto skupiny.
+
+Z~predchádzajúceho, \tj. 2010.~čísla pripočítame $1$ k~hľadanej konštante, čím
+dostaneme uvedené číslo $16$.
+Martina teda mohla pripočítať konštantu $16-1 = 15$.
+
+d) Konštanta $6$.
+Počínajúc 2. číslom sa na mieste jednotiek opakujú po rade cifry $0$, $6$~a~$2$.
+Zameráme sa len na príslušných 2010 čísel (\tj. 2. až 2011.).
+Keďže $2010 : 3 =670$ (bezo zvyšku), budú tvoriť 670 úplných trojíc čísel
+(končiacich $0$, $6$~a~$2$). To znamená, že 2011.~číslo postupnosti má na mieste
+jednotiek cifru~$2$ a~že Martina nepripočítala konštantu z~tejto skupiny.
+
+e) Konštanta $10$.
+Na mieste jednotiek sa počínajúc 3. číslom vyskytuje len číslica $6$.
+Takže konštanta, ktorú Martina pripočítala, by zatiaľ mohla byť aj~z~tejto skupiny.
+
+Z~predchádzajúceho, \tj. 2010.~čísla pripočítame $6^2=36$ k~hľadanej konštante, čím
+máme dostať číslo $16$.
+Toho sa dá docieliť jedine odčítaním (nie pripočítaním) prirodzeného čísla, takže
+Martina nemohla pripočítavať konštantu z~tejto skupiny.
+
+\smallskip
+Jedine v~odseku~c) sme našli vhodnú konštantu, ktorú mohla Martina
+pripočítať a~bolo číslo $15$.
+
+\poznamka
+Namiesto konštanty~$10$ môžeme preverovať konštantu~$0$. Tá síce nie je prirodzeným číslom (teda ona sama nemôže byť hľadaným riešením), ale patrí do rovnakej skupiny ako $10$ a~počítanie je s~ňou jednoduchšie.
+
+\hodnotenie
+1~bod za úvahu o~opakovaní cifier na mieste jednotiek (vrátane zdôvodnenia);
+2~body za nájdenie čísla~$6$ v~prvej časti a~vysvetlenie postupu;
+3~body za nájdenie konštanty~$15$ a~príslušné zdôvodnenie.
+Ak riešiteľ po nájdení konštanty~$15$ ďalej prestane hľadať, udeľte mu nanajvýš $5$~bodov.
+\endhodnotenie
+}
+
+{%%%%%   Z9-III-1
+Informácie zo zadania usporiadame do nasledujúcej tabuľky:
+$$
+\begintable
+| prvý deň | druhý deň \crthick
+počet kupcov\hfill | $n$ | $1{,}1 n$ \cr
+cena letáku (v centoch za osobu)\hfill | $x + 12$ | $x$ \cr
+celková denná tržba (v centoch)\hfill | $n(x+12)$ |  $1{,}1 nx$, resp.  $0{,}95 n(x+12)$
+\endtable
+$$
+Z~posledného políčka tabuľky zostavíme rovnicu, ktorú (za predpokladu
+$n>0$)  vyriešime:
+$$
+\align
+1{,}1 nx &= 0{,}95 n(x+12), \\
+1{,}1 x &= 0{,}95x +11{,}4, \\
+0{,}15 x &= 11{,}4, \\
+x &= 76.
+\endalign
+$$
+Cena letáka po zľave bola 76 centov (0,76€).
+
+\hodnotenie
+3~body za zostavenie tabuľky alebo jej obdobu, z~toho 1~bod %dohromady
+za informácie v~prvých dvoch riadkoch pod záhlavím a~2~body za informácie  v~poslednom riadku;
+2~body za zostavenie a~vyriešenie rovnice;
+1~bod za výsledok.
+
+Ak riešiteľ uvedie vo svojej práci variantu, že prvý deň nikto leták nekúpil, \tj.
+$n=0$, a že cena letáku po zľave mohla byť akákoľvek, nedá sa to uznať ako kompletné riešenie úlohy.
+%(V~zadaní je totiž uvedené, že sa druhý deň počet kupcov zvýšil o 10\,\%.)
+Ak riešiteľ nenájde riešenie pre $n>0$ ale má zostavenú správnu
+rovnicu, udeľte mu maximálne 4~body.
+
+Pokiaľ riešiteľ variantu pre $n=0$ pridá k správnemu riešeniu, body mu za to nestrhávajte.
+\endhodnotenie
+}
+
+{%%%%%   Z9-III-2
+Uhly $BMA$ a~$DMC$ majú rovnakú veľkosť, lebo sú vrcholové.
+Uhly $ABM$ a~$CDM$ majú rovnakú veľkosť, pretože sú striedavé.
+Trojuholníky $ABM$ a~$CDM$ sú teda podobné (podľa vety {\it uu\/}).
+Postupne zistíme pomer obsahov týchto dvoch trojuholníkov.
+\insp{z60ii.80}%
+
+Výšku lichobežníka označme $v$~a~výšku trojuholníka $CDM$ kolmú na stranu
+$CD$ označme $x$ (\obr). Pre obsahy trojuholníkov $CDM$ a~$CDA$ platí
+$$
+\aligned
+S_{CDM} &=\frac12 |CD|\cdot x=4\,(\Cm^2),  \\   %\,(\cm^2),
+S_{CDA} &=\frac12 |CD|\cdot v=12\,(\Cm^2).   %\cdot v= 12\,(\cm^2)
+\endaligned
+$$
+
+Porovnaním oboch výrazov zisťujeme, že $v=3x$. Výška trojuholníka $ABM$
+kolmá na stranu $AB$ je podľa obrázka rovná $v- x = 3x - x = 2x$.
+Podobné trojuholníky $CDM$ a~$ABM$ teda majú zodpovedajúce si výšky v~pomere
+$1:2$, obsahy týchto trojuholníkov sú preto v~pomere $1^2:2^2$, \tj.
+$1:4$.
+Obsah trojuholníka $ABM$ je
+$$
+S_{ABM} = 4\cdot S_{CDM} = 4\cdot 4 = 16\,(\Cm^2).
+$$
+
+K~vyriešeniu úlohy ostáva určiť obsah trojuholníka $MBC$.
+Z~obrázka jednoducho odvodíme vzťahy
+$$
+\aligned
+S_{AMD} &= S_{ABD}-S_{ABM}, \\
+S_{MBC} &= S_{ABC} - S_{ABM},
+\endaligned
+$$
+a~pretože $S_{ABC} = S_{ABD}$, platí
+$$
+S_{MBC} = S_{AMD}=8\,(\Cm^2).
+$$
+Obsah lichobežníka $ABCD$ získame sčítaním obsahov jednotlivých trojuholníkov:
+$$
+4 + 8 + 16 + 8 = 36\,(\Cm^2).
+$$
+
+\ineriesenie
+Trojuholníky $CDA$ a~$CDM$ majú spoločnú stranu $CD$.
+Pretože ich obsahy sú v~pomere $3:1$, musia byť aj~ich výšky kolmé na stranu $CD$ v~pomere $3:1$.
+Pokiaľ prvú z~týchto výšok označíme $v$, bude druhá z~nich rovná $\frac13v$.
+Výška trojuholníka $ABM$ kolmá na stranu $AB$ je rovná rozdielu uvedených
+výšok, teda $v-\frac13v =\frac23v$.
+
+Trojuholníky $ABD$ a~$ABM$ majú spoločnú stranu $AB$ a~práve sme ukázali,
+že ich výšky kolmé na~túto stranu sú v~pomere $3:2$. V rovnakom pomere
+musia byť aj~obsahy týchto trojuholníkov. Zo zadania vieme, že rozdiel obsahov je
+$8\cm^2$, obsah trojuholníka $ABD$ je teda $3\cdot8= 24\,(\Cm^2)$ a~obsah
+trojuholníka $ABM$ je $2\cdot8= 16\,(\Cm^2)$.
+
+Na určenie obsahu lichobežníka potrebujeme ešte poznať obsah trojuholníka $MBC$.
+Trojuholníky $CDA$ a~$CDB$ majú spoločnú stranu $CD$ a~zhodujú sa aj~vo
+výške kolmej na túto stranu, preto musia byť ich obsahy zhodné.
+Trojuholník $CDM$ tvorí spoločnú časť týchto trojuholníkov, zostávajúca časť
+trojuholníka $CDA$ musí mať rovnaký obsah ako zostávajúca časť trojuholníka
+$CDB$. Teda obsah trojuholníka $DAM$, ktorý je podľa zadania $8\cm^2$, je rovný
+obsahu trojuholníka $MBC$.
+
+
+Teraz už poznáme obsahy všetkých štyroch častí lichobežníka $ABCD$;
+obsah tohto lichobežníka je
+$$
+4 + 8 + 16 + 8 = 36\,(\Cm^2).
+$$
+
+\hodnotenie
+2~body za obsah trojuholníka $MBC$;
+1~bod za zistenie pomerov výšok trojuholníkov $CDM$ a~$CDA$;
+1~bod za určenie zodpovedajúcej výšky trojuholníka $ABM$;
+1~bod za obsah trojuholníka $ABM$;
+1~bod za správny záver.
+\endhodnotenie
+}
+
+{%%%%%   Z9-III-3
+Zadané dĺžky v~cm označíme $a$, $b$, $c$.
+Tieto isté dĺžky v~mm sú potom $10a$, $10b$, $10c$.
+Vyjadríme objemy a~povrchy vypočítané Cyrilom a~Mirkou:
+$$
+\aligned
+V_C &= abc,\\
+V_M &= 10a\cdot 10b\cdot 10c = 1000abc,\\
+S_C &= 2(ab + bc + ca), \\
+S_M &= 2(10a\cdot 10b + 10b\cdot 10c + 10c\cdot 10a) = 200(ab + bc + ca).
+\endaligned
+$$
+
+Podľa zadaných rozdielov zostavíme rovnice
+$$
+\aligned
+V_M - V_C &= 999abc = 17\,982, \\
+S_M - S_C &= 198(ab + bc + ca) = 5\,742,
+\endaligned
+$$
+ktoré upravíme:
+$$
+\aligned
+abc &= 18, \\
+ab + bc + ca &= 29.
+\endaligned
+$$
+
+
+Nájdeme všetky prípustné riešenia prvej rovnice, teda všetky možné rozklady
+čísla~$18$ na súčin troch prirodzených čísel.
+Pri každej z~týchto možností skontrolujeme, či platí aj~druhá rovnica
+(uvažujeme iba $a\le b\le c$):
+$$
+\begintable
+$a$|$b$|$c$|$ab + bc + ca$ \crthick
+1|1|18|$1 + 18 + 18 = 37$ \cr
+1|2|9|$2 + 18 + 9 = \text{\bf 29}$ \cr
+1|3|6|$3 + 18 + 6 = 27$\cr
+2|3|3|$6 + 9 + 6 = 21$
+\endtable
+$$
+Tabuľka ukazuje jediné riešenie vyhovujúce obom rovniciam,
+hrany zadaného kvádra teda majú dĺžky $10\mm$, $20\mm$ a~$90\mm$.
+
+\ineriesenie
+Prirodzené číslo vyjadrujúce objem kvádra
+v~$\Cm^3$ je tisíckrát menšie ako číslo vyjadrujúce objem v~$\Mm^3$.
+Podobne číslo vyjadrujúce povrch v~$\Cm^2$ je stokrát menšie ako číslo
+vyjadrujúce povrch v~$\Mm^2$.
+Zadanie úlohy zapísané pomocou algebrogramu vyzerá nasledovne:
+$$
+\centerline{
+\algg{J&K&0&0&0\\-\ &\ &\ &J&K}{1&7&9&8&2}
+\hskip3em
+\algg{X&Y&0&0\\-\ &\ &X&Y}{5&7&4&2}
+}
+$$
+
+Pri riešení postupujeme sprava a~vidíme, že
+písmeno sa dá nahradiť cifrou vždy jediným možným spôsobom.
+(Pri zostavovaní algebrogramu bolo jasné, že menšenec má mať rovnaký počet
+číslic ako rozdiel, a~to preto, že menšiteľ je o~niekoľko rádov menší ako
+menšenec a~zadaný rozdiel nezačína číslicou 9.)
+
+Algebrogramy majú jediné riešenie:
+$J=1$, $K=8$, \tj. $V_C=18\,(\Cm^3)$, a
+$X=5$, $Y=8$, \tj. $S_C=58\,(\Cm^2)$.
+Ďalej pokračujeme tabuľkou rovnako ako v~predchádzajúcom riešení.
+
+
+\hodnotenie
+1~bod za $V_C = 18$;
+1~bod za $S_C = 58$, prípadne za $ab + bc + ca = 29$;
+1~bod za zdôvodnenie postupu pri hľadaní objemu a~povrchu;
+2~body za všetky možné rozklady čísla $18$;
+1~bod za určenie správneho rozkladu.
+\endhodnotenie
+}
+
+{%%%%%   Z9-III-4
+a) Áno, na tabuľu môžeme napísať číslo $\frac{1}{60}$.
+Napríklad tak, že pripíšeme číslo~$\frac{1}{10}$, ktoré získame ako súčin
+čísel už napísaných: $\frac{1}{2}\cdot\frac{1}{5}$.
+A~potom napíšeme číslo $\frac{1}{60}$, lebo je priamo súčinom
+$\frac{1}{6}\cdot\frac{1}{10}$.
+
+\smallskip
+b) Áno, na tabuľu môžeme napísať číslo $\frac{2011}{375}$.
+Najprv ukážeme, že na tabuľu môžeme napísať číslo $\frac{1}{375}$.
+To sa dá rozložiť na súčin čísel, ktoré sú na tabuli od začiatku:
+$$
+\frac{1}{375} = \frac{1}{3}\cdot\frac{1}{5}\cdot\frac{1}{5}\cdot\frac{1}{5}.
+$$
+Vidíme teda, že k~pôvodným číslam môžeme postupne pripísať čísla
+$$
+\frac{1}{15} = \frac{1}{3}\cdot\frac{1}{5},\quad \frac{1}{75} = \frac{1}{5}\cdot\frac{1}{15}\quad\text{a}\quad
+\frac{1}{375} = \frac{1}{5}\cdot\frac{1}{75}.
+$$
+K~číslu $\frac{1}{375}$ môžeme pripísať ešte jedno také isté a síce ako
+súčin už napísaných čísel 1 a~$\frac{1}{375}$.
+Sčítaním $\frac{1}{375}$ a~$\frac{1}{375}$ dostaneme
+$\frac{2}{375}$ a~postupným pripočítavaním $\frac{1}{375}$ tak môžeme dôjsť k akémukoľvek zlomku, ktorý má v~menovateli $375$ a~v~čitateli prirodzené číslo.
+Teda môžeme dôjsť aj k~číslu $\frac{2011}{375}$.
+
+\smallskip
+c) Nie, na tabuľu nemôžeme napísať číslo $\frac{1}{7}$.
+Povolené sú jedine operácie sčítania a~násobenia zlomkov. Ukážeme, aký majú
+tieto operácie vplyv na menovateľ.
+(Zanedbáme, že počas týchto operácii môžeme zlomky aj krátiť. Na náš záver
+toto zanedbanie nebude mať vplyv.)
+\begin{itemize}
+  \item Pokiaľ násobíme dva zlomky, je v menovateli výsledku súčin
+    menovateľov pôvodných zlomkov.
+  \item Keď sčítame dva zlomky, je v menovateli výsledku súčin,
+    respektíve najmenší spoločný násobok menovateľov pôvodných zlomkov.
+\end{itemize}
+V~prvočíselnom rozklade súčinu, poprípade najmenšieho menovateľa násobku dvoch čísel
+nemôže byť prvočíslo, ktoré nebolo v~prvočíselnom rozklade
+žiadneho z~pôvodných dvoch čísel.
+Takže nech by sme robili akékoľvek povolené operácie, nikdy nedostaneme menovateľ,
+v~ktorého rozklade je prvočíslo, ktoré dovtedy nebolo v~rozklade žiadneho
+napísaného menovateľa.
+Keďže žiadne z menovateľov, ktoré máme na začiatku k~dispozícii, nemá vo~svojom prvočíselnom
+rozklade 7, nedokážeme dôjsť k~$\frac{1}{7}$.
+
+\hodnotenie
+V~časti~a) udeľte 1~bod za zdôvodnenú odpoveď, pričom oceňte aj tvrdenie:
+"Dá sa to, lebo $\frac{1}{60} = \frac{1}{2}\cdot\frac{1}{5}\cdot\frac{1}{6}$."
+
+V~časti b) udeľte 2~body za popis akéhokoľvek postupu vedúceho k~$\frac{2011}{375}$.
+(Pokiaľ postup nie je uvedený, môžete udeliť jeden bod za postreh, že v čitateli sa dá získať vďaka sčítaniu akékoľvek prirodzené číslo.)
+
+V~časti c) udeľte celkom 3~body, z~toho 2~body za vysvetlenie, aký má na
+menovateľ vplyv násobenie a~aké sčítanie, a~1~bod za konštatovanie, že
+násobením a~najmenšími spoločnými násobkami nezískame nové prvočíslo.
+\endhodnotenie
+}
+

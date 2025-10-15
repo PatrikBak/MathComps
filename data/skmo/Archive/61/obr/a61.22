@@ -1,0 +1,59 @@
+%!PS
+%%BoundingBox: -10 -9 112 60 
+%%HiResBoundingBox: -9.57199 -8.90779 111.98006 59.93192 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2012.03.13:1353
+%%Pages: 1
+%*Font: cmmi10 9.96265 9.96265 0c:80000040000207e9cdae060100a
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 0 0 setrgbcolor 0 0.56693 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+85.03935 0 lineto
+102.04697 51.02412 lineto
+17.00761 51.02412 lineto
+ closepath stroke
+ 0 1.13385 dtransform truncate idtransform setlinewidth pop 1 setlinecap
+newpath 76.53555 56.97621 moveto
+25.51141 -5.95207 lineto stroke
+ 0 0.28348 dtransform truncate idtransform setlinewidth pop
+ [3 3 ] 1.5 setdash
+newpath 0 0 moveto
+102.04697 51.02412 lineto stroke
+newpath 85.03935 0 moveto
+17.00761 51.02412 lineto stroke
+ 1 1 1 setrgbcolor
+newpath 52.15733 25.51207 moveto
+52.15733 25.8128 52.03786 26.10118 51.82523 26.31381 curveto
+51.6126 26.52644 51.32422 26.64592 51.02348 26.64592 curveto
+50.72275 26.64592 50.43437 26.52644 50.22174 26.31381 curveto
+50.00911 26.10118 49.88963 25.8128 49.88963 25.51207 curveto
+49.88963 25.21133 50.00911 24.92296 50.22174 24.71033 curveto
+50.43437 24.4977 50.72275 24.37822 51.02348 24.37822 curveto
+51.32422 24.37822 51.6126 24.4977 51.82523 24.71033 curveto
+52.03786 24.92296 52.15733 25.21133 52.15733 25.51207 curveto closepath fill
+ 0 0 0 setrgbcolor 0 0.56693 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash
+newpath 52.15733 25.51207 moveto
+52.15733 25.8128 52.03786 26.10118 51.82523 26.31381 curveto
+51.6126 26.52644 51.32422 26.64592 51.02348 26.64592 curveto
+50.72275 26.64592 50.43437 26.52644 50.22174 26.31381 curveto
+50.00911 26.10118 49.88963 25.8128 49.88963 25.51207 curveto
+49.88963 25.21133 50.00911 24.92296 50.22174 24.71033 curveto
+50.43437 24.4977 50.72275 24.37822 51.02348 24.37822 curveto
+51.32422 24.37822 51.6126 24.4977 51.82523 24.71033 curveto
+52.03786 24.92296 52.15733 25.21133 52.15733 25.51207 curveto closepath stroke
+-9.57199 -8.90779 moveto
+(A) cmmi10 9.96265 fshow
+87.13934 -8.90779 moveto
+(B) cmmi10 9.96265 fshow
+104.14696 53.12411 moveto
+(C) cmmi10 9.96265 fshow
+6.38263 53.12411 moveto
+(D) cmmi10 9.96265 fshow
+46.50572 13.70427 moveto
+(X) cmmi10 9.96265 fshow
+showpage
+%%EOF

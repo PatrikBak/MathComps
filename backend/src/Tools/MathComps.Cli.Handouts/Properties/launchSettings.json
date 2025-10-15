@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ParseHandouts": {
+      "commandName": "Project",
+      "commandLineArgs": "*-sk.tex",
+      "workingDirectory": "."
+    }
+  }
+}

@@ -1,0 +1,69 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 8 -9 77 9 
+%%HiResBoundingBox: 8.25392 -8.75392 76.7853 8.75392 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2012.08.23:1451
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font CMSY10
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font CMSY10
+%%IncludeResource: font CMSY10
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /cmsy10 /CMSY10 def
+%%EndSetup
+%%Page: 1 1
+ 0.5 setgray
+newpath 76.5353 0 moveto
+76.5353 2.25548 75.63918 4.41832 74.04443 6.01306 curveto
+72.44969 7.6078 70.28685 8.50392 68.03137 8.50392 curveto
+65.7759 8.50392 63.61305 7.6078 62.01831 6.01306 curveto
+60.42357 4.41832 59.52745 2.25548 59.52745 0 curveto
+59.52745 -2.25548 60.42357 -4.41832 62.01831 -6.01306 curveto
+63.61305 -7.6078 65.7759 -8.50392 68.03137 -8.50392 curveto
+70.28685 -8.50392 72.44969 -7.6078 74.04443 -6.01306 curveto
+75.63918 -4.41832 76.5353 -2.25548 76.5353 0 curveto closepath fill
+ 0 setgray 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinejoin 10 setmiterlimit
+newpath 25.51176 0 moveto
+25.51176 2.25548 24.61565 4.41832 23.0209 6.01306 curveto
+21.42616 7.6078 19.26332 8.50392 17.00784 8.50392 curveto
+14.75237 8.50392 12.58952 7.6078 10.99478 6.01306 curveto
+9.40004 4.41832 8.50392 2.25548 8.50392 0 curveto
+8.50392 -2.25548 9.40004 -4.41832 10.99478 -6.01306 curveto
+12.58952 -7.6078 14.75237 -8.50392 17.00784 -8.50392 curveto
+19.26332 -8.50392 21.42616 -7.6078 23.0209 -6.01306 curveto
+24.61565 -4.41832 25.51176 -2.25548 25.51176 0 curveto closepath stroke
+newpath 59.52745 0 moveto
+59.52745 2.25548 58.63133 4.41832 57.03659 6.01306 curveto
+55.44185 7.6078 53.279 8.50392 51.02353 8.50392 curveto
+48.76805 8.50392 46.60521 7.6078 45.01047 6.01306 curveto
+43.41573 4.41832 42.5196 2.25548 42.5196 0 curveto
+42.5196 -2.25548 43.41573 -4.41832 45.01047 -6.01306 curveto
+46.60521 -7.6078 48.76805 -8.50392 51.02353 -8.50392 curveto
+53.279 -8.50392 55.44185 -7.6078 57.03659 -6.01306 curveto
+58.63133 -4.41832 59.52745 -2.25548 59.52745 0 curveto closepath stroke
+newpath 76.5353 0 moveto
+76.5353 2.25548 75.63918 4.41832 74.04443 6.01306 curveto
+72.44969 7.6078 70.28685 8.50392 68.03137 8.50392 curveto
+65.7759 8.50392 63.61305 7.6078 62.01831 6.01306 curveto
+60.42357 4.41832 59.52745 2.25548 59.52745 0 curveto
+59.52745 -2.25548 60.42357 -4.41832 62.01831 -6.01306 curveto
+63.61305 -7.6078 65.7759 -8.50392 68.03137 -8.50392 curveto
+70.28685 -8.50392 72.44969 -7.6078 74.04443 -6.01306 curveto
+75.63918 -4.41832 76.5353 -2.25548 76.5353 0 curveto closepath stroke
+29.03433 -1.8275 moveto
+(!) cmsy10 9.96265 fshow
+showpage
+%%EOF

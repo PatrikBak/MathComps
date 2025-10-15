@@ -1,0 +1,563 @@
+\input template
+
+\Title{Algebra}
+
+\Subtitle{Rozklady na súčin}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Prečo je dobré vedieť rozkladať zložité výrazy na súčin? Predstavte si, že máte dokázať, že číslo $n^3-n$ je pre každé celé číslo $n$ deliteľné šiestimi. Bez úpravy je to nejasné. Stačí však výraz rozložiť:
+$$
+n^3-n = n(n^2-1) = (n-1)n(n+1).
+$$
+Zrazu vidíme súčin troch po sebe idúcich čísel, z~ktorých je vždy aspoň jedno párne a~práve jedno deliteľné tromi. Deliteľnosť šiestimi je tak zrejmá.
+
+Schopnosť premeniť neprehľadný súčet na prehľadný súčin je jednou z~kľúčových techník pri riešení trikových matematických úloh\fnote{Táto myšlienka rozkladania výrazov je stará tisíce rokov -- už starovekí Babylončania a~Gréci riešili problémy, ktoré dnes zapisujeme ako kvadratické rovnice, pomocou geometrických metód, ktoré boli v~podstate vizuálnym rozkladom na súčin.}. V~tejto lekcii si systematicky odvodíme známe rozklady, vysvetlíme triky a~intuíciu za nimi a~všetko si precvičíme na príkladoch.
+
+\sec Teória 
+
+V tejto časti si postupne predstavíme štyri kľúčové techniky rozkladu na súčin. Začneme od základných vzorcov, prejdeme k~všeobecnej metóde postupného vynímania a~nakoniec si vysvetlíme dopĺňanie na štvorec. Ako zaujímavosť si tiež ukážeme, že dopĺňať sa dá nielen na štvorec, ale aj na kocku, a~prekvapivo to môže mať úžitok.
+
+\secc Vzorce pre rozdiel a súčet mocnín
+
+\Exercise{}{
+	Presvedčte sa roznásobením, že platí 
+	\begitems \style i
+	\i $a^2-b^2=(a-b)(a+b)$
+	\i $a^3-b^3=(a-b)(a^2+ab+b^2)$
+	\i $a^4-b^4=(a-b)(a^3+a^2b+ab^2+b^3)$
+	\enditems
+	Ako bude vyzerať všeobecný vzorec pre $a^n-b^n$ pre prirodzené $n$?
+}{
+	Odpoveďou na otázku je Tvrdenie 1.
+}
+
+\Exercise{}{
+	Presvedčte sa roznásobením, že platí 
+	\begitems \style i
+	\i $a^3+b^3=(a+b)(a^2-ab+b^2)$
+	\i $a^5+b^5=(a+b)(a^4-a^3b+a^2b^2-ab^3+b^4)$
+	\enditems
+	Ako bude vyzerať všeobecný vzorec pre $a^n+b^n$ pre nepárne prirodzené $n$?
+}{
+	Odpoveďou na otázku je Tvrdenie 2.
+}
+
+Po chvíli skúmania iste vymyslíme všeobecné vzorce:
+
+\Theorem{}{
+	Pre všetky reálne čísla $a,b$ a~prirodzené $n$ platí
+	$$
+	a^n - b^n = (a-b)(a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1})
+	$$
+}{
+	Odčítame vyjadrenia:
+	$$
+	\align
+	a(a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1}) &= a^n  + a^{n-1}b + \cdots + ab^{n-1}  \\
+	b(a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1}) &= \hskip1cm a^{n-1}b + \cdots + ab^{n-1} + b^n
+	\endalign
+	$$
+	Naľavo môžeme vyňať veľkú zátvorku a~dostaneme presne pravú stranu dokazovaného vzorca. Napravo sa zasa všetky členy zrušia. Tvrdenie je dokázané.
+}
+
+Situácia s~$a^n+b^n$ je kurioznejšia v~tom, že takýto rozklad funguje iba pre nepárne~$n$. Z~dôkazu vidieť prečo:
+
+\Theorem{}{
+	Pre všetky reálne čísla $a,b$ a~nepárne prirodzené $n$ platí
+	$$
+	a^n + b^n = (a+b)(a^{n-1}-a^{n-2}b+\cdots-ab^{n-2}+b^{n-1})
+	$$
+}{
+	Tvrdenie je možné dokázať podobne ako predošlé -- sledovať, ktoré členy sa odčítajú pri roznásobení pravej strany. Za zmienku ale stojí trikovejší dôkaz, v~ktorom do vzorca pre $a^n-b^n$ dosadíme namiesto $b$ hodnotu $-b$. Vďaka nepárnosti $n$ potom $a^n-(-b)^n=a^n+b^n$. Každý druhý člen zátvorky $a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1}$ pri nahradení $b$ za $-b$ zmení znamienko.
+}
+
+Ako je to pre párne $n$? O~výraze $a^2+b^2$ sa dá dokázať, že sa naozaj nedá rozložiť na súčin (v obore reálnych čísel). Všetky ďalšie $a^n+b^n$ sa však rozložiť dajú, k~čomu sa postupne dopracujeme. 
+
+\Exercise{}{
+	Rozložte na súčin dvoch výrazov bez odmocnín ($n,k$ sú prirodzené čísla).
+	\begitems \style i
+	\i $a^3-27$
+	\i $a^3+8b^3$
+	\i $a^4-4^n$
+	\i $a^6+b^6$
+	\i $a^{4k+2}+b^{4k+2}$
+	\enditems
+}{
+	Jednotlivé rozklady sú
+	\begitems \style i
+	\i $a^3-27 = a^3 - 3^3 = (a-3)(a^2+3a+9)$
+	\i $a^3+8b^3 = a^3 + (2b)^3 = (a+2b)(a^2-2ab+4b^2)$
+	\i $a^4-4^n = (a^2)^2 - (2^n)^2 = (a^2-2^n)(a^2+2^n)$
+	\i $a^6+b^6 = (a^2)^3 + (b^2)^3 = (a^2+b^2)(a^4 - a^2b^2 + b^4)$
+	\i $a^{4k+2}+b^{4k+2}=(a^{2})^{2k+1}+(b^{2})^{2k+1}=(a^{2}+b^{2})(a^{4k}-a^{4k-2}b^{2}+\cdots-a^{2}b^{4k-2}+b^{4k})$
+	\enditems
+}
+
+V~zložitejších úlohách je rozklad typicky len jeden z~viacerých krokov. Môžeme si vyskúšať:
+
+\Problem{0}{}{
+	Dokážte, že pre každé prirodzené~$n$ platí, že číslo $n^5-n$ je deliteľné 30.
+}{
+	Skúmaný výraz rozložte na súčin čo najviac zátvoriek.
+}{
+	Hľadaný rozklad je $n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)$. Aby sme vyšetrili deliteľnosť 30, tak stačí separátne vyšetriť deliteľnosť $2$, $3$, $5$.
+}{
+	Platí $n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)$. Stačí dokázať, že tento výraz je deliteľný $2$, $3$, $5$. 
+	\begitems
+	\style i
+	\i deliteľnosť $2$ plynie z~toho, že z~po sebe idúcich čísel $n$, $n-1$ je aspoň jedno párne;
+	\i podobne deliteľnosť $3$ vyplýva z~čísel $n-1$, $n$, $n+1$;
+	\i deliteľnosť $5$ je zložitejšia. Iste keď $n$ dáva po delení 5 zvyšok 0, 1 alebo 4, tak sme hotoví, kvôli činiteľom $n$, $n-1$, $n+1$. Potom ak $n=5k+2$ alebo $n=5k+3$, tak $n^2+1 = 25k^2+20k+5$ alebo $n^2+1=25k^2+30k+10$, takže znova máme číslo deliteľné 5.
+	\enditems
+}
+
+\Problem{0}{}{
+	Nájdite tri rôzne dvojice $(a,b)$ také, že $a^{37} + b^{37}$ je číslo deliteľné~7 a~$0<a<b<7$.
+}{
+	Rozklad $a^{37}+b^{37}$ nám napovie oveľa jednoduchšiu deliteľnosť, ktorá stačí.
+}{
+	Keďže $a^{37}+b^{37}=(a+b)(\cdots)$, tak stačí, aby $7 \mid a+b$.
+}{
+	Platí $a^{37}+b^{37}=(a+b)(a^{36}+\cdots+b^{36})$, takže $a+b \mid a^{37}+b^{37}$, takže stačí, aby $7 \mid a+b$. To už ľahko docielime dvojicami $(a,b)$ rovnými $(1,6), (2,5), (3,4)$.
+}
+
+\Problem{1}{}{
+	Nájdite všetky prirodzené čísla $n$ väčšie ako 1 také, že $n^6-1$ je súčinom troch nie nutne rôznych prvočísel.
+}{
+	Výraz $n^6-1$ sa dá rozložiť na súčin veľa zátvoriek.
+}{
+	Jeden možný rozklad je $n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)$. Druhá zátvorka sa síce dá rozložiť, ale nie je vôbec evidentné ako. Lepší rozklad je $n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)$. Z~tohto rozkladáme ďalej. Následne už máme aspoň 4 činitele, čo znie podozrivo, ak má číslo byť súčinom troch prvočísel.
+}{
+	Máme rozklad
+	$$
+	n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)=(n-1)(n^2+n+1)(n+1)(n^2-n+1).
+	$$
+	Aby toto bolo súčinom troch prvočísel, tak jedna zátvorka musí byť rovná 1. Pre $n>1$ to je možné len pri prvej, kedy $n=2$. Vtedy naozaj máme $2^6-1=63=3\cdot3\cdot7$.
+}
+
+\secc Postupné vynímanie
+
+Bežný školský postup postupného rozkladu funguje aj v~ťažších úlohách. Idea je: všimnime si, že sa niečo dá vybrať pred zátvorku; vyberme to; a~uvidíme, čo sa stane ďalej. K~tomuto postupu existuje veľmi dôležitý trik použiteľný aj v~ťažších úloh: \textit{sledujme, kedy je výraz nulový}.
+
+\Example{}{
+	Rozložte výraz $a^4-a-b^4+b$ na súčin. 
+}{
+	Bez toho, aby sme videli výsledný rozklad, tak vieme povedať, že v~ňom bude $a-b$, pretože skúmaný výraz je pre $a=b$ rovný 0. Vďaka tomu cieľavedome preusporiadame členy ako $(a^4-b^4)+(a-b)$. Teraz vieme z~oboch výrazov vybrať $a-b$ pred zátvorku a~máme $(a-b)(a^3+a^2b+ab^2+b^3)+(a-b)=(a-b)(a^3+a^2b+ab^2+b^3+1)$.
+}
+
+Tento pohľad vysvetľuje, prečo vo vzorcoch $a^n-b^n$ a~$a^n+b^n$ z~predošlej sekcie máme $a-b$ a~$a+b$; a~tiež prečo druhý vyžaduje nepárne $n$ -- pre $a=b$ resp. $a=-b$ sú $a^n-b^n$ resp. $a^n + b^n$ nulové.
+
+\Exercise{}{Rozložte na súčin: 
+\begitems \style i
+\i [2 činitele] $2ab+a+2b+1$
+\i [3 činitele] $abc+ab+bc+ca+a+b+c+1$
+\i [3 činitele] $a^2(b-c) + b^2(c-a) + c^2(a-b)$
+\i [4 činitele] (ťažšie\fnote{Prísť na tento rozklad bol prvým krokom k~riešeniu 3. úlohy z~IMO 2006}) $ab(a^{2}-b^{2})+bc(b^{2}-c^{2})+ca(c^{2}-a^{2})$
+\enditems}{
+	Jednotlivé rozklady sú:
+	\begitems \style i
+	\i Zrejmým nulovým bodom je $a=-1$, vo výsledku čakáme $a+1$. Ľahko nájdeme $2ab+a+2b+1=(a+1)(2b+1)$.
+	\i Tu zas platí, že kedykoľvek je nejaké z~čísel $a,b,c$ rovné $-1$, tak výraz bude nulový. Vo výsledku teda čakáme $(a+1)(b+1)(c+1)$. Dokonca je to všetko: $abc+ab+bc+ca+a+b+c+1=(a+1)(b+1)(c+1)$. Postupne k~tomu vieme prísť takto: 
+	$$
+	\gather
+	abc+ab+bc+ca+a+b+c+1=
+	(abc+ab)+(bc+b)+(ac+a)+(c+1) = \\ =
+	ab(c+1)+b(c+1)+a(c+1)+(c+1)=
+	(c+1)(ab+b+a+1)=  \\ =
+	(c+1)(b(a+1)+(a+1))=
+	(c+1)(b+1)(a+1).
+	\endgather
+	$$
+	\i Keď sa dve čísla rovnajú, napr. $a=b$, tak výraz je nulový. Upravujeme výraz, aby sme vo výsledku mali zátvorku $a-b$. Čakáme, že sa tam objaví aj $b-c$, $c-a$ (prípadne opačné). 
+	$$ 
+	\gather
+	a^{2}(b-c)+b^{2}(c-a)+c^{2}(a-b) = (a^2b - ab^2) - c(a^2-b^2) + c^2(a-b) = \\ =
+	ab(a-b) - c(a-b)(a+b) - c^2(a-b) = (a-b)(ab-c(a+b)-c^2) = \\ = (a-b)(a(b-c)-c(b-c)) = (a-b)(b-c)(a-c).
+	\endgather
+	$$
+	\i Postupujeme podobne ako v~predošlom cvičení, keďže znova máme rovnosť pre $a=b$. Úpravy sú tu zložitejšie:
+	$$
+	\gather
+	ab(a^{2}-b^{2})+bc(b^{2}-c^{2})+ca(c^{2}-a^{2})=
+	ab(a^2-b^2) + b^3c - bc^3 + ac^3 - a^3c = \\ =
+	ab(a^2-b^2) - c(a^3-b^3) + c^3(a-b) = 
+	(a-b)(ab(a+b) - c(a^2+ab+b^2) + c^3).
+	\endgather
+	$$
+	Teraz sa sústreďme na zátvorku:
+	$$
+	\gather
+	ab(a+b) - c(a^2+ab+b^2) + c^3 = 
+	a^2b + ab^2 - ca^2 - abc - cb^2 + c^3 = \\ =
+	ab(a-c) + b^2(a-c) - c(a^2-c^2) = 
+	(a-c)(ab+b^2-c(a+c)).
+	\endgather
+	$$
+	Konečne posledná zátvorka:
+	$$
+	\gather
+	ab+b^2-c(a+c)=(ab-ac)+(b^2-c^2)=\\=a(b-c) + (b-c)(b+c)=  (b-c)(a+b+c).
+	\endgather
+	$$
+	Dokopy máme 
+	$$
+	a^{2}(b-c)+b^{2}(c-a)+c^{2}(a-b) = (a-b)(b-c)(a-c)(a+b+c).
+	$$
+	\enditems
+}
+
+Tento pohľad nie je univerzálny, lebo rozložené činitele vôbec nemusia byť lineárne alebo môžu byť zložitejšie a~je ťažšie vidieť koreň. Vtedy nám neostáva nič iné, len sa hrať s~preusporiadaním členov a~postupným vynímaním. 
+
+\Exercise{}{
+	Rozložte na súčin dvoch výrazov: 
+	\begitems \style i
+	\i $a^3b + a^2 + ab^3 + b^2$
+	\i $a^3b + a^2 + ab^3 + ab + b^2 + 1$
+	\i $a^3+b^3+c^3+ab(a+b)+bc(b+c)+ca(c+a)$
+	\enditems
+}
+{
+	Jednotlivé rozklady sú:
+	\begitems \style i
+	\i $a^3b + a^2 + ab^3 + b^2 = a^2(ab+1) + b^2(ab+1)=(a^2+b^2)(ab+1)$.
+	\i
+	$$
+	\abovedisplayskip-19pt
+	\gather
+	a^3b + a^2 + ab^3 + ab + b^2 + 1 = (a^3b+a^2) + (ab^3+b^2) + (ab+1) =\\ 
+	= a^2 (ab+1) + b^2 (ab+1) + (ab+1) = (a^2+b^2+1)(ab+1).
+	\endgather
+	$$
+	\i
+	$$	\abovedisplayskip-19pt
+	\gather
+	a^3+b^3+c^3+ab(a+b)+bc(b+c)+ca(c+a)= \\=
+	(a^3+ab^2+ac^2) + (b^3+bc^2+ba^2) + (c^3+ca^2+cb^2) = \\ =
+	a(a^2+b^2+c^2) + b(a^2+b^2+c^2) + c(a^2+b^2+c^2) = \\ =
+	(a+b+c)(a^2+b^2+c^2).
+	\endgather
+	$$
+	\enditems
+}
+
+Skrytý rozklad a~ďalšie algebraické úpravy ide úspešne využiť v~tomto príklade:
+
+\Problem{1}{CPSJ\fnote{Česko-Poľsko-Slovensko stretnutie Juniorov} 2018}{Pre prirodzené čísla $a,b,c$ platí 
+$$
+(a + b + c)^2 \mid ab(a + b) + bc(b + c) + ca(c + a) + 3abc.
+$$
+Dokažte, že
+$$
+(a + b + c) \mid (a - b)^2 + (b - c)^2 + (c - a)^2.
+$$}{
+	Výraz $ab(a+b) + bc(b+c) + ca(c+a) + 3abc$ sa nenápadne dá rozložiť na súčin.
+}{
+	Platí $ab(a+b) + bc(b+c) + ca(c+a) + 3abc = (a+b+c)(ab+bc+ca)$. Tým pádom sa naša deliteľnosť zjednoduší na
+	$$
+	a+b+c \mid ab+bc+ca.
+	$$ 
+	Výraz $(a-b)^2 + (b-c)^2 + (c-a)^2$ je rovný $2(a^2+b^2+c^2+ab+bc+ca)$, vidíme súvislosť.
+}{
+	Rozložíme pravú stranu prvej deliteľnosti na súčin:
+	$$
+	\align
+	ab(a + b) + bc(b + c) + ca(c + a) + 3abc &= \\
+	(ab(a + b)+abc) + (bc(b + c)+abc) + (ca(c + a)+abc) &= \\
+	ab(a+b+c) + bc(a+b+c) + ca(a+b+c) &= \\
+	(a+b+c)(ab+bc+ca).
+	\endalign
+	$$
+	Predpokladaná deliteľnosť sa preloží na $a+b+c \mid ab+bc+ca$. Platí 
+	$$
+	(a-b)^2 + (b-c)^2 + (c-a)^2 = 2(a^2+b^2+c^2+ab+bc+ca).
+	$$
+	Deliteľnosť $a+b+c \mid ab+bc+ca$ nám situáciu zjednoduší na to, že stačí dokázať $a+b+c \mid 2(a^2+b^2+c^2)$. Toto dokážeme tak, že využijeme 
+	$$
+	a+b+c \mid (a+b+c)^2 = a^2+b^2+c^2 + 2(ab+bc+ca).
+	$$
+	Spolu s~$a+b+c \mid ab+bc+ca$ potom máme $a+b+c \mid a^2+b^2+c^2$, takže dokopy sme hotoví.
+}
+
+\secc Doplnenie na štvorec
+
+Doplnenie na štvorec je jedna z~najstarších a~najelegantnejších techník v~algebre\fnote{Preslávil ju perzský matematik 9. storočia, Muhammad ibn Musa al-Chwárizmí (z jeho mena pochádza slovo \uv{algoritmus}). On neriešil rovnice našimi symbolmi, ale geometricky -- doslova kreslil štvorce a~obdĺžniky a~snažil sa z~nich \uv{doplniť} väčší štvorec.}. Umožňuje nám totiž kvadratický mnohočlen \textit{rozložiť na súčin} jednoduchších lineárnych, napr. 
+$$
+x^2+2x-3=(x+1)^2-4=(x+1-2)(x+1+2)=(x-1)(x+3).
+$$
+Vo všeobecnosti pre reálne čísla $a\neq 0$, $b$, $c$ máme
+$$
+\gather
+ax^2+bx+c
+=a\(x^2+\frac ba x + \frac ca\)
+=a\(\(x + \frac{b}{2a}\)^2 + \frac ca - \frac{b^2}{4a^2}\) =\\
+=a\(\(x + \frac{b}{2a}\)^2 - \frac{b^2 - 4ac}{4a^2}\).
+\endgather
+$$
+Z~toho už ľahko odvodíme vzorec pre riešenia kvadratickej rovnice.
+
+Vo všeobecnosti sme vlastne použili $a^2+2ab = (a+b)^2 - b^2$. Dopĺňať na štvorec však môžeme aj tak, že \uv{vyrobíme} prostredný koeficient, teda použijeme vzorec $a^2+b^2=(a+b)^2-2ab$. Toto si demonštrujeme na nasledovnom príklade:
+
+\Example{}{
+	Rozložte $n^4+m^2n^2+n^4$ na súčin.
+}{
+	Prvé, čo nám môže napadnúť, je doplniť $n^4+m^2n^2$ na štvorec. Tým dostaneme 
+	$$
+	n^4+m^2n^2+m^4= \(n^2 +\frac{m^2}2\)^2 + \frac{3m^2}4.
+	$$
+	Toto nám veľmi nepomohlo. Skúsme niečo iné, doplňme na štvorec $n^4+m^4$. Potom máme 
+	$$
+	\gather
+	n^4+n^2m^2+m^4 = (n^4+m^4)+n^2m^2 = (n^2+m^2)^2 - 2n^2m^2 + n^2m^2 = \\ = (n^2+m^2)^2 - n^2m^2 = (n^2+m^2-nm)(n^2+m^2+nm).
+	\endgather
+	$$
+}
+
+Precvičte si to na odvodení známej identity:
+
+\Exercise{Sophie-Germain identita\fnote{Volá sa po Sophie Germainovej, jednej z~najvýznamnejších matematičiek na prelome 18. a~19. storočia. V~dobe, keď ženy nemali prístup na univerzity, si sama študovala matematiku a~korešpondovala s~najväčšími matematikmi svojej doby, ako bol Gauss, spočiatku pod mužským pseudonymom.}
+}{
+	Rozložte $a^4+4b^4$ na súčin.
+}{
+	Doplnením na štvorec máme 
+	$$
+	a^4+4b^4 = (a^2)^2 + (2b^2)^2 = (a^2+2b^2)^2 - (2ab)^2 = (a^2+2b^2-2ab)(a^2+2b^2+2ab).
+	$$
+}
+
+Skúste si príklad z~celoštátneho kola MO:
+
+\Problem{0}{CKMO 2012}{
+	Určte všetky prirodzené čísla $n$, pre ktoré je $n^4 - 3n^2 + 9$ prvočíslo.
+}{
+	Skúmaný výraz sa dá na prekvapenie rozložiť. Doplnenie na štvorec je fajn technika. Len pozor, čo dopĺňame.
+}{
+	Kľúčové doplnenie je 
+	$$
+	n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=(n^2+3)^2-9n^2.
+	$$
+	Vidíme známy vzorec?
+}{
+	Platí 
+	$$
+	\gather
+	n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=\\=(n^2+3)^2-9n^2 = (n^2+3-3n)(n^2+3+3n).
+	\endgather
+	$$
+	Zjavne $n^2+3+3n > n^2+3-3n$. Druhé číslo je pritom pre $n>0$ kladné, lebo 
+	$$
+	n^2-3n+3=\(n-\frac32\)^2 + \frac 34.
+	$$
+	Aby bol súčin prvočíslo, tak $(n^2+3-3n)(n^2+3+3n)$, tak $n^2+3-3n=1$. Riešením kvadratickej rovnice dostaneme $n=1$ a~$n=2$. 
+}
+
+Naučené techniky sa pekne dajú dať dokopy v~tomto pozorovaní:
+
+\Problem{1}{}{
+	Zdôvodnite, že výraz $a^n+b^n$ ide pre každé $n>2$ rozložiť na súčin nekonštantných výrazov s~reálnymi koeficientami.
+	
+	(Poznamenajme, že sa dá dokázať, že $a^2+b^2$ sa \textit{nedá} rozložiť na súčin dvoch nekonštantných zátvoriek s~reálnymi koeficientami.)
+	}{
+	Pre nepárne $n$ máme vzorec. Uvedomme si, že nám dokonca stačí, aby $n$ malo nepárneho deliteľa. Vďaka tomuto pozorovaniu je aj párny prípad zjednodušiteľný. Vieme vyriešiť prvý párny prípad $n=4$? Vie nám to pomôcť pri zvyšných?
+}{
+	Ak má $n$ nepárneho deliteľa $k$, pričom $n=mk$, tak z~$a^n+b^n$ vieme vybrať pred zátvorku $a^k+b^k$. Zostáva teda vyriešiť čísla, ktoré nemajú nepárneho deliteľa -- čiže mocniny 2. Podľa zadania $n>2$, takže najmenšia zaujímavá mocnina je 4, na takéto mocniny máme dopĺňanie na štvorec. Čo ale vyššie mocniny? Nuž, tie sú našťastie deliteľné~4.
+}{
+	Ak má $n$ nepárneho deliteľa $k$, pričom $n=mk$, tak
+	$$
+	\gather
+	a^n+b^n
+		= a^{mk}+b^{mk}
+		= (a^m)^k+(b^m)^k =\\
+		= (a^m+b^m)\(a^{m(k-1)}-a^{m(k-2)}b^{m}+a^{m(k-3)}b^{2m}-\cdots
+		- a^{m}b^{m(k-2)}+b^{m(k-1)}\).
+	\endgather
+	$$
+	V~opačnom prípade je $n$ mocnina~2 a~vďaka $n>2$ je deliteľné 4, takže $n=4t$. Potom 
+	$$
+	\gather
+	a^{4t}+b^{4t}
+		=(a^{2t})^{2}+(b^{2t})^{2}
+		=(a^{2t}+b^{2t})^{2}-2a^{2t}b^{2t}=\\
+		=\(a^{2t}+b^{2t}-\sqrt2\,a^{t}b^{t}\)\(a^{2t}+b^{2t}+\sqrt2\,a^{t}b^{t}\)=\\
+		=\(a^{2t}-\sqrt2\,a^{t}b^{t}+b^{2t}\)\(a^{2t}+\sqrt2\,a^{t}b^{t}+b^{2t}\).
+	\endgather
+	$$ 
+}
+
+Ešte pár ťažších úloh na precvičenie:
+
+\Problem{1}{}{
+    Rozložte $2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4$ na súčin štyroch nekonštantných zátvoriek.
+}{
+	Všimnime si, že sa nám vo výraze vyskytuje $2a^2b^2-a^4-b^4$, čo je rovné $-(a^2-b^2)^2$. Kľúčový trik je spojiť to so zvyškom výrazu použitím \textit{ďalšieho} doplnenia na štvorec, pričom jeden z týchto \uv{štvorcov} bude $-(a^2-b^2)^2$.
+}{
+	Druhý hľadaný \uv{štvorec} bude $-c^4$, platí totiž: $-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2$. To vcelku dobre ladí so zvyškom výrazu.
+}{
+	Najprv si vo výraze všimneme $2a^2b^2-a^4-b^4$ a vytvoríme štvorec:
+	$$
+	2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4 = -(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2.
+	$$
+	Teraz na prvé dva členy aplikujeme doplnenie na štvorec, konkrétne doplníme $-(x^2+y^2)$ pre $x=a^2-b^2$ a $y=c^2$:
+	$$
+	\gather
+	-(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2= \\
+	= -((a^2-b^2)+c^2)^2 + 2(a^2-b^2)c^2 + 2b^2c^2 + 2c^2a^2= \\
+	= -(a^2-b^2+c^2)^2 + (2a^2c^2 - 2b^2c^2) + 2b^2c^2 + 2c^2a^2= \\
+	= -(a^2-b^2+c^2)^2 + 4a^2c^2= \\
+	= (2ac)^2 - (a^2-b^2+c^2)^2.
+	\endgather
+	$$
+	Tento výraz už ľahko rozložíme opakovaným hľadaním štvorcov a~používaním vzorca pre rozdiel štvorcov:
+	$$
+	\gather
+	(2ac - (a^2-b^2+c^2))(2ac + (a^2-b^2+c^2)) = \\
+	= (b^2 - (a^2-2ac+c^2))((a^2+2ac+c^2)-b^2)= \\
+	= (b^2 - (a-c)^2)((a+c)^2 - b^2)= \\
+	= (b-(a-c))(b+(a-c)) \cdot ((a+c)-b)((a+c)+b)= \\
+	= (a+b+c)(a+b-c)(a-b+c)(-a+b+c).
+	\endgather
+	$$
+	Poznamenajme, že sme vlastne prakticky zrekonštruovali Herónov\fnote{Herón z~Alexandrie bol starogrécky matematik a~inžinier, ktorý žil v~1. storočí n.\,l. Jeho vzorec pre obsah trojuholníka sa objavuje v~jeho diele \textit{Metrica}} vzorec. Pre obsah~$S$ trojuholníka so stranami $a,b,c$ totiž platí 
+	$$
+	16S^2 = 2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4.
+	$$
+	Tento vzorec sa zvyčajne uvádza vo výpočtovo prijateľnejšom~tvare 
+	$$
+	S = \sqrt{s(s-a)(s-b)(s-c)}, \qquad\text{kde}\qquad s=\frac{a+b+c}{2}.
+	$$
+	Sami sa presvedčte, že tento tvar je ekvivalentný s~našou dokázanou identitou
+	$$
+	16S^2=2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4=(a+b+c)(a+b-c)(a-b+c)(-a+b+c).
+	$$
+}
+
+\Problem{1}{}{
+	Pre ktoré prirodzené čísla $n$ je číslo $n^4 + 4^n$ prvočíslo?
+}{
+	Skúmaný výraz pripomína Sophie-Germain identitu. Skújte ju tam napasovať. Možno bude treba rozobrať nejaké prípady.
+}{
+	Aby sme vedeli použiť Sophie-Germain, potrebujeme, aby $4^n$ bolo v~tvare $4b^4$. To určite je pre nepárne $n$, lebo potom
+	$$
+	4^n = 4 \cdot 4^{n-1} = 4 \cdot 2^{2(n-1)} = 4 \cdot \left(2^{\frac{n-1}{2}}\right)^4.
+	$$	
+	Na druhej strane, prípad párneho $n$ je zasa evidentne neprvočíselný.
+}{
+	Rozoberieme dva prípady podľa parity $n$.
+
+	\begitems \style i
+	\i Ak je $n$ párne, potom je číslo $n^4+4^n$ zjavne deliteľné 4, takže nie je prvočíslo.
+	\i Ak je $n$ nepárne, tak si všimnime, že:
+	$$
+	4^n = 4 \cdot 4^{n-1} = 4 \cdot 2^{2(n-1)} = 4 \cdot \left(2^{(n-1)/2}\right)^4.
+	$$	
+	Náš výraz má teda tvar $a^4+4b^4$ pre $a=n$, $b=2^{\frac{n-1}2}$. Tým pádom môžeme použiť Sophie-Germainovu identitu 
+	$$
+	a^4+4b^4=(a^2+2b^2-2ab)(a^2+2b^2+2ab).
+	$$
+	Aby bol tento súčin prvočíslom, jeden z činiteľov musí byť rovný 1. Druhý činiteľ je zjavne väčší ako 1 pre každé každé $a,b \ge 1$. Analyzujme prvý činiteľ, ten je po doplnení na štvorec rovný:
+	$$
+	a^2+2b^2-2ab=(a-b)^2+b^2.
+	$$
+	Aby bolo toto rovné 1, musíme mať $a=b=1$, takže $n=1$. Vtedy naozaj $n^4+4^n=5$ je prvočíslo.
+	\enditems
+
+	Jediným riešením je teda $n=1$.
+}
+
+\secc Dopĺňanie na kocku
+
+Na záver si ukážeme netradičnú techniku: okrem dopĺňania na štvorec sa dá robiť \textit{dopĺňanie na kocku}. Myslí sa tým to, že ak máme $a^3+b^3$, tak namiesto priamej aplikácie vzorca na rozklad na súčin môžeme použiť 
+$$
+a^3 + b^3 = (a+b)^3 - 3ab(a+b).
+$$
+Ukážeme si to na príklade:
+
+\Example{}{
+	Rozložte $a^3+b^3+c^3-3abc$ na súčin.
+}{
+	Použitím doplnenia na kocku máme
+	$$
+	\align
+	a^3 + b^3 + c^3 - 3abc &= \\
+	(a+b)^3 - 3ab(a+b) + c^3 - 3abc &= \\
+	(a+b)^3 + c^3 - 3ab(a+b+c) &= \\
+	(a+b+c)((a+b)^2 - (a+b)c + c^2) - 3ab(a+b+c) &= \\
+	(a+b+c)((a+b)^2 - (a+b)c + c^2 - 3ab) &= \\
+	(a+b+c)(a^2 + 2ab + b^2 - ac - bc + c^2 - 3ab) &= \\
+	(a+b+c)(a^2 + b^2 + c^2 - ab - bc - ca).
+	\endalign
+	$$
+}
+
+Tento rozklad je sám osebe veľmi zaujímavý, umožňuje nám totiž ľahko dokázať nerovnosť:
+
+\Theorem{}{
+	Nech $a,b,c$ sú reálne čísla, pre ktoré platí $a+b+c \ge 0$. Potom 
+	$$
+	a^3+b^3+c^3 \ge 3abc,
+	$$
+	pričom rovnosť nastáva práve keď $a+b+c=0$ alebo $a=b=c$.
+}{
+	Použijeme náš už známy rozklad
+	$$
+	a^3+b^3+c^3 - 3abc = (a+b+c)(a^2+b^2+c^2-ab-bc-ca).
+	$$
+	Keďže $a+b+c \ge 0$, tak stačí dokázať $a^2+b^2+c^2 \ge ab+bc+ca$. Toto vyzerá lákavo z~hľadiska dopĺňania na štvorec, napríklad môžeme skúsiť doplniť $a^2-ab$ na štvorec. Prezradím však, že to k~cieľu viesť nebude. Trik k~dôkazu tejto nerovnosti je vynásobiť ju dvomi a~dokazovať ekvivalentnú nerovnosť
+	$$
+	2a^2+2b^2+2c^2 \ge 2ab+2bc+2ca.
+	$$
+	Vyzerá, že sme si nepomohli. Ďalší trik však je rozdeliť $2a^2$ ako $a^2+a^2$. Po vhodnom preusporiadaní členov potom máme 
+	$$
+	\align
+	a^2+a^2+b^2+b^2+c^2+c^2-2ab-2bc-2ca &= \\
+	(a^2-2ab+b^2)+(b^2-2bc+c^2)+(c^2-2ac+a^2) &=\\
+	(a-b)^2 + (b-c)^2 + (c-a)^2.
+	\endalign
+	$$
+	Keďže tento posledný výraz je určite nezáporný, dôkaz nerovnosti je hotový. Rovnosť nastáva práve keď je prvá zátvorka $a+b+c$ nulová alebo druhá zátvorka $a^2+b^2+c^2-ab-bc-ca$ nulová. Z~dôkazu jej nezápornosti vidíme, že je to práve keď $a-b=0$, $b-c=0$, $c-a=0$, teda keď $a=b=c$. Sme hotoví.
+}
+
+\sec Čo si zapamätať
+
+\secc Techniky
+
+\begitems \style N
+\i Hľadáme rozdiely/súčty mocnín, aby sme mohli použiť $a^n+b^n$ a~$a^n-b^n$
+\i Pozeráme, kedy je výraz nulový, čo nám pomôže správne vynímať
+\i Dopĺňame na štvorec/kocku. Skúšame viac možností, ako to urobiť
+\enditems
+
+\secc Užitočné vzorce
+
+\begitems \style N
+\i Rozklad $a^n-b^n$ a $a^n+b^n$ (pre nepárne $n$)
+\i Výrazy tvaru $a^4+4b^4$ sa často dajú rozložiť, aj keď to nie je zrejmé
+\i Neevidentný rozklad $a^3+b^3+c^3-3abc$ a jeho dôsledky (Tvrdenie 3)
+\i Nerovnosť $a^2+b^2+c^2 \ge ab+bc+ca$ a jej dôkaz
+\i Ďalšie užitočné rozklady ako 
+	\begitems \style i
+	\i $a^2+2ab+b^2=(a+b)^2$
+	\i $a^2+b^2+c^2+2ab+2bc+2ca=(a+b+c)^2$
+	\i atď, fantázií autorov úloh sa medze nekladajú...
+	\enditems 
+\enditems
+
+\sec Riešenia k cvičeniam
+
+\DisplayExerciseSolutions
+
+\sec Prvé návody k úlohám
+
+\DisplayFirstHints
+
+\sec Druhé návody k úlohám
+
+\DisplaySecondHints
+
+\sec Riešenia k úlohám
+
+\DisplayProblemSolutions
+
+\bye

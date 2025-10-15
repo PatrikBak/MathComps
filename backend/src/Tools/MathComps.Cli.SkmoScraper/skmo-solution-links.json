@@ -1,0 +1,2864 @@
+[
+  {
+    "Year": 51,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=272"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=273"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=274"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=275"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=276"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=277"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=278"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=279"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=280"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=281"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=85"
+  },
+  {
+    "Year": 51,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=86"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=262"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=263"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=264"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=265"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=266"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=267"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=268"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=269"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=270"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=271"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=84"
+  },
+  {
+    "Year": 52,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=87"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=252"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=253"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=254"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=255"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=256"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=257"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=258"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=259"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=260"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=261"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=83"
+  },
+  {
+    "Year": 53,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=88"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=242"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=243"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=244"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=245"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=246"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=247"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=248"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=249"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=250"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=251"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=82"
+  },
+  {
+    "Year": 54,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=89"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=232"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=233"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=234"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=235"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=236"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=237"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=238"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=239"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=240"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=241"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=81"
+  },
+  {
+    "Year": 55,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=90"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=222"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=223"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=224"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=225"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=226"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=227"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=228"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=229"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=230"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=231"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=80"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=91"
+  },
+  {
+    "Year": 56,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=94"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=212"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=213"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=214"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=215"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=216"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=217"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=218"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=219"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=220"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=221"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=79"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=92"
+  },
+  {
+    "Year": 57,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=93"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=28"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=31"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=32"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=33"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=29"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=34"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=35"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=30"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=36"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=37"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=437"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=459"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "I",
+    "Category": "Z4",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=436"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "II",
+    "Category": "Z4",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=435"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=78"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=353"
+  },
+  {
+    "Year": 58,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=354"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=6"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=7"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=314"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=9"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=13"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=319"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=10"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=14"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=320"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=430"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=44"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=312"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=323"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=329"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=322"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=328"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=321"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=327"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=431"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=42"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "I",
+    "Category": "Z4",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=432"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "II",
+    "Category": "Z4",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=11"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=358"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=359"
+  },
+  {
+    "Year": 59,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=360"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=355"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=357"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=362"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=384"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=365"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=367"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=388"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=368"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=371"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=389"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=374"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=378"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=382"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=390"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=398"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=391"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=397"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=392"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=396"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=373"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=376"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "I",
+    "Category": "Z4",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=372"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "II",
+    "Category": "Z4",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=364"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=672"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=668"
+  },
+  {
+    "Year": 60,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=673"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=423"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=425"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=439"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=492"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=452"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=456"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=512"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=453"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=457"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=513"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=427"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=443"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=489"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=485"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=499"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=486"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=498"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=487"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=497"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=426"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=442"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=994"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=995"
+  },
+  {
+    "Year": 61,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=993"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=671"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=669"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=675"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=740"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=676"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=686"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=764"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=677"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=687"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=765"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=678"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=683"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=743"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=761"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=773"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=762"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=772"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=763"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=771"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=679"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=682"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1802"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1803"
+  },
+  {
+    "Year": 62,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1804"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=992"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=991"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=997"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1071"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1008"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1011"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1078"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1009"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1013"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1079"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=999"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1003"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1069"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1073"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1083"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1074"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1084"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1075"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1085"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=998"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1001"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1805"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1806"
+  },
+  {
+    "Year": 63,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1807"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1324"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1326"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1328"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1367"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1337"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1341"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1371"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1338"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1342"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1372"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1330"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1334"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1364"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1375"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1382"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1374"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1381"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1373"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1380"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1329"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1333"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3019"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3875"
+  },
+  {
+    "Year": 64,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3905"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1728"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1730"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1732"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1872"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1745"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1753"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1903"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1746"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1754"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1904"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1734"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1738"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1829"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1864"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1870"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1863"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1869"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1862"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1868"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1733"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=1737"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3876"
+  },
+  {
+    "Year": 65,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3906"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2195"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2197"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2199"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2315"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2242"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2246"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2387"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2241"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2245"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2388"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2203"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2208"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2313"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2319"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2325"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2318"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2324"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2317"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2323"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2204"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2206"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3877"
+  },
+  {
+    "Year": 66,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3907"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2532"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2534"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2537"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2726"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2578"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2619"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2753"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2579"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2618"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2754"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2539"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2543"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2729"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2757"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2763"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2756"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2762"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2755"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2761"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2538"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=2542"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3017"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "IMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3878"
+  },
+  {
+    "Year": 67,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3908"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3037"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3039"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3041"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3121"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3042"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3046"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3125"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3043"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3047"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3126"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3048"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3052"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3117"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3135"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3129"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3134"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3128"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3133"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3127"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3049"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3053"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3909"
+  },
+  {
+    "Year": 68,
+    "CompetitionId": "EGMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4113"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3382"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3384"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3386"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3448"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3387"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3391"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3388"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3392"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3397"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3393"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3888"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3889"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3890"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3398"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3394"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3910"
+  },
+  {
+    "Year": 69,
+    "CompetitionId": "EGMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4112"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3467"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3469"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3471"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3576"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3472"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3476"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3604"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3473"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3477"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3605"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3479"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3483"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3574"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3601"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3611"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3600"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3610"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3599"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3609"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3478"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3482"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "CPSJ",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3874"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3881"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3919"
+  },
+  {
+    "Year": 70,
+    "CompetitionId": "EGMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4111"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3916"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3918"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3921"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4050"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3924"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3928"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4057"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3925"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3929"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4055"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3923"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3931"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4052"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4044"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4064"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4043"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4062"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4042"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4060"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3922"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=3933"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4162"
+  },
+  {
+    "Year": 71,
+    "CompetitionId": "EGMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4110"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4205"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4204"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4208"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4440"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4362"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4368"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4449"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4361"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4367"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4446"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4370"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4376"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4443"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4452"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4462"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4451"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4459"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4450"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4456"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4369"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4373"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4616"
+  },
+  {
+    "Year": 72,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5335"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4884"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4887"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4892"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4923"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4901"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4914"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4949"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4902"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4911"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4946"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4889"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4898"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4931"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4928"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4940"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4927"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4937"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4926"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4934"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4888"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4895"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "CPSJ",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=4968"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "CAPS",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5328"
+  },
+  {
+    "Year": 73,
+    "CompetitionId": "MEMO",
+    "Category": null,
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5347"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5359"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "S",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5362"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5368"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "III",
+    "Category": "A",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5396"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5369"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "S",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5379"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "B",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5405"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5370"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "S",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5376"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "C",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5402"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5365"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5385"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "III",
+    "Category": "Z9",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5399"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5393"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "Z8",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5414"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5392"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "Z7",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5411"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5391"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "Z6",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5408"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "I",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5364"
+  },
+  {
+    "Year": 74,
+    "CompetitionId": "II",
+    "Category": "Z5",
+    "SolutionLink": "https://skmo.sk/dokument.php?id=5382"
+  }
+]

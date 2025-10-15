@@ -1,0 +1,103 @@
+%!PS
+%%BoundingBox: -1 -1 69 69 
+%%Creator: MetaPost
+%%CreationDate: 2000.02.11:1349
+%%Pages: 1
+%%EndProlog
+%%Page: 1 1
+ 0.7 setgray
+newpath 0 45.3546 moveto
+11.33891 45.3546 lineto
+11.33891 56.69246 lineto
+22.67677 56.69246 lineto
+22.67677 68.03137 lineto
+0 68.03137 lineto
+ closepath fill
+newpath 45.3546 0 moveto
+68.03137 0 lineto
+68.03137 56.69246 lineto
+56.69246 56.69246 lineto
+56.69246 45.3546 lineto
+45.3546 45.3546 lineto
+ closepath fill
+ 0 setgray 0.28346 0 dtransform exch truncate exch idtransform pop setlinewidth
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+0 68.03137 lineto
+0 68.03137 lineto stroke
+newpath 11.33891 0 moveto
+11.33891 68.03137 lineto
+11.33891 68.03137 lineto stroke
+newpath 22.67677 0 moveto
+22.67677 68.03137 lineto
+22.67677 68.03137 lineto stroke
+newpath 34.01569 0 moveto
+34.01569 68.03137 lineto
+34.01569 68.03137 lineto stroke
+newpath 45.3546 0 moveto
+45.3546 68.03137 lineto
+45.3546 68.03137 lineto stroke
+newpath 56.69246 0 moveto
+56.69246 68.03137 lineto
+56.69246 68.03137 lineto stroke
+newpath 68.03137 0 moveto
+68.03137 68.03137 lineto
+68.03137 68.03137 lineto stroke
+ 0 0.28346 dtransform truncate idtransform setlinewidth pop
+newpath 0 0 moveto
+68.03137 0 lineto
+68.03137 0 lineto stroke
+newpath 0 11.33891 moveto
+68.03137 11.33891 lineto
+68.03137 11.33891 lineto stroke
+newpath 0 22.67677 moveto
+68.03137 22.67677 lineto
+68.03137 22.67677 lineto stroke
+newpath 0 34.01569 moveto
+68.03137 34.01569 lineto
+68.03137 34.01569 lineto stroke
+newpath 0 45.3546 moveto
+68.03137 45.3546 lineto
+68.03137 45.3546 lineto stroke
+newpath 0 56.69246 moveto
+68.03137 56.69246 lineto
+68.03137 56.69246 lineto stroke
+newpath 0 68.03137 moveto
+68.03137 68.03137 lineto
+68.03137 68.03137 lineto stroke
+ 0 1.13385 dtransform truncate idtransform setlinewidth pop
+newpath 0 45.3546 moveto
+11.33891 45.3546 lineto
+11.33891 56.69246 lineto
+22.67677 56.69246 lineto stroke
+newpath 11.33891 0 moveto
+11.33891 11.33891 lineto
+22.67677 11.33891 lineto
+22.67677 68.03137 lineto stroke
+newpath 22.67677 34.01569 moveto
+34.01569 34.01569 lineto
+34.01569 45.3546 lineto
+56.69246 45.3546 lineto
+56.69246 56.69246 lineto
+68.03137 56.69246 lineto stroke
+newpath 0 34.01569 moveto
+11.33891 34.01569 lineto
+11.33891 22.67677 lineto
+34.01569 22.67677 lineto
+34.01569 11.33891 lineto
+56.69246 11.33891 lineto
+56.69246 22.67677 lineto
+68.03137 22.67677 lineto stroke
+newpath 34.01569 68.03137 moveto
+34.01569 56.69246 lineto
+45.3546 56.69246 lineto
+45.3546 0 lineto stroke
+newpath 45.3546 34.01569 moveto
+68.03137 34.01569 lineto stroke
+newpath 0 0 moveto
+68.03137 0 lineto
+68.03137 68.03137 lineto
+0 68.03137 lineto
+ closepath stroke
+showpage
+%%EOF

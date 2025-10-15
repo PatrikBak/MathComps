@@ -1,0 +1,49 @@
+%!PS
+%%BoundingBox: -7 -7 31 31 
+%%HiResBoundingBox: -6.375 -6.375 30.375 30.375 
+%%Creator: MetaPost 2.02
+%%CreationDate: 2024.01.08:0925
+%%Pages: 1
+%*Font: cs-lmr12 11.95517 11.95517 31:ff8
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 0 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath -6 6 moveto
+30 6 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 6 -6 moveto
+6 30 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -6 18 moveto
+30 18 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 18 -6 moveto
+18 30 lineto stroke
+ 0 0.75 dtransform truncate idtransform setlinewidth pop
+newpath -6 -6 moveto
+30 -6 lineto
+30 30 lineto
+-6 30 lineto
+ closepath stroke
+-2.9265 20.23575 moveto
+(1) cs-lmr12 11.95517 fshow
+9.0735 20.23575 moveto
+(8) cs-lmr12 11.95517 fshow
+21.0735 20.23575 moveto
+(2) cs-lmr12 11.95517 fshow
+-2.9265 8.23575 moveto
+(6) cs-lmr12 11.95517 fshow
+9.0735 8.23575 moveto
+(9) cs-lmr12 11.95517 fshow
+21.0735 8.23575 moveto
+(5) cs-lmr12 11.95517 fshow
+-2.9265 -3.76425 moveto
+(3) cs-lmr12 11.95517 fshow
+9.0735 -3.76425 moveto
+(7) cs-lmr12 11.95517 fshow
+21.0735 -3.76425 moveto
+(4) cs-lmr12 11.95517 fshow
+showpage
+%%EOF

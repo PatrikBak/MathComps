@@ -1,0 +1,93 @@
+%!PS
+%%BoundingBox: -38 -33 142 122 
+%%HiResBoundingBox: -37.6636 -32.13684 141.49887 121.38908 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2011.01.13:1504
+%%Pages: 1
+%*Font: cmmi10 9.96265 9.96265 41:e00210000001
+%*Font: cmsy7 6.97385 6.97385 30:8
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 0 0 setrgbcolor 0 1 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+127.55882 0 lineto
+51.02353 89.29118 lineto
+ closepath stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop 1 setlinecap
+newpath 0 0 moveto
+52.72339 -11.9044 lineto
+127.55882 0 lineto
+103.74692 77.38678 lineto
+51.02353 89.29118 lineto
+-23.8119 77.38678 lineto
+0 0 lineto stroke
+newpath 103.74692 77.38678 moveto
+-23.8119 77.38678 lineto
+52.72339 -11.9044 lineto
+ closepath stroke
+newpath -1.70102 101.19696 moveto
+105.44792 -23.81015 lineto stroke
+newpath 66.24495 121.13908 moveto
+141.24887 33.63449 lineto stroke
+newpath 97.7167 -18.09747 moveto
+103.38599 -18.09747 lineto stroke
+newpath 96.79431 -17.02136 moveto
+102.4636 -17.02136 lineto stroke
+newpath 133.51848 39.34622 moveto
+139.18776 39.34622 lineto stroke
+newpath 132.59608 40.42233 moveto
+138.26537 40.42233 lineto stroke
+newpath 44.22697 -5.299 moveto
+49.89626 -5.299 lineto stroke
+newpath 43.30458 -4.22289 moveto
+48.97386 -4.22289 lineto stroke
+newpath 119.06241 6.60541 moveto
+124.73169 6.60541 lineto stroke
+newpath 118.14001 7.68152 moveto
+123.8093 7.68152 lineto stroke
+-10.472 -3.4039 moveto
+(A) cmmi10 9.96265 fshow
+130.55882 -3.4039 moveto
+(B) cmmi10 9.96265 fshow
+47.10698 92.29118 moveto
+(C) cmmi10 9.96265 fshow
+106.74692 77.38678 moveto
+(A) cmmi10 9.96265 fshow
+114.21892 81.00218 moveto
+(0) cmsy7 6.97385 fshow
+-37.6636 73.64192 moveto
+(B) cmmi10 9.96265 fshow
+-29.60701 77.25732 moveto
+(0) cmsy7 6.97385 fshow
+47.40929 -22.3941 moveto
+(C) cmmi10 9.96265 fshow
+55.24239 -18.7787 moveto
+(0) cmsy7 6.97385 fshow
+ 1 1 1 setrgbcolor
+newpath 53.00731 38.69339 moveto
+53.00731 38.99413 52.88783 39.2825 52.6752 39.49513 curveto
+52.46257 39.70776 52.1742 39.82724 51.87346 39.82724 curveto
+51.57272 39.82724 51.28435 39.70776 51.07172 39.49513 curveto
+50.85909 39.2825 50.73961 38.99413 50.73961 38.69339 curveto
+50.73961 38.39265 50.85909 38.10428 51.07172 37.89165 curveto
+51.28435 37.67902 51.57272 37.55954 51.87346 37.55954 curveto
+52.1742 37.55954 52.46257 37.67902 52.6752 37.89165 curveto
+52.88783 38.10428 53.00731 38.39265 53.00731 38.69339 curveto closepath fill
+ 0 0 0 setrgbcolor
+newpath 53.00731 38.69339 moveto
+53.00731 38.99413 52.88783 39.2825 52.6752 39.49513 curveto
+52.46257 39.70776 52.1742 39.82724 51.87346 39.82724 curveto
+51.57272 39.82724 51.28435 39.70776 51.07172 39.49513 curveto
+50.85909 39.2825 50.73961 38.99413 50.73961 38.69339 curveto
+50.73961 38.39265 50.85909 38.10428 51.07172 37.89165 curveto
+51.28435 37.67902 51.57272 37.55954 51.87346 37.55954 curveto
+52.1742 37.55954 52.46257 37.67902 52.6752 37.89165 curveto
+52.88783 38.10428 53.00731 38.39265 53.00731 38.69339 curveto closepath stroke
+53.97345 40.79338 moveto
+(O) cmmi10 9.96265 fshow
+107.54791 -30.19965 moveto
+(p) cmmi10 9.96265 fshow
+showpage
+%%EOF

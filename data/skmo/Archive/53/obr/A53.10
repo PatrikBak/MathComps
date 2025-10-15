@@ -1,0 +1,67 @@
+%!PS
+%%BoundingBox: -132 55 134 140 
+%%Creator: MetaPost
+%%CreationDate: 2000.02.11:1349
+%%Pages: 1
+%*Font: cmmi10 9.96265 9.96265 0b:c0000000000003e005
+%*Font: cmsy7 6.97385 6.97385 0e:8
+%*Font: cmr10 9.96265 9.96265 30:e
+%%EndProlog
+%%Page: 1 1
+ 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath -113.43143 65.38043 moveto
+113.43143 65.38043 lineto
+122.43344 107.55936 lineto
+20.60516 129.29506 lineto
+-120.2588 105.04535 lineto
+-113.43143 65.38043 lineto
+20.60516 129.29506 lineto
+113.43143 65.38043 lineto stroke
+ [6 2 ] 3 setdash
+newpath 122.43344 107.55936 moveto
+-120.2588 105.04535 lineto
+-46.41313 97.33775 lineto
+67.0183 97.33775 lineto
+ closepath stroke
+ [] 0 setdash
+newpath 115.61327 109.01518 moveto
+114.80922 105.2484 117.21104 101.54303 120.97783 100.73907 curveto stroke
+ 0 1 dtransform truncate idtransform setlinewidth pop
+newpath 119.12311 105.41354 moveto 0 0 rlineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -119.07582 98.1726 moveto
+-115.28009 98.82587 -112.7327 102.43271 -113.38606 106.22844 curveto stroke
+ 0 1 dtransform truncate idtransform setlinewidth pop
+newpath -117.03647 102.76945 moveto 0 0 rlineto stroke
+8.88942 115.37613 moveto
+(120) cmr10 9.96265 fshow
+23.83342 118.99153 moveto
+(\016) cmsy7 6.97385 fshow
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath 2.9159 120.85995 moveto
+9.40639 107.24858 28.19461 105.7609 36.74634 118.18121 curveto stroke
+-99.26291 66.3767 moveto
+(\013) cmmi10 9.96265 fshow
+newpath -90.96066 65.38043 moveto
+-90.96066 68.72725 -91.70813 72.03156 -93.14856 75.05229 curveto stroke
+90.51917 68.31389 moveto
+(\014) cmmi10 9.96265 fshow
+newpath 91.80716 80.26959 moveto
+88.79175 75.88971 87.17688 70.69777 87.17688 65.38043 curveto stroke
+-117.16743 55.57263 moveto
+(A) cmmi10 9.96265 fshow
+109.40312 55.57263 moveto
+(B) cmmi10 9.96265 fshow
+125.43344 104.15546 moveto
+(C) cmmi10 9.96265 fshow
+16.34267 132.29506 moveto
+(D) cmmi10 9.96265 fshow
+-131.18741 101.64145 moveto
+(E) cmmi10 9.96265 fshow
+-50.30309 87.52995 moveto
+(P) cmmi10 9.96265 fshow
+63.19754 87.52995 moveto
+(R) cmmi10 9.96265 fshow
+showpage
+%%EOF

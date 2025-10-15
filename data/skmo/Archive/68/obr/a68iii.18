@@ -1,0 +1,97 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -5 -10 111 76 
+%%HiResBoundingBox: -4.2625 -9.8078 110.32748 75.5043 
+%%Creator: MetaPost 1.999
+%%CreationDate: 2019.03.15:0934
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font CMMI10
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font CMMI10
+%%IncludeResource: font CMMI10
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /cmmi10 /CMMI10 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 0.56696 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+106.2992 0 lineto
+106.2992 65.6965 lineto
+0 65.6965 lineto
+0 0 lineto stroke
+ 1 0 0 setrgbcolor 0 0.9 dtransform truncate idtransform setlinewidth pop
+newpath 0 0 moveto
+92.77216 8.35896 lineto
+13.52704 57.33754 lineto
+106.2992 65.6965 lineto stroke
+ 0 setgray 0 0.56696 dtransform truncate idtransform setlinewidth pop
+newpath 0 65.6965 moveto
+13.52704 57.33754 lineto stroke
+newpath 92.77216 8.35896 moveto
+106.2992 0 lineto stroke
+ 1 setgray
+newpath 93.97215 8.35896 moveto
+93.97215 8.67723 93.8457 8.98244 93.62067 9.20747 curveto
+93.39563 9.43251 93.09042 9.55896 92.77216 9.55896 curveto
+92.45389 9.55896 92.14868 9.43251 91.92365 9.20747 curveto
+91.69861 8.98244 91.57216 8.67723 91.57216 8.35896 curveto
+91.57216 8.0407 91.69861 7.73549 91.92365 7.51045 curveto
+92.14868 7.28542 92.45389 7.15897 92.77216 7.15897 curveto
+93.09042 7.15897 93.39563 7.28542 93.62067 7.51045 curveto
+93.8457 7.73549 93.97215 8.0407 93.97215 8.35896 curveto closepath fill
+ 0 setgray
+newpath 93.97215 8.35896 moveto
+93.97215 8.67723 93.8457 8.98244 93.62067 9.20747 curveto
+93.39563 9.43251 93.09042 9.55896 92.77216 9.55896 curveto
+92.45389 9.55896 92.14868 9.43251 91.92365 9.20747 curveto
+91.69861 8.98244 91.57216 8.67723 91.57216 8.35896 curveto
+91.57216 8.0407 91.69861 7.73549 91.92365 7.51045 curveto
+92.14868 7.28542 92.45389 7.15897 92.77216 7.15897 curveto
+93.09042 7.15897 93.39563 7.28542 93.62067 7.51045 curveto
+93.8457 7.73549 93.97215 8.0407 93.97215 8.35896 curveto closepath stroke
+ 1 setgray
+newpath 14.72704 57.33754 moveto
+14.72704 57.6558 14.60059 57.96101 14.37555 58.18605 curveto
+14.15051 58.41109 13.8453 58.53754 13.52704 58.53754 curveto
+13.20877 58.53754 12.90356 58.41109 12.67853 58.18605 curveto
+12.45349 57.96101 12.32704 57.6558 12.32704 57.33754 curveto
+12.32704 57.01927 12.45349 56.71407 12.67853 56.48903 curveto
+12.90356 56.26399 13.20877 56.13754 13.52704 56.13754 curveto
+13.8453 56.13754 14.15051 56.26399 14.37555 56.48903 curveto
+14.60059 56.71407 14.72704 57.01927 14.72704 57.33754 curveto closepath fill
+ 0 setgray
+newpath 14.72704 57.33754 moveto
+14.72704 57.6558 14.60059 57.96101 14.37555 58.18605 curveto
+14.15051 58.41109 13.8453 58.53754 13.52704 58.53754 curveto
+13.20877 58.53754 12.90356 58.41109 12.67853 58.18605 curveto
+12.45349 57.96101 12.32704 57.6558 12.32704 57.33754 curveto
+12.32704 57.01927 12.45349 56.71407 12.67853 56.48903 curveto
+12.90356 56.26399 13.20877 56.13754 13.52704 56.13754 curveto
+13.8453 56.13754 14.15051 56.26399 14.37555 56.48903 curveto
+14.60059 56.71407 14.72704 57.01927 14.72704 57.33754 curveto closepath stroke
+-3.73601 -9.8078 moveto
+(A) cmmi10 9.96265 fshow
+102.27089 -9.8078 moveto
+(B) cmmi10 9.96265 fshow
+102.38264 68.6965 moveto
+(C) cmmi10 9.96265 fshow
+-4.2625 68.6965 moveto
+(D) cmmi10 9.96265 fshow
+91.8822 12.35896 moveto
+(P) cmmi10 9.96265 fshow
+6.58904 47.52974 moveto
+(Q) cmmi10 9.96265 fshow
+showpage
+%%EOF

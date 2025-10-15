@@ -1,0 +1,33 @@
+%!PS
+%%BoundingBox: -13 -11 97 53 
+%%HiResBoundingBox: -12.14449 -10.2694 96.6354 52.789 
+%%Creator: MetaPost 2.02
+%%CreationDate: 2024.09.02:1353
+%%Pages: 1
+%*Font: lmmi12 11.95517 11.95517 41:f
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 1 1 0.7 setrgbcolor
+newpath 0 0 moveto
+85.03922 0 lineto
+85.03922 42.5196 lineto
+0 42.5196 lineto
+ closepath fill
+ 0 0 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+85.03922 0 lineto
+85.03922 42.5196 lineto
+0 42.5196 lineto
+ closepath stroke
+-10.87529 -10.2694 moveto
+(A) lmmi12 11.95517 fshow
+87.1392 -10.2694 moveto
+(B) lmmi12 11.95517 fshow
+87.1392 44.6196 moveto
+(C) lmmi12 11.95517 fshow
+-12.14449 44.6196 moveto
+(D) lmmi12 11.95517 fshow
+showpage
+%%EOF

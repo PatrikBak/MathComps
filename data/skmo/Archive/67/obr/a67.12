@@ -1,0 +1,63 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -63 -1 63 78 
+%%HiResBoundingBox: -62.94537 -0.28348 62.83362 77.83917 
+%%Creator: MetaPost 1.999
+%%CreationDate: 2018.03.12:1254
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font CMMI10
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font CMMI10
+%%IncludeResource: font CMMI10
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /cmmi10 /CMMI10 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 0.56696 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 34.01569 34.01569 moveto
+34.01569 43.03761 30.43121 51.68893 24.05223 58.06792 curveto
+17.67325 64.4469 9.02193 68.03137 0 68.03137 curveto
+-9.02193 68.03137 -17.67325 64.4469 -24.05223 58.06792 curveto
+-30.43121 51.68893 -34.01569 43.03761 -34.01569 34.01569 curveto
+-34.01569 24.99376 -30.43121 16.34244 -24.05223 9.96346 curveto
+-17.67325 3.58447 -9.02193 0 0 0 curveto
+9.02193 0 17.67325 3.58447 24.05223 9.96346 curveto
+30.43121 16.34244 34.01569 24.99376 34.01569 34.01569 curveto closepath stroke
+newpath 0 68.03137 moveto
+-58.91707 34.01569 lineto
+58.91707 34.01569 lineto
+ closepath stroke
+ 1 setlinecap
+newpath -29.45854 51.02353 moveto
+0 34.01569 lineto
+29.45854 51.02353 lineto stroke
+ 0.56696 0 dtransform exch truncate exch idtransform pop setlinewidth
+ [3.15001 2.1 0 2.1 ] 0 setdash
+newpath 0 68.03137 moveto
+0 34.01569 lineto stroke
+-3.73601 71.03137 moveto
+(A) cmmi10 9.96265 fshow
+-62.94537 24.20789 moveto
+(B) cmmi10 9.96265 fshow
+55.00052 24.20789 moveto
+(C) cmmi10 9.96265 fshow
+-4.2625 24.20789 moveto
+(D) cmmi10 9.96265 fshow
+-40.38715 51.02353 moveto
+(E) cmmi10 9.96265 fshow
+32.45854 51.02353 moveto
+(F) cmmi10 9.96265 fshow
+showpage
+%%EOF

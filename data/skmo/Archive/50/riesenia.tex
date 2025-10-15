@@ -1,0 +1,931 @@
+﻿{%%%%%   A-I-1
+...}
+
+{%%%%%   A-I-2
+Ak zvolíme prirodzené čísla $a_1$, $a_2$ ľubovoľne,
+sú všetky nasledujúce členy $a_3$, $a_4$,~\dots\ skúmanej
+postupnosti jednoznačne určené rekurentným predpisom
+$$
+a_{n+1}=1+(a_n+a_{n-1})^{*}\quad (n=2,3,\dots),
+\tag1$$
+kde $a^{*}$ je najväčší nepárny deliteľ prirodzeného čísla $a$.
+Najprv vypočítame pre niekoľko  "počiatočných"
+dvojíc $a_1$, $a_2$ zopár prvých členov $a_n$,
+z ktorých už bude jasné, kde začína a~ako vyzerá perióda skúmanej
+postupnosti. Niekoľko príkladov uvádzame v~nasledujúcej
+tabuľke.
+$$
+\matrix
+a_1&a_2&a_3&a_4&a_5&a_6&a_7&a_8&a_9&a_{10}&\dots\\
+\noalign{\vskip3pt\hrule\vskip3pt}
+1&1&2&4&4&2&4&4&2&4&\dots\\
+2&1&4&6&6&4&6&6&4&6&\dots\\
+1&2&4&4&2&4&4&2&4&4&\dots\\
+1&3&2&6&2&2&2&2&2&2&\dots\\
+2&2&2&2&2&2&2&2&2&2&\dots\\
+3&1&2&4&4&2&4&4&2&4&\dots\\
+1&4&6&6&4&6&6&4&6&6&\dots\\
+2&3&6&10&2&4&4&2&4&4&\dots\\
+3&2&6&2&2&2&2&2&2&2&\dots\\
+4&1&6&8&8&2&6&2&2&2&\dots\\
+\endmatrix
+$$
+(Pre väčšie hodnoty $a_1$, $a_2$ sa perióda často objaví
+"neskôr", ako ukazuje príklad postupnosti
+$30,31,62,94,40,68,60,2,32,18,26,12,20,2,12,8,6,8,8,2,6,
+2,2\dots$)
+
+Uvedomme si, že postupnosť vytvorená podľa predpisu (1)
+je od istého člena, povedzme $a_n$, periodická
+práve vtedy keď existuje taký index $m$, že platí
+$$
+m>n,\quad a_m=a_n\quad\text{a}\quad a_{m+1}=a_{n+1}.
+\tag2
+$$
+
+Vlastné riešenie úlohy začneme tak, že dokážeme štyri tvrdenia (T1)
+až (T4), ktoré platia pre každú skúmanú postupnosť $\{a_n\}$
+a~ktoré možno "vidieť" z príkladov uvedených
+v~tabuľke.
+
+\smallskip
+(T1) {\sl Číslo $a_n$ je párne pre každé $n\geq3$.}
+
+\smallskip
+Dôkaz (T1) je triviálny: pretože číslo $a^{*}$ je nepárne pre každé
+$a$, je pravá strana rovnosti v~(1) párna.
+
+\smallskip
+(T2) {\sl  Nerovnosť $a_n\leq\max\{a_{n-1},a_{n-2}\}$ platí
+pre každé $n\geq5$.}
+
+\smallskip
+Dôkaz (T2): Pretože pre párne $a$ platí $a^{*}\leq\frac12 a$ a~pre
+každé $n\geq5$ sú podľa (T1) obidve čísla  $a_{n-1}$, $a_{n-2}$
+párne, platí pre také $n$ odhad
+$$
+a_n=1+(a_{n-1}+a_{n-2})^{*}\leq1+\frac{a_{n-1}+a_{n-2}}2\leq
+1+\max\{a_{n-1},a_{n-2}\}
+$$
+(lebo aritmetický priemer dvoch čísel neprevyšuje väčšie z~nich).
+Zistili sme, že párne číslo $a_n$ neprevyšuje nepárne číslo
+$1+\max\{a_{n-1},a_{n-2}\}$, teda neprevyšuje ani číslo o~1
+menšie, číslo $\max\{a_{n-1},a_{n-2}\}$.
+
+Z~dokázaného tvrdenia (T2) vyplýva, že každá skúmaná postupnosť
+$\{a_n\}$ má najväčší člen (a~ten sa navyše rovná jednému z~čísel
+$a_1$, $a_2$, $a_3$, $a_4$). Ukážme, ako ľahko už odtiaľ vyplýva
+tvrdenie o~periodickosti postupnosti $\{a_n\}$: ak označíme
+najväčší člen postupnosti $m$, je každá z~nekonečne veľa dvojíc $(a_n,a_{n+1})$
+($n=1,2,3,\dots$) rovná jednej z~$M^2$ dvojíc $(a,b)$, kde
+$a,b\in\{1,2,\dots,M\}$. Preto existujú dva rôzne indexy, povedzme
+$n<m$, pre ktoré platí $(a_n,a_{n+1})=(a_m,a_{m+1})$,
+t\.j\.~podmienka (2). Potom však indukciou z~(1) vyplýva, že
+$a_{n+k}=a_{m+k}$ pre každé $k\geq0$. Dokázali sme, že postupnosť
+$\{a_n\}$ je periodická a tým sme vyriešili prvú časť úlohy.
+
+\smallskip
+Zdôraznime ešte, že tvrdenie (T2) neznamená,
+že postupnosť $\{a_n\}$ je od niektorého členu nerastúca
+(popierajú to príklady z~našej tabuľky). Platí ale:
+
+\smallskip
+(T3) {\sl Existuje index $n_0$ (závislý na postupnosti $\{a_n\}$)
+taký, že pre každé $n\geq n_0$ platí rovnosť
+$\max\{a_{n-1},a_{n-2}\}=\max\{a_n,a_{n-1}\}$.}
+
+\smallskip
+Dôkaz (T3): Položme $b_n=\max\{a_n,a_{n-1}\}$ pre každé $n\geq4$.
+Podľa (T2) pre každé $n\geq5$ platí  $a_n\leq b_{n-1}$, čo spolu
+s~triviálnou rovnosťou $a_{n-1}\leq b_{n-1}$ vedie k~záveru, že
+$b_n\leq b_{n-1}$. Postupnosť prirodzených čísel $b_4$, $b_5$, $b_6$,
+\dots je teda nerastúca, preto je od istého člena, povedzme
+$b_{n_0}$, konštantná. Dôkaz (T3) je hotový.
+
+\smallskip
+(T4) {\sl Pre každé $n\geq n_0$, kde $n_0$ je index z~{\rm (T3)},
+platí implikácia: ak $a_{n}>a_{n+1}$, potom  $a_n-a_{n+1}=2$.}
+
+\smallskip
+Dôkaz (T4): Pokiaľ $a_{n}>a_{n+1}$ pre niektoré $n\geq n_0$, potom
+$a_{n}\geq a_{n+1}+2$ podľa (T1)
+a~z~rovnosti $\max\{a_{n+1},a_n\}=\max\{a_{n+2},a_{n+1}\}$ uvedenej
+v~(T3) vyplýva, že $a_{n}=a_{n+2}$, čo podľa (1) znamená, že
+$a_n=1+(a_n+a_{n+1})^{*}$. Číslo $a_n-1$ je teda deliteľom
+(väčšieho) čísla $a_n+a_{n+1}$ a~tak platí nerovnosť
+$a_n+a_{n+1}\geq2(a_n-1)$, odkiaľ $a_{n}\leq a_{n+1}+2$. Pretože
+platí aj~obrátená nerovnosť (pozri vyššie), je dôkaz (T4)
+skončený.
+
+Pomocou tvrdení (T3) a~(T4) teraz dokončíme riešenie úlohy. (Ukazuje
+sa, že všetky možné periodické skupiny členov možno vyčítať z~našej tabuľky.)
+Uvažujme aj~naďalej ľubovoľnú skúmanú postupnosť  $\{a_n\}$
+a~jej príslušný index $n_0$ z~(T3). Môžu nastať dva prípady:
+
+\smallskip
+(i) nerovnosť $a_n\leq a_{n+1}$ platí pre každé $n\geq n_0$
+
+(ii) pre niektoré $n\geq n_0$ platí $a_{n}>a_{n+1}$.
+
+\smallskip
+V~prípade (i) z~(T3) vyplýva indukciou, že $a_n=a_{n_0}$ pre každé $n\geq
+n_0$. Možnú hodnotu $c=a_{n_0}$ nájdeme podľa (1) z~rovnosti
+$c=1+(2c)^{*}$. Pretože $(2c)^{*}=c^{*}$, dostávame $c^{*}=c-1$.
+Číslo $c-1$ je však deliteľom čísla $c$ zrejme len pre $c=2$.
+Skúmaná postupnosť je teda tvaru
+$$
+a_1,a_2,\dots,a_{n_0-1},2,2,2,\dots
+\tag3
+$$
+
+V~prípade (ii) z~nerovnosti  $a_{n}>a_{n+1}$ podľa (T4) vyplýva
+$a_n=2d$ a~$a_{n+1}=2d-2$ pre vhodné celé $d>1$ (pripomeňme, že
+$a_{n}$ je párne podľa (T1)). Podľa predpisu (1) potom dostávame
+$$
+\align
+a_{n+2}&=1+(2d+2d-2)^{*}=1+(2d-1)=2d,\\
+a_{n+3}&=1+(2d-2+2d)^{*}=1+(2d-1)=2d,\\
+a_{n+4}&=1+(2d+2d)^{*}=1+d^{*}.
+\endalign
+$$
+Pre $d>1$ však platí $2d>1+d\geq1+d^{*}$ a~teda
+$a_{n+3}>a_{n+4}$. To opäť podľa (T4) znamená, že
+$a_{n+3}-a_{n+4}=2$, alebo $(2d)-(1+d^{*})=2$, odkiaľ
+$2d-3=d^{*}\leq d$, takže $d\leq3$. V~prípade $d=2$ je skúmaná
+postupnosť tvaru
+$$
+a_1,a_2,\dots,a_{n-1},4,2,4,4,2,4,4,2,\dots,
+\tag4$$
+pre $d=3$ má tvar
+$$
+a_1,a_2,\dots,a_{n-1},6,4,6,6,4,6,6,4,\dots
+\tag5
+$$
+Dokázali sme, že {\it každá\/} postupnosť zo zadania úlohy je jedného
+z~tvarov (3), (4), (5). Odtiaľ už vyplýva, že periodické od prvého
+člena sú práve tie postupnosti, ktorých dvojice prvých
+členov $(a_1,a_2)$ sú rovné jednej zo siedmich dvojíc čísel $(2,2)$, $(2,4)$,
+$(4,2)$, $(4,4)$, $(4,6)$, $(6,4)$ a~$(6,6)$.
+}
+
+{%%%%%   A-I-3
+...}
+
+{%%%%%   A-I-4
+Sčítaním všetkých troch daných nerovníc dostaneme nerovnosť
+$$
+(\sin x+\cos x)+(\sin y+\cos y)+(\sin z+\cos z)\geq3\sqrt{2}.
+\tag1
+$$
+Pre každé reálne číslo $t$ platí
+$$
+\aligned
+\sin t+\cos t&=\sqrt{2}\biggl(\frac{\sqrt{2}}{2}\sin t+
+\frac{\sqrt{2}}{2}\cos t\biggr)=\sqrt{2}\biggl(\sin t\cos\frac{\pi}{4}+
+\cos t\sin\frac{\pi}{4}\biggr)=\\
+&=\sqrt{2}\sin\left(t+\frac{\pi}{4}\right)\leq\sqrt{2},
+\endaligned
+\tag2
+$$
+lebo $\sin\left(t+\frac{\pi}{4}\right)\leq1$. Pritom rovnosť
+v~druhom riadku (2) nastane práve vtedy, keď
+$t+\frac{\pi}{4}=\frac{\pi}{2}+2k\pi$, alebo $t=\frac{\pi}{4}+2k\pi$
+pre niektoré celé číslo $k$. Sčítaním troch odhadov (2) pre $t=x$,
+$t=y$ a~$t=z$ dostaneme nerovnosť
+$$
+(\sin x+\cos x)+(\sin y+\cos y)+(\sin z+\cos z)\leq3\sqrt{2}.
+\tag3$$
+Všimnime si, že nerovnosť (3) platí pre {\it ľubovoľnú trojicu\/}
+reálnych čísel $(x,y,z)$, zatiaľ čo opačná nerovnosť (1) platí pre
+{\it každé riešenie\/} pôvodnej sústavy. Zisťujeme teda,
+že nerovnosť (1) môže byť splnená jedine ako rovnosť, čo se
+podľa predchádzajúceho stane práve vtedy, keď čísla $x$, $y$, $z$ budú tvaru
+$$
+x=\frac{\pi}{4}+2k_1\pi,\quad y=\frac{\pi}{4}+2k_2\pi,\quad
+z=\frac{\pi}{4}+2k_3\pi\quad (k_1,k_2,k_3\in\Bbb Z).
+$$
+Dosadením do pôvodnej sústavy sa ľahko presvedčíme, že každá
+taká trojica čísel $(x,y,z)$ je skutočne riešením, platí pre ňu totiž
+$$
+\sin x=\cos x=\sin y=\cos y=\sin z=\cos z=\frac{\sqrt{2}}{2}.
+$$
+(Poznámka o~skúške bola nutná, protože nerovnosť (1) je len {\it
+dôsledkom\/} zadanej sústavy. Nemoholi sme vylúčiť, že
+pre niektorú trojicu čísel $(x,y,z)$ platí (1), avšak neplatí
+niektorá z troch pôvodných nerovností.)
+
+\medskip
+{\it Poznámka.}
+Nerovnosť (2) môžeme ľahko získať z~nerovnosti medzi aritmetickým
+a~kvadratickým priemerom:
+$$
+\sin t+\cos t\le\mathopen|\sin t|+\mathopen|\cos t|\le
+2\sqrt{\sin^2t+\cos^2t\over2}=\sqrt2.
+$$
+
+Na~vyriešenie úlohy možno miesto (1) využiť aj~iné
+dôsledky danej sústavy. Prepíšme napríklad prvé z~daných
+nerovníc do tvaru $\sin x\geq\sqrt{2}-\cos y$. Ak platí táto
+nerovnosť, platí aj~umocnená nerovnosť
+$\sin^2 x\geq(\sqrt{2}-\cos y)^2$, lebo $\sqrt{2}-\cos y>0$ pre
+každé $y\in\Bbb R$. Sčítaním troch nerovností
+$$
+\sin^2 x\geq(\sqrt{2}-\cos y)^2,\
+\sin^2 y\geq(\sqrt{2}-\cos z)^2,\
+\sin^2 z\geq(\sqrt{2}-\cos x)^2
+$$
+dostaneme po úpravách nerovnosť
+$$
+0\geq\bigl(1-\sqrt{2}\cos x\bigr)^2+
+\bigl(1-\sqrt{2}\cos y\bigr)^2+
+\bigl(1-\sqrt{2}\cos z\bigr)^2,
+$$
+z ktorej už vyplýva všetko potrebné.
+
+\medskip
+Riešenie úlohy môžeme začať ešte jedným spôsobom. Umocníme
+najprv každú z troch daných nerovníc na druhú (ide
+o~dôsledkovú úpravu, lebo menšia (pravá) strana nerovnice je
+kladná) a~potom ich sčítame. Po ľahkej úprave vyjde nerovnosť
+$$
+2\sin x\cos y+2\sin y\cos z+2\sin z\cos x\geq 3.
+$$
+O~všeobecnej platnosti opačnej nerovnosti sa presvedčíme tak, že každý z
+troch členov na ľavej strane odhadneme zhora pomocou "klasickej"
+nerovnosti $2uv\leq u^2+v^2$ (ktorá je ostrá v~prípade $u\ne v$):
+$$\align
+&2\sin x\cos y+2\sin y\cos z+2\sin z\cos x\leq\\
+&\le(\sin^2x+\cos^2y)+(\sin^2y+\cos^2z)+(\sin^2z+\cos^2x)=3.
+\endalign
+$$
+Tak odvodíme nutné podmienky $\sin x=\cos y$, $\sin y=\cos z$,
+$\sin z=\cos x$, pri ktorých je riešenie pôvodnej sústavy
+už triviálnou úlohu.
+}
+
+{%%%%%   A-I-5
+...}
+
+{%%%%%   A-I-6
+...}
+
+{%%%%%   B-I-1
+...}
+
+{%%%%%   B-I-2
+...}
+
+{%%%%%   B-I-3
+ Podľa charakteru čísel v riadkoch rozdelíme všetky skúmané
+ tabuľky do troch skupín:
+
+ (a) V~žiadnom riadku tabuľky nie je $n$ rovnakých čísel. Sčítaním
+ čísel po riadkoch v~tejto situáci zistíme, že
+$$
+ S~= n(1+2+\dots+n)=\frac12n^{2}(n+1) .  \tag5
+$$
+
+ (b) V~práve jednom riadku tabuľky je $n$ rovnakých čísel $a$.
+ V~každom z~ostatných riadkov sú čísla 1, 2,~\dots, $n$, takže
+$S=na+(n-1)(1+2+\dots+n)$, a~po úprave
+$$
+ S~= na+\frac12n(n^{2}-1),\quad a~\in \{1, 2, \dots, n\}. \tag6
+$$
+
+ (c) V~niektorom riadku tabuľky je $n$ rovnakých čísel $b$ a~v~inom
+ $n$ rovnakých čísel $c$. Pokiaľ je $b=c$, vyskytuje sa číslo
+ $c$ v~každom stĺpci aspoň dvakrát, a~teda práve $n$-krát.
+ V tom prípade platí
+$$
+ S~= n^{2}c, \qquad c \in \{1, 2,\dots, n\}.        \tag7
+$$
+
+ Pokiaľ sú $b$, $c$ rôzne čísla, sú aj~v~každom stĺpci tabuľky
+dve rôzne čísla, a~teda sú v~ňom všetky čísla navzájom rôzne.
+Sčítaním po stĺpcoch zistíme, že súčet $S$ má hodnotu~ (5).
+
+ Dosadením daného $n$ a~postupne všetkých možných hodnôt čísel $a$,
+$c$ do vzťahov~ (5), (6) a~(7) dostaneme celkom $2n+1$ súčtov,
+z~toho $n$ súčtov typu~ (6) je navzájom rôznych a~$n$ súčtov
+typu~(7) je navzájom rôznych. Musíme teda ešte overiť, či
+nie je možné pre nejaké hodnoty čísel $a$, $c$ aby sa súčty~ (5)
+a~(6), alebo (5) a~(7), alebo (6) a~(7) rovnali.
+
+ V~prvom prípade z~rovnice $\frac12n^{2}(n+1)=na +
+\frac12n(n^{2}-1)$ zistíme, že rovnosť nastane pre $a=
+\frac12(n+1)$, to znamená, len keď $n$ je nepárne.
+
+ V druhom prípade prídeme analogicky k~záveru, že (5) a~(7) sa
+rovnajú len pre $n$ nepárne a~$c=\frac12(n+1)$.
+
+ V treťom prípade upravíme rovnicu $na+\frac12n(n^{2}-1)=
+n^{2}c$ na tvar $2a-1=n(2c-n)$, z~ktorého vyplýva, že pokiaľ také
+dve čísla $a, c \in \{1, 2,\dots, n\}$ existujú, je číslo $n$
+nutne nepárne a~číslo $2a-1$ je jeho násobkom. Avšak $2a-1
+\le 2n-1$, preto môže byť jedine $2a-1=n$ a~$2c-n=1$. Odtiaľ $a=
+\frac12(n+1)=c$.
+
+ Zhrnutím všetkých troch situácií môžeme konštatovať, že pre $n$ párne
+ je všetkých $2n+1$ súčtov~$S$ rôznych. Na druhej strane,
+  pre $n$ nepárne sa medzi týmito súčtami vyskytujú práve tri rovnaké.
+
+{\it Odpoveď\/}: Súčet $S$ všetkých čísel tabuľky nadobúda buď $2n+1$
+hodnôt (keď $n$ je párne), alebo $2n-1$ hodnôt (keď $n$ je
+nepárne).
+}
+
+{%%%%%   B-I-4
+...}
+
+{%%%%%   B-I-5
+...}
+
+{%%%%%   B-I-6
+...}
+
+{%%%%%   C-I-1
+...}
+
+{%%%%%   C-I-2
+...}
+
+{%%%%%   C-I-3
+...}
+
+{%%%%%   C-I-4
+...}
+
+{%%%%%   C-I-5
+...}
+
+{%%%%%   C-I-6
+...}
+
+{%%%%%   A-S-1
+...}
+
+{%%%%%   A-S-2
+...}
+
+{%%%%%   A-S-3
+\def\ov{\overline}%
+Z~vyjadrenia
+$\ov{abcd}=100\cdot\ov{ab}+\ov{cd}$ vyplýva, že podmienky deliteľnosti
+číslami $\ov{ab}$ a~$\ov{cd}$ sú
+splnené práve vtedy, keď $\ov{cd}\mid100\cdot\ov{ab}$
+a~$\ov{ab}\mid\ov{cd}$, teda práve vtedy, keď $\ov{cd}=k\cdot \ov{ab}$,
+kde prirodzené číslo $k$ je niektorý deliteľ čísla 100.
+Keďže obidve čísla $\ov{ab}$ a~$\ov{cd}$ sú podľa zadania
+nepárne a~dvojciferné,
+je buď $k=1$, alebo $k=5$. Rozlíšime dva prípady, pritom
+s~ohľadom na vyjadrenie $\ov{abcd}=10\cdot\ov{bc}+(1000a+d)$
+budeme namiesto podmienky $\ov{bc}\mid\ov{abcd}$ skúmať
+ekvivalentnú pod\-mien\-ku\looseness1
+$$
+\ov{bc}\mid(1000a+d).  \tag{$\ast$}
+$$
+(Táto úprava nie je nutná, len trochu zjednodušuje ďalšie zápisy.)
+
+a) Ak je $\ov{cd}=\ov{ab}$, platí $c=a$ a~$d=b$, takže podmienka
+\thetag{$\ast$}
+sa napíše v tvare $(10b+a)\mid(1000a+b)$. Pretože
+$$
+1000\cdot(10b+a)-(1000a+b)=9999\cdot b=11\cdot9\cdot101\cdot b
+$$
+a~101 je prvočíslo (teda je s~číslom $10b+a$ nesúdeliteľné),
+dostávame ekvivalentnú~podmienku $(10b+a)\mid(11\cdot9b)$.
+Odtiaľ, s~ohľadom na zrejmú nerovnosť $10b+a>9b$ vyplýva,
+že číslo $10b+a$ má číslo~ 11 vo svojom rozklade na prvočinitele.
+Podmienka $11\mid(10b+a)$ je však splnená
+len keď sa číslice~$a$ a~$b$ rovnajú. Potom by však
+z~rovnosti  $\ov{cd}=\ov{ab}$ vyplývalo, že číslo $\ov{abcd}$
+má {\it všetky\/} číslice rovnaké. O~takých číslach podľa zadania
+úlohy neuvažujeme.
+
+b) Z~rovnosti $\ov{cd}=5\cdot\ov{ab}$ ihneď určíme (nepárne) cifry
+$a=1$ a~$d=5$, po ich dosadení a úprave vyjde rovnosť
+$b=2c-9$. Dostávame tri možnosti:
+$$
+c=5\text{ a~}b=1,\quad c=7\text{ a~}b=5,\quad
+c=9\text{ a~}b=9.
+$$
+Podmienka \thetag{$\ast$} má teraz tvar $\ov{bc}\mid 1\,005$,
+z~čísel 15, 57 a~99
+je však len číslo 15 deliteľom čísla 1\,005
+($1\,005=3\cdot5\cdot67$), preto nutne $b=1$ a~$c=5$.
+
+\medskip
+{\it Odpoveď\/}: Hľadané číslo je jediné, a~to 1\,155.
+}
+
+{%%%%%   A-II-1
+...}
+
+{%%%%%   A-II-2
+Predpokladajme, že $s$ a~$t$ sú (pevné) čísla
+požadovanej vlastnosti. Graf funkcie $f$ je zjednotením grafov
+funkcií $f_1$ a~$f_2$, ktoré sú určené vzorcami
+$$
+f_1(x)=\frac{x^2-4x+s}{(1-t)x+(t+7)},\quad
+f_2(x)=\frac{x^2-4x+s}{(t+1)x+(7-t)}
+\tag1$$
+a~majú definičné obory  $D(f_1)=({-\infty},1\rangle$,
+$D(f_2)=\langle1,\infty)$ (polpriamky bez akýchkoľvek vylúčených
+bodov, lebo hodnota $f(x)$ podľa popisu grafu $f$ existuje pre každé
+$x\in {\Bbb R}$). Čísla~ $s$ a~$t$ určíme z~podmienky, že grafy funkcií
+$f_1$ a~$f_2$ sú polpriamky (takže ide o~lineárne funkcie).
+Zrejme platí $t\ne\pm1$ (inak by graf jednej z~funkcií $f_1$,
+$f_2$ bol časťou paraboly), preto môžeme lineárne funkcie z
+menovateľov zlomkov v~(1) zapísať v tvare
+$$
+(1-t)x+(t+7)=(1-t)(x-x_1),\quad\text{kde}\quad
+x_1=\frac{t+7}{t-1},
+\tag2a
+$$
+a~$$
+(t+1)x+(7-t)=(t+1)(x-x_2),\quad\text{kde}\quad
+x_2=\frac{t-7}{t+1}.
+\tag2b$$
+Výhodu týchto rozkladov oceníme pri vyjadrovaní podmienky, že obe
+funkcie $f_1$ a~$f_2$ sú lineárne. Predtým však poznamenajme,
+že hodnota $f_1(x)$ existuje  pre každé $x\leq1$
+a~hodnota $f_2(x)$ pre každé $x\geq1$ práve vtedy, keď čísla
+$x_1$, $x_2$ z~rozkladov (2) spĺňajú podmienku
+$$
+x_2<1<x_1.
+\tag3
+$$
+Vzorce (1)
+určujú lineárne funkcie $f_1$ a~$f_2$ práve vtedy, keď je
+kvadratický mnohočlen $x^2-4x+s$ deliteľný (bezo zvyšku)
+každým z~lineárnych mnohočlenov $(x-x_1)$ a~$(x-x_2)$. Pretože
+však podľa (3) platí $x_1\ne x_2$, možno podmienku z~predchádzajúcej
+vety vyjadriť rovnosťou mnohočlenov
+$$
+x^2-4x+s=(x-x_1)(x-x_2).
+\tag4
+$$
+Poznamenajme, že ak platí podmienka (4), budú predpisy pre funkcie $f_1$,
+$f_2$ tvaru
+$$
+f_1(x)=\frac{x-x_2}{1-t}\qquad\text{a}\qquad
+f_2(x)=\frac{x-x_1}{t+1} \,.
+$$
+Podmienka (3) zaručí, že polpriamky, ktoré sú grafmi
+$f_1$ a~$f_2$, neležia na rovnakej priamke (keby ležali, nebola by
+grafom $f$ {\it lomená čiara\/}): os $x$ totiž pretne ako pol\-priam\-ku
+$y=f_1(x)$ (v~bode $[x_2,0]$), tak aj polpriamku $y=f_2(x)$
+(v~bode $[x_1,0]$).
+
+Podmienka (4) je s~ohľadom na (2) ekvivalentná s~dvojicou rovníc
+$$
+4=\frac{t+7}{t-1}+\frac{t-7}{t+1}\quad\text{a}\quad
+s=\frac{t+7}{t-1}\cdot\frac{t-7}{t+1}=\frac{t^2-49}{t^2-1},
+$$
+z ktorých určíme neznáme hodnoty $s$ a~$t$.
+Úpravou prvej rovnice dostaneme $t^2=9$, možné hodnoty $t$ sú teda
+$\pm3$; podľa druhej rovnice im zodpovedá rovnaká
+hodnota $s={-5}$.
+Ak je $t=3$, platí podľa (2) $x_1=5$ a~$x_2={-1}$ (podmienka (3)
+je teda splnená), ak je $t={-3}$, potom $x_1={-1}$ a~$x_2=5$
+(podmienka (3) splnená nie je). Riešením úlohy je teda jediná dvojica
+$(s,t)=({-5},3)$.
+
+Aj keď sme celé riešenie viedli tak, že skúška  nie je nutná,
+spravme ju ako pre dvojicu $(s,t)=({-5},3)$ tak aj pre dvojicu
+$(s,t)=({-5},{-3})$. Pre prvú dvojicu vychádza
+$$
+f(x)=\frac{x^2-4x-5}{3|x-1|+x+7}=
+\cases
+\dfrac{(x+1)(x-5)}{-2(x-5)}=-\dfrac{x+1}{2}&\quad(x\leq1),\\
+\dfrac{(x+1)(x-5)}{4(x+1)}=\dfrac{x-5}{4}&\quad(x\geq1),
+\endcases
+$$
+takže naozaj ide o~riešenia (\obr a); dvojici $(s,t)=({-5},{-3})$
+zodpovedá funkcia
+$$
+f(x)=\frac{x^2-4x-5}{-3|x-1|+x+7}=
+\cases
+\dfrac{(x+1)(x-5)}{4(x+1)}=\dfrac{x-5}{4}
+&\quad(x\leq1,\ x\ne-1),\\
+\dfrac{(x+1)(x-5)}{-2(x-5)}=-\dfrac{x+1}{2}
+&\quad(x\geq1,\ x\ne5),
+\endcases
+$$
+ktorej grafom je lomená čiara bez dvoch bodov (\obrr1b), takže
+dvojicu $(s,t)=({-5},{-3})$ nemožno považovať za riešenie.
+
+\midinsert
+\line{\hss\inspicture-!\hss\inspicture-!\hss}
+\endinsert
+
+\medskip
+{\it Poznámka.} Môže sa stať, že by niekto chcel vyjadriť podmienku
+linearity oboch funkcií $f_1$ a~$f_2$ (bez toho, aby zaviedol čísla $x_1$,
+$x_2$) takto: mnohočlen $x^2-4x+s$ je deliteľný ako mnohočlenom
+$(1-t)x+(t+7)$, tak i~mnohočlenom $(t+1)x+(7-t)$, je teda
+deliteľný aj~ich súčinom, teda platí rovnosť mnohočlenov
+$$
+\bigl((1-t)x+(t+7)\bigr)\bigl((t+1)x+(7-t)\bigr)=(1-t^2)(x^2-4x+s)
+$$
+(koeficient $(1-t^2)$ sa zistí porovnaním kvadratických členov).
+Tento záver je však korektný len vtedy, keď sú oba lineárne
+mnohočleny {\it nesúdeliteľné\/}; v~našom riešení je táto
+nesúdeliteľnosť zaručená podmienkou (3). Súdeliteľným
+mnohočlenom z menovateľov zlomkov v~(1)
+zodpovedá "riešenie" $(s,t)=({-77},0)$ s~príslušnou
+funkciou
+$$
+f(x)=\frac{x^2-4x-77}{x+7}=x-11\quad(x\in\Bbb R,\ x\ne-7),
+$$
+ktorej graf (obr.\,20c) je síce zložený z dvoch polpriamok, ale
+ich spoločný začiatok do grafu~ $f$ nepatrí (navyše tieto
+polpriamky zvierajú priamy uhol, takže ich zjednotenie nie je
+lomená čiara).
+
+\vskip-\baselineskip
+\inspicture c
+}
+
+{%%%%%   A-II-3
+...}
+
+{%%%%%   A-II-4
+...}
+
+{%%%%%   A-III-1
+Ak je mnohočlen $P$ konštantný, čiže $P(x)=a$, tak
+číslo $a$ podľa zadania spĺňa podmienku $a^2+a=a+a$,
+takže $a=0$ alebo $a=1$. Obidva mnohočleny $P(x)=0$ a~$P(x)=1$
+sú riešením úlohy.
+
+Ak je stupeň $n$ mnohočlena $P$ kladný,
+tak $P(x)=ax^n+Q(x)$, kde $a$ je číslo rôzne od nuly
+a~$Q$ je mnohočlen so stupňom najviac $n-1$. Ak porovnáme v~rovnosti
+$$
+\bigl(ax^n+Q(x)\bigr)^2+a(-x)^n+Q(-x)=ax^{2n}+Q(x^2)+ax^n+Q(x)
+\tag1
+$$
+koeficienty pri najväčšej mocnine $x^{2n}$, dostaneme podmienku
+$a^2=a$, z ktorej vyplýva $a=1$ (pripomeňme, že $a\ne0$). Rovnosť
+(1) upravíme po dosadení hodnoty $a=1$ do ekvivalentného tvaru
+$$
+2x^nQ(x)+\bigl(Q(x)\bigr)^2-Q(x^2)=[1-(-1)^n]x^n+Q(x)-Q(-x).
+\tag2
+$$
+Predpokladajme, že mnohočlen $Q$ má kladný stupeň $k$ ($k<n$). Potom
+je na~ľavej strane (2) mnohočlen so stupňom aspoň $n+k$, čo je
+spor s~tým, že na~pravej strane~ (2) je mnohočlen so stupňom najviac~
+$n$. Preto $Q$ je konštantný mnohočlen, teda $Q(x)=b$ pre vhodné
+číslo~ $b$. Po dosadení do~ (2) dostávame podmienku
+$2bx^n+b^2-b=[1-({-1})^n]x^n$, ktorá je splnená pre každé $x$
+práve vtedy, keď $2b=1-({-1})^n$ a~zároveň $b^2-b=0$. Pre párne $n$
+vychádza jedine $b=0$ (takže $P(x)=x^n$), pre nepárne $n$ vyjde
+$b=1$ (takže $P(x)=x^n+1$).
+
+{\it Odpoveď\/}: Hľadané mnohočleny sú konštanty
+$0$ a~$1$, jednočleny $x^2$, $x^4$, $x^6$,~\dots\ a~dvojčleny
+$x+1$, $x^3+1$, $x^5+1$,~\dots
+
+\medskip
+{\bf Iné riešenie.}
+Ak pripočítame $P(-x)$ k~obom stranám danej rovnosti, dostaneme
+rovnosť $\bigl(P(x)\bigr)^2+2P(-x)=P(x^2)+P(x)+P(-x)$. Na jej
+pravej strane je párna funkcia premennej~ $x$. Preto je párna i~funkcia
+na~ľavej strane: pre každé~ $x$ platí $\bigl(P(x)\bigr)^2+2P({-x})=
+\bigl(P(-x)\bigr)^2+2P(x)$, alebo
+$$
+\bigl(P(x)-P(-x)\bigr)\cdot\bigl(P(x)+P(-x)-2\bigr)=0.
+$$
+Jeden z~dvoch činiteľov na~ľavej strane poslednej rovnosti je teda
+nulový mnohočlen. Ak platí identita $P(x)-P(-x)=0$, redukuje
+sa rovnosť zo zadania úlohy na $\bigl(P(x)\bigr)^2=P(x^2)$. Ak
+platí identita $P(x)+P(-x)-2=0$, tak pre mnohočlen~ $Q$
+definovaný rovnosťou $Q(x)=P(x)-1$ platí $Q(-x)=-Q(x)$. Po~dosadení
+a~úprave prejde rovnosť zo zadania do tvaru
+$\bigl(Q(x)\bigr)^2=Q(x^2)$.
+
+Ak zhrnieme obidva prípady, zistíme, že v~každom z~nich máme
+určiť mnohočlen~ $R$, ktorý je párnou alebo nepárnou funkciou
+a~pre každé~ $x$ spĺňa rovnosť $\bigl(R(x)\bigr)^2=R(x^2)$. Hľadajme
+také $R$ najskôr medzi jednočlenmi: po dosadení $R(x)=ax^n$
+zistíme, že je buď $a=0$, alebo $a=1$ a~$n\geq0$ je ľubovoľné.
+Predpokladajme, že $R$ nie je jednočlen, teda $R(x)=ax^n+bx^k+S(x)$, kde
+$a$, $b$ sú čísla rôzne od nuly, $n>k$ a~$S$ je nulový
+mnohočlen alebo mnohočlen so stupňom nanajvýš $k-1$. Ak porovnáme
+v~rovnosti
+$$
+\bigl(ax^n+bx^k+S(x)\bigr)\cdot\bigl(ax^n+bx^k+S(x)\bigr)
+       =ax^{2n}+bx^{2k}+S(x)
+$$
+koeficienty členov s~mocninou $x^{n+k}$, dostaneme rovnosť
+$2ab=0$, ktorá je v spore s~tým, že $a\ne0$ a~$b\ne0$. Preto
+podmienku $\bigl(R(x)\bigr)^2=R(x^2)$ spĺňajú len mnohočleny~ $R$
+rovné $0$, $1$, $x$, $x^2$, $x^3$,~\dots
+}
+
+{%%%%%   A-III-2
+...}
+
+{%%%%%   A-III-3
+Označme $(*)$ danú nerovnicu a~$\mm
+K=(-\infty,0\rangle\cup(1,\infty)$ príslušnú množinu (všetkých)
+riešení. Z~toho, že $0$ patrí do množiny $\mm K$, vyplýva pre $b$
+podmienka $b\geq0$ a zároveň $\sqrt{b}>-c$. Keby však platilo $b>0$, bol
+by výraz $\sqrt{2x^2+ax+b}$ definovaný v~niektorom okolí bodu $x=0$
+a~z~(ostrej) nerovnosti $(*)$ pre $x=0$ by vyplývala jej platnosť
+aj~pre malé kladné čísla~$x$, čo je v spore s~tvarom množiny~
+$\mm K$. Preto musí byť $b=0$ a~z~nerovnosti $\sqrt{b}>-c$ vyplýva
+podmienka $c>0$.
+
+Pretože $\sqrt{2x^2+ax+b\vphantom)}=\sqrt{x(2x+a)}$ a
+množina $\mm K$ obsahuje všetky čísla $x>1$, platí pre tieto
+$x$ nerovnosť $2x+a\geq0$, z ktorej vyplýva $a\geq{-2}$. Pretože
+$1\notin \mm K$, nerovnosť $\sqrt{2+a}>1-c$ neplatí, jej ľavá
+strana má vďaka nerovnosti $a\geq{-2}$ zmysel. Naopak, platí nerovnosť
+$\sqrt{2+a}\leq1-c$, odkiaľ vyplýva podmienka $c\leq1$. Keby
+platila ostrá nerovnosť $\sqrt{2+a}<1-c$, nerovnosť
+$\sqrt{x(2x+a)}<x-c$ by bola splnená nielen pre $x=1$, ale aj
+pre $x=1+\varepsilon$ s~dostatočne malým $\varepsilon>0$, čo je
+v spore s~tým, že $1+\varepsilon\in \mm K$. To znamená, že
+$\sqrt{2+a}=1-c$, odkiaľ $a=(1-c)^2-2=c^2-2c-1$.
+
+Zhrňme výsledky našich úvah: zistili sme, že každá vyhovujúca
+trojica čísel $(a,b,c)$ je nutne tvaru $(c^2-2c-1,0,c)$, kde
+$0<c\leq1$. Ukážme, že každá trojica popísaného
+tvaru má požadované vlastnosti. Riešme preto v~obore reálnych
+čísel nerovnicu
+$$
+\sqrt{x(2x+a)}>x-c,                \tag1
+$$
+pre pevne zvolené $c\in(0,1\rangle$ pričom $a=c^2-2c-1$.
+
+Z~nerovnosti $0<c\leq1$ a~vyjadrenia $a=(1-c)^2-2$ vyplýva, že
+${-2}\leq a<{-1}$. Pre každé $x\leq0$ teda platí $2x+a<0$. Ľavá
+strana (1) má teda zmysel a~je nezáporná, zatiaľ čo pravá strana~ (1)
+je pre tieto $x$ záporná (lebo $x-c\leq-c<0$). Preto celý
+interval $(-\infty,0\rangle$ patrí do množiny riešení (1). Nepatrí
+do nej však žiadne číslo~ $x$ z~intervalu $(0,-\frac12a)$, lebo pre ne
+nemá zmysel ľavá strana~ (1). Ostáva teda vyriešiť nerovnicu~ (1) na
+intervale $\langle-\frac12a,\infty)$. Najprv odôvodnime, že pre
+krajný bod $-\frac12a$ platia odhady $c\leq-\frac12a\leq1$.
+Skutočne, horný odhad okamžite vyplýva z~toho, že $a\geq{-2}$,
+dolný odhad sa odvodí zo zrejmej nerovnosti $c^2\leq1$:
+$$
+-\frac12a =-\frac12(c^2-2c-1)=c+\frac12(1-c^2)\geq c.
+$$
+Pre každé $x\in\langle-\frac12a,\infty)$ teda platí $x\geq c$
+a~preto sú obe strany nerovnice~ (1) nezáporné. Po umocnení oboch
+strán na druhú a~ľahkej úprave dostaneme ekvivalentnú nerovnicu
+$x^2+(a+2c)x-c^2>0$. Odtiaľ nám po dosadení $a=c^2-2c-1$ vychádza
+nerovnica $(x-1)\,(x+c^2)>0$, ktorá platí práve pre tie (kladné)
+čísla $x\in\langle-\frac12a,\infty)$, ktoré sú väčšie ako~1
+(zopakujme, že $-\frac12a\leq1$). Tým sme dokázali, že množinou
+riešení nerovnice~ (1) je skutočne množina $\mm K$ zo zadania úlohy.
+
+{\it Odpoveď\/}: Hľadané trojice sú $(a,b,c)=(c^2-2c-1,0,c)$,
+kde $c$ je ľubovoľné číslo z~intervalu $(0,1\rangle$.
+}
+
+{%%%%%   A-III-4
+V~žiadnom slove zrejme nemôžu byť štyri rovnaké písmená. Maximálna
+možná dĺžka slova uvažovaného jazyka je teda $3n$ (skupina
+$n$~ trojíc rovnakých písmen za sebou je zrejme slovo). Zároveň je
+jasné, že pre $n=1$ existuje jediné slovo dĺžky~3.
+
+Nech $n\ge2$.
+
+1. {\it Každé slovo začína dvoma rovnakými písmenami.\/} Keby to
+tak nebolo, mali by sme slovo $AB\dots A\dots A\dots$ začínajúce
+dvojicou rôznych písmen~ $A$, $B$. Ďalšie písmeno~ $B$ sa však
+nemôže vyskytovať medzi prvým a~druhým písmenom~ $A$ (jedno tam už
+je), ani za tretím písmenom~ $A$ (dve $A$ by boli medzi dvoma
+$B$). Obe ostávajúce písmená~ $B$ by museli byť medzi druhým
+a~tretím písmenom $A$, čo tiež nie je možné.
+
+2. {\it Ak vypustíme zo slova maximálnej dĺžky $3n$ tri rovnaké
+písmená, dostaneme v~jazyku s~$n-1$~písmenami opäť slovo maximálnej
+dĺžky $3(n-1)$.}
+
+Počet slov maximálnej dĺžky v~jazyku s~$n$~písmenami označme $p_n$.
+Zistime, koľko je slov maximálnej dĺžky začínajúcich zvoleným
+písmenom~ $A$. Každé také slovo začína dvoma písmenami~ $A$,
+takže tretie písmeno je buď $A$ (takých slov je zrejme
+toľko, koľko je slov maximálnej dĺžky obsahujúcich $n-1$ písmen,
+\tj.~$p_{n-1}$), alebo písmeno $B\ne A$. Pretože po vypustení všetkých
+písmen~ $A$ dostaneme opäť slovo (a~to musí začínať, ako už vieme,
+dvoma rovnakými písmenami), musí pôvodné slovo začínať skupinou
+$AABAB$ (možnosť $AABB\dots A$ zrejme neprichádza do~úvahy).
+Takých slov je opäť $p_{n-1}$.
+Celkovo je teda $2p_{n-1}$
+slov maximálnej dĺžky začínajúcich zvoleným písmenom~ $A$. To
+znamená, že $p_n=2np_{n-1}$, odkiaľ vyplýva
+$$
+p_n=2^{n-1}n!p_1=2^{n-1}n!.
+$$
+Nájdený vzorec vyhovuje aj~pre $n=1$.
+}
+
+{%%%%%   A-III-5
+...}
+
+{%%%%%   A-III-6
+...}
+
+{%%%%%   B-S-1
+...}
+
+{%%%%%   B-S-2
+...}
+
+{%%%%%   B-S-3
+...}
+
+{%%%%%   B-II-1
+...}
+
+{%%%%%   B-II-2
+...}
+
+{%%%%%   B-II-3
+ Položme $m=(n^{2})_{10}/(n_{10})^{2}$ a~$n=10k+r$, kde
+$k$ je celé nezáporné číslo a~$r$ je posledná cifra čísla $n$, \tj.~ $r
+\in \{0, 1, 2,\dots, 9\}$. Zrejme je $m$ celé pre všetky $n$,
+ktoré majú $r=0$ a~$k > 0$. Pokiaľ je $k=0$ a~$r \in \{1, 2,
+3, 4\}$, zlomok $m$ nie je definovaný.
+
+ Nech $k > 0$ a~$r \in \{1, 2\}$. Potom $m=(100k^{2}+20kr)/100k^{2} =1+r/5k$, čo nie je celé číslo.
+
+ Pre $k > 0$ a~$r=3$ platí $m=(100k^{2}+60k+10)/100k^{2}=1+(6k+1)/10k^{2}$. Čitateľ posledného zlomku nie je na rozdiel od~menovateľa deliteľný desiatimi, teda $m$ nie je celé číslo.
+
+ Ak je $k > 0$ a~$r=4$, platí $m=(100k^{2}+80k+20)/100k^{2}=1+(4k+1)/5k^{2}$. Odtiaľ $m=2$ pre $k=1$. Pre $k > 1$ je
+$(4k+1)/5k^{2} =(4k+1)/((4k+k)k) < (4k+1)/((4k+1)k) =1/k$, a~teda
+ $m$ nemôže byť celé číslo.
+
+ Ak je konečne $r \in \{5, 6, 7, 8, 9\}$, dostávame
+$$
+m=\frac{100k^{2}+20kr+(r^{2})_{10}}{100(k+1)^{2}} <
+\frac{100k^{2}+200k+100}{100(k+1)^{2}} =1.
+$$
+
+{\it Záver\/}: $m$ je celé číslo pre všetky prirodzené čísla $n$,
+ktorých dekadický zápis končí cifrou~ 0 a~pre $n=14$.
+}
+
+{%%%%%   B-II-4
+...}
+
+{%%%%%   C-S-1
+...}
+
+{%%%%%   C-S-2
+...}
+
+{%%%%%   C-S-3
+...}
+
+{%%%%%   C-II-1
+Položme $a = Dk$, $b= Dl$, kde $D = D(a,b)$ je najväčší
+spoločný deliteľ čísel $a$, $b$. Je zrejmé, že čísla $k$, $l$
+sú nesúdeliteľné. Potom
+$n= n(a,b) = Dkl$ a~má platiť $D(k+ l+ 1 + kl) = 50$. Inak napísané,
+$(1 + k)(1 + l)D= 50$. Nájdime preto všetky rozklady čísla~ 50 na
+súčin troch prirodzených čísel $D$, $1+k$, $1+l$, z~ktorých posledné
+dve sú väčšie ako~ 1. Bez ujmy na všeobecnosti môžeme predpokladať,
+že $a\le b$, tj.~ $k\le l$. Dostaneme tieto možnosti:
+$$
+\vbox{\offinterlineskip\def\enspace{\hskip.9em\relax}
+\let\par\cr
+\halign{\strut\vrule#&&\hss\enspace$#$\enspace\hss\vrule\cr
+\noalign{\hrule}%
+&D &1+k& 1+l& k& l &a &b\cr
+\noalign{\hrule}%
+& 1& 2 & 25 &1 &24 &1 &24\cr
+& 1& 5 & 10 &4 &{\phantom0}9 &4 &{\phantom0}9\cr
+& 5& 2 & {\phantom0}5 &1 &{\phantom0}4 &5 &20\cr
+\noalign{\hrule}}}
+$$
+
+Pre $D= 2$ dostaneme $k= l= 4$, ale $k$, $l$ majú byť nesúdeliteľné. Spor.
+
+Pre $D = 10$, 25 alebo 50 dostaneme $k= 0$, čo nevedie
+k~žiadnemu riešeniu.
+
+Úloha má tri riešenia.
+}
+
+{%%%%%   C-II-2
+...}
+
+{%%%%%   C-II-3
+...}
+
+{%%%%%   C-II-4
+...}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+...}
+
+{%%%%%   trojstretnutie, priklad 2
+...}
+
+{%%%%%   trojstretnutie, priklad 3
+...}
+
+{%%%%%   trojstretnutie, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 5
+Ukážeme, že jediné riešenie je funkcia $f(x)=x^2$. Položme najprv
+$y=f(x)$ a~ďalej $y=-x^2$. Porovnaním výsledkov, ktoré dostaneme
+týmito špeciálnymi voľbami, dostaneme $|f(x)|=x^2$ a~zároveň
+$f(0)=0$. Voľbou $x=0$ dostaneme $f(y)+f(-y)=2y^2$. Ako už
+vieme, musí platiť $f(y)\leq y^2$ a~súčasne $f(-y)\leq y^2$. Obe
+predchádzajúce nerovnosti však implikujú spolu s podmienkou
+$f(y)+f(-y)=2y^2$ rovnosť, a~to pre každé $y\in\Bbb R$.
+
+Skúškou sa presvedčíme, že riešením danej funkcionálnej rovnice je
+funkcia $f(x)=x^2$ ($x\in\Bbb R$).
+}
+
+{%%%%%   trojstretnutie, priklad 6
+...}
+
+{%%%%%   IMO, priklad 1
+...}
+
+{%%%%%   IMO, priklad 2
+...}
+
+{%%%%%   IMO, priklad 3
+...}
+
+{%%%%%   IMO, priklad 4
+...}
+
+{%%%%%   IMO, priklad 5
+...}
+
+{%%%%%   IMO, priklad 6
+...}
+

@@ -1,0 +1,59 @@
+%!PS
+%%BoundingBox: -86 -57 171 62 
+%%HiResBoundingBox: -85.28922 -56.94281 170.32843 61.0588 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2010.10.20:2257
+%%Pages: 1
+%*Font: cmmi10 9.96265 9.96265 0e:8000000000001e0004
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0 0 0 setrgbcolor 0 0.5 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 56.69281 0 moveto
+56.69281 15.03653 50.71867 29.45541 40.08705 40.08705 curveto
+29.45541 50.71867 15.03653 56.69281 0 56.69281 curveto
+-15.03653 56.69281 -29.45541 50.71867 -40.08705 40.08705 curveto
+-50.71867 29.45541 -56.69281 15.03653 -56.69281 0 curveto
+-56.69281 -15.03653 -50.71867 -29.45541 -40.08705 -40.08705 curveto
+-29.45541 -50.71867 -15.03653 -56.69281 0 -56.69281 curveto
+15.03653 -56.69281 29.45541 -50.71867 40.08705 -40.08705 curveto
+50.71867 -29.45541 56.69281 -15.03653 56.69281 0 curveto closepath stroke
+ 1 setlinecap
+newpath -85.03922 0 moveto
+170.07843 0 lineto stroke
+newpath -56.69281 0 moveto
+-24.23456 51.251 lineto
+105.44865 0 lineto stroke
+newpath 0 0 moveto
+-24.23456 51.251 lineto stroke
+newpath 0 0 moveto
+52.72433 20.83669 lineto stroke
+-66.2648 -8.90779 moveto
+(A) cmmi10 9.96265 fshow
+101.42035 -9.8078 moveto
+(B) cmmi10 9.96265 fshow
+-28.15111 54.251 moveto
+(C) cmmi10 9.96265 fshow
+54.82433 22.93668 moveto
+(D) cmmi10 9.96265 fshow
+-3.34166 -9.8078 moveto
+(S) cmmi10 9.96265 fshow
+ 0 setlinecap
+newpath -4.24109 8.96902 moveto
+-6.61993 7.84418 -8.45415 5.82039 -9.34077 3.3431 curveto
+-9.72842 2.25996 -9.92107 1.12889 -9.9211 0.00003 curveto stroke
+newpath -18.78174 39.7194 moveto
+-15.84904 41.10616 -13.56018 43.55553 -12.37181 46.56267 curveto stroke
+newpath 40.86125 25.52496 moveto
+39.66896 22.50803 39.67296 19.1557 40.86142 16.14865 curveto stroke
+newpath 18.42517 0 moveto
+18.42517 2.34091 17.97966 4.63576 17.13567 6.77132 curveto stroke
+newpath 88.3131 6.77196 moveto
+87.45264 4.5947 87.02353 2.2965 87.02364 -0.00002 curveto stroke
+21.26663 1.04816 moveto
+(\016) cmmi10 9.96265 fshow
+79.37712 1.04816 moveto
+(\016) cmmi10 9.96265 fshow
+showpage
+%%EOF

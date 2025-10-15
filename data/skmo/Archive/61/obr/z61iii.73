@@ -1,0 +1,146 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: -1 -1 366 74 
+%%HiResBoundingBox: -0.25 -0.25 365.91904 73.89644 
+%%Creator: MetaPost 1.208
+%%CreationDate: 2012.03.20:1038
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font CMR10
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font CMR10
+%%IncludeResource: font CMR10
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /cmr10 /CMR10 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinejoin 10 setmiterlimit
+newpath 0 0 moveto
+85.03935 0 lineto
+42.51968 73.64644 lineto
+ closepath stroke
+newpath 14.17323 24.54881 moveto
+70.86613 24.54881 lineto
+56.6929 0 lineto
+28.34645 49.09763 lineto
+56.6929 49.09763 lineto
+28.34645 0 lineto
+ closepath stroke
+40.02904 6.60918 moveto
+(7) cmr10 9.96265 fshow
+25.8558 31.15799 moveto
+(9) cmr10 9.96265 fshow
+54.20226 31.15799 moveto
+(8) cmr10 9.96265 fshow
+40.02904 36.06804 moveto
+(2) cmr10 9.96265 fshow
+40.02904 55.7068 moveto
+(4) cmr10 9.96265 fshow
+11.68259 6.60918 moveto
+(6) cmr10 9.96265 fshow
+25.8558 11.51923 moveto
+(1) cmr10 9.96265 fshow
+54.20226 11.51923 moveto
+(3) cmr10 9.96265 fshow
+68.37549 6.60918 moveto
+(5) cmr10 9.96265 fshow
+newpath 93.54338 0 moveto
+178.58273 0 lineto
+136.06306 73.64644 lineto
+ closepath stroke
+newpath 107.71661 24.54881 moveto
+164.40952 24.54881 lineto
+150.23628 0 lineto
+121.88983 49.09763 lineto
+150.23628 49.09763 lineto
+121.88983 0 lineto
+ closepath stroke
+133.57242 6.60918 moveto
+(7) cmr10 9.96265 fshow
+119.39919 31.15799 moveto
+(9) cmr10 9.96265 fshow
+147.74564 31.15799 moveto
+(8) cmr10 9.96265 fshow
+133.57242 36.06804 moveto
+(2) cmr10 9.96265 fshow
+133.57242 55.7068 moveto
+(4) cmr10 9.96265 fshow
+105.22597 6.60918 moveto
+(6) cmr10 9.96265 fshow
+119.39919 11.51923 moveto
+(1) cmr10 9.96265 fshow
+147.74564 11.51923 moveto
+(5) cmr10 9.96265 fshow
+161.91887 6.60918 moveto
+(3) cmr10 9.96265 fshow
+newpath 187.08675 0 moveto
+272.1261 0 lineto
+229.60643 73.64644 lineto
+ closepath stroke
+newpath 201.25998 24.54881 moveto
+257.95288 24.54881 lineto
+243.77965 0 lineto
+215.4332 49.09763 lineto
+243.77965 49.09763 lineto
+215.4332 0 lineto
+ closepath stroke
+227.11578 6.60918 moveto
+(7) cmr10 9.96265 fshow
+212.94255 31.15799 moveto
+(9) cmr10 9.96265 fshow
+241.289 31.15799 moveto
+(8) cmr10 9.96265 fshow
+227.11578 36.06804 moveto
+(2) cmr10 9.96265 fshow
+227.11578 55.7068 moveto
+(4) cmr10 9.96265 fshow
+198.76933 6.60918 moveto
+(1) cmr10 9.96265 fshow
+212.94255 11.51923 moveto
+(6) cmr10 9.96265 fshow
+241.289 11.51923 moveto
+(5) cmr10 9.96265 fshow
+255.46223 6.60918 moveto
+(3) cmr10 9.96265 fshow
+newpath 280.62968 0 moveto
+365.66904 0 lineto
+323.14937 73.64644 lineto
+ closepath stroke
+newpath 294.80292 24.54881 moveto
+351.49582 24.54881 lineto
+337.32259 0 lineto
+308.97614 49.09763 lineto
+337.32259 49.09763 lineto
+308.97614 0 lineto
+ closepath stroke
+320.65872 6.60918 moveto
+(7) cmr10 9.96265 fshow
+306.48549 31.15799 moveto
+(9) cmr10 9.96265 fshow
+334.83194 31.15799 moveto
+(8) cmr10 9.96265 fshow
+320.65872 36.06804 moveto
+(2) cmr10 9.96265 fshow
+320.65872 55.7068 moveto
+(4) cmr10 9.96265 fshow
+292.31227 6.60918 moveto
+(1) cmr10 9.96265 fshow
+306.48549 11.51923 moveto
+(6) cmr10 9.96265 fshow
+334.83194 11.51923 moveto
+(3) cmr10 9.96265 fshow
+349.00517 6.60918 moveto
+(5) cmr10 9.96265 fshow
+showpage
+%%EOF

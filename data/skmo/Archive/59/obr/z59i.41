@@ -1,0 +1,68 @@
+%!PS
+%%BoundingBox: -1 -57 114 1 
+%%Creator: MetaPost
+%%CreationDate: 2006.04.29:1629
+%%Pages: 1
+%*Font: cmr10 9.96265 9.96265 31:f
+%%EndProlog
+%%Page: 1 1
+ 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinejoin 10 setmiterlimit
+newpath 0 -14.1732 moveto
+28.3464 -14.1732 lineto
+28.3464 0 lineto
+0 0 lineto
+ closepath stroke
+newpath 28.3464 -14.1732 moveto
+56.69281 -14.1732 lineto
+56.69281 0 lineto
+28.3464 0 lineto
+ closepath stroke
+newpath 56.69281 -14.1732 moveto
+85.03922 -14.1732 lineto
+85.03922 0 lineto
+56.69281 0 lineto
+ closepath stroke
+newpath 85.03922 -14.1732 moveto
+113.38562 -14.1732 lineto
+113.38562 0 lineto
+85.03922 0 lineto
+ closepath stroke
+newpath 14.1732 -28.3464 moveto
+42.5196 -28.3464 lineto
+42.5196 -14.1732 lineto
+14.1732 -14.1732 lineto
+ closepath stroke
+newpath 42.5196 -28.3464 moveto
+70.86601 -28.3464 lineto
+70.86601 -14.1732 lineto
+42.5196 -14.1732 lineto
+ closepath stroke
+newpath 70.86601 -28.3464 moveto
+99.21242 -28.3464 lineto
+99.21242 -14.1732 lineto
+70.86601 -14.1732 lineto
+ closepath stroke
+newpath 28.3464 -42.5196 moveto
+56.69281 -42.5196 lineto
+56.69281 -28.3464 lineto
+28.3464 -28.3464 lineto
+ closepath stroke
+newpath 56.69281 -42.5196 moveto
+85.03922 -42.5196 lineto
+85.03922 -28.3464 lineto
+56.69281 -28.3464 lineto
+ closepath stroke
+newpath 42.5196 -56.69281 moveto
+70.86601 -56.69281 lineto
+70.86601 -42.5196 lineto
+42.5196 -42.5196 lineto
+ closepath stroke
+96.72177 -10.29681 moveto
+(3) cmr10 9.96265 fshow
+23.36505 -24.47002 moveto
+(14) cmr10 9.96265 fshow
+65.88466 -38.64322 moveto
+(24) cmr10 9.96265 fshow
+showpage
+%%EOF

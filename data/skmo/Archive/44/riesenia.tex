@@ -1,0 +1,598 @@
+﻿{%%%%%   A-I-1
+...}
+
+{%%%%%   A-I-2
+...}
+
+{%%%%%   A-I-3
+...}
+
+{%%%%%   A-I-4
+...}
+
+{%%%%%   A-I-5
+...}
+
+{%%%%%   A-I-6
+Dokážeme najprv, že počet všetkých $N$-ciferných
+čísel, ktoré možno zostaviť z~$p_0$ núl, $p_1$ jedničiek,~ \dots,
+$p_9$ deviatok, kde $\tsum_{i=0}^9p_i=N$, je rovný hodnote
+$$
+\frac{(N-1)!\,(N-p_0)}{p_0!\,p_1!\cdots p_9!}~.
+\tag $*$ $$
+Skutočne, ak je $p_0=0$~, je spomínaný počet rovný počtu všetkých
+poradí uvedených cifier, ktorý je podľa vzorca pre počet {\it poradí
+s~opakovaním\/} rovný hodnote $\frac{N!}{p_1!\cdots p_9!}$. To je ale
+$(*)$ pre $p_0=0$ (pripomíname, že $0!=1$). Ak je
+$p_0>0$, je nutné od celkového počtu poradí daných cifier (včítane $p_0$
+núl) odčítať počet
+tých z~nich, ktoré začínajú cifrou nula, tj.~ odčítať počet všetkých poradí
+$p_0-1$ núl, $p_1$ jedničiek, \dots, $p_9$ deviatok. Úpravou
+rozdielu $\frac{N!}{p_0!p_1!\cdots p_9!}-\frac{(N-1)!}{(p_0-1)!p_1!\cdots p_9!}$
+dostaneme $(*)$.
+
+Teraz vysvetlíme, že pri pevnom prirodzenom $N$ je hodnota $(*)$ najväčšia,
+keď sa počty $p_i$ navzájom "čo najmenej líšia", tj.~ sú rovné podielu
+$\frac N{10}$ (zaokrúhlenému nahor alebo dole, ak nejde o~celé
+číslo). Zapíšme preto delenie $N:10$ so zvyškom: $N=10q+r$, kde $q$
+a~$r$ sú celé nezáporné čísla, pričom $r<10$. Až do konca
+budú tieto čísla $N$, $q$ a~$r$ pevné. (V~zadaní úlohy $N=1\,994$,
+takže $q=199$ a~$r=4$. Dáme však prednosť všeobecnému popisu.)
+
+Najprv si všimneme menovateľa zlomku $(*)$. Dokážeme, že {\it najmenšia
+hodnota menovateľa je rovná $((q+1)!)^r(q!)^{10-r}$}.
+Skutočne, v~súčine
+$$
+(1\cdot2\cdots p_0)\cdot(1\cdot2\cdots p_1)\cdots
+(1\cdot2\cdots p_9)
+$$
+je práve $\tsum_{i=0}^9p_i=N$ činiteľov, z~toho najviac 10 čísel 1,
+najviac 10~ čísel~ 2, atď.~ až najviac 10 čísel $q$. Je tam preto tiež
+aspoň $N-10q=r$ čísel, ktoré nie sú menšie ako $q+1$.
+Ak teda zoradíme týchto $N$ činiteľov od najmenšieho po najväčší,
+bude prvých desať $\geqq1$, druhých desať $\geqq2$, \dots,
+$q$-tých desať $\geqq q$ a~zostávajúcich $r$ bude $\geqq q+1$.
+Celý súčin teda nie je menší ako
+$$
+1^{10}\cdot2^{10}\cdots q^{10}\cdot(q+1)^r=((q+1)!)^r(q!)^{10-r}.
+$$
+Pritom toto minimum sa dosiahne, práve keď je medzi číslami $p_i$ práve
+$r$~ hodnôt $q+1$ a~práve $10-r$ hodnôt $q$.
+
+S~ohľadom na práve dokázané tvrdenie o~minime menovateľa $(*)$ teraz ukážeme,
+že zlomok $(*)$ nemôže byť maximálny na žiadnej desatici $p_0,\dots,p_9$,
+v ktorej $p_0<q$.
+Vezmime teda ľubovoľnú deseticu $p_0,\dots,p_9$,
+v ktorej $p_0<q$. Pretože
+$\tsum_{i=0}^9p_i=10q+r>p_0+9q$, môžeme vybrať index
+$i>0$ tak, aby $p_i\ge q+1$. Ukážeme, že hodnota
+$(*)$ sa zväčší, ak zameníme v~našej desatici čísla $p_0$ a~$p_i$ po
+rade číslami $p_0+1$ a~$p_i-1$, zatiaľ čo ostatné čísla $p_j$
+nezmeníme (to odpovedá zmene, keď v~pôvodnej zostave cifier jednu
+cifru "$i$" nahradíme cifrou "0"). Ak porovnáme zápis $(*)$ pre
+pôvodnú a~pozmenenú desaticu, nahliadneme, že hodnota $(*)$ sa našou
+zmenou zväčší, práve keď
+$$
+\frac{N-p_0}{p_i}<\frac{N-p_0-1}{p_0+1}\quad\text{alebo}\quad
+p_i>\frac{(N-p_0)(p_0+1)}{N-p_0-1}.
+$$
+pretože $p_i\ge p_0+2$, stačí len dokázať, že platí
+$$
+p_0+2>\frac{(N-p_0)(p_0+1)}{N-p_0-1}.
+$$
+Ekvivalentnou úpravou dostaneme nerovnosť $p_0<\frac N2-1$. Tá sa
+v~našej situácii už ľahko zdôvodní: pretože
+$N\ge10q\ge10$ ($q\ne0$, lebo $p_0<q$) a~pretože
+nerovnosť $\frac x{10}<\frac x2-1$ je zrejme splnená pre
+každé $x>10$, platí $p_0<q\le\frac{N}{10}<\frac N2-1$.
+
+Zhrňme predchádzajúcu úvahu: Pri hľadaní najväčšej hodnoty $(*)$ sa
+môžeme obmedziť len na tie desatice $p_0,\dots,p_9$, v ktorých
+$p_0\geqq q$. pre ne však podľa tvrdenia o~najmenšej hodnote
+menovateľa $(*)$ platí
+$$
+\frac{(N-1)!(N-p_0)}{p_0!\,p_1!\cdots p_9!}\leqq
+\frac{(N-1)!(N-q)}{p_0!\,p_1!\cdots p_9!}\leqq
+\frac{(N-1)!(N-q)}{((q+1)!)^r(q!)^{10-r}}.
+$$
+Ak si uvedomíme, kedy v~posledných dvoch nerovnostiach nastáva
+rovnosť, dostávame konečný výsledok: {\it Najväčšia hodnota $(*)$
+je rovná}
+$$
+\frac{(N-1)!(N-q)}{((q+1)!)^r(q!)^{10-r}}\ \left(=
+\frac{1993!\cdot1795}{(200!)^4(199!)^6}\ \text{v zadanom
+prípade}\,\right)
+$$
+{\it a~dosiahne sa vtedy a~len vtedy, keď je medzi číslami $p_i$ práve
+$r$ hodnôt $q+1$, práve $10-r$ hodnôt $q$ a~pritom
+$p_0=q$}.
+}
+
+{%%%%%   B-I-1
+...}
+
+{%%%%%   B-I-2
+Nech $ABCD$ je daný štvorec, $K$, $L$ sú body úsečky $BC$, pre
+ktoré platí $|BK|=|CL|= \frac18$ a~$M$, $N$ sú obrazy bodov $K$,
+$L$ v~súmernosti podľa stredu štvorca. Platí:
+$$
+|AL|=|CN|>|DL|=|BN|=\sqrt{1^2
++\Big(\frac18\Big)^2}=\frac18\sqrt{65}>1{,}007 .
+$$
+Predpokladajme, že pri nejakom ofarbení tvrdenie neplatí. Ukážme
+najprv, že niektoré tri vrcholy majú rôznu farbu. Keby nemali,
+museli by byť dva susedné vrcholy (napríklad $A$, $B$) označené
+farbou~ I~a~zostávajúce vrcholy ($C$, $D$) farbou~ II. Body $L$, $N$ by potom
+museli mať farbu~III, a~to je spor, lebo $|LN|=\sqrt{1
++(\frac68)^2}=\frac54>1{,}007$.
+
+Nech teda bez ujmy na všeobecnosti majú body $A$, $B$ farbu~ I,
+$C$ farbu~ II a~$D$ farbu~ III (body tej istej farby nemôžu ležať na
+uhlopriečke štvorca). Potom bod~ $K$ nemôže mať farbu~ III ani
+I~(lebo $|AK|=\sqrt{\frac{65}8}>1{,}007$. Má teda farbu~ II
+a~analogicky $N$ má farbu~ III. Potom ale stred~ $J$ strany $CD$
+nemôže mať farbu~ I, ani žiadnu z~farieb~ II, III (platí totiž
+$|JK|=|JN|=\frac18\sqrt{65}>1{,}007$). To je spor s~predpokladom,
+že každý bod je ofarbený; tvrdenie úlohy je tým dokázané.
+}
+
+{%%%%%   B-I-3
+...}
+
+{%%%%%   B-I-4
+...}
+
+{%%%%%   B-I-5
+...}
+
+{%%%%%   B-I-6
+...}
+
+{%%%%%   C-I-1
+Nech $n=\overline{abcd}= a\cdot 10^3+b\cdot 10^2 +
+c\cdot 10+d$ označuje hľadané číslo, $a$, $b$, $c$, $d$ jeho číslice
+v~desiatkovej sústave ($a\not=0$). Podľa textu úlohy je číslo
+$m=\overline{bacd}$ deliteľné vzájomne nesúdeliteľnými číslami
+$4$, $5$, $7$ a~$9$. Je teda
+$$
+m=4\cdot 5\cdot 7\cdot 9\cdot k~=1\,260\, k,
+$$
+kde $k$ je prirodzené číslo. Ak je $m$ štvormiestnym číslom, je
+nutne $k\in \{ 1,2,\ldots ,7\} $. Jednotlivým hodnotám čísla $k$
+prislúchajú nasledujúce hodnoty $m$:
+$$
+m\in \{ 1\,260, 2\,520, 3\,780, 5\,040, 6\,300, 7\,560, 8\,820 \}.
+$$
+Zámenou číslic $b$, $a$  $ (a\not=0)$ zistíme, že hľadané číslo $n$
+nadobúda práve šesť hodnôt:
+$$
+n\in \{ 2\,160, 3\,600, 5\,220, 5\,760, 7\,380, 8\,820 \} .
+$$
+}
+
+{%%%%%   C-I-2
+...}
+
+{%%%%%   C-I-3
+...}
+
+{%%%%%   C-I-4
+%\newdimen\unit \unit=.6truemm
+\def\bod#1, #2 #3 {\rlap{\kern#2\unit\raise#3\unit\hbox{$#1$}}}
+%\newdimen\uunit \uunit=0.56truemm
+\def\bodd#1, #2 #3 {\rlap{\kern#2\uunit\raise#3\uunit\hbox{$#1$}}}
+
+Najprv si uvedomme, že stena $ACD$ štvorstenu $ABCD$ je pravouhlým
+trojuholníkom s~preponou $AD$. Vrchol $D$ leží v~rovine $BCD$
+kolmej na priamku $AC$, lebo $|\angle ACB|=90^\circ $. Označme $P$
+pätu kolmice vedenej vrcholom $D$ na stranu $BC$. V~trojuholníku
+$BCD$ je $|CD|=5\sqrt{2}$, $|\angle CBD|=45^\circ $. Ak označíme
+$v$ dĺžku úsečky $BP$, potom veľkosť výšky štvorstenu $ABCD$
+prechádzajúcej vrcholom $D$ je $v=|DP|$ a~ďalej $|CP|=8-v$ (\obr).
+\vadjust{\midinsert
+\centerline{\OBR
+        \bodd 5\sqrt{2} , 31 30
+        \bodd C, -2 -7 \bodd P, 61 -7 \bodd B, 104 -7
+    \bodd v, 67 15   \bodd D, 64 43
+\bodd \scriptstyle 45^{\circ }, 93 2 \bodd 8-v, 30 -6 \bodd v, 82 -6
+  \char3 } \hfill\Obr
+\endinsert}%
+Z~Pytagorovej vety pre trojuholník $CDP$ vyplýva:
+$$
+v^2+(8-v)^2 = \big(5\sqrt{2}\big)^2  ,
+$$
+odtiaľ po úprave máme
+$$
+v^2-8v+7=(v-1)(v-7)=0   .
+$$
+
+Skúškou sa presvedčíme, že obidva korene tejto rovnice $v_1=1$, $ v_2=7$
+vyhovujú podmienkam úlohy.
+Veľkosť výšky štvorstenu $ABCD$ prechádzejúcej vrcholom $D$ je teda
+1\,cm alebo 7\,cm. Tým je úloha vyriešená.
+}
+
+{%%%%%   C-I-5
+...}
+
+{%%%%%   C-I-6
+...}
+
+{%%%%%   A-S-1
+...}
+
+{%%%%%   A-S-2
+Označme písmenami $\mm D$ a~$\mm H$ definičný obor, resp.
+obor hodnôt ľubovoľnej funkcie $f$ uvedeného tvaru. V~prípade $a>0$
+by množina $\mm D$ obsahovala niektorý interval $(-\infty,x_0\rangle$,
+zatiaľ čo všetky prvky $\mm H$ sú
+nezáporné čísla. Preto musí platiť $a\leqq0$. Z rovnakého dôvodu
+v~prípade $a=0$ nemôže byť číslo $b$ záporné, a~zrejme v~tomto
+prípade nemôže byť ani $b=0$ (potom by totiž bolo $f(x)=\sqrt{c}$,
+čo nevyhovuje). Preto v~prípade $a=0$ musí platiť $b>0$, \tj.~
+$f(x)=\sqrt{bx+c}$. Potom však $\mm H=\langle0,\infty)$
+a~z~rovnosti $\mm D=\langle0,\infty)$ plynie $c=0$. Dostáváme
+prvé riešenie $f(x)=\sqrt{bx}$, $b>0$.
+
+V~prípade $a<0$ je grafom funkcie $y=ax^2+bx+c$ parabola
+"obrátená" dole, \tj. v~zápornom smere osi $y$. Odtiaľ plynie, že
+neprázdna množina $\mm H$ musí byť tvaru $\mm H=\langle0,M\rangle$ pre
+niektoré $M\geqq0$. Z~rovnosti $\mm D=\langle0,M\rangle$ plynie, že
+čísla $0$ a~$M$  sú koreňmi rovnice $ax^2+bx+c=0$, takže $c=0$,
+$b=-aM$ a~$f(x)=\sqrt{ax(x-M)}$ (platí to aj~v~prípade $M=0$, keď je
+koreň $0$ násobný). Obor hodnôt takejto funkcie je ale interval
+$\langle0,f(\frac M2)\rangle$ (vieme, že $x=\frac M2$ je súradnica
+vrcholu, \tj.~ "najvyššieho" bodu paraboly), preto dostávame podmienku
+$f(\frac M2)=M$:
+$$
+\sqrt{a\cdot\frac M2\cdot\Big(\frac
+M2-M\Big)}=M,\quad\text{alebo}\quad
+M\cdot\sqrt{-\frac a4}=M.
+$$
+Posledná rovnosť platí, práve keď $M=0$ alebo $a=-4$. Našli sme
+zostávajúce riešenie
+$f(x)=\sqrt{ax^2}$ ($a<0$) a~$f(x)=\sqrt{-4x^2+bx}$ ($b>0$).
+
+Odpoveď: Hľadané funkcie sú troch druhov: $f(x)=\sqrt{bx}$ ($b>0$),
+$f(x)=\sqrt{ax^2}$ ($a<0$) a~$f(x)=\sqrt{-4x^2+bx}$ ($b>0$).
+}
+
+{%%%%%   A-S-3
+...}
+
+{%%%%%   A-II-1
+Ak má päťnásťmiestne číslo vo svojom zápise
+$x$ trojek a~$8-x$ osmičiek na mieste párnych rádov a~zároveň
+$y$ trojek a~$7-y$ osmičiek na mieste nepárnych rádov, je podľa
+známeho kritéria toto číslo násobkom jedenástich, práve keď
+je 11-timi deliteľný ciferný súčet
+$$
+x\cdot3+(8-x)\cdot8-y\cdot3-(7-y)\cdot8=5(y-x)+8.
+$$
+Pretože $0\le x\le8$ a~$0\le y\le7$, platí $-8\le y-x\le7$.
+Prebratím  všetkých možných hodnôt $y-x$ (alebo úpravou
+$5(y-x)+8=5(y-x+6)-22$) zistíme, že podmienka $11 | 5(y-x)+8$
+platí, práve keď  $y-x=-6$ alebo $y-x=5$, takže $y=x-6$ alebo
+$y=x+5$.  Pretože $x$ trojek rozmiestníme
+na niektoré z~ôsmich pozícií
+$\binom8x$ spôsobmi a~podobne $y$ trojek na niektoré zo siedmych pozícií
+$\binom7y$ spôsobmi, je hľadaný počet rovný
+$$
+\sum_{x=6}^8\binom8x\binom7{x-6} +
+\sum_{x=0}^2\binom8x\binom7{x+5}=
+28+56+21+21+56+28=210.
+$$
+
+\medskip
+{\it Iné riešenie\/}: Päťnásťmiestne číslo so zápisom $c_1c_2\dots c_{15}$
+dáva po delení jedenástimi rovnaký zvyšok ako súčet
+$$
+S=c_1-c_2+c_3-c_4+c_5-\dots-c_{14}+c_{15}.
+\tag 1
+$$
+Ak je $c_i\in\{3,8\}$ pre každé $i$, potom vzhľadom k~tomu,
+že $8\equiv-3\pmod {11}$, dáva súčet~ $S$ po delení jedenástimi
+rovnaký zvyšok ako súčet $S'$ s~15-timi členmi
+$$
+S'=\pm3\pm3\pm3\pm\dots\pm3,
+\tag 2
+$$
+v ktorom pred $i$-tu trojkou (pre každé $i$) je rovnaké
+znamienko ako v~kongruencii $(\m1)^{i+1}c_i\equiv\pm3\pmod{11}$.
+Naopak ku každému súčtu $S'$ tvaru (2) možno podľa posledných
+kongruencií priradiť jediný súčet $S$ tvaru (1) s~ciframi
+$c_i\in\{3,8\}$. Hľadaný počet päťnásťmiestnych čísel je preto
+rovný počtu všetkých tých výberov znamienok v~(2), pri ktorých
+$S'\equiv0\pmod{11}$. Pretože každý súčet $S'$ je nepárny
+násobok troch, ktorý v~absolutnej hodnote neprevyšuje číslo~ 45,
+zaujímame sa o~tie výbery znamienok, pri ktorých $S'=33$ alebo $S'=\m33$. To
+nastane, práve keď je vybrané 13-krát plus a~2-krát
+mínus, alebo naopak 13-krát mínus a~2-krát plus. Hľadaný počet je preto
+rovný $2\cdot\binom{15}{2}=210$.
+}
+
+{%%%%%   A-II-2
+...}
+
+{%%%%%   A-II-3
+...}
+
+{%%%%%   A-II-4
+...}
+
+{%%%%%   A-III-1
+...}
+
+{%%%%%   A-III-2
+...}
+
+{%%%%%   A-III-3
+Označme dané body $A_1$, $A_2$,~$\dots$, $A_5$, dané
+priamky $p_1$, $p_2$,~\dots, $p_5$ a~rozlíšme dva prípady:
+
+\item{(I)} {\it Na každej danej priamke ležia nanajvýš dva dané
+body}. Keby $A_i\in p_j\cap p_k$ pre niektoré indexy $i$ a~$j\ne k$,
+platilo by $A_x\in p_j\cup p_k$ pre nanajvýš tri hodnoty $x$
+(včítane $x=i$), takže by zostávajúce dva dané body spolu s~priamkami
+$p_j$, $p_k$ tvorili vhodný výber. V~opačnom prípade by každým
+bodom $A_i$ prechádzala nanajvýš jedna priamka $p_j$; potom by dokonca
+niektoré {\it tri\/} priamky $p_j$ neprechádzali ani bodom $A_1$,
+ani bodom $A_2$.
+
+
+\item{(II)} {\it Na niektorej danej priamke ležia aspoň tri dané
+body}. Nech napríklad body $A_1$, $A_2$ a~$A_3$ ležia na priamke
+$p_1$. Pretože každá priamka $p_j$ ($j>1$) prechádza nanajvýš jedným
+z~bodov $A_1$, $A_2$, $A_3$ (inak by bolo $p_j=p_1$), môžeme jej
+priradiť
+dvojprvkovú množinu $M_j\subset\{A_1,A_2,A_3\}$ takú, že
+$p_j\cap
+M_j=\emptyset$. Avšak trojprvková množina má len tri rôzne
+dvojprvkové  podmnožiny, takže niektoré dve zo štyroch množín $M_2$,
+$M_3$, $M_4$ a~$M_5$ sú rovnaké. Pri vhodnom očíslovaní bodov
+a~priamok teda platí $M_2=M_3=\{A_1,A_2\}$. To znamená, že je
+možné vybrať body $A_1$,  $A_2$ a~priamky $p_2$, $p_3$.
+
+}
+
+{%%%%%   A-III-4
+...}
+
+{%%%%%   A-III-5
+...}
+
+{%%%%%   A-III-6
+Pre kladné korene $a$, $b$, $c$, $0<a<b<c$, rovnice (1) musí
+platiť Pytagorova veta $a^2+b^2=c^2$ a~Vi\`etove vzťahy
+$$
+a+b+c=2p(p+1),\quad ab+bc+ac=p^4+4p^3
+-1,\quad abc=3p^3.
+\tag2$$
+Dostávame tak
+$$
+\align
+2c^2&=a^2+b^2+c^2=(a+b+c)^2 -2(ab+bc+ac)=\\
+    &=4p^2(p+1)^2-2(p^4+4p^3-1)=2(p^2+1)^2,
+\endalign
+$$
+t\.j\. $c=p^2+1$. Preto zo vzorcov (2) ďalej vyplýva
+$$\align
+a+b&=2p(p+1)-c=p^2+2p-1,\\
+ab&=p^4+4p^3-1-c(a+b)=2p^3-2p.
+\endalign
+$$
+Čísla $a$, $b$ sú teda korene kvadratickej rovnice
+$$
+u^2-(p^2+2p-1)u+2p^3-2p=0,
+$$
+čo sú (po jednoduchom výpočte) čísla $2p$ a~$p^2-1$. Odtiaľ vyplýva nutná
+podmienka $p>1$. Čísla $2p$, $p^2-1$, $p^2+1$ sú korene (1),
+práve keď spĺňajú tretí Vi\`etov~vzťah
+$$
+2p(p^2-1)(p^2+1)=3p^3,\quad\text{alebo}\quad
+p(2p^2+1)(p^2-2)=0.
+$$
+S~prihliadnutím na $p>1$ tak dostávame jediné riešenie $p=\sqrt2$.
+Koreňmi (1) sú v tomto prípade tri čísla $1$, $2\sqrt2$ a~$3$.
+}
+
+{%%%%%   B-S-1
+...}
+
+{%%%%%   B-S-2
+...}
+
+{%%%%%   B-S-3
+...}
+
+{%%%%%   B-II-1
+...}
+
+{%%%%%   B-II-2
+...}
+
+{%%%%%   B-II-3
+...}
+
+{%%%%%   B-II-4
+...}
+
+{%%%%%   C-S-1
+...}
+
+{%%%%%   C-S-2
+...}
+
+{%%%%%   C-S-3
+...}
+
+{%%%%%   C-II-1
+Nech $n=1\,000a+100b+10c+d$, potom $n'=1\,000d+100c+10b+a$, kde
+$a,d\in \{ 1,2,\ldots ,9\}$, $b,c\in \{0,1,2,\ldots ,9\}$. Pre
+ich súčet máme
+$$
+n+n'=1\,001(a+d)+110({b+c}).
+$$
+Pritom vidíme, že
+7 delí 1\,001, ale nedelí 110 a~10 delí 110, ale nedelí 1\,001.
+Aby bol súčet $n+n'$ deliteľný sedemdesiatimi, musí byť číslo $a+d$
+deliteľné desiatimi a~podobne číslo $b+c$ musí byť deliteľné siedmimi.
+Hľadáme preto všetky usporiadané dvojice $[a,d]$ také, že
+$10| (a+d)$, kde $a,d\in \{ 1,2,\ldots ,9\}$, a~všetky
+usporiadané dvojice $[b,c]$, pre ktoré $7| (b+c)$, kde
+$b,c\in \{ 0,1,2,\ldots ,9\}$.
+
+Ľahko zistíme, že ide práve o~tieto usporiadané dvojice:
+$$
+\align
+[a,d]=&[1,9],[2,8],[3,7],[4,6],[5,5],[6,4],[7,3],
+[8,2],[9,1]\text{  --- 9 dvojíc}, \\
+[b,c]=&[0,0],[0,7],[1,6],[2,5],[3,4],[4,3],[5,2],
+[6,1],[7,0],\\
+&[5,9],[6,8],[7,7],[8,6],[9,5]\text{  --- 14~ dvojíc}.
+\endalign
+$$
+Spolu teda existuje $9 \times 14 =126$ štvormiestnych čísel~ $n$
+s~danou vlastnosťou.
+}
+
+{%%%%%   C-II-2
+...}
+
+{%%%%%   C-II-3
+...}
+
+{%%%%%   C-II-4
+...}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+...}
+
+{%%%%%   trojstretnutie, priklad 2
+...}
+
+{%%%%%   trojstretnutie, priklad 3
+...}
+
+{%%%%%   trojstretnutie, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 5
+...}
+
+{%%%%%   trojstretnutie, priklad 6
+...}
+
+{%%%%%   IMO, priklad 1
+...}
+
+{%%%%%   IMO, priklad 2
+...}
+
+{%%%%%   IMO, priklad 3
+...}
+
+{%%%%%   IMO, priklad 4
+...}
+
+{%%%%%   IMO, priklad 5
+...}
+
+{%%%%%   IMO, priklad 6
+...}
+
+{%%%%%   MEMO, priklad 1
+...}
+
+{%%%%%   MEMO, priklad 2
+...}
+
+{%%%%%   MEMO, priklad 3
+...}
+
+{%%%%%   MEMO, priklad 4
+...}
+
+{%%%%%   MEMO, priklad t1
+...}
+
+{%%%%%   MEMO, priklad t2
+...}
+
+{%%%%%   MEMO, priklad t3
+...}
+
+{%%%%%   MEMO, priklad t4
+...}
+
+{%%%%%   MEMO, priklad t5
+...}
+
+{%%%%%   MEMO, priklad t6
+...}
+
+{%%%%%   MEMO, priklad t7
+...}
+
+{%%%%%   MEMO, priklad t8
+...} 

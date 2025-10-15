@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "Calculate Similarities": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "calculate-similarities --count 3600"
+    },
+    "Calculate Embeddings": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "calculate-similarities --count 10 --embeddings-only"
+    },
+    "Interactive": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "interactive"
+    }
+  }
+}

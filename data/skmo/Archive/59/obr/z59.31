@@ -1,0 +1,96 @@
+%!PS
+%%BoundingBox: -76 -66 121 33 
+%%Creator: MetaPost
+%%CreationDate: 2006.04.29:1629
+%%Pages: 1
+%%EndProlog
+%%Page: 1 1
+ 0 0.5 dtransform truncate idtransform setlinewidth pop [] 0 setdash
+ 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath -9.77962 0 moveto
+55.41711 0 lineto stroke
+newpath 35.8579 32.59837 moveto
+-9.77962 32.59837 lineto stroke
+newpath 55.41711 0 moveto
+35.8579 32.59837 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -9.77962 32.59837 moveto
+-9.77962 0 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath 55.41713 0 moveto
+-9.7796 0 lineto
+-1 -1 scale stroke grestore
+gsave newpath 9.77962 -32.59837 moveto
+55.41713 -32.59837 lineto
+-1 -1 scale stroke grestore
+gsave newpath -9.7796 0 moveto
+9.77962 -32.59837 lineto
+-1 -1 scale stroke grestore
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath 55.41713 -32.59837 moveto
+55.41713 0 lineto
+-1 -1 scale stroke grestore
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath 55.41713 -32.59837 moveto
+-9.7796 -32.59837 lineto
+-1 -1 scale stroke grestore
+gsave newpath 9.77962 -65.19675 moveto
+55.41713 -65.19675 lineto
+-1 -1 scale stroke grestore
+gsave newpath -9.7796 -32.59837 moveto
+9.77962 -65.19675 lineto
+-1 -1 scale stroke grestore
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath 55.41713 -65.19675 moveto
+55.41713 -32.59837 lineto
+-1 -1 scale stroke grestore
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath -9.77962 0 moveto
+-74.97635 0 lineto
+-1 1 scale stroke grestore
+gsave newpath -55.41713 32.59837 moveto
+-9.77962 32.59837 lineto
+-1 1 scale stroke grestore
+gsave newpath -74.97635 0 moveto
+-55.41713 32.59837 lineto
+-1 1 scale stroke grestore
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath -9.77962 32.59837 moveto
+-9.77962 0 lineto
+-1 1 scale stroke grestore
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -55.41713 -32.59837 moveto
+9.7796 -32.59837 lineto stroke
+newpath -9.77962 0 moveto
+-55.41713 0 lineto stroke
+newpath 9.7796 -32.59837 moveto
+-9.77962 0 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -55.41713 0 moveto
+-55.41713 -32.59837 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -55.41713 -65.19675 moveto
+9.7796 -65.19675 lineto stroke
+newpath -9.77962 -32.59837 moveto
+-55.41713 -32.59837 lineto stroke
+newpath 9.7796 -65.19675 moveto
+-9.77962 -32.59837 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -55.41713 -32.59837 moveto
+-55.41713 -65.19675 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+gsave newpath 55.41713 -32.59837 moveto
+120.61386 -32.59837 lineto
+1 -1 scale stroke grestore
+gsave newpath 101.05464 -65.19675 moveto
+55.41713 -65.19675 lineto
+1 -1 scale stroke grestore
+gsave newpath 120.61386 -32.59837 moveto
+101.05464 -65.19675 lineto
+1 -1 scale stroke grestore
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+gsave newpath 55.41713 -65.19675 moveto
+55.41713 -32.59837 lineto
+1 -1 scale stroke grestore
+showpage
+%%EOF

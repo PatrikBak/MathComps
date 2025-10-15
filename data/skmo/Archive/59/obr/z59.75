@@ -1,0 +1,68 @@
+%!PS
+%%BoundingBox: -21 -13 164 95 
+%%Creator: MetaPost
+%%CreationDate: 2006.04.29:1629
+%%Pages: 1
+%*Font: csr10 9.96265 9.96265 2c:afc400000000040739a1000000000000000000000000008
+%%EndProlog
+%%Page: 1 1
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth [] 0 setdash
+ 1 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath 28.3464 0 moveto
+28.3464 85.03922 lineto stroke
+newpath 56.69281 0 moveto
+56.69281 85.03922 lineto stroke
+newpath 85.03922 0 moveto
+85.03922 85.03922 lineto stroke
+newpath 113.38562 0 moveto
+113.38562 85.03922 lineto stroke
+ 0 1.13385 dtransform truncate idtransform setlinewidth pop
+newpath 0 0 moveto
+47.24329 0 94.48874 0 141.73203 0 curveto
+141.73203 85.03922 lineto
+94.48874 85.03922 47.24329 85.03922 0 85.03922 curveto
+ closepath stroke
+newpath -19.84248 93.54236 moveto
+-8.50392 93.54236 lineto
+-8.50392 -8.50444 lineto
+-19.84248 -8.50444 lineto stroke
+gsave [0 -1 1 0 -18.42242 57.3529 ] concat 0 0 moveto
+(ja) csr10 9.96265 fshow grestore
+gsave [0 -1 1 0 -18.42242 49.6042 ] concat 0 0 moveto
+(visk) csr10 9.96265 fshow grestore
+gsave [0 -1 1 0 -18.42242 32.6676 ] concat 0 0 moveto
+(o) csr10 9.96265 fshow grestore
+5.3175 40.278 moveto
+(11,{) csr10 9.96265 fshow
+33.66391 40.278 moveto
+(11,{) csr10 9.96265 fshow
+62.01031 40.278 moveto
+(10,{) csr10 9.96265 fshow
+90.35672 40.278 moveto
+(10,{) csr10 9.96265 fshow
+121.19377 40.278 moveto
+(9,{) csr10 9.96265 fshow
+8.9151 -10.74553 moveto
+(1.,) csr10 9.96265 fshow
+37.2615 -10.74553 moveto
+(2.,) csr10 9.96265 fshow
+65.60791 -10.74553 moveto
+(3.,) csr10 9.96265 fshow
+93.95432 -10.74553 moveto
+(4.,) csr10 9.96265 fshow
+123.68446 -10.90068 moveto
+(5.) csr10 9.96265 fshow
+134.75406 -10.90068 moveto
+(p\344tina) csr10 9.96265 fshow
+ 1 setgray
+newpath 163.55876 0 moveto
+163.55876 0.15036 163.49904 0.29456 163.39272 0.40088 curveto
+163.28639 0.5072 163.1422 0.56693 162.99184 0.56693 curveto
+162.84148 0.56693 162.69728 0.5072 162.59096 0.40088 curveto
+162.48463 0.29456 162.42491 0.15036 162.42491 0 curveto
+162.42491 -0.15036 162.48463 -0.29456 162.59096 -0.40088 curveto
+162.69728 -0.5072 162.84148 -0.56693 162.99184 -0.56693 curveto
+163.1422 -0.56693 163.28639 -0.5072 163.39272 -0.40088 curveto
+163.49904 -0.29456 163.55876 -0.15036 163.55876 0 curveto closepath fill
+showpage
+%%EOF

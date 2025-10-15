@@ -1,0 +1,15 @@
+---
+globs: *.cs
+alwaysApply: false
+---
+
+- Write descriptive XML documentation that helps the reader understand context and intent, not just what types are involved.
+- When adding XML documentation, always include:
+  - `<param>` for each parameter
+  - `<returns>` for the return value
+- Use `<inheritdoc/>` where possible instead of repeating comments, e.g. comment on interface, inheritdoc on implementation
+- Always write useful inline comments
+- Prefer comments above code rather than at the end of lines for better readability
+- Make sure that both XML documentation and inline comments tell a story, not restate code
+- Avoid abbreviated variables, even in lambdas
+- Run tests from the backend directory using `dotnet test` for non-interactive test execution

@@ -1,0 +1,137 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 22 -12 216 69 
+%%HiResBoundingBox: 22.11017 -11.4129 215.99963 68.59833 
+%%Creator: MetaPost 1.999
+%%CreationDate: 2020.01.13:1015
+%%Pages: 1
+%%DocumentResources: procset mpost-minimal
+%%+ font csssi10 csr7
+%%DocumentSuppliedResources: procset mpost-minimal
+%%DocumentNeededResources: font csssi10 csr7
+%%IncludeResource: font csssi10
+%%IncludeResource: font csr7
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset mpost-minimal
+/bd{bind def}bind def/fshow {exch findfont exch scalefont setfont show}bd
+/fcp{findfont dup length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall}bd
+/fmc{FontMatrix dup length array copy dup dup}bd/fmd{/FontMatrix exch def}bd
+/Amul{4 -1 roll exch mul 1000 div}bd/ExtendFont{fmc 0 get Amul 0 exch put fmd}bd
+/ScaleFont{dup fmc 0 get Amul 0 exch put dup dup 3 get Amul 3 exch put fmd}bd
+/SlantFont{fmc 2 get dup 0 eq{pop 1}if Amul FontMatrix 0 get mul 2 exch put fmd}bd
+%%EndResource
+%%EndProlog
+%%BeginSetup
+ /csssi10 /csssi10 def
+ /csr7 /csr7 def
+%%EndSetup
+%%Page: 1 1
+ 0 setgray 0 1.13391 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 1 setlinejoin 10 setmiterlimit
+newpath 22.67712 0 moveto
+34.01569 0 lineto
+45.35425 0 lineto
+45.35425 34.01569 lineto
+22.67712 34.01569 lineto
+22.67712 22.67712 lineto
+ closepath stroke
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop 1 setlinecap
+newpath 34.01569 0 moveto
+34.01569 22.67712 lineto
+22.67712 22.67712 lineto stroke
+29.08278 -9.9185 moveto
+(L) csssi10 9.96265 fshow
+34.47928 -11.4129 moveto
+(1) csr7 6.97385 fshow
+ 0 1.13391 dtransform truncate idtransform setlinewidth pop
+newpath 56.69281 0 moveto
+68.03137 0 lineto
+79.36993 0 lineto
+79.36993 11.33856 lineto
+90.7085 11.33856 lineto
+90.7085 45.35425 lineto
+68.03137 45.35425 lineto
+68.03137 34.01569 lineto
+56.69281 34.01569 lineto
+56.69281 22.67712 lineto
+ closepath stroke
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop
+newpath 68.03137 0 moveto
+68.03137 22.67712 lineto
+56.69281 22.67712 lineto stroke
+newpath 79.36993 11.33856 moveto
+79.36993 34.01569 lineto
+68.03137 34.01569 lineto stroke
+63.09846 -9.9185 moveto
+(L) csssi10 9.96265 fshow
+68.49496 -11.4129 moveto
+(2) csr7 6.97385 fshow
+ 0 1.13391 dtransform truncate idtransform setlinewidth pop
+newpath 102.04706 0 moveto
+113.38562 0 lineto
+124.72418 0 lineto
+124.72418 11.33856 lineto
+136.06274 11.33856 lineto
+136.06274 22.67712 lineto
+147.4013 22.67712 lineto
+147.4013 56.69281 lineto
+124.72418 56.69281 lineto
+124.72418 45.35425 lineto
+113.38562 45.35425 lineto
+113.38562 34.01569 lineto
+102.04706 34.01569 lineto
+102.04706 22.67712 lineto
+ closepath stroke
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop
+newpath 113.38562 0 moveto
+113.38562 22.67712 lineto
+102.04706 22.67712 lineto stroke
+newpath 124.72418 11.33856 moveto
+124.72418 34.01569 lineto
+113.38562 34.01569 lineto stroke
+newpath 136.06274 22.67712 moveto
+136.06274 45.35425 lineto
+124.72418 45.35425 lineto stroke
+108.45271 -9.9185 moveto
+(L) csssi10 9.96265 fshow
+113.84921 -11.4129 moveto
+(3) csr7 6.97385 fshow
+ 0 1.13391 dtransform truncate idtransform setlinewidth pop
+newpath 158.73987 0 moveto
+170.07843 0 lineto
+181.41699 0 lineto
+181.41699 11.33856 lineto
+192.75555 11.33856 lineto
+192.75555 22.67712 lineto
+204.09412 22.67712 lineto
+204.09412 34.01569 lineto
+215.43268 34.01569 lineto
+215.43268 68.03137 lineto
+192.75555 68.03137 lineto
+192.75555 56.69281 lineto
+181.41699 56.69281 lineto
+181.41699 45.35425 lineto
+170.07843 45.35425 lineto
+170.07843 34.01569 lineto
+158.73987 34.01569 lineto
+158.73987 22.67712 lineto
+ closepath stroke
+ 0 0.56696 dtransform truncate idtransform setlinewidth pop
+newpath 170.07843 0 moveto
+170.07843 22.67712 lineto
+158.73987 22.67712 lineto stroke
+newpath 181.41699 11.33856 moveto
+181.41699 34.01569 lineto
+170.07843 34.01569 lineto stroke
+newpath 192.75555 22.67712 moveto
+192.75555 45.35425 lineto
+181.41699 45.35425 lineto stroke
+newpath 204.09412 34.01569 moveto
+204.09412 56.69281 lineto
+192.75555 56.69281 lineto stroke
+165.14552 -9.9185 moveto
+(L) csssi10 9.96265 fshow
+170.54202 -11.4129 moveto
+(4) csr7 6.97385 fshow
+showpage
+%%EOF

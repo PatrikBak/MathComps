@@ -1,0 +1,236 @@
+%!PS
+%%BoundingBox: -57 -57 57 57 
+%%HiResBoundingBox: -56.25 -56.25 56.25 56.25 
+%%Creator: MetaPost 2.02
+%%CreationDate: 2024.03.22:1303
+%%Pages: 1
+%*Font: cs-lmr12 11.95517 11.95517 2e:b
+%*Font: lmsy10 11.95514 9.96265 01:8
+%%BeginProlog
+%%EndProlog
+%%Page: 1 1
+ 0.9 0.9 0 setrgbcolor 0 3 dtransform truncate idtransform setlinewidth pop
+ [] 0 setdash 0 setlinecap 1 setlinejoin 10 setmiterlimit
+newpath -48 -48 moveto
+-48 48 lineto
+48 48 lineto
+48 -48 lineto
+-32 -48 lineto
+-32 -40 lineto stroke
+ 0 1 1 setrgbcolor
+newpath -32 -40 moveto
+-32 32 lineto
+32 32 lineto
+32 -32 lineto
+-16 -32 lineto
+-16 -24 lineto stroke
+ 1 0.5 1 setrgbcolor
+newpath -16 -24 moveto
+-16 16 lineto
+16 16 lineto
+16 -8 lineto stroke
+ 0 5 dtransform truncate idtransform setlinewidth pop 1 setlinecap
+newpath 16 -16 moveto 0 0 rlineto stroke
+newpath 8 -16 moveto 0 0 rlineto stroke
+newpath 0 -16 moveto 0 0 rlineto stroke
+ 0 0 0 setrgbcolor
+-50.9265 -51.76425 moveto
+(0) cs-lmr12 11.95517 fshow
+-50.9265 -35.76425 moveto
+(0) cs-lmr12 11.95517 fshow
+-50.9265 -19.76425 moveto
+(0) cs-lmr12 11.95517 fshow
+-49.6259 2.44449 moveto
+(.) cs-lmr12 11.95517 fshow
+-49.6259 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+-49.6259 -5.5256 moveto
+(.) cs-lmr12 11.95517 fshow
+-50.9265 12.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-50.9265 28.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-50.9265 44.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-34.9265 -51.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+-34.9265 -35.76425 moveto
+(0) cs-lmr12 11.95517 fshow
+-34.9265 -19.76425 moveto
+(0) cs-lmr12 11.95517 fshow
+-33.6259 2.44449 moveto
+(.) cs-lmr12 11.95517 fshow
+-33.6259 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+-33.6259 -5.5256 moveto
+(.) cs-lmr12 11.95517 fshow
+-34.9265 12.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-34.9265 28.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-34.9265 44.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-18.9265 -51.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+-18.9265 -35.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+-18.9265 -19.76425 moveto
+(0) cs-lmr12 11.95517 fshow
+-17.6259 2.44449 moveto
+(.) cs-lmr12 11.95517 fshow
+-17.6259 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+-17.6259 -5.5256 moveto
+(.) cs-lmr12 11.95517 fshow
+-18.9265 12.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-18.9265 28.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-18.9265 44.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+-6.97385 -50.91505 moveto
+(\001) lmsy10 11.95514 fshow
+-1.66045 -50.91505 moveto
+(\001) lmsy10 11.95514 fshow
+3.65295 -50.91505 moveto
+(\001) lmsy10 11.95514 fshow
+-6.97385 -34.91505 moveto
+(\001) lmsy10 11.95514 fshow
+-1.66045 -34.91505 moveto
+(\001) lmsy10 11.95514 fshow
+3.65295 -34.91505 moveto
+(\001) lmsy10 11.95514 fshow
+-6.97385 -18.91505 moveto
+(\001) lmsy10 11.95514 fshow
+-1.66045 -18.91505 moveto
+(\001) lmsy10 11.95514 fshow
+3.65295 -18.91505 moveto
+(\001) lmsy10 11.95514 fshow
+-6.97385 13.08495 moveto
+(\001) lmsy10 11.95514 fshow
+-1.66045 13.08495 moveto
+(\001) lmsy10 11.95514 fshow
+3.65295 13.08495 moveto
+(\001) lmsy10 11.95514 fshow
+-6.97385 29.08495 moveto
+(\001) lmsy10 11.95514 fshow
+-1.66045 29.08495 moveto
+(\001) lmsy10 11.95514 fshow
+3.65295 29.08495 moveto
+(\001) lmsy10 11.95514 fshow
+-6.97385 45.08495 moveto
+(\001) lmsy10 11.95514 fshow
+-1.66045 45.08495 moveto
+(\001) lmsy10 11.95514 fshow
+3.65295 45.08495 moveto
+(\001) lmsy10 11.95514 fshow
+13.0735 -51.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+13.0735 -35.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+13.0735 -19.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+14.3741 2.44449 moveto
+(.) cs-lmr12 11.95517 fshow
+14.3741 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+14.3741 -5.5256 moveto
+(.) cs-lmr12 11.95517 fshow
+13.0735 12.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+13.0735 28.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+13.0735 44.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+29.0735 -51.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+29.0735 -35.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+29.0735 -19.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+30.3741 2.44449 moveto
+(.) cs-lmr12 11.95517 fshow
+30.3741 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+30.3741 -5.5256 moveto
+(.) cs-lmr12 11.95517 fshow
+29.0735 12.23575 moveto
+(1) cs-lmr12 11.95517 fshow
+29.0735 28.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+29.0735 44.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+45.0735 -51.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+45.0735 -35.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+45.0735 -19.76425 moveto
+(1) cs-lmr12 11.95517 fshow
+46.3741 2.44449 moveto
+(.) cs-lmr12 11.95517 fshow
+46.3741 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+46.3741 -5.5256 moveto
+(.) cs-lmr12 11.95517 fshow
+45.0735 12.23575 moveto
+(1) cs-lmr12 11.95517 fshow
+45.0735 28.23575 moveto
+(1) cs-lmr12 11.95517 fshow
+45.0735 44.23575 moveto
+(0) cs-lmr12 11.95517 fshow
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -56 -56 moveto
+-56 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 -56 moveto
+56 -56 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -40 -56 moveto
+-40 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 -40 moveto
+56 -40 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -24 -56 moveto
+-24 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 -24 moveto
+56 -24 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath -8 -56 moveto
+-8 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 -8 moveto
+56 -8 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 8 -56 moveto
+8 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 8 moveto
+56 8 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 24 -56 moveto
+24 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 24 moveto
+56 24 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 40 -56 moveto
+40 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 40 moveto
+56 40 lineto stroke
+ 0.5 0 dtransform exch truncate exch idtransform pop setlinewidth
+newpath 56 -56 moveto
+56 56 lineto stroke
+ 0 0.5 dtransform truncate idtransform setlinewidth pop
+newpath -56 56 moveto
+56 56 lineto stroke
+-6.20601 1.4482 moveto
+(.) cs-lmr12 11.95517 fshow
+-1.62592 -1.5405 moveto
+(.) cs-lmr12 11.95517 fshow
+2.9542 -4.5293 moveto
+(.) cs-lmr12 11.95517 fshow
+showpage
+%%EOF

@@ -1,0 +1,79 @@
+[
+  {
+    "category": "Algebra",
+    "handouts": [
+      {
+        "title": "Rozklady na súčin",
+        "slug": "rozklady-na-sucin",
+        "filename": "algebra-1-rozklady-sk.json",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Sústavy rovníc",
+        "slug": "sustavy-rovnic",
+        "filename": "algebra-2-sustavy-sk.json",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Nerovnosti",
+        "slug": "nerovnosti",
+        "authors": ["Patrik Bak"]
+      }
+    ]
+  },
+  {
+    "category": "Teória čísel",
+    "handouts": [
+      {
+        "title": "Deliteľnosť",
+        "slug": "delitelnost",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Diofantické rovnice",
+        "slug": "diofanticke-rovnice",
+        "authors": ["Patrik Bak"]
+      }
+    ]
+  },
+  {
+    "category": "Geometria",
+    "handouts": [
+      {
+        "title": "Podobnosti a zhodnosti",
+        "slug": "podobnosti-a-zhodnosti",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Uhly",
+        "slug": "uhly",
+        "authors": ["Patrik Bak"]
+      }
+    ]
+  },
+  {
+    "category": "Kombinatorika",
+    "handouts": [
+      {
+        "title": "Ofarbovanie",
+        "slug": "ofarbovanie",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Dirichletov princíp",
+        "slug": "dirichletov-princip",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Extremálny princíp",
+        "slug": "extremalny-princip",
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "title": "Grafové úlohy",
+        "slug": "grafove-ulohy",
+        "authors": ["Patrik Bak"]
+      }
+    ]
+  }
+]

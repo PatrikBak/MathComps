@@ -1,0 +1,836 @@
+\input template
+
+\Title{Algebra}
+
+\Subtitle{Sústavy rovníc}
+
+\Author{Patrik Bak}
+
+\Stars{0} test \par
+\Stars{1} test \par
+\Stars{2} test \par
+\Stars{3} test \par
+
+\sec Úvod
+
+Sústavy rovníc sú bežná školská téma, kde sa naučíme veľa bežných metód. Existuje však veľa zaujímavých úloh, kde tieto metódy vedú na veľmi komplikovaný postup alebo úplne zlyhajú; pritom tieto úlohy majú veľmi elegantné nečakané riešenie. Vezmime si napríklad
+$$
+\align
+x^2+1 &= 2y, \\
+y^2+1 &= 2x.
+\endalign
+$$
+Školský postup na túto sústavu je použiť \uv{dosadzovaciu metódu}. Keď však vyjadríme $y$ z~prvej rovnice a~dosadíme do druhej, dostaneme po sérii úprav rovnicu štvrtého stupňa. Tá sa dá vyriešiť hádaním koreňov a~následným delením mnohočlena mnohočlenom, ale postup je zdĺhavý\fnote{Zaujímavosťou je, že zatiaľ čo pre rovnice do štvrtého stupňa existujú všeobecné vzorce na nájdenie koreňov (aj keď sú veľmi zložité), pre rovnice piateho a~vyššieho stupňa bolo v~19. storočí dokázané (Abel, Galois), že takéto všeobecné vzorce neexistujú.}. V~tomto materiáli si však ukážeme tri iné elegantnejšie a~všeobecne užitočné metódy riešenia tohto príkladu.
+
+\sec Teória 
+
+Existuje veľa všemožných postupov, ktoré sa dajú zvoliť pri riešení sústav rovníc. V~tomto materiáli sa zameriame na tri veľmi časté techniky:
+
+\begitems \style n
+\i Odčítanie rovníc
+\i Sčítanie rovníc
+\i Usporiadanie premenných
+\enditems
+
+Veľmi často budeme nadväzovať na techniky \textit{rozklad na súčin} resp. \textit{dopĺňanie na štvorec}, ktoré sme precvičili v~predošlom materiáli.
+
+Než začneme riešiť, tak jedna dôležitá praktická rada: Vždy je dobré urobiť ju a~do riešenia napísať, že ste ju urobili. Častokrát je to oveľa rýchlejšie ako \textit{precízne} zdôvodniť, že ju spraviť netreba.  
+
+\secc Odčítanie rovníc
+
+Najbežnejšia metóda na zaujímavejšie sústavy spočíva v~odčítavaní rovníc a~následnom rozkladaní na súčin. Vráťme sa k~príkladu z~úvodu:
+
+\Example{}{
+    Metódou odčítania rovníc riešte sústavu v~množine reálnych čísel:
+    $$
+    \align
+    x^2+1 &= 2y, \\
+    y^2+1 &= 2x. \\
+    \endalign
+    $$
+}{
+    Odčítaním druhej rovnice od prvej dostaneme
+    $$
+    \align
+    x^2+1-(y^2+1)&=2y-2x,\\
+    (x-y)(x+y)&=-2(x-y),\\
+    (x-y)(x+y+2)&=0.
+    \endalign
+    $$
+    Teda buď $x=y$, alebo $x+y=-2$.
+    \begitems
+    \i Ak $x=y$, potom z~$x^2+1=2x$ vyplýva $(x-1)^2=0$, čiže $x=y=1$.
+    \i Ak $x+y=-2$, potom dosadením do $x^2+1=2y$ dostaneme $x^2+1=2(-2-x)$, čo sa upraví na $x^2+2x+5=0$. Ľahko zistíme, že táto rovnica v~reálnych číslach nemá riešenie.
+    \enditems
+    Sústava má teda jediné riešenie $(x,y)=(1,1)$, o~čom sa ľahko presvedčíme skúškou.
+}
+
+Situácia je zložitejšia, keď máme viac rovníc, vtedy často potrebujeme odčítavať viac dvojíc rovníc a~často sa nevyhneme rozboru prípadov:
+
+\Example{}{
+    Metódou odčítania rovníc riešte sústavu v~množine reálnych čísel:
+    $$
+    \align
+    x^2-1 &= y+z, \\
+    y^2-1 &= z+x, \\
+    z^2-1 &= x+y. \\
+    \endalign
+    $$
+}{
+    Odčítaním prvej a~druhej rovnice dostaneme
+    $$
+    x^2-y^2=(y+z)-(z+x)=y-x.
+    $$
+    Po prevedení na jednu stranu máme
+    $$
+    \align 
+    x^2-y^2 + (x-y) &= 0, \\
+    (x-y)(x+y) + (x-y) &= 0, \\
+    (x-y)(x+y+1) &= 0.
+    \endalign
+    $$
+    Cyklicky získame aj
+    $$
+    \align
+    (y-z)(y+z+1)&=0,\\
+    (z-x)(z+x+1)&=0.
+    \endalign
+    $$
+    Pre každú dvojicu premenných teda platí: buď sú si rovné, alebo ich súčet je $-1$.
+
+    \begitems
+    \i Ak $x=y=z=t$, potom z~ktorejkoľvek rovnice $t^2-1=2t$, čiže $t^2-2t-1=0$, čo dáva $t=1\pm\sqrt2$.
+    \i Ak $x=y\neq z$, potom z~rovníc plynie $x+z=-1$. Dosadením $y=x$ a~$z=-1-x$ do tretej rovnice:
+    $$
+    (-1-x)^2-1= 2x
+    $$
+    čo sa upraví na $x^2=0$, takže $x=0$ a~$z=-1$. Máme teda riešenie $(0,0,-1)$. Cyklicky v~prípadoch $y=z\neq x$ a~$z=x \neq y$ dostaneme riešenia $(-1,0,0)$ a~$(0,-1,0)$.
+    \i Ak by nebola rovná žiadna dvojica, tak z~$x\neq y$ a~$x \neq z$ máme $x+y=-1$ a~$x+z=-1$. Porovnaním máme $x+y=x+z$, takže $y=z$, čo je spor s~predpokladom.    
+    \enditems
+
+    Riešeniami sú trojice $(1+\sqrt2,1+\sqrt2,1+\sqrt2)$, $(1-\sqrt2,1-\sqrt2,1-\sqrt2)$, $(-1,0,0)$, $(0,-1,0)$ a~$(0,0,-1)$, o~čom sa ľahko presvedčíme skúškou.
+}
+
+Odčítanie rovníc si môžete precvičiť na príkladoch:
+
+\Exercise{}{
+    Riešte sústavu rovníc v~obore reálnych čísel:
+    $$
+    \align
+    x^2 + xy &= x + 1,\\
+    y^2 + xy &= y + 1.
+    \endalign
+    $$
+}{
+    Odčítaním rovníc dostaneme $x^2-y^2=x-y$, čo upravíme na
+    $$
+    (x-y)(x+y-1)=0.
+    $$
+    To nám dáva dve možnosti:
+
+    \begitems
+    \i Ak $x=y$, dosadením do prvej rovnice máme $2x^2-x-1=0$. Táto rovnica má korene $x=1$ a~$x=-1/2$. Získavame tak dve riešenia: $(1,1)$ a~$(-1/2, -1/2)$. Skúška správnosti sedí.
+
+    \i Ak $y=1-x$, prvá rovnica prejde do tvaru $x^2+x(1-x)=x+1$, z~čoho po úprave dostaneme $x=x+1$, teda $0=1$. Tento prípad nevedie k~žiadnemu riešeniu.
+    \enditems
+
+    Sústava má práve dve riešenia: $(1,1)$ a~$(-1/2, -1/2)$.
+}
+
+\Exercise{}{
+    Riešte sústavu rovníc v~obore reálnych čísel:
+    $$
+    \align
+    xy+x+y &= 3, \\
+    yz+y+z &= 3, \\
+    zx+z+x &= 3. \\
+    \endalign
+    $$
+}{
+    Odčítaním druhej rovnice od prvej dostaneme 
+    $$
+    (xy+x+y) - (yz+y+z) = 0,
+    $$
+    čo upravíme na
+    $$
+    \align
+    y(x-z) + (x-z) &= 0, \\
+    (x-z)(y+1) &=0. \\
+    \endalign
+    $$
+    Podobne dostaneme aj 
+    $$
+    \align 
+    (y-x)(y+1) &= 0, \\
+    (z-y)(z+1) &= 0. \\
+    \endalign
+    $$
+    Ak je nejaká premenná rovná $-1$, napríklad $y$, tak v~prvej rovnici máme spor $-1=3$. Podobne ani zvyšné premenné nemôžu byť rovné $-1$. Nutne sú teda všetky tri rovnaké. 
+
+    Dosadením $x=y=z=t$ do prvej rovnice získame $t^2+2t-3=0$, čo je kvadratická rovnica s~riešeniami $1$ a~$-3$. 
+
+    Skúškou sa môžeme presvedčiť, že obe nájdené riešenia $(1,1,1)$ a~$(-3,-3,-3)$ vyhovujú.
+}
+
+\Exercise{58. ročník, domáce B, úloha 2}{
+    Určte všetky trojice $(x,y,z)$ reálnych čísel, pre ktoré platí
+    $$
+    \align
+    x^2+xy&=y^2+z^2,\\
+    z^2+zy&=y^2+x^2. \\
+    \endalign
+    $$
+}{
+    Odčítaním druhej rovnice od prvej dostaneme
+    $$
+    \align
+    (x^2+xy)-(z^2+zy)&=(y^2+z^2)-(y^2+x^2),\\
+    2(x^2-z^2)+y(x-z)&=0,\\
+    2(x-z)(x+z)+y(x-z)&=0,\\
+    (x-z)\(2(x+z)+y\)&=0.
+    \endalign
+    $$
+    Odtiaľ buď $x=z$, alebo $y=-2(x+z)$.
+
+    \begitems 
+    \i Ak $x=z$, tak z~prvej rovnice $xy=y^2$, čiže $y(y-x)=0$. Ak $y=0$, vyhovuje ľubovoľné $(x,0,x)$. Ak $y=x$, dostaneme $(x,x,x)$ pre ľubovoľné reálne $x$.
+    \i Ak $y=-2(x+z)$, dosadením do prvej rovnice dostaneme 
+    $$
+    \align
+    x^2-2x(x+z)&=(-2(x+z))^2+z^2, \\
+    x^2-2x^2-2xz &= 4x^2+8xz+4z^2+z^2, \\
+    -5x^2 - 10xz - 5z^2 &= 0, \\
+    -5(x+z)^2 &= 0.
+    \endalign
+    $$
+    Odtiaľ $z=-x$ a~$y=0$, takže riešenia sú $(x,0,-x)$ pre ľubovoľné reálne $x$.
+    \enditems
+
+    Všetky riešenia sú práve trojice $(t,t,t)$, $(t,0,t)$ a~$(t,0,-t)$ pre ľubovoľné reálne $t$, o~čom sa ľahko presvedčíme skúškou.
+}
+
+\secc Sčítanie rovníc
+
+Popri odčítaní je niekedy dobrý nápad rovnice aj sčítať. Sú príklady, kde výsledná rovnica buď niečo napovie, alebo sa rovno vzdá. Vráťme sa k~príkladu z~úvodu:
+
+\Example{}{
+    Metódou sčítania rovníc riešte sústavu v~množine reálnych čísel:
+    $$
+    \align
+    x^2+1 &= 2y, \\
+    y^2+1 &= 2x. \\
+    \endalign
+    $$
+}{
+    Sčítaním rovníc zo zadania dostaneme
+    $$
+    x^2+1+y^2+1 = 2y+2x.
+    $$
+    Na prvý pohľad sme si nepomohli. Je treba si však všimnúť, že po premiestnení všetkých členov na jednu stranu nemáme nič viac než súčet štvorcov:
+    $$
+    \align
+    x^2+1+y^2+1 &= 2y+2x, \\
+    (x^2-2x+1) + (y^2-2y+1) &=0, \\
+    (x-1)^2 + (y-1)^2 &= 0.
+    \endalign
+    $$
+    Z~toho už hneď máme, že musí platiť $x=1$ a~$y=1$. Skúškou sa presvedčíme, že dvojica $(1,1)$ je naozaj riešením.
+}
+
+
+Ukážeme si ešte zložitejší príklad s~dokonca tromi premennými:
+
+\Example{}{
+    Riešte sústavu v~množine reálnych čísel:
+    $$
+    \align
+    x^2 &= y(2z-x), \\
+    y^2 &= z(2x-y), \\
+    z^2 &= x(2y-z). \\
+    \endalign
+    $$
+}{
+    Po úprave rovníc na tvar
+    $$
+    x^2+xy=2yz,\qquad y^2+yz=2zx,\qquad z^2+zx=2xy
+    $$
+    a~ich následnom sčítaní dostaneme $x^2+y^2+z^2+xy+yz+zx = 2(xy+yz+zx)$, čo je ekvivalentné s
+    $$
+    x^2+y^2+z^2-xy-yz-zx=0.
+    $$
+    Túto rovnosť môžeme vynásobiť dvomi a~prepísať na súčet štvorcov:
+    $$
+    (x-y)^2+(y-z)^2+(z-x)^2=0.
+    $$
+    Keďže sčítame tri nezáporné čísla, rovnosť platí, len ak sú všetky tri nulové, teda $x-y=0$, $y-z=0$ a~$z-x=0$. Z~toho vyplýva, že $x=y=z$.
+    
+    Dosadením do pôvodných rovníc ľahko overíme, že každá trojica $(t,t,t)$ pre $t\in\R$ je riešením.
+}
+
+\Exercise{}{
+    V~obore reálnych čísel riešte sústavu rovníc:
+    $$
+    \align
+    a^2+b&=c, \\
+    b^2+c&=a, \\
+    c^2+a&=b.
+    \endalign
+    $$
+}{
+    Sčítaním daných troch rovníc máme
+    $$
+    a^2+b^2+c^2+a+b+c = a+b+c,
+    $$
+    z~čoho po úprave dostaneme
+    $$
+    a^2+b^2+c^2 = 0.
+    $$
+    Z~toho nutne máme $a^2=0$, $b^2=0$ a~$c^2=0$, čo znamená $a=b=c=0$.
+    
+    Dosadením do sústavy overíme, že $(0,0,0)$ je naozaj riešením.
+}
+
+\Exercise{}{
+    V~obore reálnych čísel vyriešte sústavu
+    $$
+    \align
+    z^2 &= 4(x-1),\\
+    x^2 &= 4(y-1),\\
+    y^2 &= 4(z-1).\\
+    \endalign
+    $$
+}{
+    Sčítaním rovníc dostaneme
+    $$
+    x^2+y^2+z^2=4(x+y+z-3).
+    $$
+    Teraz prenesieme všetko na ľavú stranu, $12$ napíšeme ako $4+4+4$ a~doplníme na štvorec:
+    $$
+    \align
+    &\hphantom{=}x^2-4x+y^2-4y+z^2-4z+12\\
+     &=(x^2-4x+4)+(y^2-4y+4)+(z^2-4z+4)\\
+     &=(x-2)^2+(y-2)^2+(z-2)^2.
+    \endalign
+    $$
+    Tento súčet by mal byť rovný nule, nutne teda každý z~troch nezáporných sčítancov je rovný~$0$. Skúškou overíme, že trojica $(2,2,2)$ vyhovuje aj pôvodnej sústave.
+}
+
+\Exercise{}{
+    Riešte sústavu v~reálnych číslach:
+    $$
+    \align
+    x(x+y+z)&=20,\\
+    y(x+y+z)&=30,\\
+    z(x+y+z)&=50.\\
+    \endalign
+    $$
+}{
+    Všimnime si, že vo všetkých troch rovniciach sa vyskytuje spoločný činiteľ $x+y+z$, sčítaním rovníc ho teda budeme vedieť vyňať pred zátvorku:
+    $$
+    \align
+    x(x+y+z)+y(x+y+z)+z(x+y+z) &= 20+30+50, \\
+    (x+y+z)(x+y+z) &= 100, \\
+    (x+y+z)^2&=100. \\
+    \endalign
+    $$
+    Odtiaľ dostávame dve možnosti pre hodnotu súčtu $x+y+z$:
+    $$
+    x+y+z = 10 \quad \text{alebo} \quad x+y+z = -10.
+    $$
+    Rozoberieme oba prípady.
+    \begitems
+    \i Ak $x+y+z=10$, dosadením do pôvodných rovníc dostaneme:
+    $$
+    \align
+    x \cdot 10 &= 20 \quad\text{z čoho}\quad x=2, \\
+    y \cdot 10 &= 30 \quad\text{z čoho}\quad y=3, \\
+    z \cdot 10 &= 50 \quad\text{z čoho}\quad z=5.
+    \endalign
+    $$
+    Získali sme riešenie $(2,3,5)$.
+
+    \i Ak $x+y+z=-10$, podobne $(-2,-3,-5)$.
+    \enditems
+    Skúškou správnosti sa presvedčíme, že obe trojice $(2,3,5)$ a~$(-2,-3,-5)$ vyhovujú.
+}
+
+\secc Využitie usporiadania 
+
+Zdanlivo najtrikovejší spôsob je využiť symetriu a~premenné si \uv{bez ujmy na všeobecnosti} usporiadať a~použiť odhady.
+
+Bez väčších rečí si to ukážeme na našom príklade:
+
+\Example{}{
+    Metódou usporiadania premenných riešte sústavu v~množine reálnych čísel:
+    $$
+    \align
+    x^2+1 &= 2y, \\
+    y^2+1 &= 2x. \\
+    \endalign
+    $$
+}{
+    Uvedomme si, že sústava je v~premenných $x$ a~$y$ \textit{symetrická}, keďže zámenou premenných $x$ a~$y$ dostávame rovnakú úlohu. Inak povedané, dvojica $(x,y)$ je riešením práve keď aj dvojica $(y,x)$. Tým pádom stačí nájsť tie dvojice, kde $x \ge y$, a~vo výsledku k~týmto dvojiciam pridať dvojice s~vymenenými prvkami. Poďme na to:
+
+    Ak máme $x \ge y$, tak $2x \ge 2y$, takže $y^2+1 \ge x^2+1$, čo dáva $y^2 \ge x^2$. Z~tohto vo všeobecnosti \textit{nevyplýva} $y \ge x$, to platí len pre kladné $x$ a~$y$. Lenže, naše $x$ a~$y$ sú určite kladné, napríklad v~prvej rovnici máme $x^2+1=2y$, naľavo je číslo kladné, takže aj $2y$ je kladné, takže aj $y$, a~podobne aj~$x$. Tým pádom z~$y^2 \ge x^2$ naozaj vyplýva $y \ge x$. Máme teda $x \ge y$ a~$y \ge x$, čo dokopy dáva $x=y$. Riešenie potom dokončíme ako predtým a~dostaneme jediné riešenie $(1,1)$.
+}
+
+Poznamenajme, že táto sústava nemá riešenie, kedy by sa premenné nerovnali, takže k~nájdenému riešeniu $(1,1)$ sme nemuseli pridávať ďalšie. V~nasledovnom veľmi jednoduchom príklade to tak nebude:
+
+\Example{}{Riešte sústavu v~reálnych číslach:
+    $$
+    \align
+    |x-y| &= 2, \\
+    x+y &=4. \\
+    \endalign
+    $$
+}{
+    Sústava je symetrická, takže bez ujmy na všeobecnosti $x \ge y$. Tým dostaneme sústavu dvoch lineárnych rovníc o~dvoch neznámych:
+    $$
+    \align
+    x-y &= 2, \\
+    x+y &=4, \\
+    \endalign
+    $$
+    o~ktorej sa ľahko presvedčíme, že má jediné riešenie $(3,1)$. Pôvodná sústava má teda dve riešenia, $(3,1)$ a~$(1,3)$.
+}
+
+Symetria je fascinujúca vec. Jej využitie usporiadaním premenných je veľmi silná technika používaná vo všetkých oblastiach matematiky. Kedy to vlastne môžeme urobiť? Vo všeobecnosti: Keď výmenou premenných $X$ a~$Y$ dostaneme rovnakú úlohu, tak stačí vyriešiť úlohu v~prípade $X \ge Y$ a~argumentovať, že v~prípade $Y \ge X$ je úloha symetrická. 
+
+V~kontexte sústav rovníc môžeme mať prípad, kedy máme rovnicu s~viacerými premennými, tá je symetrická práve vtedy, keď výmenou ktorýchkoľvek dvoch premenných dostaneme rovnakú úlohu: V~takom prípade vieme premenné usporiadať všetky, napríklad pre úlohu s~premennými $x,y,z$ stačí vyriešiť prípad $x \ge y \ge z$ a~finálne riešenia prepermutovať, napríklad ak by sme mali riešenie $(3,2,1)$, tak máme ďalších 5~riešení $(3,1,2)$, $(2,1,3)$, $(2,3,1)$, $(1,3,2)$.
+
+V~ďalšom príklade si ukážeme, že niečo usporiadať vieme aj keď nemáme úplnú symetriu:
+
+\Example{}{
+    Riešte sústavu v~reálnych číslach:
+    $$
+    \align
+    x^3 + 1 &=2y, \\
+    y^3 + 1 &=2z, \\
+    z^3 + 1 &=2x. \\ 
+    \endalign
+    $$
+}{
+    Táto sústava \textit{nie je} symetrická: zámenou premenných $x$ a~$y$ nedostaneme úplne rovnakú sadu troch rovníc. Vidíme však, že ešte formu symetrie vykazuje -- rovnice akosi \uv{do kolečka} opakujú premenné $x,y,z$ v~tomto poradí. Presnejšie: Ak nahradíme premenné $(x,y,z)$ premennými $(z,x,y)$, tak dostaneme rovnakú sústavu (presvedčte sa o~tom). Takéto sústavy nazývame \textit{cyklické}. V~nich si síce nemôžeme dovoliť usporiadať všetky premenné ako pri symetrických, avšak môžeme si dovoliť bez újmy na všeobecnosti predpokladať, že nejaká z~premenných je najväčšia/najmenšia. Ak je napr. $x$ maximum z~$x,y,z$ a~nájdeme riešenie napríklad $(3,2,1)$, tak vďaka cyklickosti sústavy získame ďalšie dve riešenia $(2,1,3)$ a~$(1,2,3)$.
+
+    Po dlhom úvode sa konečne pusťme do príkladu. Keďže naša sústava je cyklická, stačí vyriešiť prípad, kedy $x=\max\{x,y,z\}$. Vtedy platí $x \ge z$, teda $x^3+1 \ge z^3+1$ (keďže funkcia $f\colon x\rightarrow x^3$ je rastúca). To ale z~porovnania prvej a~tretej rovnice znamená, že $2y \ge 2x$, resp. $y \ge x$. To spolu s~$x \ge y$ dáva $x=y$. To nám umožňuje použiť $y \ge z$ podobným spôsobom, $2z=y^3+1 \ge z^3+1 = 2x$, takže $z \ge x$, teda $z=x$, dokopy $x=y=z$.
+    
+    Všetky rovnice teda majú tvar $t^3+1=2t$, ekvivalentne $t^3-2t+1=0$. To je síce kubická rovnica, avšak našťastie ľahko uhádneme jej koreň $t=1$, takže štandardným spôsobom delenia mnohočlena mnohočlenom prídeme na rozklad:
+    $$
+    t^3-2t+1 =(t-1)(t^2+t-1)
+    $$
+    Poslednú rovnicu už hravo vyriešime a~zistíme, že má tri riešenia $t=1$ a~$t=\frac12(-1\pm\sqrt5)$, ktoré vďaka ekvivalentnosti použitých úprav vyhovujú aj pôvodnej rovnici $t^3+1=2t$. 
+    
+    Sústava má tri riešenia tvaru $(x,y,z)=(t,t,t)$, kde $t \in \{1, \frac12(-1\pm\sqrt5)\}$.
+}
+
+\Exercise{}{
+    V~obore reálnych čísel riešte sústavu rovníc
+    $$
+    \align
+    x &= \sqrt{y+2},\\
+    y &= \sqrt{x+2}.\\
+    \endalign
+    $$
+}{
+    Sústava je symetrická, bez ujmy na všeobecnosti predpokladajme, že $x \ge y$. Keďže funkcia $f(t)=\sqrt{t+2}$ je rastúca, platí
+    $$
+    x \ge y \implies \sqrt{x+2} \ge \sqrt{y+2},
+    $$
+    takže použitím sústavy máme $y \ge x$. Z~$x \ge y$ a~$y \ge x$ nutne vyplýva $x=y$.
+    
+    Dosadením do prvej rovnice dostaneme $x=\sqrt{x+2}$. Po umocnení na druhú máme $x^2=x+2$, čo je kvadratická rovnica s~koreňmi $x=2$ a~$x=-1$, takže $(x,y)$ je buď $(2,2)$ alebo $(-1,-1)$. Skúškou však prejde iba prvá dvojica.
+    
+    Sústava ma jediné riešenie $(x,y)=(2,2)$.
+}
+
+\Exercise{}{
+    Určte všetky trojice $(x,y,z)$ reálnych čísel, pre ktoré platí
+    $$
+    \align
+    (x+y)^5 &= 64z, \\
+    (y+z)^5 &= 64x, \\
+    (z+x)^5 &= 64y. \\
+    \endalign
+    $$
+}{
+    Sústava je symetrická, preto bez ujmy na všeobecnosti predpokladajme, že $x \ge y \ge z$. Potom aj $64x \ge 64y \ge 64z$, podľa sústavy teda máme      
+    $$
+    (y+z)^5 \ge (z+x)^5 \ge (x+y)^5.
+    $$
+    Keďže funkcia $f\colon t \rightarrow t^5$ je rastúca, dostávame z~toho
+    $$
+    y+z \ge z+x \ge x+y,
+    $$
+    resp. $y \ge x$ z~prvej a~$z \ge y$ z~druhej. Spolu s~predpokladom $x \ge y \ge z$ to znamená $x=y=z$. Dosadením do prvej rovnice dostaneme $(2x)^5=64x$.
+    $$
+    64x^5-64x=0 \implies x(x^5-1)=0,
+    $$   
+    takže $x=0$ alebo $x=1$.
+
+    Skúškou sa presvedčíme, že nájdené riešenia $(0,0,0)$ a~$(1,1,1)$ naozaj vyhovujú.
+}
+
+\Exercise{}{
+    Určte všetky trojice $(x,y,z)$ reálnych čísel, pre ktoré platí
+    $$
+    \align
+    x^5 &= 5y^3 - 4z, \\
+    y^5 &= 5z^3 - 4x, \\
+    z^5 &= 5x^3 - 4y. \\
+    \endalign
+    $$
+}{
+    Sústava nie je symetrická, takže nemôžeme predpokladať $x \ge y \ge z$. Je však cyklická, bez ujmy na všeobecnosti nech $x=\max\{x,y,z\}$. Tým pádom $x \ge z$, a~teda $x^5 \ge z^5$. Pozrime sa, čo nám hovorí prvá a~tretia rovnica:
+    $$
+    \align
+    5y^3 - 4z &\ge 5x^3 - 4y, \\
+    4y - 4z &\ge 5x^3 - 5y^3.
+    \endalign
+    $$
+    Keďže však tiež $x \ge y$, tak aj $5x^3 \ge 5y^3$, takže posledná nerovnosť znamená dokonca $4y-4z \ge 0$, teda $y \ge z$. Tým pádom $y^5 \ge z^5$. Pozrime sa, čo nám hovorí druhá a~tretia rovnica:
+    $$
+    \align
+    5z^3-4x &\ge 5x^3 - 4y\\
+    4y - 4x &\ge 5x^3-5z^3.
+    \endalign
+    $$
+    Podobne ako v~predošlom porovnaní máme $y \ge x$. Spolu s~$x \ge y$ to ale znamená $x=y$. Posledná nerovnosť potom znamená $0 \ge 5x^3-5z^3$, takže $z^3 \ge x^3$, čo dáva $z \ge x$, čo spolu s~$x \ge z$ znamená aj $x=z$. Nutne teda $x=y=z$.
+
+    Dosadením $x=y=z$ do prvej rovnice dostaneme $x^5 = 5x^3 - 4x$, čiže $x^5-5x^3+4x=0$. Vidíme, že $x=0$ je koreň, máme teda $x(x^4-5x^2+4)=0$. Mnohočlen $x^4-5x^2+4$ je zjavne kvadratický v~premennej $t=x^2$, riešením rovnice $t^2-5t+4=0$ ľahko nájdeme korene $t=4$ a~$t=1$. Naša rovnica sa teda dá rozložiť ako $x(x^2-4)(x^2-1)=0$, takže vo finále má 5 koreňov: $0$, $\pm 1$, $\pm 2$.
+
+    Skúškou sa presvedčíme, že všetkých 5~nájdených riešení $(0,0,0)$, $(-1,-1,-1)$, $(1,1,1)$, $(-2,-2,-2)$, $(2,2,2)$ vyhovuje.
+}
+
+\sec Čo si zapamätať
+
+\secc Techniky riešenia sústav
+
+\begitems \style N
+\i Sčítavajte a~odčítavajte rovnice. V~niektorých úlohách môže tiež pomôcť ich násobiť alebo deliť.
+\i Hľadajte rozklady výrazov na súčin. 
+\i Sledujte symetriu resp. cyklickosť a~bez ujmy na všeobecnosti usporiadajte premenné resp. predpokladajte, ktorá je najväčšia alebo najmenšia. Nezabúdajte zahrnúť symetrické resp. cyklické riešenia do finálnej odpovede.
+\i Všímajte si, či sa výrazy nedajú upraviť na súčty štvorcov. 
+\i Nezabúdajte na skúšku správnosti -- ak aj technicky nie je potrebná, často je ľahšie ju urobiť než precízne zdôvodniť, že nie je potrebná.
+\enditems
+
+\textit{Poznámka.} Je veľa techník, ku ktorým sme sa nedostali -- najbežnejšia z~nich je využitie zložitejších nerovností. K~takýmto sústavám sa vrátime v~materiáli o~nerovnostiach.
+
+\secc Všeobecne užitočné poznatky
+
+\begitems \style N
+\i Kedykoľvek vidíme $x^2+y^2+z^2 = xy+yz+zx$, znamená to hneď $x=y=z$ (dokonca ľavá strana je vždy aspoň tak veľká ako pravá a~rovnosť nastáva len pre $x=y=z$)
+\i Symetria a~cyklickosť sa neviaže iba na sústavy rovníc -- vo všetkých častiach matematiky je veľmi dôležité niečo bez ujmy na všeobecnosti predpokladať a~tým si zjednodušiť úlohu.
+\enditems
+
+\sec Ďalšie úlohy
+
+Aby toho nebolo málo, tu je niekoľko ďalších úloh. Všetky rôzne kombinujú metódy, ktoré sme sa naučili alebo videli po ceste (ako rozklady na súčin, dopĺňanie na štvorec, analyzovanie prípadov, sčítanie/odčítanie rovníc, atď.). Úlohy sú radené približne podľa obtiažnosti.
+
+\Problem{0}{74. ročník MO, krajské B, úloha 1}{
+    V~obore reálnych čísel riešte sústavu rovníc
+    $$
+    \align
+    x^2+4y^2+z^2-4xy-2z+1&=0,\\
+    y^2-xy-2y+2x&=0.
+    \endalign
+    $$
+}{
+    Všimnite si, že druhá rovnica sa vlastne dá rozložiť na súčin. To pomôže pri zjednodušení prvej rovnice.
+}{
+    Druhá rovnica nám dáva $(y-x)(y-2)=0$. To dáva dva prípady, $y=x$ a~$y=2$. Dosadíme do prvej rovnice a~všimnime si, že vyzerá veľmi \textit{štvorcovito}.
+}{
+    Druhú rovnicu si postupným vynímaním rozložíme na súčin:
+    $$
+    y(y-2) - x(y-2) = 0 \implies (y-x)(y-2) = 0.
+    $$
+    Táto rovnosť nastane práve vtedy, keď $y=x$ alebo $y=2$. Rozoberieme oba prípady.
+
+    \begitems
+    \i Ak $y=x$, dosadením do prvej rovnice dostaneme
+    $$
+    x^2+4x^2+z^2-4x^2-2z+1=0,
+    $$
+    čo sa po úprave zmení na
+    $$
+    x^2 + (z-1)^2 = 0.
+    $$
+    Keďže ide o~súčet dvoch nezáporných čísel, rovnosť môže nastať, len ak sú oba sčítance nulové. Teda $x=0$ a~$z=1$. Keďže $y=x$, máme riešenie $(0,0,1)$.
+    \i Ak $y=2$, dosadením do prvej rovnice dostaneme
+    $$
+    x^2+4(2^2)+z^2-4x(2)-2z+1 = 0,
+    $$
+    čo po úprave a~doplnení na štvorec dáva
+    $$
+    \align
+    x^2-8x+16+z^2-2z+1&=0,\\
+    (x-4)^2 + (z-1)^2 &= 0.
+    \endalign
+    $$
+    Podobne ako v~prvom prípade, odtiaľto vyplýva $x=4$ a~$z=1$. Keďže sme predpokladali $y=2$, máme riešenie $(4,2,1)$.
+    \enditems
+    
+    Skúškou správnosti sa presvedčíme, že obe nájdené trojice $(0,0,1)$ a~$(4,2,1)$ sú riešeniami sústavy.
+}
+
+
+\Problem{0}{57. ročník MO, celoštátne kolo A v~Česku\fnote{V~tomto ročníku bolo celoštátne aj krajské  kolo \textit{výnimočne} iné v~Česku a~na Slovensku.}, úloha 1}{
+    Riešte sústavu v~reálnych číslach:
+    $$
+    \align
+    x + y^2 &= y^3, \\
+    y + x^2 &= x^3. \\
+    \endalign
+    $$
+}{
+    Odčítame rovnice a~rozložíme na súčin. 
+}{
+    Po odčítaní rovníc a~rozložení na súčin máme, že buď $x=y$ alebo $x^2+xy+y^2-x-y+1=0$. Druhá rovnica je neevidentná. Priamočiary spôsob jej riešenia je, že jednu premennú (napr. $x$) považujeme za neznámu a~druhú (napr. $y$) za parameter a~riešime kvadratickú rovnicu. Krajší spôsob je však nájsť rozklad na súčet štvorcov, k~čomu podobne ako pri analýze $x^2+y^2+z^2-xy-yz-zx$ potrebujeme najprv násobiť dvomi.
+}{
+    Odčítaním rovníc dostaneme $x-y-(x^2-y^2)=y^3-x^3$, čo po vyňatí člena $(x-y)$ vedie na
+    $$
+    (x-y)(1 - x - y + x^2+xy+y^2) = 0.
+    $$
+    To nám dáva dve možnosti.
+
+    \begitems
+    \i Ak $x=y$, dosadením do prvej rovnice sústavy máme $x+x^2=x^3$, čiže $x(x^2-x-1)=0$.
+    Riešeniami sú $x=0$ a~korene rovnice $x^2-x-1=0$, teda $x=\frac{1\pm\sqrt{5}}{2}$.
+    Získavame tak tri riešenia: $(0,0)$, $(\frac{1+\sqrt{5}}{2}, \frac{1+\sqrt{5}}{2})$ a~$(\frac{1-\sqrt{5}}{2}, \frac{1-\sqrt{5}}{2})$.
+
+    \i Ak $x^2+xy+y^2-x-y+1=0$, vynásobíme rovnicu dvomi a~vhodne preusporiadame členy do súčtu troch štvorcov:
+    $$
+    \align
+    2x^2+2xy+2y^2-2x-2y+2&=0, \\
+    (x^2-2x+1) + (y^2-2y+1) + (x^2+2xy+y^2) &= 0, \\
+    (x-1)^2 + (y-1)^2 + (x+y)^2 &= 0.
+    \endalign
+    $$
+    Súčet troch nezáporných čísel je nula, práve keď sú všetky tri nulové. Muselo by teda platiť $x-1=0$, $y-1=0$ a~$x+y=0$. Prvé dve rovnice dávajú $x=1$ a~$y=1$, čo je v~spore s~treťou rovnicou. Tento prípad teda nemá žiadne riešenie.
+    \enditems
+
+    Sústava má preto práve tri riešenia uvedené v~prvom prípade.
+}
+
+\Problem{0}{70. ročník MO, školské B, úloha 1}{
+    Pre reálne čísla $x$, $y$, $z$ platí
+    $$
+    \align
+    |x+y|&=1-z,\\
+    |y+z|&=1-x,\\
+    |z+x|&=1-y.
+    \endalign
+    $$
+    Zistite, aké všetky hodnoty môže nadobúdať súčet $x+y+z$. Pre každý vyhovujúci súčet uveďte príklad prislúchajúcich čísel $x$, $y$, $z$.
+}{
+    S~absolútnymi hodnotami dobre funguje umocňovanie na druhú, vďaka tomu sa strácajú.
+}{
+    Po odstránení absolútnych hodnôt je možné napríklad každú dvojicu rovníc odčítať a~rozložiť na súčin (náš cieľ nie je nájsť všetky riešenia, ale len možné hodnoty súčtu $x+y+z$, čo nám pomôže v~diskusii). Ešte rýchlejšie riešenie je prekvapivo sčítať všetky rovnice. V~každom prípade nezabudnite overiť, že pre nájdených kandidátov pre $x+y+z$ naozaj existujú $x,y,z$, pre ktoré je súčet dosiahnuteľný.
+}{
+    Aby sme sa zbavili absolútnych hodnôt, umocníme každú z~troch rovníc na druhú:
+    $$
+    \align
+    (x+y)^2 &= (1-z)^2, \\
+    (y+z)^2 &= (1-x)^2, \\
+    (z+x)^2 &= (1-y)^2.
+    \endalign
+    $$
+    Sčítaním týchto troch rovníc a~roznásobením všetkých zátvoriek dostaneme:
+    $$
+    2x^2 + 2y^2 + 2z^2 + 2xy + 2yz + 2zx = 3 - 2(x+y+z) + x^2 + y^2 + z^2.
+    $$
+    Túto rovnicu zjednodušíme odčítaním výrazu $x^2+y^2+z^2$ od oboch strán. Zostane nám:
+    $$
+    x^2+y^2+z^2 + 2xy+2yz+2zx = 3 - 2(x+y+z).
+    $$
+    Výraz na ľavej strane je presne vzorec pre $(x+y+z)^2$. Ak označíme súčet $S = x+y+z$, rovnica tak prejde do tvaru $S^2 = 3 - 2S$, čiže $S^2 + 2S - 3 = 0$. Rozkladom na súčin $(S+3)(S-1)=0$ nájdeme dve možné hodnoty pre súčet: $S=1$ a~$S=-3$.
+
+    Musíme ešte overiť, či sú obe tieto hodnoty skutočne dosiahnuteľné.
+    \begitems
+    \i Pre $S=1$ môžeme zvoliť $(x,y,z)=(1,0,0)$. Ľahko overíme, že to vyhovuje.
+    \i Pre $S=-3$ stačí zasa vziať $(x,y,z)=(-1,-1,-1)$.
+    \enditems
+    Možné hodnoty súčtu $x+y+z$ sú teda $1$ a~$-3$.
+    
+    Dodajme, že úloha má ďalšie možné spôsoby riešenia, môžeme napríklad diskutovať znamienka výrazov $x+y$, $y+z$, $z+x$. 
+}
+
+\Problem{0}{71. ročník MO, krajské A, úloha 2}{
+    V~obore \textit{kladných\fnote{Nemalý počet účastníkov si kladnosť nevšimol a~riešili úlohu, ktorá nemala pekné riešenia.}} reálnych čísel riešte sústavu rovníc
+    $$
+    \align
+    x^2 + 2y^2 &= \hphantom{1}x + 2y + 3z, \\
+    y^2 + 2z^2 &= 2x + 3y + 4z, \\
+    z^2 + 2x^2 &= 3x + 4y + 5z.
+    \endalign
+    $$
+}{
+    Všimnite si, že po sčítaní všetkých rovníc máme na pravej strane $6x+9y+12z$, čo je akosi podozrivo podobné pravej strane jednej z~našich rovníc.
+}{
+    Trikom je sčítať všetky rovnice a~odčítať dvojnásobok druhej rovnice, tým úplne vynulujeme pravú stranu a~na ľavej zostane $x^2=z^2$, čo vďaka kladnosti $x,y,z$ dáva $x=z$.
+}{
+    Sčítaním všetkých troch rovníc dostaneme
+    $$
+    3x^2+3y^2+3z^2 = 6x+9y+12z.
+    $$
+    Pravá strana je presne trojnásobkom pravej strany druhej rovnice. Odčítaním trojnásobku druhej rovnice od súčtu všetkých rovníc tak získame rovnicu s~nulovou pravou stranou:
+    $$
+    (3x^2+3y^2+3z^2) - 3(y^2+2z^2) = 0.
+    $$
+    Po úprave máme $3x^2 - 3z^2 = 0$, čiže $x^2=z^2$. Keďže $x,y,z$ sú kladné reálne čísla, vyplýva odtiaľ $x=z$.
+
+    Dosadením $z=x$ do prvých dvoch rovníc sústavy dostaneme:
+    $$
+    \align
+    x^2 + 2y^2 &= 4x + 2y = 2(2x+y), \\
+    y^2 + 2x^2 &= 6x + 3y = 3(2x+y), \\
+    \endalign
+    $$
+    Vidíme, že $3(x^2+2y^2) = 2(y^2+2x^2)$, z~čoho $4y^2=x^2$, teda z~kladnosti máme $2y=x$. Spätným dosadením do napr. prvej rovnice dostaneme $(2y)^2 + 2y^2 = 2(4y+y)$, teda $6y^2=10y$, takže buď $y=0$ alebo $y=5/3$. 
+    
+    Dokopy máme dvoch kandidátov na riešenia: $(0,0,0)$, $(10/3,5/3,10/3)$. Skúškou ľahko overíme, že obe trojice vyhovujú.
+}
+
+\Problem{0}{}{
+    V~obore reálnych čísel riešte sústavu rovníc
+    $$
+    \align
+    a^3+b &= c, \\
+    b^3+c &= d, \\
+    c^3+d &= a, \\
+    d^3+a &= b.
+    \endalign
+    $$
+}{
+    Sústava je cylická, stačí teda riešiť prípad keď $a=\max\{a,b,c,d\}$. Tým pádom $a^3 \ge b^3$ atď, máme viac možností, ako to využiť. Jedna z~nich nám dá ďalšiu nerovnosť medzi $a,b,c,d$.
+}{
+    Kľúčom je využiť $a^3 \ge c^3$, to nám dáva $c-b \ge a-d$, čo po úprave znamená $d-b \ge a-c$, takže nutne $d \ge b$. Čo nám dáva $d^3 \ge b^3$?
+}{
+    Sústava je cyklická, preto stačí vyriešiť $a=\max\{a,b,c,d\}$. Potom $a \ge c$, takže aj $a^3 \ge c^3$. Z~prvej a~tretej rovnice tak dostaneme $c-b \ge a-d$, čo upravíme na $d-b \ge a-c$. Keďže $a \ge c$, je pravá strana nezáporná, teda $d \ge b$.
+
+    Z~nerovnosti $d \ge b$ podobne odvodíme $d^3 \ge b^3$, čo po dosadení z~druhej a~štvrtej rovnice dáva $b-a \ge d-c$, teda $b-d \ge a-c$. Lenže $a \ge c$, teda $b \ge d$, čo dokopy s~$d \ge b$ dáva $d=b$, a~následne $b-d \ge a-c$ dáva $0 \ge a-c$, takže $c=a$.
+    
+    Dosadením do sústavy ju zredukujeme na
+    $$
+    \align
+    a^3+b &= a, \\
+    b^3+a &= b.
+    \endalign
+    $$
+    Sčítaním rovníc dostaneme $a^3+b^3=0$, takže $a^3=(-b)^3$, z~čoho $b=-a$. Dosadením už máme len jednu rovnicu $a^3-a=a$, ktorá je ekvivalentná s~$a(a^2-2)=0$, takže $a=0$ alebo $a=\pm \sqrt2$.
+
+    Skúškou ľahko overíme, že všetky štvorice
+    $$
+    (0,0,0,0), 
+    (\sqrt{2}, -\sqrt{2}, \sqrt{2}, -\sqrt{2}), 
+    (-\sqrt{2}, \sqrt{2}, -\sqrt{2}, \sqrt{2})
+    $$
+    sú riešením.
+}
+
+\Problem{0}{}{
+    Nájdite najmenšie štvormiestne prirodzené číslo $n$, pre ktoré má sústava
+    $$
+    \align
+    x^3+y^3+x^2y+y^2x&=n,\\
+    x^2+y^2+x+y&=n+1
+    \endalign
+    $$
+    iba celočíselné riešenia.
+}{
+    Prvým krokom je všimnúť si, že ľavá strana rovnice sa vlastne dá rozložiť na súčin výrazov podozrivo podobných tým v~druhej rovnici.
+}{
+    Platí $x^3+y^3+x^2y+y^2x=(x+y)(x^2+y^2)$. Druhá rovnica je pritom $(x+y)+(x^2+y^2)=n+1$. Čísla $A=x+y$, $B=x^2+y^2$ teda spĺňajú $AB=n$, $A+B=n+1$. Ktoré to asi môžu byť? Formálne ich vieme odvodiť buď uvedomením si, že z~Vietových\fnote{Vietove vzťahy sú pomenované po francúzskom matematikovi Francoisovi Viete (1540--1603), ktorý je považovaný za jedného z~otcov modernej algebry vďaka svojmu systematickému používaniu písmen na reprezentáciu neznámych a~parametrov, čo umožnilo riešiť problémy všeobecnejšie.} vzťahov $A,B$ musia byť korene kvadratickej rovnice $t^2-(n+1)t+n=0$ a~tú vyriešiť; prípadne môžeme dosadiť $B=n+1-A$ do prvej rovnice, atď. V~každom prípade získame dve možnosti pre $(A,B)$. Jedna z~nich sa dá vylúčiť rýchlo (nezabúdajme, že $n$ je štvorciferné číslo, teda je kladné).
+}{
+    Platí $x^3+y^3+x^2y+y^2x=(x+y)(x^2+y^2)$. Ak označíme $A=x+y$ a~$B=x^2+y^2$, sústava sa ekvivalentne prepíše do tvaru $AB=n$ a~$A+B=n+1$. Z~Vietových vzťahov vyplýva, že $A$ a~$B$ sú korene kvadratickej rovnice $t^2-(n+1)t+n=0$, ktorú môžeme rozložiť ako $(t-1)(t-n)=0$. Možné hodnoty pre dvojicu $\{A,B\}$ sú teda $\{1,n\}$. Rozoberieme oba prípady.
+
+    \begitems
+    \i Nech $x+y=n$ a~$x^2+y^2=1$. Keďže $x,y$ sú celé čísla, z~druhej rovnice máme $x,y \leq 1$. Súčet $x+y$ rovný $n$ teda určite nebude štvorciferné číslo.
+    \i Nech $x+y=1$ a~$x^2+y^2=n$. Aspoň jedno z~čísel $x,y$ je kladné (inak by $x+y \leq 0$), bez ujmy na všeobecnosti nech je to $x$. 
+    
+    Dosadením $y=1-x$ do druhej rovnice dostaneme $x^2+(1-x)^2=n$, teda $n=2x^2-2x+1$. Funkcia $f(x)=2x^2-2x+1$ je zrejme pre $x \ge 1$ rastúca. Cieľom je nájsť najmenšie $x$, pre ktoré je $f(x)$ štvorciferné. To sa dá riešením nerovnice $2x^2-2x+1 \ge 1000$, alebo skúšaním, odpoveď je $x=23$, keďže $f(22)=925$ a~$f(23)=1013$. 
+    
+    Na druhej strane, pre $n=1013$ má rovnica $2x^2-2x+1=1013$ dve riešenia $x=23$ a~$x=-22$, čomu odpovedajú $y=-22$ a~$y=23$, takže obe celočíselné.
+
+    Odpoveď je $n=1013$.
+    \enditems
+}
+
+\Problem{0}{64. ročník MO, celoštátne kolo A, úloha 4}{
+    V~obore reálnych čísel vyriešte sústavu rovníc
+    $$
+    \align
+    a(b^2 + c) &= c(c + ab),\\
+    b(c^2 + a) &= a(a + bc),\\
+    c(a^2 + b) &= b(b + ca).
+    \endalign
+    $$
+}{
+    Sčítanie a~odčítanie nevedie k~ničomu rozložiteľnému. Trikom v~tejto úlohe je použiť \textit{násobenie} rovníc. Keď napríklad vynásobíme rovnice ako sú, tak môžeme v~prípade $abc \neq 0$ krátiť. To nám niečo dá, ale prezradím, že nič extra užitočné. Kľúčom je násobiť rovnice po menšej úprave každej z~nich.
+}{
+    Upravíme prvú rovnicu preusporiadaním členov:
+    $$
+    \align
+    a(b^2+c) &= c(c+ab), \\
+    ab^2 + ac &= c^2 + abc, \\
+    ab^2 - abc &= c^2 - ac, \\
+    ab(b-c) &= c(c-a).
+    \endalign
+    $$
+    Teraz už vieme násobiť a~za predpokladu vzájomnej rôznosti $a,b,c$ a~ich nenulovosti to dá užitočné veci. Nebude to koniec, ale budeme blízko.
+}{
+    Upravíme prvú rovnicu preusporiadaním členov:
+    $$
+    \align
+    a(b^2+c) &= c(c+ab), \\
+    ab^2 + ac &= c^2 + abc, \\
+    ab^2 - abc &= c^2 - ac, \\
+    ab(b-c) &= c(c-a).
+    \endalign
+    $$
+    Keď takto upravíme zvyšné rovnice, dostaneme:
+    $$
+    \align
+    ab(b-c) &= c(c-a), \tag1 \\
+    bc(c-a) &= a(a-b), \tag2 \\
+    ca(a-b) &= b(b-c). \tag3
+    \endalign
+    $$
+    Rozoberieme niekoľko prípadov.
+
+    \begitems
+    \i Ak je nejaká premenná nulová, napríklad $a=0$, tak z~prvej rovnice máme $0=c^2$, takže $c=0$, čo zas v~tretej rovnici dáva $b=0$. Máme $(0,0,0)$, čo je naozaj riešenie. Predpokladajme teda, že $a,b,c$ sú nenulové.
+    \i Ak sú všetky premenné nenulové, ale nejaké dve sa rovnajú, napríklad $a=b$, tak z~druhej rovnice $bc(c-a)=0$ dáva vďaka nenulovosti $b,c$ rovnosť $c=a$, takže všetky tri premenné sa rovnajú. Ľahko overíme, že každá trojica $(t,t,t)$ je riešením sústavy (zahŕňa už aj nájdené riešenie $(0,0,0)$). Predpokladajme teda, že $a,b,c$ sú po dvoch rôzne. Vynásobením rovníc (1), (2), (3) dostaneme
+    $$
+    a^2b^2c^2(a-b)(b-c)(c-a) = abc(a-b)(b-c)(c-a).
+    $$
+    Keďže sú premenné rôzne a~nenulové, môžeme deliť výrazom $abc(a-b)(b-c)(c-a)$ a~dostaneme $abc=1$. To použijeme na úpravu rovníc (1), (2), (3) tak, že ich postupne vynásobíme $c$, $a$, $b$:
+    $$
+    \align
+    (b-c) &= c^2(c-a), \\
+    (c-a) &= a^2(a-b), \\
+    (a-b) &= b^2(b-c). 
+    \endalign
+    $$
+    To už povedie k~sporu: Sústava je cyklická, takže stačí vyriešiť $a=\max\{a,b,c\}$. Potom $c-a<0$, takže z~prvej rovnice $b-c<0$, takže z~poslednej rovnice $a-b<0$, spor.
+    \enditems
+
+    Zhrnutím všetkých prípadov dostávame, že jedinými riešeniami sú trojice $(t,t,t)$ pre ľubovoľné reálne číslo $t$.
+}
+
+\sec Riešenia k cvičeniam
+
+\DisplayExerciseSolutions
+
+\sec Prvé návody k úlohám
+
+\DisplayFirstHints
+
+\sec Druhé návody k úlohám
+
+\DisplaySecondHints
+
+\sec Riešenia k úlohám
+
+\DisplayProblemSolutions
+
+\bye

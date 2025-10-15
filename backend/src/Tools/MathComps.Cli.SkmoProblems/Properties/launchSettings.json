@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Parse Archive": {
+      "commandName": "Project",
+      "workingDirectory": "."
+    },
+    "Test One Year": {
+      "commandName": "Project",
+      "commandLineArgs": "--years 75 --mode AllInOneFile",
+      "workingDirectory": "."
+    }
+  }
+}

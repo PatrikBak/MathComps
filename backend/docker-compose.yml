@@ -1,0 +1,87 @@
+services:
+  # PostgreSQL database, accessible via localhost only
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: mathcomps
+      POSTGRES_USER: mathcomps
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mathcomps"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # .NET API - communicates with postgres via internal network
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+      - web
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mathcomps-api.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mathcomps-api.entrypoints=websecure"
+      - "traefik.http.routers.mathcomps-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mathcomps-api.loadbalancer.server.port=8080"
+      - "traefik.docker.network=web"
+
+  # Traefik reverse proxy - handles HTTPS and routing
+  traefik:
+    image: traefik:v3.2
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - web
+      - internal
+
+networks:
+  # Internal network: API and DB communicate here
+  internal:
+    driver: bridge
+  # Web network: Traefik and API, for external HTTP/HTTPS traffic
+  web:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  traefik_letsencrypt:

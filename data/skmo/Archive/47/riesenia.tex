@@ -1,0 +1,888 @@
+﻿{%%%%%   A-I-1
+Označme $k=1\,997$ a~všimnime si, že pre každé~$n$ platí
+$$
+k^{2^{n+1}}-1=\bigl(k^{2^{n}}\bigr)^2-1^2=
+\bigl(k^{2^{n}}-1\bigr)\bigl(k^{2^{n}}+1\bigr).
+\tag 1$$
+To nám umožní dokazovať uvedené tvrdenie indukciou.
+Začneme s~hodnotou $n=0$, lebo číslo $k-1$ je deliteľné
+číslom $2^2$. Pretože číslo $k^{2^{n}}+1$ je pre každé~$n$ párne,
+vyplýva z~(1), že pokiaľ číslo $k^{2^{n}}-1$ je deliteľné
+číslom~$2^{n+2}$, je číslo $k^{2^{n+1}}-1$ deliteľné čís\-lom~
+$2\cdot2^{n+2}$, teda číslom $2^{n+3}$. Tým je dôkaz indukciou
+ukončený. Dodajme, že namiesto (1) je možné podobne využiť aj rovnosti
+$$
+\bigl(k^{2^{n}}-1\bigr)^2=k^{2^{n+1}}-2\cdot k^{2^{n}}+1=
+\bigl(k^{2^{n+1}}-1\bigr)-2\bigl(k^{2^{n}}-1\bigr).
+$$
+
+\medskip
+{\bf Iné riešenie.}
+Namiesto matematickej indukcie môžeme využiť binomickú vetu
+a~dokázať, že  pre každé celé číslo $k$ je rozdiel $(4k+1)^{2^n}-1$
+deliteľný číslom~ $2^{n+2}$. (Odtiaľ voľbou $k=499$
+dostaneme tvrdenie úlohy.) Z~binomickej vety pre exponent $2^n$
+vyplýva rozklad
+$$
+\aligned
+(4k+1)^{2^n}-1=&(4k)^{2^n}+\binom{2^n}{1}(4k)^{2^n-1}+\dots+\\
+&+\binom{2^n}{j}(4k)^{2^n-j}+\dots+\binom{2^n}{2^n-1}4k.
+\endaligned
+\tag 2
+$$
+
+Prvý sčítanec napravo je deliteľný mocninou $2^{2^{n+1}}$,
+a~teda aj~mocninou $2^{n+2}$, lebo $n+2\leqq2^{n+1}$ pre každé celé
+$n\geqq0$ (ľahká indukcia). Teraz pre každé $j\in\{1,2,\dots,2^n-1\}$
+zistíme, akou mocninou čísla~ 2 je deliteľné kombinačné
+číslo~$\binom{2^n}{j}$. Na~to využijeme vyjadrenie
+$$
+\binom{2^n}{j}=\frac{2^n}{j}\cdot\frac{2^n-1}{1}\cdot
+\frac{2^n-2}{2}\cdot\frac{2^n-3}{3}\cdot\dots\cdot\frac{2^n-j+1}{j-1},
+\tag 3
+$$
+ktoré je výhodné preto, že čísla $i$ a~$2^n-i$
+($1\leqq i\leqq2^n-1$) majú vo svojich
+rozkladoch na~prvočinitele tú istú mocninu čísla 2.
+Ak je preto $j=2^{\alpha}\ell$, kde
+$0\leqq\alpha\leqq n-1$ a~$\ell$ je nepárne, je podľa (3) uvažované
+číslo $\binom{2^n}{j}$ nepárnym násobkom mocniny $2^{n-\alpha}$.
+Odtiaľ vyplýva, že číslom $2^{n+2}$ je deliteľný každý sčítanec na
+pravej strane (2) práve vtedy, keď pre každý uvažovaný index $j$ platí
+nerovnosť $n+2\leqq(n-\alpha)+2(2^n-j)$, alebo
+$\alpha+2\leqq2(2^n-j)$. Pretože $\alpha+2\leqq2^{\alpha+1}$
+(ľahká indukcia), stačí nám dokázať silnejšie nerovnosti
+$2^{\alpha}\leqq2^n-j$. Tie ale vyplývajú z~definície čísel
+$\alpha=\alpha(j)$: pretože moc\-ni\-na~ $2^{\alpha}$ delí číslo $j$,
+delí aj~číslo $2^n-j$, takže ho neprevyšuje.
+}
+
+{%%%%%   A-I-2
+...}
+
+{%%%%%   A-I-3
+a) Postupne nájdeme všetky slová dĺžok 2, 3 a~4.
+Z~možných skupín dĺžky 2 slovami nie sú práve $BB$ (neobsahuje
+žiadne $A$) a~$AA$ (je neprípustného tvaru). Takže slová dĺžky 2 sú práve
+$AB$ a~$BA$. Z~nich vytvoríme neprípustné tvary dĺžky~ 3: $ABA$
+a~$BAA$. Ostatné skupiny dĺžky 3 (s~výnimkou $BBB$), teda slová sú:
+$AAA$, $AAB$, $ABB$, $BAB$, $BBA$. Ak pripíšeme na ich
+koniec vždy písmeno $A$, dostaneme päť neprípustných tvarov dĺžky~ 4:
+$AAAA$, $AABA$, $ABBA$, $BABA$, $BBAA$. Ostatné skupiny dĺžky~ 4
+(s~výnimkou $BBBB$) sú teda hľadané slová: $AAAB$, $AABB$,
+$ABAA$, $ABAB$, $ABBB$, $BAAA$, $BAAB$, $BABB$, $BBAB$, $BBBA$.
+
+b) Podľa časti a) vieme, že $p_1=1$, $p_2=2$, $p_3=5$ a~$p_4=10$.
+Teraz pre každé $n\geqq1$ vyjadríme počet $p_{n+1}$ pomocou počtu
+$p_n$. Rozdelíme teda všetky slová dĺžky $n+1$  do~ dvoch
+skupín podľa toho, ktorým písmenom končia: tých, ktoré sú tvaru
+$\dots A$, je práve $2^n-p_n$ (pred~posledným $A$ stojí ľubovoľná
+skupina dĺžky $n$, ktorá nie je slovo); tých, ktoré sú tvaru
+$\dots B$, je práve $2^n-1$ (pred~pos\-led\-ným~$B$ stojí ľubovoľná
+skupina dĺžky $n$ okrem $BB\dots B$). Preto platí
+$p_{n+1}=(2^n-p_n)+(2^n-1)=2^{n+1}-1-p_n$. Z~ vyjadrení
+pre $p_{n+1}$ a~$p_{n+2}$ vyplýva:
+$p_{n+2}=2^{n+2}-1-p_{n+1}=2^{n+2}-1-(2^{n+1}-1-p_n)=
+p_n+2^{n+1}$. Z~toho budeme určovať hodnoty $p_n$
+oddelene pre párne a~pre~nepárne indexy~ $n$:
+$$\align
+p_{2k-1}=&p_{2k-3}+2^{2k-2}=p_{2k-5}+2^{2k-4}+2^{2k-2}=\dots=\\
+=&p_1+2^2+2^4+\dots+2^{2k-4}+2^{2k-2}=\\
+=&1+4+4^2+\dots+4^{k-2}+4^{k-1}=\frac{4^{k}-1}{3}, \\
+\endalign
+$$
+$$\align
+p_{2k}=&p_{2k-2}+2^{2k-1}=p_{2k-4}+2^{2k-3}+2^{2k-1}=\dots=\\
+=&p_2+2^3+2^5+\dots+2^{2k-3}+2^{2k-1}=\\
+=&2+2\cdot4^1+2\cdot4^2+\dots+2\cdot4^{k-2}+2\cdot4^{k-1}=
+\frac{2\cdot(4^{k}-1)}{3} .
+\endalign
+$$
+Nájdené vzorce platia pre každé $k\geqq1$. Dodajme, že ich môžeme
+zapísať jednotným spôsobom
+$$
+p_{n}=\frac{2^{n+2}+(-1)^{n+1}-3}{6}\qquad(n=1,2,3,4,\dots)  .
+$$
+
+\medskip
+{\bf Iné riešenie.}
+Odlišný postup riešenia založíme na priamom (t\.j\.~ ne\-re\-ku\-rent\-nom)
+popise slov daného jazyka. Nie je ťažké sa dovtípiť, že rozhodnutie
+o~tom, či je daná skupina písmen~$A$, $B$
+slovom, podstatne závisí na parite počtu písmen~$A$, ktorými sa
+táto skupina končí.
+Najprv je jasné, že skupina končiaca písmenom $B$ je slovo, práve
+keď obsahuje {\it aspoň jedno\/} písmeno $A$. Skupina
+$\underbrace{AA\dots A}_{\text{$q$-krát}}$
+(neobsahujúca žiadne písmeno~ $B$) je zrejme slovo, práve keď je
+počet $q$ jeho písmen {\it nepárny}. "Zostáva" rozhodnúť o~skupinách
+$$
+X_1X_2\dots X_rB\underbrace{AA\dots A}_{\text{$q$-krát}},
+$$
+kde $q$ a~$r$ sú ľubovoľné počty (nevylučujeme, že $r=0$).
+Zapísaná skupina je slovo, práve keď buď $q$ je {\it nepárne\/}
+a~$X_1X_2\dots X_rB$ slovo {\it nie je\/} (teda $X_i=B$ pre každé $i$),
+alebo $q$ je {\it párne\/} a~$X_1X_2\dots X_rB$ slovo {\it je\/}
+(čiže $r\geqq1$ a~$X_i=A$ pre niektoré $i$). Dôkaz poslednej
+vety sa jednoducho prevedie indukciou podľa čísla $q$.
+
+Získaný popis umožňuje priamo nielen vypísať všetky slová
+danej dĺžky $n$, ale tiež určiť ich počet $p_n$, a~to pomocou
+rozdelenia slov do skupín podľa počtu~$q$ písmen~$A$, ktorými
+jednotlivé slová končia ($0\leqq q\leqq n$).
+V~každej takejto skupine sú všetky slová tvaru
+$$
+X_1X_2\dots X_{n-q}\underbrace{AA\dots A}_{\text{$q$-krát}},
+$$
+kde v~prípade $q<n$ nutne $X_{n-q}=B$.
+Pre dané nepárne $q$ je tohoto tvaru jediné slovo (odpovedajúce
+počiatočnej skupine $X_1X_2\dots X_{n-q}=BB\dots B)$,
+pre dané párne $q\leqq n-2$ je takýchto slov práve $2^{n-q-1}-1$
+(lebo potom $X_{n-q}=B$ a~$X_1X_2\dots X_{n-q-1}$ je ľubovoľná
+z~$2^{n-q-1}-1$ skupín písmen obsahujúcich aspoň jedno $A$),
+napokon pre párne $q\in\{n-1,n\}$ také slovo neexistuje (takže
+vyjadrenie $2^{n-q-1}-1$ platí aj~pre $q=n-1$). Ak spočítame tieto počty
+pre~$q\in\{0,1,\dots,n\}$, dostaneme v~prípade nepárneho $n=2k-1$
+$$
+\align
+p_{2k-1}&=\underbrace{(2^{2k-2}-1)}_{q=0}+\underbrace{1\strut}_{q=1}
++\underbrace{(2^{2k-4}-1)}_{q=2}+\underbrace{\strut1}_{q=3}+\dots
++\underbrace{(2^0-1)}_{q=2k-2}+
+\underbrace{\strut1}_{q=2k-1}=\\
+&=4^{k-1}+4^{k-2}+\dots+4+1=\frac{4^{k}-1}{3},
+\endalign
+$$
+zatiaľ čo pre párne $n=2k$ nám vyjde
+$$\align
+p_{2k}&=\underbrace{(2^{2k-1}-1)}_{q=0}+\!\underbrace{\strut1}_{q=1}\!
++\underbrace{(2^{2k-3}-1)}_{q=2}+\!\underbrace{\strut1}_{q=3}\!+\dots
++\underbrace{(2^1-1)}_{q=2k-2}+\!\underbrace{\strut1}_{q=2k-1}\!+
+\!\underbrace{\strut0}_{q=2k}\!=\\
+&=2\cdot(4^{k-1}+4^{k-2}+\dots+4+1)=\frac{2\cdot(4^{k}-1)}{3}.
+\endalign
+$$
+}
+
+{%%%%%   A-I-4
+...}
+
+{%%%%%   A-I-5
+...}
+
+{%%%%%   A-I-6
+...}
+
+{%%%%%   B-I-1
+...}
+
+{%%%%%   B-I-2
+Označme $P$ pätu kolmice $p$ na priamku $q$, ktorá prechádza bodom~
+$A$. S~každým štvorcom daných vlastností možno uvažovať štvorec,
+ktorý je s~ním symetrický podľa priamky~ $p$ a~rovnako vyhovuje
+podmienkam úlohy. Odtiaľ vyplýva, že vyšetrovaná množina stredov $S$
+všetkých štvorcov~$ABC\!D$ daných vlastností je rovinný útvar, ktorý je
+symetrický podľa priamky~$p$. Uvažujme teraz taký štvorec $ABC\!D$
+so~zvyčajným označením jeho vrcholov, kde $B \in q$.
+
+\smallskip
+
+\noindent
+Ďalej rozlíšime tri prípady polohy jeho vrcholov $C$, $D$ v~rovine:
+
+a) obidva vrcholy $C$, $D$ ležia v~polrovine $qA$ (obr\. \obrnum),
+
+b) len vrchol $D$ leží v~polrovine $qA$ (obr\. \obrnum),
+
+c) žiaden z~vrcholov $C$, $D$ neleží v~polrovine $qA$ (obr\. \obrnum).
+
+%\midinsert
+\vskip12cm
+%\centerline{\inspicture-!\hss\inspicture-!}
+%\centerline{\inspicture-!\hss\inspicture-!}
+%\endinsert
+
+\medbreak
+V~prípade a) označme $K$, $L$ po rade päty kolmíc zo stredu $S$
+uvažovaného štvorca $ABC\!D$ na priamky~ $p$, $q$. Vzhľadom k~tomu,
+že platí $|\angle ASB|=|\angle KSL|=90^{\circ}$, je pravouhlý
+trojuholník $BSL$ obrazom pravouhlého trojuholníka $ASK$
+v~otočení so~ stredom $S$ o~uhol~ $90^{\circ}$. Preto platí
+$|SK|=|SL|$. Rovnaký záver zdôvodníme podobne aj~v~prípadoch~ b)
+a~c) (obr\. \obrrnum2 ~a~\obrrnum1). Stred~ $S$ uvažovaného štvorca $ABC\!D$
+teda vždy leží na osi $o$ uhla $KPL$.
+
+Naopak ku každému bodu $S$ priamky $o$ možno ľahko zostrojiť štvorec
+$ABC\!D$, ktorého stredom je bod $S$ a~ktorého vrchol $B$ leží na
+priamke~ $q$.
+
+{\it Záver\/}: Hľadanou množinou bodov je dvojica navzájom
+kolmých priamok~ $o$ a~$o'$, ktoré prechádzajú bodom~ $P$ a~zvierajú
+s~priamkami $p$ a~$q$ uhol $45^{\circ}$ (obr\. \obrnum).
+
+\medskip
+\newpage
+{\bf Iné riešenie.} Využijeme  vlastnosti obvodových uhlov, a~to
+pre všetky tri vyššie popísané prípady. Aj~tu ukážeme riešenie len
+pre prípad~z~obr\. \obrrnum4.
+
+\vskip7cm
+
+Vzhľadom k~tomu, že platí $|\angle ASB|=|\angle AP\!B|=90^{\circ}$,
+môžeme štvoruholníku $AP\!BS$ opísať kružnicu. Odtiaľ na základe
+vety o~obvodových uhloch dostávame $|\angle APS|=|\angle
+ABS|=45^{\circ}$. Stred $S$ uvažovaného štvoruholníka~$ABC\!D$ leží
+teda na osi uhla $AP\!B$.
+}
+
+{%%%%%   B-I-3
+...}
+
+{%%%%%   B-I-4
+...}
+
+{%%%%%   B-I-5
+Sčítaním všetkých troch rovníc dostaneme
+$$
+6(x+y+z)=3p,\qquad\text{t\.j\.}\qquad
+x+y+z=\frac{p}2.
+$$
+ Ak dosadíme túto hodnotu do ľavých strán jednotlivých rovníc
+sústavy upravených podľa vzoru
+$$
+a+2b+3c=2(a+b+c)+c-a,
+$$
+dostaneme po úprave nasledujúcu sústavu rovníc (už bez parametra~$p$):
+$$
+z-x=x^2-z^2 ,\qquad x-y=y^2-x^2,  \qquad y-z=z^2-y^2.
+$$
+
+Z~prvej rovnice ľahko zistíme, že platí $z-x=0$ alebo $z+x+1=0$.
+Podobne z~druhej, resp.~ tretej rovnice dostávame $x-y=0$ alebo
+$x+y+1=0$, resp.~ $y-z=0$ alebo $y+z+1=0$. Pretože daná sústava
+rovníc sa nemení cyklickou permutáciou neznámych $x$, $y$, $z$,
+stačí rozlíšiť dva prípady:
+
+(i) $x=y=z$.  Z~počiatočnej sústavy potom ľahko určíme, že jediným
+    riešením je trojica
+$$
+(x,y,z)=\left(\frac{p}6,\frac{p}6,\frac{p}6\right).
+$$
+
+(ii) $x=y$ a~$z=-x-1$.  Pre také trojice neznámych je daná
+    sústava ekvivalentná s~jedinou rovnicou $2x=p+2$ (o~tom sa
+    ľahko presvedčíme dosadením), takže platí
+$$
+x=y=1+\frac{p}2 \qquad \hbox{a} \qquad z=-2-\frac{p}2.
+$$
+
+Permutovaním trojice
+    $(x,y,z)$ v~prípade~(i) žiadne ďalšie riešenie nedostaneme,
+v~prípade~(ii) sú výsledkom riešenia
+ $$
+\left(1+\frac{p}2,\ 1+\frac{p}2,\ -2-\frac{p}2\right),\
+   \left(-2-\frac{p}2,\ 1+\frac{p}2,\ 1+\frac{p}2\right),\
+   \left(1+\frac{p}2,\ -2-\frac{p}2,\ 1+\frac{p}2\right).
+$$
+
+    Riešenie danej sústavy je jediné, práve keď
+$$\frac{p}6=1+\frac{p}2=-2-\frac{p}2.
+$$
+To nastane len pre $p=-3$. Pre každé iné~ $p$ má sústava
+práve štyri riešenia, lebo žiadne dve z~čísel $\frac16p$,
+$1+\frac12p$, $-2-\frac12p$ sa pre $p\ne-3$ nerovnajú.
+}
+
+{%%%%%   B-I-6
+...}
+
+{%%%%%   C-I-1
+...}
+
+{%%%%%   C-I-2
+...}
+
+{%%%%%   C-I-3
+...}
+
+{%%%%%   C-I-4
+...}
+
+{%%%%%   C-I-5
+...}
+
+{%%%%%   C-I-6
+...}
+
+{%%%%%   A-S-1
+...}
+
+{%%%%%   A-S-2
+...}
+
+{%%%%%   A-S-3
+Sčítaním prvých dvoch rovníc dostaneme
+$$
+(u+v)(x+y)=(x+y)^2,
+$$
+odkiaľ vyplýva
+$$x+y=0
+\qquad \text{alebo} \qquad
+x+y=u+v.
+$$
+
+V~prvom prípade po dosadení $y=-x$ do prvej rovnice dostaneme $x(u-v)=0$,
+odkiaľ $u=v$ (lebo podľa zadania $x\ne0$).
+Po dosadení $y=-x$ a~$u=v$
+do~tretej rovnice dostaneme po ľahkej úprave rovnicu
+$$x^2+u^2=0,$$
+ktorá v~našom obore nemá riešenie.
+
+V druhom prípade (keď $x+y=u+v$) je pravá strana prvej
+rovnice rovná $x(x+y)=x(u+v)$, to je $ux+vx$.
+Porovnaním
+s~ľavou stranou $ux+vy$  preto (s~ohľadom na~$v\ne0$) vychádza $x=y$.
+V~tomto prípade teda
+$$x=y=\frac12(u+v),$$
+po dosadení do~tretej rovnice
+$$
+\Bigl(\dfrac{u+v}{2}\Bigr)^2+uv=u^2+v^2,
+$$
+vyjde po úprave $(u-v)^2=0$. Z toho $u=v$, teda $x=y=u=v$.
+Tým je celý dôkaz ukončený.
+
+{\it Poznámka}: Ani v~obore {\it všetkých\/} %(teda aj~nulových)
+reálnych čísel (vrátane nuly)
+iné riešenia ako $x=y=u=v$ neexistujú. Dokážeme to,
+keď predchádzajúci postup doplníme o~rozbor dvoch situácií:
+
+a) $x+y=0$ a~$x=0$. Zrejme $y=0$ a z~tretej rovnice sústavy, ktorá
+má teraz tvar
+$$uv=u^2+v^2,$$
+už vyplýva $u=v=0$.
+
+b) $x+y=u+v$ a~$v=0$. Zrejme $x+y=u$ a~tretia rovnica sústavy má
+teraz tvar
+$$xy=u^2,$$
+takže $xy=(x+y)^2$. Odtiaľ už vyplýva $x=y=0$,
+a~preto aj~$u=0$.
+}
+
+{%%%%%   A-II-1
+Tvrdenie dokážeme indukciou podľa čísla~ $n$. Môžeme
+začať od hodnoty $n=0$: číslo $1\,997^{3^0}+1$ je skutočne násobkom
+čísla $3^3$ ($1\,998=27\cdot74$). Ak platí podľa indukčného
+predpokladu rovnosť $1\,997^{3^n}+1=3^{n+3}k_n$ pre~vhodné prirodzené
+číslo $k_n$, dostaneme zo vzorca $A^3+B^3=(A+B)^3-3AB(A+B)$ pre
+hodnoty $A=1\,997^{3^n}$ a~$B=1$ nasledujúce vyjadrenie:
+$$
+1\,997^{3^{n+1}}+1=\bigl(3^{n+3}k_n\bigr)^3-
+3\cdot1\,997^{3^n}\cdot(3^{n+3}k_n)=
+3^{n+4}\bigl(3^{2n+5}k_n^3-1\,997^{3^n}k_n\bigr).
+$$
+Tým je dôkaz ukončený.
+
+Dodajme, že pri druhom indukčnom kroku bolo tiež možné
+využiť rozklad
+$$
+x^{3^{n+1}}+1=\bigl(x^{3^n}\bigr)^3+1^3=\bigl(x^{3^n}+1\bigr)
+                              \bigl(x^{2\cdot3^n}-x^{3^n}+1\bigr)
+$$
+a~vysvetliť, prečo pre $x=1\,997$ je druhý činiteľ deliteľný tromi:
+čísla $1\,997^{2\cdot3^n}$ a~$1\,997^{3^n}$ totiž po delení tromi
+dávajú po rade zvyšky $1$ a~$2$.
+}
+
+{%%%%%   A-II-2
+...}
+
+{%%%%%   A-II-3
+Ak odčítame od prvej rovnice druhú, a~potom
+od tretej rovnice prvú, dostaneme rovnosti
+$$
+(x-y)(x+y+z)=1\quad\text{\ \ a\ \ }\quad (z-x)(x+y+z)=1.
+$$
+Vyplýva z~nich, že čísla $x-y$ a~$z-x$ sú, rovnako ako $x+y+z$,
+nutne rôzne od nuly a~obe sa rovnajú číslu $s=(x+y+z)^{-1}$.
+Vyjadrenie $y=x-s$ a~$z=x+s$ dosadíme do pôvodnej sústavy:
+$$\aligned
+x^2-(x+s)(x-s)&=a,\\
+(x-s)^2-x(x+s)&=a-1,\\
+(x+s)^2-x(x-s)&=a+1.
+\endaligned
+\tag {$*$}
+$$
+Ľahko zistíme, že táto sústava je ekvivalentná s~dvojicou rovníc
+$s^2=a$ a~$3xs=1$, z~ktorých vyplýva podmienka riešiteľnosti
+$a>0$ (lebo $s\ne0$), ale aj vyjadrenie $s=\pm\sqrt{a}$
+a~$x=\dfrac{1}{3s}=\pm\dfrac{1}{3\sqrt{a}}$, takže
+$y=x-s=\pm\dfrac{1-3a}{3\sqrt{a}}$
+a~$z=x+s=\pm\dfrac{1+3a}{3\sqrt{a}}$ (vo všetkých vzorcoch platí
+vždy rovnaké znamienko). Pretože sústava ($*$) bola riešená
+ekvivalentnými úpravami, nie je potrebné prevádzať skúšku.
+
+{\it Odpoveď\/}: Pre $a\leqq0$ sústava nemá žiadne riešenie, pre $a>0$
+existujú práve dve riešenia $(x,y,z)$, a~to trojice
+$$
+\left(\frac{1}{3\sqrt{a}},\frac{1-3a}{3\sqrt{a}},
+\frac{1+3a}{3\sqrt{a}}\right)\quad\text{a}\quad
+\left(\frac{-1}{3\sqrt{a}},\frac{-1+3a}{3\sqrt{a}},
+\frac{-1-3a}{3\sqrt{a}}\right).
+$$
+
+\medskip
+{\bf Iné riešenie.} Členy na ľavých stranách rovníc eliminujeme
+tak, že sčítame {$y$-násobok} prvej rovnice so $z$-násobkom
+druhej a~$x$-násobkom tretej rovnice. Dostaneme tak lineárnu
+rovnicu $0=ay+(a-1)z+(a+1)x$. Podobne sčítaním $z$-násobku
+prvej rovnice s~$x$-násobkom druhej a~$y$-násobkom
+tretej rovnice dostaneme $0=az+(a-1)x+(a+1)y$. Zo získaných rovníc
+$$
+(a+1)x+ay+(a-1)z=0,\qquad (a-1)x+(a+1)y+az=0
+$$
+eliminujeme najprv premennú $z$ (odčítaním $(a-1)$-násobku
+druhej od $a$-násobku prvej rovnice), výsledkom je
+vyjadrenie $y=(1-3a)x$; potom podobnou elimináciou premennej~ $y$
+dospejeme k~rovnosti $z=(1+3a)x$. Ak dosadíme tieto vyjadrenia~ $y$
+a~$z$ do pôvodných rovníc, dostaneme sústavu
+$$
+\align
+9a^2x^2=&a,\\
+9a(a+1)x^2=&a+1,\\
+9a(a-1)x^2=&a-1.
+\endalign
+$$
+Tá je ekvivalentná (bez ohľadu na hodnotu parametra $a$)
+s~jedinou rovnicou $9ax^2=1$. Tak dostávame podmienku riešiteľnosti
+$a>0$ a~vzorce pre obidve riešenia
+$$
+x=\pm\frac{1}{3\sqrt{a}},\quad\
+y=(1-3a)x=\pm\frac{1-3a}{3\sqrt{a}},\quad\
+z=(1+3a)x=\pm\frac{1+3a}{3\sqrt{a}}.
+$$
+}
+
+{%%%%%   A-II-4
+Označme $\alpha=|\angle BAD|$
+a~$\gamma=|\angle BC\!D|$. Platí
+$$
+\align
+|\angle BO_C\!D|=&180^{\circ}-(|\angle O_CBD|+|\angle O_C\!DB|)=\\
+=&180^{\circ}-\frac12(|\angle CBD|+|\angle C\!DB|)=
+90^{\circ}+\frac12\gamma,
+\endalign
+$$
+podobne $|\angle BO_AD|=90^{\circ}+\frac12\alpha$. Pretože body
+$A$ a~$O_C$ ležia v~opačných polrovinách s~hraničnou priamkou $BD$,
+je podmienka a) úlohy ekvivalentná s~tým, že súčet veľkostí uhlov
+$BAD$ a~$BO_C\!D$ je $180^{\circ}$, t\.j\.~
+$\alpha+(90^{\circ}+\frac12\gamma)=180^{\circ}$. Podobne
+usúdime, že podmienka b) je splnená, práve keď
+$\gamma+(90^{\circ}+\frac12\alpha)=180^{\circ}$. Nájdená dvojica
+rovníc má jediné riešenie $\alpha=\gamma=60^{\circ}$. Preto body
+$A$ a~$C$ ležia každý na inom z~dvoch kruhových oblúkov,
+z~ktorých je úsečku $BD$ vidieť pod uhlom $60^{\circ}$.
+Na druhej strane, ak si zvolíme ľubovoľný vnútorný bod $A$ jedného
+z~týchto oblúkov, možno na druhom oblúku vybrať bod $C$ tak,
+aby $ABC\!D$ bol {\it konvexný\/} štvoruholník (stačí napríklad
+trojuholník $ABD$ doplniť na~rovnobežník $ABC\!D$).
+
+{\it Odpoveď\/}: Hľadanú množinu vrcholov~ $A$ tvoria vnútorné body
+dvoch kruhových oblúkov, z ktorých je úsečku $BD$ vidieť pod
+uhlom $60^{\circ}$.
+}
+
+{%%%%%   A-III-1
+...}
+
+{%%%%%   A-III-2
+...}
+
+{%%%%%   A-III-3
+\fontplace
+\tpoint B; \tpoint C; \lBpoint D; \bpoint A;
+\rBpoint K; \lBpoint L; \lbpoint M;
+[19 {\rm\quad}] \hfil \Obr
+
+Označme $\varrho$ polomer vpísanej gule a~$v_A$, $v_B$,
+$v_C$, $v_D$ telesové výšky daného štvorstena (s~indexmi podľa
+vrcholov, z ktorých vychádzajú). Odťatý štvor\-sten $AKLM$~ (\obr)
+je rovnoľahlý podľa stredu~ $A$ s~celým štvorstenom
+$ABC\!D$. Súčty dĺžok ich hrán sú preto v~ rovnakom pomere
+ako ich telesové výšky zo~ spoločného vrcholu $A$, teda
+v~pomere $(v_A-2\varrho):v_A$, lebo $2\varrho$ je vzdialenosť rovín $KLM$
+a~$BC\!D$ (sú totiž rovnobežné a~obidve sa dotýkajú vpísanej gule).
+
+\inspicture r(1)
+
+Rovnakú úvahu môžeme zopakovať pre~ zvyšné  tri odťaté štvorsteny.
+Našou úlohou je preto dokázať rovnosť
+$$
+\frac{v_A-2\varrho}{v_A}+\frac{v_B-2\varrho}{v_B}+
+\frac{v_C-2\varrho}{v_C}+\frac{v_D-2\varrho}{v_D}=2,
+$$
+ktorá je ekvivalentná s~rovnosťou
+$$
+\varrho\Bigl(\frac{1}{v_A}+\frac{1}{v_B}+
+\frac{1}{v_C}+\frac{1}{v_D}\Bigr)=1.
+$$
+Na~to nám poslúži nasledujúca úvaha o~objeme $V$
+a~povrchu $S$ štvorstena $ABC\!D$. Najprv $S=S_A+S_B+S_C+S_D$
+(kde $S_X$ je obsah tej steny, ktorá neobsahuje vrchol~$X$), ďalej
+$$
+V=\frac13 S_Av_A=\frac13 S_Bv_B=\frac13 S_Cv_C=\frac13 S_Dv_D
+$$
+a~konečne $V=\dfrac13\varrho S$. Podľa týchto vzorcov platí
+$$
+\varrho\Bigl(\frac{1}{v_A}+\frac{1}{v_B}+
+\frac{1}{v_C}+\frac{1}{v_D}\Bigr)=\frac{3V}{S}
+\Bigl(\frac{S_A}{3V}+\frac{S_B}{3V}+
+\frac{S_C}{3V}+\frac{S_D}{3V}\Bigr)=1
+$$
+a~tým je dôkaz ukončený.
+}
+
+{%%%%%   A-III-4
+...}
+
+{%%%%%   A-III-5
+...}
+
+{%%%%%   A-III-6
+Pravá strana prvej rovnice má rovnaké znamienko ako
+neznáma $x$  ($\ne0$), ľavá strana ako súčin $yz$ ($\ne0$).
+Ľubovoľné riešenie $(x,y,z)$ danej sústavy preto spĺňa podmienku
+$$
+xyz>0.                        \tag 1
+$$
+Ako vieme, kladné čísla $a$, $b$, $c$ tvoria strany niektorého
+trojuholníka práve vtedy, keď je kladné každé z~ troch čísel
+$$
+a+b-c,\quad\ a+c-b,\quad\ b+c-a.      \tag 2
+$$
+Ak je $(x,y,z)$ riešenie danej sústavy, tak
+$$
+a+b-c=x\Bigl(\frac yz+\frac zy\Bigr)+
+y\Bigl(\frac zx+\frac xz\Bigr)
+-z\Bigl(\frac xy+\frac yx\Bigr)=\frac{2xy}{z},
+$$
+čo je podľa (1) kladné číslo. Analogicky zistíme, že
+$$
+a+c-b=\frac{2xz}{y}>0\qquad\text{a}\qquad
+b+c-a=\frac{2yz}{x}>0.
+$$
+
+V~druhej časti riešenia naopak predpokladajme, že každé z~čísel~ (2)
+je kladné a~nájdime {\it všetky\/} riešenia danej sústavy (aj~keď
+by stačilo uviesť {\it jedno\/} riešenie). Pomôžu nám pri tom
+predchádzajúce výpočty, podľa ktorých musí napríklad platiť
+$$
+(a+b-c)(a+c-b)=\frac{2xy}{z}\cdot\frac{2xz}{y}=4x^2.
+$$
+Táto a~ďalšie dve analogické rovnosti vedú k~vyjadreniu
+$$
+\left.\aligned
+x&=\frac{\ep_1}{2}\sqrt{(a+b-c)(a+c-b)}\\
+y&=\frac{\ep_2}{2}\sqrt{(a+b-c)(b+c-a)}\\
+z&=\frac{\ep_3}{2}\sqrt{(a+c-b)(b+c-a)}
+\endaligned\,\right\},                            \tag 3
+$$
+kde $\ep_i=\pm1$ pre $i\in\{1,2,3\}$, pritom $\ep_1\ep_2\ep_3=1$
+podľa (1). Také trojice $(\ep_1,\ep_2,\ep_3)$ sú zrejme
+práve štyri. Podľa (3) tak dostávame štyri trojice $(x,y,z)$.
+Priamym dosadením a~rutinným výpočtom overíme, že sú to
+skutočne riešenia zadanej sústavy.
+}
+
+{%%%%%   B-S-1
+Druhú rovnicu upravíme na tvar
+$
+(1-c)ab+(a+b)c=0.
+$
+Podľa prvej rovnice je však $a+b=1-c$, takže odtiaľ
+dostávame podmienku
+$
+(1-c)(ab+c)=0.
+$
+Pretože pôvodná sústava bola symetrická vzhľadom k~neznámym $a$,
+$b$, $c$, pokúsime sa ešte upraviť činiteľ $ab+c$. Pomocou prvej
+rovnice tak dostaneme
+$$
+ab+c=ab+(1-a-b)=a(b-1)+(1-b)=(1-a)(1-b),
+$$
+takže
+$$
+(1-c)(ab+c)=(1-a)(1-b)(1-c)=0.
+$$
+Odtiaľ vyplýva, že niektoré z~čísel $a$, $b$,
+$c$ je nutne rovné jednej, ostatné dve z~nich sú potom (z rovnosti
+$a+b+c=1$) čísla navzájom opačné. Trojica $(a,b,c)$ má teda
+jeden z~tvarov
+$$
+(1,k,\m k),\ (k,1,\m k),\ (k,\m k,1),
+$$
+kde $k$ je vhodné číslo. Dosadením sa ľahko presvedčíme, že sú
+to skutočne riešenia, a~to pre ľubovoľné reálne číslo~ $k$.
+
+\medskip
+{\bf Riešenie 2.} Použijeme štandardný postup pre riešenie sústav
+rovníc. Z~prvej rovnice vyjadríme napríklad "neznámu" $c=1-a-b$
+a~dosadíme do druhej rovnice, ktorú potom budeme riešiť vzhľadom
+na~"neznámu"~ $b$ (považujúc $a$ za "parameter"). Dostaneme tak po
+rutinných úpravách kvadratickú rovnicu
+$$
+(a-1)b^2+(a^2-2a+1)b+(a-a^2)=0.
+$$
+Jej koeficienty, ako ľahko vidíme, majú spoločný činiteľ
+$a-1$, takže rovnicu pred riešením ešte upravíme:
+$$
+(a-1)\bigl[b^2+(a-1)b-a\bigr]=0.
+$$
+Pretože korene trojčlena v~hranatých zátvorkách sú $b_1=1$
+a~$b_2=-a$, musí nastať jeden z~prípadov $a=1$, $b=1$, alebo $b=-a$.
+Záver je rovnaký ako v~prvom riešení.
+
+\medskip
+{\bf Riešenie 3.} V~oboch rovniciach vystupujú výrazy, ktoré, ako
+vieme, súvisia s~koe\-fi\-cien\-tami mnohočlena $P(x)=(x-a)(x-b)(x-c)$.
+Tak zistíme, že ak sú obidve rovnice splnené, má mnohočlen $P(x)$
+tvar $x^3-x^2+px-p$, kde $p=abc$. Vtedy platí $P(1)=1-1+p-p=0$,
+takže číslo 1 musí byť jedným z~koreňov $a$, $b$, $c$ mnohočlena
+$P(x)$. Záver je rovnaký ako v~prvom riešení.
+}
+
+{%%%%%   B-S-2
+...}
+
+{%%%%%   B-S-3
+...}
+
+{%%%%%   B-II-1
+Z~druhej a~tretej rovnice, ktoré upravíme do~tvaru
+$$
+x(z-2)=2z, \qquad y(z-3)=3z,
+$$
+vyplýva podmienka $z\notin\{2,3\}$ a~vyjadrenie
+$$
+x={2z\over z-2}, \qquad y={3z\over z-3} . \tag1
+$$
+Dosadením do prvej rovnice sústavy dostaneme
+$$
+{6z^2\over (z-2)(z-3)}={2az\over z-2}+{3az\over z-3}
+$$
+a~po úprave
+$$
+z\bigl((6-5a)z+12a\bigr)=0.
+$$
+
+Odtiaľ vyplýva, že je buď $z=0$ (potom $x=y=0$), alebo (za predpokladu
+$a\ne\frac65$)
+$$
+z={12a\over5a-6},
+$$
+odkiaľ podľa (1) dostávame riešenie
+$$
+x={12a\over a+6},\quad
+y={12a\over 6-a},\quad
+z={12a\over5a-6}.                          \tag2
+$$
+Pritom podmienka $z\notin\{2,3\}$ je ekvivalentná s podmienkou
+$a\notin\{-6,6\}$. Naviac si všimnime, že pre $a=0$ dáva (2)
+riešenie $x=y=z=0$. Toto riešenie zrejme sústave vyhovuje pre
+ľubovoľné reálne~ $a$.
+
+{\it Záver}. Pre $a\in\{-6,0,\frac65,6\}$ má sústava jediné
+riešenie $x=y=z=0$, pre ostatné reálne~ $a$ má sústava naviac
+aj~nenulové riešenie (2).
+
+\medskip
+{\bf Iné riešenie.}
+Trojica $x=y=z=0$ je riešením danej sústavy. Z~druhej a~tretej
+rovnice vyplýva, že pokiaľ je jedno z~čísel $x$, $y$, $z$ rovné
+nule, sú nulové aj~ostatné dve. Preto ďalej predpokladajme, že
+$xyz\ne0$. Potom nutne aj~$a\ne0$. Sústavu prepíšeme do~tvaru
+$$
+\frac1a=\frac1x+\frac1y,\qquad
+\frac12=\frac1x+\frac1z,\qquad
+\frac13=\frac1y+\frac1z       .
+$$
+To je sústava lineárnych rovníc vzhľadom k~neznámym $\dfrac1x$,
+$\dfrac1y$, $\dfrac1z$. Ľahko nájdeme jej (jediné) riešenie
+$$
+\frac1x=\frac1{12}+\frac1{2a},\quad
+\frac1y=-\frac1{12}+\frac1{2a},\quad
+\frac1z=\frac5{12}-\frac1{2a}.
+$$
+Odtiaľ určíme trojicu
+$$
+x={12a\over a+6},\quad
+y={12a\over 6-a},\quad
+z={12a\over5a-6},                          \tag3
+$$
+ktorá je riešením, pokiaľ $a\notin\{-6,6,\frac65\}$.
+
+{\it Záver}. Pre $a\in\{-6,0,\frac65,6\}$ má sústava jediné
+riešenie $x=y=z=0$; pre ostatné hodnoty~ $a$ má sústava
+aj~druhé riešenie (3).
+}
+
+{%%%%%   B-II-2
+...}
+
+{%%%%%   B-II-3
+...}
+
+{%%%%%   B-II-4
+...}
+
+{%%%%%   C-S-1
+...}
+
+{%%%%%   C-S-2
+...}
+
+{%%%%%   C-S-3
+...}
+
+{%%%%%   C-II-1
+...}
+
+{%%%%%   C-II-2
+...}
+
+{%%%%%   C-II-3
+...}
+
+{%%%%%   C-II-4
+...}
+
+{%%%%%   vyberko, den 1, priklad 1
+...}
+
+{%%%%%   vyberko, den 1, priklad 2
+...}
+
+{%%%%%   vyberko, den 1, priklad 3
+...}
+
+{%%%%%   vyberko, den 1, priklad 4
+...}
+
+{%%%%%   vyberko, den 2, priklad 1
+...}
+
+{%%%%%   vyberko, den 2, priklad 2
+...}
+
+{%%%%%   vyberko, den 2, priklad 3
+...}
+
+{%%%%%   vyberko, den 2, priklad 4
+...}
+
+{%%%%%   vyberko, den 3, priklad 1
+...}
+
+{%%%%%   vyberko, den 3, priklad 2
+...}
+
+{%%%%%   vyberko, den 3, priklad 3
+...}
+
+{%%%%%   vyberko, den 3, priklad 4
+...}
+
+{%%%%%   vyberko, den 4, priklad 1
+...}
+
+{%%%%%   vyberko, den 4, priklad 2
+...}
+
+{%%%%%   vyberko, den 4, priklad 3
+...}
+
+{%%%%%   vyberko, den 4, priklad 4
+...}
+
+{%%%%%   vyberko, den 5, priklad 1
+...}
+
+{%%%%%   vyberko, den 5, priklad 2
+...}
+
+{%%%%%   vyberko, den 5, priklad 3
+...}
+
+{%%%%%   vyberko, den 5, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 1
+...}
+
+{%%%%%   trojstretnutie, priklad 2
+...}
+
+{%%%%%   trojstretnutie, priklad 3
+...}
+
+{%%%%%   trojstretnutie, priklad 4
+...}
+
+{%%%%%   trojstretnutie, priklad 5
+...}
+
+{%%%%%   trojstretnutie, priklad 6
+...}
+
+{%%%%%   IMO, priklad 1
+...}
+
+{%%%%%   IMO, priklad 2
+...}
+
+{%%%%%   IMO, priklad 3
+...}
+
+{%%%%%   IMO, priklad 4
+...}
+
+{%%%%%   IMO, priklad 5
+...}
+
+{%%%%%   IMO, priklad 6
+...}
+
+{%%%%%   MEMO, priklad 1
+...}
+
+{%%%%%   MEMO, priklad 2
+...}
+
+{%%%%%   MEMO, priklad 3
+...}
+
+{%%%%%   MEMO, priklad 4
+...}
+
+{%%%%%   MEMO, priklad t1
+...}
+
+{%%%%%   MEMO, priklad t2
+...}
+
+{%%%%%   MEMO, priklad t3
+...}
+
+{%%%%%   MEMO, priklad t4
+...}
+
+{%%%%%   MEMO, priklad t5
+...}
+
+{%%%%%   MEMO, priklad t6
+...}
+
+{%%%%%   MEMO, priklad t7
+...}
+
+{%%%%%   MEMO, priklad t8
+...} 

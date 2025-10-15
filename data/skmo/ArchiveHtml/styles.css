@@ -1,0 +1,132 @@
+body {
+  font-family: "Cambria Math", sans-serif;
+  height: 100vh;
+  margin: 0;
+}
+
+.katex {
+  font-size: 1em;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+}
+
+.problem {
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+
+.problem:last-child {
+  border-bottom: none;
+}
+
+.problem-id {
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.problem-text {
+  margin-bottom: 20px;
+  font-size: 1.1em;
+}
+
+.problem-author {
+  float: right;
+  color: #777;
+  font-size: 1em;
+}
+
+.math-display {
+  margin: 0.75em 0;
+}
+
+.math-display .katex-display {
+  margin: 0;
+}
+
+.problem-figure {
+  zoom: 1.2;
+  display: block;
+  margin: 1.5rem auto;
+  text-align: center;
+}
+
+.problem-figure--inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.25em;
+  line-height: 0;
+}
+
+.problem-figure--inline object {
+  display: inline-block;
+  vertical-align: middle;
+  height: 1.2em;
+  width: auto;
+}
+
+.problem-text ol,
+.problem-text ul {
+  margin: 0.5em 0 1em;
+  padding-left: 2em;
+}
+
+.problem-text li {
+  margin-bottom: 0.3em;
+  line-height: 1.4;
+}
+
+.problem-text ul:not(.list) {
+  list-style-type: disc;
+}
+
+.problem-text ol:not(.list) {
+  list-style-type: decimal;
+}
+
+.problem-text ol[type="a"]:not(.list) {
+  list-style-type: lower-alpha;
+}
+
+.problem-text ol[type="A"]:not(.list) {
+  list-style-type: upper-alpha;
+}
+
+.problem-text ol[type="i"]:not(.list) {
+  list-style-type: lower-roman;
+}
+
+.problem-text ol[type="I"]:not(.list) {
+  list-style-type: upper-roman;
+}
+
+.problem-text .list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.problem-text .list > li {
+  position: relative;
+  padding-left: 2em;
+}
+
+.problem-text .list .li-marker {
+  position: absolute;
+  left: 0;
+  width: 1.8em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,24 @@
+{
+  "profiles": {
+    "Suggest Tags": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "suggest-tags --count 50"
+    },
+    "Run Tagging": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "tag-problems --count 10 --dry-run"
+    },
+    "Remove tags": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "prune-tags --limit 5"
+    },
+    "Interactive": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "interactive"
+    }
+  }
+}

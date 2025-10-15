@@ -1,0 +1,25 @@
+Classify math problems using ONLY approved tags.
+
+APPROVED TAGS:
+{approved_tags}
+
+PROBLEM: {problem_statement}
+SOLUTION: {problem_solution}
+
+Rules:
+- Use ONLY approved tags (exact spelling, case-insensitive match)
+- Exactly 1 Area tag - prefer most specific (e.g., "Kombinatorická geometria" not "Geometria" + "Kombinatorika")
+- 0-2 Type tags (from problem statement only)
+- 0-2 Technique tags (from solution only; none if solution empty)
+- No invented/modified tags
+
+Before responding, verify:
+✓ Exactly 1 area tag (if both broad + specific exist, use only specific)
+✓ Type tags only from problem statement
+✓ Technique tags only from solution (if present)
+✓ All tags exist in approved list
+
+Output JSON:
+{"area": ["tag"], "type": ["tag"], "technique": ["tag"]}
+
+If no valid tags: NONE
