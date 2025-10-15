@@ -144,7 +144,6 @@ export default function ParticleSystem() {
 
     const context = canvas.getContext('2d', {
       alpha: true,
-      desynchronized: true,
     })
     if (!context) return
 
@@ -229,7 +228,6 @@ export default function ParticleSystem() {
         height: '100%',
         zIndex: 0,
         pointerEvents: 'none',
-        willChange: 'transform',
       }}
       aria-hidden="true"
     />
