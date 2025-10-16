@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using MathComps.Api.Constants;
+using System.Text.RegularExpressions;
 
 namespace MathComps.Api.Extensions;
 
@@ -54,10 +55,16 @@ public static class ServiceCollectionExtensions
         services.AddCors(options => options
             // With one policy, more than enough
             .AddPolicy("default", policyBuilder => policyBuilder
-                // Get the allowed hosts from the config
-                .WithOrigins(configuration.GetSection("Cors:Origins").Get<string[]>() ?? [])
-                // Needed for wildcard subdomains, e.g. *.example.app. Good for preview branches
-                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                // Custom origin validation to support wildcards
+                .SetIsOriginAllowed(origin =>
+                     // Get allowed origins from configuration
+                     (configuration.GetSection("Cors:Origins").Get<string[]>() ?? [])
+                         // Convert wildcard patterns to regex patterns
+                         .Select(allowedOrigin =>
+                             // Escape special regex characters first, then replace * with .*
+                             $"^{Regex.Escape(allowedOrigin).Replace("\\*", ".*")}$")
+                        // Check if the origin matches any of the regex patterns
+                        .Any(pattern => Regex.IsMatch(origin, pattern, RegexOptions.IgnoreCase)))
                 // Allow common headers for browser requests
                 .WithHeaders("Content-Type", "X-Requested-With")
                 // Only required HTTP methods
