@@ -1,3 +1,4 @@
+using MathComps.Cli.Tagging.Commands.Helpers;
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
@@ -7,105 +8,88 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using static MathComps.Cli.Tagging.Constants.LoggingConstants;
 
 namespace MathComps.Cli.Tagging.Commands;
 
 /// <summary>
 /// Handles loading problems with solutions, then sending them to Gemini for categorized tag suggestions,
-/// then writing the AI's JSON response to a debug file for human review and approval.
-/// The prompt includes a single flattened DISALLOWED list (approved + forbidden) to block duplicates and low‑value entries
-/// while leaving room for creative but high‑quality, generally useful suggestions.
+/// then sending the suggested tags back to Gemini for filtering, then storing the final suggestions.
 /// </summary>
 /// <param name="databaseService">The database service for accessing problem and tag data.</param>
-/// <param name="geminiOptions">Configuration settings specific to the Gemini model for this command.</param>
+/// <param name="suggestTagsOptions">The settings for the command which don't need to be in options.</param>
 /// <param name="geminiService">The service responsible for making calls to the Gemini API.</param>
-[Description("Suggests categorized tags (Area/Type/Technique) based on a random sample of problems with solutions.")]
+[Description(
+   $"""
+    Suggests categorized tags (Area/Goal/Type/Technique) based on a random sample of problems with solutions.
+    Stores logs in the '{LogsDirectory}' folder:
+      - {SuggestTagsLogFile} is the prompt for suggesting tags
+      - {SuggestTagsAiResponseFile} is the AI response
+      - {FilterTagsPromptFile} is the prompt for vetoing suggested tags
+      - {FilterTagsAiResponseFile} is the AI response to vetoing
+    """)]
 public class SuggestTagsCommand(
     ITaggingDatabaseService databaseService,
-    IOptionsSnapshot<CommandGeminiSettings> geminiOptions,
+    IOptions<SuggestTagsSettings> suggestTagsOptions,
     IGeminiService geminiService)
     : AsyncCommand<SuggestTagsCommand.Settings>
 {
     /// <summary>
-    /// The command arguments
+    /// Configuration settings for the suggest-tags command.
     /// </summary>
     public class Settings : CommandSettings
     {
+        /// <summary>
+        /// How many problems we sent, usually ~50 already takes too long. Who knows whether
+        /// this will even be more useful now, given that the approved tags are already okay.
+        /// </summary>
         [CommandOption("-n|--count")]
         [Description("Number of random problems with solutions to use for categorized tag suggestions.")]
         public required int Count { get; set; }
     }
 
-    ///// <inheritdoc/>
+    /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Get the gemini settings
-        var geminiSettings = geminiOptions.Get("SuggestTags");
-
-        // Load the system prompt template for this command.
-        var systemPrompt = await File.ReadAllTextAsync(geminiSettings.SystemPromptPath);
-
-        // Read the categorized approved tags and forbidden tags for AI context and filtering.
-        // We will provide the AI with a single flattened DISALLOWED list (approved + forbidden).
-        var approvedTags = TagFilesHelper.GetCategorizedApprovedTags();
-
-        // Merge all tag names the AI should not suggest (approved + forbidden),
-        // ordered nicely (who knows, maybe it has an affect)
-        var disallowedTagNames = approvedTags.Values.Flatten()
-            .Concat(TagFilesHelper.GetForbiddenTags())
-            .Order()
-            .ToImmutableList();
-
-        // We'll be comparing tags by slugs (I love this)
-        var disallowedTagSlugs = disallowedTagNames.Select(tag => tag.ToSlug()).ToImmutableHashSet();
+        // Ensure the logs directory exists
+        Directory.CreateDirectory(LogsDirectory);
 
         // Get random problems with solutions for tag discovery.
         var problemsWithSolutions = await databaseService.GetProblemsForTagSuggestionAsync(settings.Count);
 
-        // Format problems for the prompt.
-        var problemsText = problemsWithSolutions
-            .Select(problem => $"Problem: {problem.Statement}\nSolution: {problem.Solution}")
-            .ToJoinedString("\n---\n");
+        // 1st round of AI: suggest tags
+        var (suggestedTags, aiResponse1) = await SuggestTags(problemsWithSolutions);
 
-        // Build the user prompt by injecting the DISALLOWED list and problems into the template.
-        var userPrompt = systemPrompt
-            .Replace("{disallowed_tags}", disallowedTagNames.ToJoinedString("\n"))
-            .Replace("{problems}", problemsText);
+        // 2nd round of AI: filter tags
+        (suggestedTags, var aiResponse2) = await FilterTags(suggestedTags);
 
-        // Call the AI service to get the categorized tag suggestions in JSON format.
-        var aiResponseRaw = await geminiService.GenerateContentAsync(geminiSettings.Model, systemPrompt, userPrompt);
+        // The final AI response text to log
+        var aiResponse =
+            "Suggested tags:\n"
+            .Concat(aiResponse1)
+            .Concat("\n\nFiltering output:\n")
+            .Concat(aiResponse2)
+            .Concat("\n")
+            .ToJoinedString("");
 
-        // Parse the response
-        var suggestedTags = GeneralUtilities.TryExecute(() => TaggingHelpers.ParseAiResponse(aiResponseRaw));
+        // Remove any suggestions that it should have not made but AI is shit so...
+        suggestedTags = suggestedTags.FilterOut(
+            // Remove forbidden + 
+            TagFilesHelper.GetForbiddenTags().GetAllTagNames()
+                // Approved tags
+                .Concat(TagFilesHelper.GetCategorizedApprovedTags().MapTagsToTheirData().Keys
+            ));
 
-        // Time to parse out the shit it returned
-        string tagSummary;
+        // Find the counts, just for logging
+        var countPerTag = suggestedTags.Data.ToImmutableDictionary(pair => pair.Key, pair => pair.Value.Length);
+        var totalCount = countPerTag.Sum(pair => pair.Value);
+        var countsText = countPerTag.Select(pair => $"{pair.Key}: {pair.Value}").ToJoinedString();
 
-        // Some shit
-        if (suggestedTags is null)
-            tagSummary = "AI returned non-JSON response";
+        // Yay, we have a summary
+        var tagSummary = $"{totalCount} new tags suggested ({countsText})";
 
-        // Some tags
-        else
-        {
-            // Remove any suggestions that it should have not made but AI is shit so...
-            suggestedTags = FilterOutApprovedOrForbiddenTags(suggestedTags, disallowedTagSlugs);
-
-            // Find the counts, just for logging
-            var areaCount = suggestedTags.Area?.Length ?? 0;
-            var typeCount = suggestedTags.Type?.Length ?? 0;
-            var techniqueCount = suggestedTags.Technique?.Length ?? 0;
-            var totalCount = areaCount + typeCount + techniqueCount;
-
-            // Yay, we have a summary
-            tagSummary = $"{totalCount} new tags suggested (Area: {areaCount}, Type: {typeCount}, Technique: {techniqueCount})";
-        }
-
-        // Make sure the suggested tags are logged
-        TagFilesHelper.WriteSuggestedTags(
-            aiResponseRaw,
-            suggestedTags,
-            problems: [.. problemsWithSolutions.Select(problem => problem.Slug).Order()]);
+        // Write the approved suggested tags to a simple JSON file
+        File.WriteAllText($"{LogsDirectory}/{SuggestedTagsJsonFile}", suggestedTags.ToJson(writeIndented: true));
 
         // Log completion with summary of suggestions.
         AnsiConsole.MarkupLine($"[green]Tag suggestion finished:[/] {tagSummary}");
@@ -115,35 +99,116 @@ public class SuggestTagsCommand(
     }
 
     /// <summary>
-    /// Filters out any AI suggestions that already exist in the approved tags list.
-    /// This ensures no duplicate tags are suggested regardless of AI compliance with instructions.
+    /// Sends problems to the AI service to generate initial tag suggestions.
+    /// Creates a prompt with the problems, tag rules, and approved tags, then calls the Gemini API.
     /// </summary>
-    /// <param name="suggestion">The original AI suggestion response.</param>
-    /// <param name="disallowedTagSlugs">Set of all disallowed tag slugs (hehe) for deduplication.</param>
-    /// <returns>Filtered suggestion with duplicates removed.</returns>
-    private static TagCollection FilterOutApprovedOrForbiddenTags(
-        TagCollection suggestion,
-        ImmutableHashSet<string> disallowedTagSlugs)
+    /// <param name="problemsWithSolutions">The list of problems with their solutions to analyze for tag suggestions.</param>
+    /// <returns>A tuple containing the parsed suggested tags and the raw AI response for logging purposes.</returns>
+    private async Task<(SimpleTagsByCategory Tags, string RawAiResponse)> SuggestTags(List<ProblemDetailsDto> problemsWithSolutions)
     {
-        // Area tags
-        var filteredArea = suggestion.Area?
-            .Where(tagName => !disallowedTagSlugs.Contains(tagName.ToSlug()))
-            .ToArray();
+        // Log start
+        AnsiConsole.MarkupLine($"[blue]Suggesting tags[/]");
 
-        // Type tags
-        var filteredType = suggestion.Type?
-            .Where(tagName => !disallowedTagSlugs.Contains(tagName.ToSlug()))
-            .ToArray();
+        // Get the Gemini settings for the prompt
+        var geminiSettings = suggestTagsOptions.Value.SuggestTags;
 
-        // Technique tags
-        var filteredTechnique = suggestion.Technique?
-            .Where(tagName => !disallowedTagSlugs.Contains(tagName.ToSlug()))
-            .ToArray();
+        // Get the system prompt for suggesting tags
+        var systemPrompt = File.ReadAllText(geminiSettings.SystemPromptPath);
 
-        // We're happy
-        return new TagCollection(
-            Area: filteredArea?.Length > 0 ? filteredArea : null,
-            Type: filteredType?.Length > 0 ? filteredType : null,
-            Technique: filteredTechnique?.Length > 0 ? filteredTechnique : null);
+        // Get the tag rules text (common for both suggesting and filtering)
+        var tagRules = File.ReadAllText(suggestTagsOptions.Value.TagRulesPath);
+
+        // Get the approved tags from which the AI should choose
+        var approvedTags = TagFilesHelper.GetCategorizedApprovedTags();
+
+        // Format problem + solution for the prompt.
+        var problemsText = problemsWithSolutions
+            .Select(problem => $"Problem: {problem.Statement}\nSolution: {problem.Solution}")
+            .ToJoinedString("\n---\n");
+
+        // Build the final prompt by replacing placeholders with actual data.
+        var userPrompt = systemPrompt
+            .Replace("{tag_rules}", tagRules)
+            .Replace("{example_tags}", approvedTags.ToJson())
+            .Replace("{problems}", problemsText);
+
+        // Store the prompt for debugging
+        File.WriteAllText($"{LogsDirectory}/{SuggestTagsLogFile}", userPrompt);
+
+        // Call the AI
+        var aiResponseRaw = await geminiService.GenerateContentAsync(
+            geminiSettings.Model,
+            systemPrompt,
+            userPrompt,
+            geminiSettings.ThinkingBudget
+        );
+
+        // Store the AI response for debugging
+        File.WriteAllText($"{LogsDirectory}/{SuggestTagsAiResponseFile}", aiResponseRaw);
+
+        // Parse and return the suggested tags along with the raw AI response.
+        return (TaggingHelpers.ParseSuggestedTags(aiResponseRaw), aiResponseRaw);
+    }
+
+    /// <summary>
+    /// Sends the initially suggested tags back to the AI for filtering and approval.
+    /// The AI reviews each suggested tag against existing approved and forbidden tags to make approval decisions.
+    /// </summary>
+    /// <param name="candidateTags">The initially suggested tags that need to be filtered and approved.</param>
+    /// <returns>A tuple containing the filtered approved tags and the raw AI response for logging purposes.</returns>
+    private async Task<(SimpleTagsByCategory Tags, string RawAiResponse)> FilterTags(SimpleTagsByCategory candidateTags)
+    {
+        // Log start
+        AnsiConsole.MarkupLine($"[blue]Filtering suggested tags[/]");
+
+        // Get the Gemini settings for filtering
+        var geminiSettings = suggestTagsOptions.Value.VetoTags;
+
+        // Get the system prompt for filtering
+        var systemPrompt = File.ReadAllText(geminiSettings.SystemPromptPath);
+
+        // Get the tag rules text (common for both suggesting and filtering)
+        var tagRules = File.ReadAllText(suggestTagsOptions.Value.TagRulesPath);
+
+        // Get the approved tags from which the AI should choose
+        var approvedTags = TagFilesHelper.GetCategorizedApprovedTags();
+
+        // Get the forbidden tags to help AI with the filtering (hopefully)
+        var forbiddenTags = TagFilesHelper.GetForbiddenTags();
+
+        // Build the final prompt by replacing placeholders with actual data.
+        var userPrompt = systemPrompt
+            .Replace("{tag_rules}", tagRules)
+            .Replace("{candidate_tags}", candidateTags.ToJson())
+            .Replace("{known_tags}", approvedTags.ToJson())
+            .Replace("{forbidden_tags}", forbiddenTags.ToJson());
+
+        // Store the filter prompt for debugging
+        File.WriteAllText($"{LogsDirectory}/{FilterTagsPromptFile}", userPrompt);
+
+        // Call the AI
+        var aiResponseRaw = await geminiService.GenerateContentAsync(
+            geminiSettings.Model,
+            systemPrompt,
+            userPrompt,
+            geminiSettings.ThinkingBudget
+        );
+
+        // Store the AI response for debugging 
+        File.WriteAllText($"{LogsDirectory}/{FilterTagsAiResponseFile}", aiResponseRaw);
+
+        // Get a dictionary mapping... tag names to approval decisions
+        var approvals = TaggingHelpers.ParseTagApprovals(aiResponseRaw)
+            .ToImmutableDictionary(pair => pair.Key, pair => pair.Value.Approved);
+
+        // Apply the approvals to the candidate tags
+        var result = candidateTags.Filter(approvals, out var unmatchedApprovals, out var unmatchedCandidates);
+
+        // Warn about any unmatched tags, I guess this won't happen?
+        if (unmatchedApprovals.Count > 0)
+            AnsiConsole.MarkupLine($"[yellow]AI suggested filter out nonexistent tags:[/] {unmatchedApprovals.Order().ToJoinedString()}");
+
+        // Done
+        return (result, aiResponseRaw);
     }
 }

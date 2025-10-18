@@ -1,3 +1,5 @@
+using MathComps.Cli.Tagging.Commands.Helpers;
+using MathComps.Cli.Tagging.Constants;
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
@@ -12,17 +14,23 @@ using System.ComponentModel;
 namespace MathComps.Cli.Tagging.Commands;
 
 /// <summary>
-/// Orchestrates AI-powered problem tagging using Gemini API with categorized approved tag vocabulary.
-/// Processes problems in batches, validates JSON tag suggestions against approved list, and updates database.
-/// Supports dry-run mode for safe testing and provides detailed progress tracking with tag categorization.
+/// Gets problems from the database, uses AI to suggest tags based on problem statements and solutions,
+/// and updates the database with these tags. Supports options for dry runs, batch sizes, and
+/// tag selection filtering.
 /// </summary>
 /// <param name="databaseService">The database service for accessing problem and tag data.</param>
-/// <param name="geminiOptions">Configuration settings specific to the Gemini model for this command.</param>
+/// <param name="tagProblemsOptions">Configuration settings specific for this command.</param>
 /// <param name="geminiService">The service responsible for making calls to the Gemini API.</param>
-[Description("Automatically tag problems using AI analysis with categorized approved tag vocabulary.")]
+[Description($"""
+    Automatically tag problems using AI analysis with categorized approved tag vocabulary.
+    Stores logs in the '{LoggingConstants.LogsDirectory}' folder; these can be used to inspect the process in detail.
+    Reasoning behind tags derived from the problem statement can be found in '<problem>.statement.json'
+    files; for tags derived using problem solution too (i.e. technique tags), see '<problem>.solution.json'.
+    Prompts sent to the LLM are stored in '<problem>.statement.prompt.txt' / '<problem>.solution.prompt.txt'.
+""")]
 public class TagProblemsCommand(
     ITaggingDatabaseService databaseService,
-    IOptionsSnapshot<CommandGeminiSettings> geminiOptions,
+    IOptions<TagProblemsSettings> tagProblemsOptions,
     IGeminiService geminiService)
     : AsyncCommand<TagProblemsCommand.Settings>
 {
@@ -55,38 +63,87 @@ public class TagProblemsCommand(
         [Description("Skip problems that already have tags assigned.")]
         [DefaultValue(false)]
         public bool SkipTagged { get; set; }
+
+        /// <summary>
+        /// If set, clears all tags of all problems. If specified together with a tag selection,
+        /// clears only the tags from the tag selection.
+        /// </summary>
+        [CommandOption("--clear-tags")]
+        [Description("Clears all tags before tagging. If specified together with a tag selection, clears only those tags.")]
+        [DefaultValue(false)]
+        public bool ClearTags { get; set; }
+
+        /// <summary>
+        /// This specified how much we wanna spam Gemini in parallel.
+        /// </summary>
+        [CommandOption("--num-threads")]
+        [Description("Number of threads to run the tagging in parallel. Note: make sure to take into account model rate limits when setting this.")]
+        [DefaultValue(1)]
+        public int NumThreads { get; set; }
+
+        /// <summary>
+        /// Specifies a file containing a list of tags to consider for tagging.
+        /// </summary>
+        [CommandOption("--tag-selection-file")]
+        [Description("Consider only some subset of tags. Argument should be path to a file, where each line contains the name of one tag.")]
+        [DefaultValue(null)]
+        public string? TagSelectionFile { get; set; }
+
+        /// <inheritdoc/>
+        public override ValidationResult Validate()
+        {
+            // Validate that mutually exclusive options are not both specified
+            return SkipTagged && ClearTags
+                ? ValidationResult.Error("Both '--skip-tagged' and '--clear-tags' have been specified, but they are mutually exclusive.")
+                : ValidationResult.Success();
+        }
     }
 
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        // Ensure logs directory exists for storing AI interaction logs
+        Directory.CreateDirectory(LoggingConstants.LogsDirectory);
+
         #region Load configuration and initial data
 
-        // Load settings for the command
-        var geminiSettings = geminiOptions.Get("TagProblems");
+        // Initialize tag selector to include all tags by default
+        Func<string, bool> tagNameFilter = _ => true;
 
-        // Load system prompts
-        var systemPromptTemplate = await File.ReadAllTextAsync(geminiSettings.SystemPromptPath);
+        // Load the approved tags from the tag files
+        var tagsSelection = TagFilesHelper.GetCategorizedApprovedTags().Simple();
 
-        // Load categorized approved tags from the version-controlled file for AI context.
-        var approvedTags = TagFilesHelper.GetCategorizedApprovedTags();
+        // If a tag selection file is provided...
+        if (settings.TagSelectionFile != null)
+        {
+            // Read the specified tags from the file
+            var tags = File.ReadAllLines(settings.TagSelectionFile).ToHashSet();
 
-        // We'll be comparings tags by slugs
-        var approvedTagSlugs = approvedTags.ToImmutableDictionary(
-            pair => pair.Key,
-            pair => pair.Value.Select(tag => tag.ToSlug()).ToImmutableHashSet()
+            // Create a set for efficient lookup
+            tagsSelection = tagsSelection.Filter(tags.ToImmutableDictionary(tagName => tagName, tagName => true), out var unmatchedApprovals, out var unmatchedCandidates);
+
+            // We will select only from there tags
+            tagNameFilter = tags.Contains;
+        }
+
+        // If specified, clear existing tags before tagging
+        if (settings.ClearTags)
+            await databaseService.RemoveTagsFromAllProblemsAsync([.. tagsSelection.Data.Values.Flatten()]);
+
+        // Retrieve the problems that need tagging based on user settings
+        var problemsToTag = await databaseService.GetProblemsToTagAsync(
+            settings.Count,
+            settings.SkipTagged,
+            tagsSelection
         );
 
-        // Retrieve the problems that need tagging based on user settings.
-        var problemsToTag = await databaseService.GetProblemsToTagAsync(settings.Count, settings.SkipTagged);
-
-        // If no problems found to process.
+        // If no problems found to process
         if (problemsToTag.Count == 0)
         {
             // Make aware
             AnsiConsole.MarkupLine("[yellow]No problems found to tag with the specified criteria.[/]");
 
-            // Nothing to do
+            // Exit successfully
             return 0;
         }
 
@@ -94,7 +151,14 @@ public class TagProblemsCommand(
 
         #region Process problems with AI tagging
 
-        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the tagging process.
+        // Create timestamp for organizing log files by execution time
+        var datetimeString = $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
+
+        // Initialize the main log file for tracking tagging operations
+        var logPath = $"{LoggingConstants.LogsDirectory}/{LoggingConstants.TagProblemsLogFile}";
+        File.WriteAllText(logPath, "");
+
+        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the tagging process
         await AnsiConsole.Progress()
             .AutoClear(enabled: false)
             .Columns(
@@ -106,90 +170,90 @@ public class TagProblemsCommand(
             ])
             .StartAsync(async context =>
             {
-                // Create progress task for AI processing phase.
+                // Create progress task for AI processing phase
                 var processingTask = context.AddTask("[green]Processing problems for AI tagging[/]", maxValue: problemsToTag.Count);
                 processingTask.StartTask();
 
-                // Process each problem sequentially to get AI tag suggestions.
-                for (var i = 0; i < problemsToTag.Count; i++)
-                {
-                    // Get the problem
-                    var problem = problemsToTag[i];
+                // Semaphore to ensure thread-safe database operations
+                SemaphoreSlim semaphore = new(1, 1);
 
-                    // Update progress description to show current problem context.
-                    processingTask.Description = $"[green]{i + 1:N0} of {problemsToTag.Count:N0}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
-
-                    // Format the categorized approved tags for the prompt in a structured way.
-                    var approvedTagsText = string.Join("\n",
-                    [
-                        "AREA TAGS:",
-                        approvedTags[TagType.Area].Select(tagWithType => "- " + tagWithType).ToJoinedString(),
-                        "",
-                        "TYPE TAGS:",
-                        approvedTags[TagType.Type].Select(tagWithType => "- " + tagWithType).ToJoinedString(),
-                        "",
-                        "TECHNIQUE TAGS:",
-                        approvedTags[TagType.Technique].Select(tagWithType => "- " + tagWithType).ToJoinedString(),
-                    ]);
-
-                    // Build AI prompt by substituting template placeholders with actual data.
-                    var userPrompt = systemPromptTemplate
-                        .Replace("{approved_tags}", approvedTagsText)
-                        .Replace("{problem_statement}", problem.Statement)
-                        .Replace("{problem_solution}", problem.Solution ?? string.Empty);
-
-                    // Request AI tag suggestions using the configured model and prompt.
-                    var aiResponseRaw = await GeneralUtilities.TryExecuteAsync(() => geminiService.GenerateContentAsync(geminiSettings.Model, systemPromptTemplate, userPrompt),
-                        // Handle errors
-                        exception =>
-                        {
-                            // Log the problem
-                            AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] Gemini service errors");
-                            AnsiConsole.WriteException(exception);
-                        });
-
-                    // Sad problems
-                    if (aiResponseRaw is null)
+                // Process problems in parallel with configurable thread count
+                await Parallel.ForAsync(0, problemsToTag.Count, new ParallelOptions { MaxDegreeOfParallelism = settings.NumThreads },
+                    async (problemIndex, cancellationToken) =>
                     {
-                        // Progress further
-                        processingTask.Increment(1);
+                        // Get the current problem to process
+                        var problem = problemsToTag[problemIndex];
 
-                        // Move onto the next problem
-                        continue;
-                    }
+                        // Update progress description to show current problem context
+                        processingTask.Description = $"[green]Started {problemIndex + 1:N0} of {problemsToTag.Count:N0}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
 
-                    // Parse the response
-                    var suggestedTags = GeneralUtilities.TryExecute(() => TaggingHelpers.ParseAiResponse(aiResponseRaw),
-                        // Handle exceptions
-                        exception =>
+                        // Process statement tags (Area/Goal/Type) for this problem
+                        var statementTagsAsync = TagProblem(
+                            datetimeString,
+                            "statement",
+                            tagProblemsOptions.Value.TagProblemStatement,
+                            tagData => tagData.TagType != TagType.Technique && tagNameFilter(tagData.TagName),
+                            problem);
+
+                        // Initialize technique tags as empty (will be populated if solution exists)
+                        var techniqueTagsAsync = Task.FromResult(new Dictionary<string, ProblemTagData>().ToImmutableDictionary());
+
+                        // Problems with solution
+                        if (problem.Solution != null)
                         {
-                            // Log the problem
-                            AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] AI response parsing problem");
-                            AnsiConsole.WriteException(exception);
-                        });
+                            // Get technique tags too
+                            techniqueTagsAsync = TagProblem(
+                                datetimeString,
+                                "solution",
+                                tagProblemsOptions.Value.TagProblemSolution,
+                                tagData => tagData.TagType == TagType.Technique && tagNameFilter(tagData.TagName),
+                                problem
+                            );
+                        }
 
-                    // Sad problems
-                    if (suggestedTags is null)
-                    {
-                        // Progress further
-                        processingTask.Increment(1);
+                        // Wait for both statement and technique tag processing to complete
+                        var statementTags = await statementTagsAsync;
+                        var techniqueTags = await techniqueTagsAsync;
 
-                        // Move onto the next problem
-                        continue;
-                    }
-                    // The raw response from the AI is immediately filtered against the master list of approved tag names.
-                    // This is a critical security and data integrity step to ensure that only sanctioned tags can ever enter the database.
-                    var filteredResponse = FilterToApprovedTagsOnly(suggestedTags, approvedTagSlugs);
+                        // Combine all suggested tags from both analyses
+                        var suggestedTags = statementTags.Union(techniqueTags).ToImmutableDictionary();
 
-                    // If we have any tags to apply, we do so here.
-                    if (filteredResponse.GetAllTags().Count > 0 && !settings.DryRun)
-                        await databaseService.UpdateTagsForProblemAsync(problem.Id, filteredResponse);
+                        // Apply tag suggestions to database if not in dry-run mode
+                        if (suggestedTags.Count > 0 && !settings.DryRun)
+                        {
+                            // Use semaphore to ensure thread-safe database access
+                            await semaphore.WaitAsync(cancellationToken);
 
-                    // Advance the progress bar to reflect that this problem has been successfully processed.
-                    processingTask.Increment(1);
-                }
+                            try
+                            {
+                                // Add the suggested tags to the problem in the database
+                                await databaseService.AddTagsForProblemAsync(problem.Id, suggestedTags);
+                            }
+                            finally
+                            {
+                                // Release the semaphore for other threads
+                                semaphore.Release();
+                            }
+                        }
 
-                // Mark AI processing phase as complete.
+                        // Extract high-confidence tags for logging
+                        var tags = suggestedTags
+                            .Where(pair => pair.Value.GoodnessOfFit >= ProblemTag.MinimumGoodnessOfFitThreshold)
+                            .Select(pair => pair.Key)
+                            .ToJoinedString();
+
+                        // Thread-safely
+                        lock (context)
+                        {
+                            // Log the tags assigned to this problem
+                            File.AppendAllText(logPath, $"{problem.Slug}: {tags}\n");
+
+                            // Advance the progress bar to reflect that this problem has been successfully processed
+                            processingTask.Increment(1);
+                        }
+                    });
+
+                // Mark AI processing phase as complete
                 processingTask.StopTask();
             });
 
@@ -197,18 +261,17 @@ public class TagProblemsCommand(
 
         #region Apply changes or report dry-run results
 
-        // In dry-run mode, show what would happen without making database changes.
+        // In dry-run mode, show what would happen without making database changes
         if (settings.DryRun)
         {
-            // Display summary of intended changes for user review.
+            // Display summary of intended changes for user review
             AnsiConsole.MarkupLine($"[bold yellow]Dry run complete.[/]");
 
-            // We're done
+            // Exit successfully after dry run
             return 0;
         }
 
-
-        // Confirm successful completion with summary statistics.
+        // Confirm successful completion with summary statistics
         AnsiConsole.MarkupLine($"[bold green]Database updated successfully.[/]");
 
         #endregion
@@ -216,37 +279,143 @@ public class TagProblemsCommand(
         return 0;
     }
 
-
     /// <summary>
-    /// Filters AI tagging response to keep only tags that exist in the approved tags list.
-    /// This ensures database consistency by rejecting any invalid or non-approved tag suggestions.
+    /// Uses AI to analyze a problem and suggest appropriate tags based on the problem statement or solution.
     /// </summary>
-    /// <param name="response">The original AI tagging response.</param>
-    /// <param name="approvedTagSlugs">The slugs of tags (lol) that are approved.</param>
-    /// <returns>Filtered response containing only valid approved tags.</returns>
-    private static TagCollection FilterToApprovedTagsOnly(
-        TagCollection response,
-        ImmutableDictionary<TagType, ImmutableHashSet<string>> approvedTagSlugs)
+    /// <param name="folder">Directory name for organizing log files by analysis type (e.g., "statement", "solution").</param>
+    /// <param name="suffix">File suffix for log files to distinguish between different analysis types.</param>
+    /// <param name="geminiSettings">Configuration for the Gemini AI model including prompts and parameters.</param>
+    /// <param name="tagSelector">Function to filter which tags are eligible for suggestion based on their name and type.</param>
+    /// <param name="problem">The problem details including statement, solution, and existing tags.</param>
+    /// <returns>Dictionary of suggested tags with their confidence scores and justifications.</returns>
+    private async Task<ImmutableDictionary<string, ProblemTagData>> TagProblem(
+        string folder,
+        string suffix,
+        CommandGeminiSettings geminiSettings,
+        Func<(string TagName, TagType TagType), bool> tagSelector,
+        ProblemDetailsDto problem)
     {
-        // Area tags
-        var validArea = response.Area?
-            .Where(tagName => approvedTagSlugs[TagType.Area].Contains(tagName.ToSlug()))
-            .ToArray();
+        // Load the system prompt template for AI interaction
+        var systemPromptTemplate = await File.ReadAllTextAsync(geminiSettings.SystemPromptPath);
 
-        // Type tags
-        var validType = response.Type?
-            .Where(tagName => approvedTagSlugs[TagType.Type].Contains(tagName.ToSlug()))
-            .ToArray();
+        // Get all approved tags for validation and filtering
+        var allApprovedTags = TagFilesHelper.GetCategorizedApprovedTags().MapTagsToTheirData();
 
-        // Technique tags
-        var validTechnique = response.Technique?
-            .Where(tagName => approvedTagSlugs[TagType.Technique].Contains(tagName.ToSlug()))
-            .ToArray();
+        // Identify tags that are forbidden (already assigned or not in selection)
+        var tagsNotToBeUsed = allApprovedTags
+            .Where(pair => problem.TagsData.ContainsKey(pair.Key) || !tagSelector((pair.Key, pair.Value.Type)))
+            .Select(pair => pair.Key)
+            .ToImmutableHashSet();
 
-        // We're happy
-        return new TagCollection(
-            Area: validArea?.Length > 0 ? validArea : null,
-            Type: validType?.Length > 0 ? validType : null,
-            Technique: validTechnique?.Length > 0 ? validTechnique : null);
+        // Build the list of tags that can be processed (not forbidden)
+        var tagsToProcess = TagFilesHelper.GetCategorizedApprovedTags()
+            .MapTagsToTheirData()
+            .Where(pair => !tagsNotToBeUsed.Contains(pair.Key))
+            .ToImmutableDictionary(
+                pair => pair.Key,
+                pair => new
+                {
+                    Category = pair.Value.Type.ToString(),
+                    pair.Value.Description
+                });
+
+        // Get already assigned tags with their metadata for context
+        var alreadyAssignedTags =
+            (from problemTagPair in problem.ApprovedTags()
+             join approvedTagPair in allApprovedTags on problemTagPair.Key equals approvedTagPair.Key
+             select new
+             {
+                 Tag = problemTagPair.Key,
+                 problemTagPair.Value.TagType,
+                 approvedTagPair.Value.Description
+             })
+            .ToImmutableDictionary(
+                data => data.Tag,
+                data => new
+                {
+                    Category = data.TagType.ToString(),
+                    data.Description
+                });
+
+        // If no tags can be processed, return empty result
+        if (tagsToProcess.Count == 0)
+            return ImmutableDictionary<string, ProblemTagData>.Empty;
+
+        // Build context text about already assigned tags for AI
+        var alreadyAssignedTagsText = alreadyAssignedTags.Count == 0 ? "" :
+            $"""
+             The following tags have already been assigned to the problem (you can't unassign them,
+             but they may influence your decisions):
+             {alreadyAssignedTags.ToJson()}
+             """;
+
+        // Build the user prompt by replacing placeholders with actual problem data
+        var userPrompt = systemPromptTemplate
+            .Replace("{already_assigned_tags_text}", alreadyAssignedTagsText)
+            .Replace("{candidate_tags}", tagsToProcess.ToJson())
+            .Replace("{problem_statement}", problem.Statement)
+            .Replace("{problem_solution}", problem.Solution ?? string.Empty);
+
+        // Prepare the log directory
+        var logDirectory = $"{LoggingConstants.LogsDirectory}/{folder}";
+        Directory.CreateDirectory(logDirectory);
+
+        // Store the final prompt sent to the AI for debugging
+        var userPromptPath = $"{logDirectory}/{problem.Slug}.{suffix}.prompt.txt";
+        File.WriteAllText(userPromptPath, userPrompt);
+
+        // In a try-catch
+        var aiResponseRaw = await GeneralUtilities.TryExecuteAsync(() =>
+            // Call the Gemini service to get tag suggestions
+            geminiService.GenerateContentAsync(
+                geminiSettings.Model,
+                systemPromptTemplate,
+                userPrompt,
+                geminiSettings.ThinkingBudget
+            ),
+            // Handle AI service errors gracefully
+            exception =>
+            {
+                // Log the problem slug and exception details
+                AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] Gemini service errors");
+                AnsiConsole.WriteException(exception);
+            });
+
+        // If AI service failed, return empty result
+        if (aiResponseRaw is null)
+            return ImmutableDictionary<string, ProblemTagData>.Empty;
+
+        // Store the raw AI response for debugging
+        var aiResponsePath = $"{logDirectory}/{problem.Slug}.{suffix}.json";
+        File.WriteAllText(aiResponsePath, aiResponseRaw);
+
+        // Parse the AI response to extract tag suggestions with fitness scores
+        var suggestedTags = GeneralUtilities.TryExecute(() => (
+            from suggestedTagPair in TaggingHelpers.ParseTagFitnesses(aiResponseRaw)
+            join approvedTagPair in allApprovedTags on suggestedTagPair.Key equals approvedTagPair.Key
+            select KeyValuePair.Create(
+                suggestedTagPair.Key,
+                new ProblemTagData(
+                    approvedTagPair.Value.Type,
+                    suggestedTagPair.Value.GoodnessOfFit,
+                    suggestedTagPair.Value.Justification,
+                    Confidence: 0)
+                )
+            )
+            .ToImmutableDictionary(),
+            // Handle JSON parsing errors gracefully
+            exception =>
+            {
+                // Log the problem slug and parsing exception details
+                AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] AI response parsing problem");
+                AnsiConsole.WriteException(exception);
+            });
+
+        // If parsing failed, return empty result
+        if (suggestedTags is null)
+            return ImmutableDictionary<string, ProblemTagData>.Empty;
+
+        // Filter suggestions to only include tags that were actually candidates
+        return suggestedTags.Where(pair => tagsToProcess.ContainsKey(pair.Key)).ToImmutableDictionary();
     }
 }

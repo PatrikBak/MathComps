@@ -1,0 +1,32 @@
+I will give you a list candidate tags (in Slovak) describing math problems. I will also give you
+a list of known tags (that have already been approved). For each of the candidate tags,
+you should verify whether it satisfies the tag rules listed below and whether it is new
+(i.e. not among the list of known tags). Approve new tags that satisfy the rules, and reject
+the others.
+
+{tag_rules}
+
+CANDIDATE TAGS:
+{candidate_tags}
+
+KNOWN TAGS (sorted by category):
+{known_tags}
+
+If you spot multiple candidate tags that are synonymous, then only one of them should be approved.
+If you spot a candidate tag that is similar or synonymous with an already known tag, then that
+candidate tag should be rejected. If you spot a tag that seems to fit better into a different
+category, you should reject that tag (e.g. 'Nerovnosti' should not fall into the category Area,
+but under Term instead; the corresponding Area would be 'Algebra').
+
+Also, here is a list of forbidden tags. If you encounter any of those among the candidate tags,
+you should reject them too.
+
+FORBIDDEN TAGS:
+{forbidden_tags}
+
+You must output a JSON (and only this JSON) with the following format:
+{[tag]: {"Approved": true | false, "Reason": string}}
+
+i.e. the individual tags are the keys of the JSON object, the values are JSON objects/dicts
+saying whether the tag has been approved and the reason behind the decision. For each tag,
+specify a non-empty string as "Reason" only if that tag has been rejected.

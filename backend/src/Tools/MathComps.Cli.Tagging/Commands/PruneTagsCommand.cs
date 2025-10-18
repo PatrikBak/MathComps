@@ -87,7 +87,7 @@ public class PruneTagsCommand(ITaggingDatabaseService databaseService) : AsyncCo
 
         // Handle each usage
         foreach (var usage in candidates)
-            await databaseService.RemoveTagFromAllProblemsAsync(usage.Id);
+            await databaseService.RemoveTagsFromAllProblemsAsync([usage.Name]);
 
         // Log success
         AnsiConsole.MarkupLine($"[green]Deleted {candidates.Count} tags.[/]");

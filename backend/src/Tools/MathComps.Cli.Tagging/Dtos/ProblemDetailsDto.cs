@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace MathComps.Cli.Tagging.Dtos;
 
 /// <summary>
@@ -11,4 +13,14 @@ public record ProblemDetailsDto(
     Guid Id,
     string Slug,
     string Statement,
-    string? Solution);
+    string? Solution,
+    ImmutableDictionary<string, ProblemTagData> TagsData)
+{
+    /// <summary>
+    /// Returns only tag with at are goodness of fit above the minimum threshold.
+    /// </summary>
+    /// <returns>Dictionary of approved tags.</returns>
+    public ImmutableDictionary<string, ProblemTagData> ApprovedTags() =>
+        // Filter tags to only those that are approved
+        TagsData.Where(pair => pair.Value.IsApproved).ToImmutableDictionary();
+}

@@ -6,7 +6,6 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Text.Json;
 
 namespace MathComps.Cli.SkmoProblems;
 
@@ -132,7 +131,7 @@ public class ParseCommand : AsyncCommand<ParseCommand.Settings>
         if (yearsToProcess is null)
         {
             // Convert to JSON for storage.
-            var serializedProblems = JsonSerializer.Serialize(parsedProblems);
+            var serializedProblems = parsedProblems.ToJson();
 
             // Write the final output file, overwriting the version-controlled file.
             File.WriteAllText(Path.Combine("../../../../", SkmoDataPaths.SkmoParsedArchiveFile), serializedProblems);

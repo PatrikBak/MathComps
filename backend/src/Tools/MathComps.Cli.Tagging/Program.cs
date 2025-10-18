@@ -14,7 +14,6 @@ var services = new ServiceCollection();
 // Configuration is built manually to support both appsettings.json and user secrets.
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false)
-    .AddJsonFile("appsettings.json", optional: false)
     .AddUserSecrets<Program>(optional: true)
     .AddEnvironmentVariables()
     .Build();
@@ -33,9 +32,10 @@ services.AddOptions<GeminiSettings>()
 // Bind the Gemini service
 services.AddHttpClient<IGeminiService, GeminiService>();
 
-// Command-specific Gemini settings are configured for each CLI command.
-services.AddOptions<CommandGeminiSettings>("SuggestTags").Bind(configuration.GetSection("SuggestTags"));
-services.AddOptions<CommandGeminiSettings>("TagProblems").Bind(configuration.GetSection("TagProblems"));
+// Add settings for commands
+services.AddOptions<SuggestTagsSettings>().Bind(configuration.GetSection("SuggestTagsSettings"));
+services.AddOptions<TagProblemsSettings>().Bind(configuration.GetSection("TagProblemsSettings"));
+services.AddOptions<VetoProblemTagsSettings>().Bind(configuration.GetSection("VetoProblemTagsSettings"));
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
@@ -56,6 +56,7 @@ app.Configure(config =>
     // Commands
     config.AddCommand<SuggestTagsCommand>("suggest-tags");
     config.AddCommand<TagProblemsCommand>("tag-problems");
+    config.AddCommand<VetoProblemTagsCommand>("veto-problem-tags");
     config.AddCommand<PruneTagsCommand>("prune-tags");
     config.AddCommand<InteractiveTagManagerCommand>("interactive");
 

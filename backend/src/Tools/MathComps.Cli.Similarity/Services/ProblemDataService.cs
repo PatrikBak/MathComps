@@ -53,11 +53,19 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             select new
             {
                 problem.Id,
-                TagIds = problem.Tags.Select(tag => tag.Id).ToImmutableHashSet(),
                 problem.RoundInstance.Round.CompetitionId,
                 problem.RoundInstance.Round.CompositeSlug,
                 problem.StatementEmbedding,
                 problem.SolutionEmbedding,
+
+                // Get tag ids
+                TagIds = problem.ProblemTagsAll.AsQueryable()
+                    // Only good enough tags
+                    .Where(ProblemTag.IsGoodEnoughTag)
+                    // Take their ids
+                    .Select(problemTag => problemTag.TagId)
+                    // As a set
+                    .ToImmutableHashSet(),
 
                 // For validation
                 HasSolution = problem.Solution != null,

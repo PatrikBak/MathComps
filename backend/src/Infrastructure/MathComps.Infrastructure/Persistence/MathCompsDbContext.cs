@@ -332,28 +332,30 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion ProblemAuthor (ordered join)
 
-        #region Problem <-> Tag (many-to-many)
+        #region ProblemTag (ordered join)
 
-        modelBuilder.Entity<Problem>()
-            .HasMany(p => p.Tags)
-            .WithMany(t => t.Problems)
-            .UsingEntity<Dictionary<string, object>>(
-                "problem_tag",
-                right => right.HasOne<Tag>()
-                              .WithMany()
-                              .HasForeignKey("tag_id")
-                              .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<Problem>()
-                              .WithMany()
-                              .HasForeignKey("problem_id")
-                              .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
-                    join.HasKey("problem_id", "tag_id");
-                    join.HasIndex("tag_id", "problem_id").HasDatabaseName("ix_problem_tag_tag_problem");
-                });
+        modelBuilder.Entity<ProblemTag>(e =>
+        {
+            e.HasKey(x => new { x.ProblemId, x.TagId });
 
-        #endregion Problem <-> Tag (many-to-many)
+            e.HasOne(pa => pa.Problem)
+             .WithMany(p => p.ProblemTagsAll)
+             .HasForeignKey(pa => pa.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(pa => pa.Tag)
+             .WithMany(a => a.ProblemTagsAll)
+             .HasForeignKey(pa => pa.TagId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Efficient lookup: all problems with a given tag.
+            e.HasIndex(x => x.TagId).HasDatabaseName("ix_problem_tag_tag_id");
+
+            // Efficient lookup: all tags of a given problem.
+            e.HasIndex(x => x.ProblemId).HasDatabaseName("ix_problem_tag_problem_id");
+        });
+
+        #endregion ProblemTag (ordered join)
 
         #region ProblemSimilarity
 

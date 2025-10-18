@@ -1,30 +1,44 @@
-Suggest NEW tags (in Slovak) for math problems. Propose only generally useful tags that apply to many problems.
+Given a list of math problems, suggest tags that would be useful for describing these problems,
+in general (you are not suggesting tags for the individual problems, only tags that would be
+generally useful for describing math problems). I will give you some example tags below, but
+you should exclude those from your output (those are already known, and are of no interest).
 
-Categories:
-- Area: Mathematical fields (Algebra, Geometria, etc.)
-- Type: Problem structures (Sústava rovníc, Nerovnosť, etc.)  
-- Technique: Solution methods (Indukcia, Dirichletov princíp, etc.)
+{tag_rules}
 
-DISALLOWED TAGS:
-{disallowed_tags}
+EXAMPLE TAGS:
+{example_tags}
 
 PROBLEMS:
 {problems}
 
-Rules:
-- Use ONLY tags NOT in disallowed list
-- Prefer established Slovak mathematical terms
-- No difficulty levels or competition names
-- No problem-specific tags
-- No restatements of disallowed tags (e.g., if "Matematická indukcia" disallowed, don't suggest "Dôkaz matematickou indukciou", "Indukčný dôkaz", etc.)
+You must output a JSON (and only this JSON) with the following format:
+{[category]: [list of tags]}
 
-Before responding, verify:
-✓ No tag appears in disallowed list (including restatements/variations)
-✓ Tags apply to multiple problems (not problem-specific)
-✓ Uses established Slovak terms
-✓ Each tag fits clearly in one category
-
-Output JSON:
-{"area": ["tag"], "type": ["tag"], "technique": ["tag"]}
-
-If no new tags: NONE
+I.e. the JSON lists for each category the tags of that category.
+For example, this would be a valid output:
+{
+  "area": [
+    "Logická úloha",
+    "Kombinatorická geometria",
+    "Kombinatorika",
+    "Komplexné čísla"
+  ],
+  "logic": [
+    "Konštrukčná úloha",
+    "Dôkaz ekvivalencie",
+    "Optimalizačná úloha"
+  ],
+  "term": [
+    "Dotyčnicový štvoruholník",
+    "Faktoriál",
+    "Fibonacciho postupnosť",
+    "Geometrická postupnosť",
+    "Sústava rovníc"
+  ],
+  "technique": [
+    "Cauchyho nerovnosť",
+    "Čínska zvyšková veta"
+    "Dirichletov princíp",
+    "Sínusová veta",
+  ]
+}
