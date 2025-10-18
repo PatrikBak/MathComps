@@ -7,9 +7,6 @@ using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
-// We'll use DI
-var services = new ServiceCollection();
-
 // Build a config...
 var configuration = new ConfigurationBuilder()
     // Which starts off with user secrets
@@ -18,6 +15,9 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     // Ship
     .Build();
+
+// We'll use DI
+var services = new ServiceCollection();
 
 // Register configuration for dependency injection.
 services.AddSingleton<IConfiguration>(configuration);
@@ -32,11 +32,14 @@ services.AddLogging(logging =>
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
 
-// The DatabaseSeeder contains the core logic for populating the database.
+// The seeder contains the core logic for populating the database.
 services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
 
-// The application runs with the provided command-line arguments and returns the exit code.
-return await new CommandApp<SeedCommand>(registrar).RunAsync(args);
+// Start the app with a single command
+var app = new CommandApp<SeedCommand>(registrar);
+
+// Run the app, it'll return the exit code
+return await app.RunAsync(args);
