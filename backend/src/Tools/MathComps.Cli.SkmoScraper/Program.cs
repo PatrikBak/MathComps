@@ -3,7 +3,6 @@ using MathComps.Cli.SkmoScraper.Services;
 using MathComps.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
@@ -13,36 +12,50 @@ using System.Text.Json;
 // We need this to handle window-1250...Crazy
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-// Build the host with logging configuration to suppress default logging output
-var builder = Host.CreateApplicationBuilder(args);
+// Build a config...
+var configuration = new ConfigurationBuilder()
+    // Which starts off with user secrets
+    .AddUserSecrets<Program>()
+    // And might use env variables to override the connection string to update prod DB 😇
+    .AddEnvironmentVariables()
+    // Ship
+    .Build();
 
-// Configure logging to minimize console output and focus on errors only
-builder.Logging.ClearProviders();
-builder.Logging.SetMinimumLevel(LogLevel.Warning);
+// We'll use DI
+var services = new ServiceCollection();
 
-// Add user secrets for development (connection string will come from secrets)
-builder.Configuration.AddUserSecrets<Program>(optional: true);
+// Register configuration for dependency injection.
+services.AddSingleton<IConfiguration>(configuration);
+
+// Configure logging to reduce noise from EF Core queries.
+services.AddLogging(logging =>
+{
+    // No logging of every crazy query
+    logging.SetMinimumLevel(LogLevel.Warning);
+});
 
 // The core scraping logic is encapsulated in a dedicated service.
-builder.Services.AddHttpClient<ISkmoScraperService, SkmoScraperService>();
+services.AddHttpClient<ISkmoScraperService, SkmoScraperService>();
 
 // This does actual DB manipulation
-builder.Services.AddTransient<ISkmoDatabaseService, SkmoDatabaseService>();
+services.AddTransient<ISkmoDatabaseService, SkmoDatabaseService>();
 
 // Register database context using Infrastructure project's extension method
-builder.Services.AddMathCompsDbContext(builder.Configuration);
+services.AddMathCompsDbContext(configuration);
 
 // The JSON serializer is configured to write indented JSON for readability.
-builder.Services.AddSingleton(new JsonSerializerOptions
+services.AddSingleton(new JsonSerializerOptions
 {
     WriteIndented = true,
 });
 
-// A custom registrar is used to integrate Spectre.Console.Cli with the application's service collection.
-using var registrar = new DependencyInjectionRegistrar(builder.Services);
+// A custom registrar is used to integrate Spectre.Console.Cli with the DI container.
+using var registrar = new DependencyInjectionRegistrar(services);
+
+// Start the app with DI
 var app = new CommandApp(registrar);
 
-// The application is configured with commands for scraping and updating solution links.
+// The application is configured with commands
 app.Configure(config =>
 {
     // Register commands
@@ -53,5 +66,5 @@ app.Configure(config =>
     config.PropagateExceptions();
 });
 
-// The application runs with the provided command-line arguments and returns the exit code.
+// Run the app, it'll return the exit code
 return await app.RunAsync(args);
