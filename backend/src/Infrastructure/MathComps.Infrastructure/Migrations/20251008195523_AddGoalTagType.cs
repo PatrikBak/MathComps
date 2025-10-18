@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace MathComps.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class newTagType : Migration
+    public partial class AddGoalTagType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

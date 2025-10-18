@@ -2,6 +2,7 @@ using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
+using MathComps.Shared;
 using MathComps.Shared.Cli;
 using Spectre.Console;
 using System.Collections.Immutable;
@@ -28,7 +29,7 @@ public class InteractiveTagManagerCommand(
     protected override string ApplicationDescription => "Interactive tag management for MathComps problems";
 
     /// <inheritdoc/>
-    protected override string CommandUsageHint => "Commands: add <slug> \"<tag>\" <type> | remove <slug> \"<tag>\" | clear <slug> | list <slug> | help | exit";
+    protected override string CommandUsageHint => "Commands: add <slug> \"<tag>\" <type> | remove <slug> \"<tag>\" | clear <slug> | clearTag \"<tag>\" | list <slug> | help | exit";
 
     /// <inheritdoc/>
     protected override async Task HandleCommandAsync(string[] commandParts)
@@ -90,7 +91,7 @@ public class InteractiveTagManagerCommand(
 
         // Validate and parse tag type against allowed enumeration values.
         if (!Enum.TryParse<TagType>(tagTypeString, ignoreCase: true, out var tagType))
-            throw new ArgumentException($"Tag type must be one of: {string.Join(", ", Enum.GetNames<TagType>())}");
+            throw new ArgumentException($"Tag type must be one of: {Enum.GetNames<TagType>().ToJoinedString()}");
 
         // Retrieve the problem ID for database operations.
         var problemId = await problemLookupService.GetProblemIdBySlugAsync(problemSlug);
@@ -98,23 +99,28 @@ public class InteractiveTagManagerCommand(
         // Make sure we have it
         if (problemId == null)
         {
-            // Log if not
+            // Log and quit if not
             AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
             return;
         }
 
         // Construct tag collection in the format expected by the database service.
         // The existing service requires categorized collections rather than individual tags.
-        var tagsDict = new Dictionary<string, ProblemTagData>
+        var tags = new Dictionary<string, ProblemTagData>
         {
+            // Manual tags gets the best fit
             [tagName] = new ProblemTagData(tagType, 1.0f)
         };
 
         // Execute the database update using single-problem operation.
-        await databaseService.AddTagsForProblemAsync(problemId.Value, tagsDict.ToImmutableDictionary());
+        await databaseService.AddTagsForProblemAsync(problemId.Value, tags.ToImmutableDictionary());
 
-        // Confirm successful operation with clear visual feedback.
-        AnsiConsole.MarkupLine($"[green]✓[/] Added [yellow]{Markup.Escape(tagName)}[/] ([dim]{tagType.ToString().ToLower()}[/]) to [cyan]{Markup.Escape(problemSlug)}[/]");
+        // Log success
+        AnsiConsole.MarkupLine(
+            $"[green]✓[/] Added [yellow]{Markup.Escape(tagName)}[/] " +
+            $"([dim]{tagType.ToString().ToLower()}[/])" +
+            $" to [cyan]{Markup.Escape(problemSlug)}[/]"
+        );
     }
 
     /// <summary>
@@ -139,7 +145,7 @@ public class InteractiveTagManagerCommand(
         // Make sure we have it
         if (problemId == null)
         {
-            // Log if not
+            // Log and quit if not
             AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
 
             return;
@@ -166,17 +172,26 @@ public class InteractiveTagManagerCommand(
         // Parse args
         var tagName = parts[1];
 
-        // Load usage for all tags; this is our decision surface.
-        var usages = await databaseService.GetAllTagUsageAsync();
-        var usage = usages.FirstOrDefault(u => u.Name == tagName);
+        // Find all tag usages to get its ID
+        var usage = (await databaseService.GetAllTagUsageAsync())
+            // So we can find the current one
+            .FirstOrDefault(usage => usage.Name == tagName);
+
+        // Make sure we have it
         if (usage is null)
         {
+            // Log and quit if not
             AnsiConsole.MarkupLine($"[red]Tag not found:[/] {Markup.Escape(tagName)}");
             return;
         }
 
-        await databaseService.RemoveTagFromAllProblemsAsync(usage.Id);
-        AnsiConsole.MarkupLine($"[green]✓[/] Removed [yellow]{Markup.Escape(tagName)}[/] from {usage.ProblemCount} problems");
+        // Do the removal
+        await databaseService.RemoveTagsFromAllProblemsAsync([usage.Name]);
+
+        // Log with the numbers of affected problems
+        AnsiConsole.MarkupLine(
+            $"[green]✓[/] Removed [yellow]{Markup.Escape(tagName)}[/] from {usage.ProblemCount} problems"
+        );
     }
 
     /// <summary>
@@ -200,12 +215,12 @@ public class InteractiveTagManagerCommand(
         // Make sure we have it
         if (problemId == null)
         {
-            // Log if not
+            // Log and quit if not
             AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
-
             return;
         }
 
+        // Do the update
         await databaseService.ClearTagsForProblemAsync(problemId.Value);
 
         // Confirm successful operation with clear visual feedback.
@@ -233,33 +248,49 @@ public class InteractiveTagManagerCommand(
         // Make sure we have it
         if (problemId == null)
         {
-            // Log if not
+            // Log and quit if not
             AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
-
             return;
         }
 
-        // Retrieve current tags for the problem from the database service.
-        var tagCollection = await databaseService.GetTagsForProblemAsync(problemId.Value);
-        var tagsByCategory = tagCollection.GroupBy(kv => kv.Value.TagType)
-            .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(kv => kv.Key, kv => kv.Value));
+        // Ge the tags for the problem
+        var tagsByCategory = (await databaseService.GetTagsForProblemAsync(problemId.Value))
+            // Group by type...
+            .GroupBy(pair => pair.Value.TagType)
+            // So we can map from type...
+            .ToImmutableDictionary(group => group.Key,
+                // To a dictionary mapping name to the data with AI's metadata
+                group => group.ToImmutableDictionary(pair => pair.Key, pair => pair.Value));
 
-        // Display the tags organized by category for clear presentation.
+        // Log the problem
         AnsiConsole.MarkupLine($"[bold]Tags for problem [cyan]{Markup.Escape(problemSlug)}[/]:[/]");
+        AnsiConsole.WriteLine();
 
-        foreach (var kv0 in tagsByCategory)
+        // Log each tag
+        foreach (var (tagType, tags) in tagsByCategory)
         {
-            AnsiConsole.MarkupLine($"  [dim]{kv0.Key}:[/]");
-            foreach (var kv in kv0.Value)
+            // Log the tag type
+            AnsiConsole.MarkupLine($"  [yellow bold]{tagType}[/]");
+
+            // Log each tag under the type
+            foreach (var (tag, (_, goodnessOfFit, justification, _)) in tags)
             {
-                AnsiConsole.MarkupLine($"    [green]{kv.Key}[/] (\"{kv.Value.Justification}\", GoodnessOfFit = {kv.Value.GoodnessOfFit})");
+                // Log the tag name and metadata
+                AnsiConsole.MarkupLine($"    [green]{tag}[/]");
+                AnsiConsole.Markup($"      [blue]Fit:[/] [cyan]{goodnessOfFit}[/]");
+
+                // Create paragraph with "Reason:" prefix included, padded to align under the tag name.
+                var reasonContent = new Markup($"[blue]Reason:[/] [grey]{justification}[/]");
+                var paddedReason = new Padder(reasonContent).PadLeft(6);
+
+                // Write it out
+                AnsiConsole.Write(paddedReason);
             }
         }
 
         // If no tags were found, show appropriate message.
-        if (tagCollection.Count == 0)
+        if (tagsByCategory.Count == 0)
             AnsiConsole.MarkupLine("  [dim]No tags assigned[/]");
-
     }
 
     /// <inheritdoc/>
@@ -268,24 +299,24 @@ public class InteractiveTagManagerCommand(
         AnsiConsole.MarkupLine("[bold]Available Commands:[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]add[/] <problem-slug> \"<tag-name>\" <tag-type>");
-        AnsiConsole.MarkupLine("  Add a tag to a problem. Tag type must be: area, type, or technique");
-        AnsiConsole.MarkupLine("  Example: [dim]add csmo-2023-a-1 \"Number Theory\" area[/]");
+        AnsiConsole.MarkupLine("  Add a tag to a problem. Tag type must be: area, type, technique, or goal");
+        AnsiConsole.MarkupLine("  Example: [dim]add 75-csmo-a-i-1 \"Kombinatorická geometria\" area[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]remove[/] <problem-slug> \"<tag-name>\"");
         AnsiConsole.MarkupLine("  Remove a specific tag from a problem");
-        AnsiConsole.MarkupLine("  Example: [dim]remove csmo-2023-a-1 \"Geometry\"[/]");
+        AnsiConsole.MarkupLine("  Example: [dim]remove 75-csmo-a-i-1 \"Geometria\"[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]clear[/] <problem-slug>");
         AnsiConsole.MarkupLine("  Remove all tags from a problem");
-        AnsiConsole.MarkupLine("  Example: [dim]clear csmo-2023-a-1[/]");
+        AnsiConsole.MarkupLine("  Example: [dim]clear 75-csmo-a-i-1[/]");
         AnsiConsole.MarkupLine("");
-        AnsiConsole.MarkupLine("[cyan]clearTag[/] <tag-name>");
+        AnsiConsole.MarkupLine("[cyan]clearTag[/] \"<tag-name>\"");
         AnsiConsole.MarkupLine("  Remove the tag from all problems");
-        AnsiConsole.MarkupLine("  Example: [dim]clearTag \"Teória kúzel\"[/]");
+        AnsiConsole.MarkupLine("  Example: [dim]clearTag \"Teória kúziel\"[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]list[/] <problem-slug>");
         AnsiConsole.MarkupLine("  Show all tags currently assigned to a problem");
-        AnsiConsole.MarkupLine("  Example: [dim]list csmo-2023-a-1[/]");
+        AnsiConsole.MarkupLine("  Example: [dim]list 75-csmo-a-i-1[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]help[/]");
         AnsiConsole.MarkupLine("  Show this help information");

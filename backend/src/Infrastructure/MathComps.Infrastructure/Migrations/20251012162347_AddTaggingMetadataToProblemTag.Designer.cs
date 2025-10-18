@@ -14,8 +14,8 @@ using Pgvector;
 namespace MathComps.Infrastructure.Migrations
 {
     [DbContext(typeof(MathCompsDbContext))]
-    [Migration("20251015104517_ProblemTagAll")]
-    partial class ProblemTagAll
+    [Migration("20251012162347_AddTaggingMetadataToProblemTag")]
+    partial class AddTaggingMetadataToProblemTag
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -354,7 +354,7 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("confidence");
 
-                    b.Property<float>("GoodnessOfFit")
+                    b.Property<float?>("GoodnessOfFit")
                         .HasColumnType("real")
                         .HasColumnName("goodness_of_fit");
 
@@ -655,14 +655,14 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemTag", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
-                        .WithMany("ProblemTagsAll")
+                        .WithMany("ProblemTags")
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_problem_tag_problems_problem_id");
 
                     b.HasOne("MathComps.Domain.EfCoreEntities.Tag", "Tag")
-                        .WithMany("ProblemTagsAll")
+                        .WithMany("ProblemTags")
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -738,7 +738,7 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.Navigation("ProblemAuthors");
 
-                    b.Navigation("ProblemTagsAll");
+                    b.Navigation("ProblemTags");
 
                     b.Navigation("SimilarProblems");
                 });
@@ -760,7 +760,7 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Tag", b =>
                 {
-                    b.Navigation("ProblemTagsAll");
+                    b.Navigation("ProblemTags");
                 });
 #pragma warning restore 612, 618
         }

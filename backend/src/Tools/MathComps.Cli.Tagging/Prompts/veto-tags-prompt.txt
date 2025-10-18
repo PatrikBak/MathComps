@@ -25,8 +25,8 @@ FORBIDDEN TAGS:
 {forbidden_tags}
 
 You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"approved": true | false, "reason": string}}
+{[tag]: {"Approved": true | false, "Reason": string}}
 
 i.e. the individual tags are the keys of the JSON object, the values are JSON objects/dicts
 saying whether the tag has been approved and the reason behind the decision. For each tag,
-specify a non-empty string as "reason" only if that tag has been rejected.
+specify a non-empty string as "Reason" only if that tag has been rejected.

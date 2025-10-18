@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace MathComps.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class ProblemTagAll : Migration
+    public partial class MakeGoodnessOfFitRequired : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

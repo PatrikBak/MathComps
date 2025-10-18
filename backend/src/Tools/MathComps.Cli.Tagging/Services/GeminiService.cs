@@ -1,7 +1,7 @@
 using MathComps.Cli.Tagging.Settings;
+using MathComps.Shared;
 using Microsoft.Extensions.Options;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MathComps.Cli.Tagging.Services;
@@ -13,14 +13,6 @@ namespace MathComps.Cli.Tagging.Services;
 /// <param name="geminiSettings">The configuration settings for the Gemini API.</param>
 public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> geminiSettings) : IGeminiService
 {
-    /// <summary>
-    /// Reusable JsonSerializer options with camelCase naming policy.
-    /// </summary>
-    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     /// <inheritdoc />
     public async Task<string> GenerateContentAsync(string model, string systemPrompt, string userPrompt, int thinkingBudget, CancellationToken cancellationToken = default)
     {
@@ -34,7 +26,7 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
         // The request URL is constructed with the model endpoint. 
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
-        // The payload includes a system instruction to define the AI's role and the user's content (the actual prompt).
+        // Prepare the request data in the structure expected by the Gemini API.
         var payload = new
         {
             SystemInstruction = new
@@ -52,8 +44,7 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
         };
 
         // The payload is serialized to JSON and sent as the body of the POST request.
-        var jsonPayload = JsonSerializer.Serialize(payload, _jsonSerializerOptions);
-        using var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+        using var content = new StringContent(payload.ToJson(), Encoding.UTF8, "application/json");
 
         // The request is sent to the Gemini API...
         var response = await httpClient.PostAsync(url, content, cancellationToken);

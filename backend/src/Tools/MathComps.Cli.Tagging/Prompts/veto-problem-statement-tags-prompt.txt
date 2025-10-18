@@ -5,10 +5,10 @@ i.e. either approve or reject it, based on the following rules:
 
 - Whether it actually fits the description, whether the justification does not
   contradict the description
-- The tag must be relevant to the problem. Even if the provided "justification" for using
+- The tag must be relevant to the problem. Even if the provided "Justification" for using
   the tag is true, if it is not relevant to the problem (e.g. it says something true
   mathematically that is not related to the problem), it should be rejected.
-- Reject any tags where their listed "justification" is related to the problem solution.
+- Reject any tags where their listed "Justification" is related to the problem solution.
   In particular, the justification mustn't be a speculation about how something might
   be used in the solution.
 - Each tag must trivially follow from the problem statement, i.e. there must be no non-trivial
@@ -38,14 +38,14 @@ PROBLEM: {problem_statement}
 
 List of candidate tags has the following format:
 
-{[tag]: {"tagCategory": string, "tagDescription": string, "justification": string}}
+{[tag]: {"TagCategory": string, "TagDescription": string, "Justification": string}}
 
 CANDIDATE TAGS:
 {candidate_tags}
 
 You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"approved": true | false, "justification": string}}
+{[tag]: {"Approved": true | false, "Justification": string}}
 
 Each tag from among the candidate tags must be exactly once in the output JSON.
-You should provide a justification only if the tag is rejected i.e. "approved" is false;
+You should provide a justification only if the tag is rejected i.e. "Approved" is false;
 otherwise, leave the justification empty.

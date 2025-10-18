@@ -346,7 +346,7 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             e.HasOne(pa => pa.Tag)
              .WithMany(a => a.ProblemTagsAll)
              .HasForeignKey(pa => pa.TagId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Cascade);
 
             // Efficient lookup: all problems with a given tag.
             e.HasIndex(x => x.TagId).HasDatabaseName("ix_problem_tag_tag_id");

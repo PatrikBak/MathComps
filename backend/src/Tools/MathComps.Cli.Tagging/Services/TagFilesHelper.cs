@@ -1,6 +1,5 @@
-using System.Collections.Immutable;
-using System.Text.Json;
 using MathComps.Cli.Tagging.Dtos;
+using System.Text.Json;
 
 namespace MathComps.Cli.Tagging.Services;
 
@@ -21,49 +20,28 @@ public static class TagFilesHelper
     /// <remarks>The tags with their type</remarks>
     public static TagsByCategory GetCategorizedApprovedTags()
     {
+        // Read the approved tags JSON file
         var jsonContent = File.ReadAllText(Path.Combine(DataFolder, "approved-tags.json"));
-        return JsonSerializer.Deserialize<TagsByCategory>(jsonContent) ?? throw new InvalidOperationException("Could not parse json");
-    }
 
-    public static ImmutableDictionary<string, string> GetForbiddenTags()
-    {
-        var text = File.ReadAllText(Path.Combine(DataFolder, "forbidden-tags.json"));
-        return JsonSerializer.Deserialize<ImmutableDictionary<string, string>>(text)
-            ?? throw new Exception("Couldn't parse forbidden tags");
+        // Deserialize into a custom structure
+        return JsonSerializer.Deserialize<TagsByCategory>(jsonContent)
+            // Just in case, the file should be valid
+            ?? throw new InvalidOperationException("Approved tags parsed to null");
     }
 
     /// <summary>
-    /// Write AI's categorized tag suggestions in the same format as approved-tags.json for easy manual merging.
+    /// Read forbidden tags with their reasons from the JSON file.
+    /// Returns a <see cref="TagDescriptions"/> record containing tag names mapped to their forbidden reasons.
     /// </summary>
-    /// <param name="suggestedTagsJson">The JSON response from the AI containing categorized tag suggestions.</param>
-    /// <param name="tags">Already parsed and deduplicated tags</param>
-    /// <param name="problems">The slugs of problems it used to infer the tags, written for debugging purposes.</param>
-    public static void WriteTags(string suggestedTagsJson, SimpleTagsByCategory? tags, ImmutableList<string> problems)
+    /// <returns>A <see cref="TagDescriptions"/> record containing forbidden tags and their reasons</returns>
+    public static TagDescriptions GetForbiddenTags()
     {
-        var datetime = DateTime.Now;
+        // Read the forbidden tags JSON file
+        var text = File.ReadAllText(Path.Combine(DataFolder, "forbidden-tags.json"));
 
-        {
-            var output = new List<string>
-            {
-                "AI-Suggested Tags",
-                $"Generated: {datetime:yyyy-MM-dd HH:mm:ss}",
-                $"Based on {problems.Count} problems",
-                "",
-                "Original AI Response (for debugging):",
-                $"{suggestedTagsJson}",
-                "Problems analyzed:"
-            };
-            output.AddRange(problems);
-
-            var path = Path.Combine(DataFolder, "SuggestedTags", $"{datetime:yyyy-MM-dd_HH-mm-ss}.txt");
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            File.WriteAllLines(path, output);
-        }
-
-        if (tags != null)
-        {
-            var path = Path.Combine(DataFolder, "SuggestedTags", $"{datetime:yyyy-MM-dd_HH-mm-ss}.json");
-            File.WriteAllText(path, tags.ToJson());
-        }
+        // Deserialize to a TagDescriptions record mapping tag names to the reasons they are forbidden
+        return JsonSerializer.Deserialize<TagDescriptions>(text)
+            // Just in case, the file should be valid
+            ?? throw new InvalidOperationException("Forbidden tags parsed to null");
     }
 }

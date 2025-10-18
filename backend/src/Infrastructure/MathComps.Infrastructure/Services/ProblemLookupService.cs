@@ -24,7 +24,7 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         // Query for problem ID only to minimize data transfer and improve performance
         return await dbContext.Problems
             .Where(problem => problem.Slug == problemSlug)
-            .Select(problem => problem.Id)
+            .Select(problem => (Guid?)problem.Id)
             .FirstOrDefaultAsync(cancellationToken);
     }
 

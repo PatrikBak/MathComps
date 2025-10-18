@@ -19,12 +19,12 @@ Rules:
 - Any number of tags may be approved, but they must be relevant. Each tag must be somehow related to the solution.
 
 You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"goodnessOfFit": float, "justification": string}}
+{[tag]: {"GoodnessOfFit": float, "Justification": string}}
 
 It must be a valid JSON (i.e. no C-like comments, ...).
 
 Each tag from among the candidate tags must be exactly once in the output JSON.
-Do not use escaped TeX (e.g. "\angle", "\perp", etc.) in the "justification" field.
-The field "goodnessOfFit" must be a real number between 0 and 1, and it should be
+Do not use escaped TeX (e.g. "\angle", "\perp", etc.) in the "Justification" field.
+The field "GoodnessOfFit" must be a real number between 0 and 1, and it should be
 a numerical value representing how good of a fit the tag is (0 meaning no fit at all,
 1 meaning perfect fit).

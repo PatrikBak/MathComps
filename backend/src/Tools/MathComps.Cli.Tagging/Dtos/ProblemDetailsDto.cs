@@ -17,8 +17,10 @@ public record ProblemDetailsDto(
     ImmutableDictionary<string, ProblemTagData> TagsData)
 {
     /// <summary>
-    /// Returns only tag with goodness-of-fit at least 0.5.
+    /// Returns only tag with at are goodness of fit above the minimum threshold.
     /// </summary>
+    /// <returns>Dictionary of approved tags.</returns>
     public ImmutableDictionary<string, ProblemTagData> ApprovedTags() =>
-        TagsData.Where(kv => kv.Value.GoodnessOfFit >= 0.5f).ToImmutableDictionary();
+        // Filter tags to only those that are approved
+        TagsData.Where(pair => pair.Value.IsApproved).ToImmutableDictionary();
 }

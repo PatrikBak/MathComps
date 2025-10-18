@@ -62,6 +62,7 @@ public class ProblemFilterService(
             .Select(problem => new ProblemDto(
                 problem.Slug,
                 problem.StatementParsed,
+
                 // Problem Source
                 new ProblemSource(
                     // Season
@@ -91,8 +92,17 @@ public class ProblemFilterService(
                         ),
                     problem.Number
                 ),
+
                 // Tags
-                problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Select(pt => new TagDto(pt.Tag.Slug, pt.Tag.Name, pt.Tag.TagType)).ToImmutableList(),
+                problem.ProblemTagsAll.AsQueryable()
+                    .Where(ProblemTag.IsGoodEnoughTag)
+                    .Select(problemTag => new TagDto(
+                        problemTag.Tag.Slug,
+                        problemTag.Tag.Name,
+                        problemTag.Tag.TagType)
+                    )
+                    .ToImmutableList(),
+
                 // Authors
                 problem.ProblemAuthors
                     // Maintain author order by ordinal
@@ -105,6 +115,7 @@ public class ProblemFilterService(
                     ))
                     // Evaluate 
                     .ToImmutableList(),
+
                 // Similar Problems 
                 problem.SimilarProblems
                     // Only similar enough problems
@@ -159,12 +170,14 @@ public class ProblemFilterService(
                     ))
                     // Evaluate
                     .ToImmutableList(),
+
                 // Images
                 problem.Images
                     // Project to ProblemImageDto
                     .Select(image => new ProblemImageDto(image.ContentId, image.Width, image.Height, image.Scale))
                     // Evaluate
                     .ToImmutableList(),
+
                 problem.SolutionLink
             ));
 
@@ -278,7 +291,7 @@ public class ProblemFilterService(
 
                     // We want any tags
                     problems = problems.Where(problem =>
-                        problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Any(pt => parameters.TagSlugs.Contains(pt.Tag.Slug)));
+                        problem.ProblemTagsAll.AsQueryable().Where(ProblemTag.IsGoodEnoughTag).Any(pt => parameters.TagSlugs.Contains(pt.Tag.Slug)));
 
                     break;
 
@@ -290,7 +303,7 @@ public class ProblemFilterService(
                     {
                         // Each iteration adds one more required tag
                         problems = problems.Where(problem =>
-                            problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f).Any(pt => pt.Tag.Slug == tagSlug));
+                            problem.ProblemTagsAll.AsQueryable().Where(ProblemTag.IsGoodEnoughTag).Any(pt => pt.Tag.Slug == tagSlug));
                     }
 
                     break;
@@ -408,7 +421,7 @@ public class ProblemFilterService(
         // Build tag facet options sorted by popularity then alphabetically
         var tagGroups = await tagsScope
             // Extract tags for grouping
-            .SelectMany(problem => problem.ProblemTagsAll.Where(pt => pt.GoodnessOfFit >= 0.5f))
+            .SelectMany(Problem.GoodTags)
             .Select(pt => pt.Tag)
             // Group by unique tag (name + slug)
             .GroupBy(tag => new { tag.Name, tag.Slug })

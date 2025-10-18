@@ -3,14 +3,19 @@
     "Suggest Tags": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "suggest-tags --count 50"
+      "commandLineArgs": "suggest-tags --count 10"
     },
     "Run Tagging": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "tag-problems --count 10 --dry-run"
+      "commandLineArgs": "tag-problems --count 10 --skip-tagged --num-threads 4"
     },
-    "Remove tags": {
+    "Run Vetoing": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "veto-problem-tags --count 10 --num-threads 4"
+    },
+    "Prune tags": {
       "commandName": "Project",
       "workingDirectory": ".",
       "commandLineArgs": "prune-tags --limit 5"

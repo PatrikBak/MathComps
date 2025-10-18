@@ -9,16 +9,16 @@ SOLUTION: {problem_solution}
 
 List of candidate tags has the following format:
 
-{[tag]: {"tagCategory": string, "tagDescription": string, "justification": string}}
+{[tag]: {"TagCategory": string, "TagDescription": string, "Justification": string}}
 
 CANDIDATE TAGS:
 {candidate_tags}
 
 You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"approved": true | false, "justification": string}}
+{[tag]: {"Approved": true | false, "Justification": string}}
 
 It must be a valid JSON (i.e. no C-like comments, ...).
 
 Each tag from among the candidate tags must be exactly once in the output JSON.
-You should provide a justification only if the tag is rejected i.e. "approved" is false;
+You should provide a justification only if the tag is rejected i.e. "Approved" is false;
 otherwise, leave the justification empty.

@@ -5,7 +5,6 @@ using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
@@ -33,13 +32,10 @@ services.AddOptions<GeminiSettings>()
 // Bind the Gemini service
 services.AddHttpClient<IGeminiService, GeminiService>();
 
-// Command-specific Gemini settings are configured for each CLI command.
-services.AddOptions<CommandGeminiSettings>("SuggestTags").Bind(configuration.GetSection("SuggestTags"));
-services.AddOptions<CommandGeminiSettings>("VetoTags").Bind(configuration.GetSection("VetoTags"));
-services.AddOptions<CommandGeminiSettings>("TagProblemStatement").Bind(configuration.GetSection("TagProblemStatement"));
-services.AddOptions<CommandGeminiSettings>("TagProblemSolution").Bind(configuration.GetSection("TagProblemSolution"));
-services.AddOptions<CommandGeminiSettings>("VetoProblemStatementTags").Bind(configuration.GetSection("VetoProblemStatementTags"));
-services.AddOptions<CommandGeminiSettings>("VetoProblemSolutionTags").Bind(configuration.GetSection("VetoProblemSolutionTags"));
+// Add settings for commands
+services.AddOptions<SuggestTagsSettings>().Bind(configuration.GetSection("SuggestTagsSettings"));
+services.AddOptions<TagProblemsSettings>().Bind(configuration.GetSection("TagProblemsSettings"));
+services.AddOptions<VetoProblemTagsSettings>().Bind(configuration.GetSection("VetoProblemTagsSettings"));
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
