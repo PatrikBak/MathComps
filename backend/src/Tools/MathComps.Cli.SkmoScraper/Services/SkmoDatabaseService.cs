@@ -1,3 +1,4 @@
+using MathComps.Cli.SkmoScraper.Dtos;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace MathComps.Cli.SkmoScraper.Services;
 public class SkmoDatabaseService(IDbContextFactory<MathCompsDbContext> contextFactory) : ISkmoDatabaseService
 {
     /// <inheritdoc/>
-    public async Task<int> UpdateProblemsWithSolutionLinkAsync(
+    public async Task<UpdateResult> UpdateProblemsWithSolutionLinkAsync(
         int seasonYear,
         string competitionSlug,
         string? categorySlug,
@@ -49,9 +50,19 @@ public class SkmoDatabaseService(IDbContextFactory<MathCompsDbContext> contextFa
             query = query.Where(problem => problem.RoundInstance.Round.Slug == roundSlug);
         }
 
-        // Efficiently update problems and return the number of updated rows
-        return await query.ExecuteUpdateAsync(problem =>
-            // We just setting one property
-            problem.SetProperty(entity => entity.SolutionLink, solutionLink));
+        // First, count total problems that match the criteria
+        var totalProblemsFound = await query.CountAsync();
+
+        // The query will return the number of problems updated
+        var problemsUpdated = await query
+            // That don't already have the correct solution link
+            .Where(problem => problem.SolutionLink != solutionLink)
+            // And on those
+            .ExecuteUpdateAsync(problem =>
+                // Set just the solution link
+                problem.SetProperty(entity => entity.SolutionLink, solutionLink));
+
+        // We'd like to return both the number of problems updated and total found
+        return new UpdateResult(problemsUpdated, totalProblemsFound);
     }
 }

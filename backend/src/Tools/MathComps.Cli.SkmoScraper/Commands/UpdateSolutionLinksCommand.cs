@@ -88,27 +88,27 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
                     }
 
                     // Update problems in the database with the solution link
-                    var updatedProblems = await databaseService.UpdateProblemsWithSolutionLinkAsync(
+                    var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(
                         solution.Year,
                         competitionSlug,
                         categorySlug,
                         roundSlug,
                         solution.SolutionLink);
 
-                    // If no problems were updated, we're sad
-                    if (updatedProblems == 0)
-                    {
-                        // Make a nice slug for logging
-                        var slug = $"{solution.Year}-{competitionSlug}" +
-                                   $"{(categorySlug == null ? "" : $"-{categorySlug}")}" +
-                                   $"{(roundSlug == null ? "" : $"-{roundSlug}")}";
+                    // Make a nice slug for logging
+                    var slug = $"{solution.Year}-{competitionSlug}" +
+                               $"{(categorySlug == null ? "" : $"-{categorySlug}")}" +
+                               $"{(roundSlug == null ? "" : $"-{roundSlug}")}";
 
-                        // Make aware of all props
+                    // If no problems to update
+                    if (result.TotalProblemsFound == 0)
+                    {
+                        // This is good to know
                         AnsiConsole.MarkupLine($"[red]Found no problems for [yellow]{slug.ToUpperInvariant()}[/][/]");
                     }
 
-                    // Tally the count
-                    totalUpdatedProblems += updatedProblems;
+                    // We'll report the total updated problems
+                    totalUpdatedProblems += result.ProblemsUpdated;
 
                     // Let's move on onto the next link
                     task.Increment(1);
