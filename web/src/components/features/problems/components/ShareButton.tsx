@@ -60,8 +60,8 @@ export const ShareButton = ({
 
       // URL based on whether there are additional filters
       const shareUrls = {
-        withFilters: `${window.location.origin}/${ROUTES.PROBLEMS}?${serializedFilters}`,
-        withoutFilters: `${window.location.origin}/${ROUTES.PROBLEMS}`,
+        withFilters: `${window.location.origin}${ROUTES.PROBLEMS}?${serializedFilters}`,
+        withoutFilters: `${window.location.origin}${ROUTES.PROBLEMS}`,
       }
       const shareUrl = serializedFilters ? shareUrls.withFilters : shareUrls.withoutFilters
 

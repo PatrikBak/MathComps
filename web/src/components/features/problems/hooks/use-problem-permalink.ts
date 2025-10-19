@@ -9,7 +9,7 @@ export const useProblemPermalink = () => {
 
   const copyPermalink = useCallback(
     (slug: string) => {
-      const url = `${window.location.origin}/${ROUTES.PROBLEMS}?id=${slug}`
+      const url = `${window.location.origin}${ROUTES.PROBLEMS}?id=${slug}`
       clipboard.copy(url)
       toast.success('Odkaz na úlohu bol skopírovaný do schránky')
     },
