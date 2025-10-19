@@ -79,7 +79,7 @@ MathComps/
 **Deploy (requires DB access):**
 
 4. **Run the database seeder** (needs a connection to the real DB) - see [Database Seeder README](backend/src/Tools/MathComps.Cli.DatabaseSeeder/README.md) for details
-5. **Run the update links** if there is a new link or new problems with an existing link
+5. **Run the update links** if there is a new link or new problems with an existing link - see [SKMO Scraper README](backend/src/Tools/MathComps.Cli.SkmoScraper/README.md) for details
 6. **Run the tagging tool** to tag new problems if there are any - see [Tagging README](backend/src/Tools/MathComps.Cli.Tagging/README.md) for details
 7. **Run the similarity tool** to calculate similarities for new problems - see [Similarity README](backend/src/Tools/MathComps.Cli.Similarity/README.md) for details
 
