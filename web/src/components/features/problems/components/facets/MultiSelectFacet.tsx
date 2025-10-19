@@ -108,19 +108,24 @@ export default function MultiSelectFacet({
     // Only run this logic when the popover transitions from closed to open
     // or when the user deleted the content of the search filter
     if (facet.open || !facet.query) {
-      // Sort with selected items first - use refs to get current state
-      setCurrentOptions(
-        [...filteredRef.current].sort((a, b) => {
-          const aSelected = selectedRef.current.includes(a.id)
-          const bSelected = selectedRef.current.includes(b.id)
+      // Use setTimeout to make sorting asynchronous and prevent UI blocking
+      const timeoutId = setTimeout(() => {
+        // Sort with selected items first - use refs to get current state
+        setCurrentOptions(
+          [...filteredRef.current].sort((a, b) => {
+            const aSelected = selectedRef.current.includes(a.id)
+            const bSelected = selectedRef.current.includes(b.id)
 
-          // If both are selected or both are unselected, maintain original order
-          if (aSelected === bSelected) return 0
+            // If both are selected or both are unselected, maintain original order
+            if (aSelected === bSelected) return 0
 
-          // Selected items come first
-          return aSelected ? -1 : 1
-        })
-      )
+            // Selected items come first
+            return aSelected ? -1 : 1
+          })
+        )
+      }, 0)
+
+      return () => clearTimeout(timeoutId)
     }
   }, [facet.open, facet.query])
 

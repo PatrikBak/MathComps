@@ -207,84 +207,94 @@ export const useSearchFiltersLogic = ({
   //    options that would yield zero results.
 
   // The competition tree options are the most complex to build.
-  const competitionTreeOpts: TreeSelectFacetOption[] = useMemo(() => {
-    // Build a map from competition slug to competition data for quick lookup.
-    const competitionDataBySlug = new Map(
-      filterOptions.competitions.map((competition) => [
-        competition.competitionData.slug,
-        competition,
-      ])
-    )
+  // Use state to make this computation asynchronous and prevent UI blocking
+  const [competitionTreeOpts, setCompetitionTreeOpts] = React.useState<TreeSelectFacetOption[]>([])
 
-    // The competitions never disappear from the tree (by design),
-    // that is why we're convering base options
-    return baseOptions.competitions.map((baseCompetition) => {
-      // Lookup the current competition data in the filtered options
-      const competitionSlug = baseCompetition.competitionData.slug
-      const currentCompetition = competitionDataBySlug.get(competitionSlug)
+  React.useEffect(() => {
+    // Use setTimeout to make tree building asynchronous and prevent UI blocking
+    const timeoutId = setTimeout(() => {
+      // Build a map from competition slug to competition data for quick lookup.
+      const competitionDataBySlug = new Map(
+        filterOptions.competitions.map((competition) => [
+          competition.competitionData.slug,
+          competition,
+        ])
+      )
 
-      // Handle the categories of this competition
-      const categoryChildren = baseCompetition.categoryData.map((baseCategory) => {
-        // Lookp the category data in the filtered options
-        const categorySlug = baseCategory.categoryData.slug
-        const currentCategory = currentCompetition?.categoryData.find(
-          (category) => category.categoryData.slug === categorySlug
-        )
+      // The competitions never disappear from the tree (by design),
+      // that is why we're convering base options
+      const treeOptions = baseOptions.competitions.map((baseCompetition) => {
+        // Lookup the current competition data in the filtered options
+        const competitionSlug = baseCompetition.competitionData.slug
+        const currentCompetition = competitionDataBySlug.get(competitionSlug)
 
-        // Handle round children
-        const roundChildren = baseCategory.roundData.map((baseRound) => {
-          // Lookup the round in the filtered results
-          const currentRound = currentCategory?.roundData.find(
+        // Handle the categories of this competition
+        const categoryChildren = baseCompetition.categoryData.map((baseCategory) => {
+          // Lookp the category data in the filtered options
+          const categorySlug = baseCategory.categoryData.slug
+          const currentCategory = currentCompetition?.categoryData.find(
+            (category) => category.categoryData.slug === categorySlug
+          )
+
+          // Handle round children
+          const roundChildren = baseCategory.roundData.map((baseRound) => {
+            // Lookup the round in the filtered results
+            const currentRound = currentCategory?.roundData.find(
+              (round) => round.slug === baseRound.slug
+            )
+
+            // Create the node with updated count
+            return {
+              id: roundNodeId(competitionSlug, baseRound.slug, categorySlug),
+              displayName: baseRound.displayName,
+              fullName: baseRound.fullName,
+              count: currentRound?.count ?? 0,
+            }
+          })
+
+          // Create the node with updated count
+          return {
+            id: categoryNodeId(competitionSlug, categorySlug),
+            displayName: baseCategory.categoryData.displayName,
+            fullName: baseCategory.categoryData.fullName,
+            count: currentCategory?.categoryData.count ?? 0,
+            children: roundChildren.length > 0 ? roundChildren : undefined,
+          }
+        })
+
+        // Handle the direct rounds of the competiton
+        const directRoundChildren = baseCompetition.roundData.map((baseRound) => {
+          // Lookup the round in the filetered data
+          const currentRound = currentCompetition?.roundData.find(
             (round) => round.slug === baseRound.slug
           )
 
           // Create the node with updated count
           return {
-            id: roundNodeId(competitionSlug, baseRound.slug, categorySlug),
+            id: roundNodeId(competitionSlug, baseRound.slug),
             displayName: baseRound.displayName,
             fullName: baseRound.fullName,
             count: currentRound?.count ?? 0,
           }
         })
 
-        // Create the node with updated count
-        return {
-          id: categoryNodeId(competitionSlug, categorySlug),
-          displayName: baseCategory.categoryData.displayName,
-          fullName: baseCategory.categoryData.fullName,
-          count: currentCategory?.categoryData.count ?? 0,
-          children: roundChildren.length > 0 ? roundChildren : undefined,
-        }
-      })
-
-      // Handle the direct rounds of the competiton
-      const directRoundChildren = baseCompetition.roundData.map((baseRound) => {
-        // Lookup the round in the filetered data
-        const currentRound = currentCompetition?.roundData.find(
-          (round) => round.slug === baseRound.slug
-        )
+        // Gather the children
+        const children = [...categoryChildren, ...directRoundChildren]
 
         // Create the node with updated count
         return {
-          id: roundNodeId(competitionSlug, baseRound.slug),
-          displayName: baseRound.displayName,
-          fullName: baseRound.fullName,
-          count: currentRound?.count ?? 0,
+          id: competitionNodeId(competitionSlug),
+          displayName: baseCompetition.competitionData.displayName,
+          fullName: baseCompetition.competitionData.fullName,
+          count: currentCompetition?.competitionData.count ?? 0,
+          children: children.length > 0 ? children : undefined,
         }
       })
 
-      // Gather the children
-      const children = [...categoryChildren, ...directRoundChildren]
+      setCompetitionTreeOpts(treeOptions)
+    }, 0)
 
-      // Create the node with updated count
-      return {
-        id: competitionNodeId(competitionSlug),
-        displayName: baseCompetition.competitionData.displayName,
-        fullName: baseCompetition.competitionData.fullName,
-        count: currentCompetition?.competitionData.count ?? 0,
-        children: children.length > 0 ? children : undefined,
-      }
-    })
+    return () => clearTimeout(timeoutId)
   }, [baseOptions.competitions, filterOptions])
 
   // Expand all nodes by default

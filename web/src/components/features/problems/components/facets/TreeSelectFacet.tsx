@@ -109,49 +109,65 @@ export default function TreeSelectFacet({
   }, [options])
 
   /**
-   * Filters the tree based on the current search query.
+   * State for the filtered tree to make filtering asynchronous
+   */
+  const [filteredTree, setFilteredTree] = React.useState(options)
+  const [searchExpandedIds, setSearchExpandedIds] = React.useState<Set<string>>(new Set())
+
+  /**
+   * Filters the tree based on the current search query asynchronously.
    * The filtered tree includes nodes that match the query and their ancestors.
    * It also returns a set of node IDs that should be expanded to reveal the search results.
    */
-  const { filteredTree, searchExpandedIds } = React.useMemo(() => {
+  React.useEffect(() => {
     const query = facet.query.trim().toLowerCase()
-    if (!query) return { filteredTree: options, searchExpandedIds: new Set<string>() }
-
-    const expanded = new Set<string>()
-
-    function filterNodes(nodes: TreeSelectFacetOption[]): TreeSelectFacetOption[] {
-      const result: TreeSelectFacetOption[] = []
-      for (const node of nodes) {
-        const labelMatches =
-          node.displayName.toLowerCase().includes(query) ||
-          (node.fullName && node.fullName.toLowerCase().includes(query))
-        const childMatches = node.children ? filterNodes(node.children) : []
-        if (labelMatches) {
-          // Node's label matches the query. Include it and any of its children that also match.
-          const nextNode: TreeSelectFacetOption = {
-            ...node,
-            children: childMatches.length > 0 ? childMatches : undefined,
-          }
-          if ((nextNode.children?.length ?? 0) > 0) {
-            expanded.add(node.id)
-          }
-          result.push(nextNode)
-          continue
-        }
-        if (childMatches.length > 0) {
-          // Node's label doesn't match, but it has descendants that do.
-          // Include the node, but only with its matching descendants.
-          const nextNode: TreeSelectFacetOption = { ...node, children: childMatches }
-          expanded.add(node.id)
-          result.push(nextNode)
-          continue
-        }
-        // Neither this node nor its descendants match; skip it.
-      }
-      return result
+    if (!query) {
+      setFilteredTree(options)
+      setSearchExpandedIds(new Set())
+      return
     }
 
-    return { filteredTree: filterNodes(options), searchExpandedIds: expanded }
+    // Use setTimeout to make tree filtering asynchronous and prevent UI blocking
+    const timeoutId = setTimeout(() => {
+      const expanded = new Set<string>()
+
+      function filterNodes(nodes: TreeSelectFacetOption[]): TreeSelectFacetOption[] {
+        const result: TreeSelectFacetOption[] = []
+        for (const node of nodes) {
+          const labelMatches =
+            node.displayName.toLowerCase().includes(query) ||
+            (node.fullName && node.fullName.toLowerCase().includes(query))
+          const childMatches = node.children ? filterNodes(node.children) : []
+          if (labelMatches) {
+            // Node's label matches the query. Include it and any of its children that also match.
+            const nextNode: TreeSelectFacetOption = {
+              ...node,
+              children: childMatches.length > 0 ? childMatches : undefined,
+            }
+            if ((nextNode.children?.length ?? 0) > 0) {
+              expanded.add(node.id)
+            }
+            result.push(nextNode)
+            continue
+          }
+          if (childMatches.length > 0) {
+            // Node's label doesn't match, but it has descendants that do.
+            // Include the node, but only with its matching descendants.
+            const nextNode: TreeSelectFacetOption = { ...node, children: childMatches }
+            expanded.add(node.id)
+            result.push(nextNode)
+            continue
+          }
+          // Neither this node nor its descendants match; skip it.
+        }
+        return result
+      }
+
+      setFilteredTree(filterNodes(options))
+      setSearchExpandedIds(expanded)
+    }, 0)
+
+    return () => clearTimeout(timeoutId)
   }, [options, facet.query])
 
   /**
