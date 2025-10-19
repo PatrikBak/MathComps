@@ -60,8 +60,8 @@ public class ProblemTag
     /// <item>
     /// We have this process of veto-ing tags. Each round of vetoing increases
     /// our confidence in the tag assignment by.
-    /// For manual tag assignments, this is set to some big number (manual 
-    /// assignments have 100% confidence, since the human doing the assignment 
+    /// For manual tag assignments, this is set to null; entries with null values are ignored
+    /// during veto-ing. (Manual assignments have 100% confidence, since the human doing the assignment 
     /// knows what they're doing).
     /// </item>
     /// </list>
