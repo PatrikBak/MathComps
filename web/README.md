@@ -25,20 +25,40 @@ cd web
 npm install
 ```
 
-### 2. Connect to Backend API (Optional)
+### 2. Environment Configuration (Optional)
 
-The frontend automatically connects to `http://localhost:5000` in development (configured in `.env.development`).
+The application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form functionality.
 
-To use a different API URL, create a `.env.local` file:
+**For contact form emails, create a `.env.local` file:**
 
 ```bash
-# Override the default backend URL
-echo "NEXT_PUBLIC_API_URL=http://your-custom-url" > .env.local
+# Email Configuration (for contact form)
+# Get API key from https://resend.com/
+RESEND_API_KEY=your-resend-api-key-here
+
+# Email address where contact form submissions will be sent
+# Must be verified in your Resend account
+CONTACT_EMAIL=contact@yourdomain.com
+
+# Email address to send from (just the email, no name)
+# Must be verified in your Resend account
+SENDER_EMAIL=noreply@yourdomain.com
 ```
+
+**Development Mode:** If you leave the email variables empty, the contact form will work in development mode without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
+
+**Other available variables (have good defaults):**
+
+- `NEXT_PUBLIC_API_URL` – The URL where the API listens to (defaults to `http://localhost:5000` for .NET)
+- `NEXT_PUBLIC_SITE_URL` – The URL of the website itself, used only to display raw links on the website (defaults to `http://localhost:3000`)
+
+### 3. Backend API Connection
+
+The frontend connects to the backend API using `NEXT_PUBLIC_API_URL` from your environment variables.
 
 For backend API setup, see the [Backend README](../backend/README.md).
 
-### 3. Run Development Server
+### 4. Run Development Server
 
 ```bash
 npm run dev
@@ -46,7 +66,7 @@ npm run dev
 
 The app will be available at `http://localhost:3000`.
 
-### 4. Build for Production
+### 5. Build for Production
 
 ```bash
 # Stop dev server first (Ctrl+C), then build
@@ -91,6 +111,7 @@ npm run preview
 - **Tailwind CSS 4** – Styling
 - **KaTeX** – Math rendering
 - **TanStack Query** – Data fetching and caching
+- **Resend** – Contact form email delivery
 - **Vitest** – Testing framework
 
 ## Development Tips
@@ -112,6 +133,18 @@ The problem search feature is in [`src/components/features/problems/`](src/compo
 
 Educational handouts are parsed from TeX and stored as JSON in [`src/content/handouts/`](src/content/handouts/). See the [Handouts CLI tool](../backend/src/Tools/MathComps.Cli.Handouts/README.md) for parsing instructions.
 
+### Contact Form
+
+The contact form feature includes:
+
+- Modal-based contact form with validation
+- Email submission via Resend API
+- Bot detection with honeypot fields
+- Form validation using Zod schemas
+- Rate limiting handled by Cloudflare
+
+Configuration is handled through environment variables (see [Environment Configuration](#2-environment-configuration-optional) section above).
+
 ## Troubleshooting
 
 **Build fails:** Ensure dev server is stopped before running `npm run build`
@@ -121,3 +154,5 @@ Educational handouts are parsed from TeX and stored as JSON in [`src/content/han
 **Port 3000 busy:** Stop any running Next.js dev servers or change the port with `npm run dev -- -p 3001`
 
 **API connection issues:** Check `NEXT_PUBLIC_API_URL` and backend is running (see [Backend README](../backend/README.md))
+
+**Contact form not working:** Verify Resend API key and email configuration in `.env` file

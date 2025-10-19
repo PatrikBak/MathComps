@@ -5,6 +5,9 @@
 const envMap: Record<string, string | undefined> = {
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  CONTACT_EMAIL: process.env.CONTACT_EMAIL,
+  SENDER_EMAIL: process.env.SENDER_EMAIL,
 }
 
 /**

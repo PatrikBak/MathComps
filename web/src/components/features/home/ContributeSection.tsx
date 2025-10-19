@@ -1,5 +1,6 @@
 import { Code, FileText, Globe, Shield } from 'lucide-react'
 
+import ContactButton from '@/components/features/contact/ContactButton'
 import Badge from '@/components/features/home/layout/Badge'
 import ThreeCardSection from '@/components/features/home/layout/ThreeCardSection'
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -13,12 +14,9 @@ export const ContributeSection = () => {
       description: (
         <>
           Našli ste chybu, máte nápad na funkciu alebo akýkoľvek iný postreh?{' '}
-          <AppLink
-            href="mailto:contact@mathcomps.fun"
-            className="text-indigo-400 font-medium hover:underline"
-          >
+          <ContactButton reason="feedback" className="text-indigo-400 font-medium hover:underline">
             Napíšte
-          </AppLink>
+          </ContactButton>
           .
         </>
       ),
@@ -45,12 +43,12 @@ export const ContributeSection = () => {
       description: (
         <>
           Ak máte záujem prispievať materiálmi alebo inými užitočnými článkami, určite{' '}
-          <AppLink
-            href="mailto:contact@mathcomps.fun"
+          <ContactButton
+            reason="content-contribution"
             className="text-indigo-400 font-medium hover:underline"
           >
             sa ozvite
-          </AppLink>
+          </ContactButton>
           .
         </>
       ),

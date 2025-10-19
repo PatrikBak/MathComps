@@ -67,7 +67,7 @@ export const facetUI = {
     'flex h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] items-center justify-center rounded-full bg-slate-600 px-1 sm:px-1.5 text-[10px] sm:text-xs font-semibold text-slate-100',
 
   trigger:
-    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-gradient-to-r from-slate-800/50 to-slate-900/80 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-100 outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)]',
+    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-100 outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)]',
   triggerIconBox: 'shrink-0 text-slate-400',
 
   popover:
@@ -89,6 +89,12 @@ export const facetUI = {
   itemLabel: 'truncate text-xs sm:text-sm font-medium',
   // fixed width + right-aligned tabular nums
   itemCount: 'w-7 sm:w-8 text-right text-[10px] sm:text-xs tabular-nums text-slate-400',
+
+  // Consistent input styling for all facet components
+  input: 'h-4 w-4 accent-indigo-400',
+
+  // Non-interactive input styling (for visual-only checkboxes like in TreeSelectFacet)
+  inputNonInteractive: 'h-4 w-4 accent-indigo-400 pointer-events-none',
 }
 
 // #endregion
@@ -165,6 +171,11 @@ function useFacetBase<T extends FacetOption>(config: {
         focusAppropriateElement()
       }, 10)
       return () => window.clearTimeout(id)
+    } else {
+      // When closing, immediately blur any focused element to prevent focus ring flash
+      if (document.activeElement && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
     }
     setQuery('')
   }, [open, focusAppropriateElement])
@@ -396,7 +407,7 @@ function FacetPopover(props: FacetPopoverProps) {
 
   return (
     <FloatingPortal>
-      <FloatingFocusManager context={context} modal={true}>
+      <FloatingFocusManager context={context} modal={true} returnFocus={false}>
         <div
           ref={refs.setFloating}
           style={floatingStyles}

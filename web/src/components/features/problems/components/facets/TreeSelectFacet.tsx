@@ -264,7 +264,7 @@ export default function TreeSelectFacet({
           <div className="flex items-center shrink-0 mr-2">
             <input
               type="checkbox"
-              className="h-4 w-4 accent-indigo-400 pointer-events-none"
+              className={facetUI.inputNonInteractive}
               checked={isChecked}
               ref={(element) => {
                 if (!element) return
