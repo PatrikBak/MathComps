@@ -33,7 +33,7 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
     }
 
     // internal (including /path#hash and /path?x=1)
-    return <Link ref={ref} href={href} prefetch={prefetch} className={classes} {...rest} />
+    return <Link ref={ref} href={href} prefetch={prefetch ?? true} className={classes} {...rest} />
   }
 )
 AppLink.displayName = 'AppLink'
