@@ -171,10 +171,10 @@ export default function ProblemsLibrary() {
 
   // Scroll to top when problems set changes (new search), but not during infinite scroll
   useEffect(() => {
-    if (!isLoadingMore && virtuosoRef.current) {
+    if (virtuosoRef.current) {
       virtuosoRef.current.scrollTo({ top: 0 })
     }
-  }, [isLoadingMore, problems])
+  }, [filters])
 
   // Virtuoso will handle the infinite scrolling; we prefetch when close to the end
   const virtuosoRef = React.useRef<VirtuosoHandle | null>(null)
