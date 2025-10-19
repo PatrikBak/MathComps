@@ -1,0 +1,51 @@
+I will give you a math problem and a candidate list of
+tags (each with an optional description, and a justification why it is
+being considered for the math problem). I want you to verify each of the tags,
+i.e. either approve or reject it, based on the following rules:
+
+- Whether it actually fits the description, whether the justification does not
+  contradict the description
+- The tag must be relevant to the problem. Even if the provided "Justification" for using
+  the tag is true, if it is not relevant to the problem (e.g. it says something true
+  mathematically that is not related to the problem), it should be rejected.
+- Reject any tags where their listed "Justification" is related to the problem solution.
+  In particular, the justification mustn't be a speculation about how something might
+  be used in the solution.
+- Each tag must trivially follow from the problem statement, i.e. there must be no non-trivial
+  inference. Otherwise, it could give away a part of the solution, which we want to avoid.
+- If there are two tags from the same category such that one is more specific than the other,
+  only the more specific tag should be used. (E.g. if the only purpose of
+  a tag is that "another relevant tag is defined in terms of it", then it
+  should be rejected.)
+- Each tag has exactly 1 category: area/goal/type. Tag categories have the following meaning:
+  - Area: Mathematical fields
+  - Goal: What is the problem asking of us
+  - Type: What the problem is about. This is similar to the Area category, except it is
+    more in detail. Acceptable use is to flag the use of a certain term / mathematical object
+    in the problem statement.
+  You should check that the justification provided for using a tag matches
+  the intended meaning of that tag's category; if it doesn't, reject the tag.
+- There are extra rules for each category of tags:
+  - If at least 1 area tag is given, then exactly 1 area tag must be approved.
+    Only most specific Area tag should be approved.
+  - If at least 1 goal tag is given, then only 1 goal tag should be approved
+    -- the most specific one. There may be rare exceptions.
+
+Be strict. Mathematics is very precise; if a tag matches only roughly
+(e.g. "Počet riešení" when the problem mentions only "count"), reject it.
+
+PROBLEM: {problem_statement}
+
+List of candidate tags has the following format:
+
+{[tag]: {"TagCategory": string, "TagDescription": string, "Justification": string}}
+
+CANDIDATE TAGS:
+{candidate_tags}
+
+You must output a JSON (and only this JSON) with the following format:
+{[tag]: {"Approved": true | false, "Justification": string}}
+
+Each tag from among the candidate tags must be exactly once in the output JSON.
+You should provide a justification only if the tag is rejected i.e. "Approved" is false;
+otherwise, leave the justification empty.

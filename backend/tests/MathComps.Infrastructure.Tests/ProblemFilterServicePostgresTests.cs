@@ -612,7 +612,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
             AuthorId = authorTkadlec.Id,
             Ordinal = 1
         });
-        p1.Tags.Add(tagGeometry);
+        p1.ProblemTagsAll.Add(new ProblemTag { ProblemId = p1.Id, TagId = tagGeometry.Id, GoodnessOfFit = 1.0f });
 
         // Problem 2: Problem with "štvorstena" (tetrahedron) for text search testing
         var p2 = new Problem
@@ -664,7 +664,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
             AuthorId = authorBak.Id,
             Ordinal = 1
         });
-        p4.Tags.Add(tagAlgebra);
+        p4.ProblemTagsAll.Add(new ProblemTag { ProblemId = p4.Id, TagId = tagAlgebra.Id, GoodnessOfFit = 1.0f });
 
         // Problem 5: Number theory problem by Patrik Bak in season 74, category Z9
         var p5 = new Problem
@@ -682,7 +682,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
             AuthorId = authorBak.Id,
             Ordinal = 1
         });
-        p5.Tags.Add(tagNumberTheory);
+        p5.ProblemTagsAll.Add(new ProblemTag { ProblemId = p5.Id, TagId = tagNumberTheory.Id, GoodnessOfFit = 1.0f });
 
         // Problem 6: Another problem by Patrik Bak in season 74, regional round
         var p6 = new Problem
@@ -717,7 +717,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
             AuthorId = authorBak.Id,
             Ordinal = 1
         });
-        p7.Tags.Add(tagGeometry);
+        p7.ProblemTagsAll.Add(new ProblemTag { ProblemId = p7.Id, TagId = tagGeometry.Id, GoodnessOfFit = 1.0f });
 
         // Add all problems to the context and save changes
         // This creates a total of 7 problems with the following distribution:

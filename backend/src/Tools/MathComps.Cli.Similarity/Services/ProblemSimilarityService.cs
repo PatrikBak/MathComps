@@ -1,6 +1,7 @@
 using MathComps.Cli.Similarity.Dtos;
 using MathComps.Cli.Similarity.Settings;
 using MathComps.Domain;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -76,13 +77,19 @@ public class ProblemSimilarityService(
 
         // Construct a query to find candidate problems based on a set of criteria.
         var candidatesQuery = context.Problems
-            // Exclude the curent problem
+            // Exclude the current problem
             .Where(problem => problem.Id != sourceProblemData.ProblemId
                 // The candidate must be from a relevant competition.
                 && relevantCompetitionSlug.Contains(problem.RoundInstance.Round.CompositeSlug));
 
         // The candidate must have at least one tag in common with the source problem if it has any tags
-        candidatesQuery = candidatesQuery.Where(problem => problem.Tags.Any(tag => sourceProblemData.TagsIds.Contains(tag.Id)));
+        candidatesQuery = candidatesQuery.Where(problem =>
+            // From the tags
+            problem.ProblemTagsAll.AsQueryable()
+                // That have good enough quality
+                .Where(ProblemTag.IsGoodEnoughTag)
+                // Check for at least one matches
+                .Any(problemTag => sourceProblemData.TagsIds.Contains(problemTag.TagId)));
 
         // The candidate's statement must exist...
         candidatesQuery = candidatesQuery.Where(problem => problem.StatementEmbedding != null &&
@@ -122,9 +129,15 @@ public class ProblemSimilarityService(
                     : null,
 
                 // Tags
-                TagIds = problem.Tags.Select(tag => tag.Id).ToImmutableHashSet(),
+                TagIds = problem.ProblemTagsAll.AsQueryable()
+                    // Only good enough tags
+                    .Where(ProblemTag.IsGoodEnoughTag)
+                    // Get their ids
+                    .Select(problemTag => problemTag.TagId)
+                    // In a set
+                    .ToImmutableHashSet(),
 
-                // The 'competiton-category-round' slug
+                // The 'competition-category-round' slug
                 Slug = problem.RoundInstance.Round.CompositeSlug,
             })
             // Evaluate
@@ -132,7 +145,7 @@ public class ProblemSimilarityService(
             // Now we can do in-memory similarity calculation
             .Select(candidateData =>
             {
-                // The statement similiarity
+                // The statement similarity
                 var statementSimilarity = 1 - candidateData.StatementDistance;
 
                 // The solution similarity

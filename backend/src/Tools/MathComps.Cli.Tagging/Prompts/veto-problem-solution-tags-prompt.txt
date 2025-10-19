@@ -1,0 +1,24 @@
+I will give you a math problem and a candidate list of
+tags (each with an optional description, and a justification why it is
+being considered for the math problem). Each of the tags given is about
+the problem solution. I want you to verify each of the tags,
+i.e. either approve or reject it.
+
+PROBLEM: {problem_statement}
+SOLUTION: {problem_solution}
+
+List of candidate tags has the following format:
+
+{[tag]: {"TagCategory": string, "TagDescription": string, "Justification": string}}
+
+CANDIDATE TAGS:
+{candidate_tags}
+
+You must output a JSON (and only this JSON) with the following format:
+{[tag]: {"Approved": true | false, "Justification": string}}
+
+It must be a valid JSON (i.e. no C-like comments, ...).
+
+Each tag from among the candidate tags must be exactly once in the output JSON.
+You should provide a justification only if the tag is rejected i.e. "Approved" is false;
+otherwise, leave the justification empty.

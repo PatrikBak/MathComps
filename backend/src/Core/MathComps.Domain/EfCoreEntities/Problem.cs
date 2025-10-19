@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using Pgvector;
 
 namespace MathComps.Domain.EfCoreEntities;
@@ -9,6 +10,14 @@ namespace MathComps.Domain.EfCoreEntities;
 /// </summary>
 public class Problem
 {
+    /// <summary>
+    /// Expression that selects only the problem tags with good enough fit (goodness of fit >= threshold).
+    /// This provides a clean way to filter out tags with poor goodness of fit in LINQ queries.
+    /// </summary>
+    public static readonly Expression<Func<Problem, IEnumerable<ProblemTag>>> GoodTags =
+        // Select only the good enough tags
+        problem => problem.ProblemTagsAll.AsQueryable().Where(ProblemTag.IsGoodEnoughTag);
+
     /// <summary>
     /// Primary key.
     /// </summary>
@@ -77,9 +86,10 @@ public class Problem
     public ICollection<ProblemImage> Images { get; } = [];
 
     /// <summary>
-    /// Associated tags (many-to-many).
+    /// Associated tags via the ordered join entity. This includes all tags processed
+    /// by the LLM, even the rejected ones (i.e. ones with goodness of fit < 0.5).
     /// </summary>
-    public ICollection<Tag> Tags { get; } = [];
+    public ICollection<ProblemTag> ProblemTagsAll { get; } = [];
 
     /// <summary>
     /// Similarity edges to other problems where this problem is the source.

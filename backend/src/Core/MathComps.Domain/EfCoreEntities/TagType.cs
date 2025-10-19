@@ -12,7 +12,7 @@ public enum TagType
     Area = 1,
 
     /// <summary>
-    /// Problem structures, formats, or recurring mathematical objects (e.g., Inequality, Construction Problem, Incircle).
+    /// Recurring mathematical objects (e.g., Inequality, Incircle).
     /// Type tags describe what kind of mathematical task or entity the problem involves.
     /// </summary>
     Type = 2,
@@ -21,5 +21,11 @@ public enum TagType
     /// Specific solution methods, principles, or techniques (e.g., Mathematical Induction, Extremal Principle).
     /// Technique tags can only be assigned when a solution is available that demonstrates the technique.
     /// </summary>
-    Technique = 3
+    Technique = 3,
+
+    /// <summary>
+    /// Logical structure of the problem. E.g. construction problem, proof of existence, proof of equivalence,
+    /// proof of uniqueness of solution, number of solutions, etc.
+    /// </summary>
+    Goal = 4,
 }

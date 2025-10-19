@@ -13,5 +13,5 @@ public interface IGeminiService
     /// <param name="userPrompt">The user's prompt containing the specific request.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The generated text content.</returns>
-    Task<string> GenerateContentAsync(string model, string systemPrompt, string userPrompt, CancellationToken cancellationToken = default);
+    Task<string> GenerateContentAsync(string model, string systemPrompt, string userPrompt, int thinkingBudget, CancellationToken cancellationToken = default);
 }

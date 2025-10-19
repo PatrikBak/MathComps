@@ -1,2 +1,4 @@
 # Logged tag suggestions from AI
 Data/SuggestedTags/*.txt
+Data/tags-to-redo.txt
+.ignore

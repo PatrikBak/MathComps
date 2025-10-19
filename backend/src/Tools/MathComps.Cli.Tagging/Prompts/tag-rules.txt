@@ -1,0 +1,18 @@
+Tag rules:
+- Tags should be generally useful; they should apply to many problems.
+- Each tag should cleanly fall into exactly one "category". There are four categories:
+  - Area: Mathematical fields (Algebra, Geometria, etc.)
+  - Goal: What is the problem asking of us. Examples: konštrukčná úloha, dôkaz existence, dôkaz jednoznačnosti,
+    počet riešení, víťažná stratégia, remízujúca stratégia, ...
+  - Type: What the problem is about. This is similar to the Area category, except it is
+    more in detail. E.g. one could include tags such as 'Absolútna hodnota', 'Nerovnosť',
+    'Sústava rovníc', 'Fibonacciho postupnosť', 'Algebrogram', 'Kružnica opísaná',
+    'Najmenší spoločný násobok', 'Nesúdeliteľné čísla', 'Periodická postupnosť',
+    'Prvočísla', 'Hra dvoch hráčov', 'Hra troch alebo viac hráčov', 'Permutácia', ...
+  - Technique: Solution methods (Indukcia, Dirichletov princíp, etc.). These should
+    be specific enough that it is clear it's a single technique, not a broad class
+    of techniques. E.g. theorems like "Cauchy-Schwartzova nerovnosť" are perfect here
+    -- the technique involves proper use of the theorem.
+- Prefer established Slovak mathematical terms
+- No difficulty levels or competition names
+- Not problem-specific

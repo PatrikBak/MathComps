@@ -7,6 +7,7 @@ alwaysApply: false
 - When adding XML documentation, always include:
   - `<param>` for each parameter
   - `<returns>` for the return value
+- Use `<see>` tags when referencing real objects (classes, methods, properties, etc.) in XML comments
 - Use `<inheritdoc/>` where possible instead of repeating comments, e.g. comment on interface, inheritdoc on implementation
 - Always write useful inline comments
 - Prefer comments above code rather than at the end of lines for better readability
