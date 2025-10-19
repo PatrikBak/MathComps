@@ -55,14 +55,6 @@ public class TagProblemsCommand(
         [Description("Number of problems to tag.")]
         public required int Count { get; set; }
 
-        /// <summary>
-        /// Whether to exclude problems that already have tags assigned.
-        /// This allows efficient processing of only untagged problems, avoiding redundant AI calls.
-        /// </summary>
-        [CommandOption("--skip-tagged")]
-        [Description("Skip problems that already have tags assigned.")]
-        [DefaultValue(false)]
-        public bool SkipTagged { get; set; }
 
         /// <summary>
         /// If set, clears all tags of all problems. If specified together with a tag selection,
@@ -88,15 +80,6 @@ public class TagProblemsCommand(
         [Description("Consider only some subset of tags. Argument should be path to a file, where each line contains the name of one tag.")]
         [DefaultValue(null)]
         public string? TagSelectionFile { get; set; }
-
-        /// <inheritdoc/>
-        public override ValidationResult Validate()
-        {
-            // Validate that mutually exclusive options are not both specified
-            return SkipTagged && ClearTags
-                ? ValidationResult.Error("Both '--skip-tagged' and '--clear-tags' have been specified, but they are mutually exclusive.")
-                : ValidationResult.Success();
-        }
     }
 
     /// <inheritdoc/>
@@ -119,8 +102,12 @@ public class TagProblemsCommand(
             // Read the specified tags from the file
             var tags = File.ReadAllLines(settings.TagSelectionFile).ToHashSet();
 
-            // Create a set for efficient lookup
-            tagsSelection = tagsSelection.Filter(tags.ToImmutableDictionary(tagName => tagName, tagName => true), out var unmatchedApprovals, out var unmatchedCandidates);
+            // Filter out the loaded tags from the approved ones
+            tagsSelection = tagsSelection.Filter(
+                tags.ToImmutableDictionary(tagName => tagName, tagName => true),
+                out var _,
+                out var _
+            );
 
             // We will select only from there tags
             tagNameFilter = tags.Contains;
@@ -133,7 +120,6 @@ public class TagProblemsCommand(
         // Retrieve the problems that need tagging based on user settings
         var problemsToTag = await databaseService.GetProblemsToTagAsync(
             settings.Count,
-            settings.SkipTagged,
             tagsSelection
         );
 

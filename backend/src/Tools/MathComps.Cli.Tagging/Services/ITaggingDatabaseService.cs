@@ -20,10 +20,9 @@ public interface ITaggingDatabaseService
     /// Retrieves a list of problems to be tagged, ordered deterministically.
     /// </summary>
     /// <param name="count">The number of problems to retrieve.</param>
-    /// <param name="skipAlreadyTagged">Whether to exclude problems that already have tags assigned.</param>
     /// <param name="tagSelection">If specified, considers only problems where at least one of these tags has not been considered for the problem yet.</param>
     /// <returns>A list of DTOs containing problem details.</returns>
-    Task<List<ProblemDetailsDto>> GetProblemsToTagAsync(int count, bool skipAlreadyTagged, SimpleTagsByCategory? tagSelection);
+    Task<List<ProblemDetailsDto>> GetProblemsToTagAsync(int count, SimpleTagsByCategory? tagSelection);
 
     /// <summary>
     /// Retrieves problems that have tags requiring manual review for potential vetoing.

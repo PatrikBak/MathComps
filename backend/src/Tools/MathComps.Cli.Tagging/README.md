@@ -33,7 +33,7 @@ The tagging process is a workflow that combines AI suggestions with human oversi
 - **Note**: If a problem has no solution, the AI is forbidden from assigning **Technique** tags.
 - You can choose to apply tags only from some subset using the `--tag-selection-file` command line option. This is useful e.g. when re-tagging a select few tags (e.g. you find out the AI doesn't process them well, adjust the description in `approved-tags.json` and want to apply the changes).
 - You can use `--clear-tags` to clear all the tags from the tag selection file before doing the tagging. (If no tag selection file is provided, it clears _all_ tags.)
-- The database stores not only the approved tags, but also the rejected tags. This is so that the next time `tag-problems` is called, it ignores problems that have all the tags already processed. This is useful especially together with `--tag-selection-file`.
+- The database stores not only the approved tags, but also the rejected tags. This ensures that the next time `tag-problems` is called, it automatically ignores problems that have all the specified tags already processed. This is useful especially together with `--tag-selection-file`.
 
 ### 5. Filter bad AI tags
 
@@ -81,9 +81,6 @@ Applies the official, approved tags to problems.
 # Process 50 problems
 dotnet run -- tag-problems --count 50
 
-# Process only untagged problems
-dotnet run -- tag-problems --count 50 --skip-tagged
-
 # Process with specific tag selection and clear existing tags
 dotnet run -- tag-problems --count 50 --tag-selection-file tags.txt --clear-tags
 
@@ -92,10 +89,11 @@ dotnet run -- tag-problems --count 50 --num-threads 3
 ```
 
 - `--count`: Number of problems to process.
-- `--skip-tagged`: Only process problems that have no tags.
 - `--tag-selection-file`: Consider only tags listed in the specified file (one tag per line).
 - `--clear-tags`: Clear all tags before tagging. If used with `--tag-selection-file`, clears only those tags.
 - `--num-threads`: Number of parallel threads for processing (default: 1). Consider rate limits when setting this.
+
+**Note**: The command automatically skips problems that already have all the specified tags assigned, making it efficient to run multiple times without redundant processing.
 
 ### **veto-problem-tags**
 

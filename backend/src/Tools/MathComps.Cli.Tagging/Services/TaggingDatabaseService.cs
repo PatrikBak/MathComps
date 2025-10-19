@@ -32,18 +32,13 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
     }
 
     /// <inheritdoc />
-    public async Task<List<ProblemDetailsDto>> GetProblemsToTagAsync(int count, bool skipAlreadyTagged, SimpleTagsByCategory? tagSelection)
+    public async Task<List<ProblemDetailsDto>> GetProblemsToTagAsync(int count, SimpleTagsByCategory? tagSelection)
     {
         // Gain DB access
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         // Start building the query for problems that need tagging
         var query = dbContext.Problems.AsQueryable();
-
-        // Filter out problems that already have tags if requested
-        // This allows users to efficiently focus on untagged problems only
-        if (skipAlreadyTagged)
-            query = query.Where(problem => !problem.ProblemTagsAll.AsQueryable().Any(ProblemTag.IsGoodEnoughTag));
 
         // Filter out problems for which we have already considered all tags in tagSelection
         if (tagSelection != null)
