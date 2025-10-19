@@ -64,15 +64,15 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
 
         try
         {
-            // Clear existing tags
-            AnsiConsole.MarkupLine("[bold cyan]Phase 1:[/] Clearing existing tags...");
-            await databaseService.ClearAllTagsAsync();
-            AnsiConsole.MarkupLine("[green]All existing tags cleared[/]");
-
             // Load and parse CSV
-            AnsiConsole.MarkupLine("[bold cyan]Phase 2:[/] Loading and parsing CSV file...");
+            AnsiConsole.MarkupLine("[bold cyan]Phase 1:[/] Loading and parsing CSV file...");
             var csvRows = LoadCsvFile(settings.FilePath);
             AnsiConsole.MarkupLine($"[green]Loaded {csvRows.Count} rows from CSV[/]");
+
+            // Clear existing tags
+            AnsiConsole.MarkupLine("[bold cyan]Phase 2:[/] Clearing existing tags...");
+            await databaseService.ClearAllTagsAsync();
+            AnsiConsole.MarkupLine("[green]All existing tags cleared[/]");
 
             // Import in batches
             AnsiConsole.MarkupLine("[bold cyan]Phase 3:[/] Importing tags in batches...");
