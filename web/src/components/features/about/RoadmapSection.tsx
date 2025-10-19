@@ -26,7 +26,7 @@ const FeatureBadge = ({ title }: FeatureItem) => {
 
 const FeatureCategory = ({ category }: { category: FeatureCategory }) => {
   return (
-    <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/40 transition-all duration-300">
+    <div className="bg-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:bg-slate-900/40 transition-all duration-300">
       <div className="flex items-center gap-3 mb-4">
         <div
           className={cn(

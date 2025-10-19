@@ -60,12 +60,12 @@ const POPOVER_MAX_HEIGHT = 520
 export const facetUI = {
   headerRow: 'flex items-center justify-between gap-2 mb-1 sm:mb-1.5',
 
-  title: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium text-slate-300',
+  title: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-semibold text-slate-200',
 
   trigger:
-    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)] text-slate-400',
+    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)] text-slate-300',
 
-  triggerIconBox: 'shrink-0 text-slate-400',
+  triggerIconBox: 'shrink-0 text-slate-300',
 
   popover:
     'z-[1000] flex flex-col overflow-hidden rounded-lg border border-slate-700 bg-gray-800/95 shadow-2xl backdrop-blur',

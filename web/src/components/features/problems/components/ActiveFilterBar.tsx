@@ -265,7 +265,7 @@ export default function ActiveFiltersBar({
         <div className="flex items-center gap-2 text-sm flex-shrink min-w-0">
           {isSidebarVisible ? (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <h2 className="font-semibold text-slate-300 whitespace-nowrap">Aktívne filtre</h2>
+              <h2 className="font-semibold text-slate-200 whitespace-nowrap">Aktívne filtre</h2>
               {activeTokenCount > 0 && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-xs font-medium text-white">
                   {activeTokenCount}

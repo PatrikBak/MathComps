@@ -4,7 +4,7 @@
  */
 export const GUIDE_STYLES = {
   // Card and container styles (responsive padding)
-  card: 'border border-slate-700/50 rounded-lg p-4 sm:p-5 lg:p-6 bg-slate-800/20 hover:border-slate-600/50 transition-colors',
+  card: 'border border-slate-700/50 rounded-lg p-4 sm:p-5 lg:p-6 bg-slate-900/20 hover:border-slate-600/50 transition-colors',
   cardLarge:
     'border border-slate-700/50 rounded-lg p-4 sm:p-6 bg-gradient-to-br from-slate-800/20 to-slate-800/10',
 

@@ -56,7 +56,7 @@ function OrganizationLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-gradient-to-br from-slate-700/50 to-slate-800/50 hover:from-slate-700/70 hover:to-slate-800/70 border border-slate-600/50 transition-all"
+      className="group relative flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-gradient-to-br bg-slate-900/50 hover:bg-slate-800/50 border border-slate-600/50 transition-all"
     >
       <div className="flex-shrink-0">
         <FlagIcon countries={[country]} flagHeight={24} flagWidth={32} />
@@ -203,7 +203,7 @@ export default function MathOlympiadSection({
     >
       {/* Main content container */}
       <div className={GUIDE_STYLES.sectionSpacing}>
-        <div className="relative border border-blue-500/20 rounded-lg p-4 sm:p-5 bg-slate-800/30 overflow-hidden">
+        <div className="relative border border-blue-500/20 rounded-lg p-4 sm:p-5 bg-slate-900/30 overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>
           <div className="relative">
             <p className={cn(GUIDE_STYLES.textNormal, 'mb-3 sm:mb-4')}>

@@ -55,7 +55,7 @@ export const SearchFilters = ({
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
 
   return (
-    <div className="flex flex-col rounded-lg border border-slate-600/60 bg-slate-800/90 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">
+    <div className="flex flex-col rounded-lg border border-slate-600/40 bg-slate-800/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">
       {/* Filters Body */}
       <div className="flex-grow overflow-y-auto p-3 sm:p-4 lg:p-5 lg:min-h-0">
         <div className="space-y-3 sm:space-y-4">
@@ -63,7 +63,7 @@ export const SearchFilters = ({
           <div>
             <label
               htmlFor="search"
-              className="mb-2 sm:mb-3 block text-xs sm:text-sm font-medium text-slate-300"
+              className="mb-2 sm:mb-3 block text-xs sm:text-sm font-semibold text-slate-200"
             >
               Vyhľadávanie
             </label>
@@ -104,7 +104,7 @@ export const SearchFilters = ({
               <label
                 htmlFor="search-solution"
                 className={cn(
-                  'ml-2 text-xs sm:text-[14px] leading-none text-slate-300 transition-colors',
+                  'ml-2 text-xs sm:text-[14px] leading-none text-slate-200 transition-colors',
                   !filters.searchText && 'text-slate-500'
                 )}
               >
@@ -114,7 +114,7 @@ export const SearchFilters = ({
           </div>
 
           {/* Section 2: Contextual Filters */}
-          <div className="space-y-3 sm:space-y-4 border-t border-slate-600/60 pt-3 sm:pt-4 py-2">
+          <div className="space-y-3 sm:space-y-4 border-t border-slate-500/70 pt-3 sm:pt-4 py-2">
             <TreeSelectFacet
               title="Súťaž"
               options={competitionTreeOpts}
@@ -161,7 +161,7 @@ export const SearchFilters = ({
           </div>
 
           {/* Section 3: Attribute Filters (Multi-select) */}
-          <div className="space-y-3 sm:space-y-4 border-t border-slate-600/60 pt-3 sm:pt-4">
+          <div className="space-y-3 sm:space-y-4 border-t border-slate-500/70 pt-3 sm:pt-4">
             <MultiSelectFacet
               title="Kľúčové slová"
               titleTooltip="Kľúčové slová sú prideľované čiastočne na základe heuristík a umelej inteligencie, a preto môžu obsahovať nepresnosti."

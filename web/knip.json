@@ -4,7 +4,8 @@
     "eslint-config-next",
     "tw-animate-css",
     "tailwindcss",
-    "eslint-config-prettier"
+    "eslint-config-prettier",
+    "@tailwindcss/forms"
   ],
   "eslint": {
     "config": ["eslint.config.{js,mjs,cjs}"]
