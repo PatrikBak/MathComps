@@ -146,8 +146,9 @@ function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled = 
     // Only run if filters are provided and enabled
     enabled: enabled && filters !== null,
 
-    // Keep previous data while new query is loading to prevent filter options from flickering to base state
-    placeholderData: (previousData) => previousData,
+    // Don't keep previous data during loading to avoid showing stale filter counts
+    // This prevents the sidebar from showing incorrect counts during filter changes
+    placeholderData: undefined,
 
     // Retry with exponential backoff (inherited from QueryClient defaults)
     // Don't refetch on window focus for search results (user intent is to adjust filters, not auto-refresh)
