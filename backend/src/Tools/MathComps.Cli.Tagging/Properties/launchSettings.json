@@ -15,10 +15,15 @@
       "workingDirectory": ".",
       "commandLineArgs": "veto-problem-tags --count 10 --num-threads 4"
     },
-    "Prune tags": {
+    "Prune Tags": {
       "commandName": "Project",
       "workingDirectory": ".",
       "commandLineArgs": "prune-tags --limit 5"
+    },
+    "Import Tags": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "import-tags Data/import-example.csv"
     },
     "Interactive": {
       "commandName": "Project",

@@ -65,6 +65,20 @@ public interface ITaggingDatabaseService
     Task<List<TagUsageDto>> GetAllTagUsageAsync();
 
     /// <summary>
+    /// Clears all tags from the database. This deletes all <see cref="Tag"/> entities, which automatically
+    /// triggers cascade delete for all <see cref="ProblemTag"/> associations.
+    /// </summary>
+    Task ClearAllTagsAsync();
+
+    /// <summary>
+    /// Imports tags for problems in a single transaction. Groups tags by problem slug, looks up problem IDs,
+    /// creates or reuses <see cref="Tag"/> entities, and creates <see cref="ProblemTag"/> associations.
+    /// </summary>
+    /// <param name="tagImports">List of <see cref="TagImportDto"/> objects containing tag import data</param>
+    /// <returns><see cref="ImportTagsResult"/> containing import statistics and any skipped problem slugs</returns>
+    Task<ImportTagsResult> ImportTagsAsync(List<TagImportDto> tagImports);
+
+    /// <summary>
     /// Removes the specified tags from the database completely, including all associations with problems.
     /// </summary>
     /// <param name="tags">The tags to delete.</param>

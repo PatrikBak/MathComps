@@ -59,6 +59,7 @@ app.Configure(config =>
     config.AddCommand<VetoProblemTagsCommand>("veto-problem-tags");
     config.AddCommand<PruneTagsCommand>("prune-tags");
     config.AddCommand<InteractiveTagManagerCommand>("interactive");
+    config.AddCommand<ImportTagsCommand>("import-tags");
 
     // Helps debugging
     config.PropagateExceptions();

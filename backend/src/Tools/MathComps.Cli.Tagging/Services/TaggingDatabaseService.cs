@@ -404,4 +404,84 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                     )
                 ))
             )];
+
+    /// <inheritdoc />
+    public async Task ClearAllTagsAsync()
+    {
+        // Get DB access
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        // Delete all Tag entities - cascade delete will automatically remove ProblemTag associations
+        await dbContext.Tags.ExecuteDeleteAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<ImportTagsResult> ImportTagsAsync(List<TagImportDto> tagImports)
+    {
+        // Get DB access
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        // Group tags by problem slug
+        var tagsByProblem = tagImports
+            .GroupBy(tag => tag.ProblemSlug)
+            .ToDictionary(group => group.Key, group => group.ToList());
+
+        // Find problem ids
+        var problemSlugToId = await dbContext.Problems
+            .Where(probleem => tagsByProblem.Keys.Contains(probleem.Slug))
+            .ToDictionaryAsync(problem => problem.Slug, problem => problem.Id);
+
+        // Track skipped problem slugs
+        var skippedProblemSlugs = new List<string>();
+
+        // Ensure all required Tag entities exist in the database
+        var tagSlugToTagEntity = await GetOrCreateTagEntitiesAsync(
+            dbContext,
+            tagImports.Select(tag => (tag.TagName, tag.TagType)).Distinct()
+        );
+
+        // Track successful imports
+        var importedCount = 0;
+
+        // Process each problem's tags
+        foreach (var (problemSlug, problemGroup) in tagsByProblem)
+        {
+            // Handle non-existing problems
+            if (!problemSlugToId.TryGetValue(problemSlug, out var problemId))
+            {
+                // By remembering and skipping them
+                skippedProblemSlugs.Add(problemSlug);
+                continue;
+            }
+
+            // Create ProblemTag associations
+            var problemTagEntities = problemGroup
+                .Select(tag => new ProblemTag
+                {
+                    // Look up already existing tag id
+                    TagId = tagSlugToTagEntity[tag.TagName.ToSlug()].Id,
+
+                    // We're in a loop for one problem
+                    ProblemId = problemId,
+
+                    // Copy the rest
+                    GoodnessOfFit = tag.GoodnessOfFit,
+                    Justification = tag.Justification,
+                    Confidence = tag.Confidence,
+                })
+                .ToList();
+
+            // Add all ProblemTag associations for this problem
+            dbContext.Set<ProblemTag>().AddRange(problemTagEntities);
+
+            // Assume all imported (not precise if we didn't clear before)
+            importedCount += problemTagEntities.Count;
+        }
+
+        // Save all changes in a single transaction
+        await dbContext.SaveChangesAsync();
+
+        // Collect results
+        return new ImportTagsResult(importedCount, skippedProblemSlugs);
+    }
 }

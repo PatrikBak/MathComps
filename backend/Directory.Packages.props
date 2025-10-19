@@ -25,6 +25,7 @@
     <PackageVersion Include="Pgvector.EntityFrameworkCore" Version="0.2.0" />
     <PackageVersion Include="Spectre.Console" Version="0.51.1" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.51.1" />
+    <PackageVersion Include="CsvHelper" Version="33.0.1" />
     <PackageVersion Include="HtmlAgilityPack" Version="1.12.2" />
     <PackageVersion Include="PuppeteerSharp" Version="18.0.3" />
     <PackageVersion Include="Slugify.Core" Version="5.1.1" />

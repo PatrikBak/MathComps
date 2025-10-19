@@ -134,6 +134,39 @@ dotnet run -- prune-tags --limit 2
 - `--limit`: The usage threshold. Tags used this many times or fewer will be removed.
 - `--dry-run`: Preview the changes without modifying the database.
 
+### **import-tags**
+
+Imports tags from a CSV file, clearing existing tags first and processing in batches. This command is primarily used for batch-exporting tags from local development to production.
+
+```bash
+# Import from CSV file
+dotnet run -- import-tags Data/import-example.csv
+
+# Import with custom batch size
+dotnet run -- import-tags Data/import-example.csv --batch-size 50
+```
+
+- `<file-path>`: Path to the CSV file containing tag data
+- `--batch-size`: Number of rows to process in each batch (default: 1000)
+
+**CSV Format**: The CSV must have columns: `ProblemSlug`, `TagName`, `TagType`, `Confidence`, `GoodnessOfFit`, `Justification`. TagType values should be: `Area`, `Type`, `Technique`, or `Goal`.
+
+**Exporting from Database**: To create the CSV file from an existing database, use this SQL query:
+
+```sql
+SELECT p.slug AS "ProblemSlug",
+       name AS "TagName",
+       -- This converts PG snake_case onto C# PascalCase
+       replace(initcap(replace(tag_type::text, '_', ' ')), ' ', '') AS "TagType",
+       goodness_of_fit AS "GoodnessOfFit",
+       confidence AS "Confidence",
+       justification AS "Justification"
+FROM tags t
+JOIN problem_tag pt ON t.id = pt.tag_id
+JOIN problems p ON p.id = pt.problem_id
+ORDER BY p.id
+```
+
 ### **interactive**
 
 Starts an interactive session to manually manage tags.
