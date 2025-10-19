@@ -266,7 +266,7 @@ export default function MultiSelectFacet({
                       type="checkbox"
                       checked={checked}
                       onChange={() => onChange(toggleOptionSelection(option.id, selected))}
-                      className="h-4 w-4 accent-indigo-400"
+                      className={facetUI.input}
                     />
                     <span
                       className={facetUI.itemLabel}

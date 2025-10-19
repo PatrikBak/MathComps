@@ -54,9 +54,10 @@ const config = [
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
     },
-  }, // App dir tweak - prefer default exports
+  }, // App dir tweak - prefer default exports (except API routes)
   {
     files: ['src/app/**/*.{js,ts,jsx,tsx}'],
+    ignores: ['src/app/api/**/*.{js,ts,jsx,tsx}'],
     rules: {
       'import/prefer-default-export': 'error',
     },

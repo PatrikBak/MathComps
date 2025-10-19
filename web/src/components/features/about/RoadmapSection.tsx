@@ -1,5 +1,6 @@
 import React from 'react'
 
+import ContactButton from '@/components/features/contact/ContactButton'
 import AnimatedSection from '@/components/shared/components/AnimatedSection'
 import { cn } from '@/components/shared/utils/css-utils'
 import { HOME_ABOUT_STYLES } from '@/constants/common-section-styles'
@@ -118,12 +119,12 @@ export const RoadmapSection = () => {
         <div className="mt-8 text-center">
           <p className="text-slate-400 text-sm">
             Tento zoznam sa bude v čase meniť. Pokojne doň môžete{' '}
-            <a
-              href="mailto:contacts@mathcomps.com"
+            <ContactButton
+              reason="feature-ideas"
               className="text-indigo-400 hover:text-indigo-300 underline"
             >
               prispieť svojimi nápadmi
-            </a>
+            </ContactButton>
             .
           </p>
         </div>

@@ -1,5 +1,6 @@
 import React from 'react'
 
+import ContactButton from '@/components/features/contact/ContactButton'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ROUTES } from '@/constants/routes'
@@ -49,10 +50,12 @@ export default function Footer() {
                   <AppLink href={ROUTES.ABOUT}>O projekte</AppLink>
                 </li>
                 <li>
-                  <AppLink href="/#contribute-section">Chcem prispieť</AppLink>
+                  <AppLink href="/#sponsorship-section">Sponzori</AppLink>
                 </li>
                 <li>
-                  <AppLink href="/#sponsorship-section">Sponzori</AppLink>
+                  <ContactButton className="text-slate-400 hover:text-white transition-colors duration-300">
+                    Kontakt
+                  </ContactButton>
                 </li>
               </ul>
             </div>

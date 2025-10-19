@@ -1,5 +1,6 @@
 import { Heart, Star } from 'lucide-react'
 
+import ContactButton from '@/components/features/contact/ContactButton'
 import Badge from '@/components/features/home/layout/Badge'
 import AnimatedSection from '@/components/shared/components/AnimatedSection'
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -57,13 +58,13 @@ export default function SponsorshipSection() {
 
               <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-600/50 to-transparent mb-4 sm:mb-6" />
 
-              <AppLink
-                href="mailto:contact@mathcomps.fun"
+              <ContactButton
+                reason="sponsorship"
                 className="inline-flex items-center gap-2 sm:gap-2 lg:gap-3 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 rounded-lg lg:rounded-xl text-violet-300 font-semibold lg:font-bold text-sm sm:text-base lg:text-lg border-2 border-violet-500/40 hover:bg-violet-500/10 hover:border-violet-500/70 transition-all duration-300 shadow-lg shadow-violet-500/10"
               >
                 <Heart size={16} className="sm:w-[18px] sm:h-[18px] lg:w-6 lg:h-6" />
                 <span>Staňte sa sponzorom</span>
-              </AppLink>
+              </ContactButton>
             </GlassCard>
           </div>
         </div>
