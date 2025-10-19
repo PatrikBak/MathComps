@@ -141,7 +141,7 @@ export const MobileFilterButton = ({ onClick, activeFilterCount }: MobileFilterB
   return (
     <button
       onClick={onClick}
-      className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-600/60 bg-slate-800/90 px-3 py-2 text-sm font-medium text-slate-300 shadow-sm hover:bg-slate-700/90 hover:text-slate-200 focus:outline-none active:scale-[0.98] transition-transform"
+      className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-600/60 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 shadow-sm hover:bg-slate-700/90 hover:text-slate-200 focus:outline-none active:scale-[0.98] transition-transform"
       aria-label={`Otvoriť filtre${activeFilterCount > 0 ? ` (${activeFilterCount} aktívnych)` : ''}`}
     >
       <Filter className="h-4 w-4 flex-shrink-0" />

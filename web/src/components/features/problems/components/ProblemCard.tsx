@@ -109,7 +109,7 @@ export function ProblemCard({
   return (
     <div
       className={cn(
-        'bg-slate-800/90 border rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:border-slate-500/80',
+        'bg-slate-800 border rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:border-slate-500/80',
         // Highlight border when similar problems section is expanded
         expandedView !== null ? 'border-indigo-500' : 'border-slate-600/60'
       )}

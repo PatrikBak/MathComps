@@ -1,5 +1,5 @@
 export const ProblemCardSkeleton = () => (
-  <div className="bg-slate-800/90 border border-slate-600/60 rounded-lg shadow-lg animate-pulse overflow-hidden">
+  <div className="bg-slate-800 border border-slate-600/60 rounded-lg shadow-lg animate-pulse overflow-hidden">
     {/* Card Header - matches ProblemCard header structure */}
     <div className="flex items-center justify-between px-6 py-4 border-b border-slate-600/60">
       <div className="flex items-center gap-3">

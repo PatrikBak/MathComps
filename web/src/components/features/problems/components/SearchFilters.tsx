@@ -63,7 +63,7 @@ export const SearchFilters = ({
           <div>
             <label
               htmlFor="search"
-              className="mb-2 sm:mb-3 block text-xs sm:text-sm font-medium text-gray-400"
+              className="mb-2 sm:mb-3 block text-xs sm:text-sm font-medium text-slate-300"
             >
               Vyhľadávanie
             </label>

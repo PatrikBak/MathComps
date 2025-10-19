@@ -247,7 +247,7 @@ export default function ActiveFiltersBar({
     Boolean(filters.searchInSolution)
 
   return (
-    <div className="rounded-xl border border-slate-600/60 bg-slate-800/90 p-3 backdrop-blur-sm lg:p-4">
+    <div className="rounded-xl border border-slate-600/60 bg-slate-800 p-3 lg:p-4">
       {/* Custom breakpoint for Share button visibility + Mobile padding reduction */}
       <style>{`
         @media (min-width: 500px) {

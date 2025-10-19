@@ -58,24 +58,24 @@ const POPOVER_MAX_HEIGHT = 520
 
 /** Centralized Tailwind CSS class names for consistent facet component styling. */
 export const facetUI = {
-  headerLabel: 'text-[11px] sm:text-[12px] font-medium tracking-wide text-slate-400',
   headerRow: 'flex items-center justify-between gap-2 mb-1 sm:mb-1.5',
-  header: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium text-gray-400',
-  title: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium text-gray-400',
-  titleText: 'flex-1',
-  countPill:
-    'flex h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] items-center justify-center rounded-full bg-slate-600 px-1 sm:px-1.5 text-[10px] sm:text-xs font-semibold text-slate-100',
+
+  title: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium text-slate-300',
 
   trigger:
-    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-100 outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)]',
+    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)] text-slate-400',
+
   triggerIconBox: 'shrink-0 text-slate-400',
 
   popover:
     'z-[1000] flex flex-col overflow-hidden rounded-lg border border-slate-700 bg-gray-800/95 shadow-2xl backdrop-blur',
+
   popoverHeader:
     'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
+
   searchRow:
     'flex items-center gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
+
   searchInput:
     'h-8 sm:h-9 flex-1 rounded-md border border-transparent bg-slate-900/70 px-2.5 sm:px-3 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400/70',
 
@@ -83,18 +83,16 @@ export const facetUI = {
 
   itemBase:
     'flex items-center justify-between gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors',
+
   itemHover: 'hover:bg-slate-700/50',
-  // softened selected look (no strong fill, subtle ring)
+
   itemSelected: 'bg-indigo-400/10 ring-1 ring-inset ring-indigo-400/30',
+
   itemLabel: 'truncate text-xs sm:text-sm font-medium',
-  // fixed width + right-aligned tabular nums
+
   itemCount: 'w-7 sm:w-8 text-right text-[10px] sm:text-xs tabular-nums text-slate-400',
 
-  // Consistent input styling for all facet components
   input: 'h-4 w-4 accent-indigo-400',
-
-  // Non-interactive input styling (for visual-only checkboxes like in TreeSelectFacet)
-  inputNonInteractive: 'h-4 w-4 accent-indigo-400 pointer-events-none',
 }
 
 // #endregion
@@ -283,6 +281,8 @@ type FacetHeaderProps = {
   suppressClear?: boolean
   /** Optional text to display in a tooltip next to the title. */
   titleTooltip?: string
+  /** Optional custom CSS class for the title container. */
+  titleClassName?: string
 }
 
 /**
@@ -296,13 +296,14 @@ export function FacetHeader({
   onClear,
   suppressClear = false,
   titleTooltip,
+  titleClassName,
 }: FacetHeaderProps) {
   const showClearVisible = isDirty && !suppressClear
 
   return (
     <div className={facetUI.headerRow}>
-      <div className={facetUI.title}>
-        <h3 id={labelId} className={facetUI.titleText}>
+      <div className={cn(facetUI.title, titleClassName)}>
+        <h3 id={labelId} className="flex-1">
           {title}
         </h3>
         {titleTooltip && (
@@ -365,10 +366,10 @@ function FacetTrigger(props: FacetTriggerProps) {
     >
       {/* Left: constant label + dynamic count pill */}
       <span className="min-w-0 flex items-center gap-2 truncate">
-        <span className="truncate text-slate-200">{closedLabel}</span>
+        <span className="truncate">{closedLabel}</span>
         {count > 0 && (
           <span
-            className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none text-slate-300"
+            className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
             aria-label={`Počet vybraných: ${count}`}
           >
             {count}
