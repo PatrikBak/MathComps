@@ -2,17 +2,28 @@
  * Typed representation of a single handout entry shown in the handouts list.
  */
 export type HandoutEntry = {
+  /** Display title of the handout */
   title: string
-  slug: string // precomputed URL-friendly slug
-  filename?: string // optional - if present, handout is available
-  authors: string[]
+  /** Precomputed URL-friendly slug */
+  slug: string
+  /** Optional data object containing handout details - present only for available handouts */
+  data?: {
+    /** Content file name */
+    filename: string
+    /** Handout authors */
+    authors: string[]
+    /** Brief description for SEO/OG metadata */
+    description: string
+  }
 }
 
 /**
  * Groups handouts by a high-level category, e.g., Algebra, Teória čísel.
  */
 export type HandoutSection = {
+  /** Category name */
   category: string
+  /** Array of handout entries in this category */
   handouts: HandoutEntry[]
 }
 

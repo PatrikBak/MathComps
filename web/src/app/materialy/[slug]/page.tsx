@@ -7,7 +7,9 @@ import type {
   HandoutEntry,
   HandoutSection,
 } from '@/components/features/handouts/types/handout-types'
+import { ROUTES } from '@/constants/routes'
 import handoutIndex from '@/content/handouts/handouts.json'
+import { generatePageMetadata } from '@/lib/metadata'
 
 /**
  * Loads the requested handout document by its slug.
@@ -26,16 +28,15 @@ async function loadDocumentBySlug(
   const flatEntries = sections.flatMap((section) => section.handouts)
 
   // Find the entry that matches both the slug and has a content file associated
-  const entry = flatEntries.find((handout) => handout.slug === slug && handout.filename)
+  const entry = flatEntries.find((handout) => handout.slug === slug && handout.data?.filename)
 
-  // Throw early if the handout doesn't exist - this will be caught by the page component
-  // and converted into a proper 404 response
-  if (!entry) throw new Error('Requested handout not found')
+  // Throw early if the handout doesn't exist or has no data
+  if (!entry || !entry.data) throw new Error('Requested handout not found')
 
   // Dynamically import the handout's JSON file from the content directory.
   // This enables Next.js to code-split and only load the specific handout being viewed,
   // rather than bundling all handout content into the initial page load.
-  const documentModule = await import(`@/content/handouts/${entry.filename}`)
+  const documentModule = await import(`@/content/handouts/${entry.data.filename}`)
 
   // Return the parsed document and its metadata
   return { document: documentModule.default as Document, entry }
@@ -57,41 +58,50 @@ export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
       // Flatten all sections into a single array of entries
       .flatMap((section) => section.handouts)
       // Only include handouts that have an associated content file (not just placeholders)
-      .filter((handout) => handout.filename)
+      .filter((handout) => handout.data?.filename)
       // Transform each handout into the param shape that Next.js expects
       .map((handout) => ({ slug: handout.slug }))
   )
 }
 
 /**
- * Generates metadata based on the current slug's document title.
+ * Generates comprehensive metadata based on the current slug's handout data.
  *
- * This function extracts the handout title from the index to populate the page's
- * HTML metadata, enabling proper browser tab titles and social media previews.
+ * This function extracts the handout information from the index to populate rich
+ * HTML metadata, including OG tags for proper social media previews.
  *
  * @param params - Next.js dynamic route parameters containing the slug
- * @returns Metadata object with the handout title
+ * @returns Metadata object with comprehensive handout metadata
  */
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  // Extract the slug from the async params object that Next.js provides
   const { slug } = await params
 
-  // Load the handout index
-  const entry = (handoutIndex as unknown as HandoutSection[])
-    // flatten all sections into a single array of entries
-    .flatMap((section) => section.handouts)
-    // Find the right handout that has a real file (i.e. filename not null)
-    .find((handout) => handout.slug === slug && handout.filename)
+  // Find the handout data in the index
+  const handoutData = (handoutIndex as unknown as HandoutSection[])
+    // Flatten all sections into a single array of entries
+    .flatMap((section) =>
+      // Map each handout to include its category for metadata generation
+      section.handouts.map((handout) => ({ handout, category: section.category }))
+    )
+    // Find the entry that matches the slug and has a content file associated
+    .find((data) => data.handout.slug === slug && data.handout.data?.filename)
 
   // Throw if no matching entry exists
-  if (!entry) throw new Error(`No handout found with slug: ${slug}`)
+  if (!handoutData || !handoutData.handout.data) {
+    throw new Error(`No handout found with slug: ${slug}`)
+  }
 
-  // Return the title if the handout exists
-  return { title: entry.title }
+  return generatePageMetadata({
+    title: handoutData.handout.title,
+    description: handoutData.handout.data.description,
+    path: `${ROUTES.HANDOUTS}/${slug}`,
+    type: 'article',
+    section: `Materiály • ${handoutData.category}`,
+  })
 }
 
 /**
@@ -112,8 +122,11 @@ export default async function RenderPage({ params }: { params: Promise<{ slug: s
     // Attempt to load the handout document and its metadata
     const { document, entry } = await loadDocumentBySlug(slug)
 
+    // Ensure data exists (should always be true after loadDocumentBySlug)
+    if (!entry.data) throw new Error('Invalid handout data')
+
     // Render the handout detail component with the loaded document and author information
-    return <HandoutDetail document={document} authors={entry.authors} />
+    return <HandoutDetail document={document} authors={entry.data.authors} />
   } catch {
     // If the handout doesn't exist or fails to load, show Next.js's 404 page
     notFound()

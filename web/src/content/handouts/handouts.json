@@ -5,19 +5,24 @@
       {
         "title": "Rozklady na súčin",
         "slug": "rozklady-na-sucin",
-        "filename": "algebra-1-rozklady-sk.json",
-        "authors": ["Patrik Bak"]
+        "data": {
+          "filename": "algebra-1-rozklady-sk.json",
+          "authors": ["Patrik Bak"],
+          "description": "Systematický úvod do rozkladania algebraických výrazov na súčin. Pokrýva základné vzorce, postupné vynímanie a dopĺňanie na štvorec s praktickými aplikáciami."
+        }
       },
       {
         "title": "Sústavy rovníc",
         "slug": "sustavy-rovnic",
-        "filename": "algebra-2-sustavy-sk.json",
-        "authors": ["Patrik Bak"]
+        "data": {
+          "filename": "algebra-2-sustavy-sk.json",
+          "authors": ["Patrik Bak"],
+          "description": "Základné techniky riešenia súťažných sústav rovníc. Pokrýva odčítanie, sčítanie a usporiadanie premenných."
+        }
       },
       {
         "title": "Nerovnosti",
-        "slug": "nerovnosti",
-        "authors": ["Patrik Bak"]
+        "slug": "nerovnosti"
       }
     ]
   },
@@ -26,13 +31,11 @@
     "handouts": [
       {
         "title": "Deliteľnosť",
-        "slug": "delitelnost",
-        "authors": ["Patrik Bak"]
+        "slug": "delitelnost"
       },
       {
         "title": "Diofantické rovnice",
-        "slug": "diofanticke-rovnice",
-        "authors": ["Patrik Bak"]
+        "slug": "diofanticke-rovnice"
       }
     ]
   },
@@ -41,13 +44,11 @@
     "handouts": [
       {
         "title": "Podobnosti a zhodnosti",
-        "slug": "podobnosti-a-zhodnosti",
-        "authors": ["Patrik Bak"]
+        "slug": "podobnosti-a-zhodnosti"
       },
       {
         "title": "Uhly",
-        "slug": "uhly",
-        "authors": ["Patrik Bak"]
+        "slug": "uhly"
       }
     ]
   },
@@ -56,23 +57,19 @@
     "handouts": [
       {
         "title": "Ofarbovanie",
-        "slug": "ofarbovanie",
-        "authors": ["Patrik Bak"]
+        "slug": "ofarbovanie"
       },
       {
         "title": "Dirichletov princíp",
-        "slug": "dirichletov-princip",
-        "authors": ["Patrik Bak"]
+        "slug": "dirichletov-princip"
       },
       {
         "title": "Extremálny princíp",
-        "slug": "extremalny-princip",
-        "authors": ["Patrik Bak"]
+        "slug": "extremalny-princip"
       },
       {
         "title": "Grafové úlohy",
-        "slug": "grafove-ulohy",
-        "authors": ["Patrik Bak"]
+        "slug": "grafove-ulohy"
       }
     ]
   }
