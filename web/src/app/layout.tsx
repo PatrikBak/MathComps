@@ -9,16 +9,23 @@ import { Toaster } from 'sonner'
 import KatexSetup from '@/components/math/KatexSetup'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { cn } from '@/components/shared/utils/css-utils'
+import { SITE_KEYWORDS, SITE_LANGUAGE, SITE_NAME, SITE_TITLE } from '@/constants/og-metadata'
+import { generatePageMetadata, getCanonicalUrl } from '@/lib/metadata'
 
 const inter = Inter({
   subsets: ['latin'],
 })
 
 export const metadata: Metadata = {
-  // Site-wide defaults and title template for per-page titles
-  title: { default: 'Mathcomps', template: '%s | Mathcomps' },
-  description: 'Math competitions website',
+  // Use our standard page metadata generation
+  ...generatePageMetadata({}),
+
+  // Root layout specific overrides
+  title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
+  keywords: SITE_KEYWORDS,
   icons: { icon: '/icon.svg' },
+  metadataBase: new URL(getCanonicalUrl()),
+  manifest: '/manifest.json',
 }
 
 export const viewport = {
@@ -28,7 +35,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sk">
+    <html lang={SITE_LANGUAGE}>
       <body className={cn(inter.className, 'antialiased')}>
         <QueryProvider>
           <KatexSetup />

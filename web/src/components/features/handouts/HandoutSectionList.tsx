@@ -16,6 +16,12 @@ type HandoutSectionListProps = {
   sections: HandoutSection[]
 }
 
+type HandoutCardProps = {
+  title: string
+  slug: string
+  authors: string[]
+}
+
 // #endregion
 
 // #region UI components
@@ -24,19 +30,18 @@ type HandoutSectionListProps = {
  * Renders a link card for an available handout, showing its title, authors,
  * and an icon indicating it is accessible.
  */
-function HandoutCard({ handout }: { handout: HandoutEntry }) {
-  const authors = handout.authors ?? ['Patrik Bak']
+function HandoutCard({ title, slug, authors }: HandoutCardProps) {
   return (
     <AppLink
-      href={`${ROUTES.HANDOUTS}/${handout.slug}`}
-      aria-label={`Otvoriť materiál: ${handout.title}`}
+      href={`${ROUTES.HANDOUTS}/${slug}`}
+      aria-label={`Otvoriť materiál: ${title}`}
       className="group block rounded-xl p-3.5 sm:p-5 md:p-6 bg-white/[0.04] border border-white/10 hover:bg-white/[0.055] ring-1 ring-transparent hover:ring-indigo-500/30 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
     >
       <div className="flex items-center gap-3 sm:gap-4">
         <FileText className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-indigo-400 shrink-0" />
         <div className="min-w-0 flex-1">
           <span className="block truncate text-base sm:text-lg font-medium text-gray-200 group-hover:text-white">
-            {handout.title}
+            {title}
           </span>
           <p className="mt-0.5 sm:mt-1 flex items-center gap-2 text-xs sm:text-sm text-gray-400 truncate">
             <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 opacity-70" />
@@ -78,8 +83,8 @@ function PlannedHandoutCard({ handout }: { handout: HandoutEntry }) {
  * counts of available and planned handouts.
  */
 function HandoutSectionHeader({ section }: { section: HandoutSection }) {
-  const availableCount = section.handouts.filter((handout) => handout.filename).length
-  const plannedCount = section.handouts.filter((handout) => !handout.filename).length
+  const availableCount = section.handouts.filter((handout) => handout.data?.filename).length
+  const plannedCount = section.handouts.filter((handout) => !handout.data?.filename).length
   const totalCount = section.handouts.length
 
   return (
@@ -131,8 +136,12 @@ export function HandoutSectionList({ sections }: HandoutSectionListProps) {
           <ul role="list" className="grid gap-2.5 sm:gap-4 md:grid-cols-2">
             {section.handouts.map((handout) => (
               <li key={handout.slug}>
-                {handout.filename ? (
-                  <HandoutCard handout={handout} />
+                {handout.data?.filename ? (
+                  <HandoutCard
+                    title={handout.title}
+                    slug={handout.slug}
+                    authors={handout.data.authors}
+                  />
                 ) : (
                   <PlannedHandoutCard handout={handout} />
                 )}

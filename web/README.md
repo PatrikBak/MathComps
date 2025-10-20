@@ -50,7 +50,7 @@ SENDER_EMAIL=noreply@yourdomain.com
 **Other available variables (have good defaults):**
 
 - `NEXT_PUBLIC_API_URL` – The URL where the API listens to (defaults to `http://localhost:5000` for .NET)
-- `NEXT_PUBLIC_SITE_URL` – The URL of the website itself, used only to display raw links on the website (defaults to `http://localhost:3000`)
+- `NEXT_PUBLIC_SITE_URL` – The URL of the website itself, used for Open Graph metadata, canonical URLs, and social media sharing (defaults to `http://localhost:3000`)
 
 ### 3. Backend API Connection
 

@@ -6,8 +6,11 @@ import HeroSection from '@/components/features/home/HeroSection'
 import SponsorshipSection from '@/components/features/home/SponsorshipSection'
 import VisionSection from '@/components/features/home/VisionSection'
 import Layout from '@/components/layout/Layout'
+import { generatePageMetadata } from '@/lib/metadata'
 
-export const metadata: Metadata = { title: 'Mathcomps' }
+export const metadata: Metadata = generatePageMetadata({
+  // Home page uses default title and description from constants
+})
 
 export default function Home() {
   return (
