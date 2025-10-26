@@ -1,13 +1,17 @@
 'use client'
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { CACHE_TIMING } from '../constants/timing-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
 import { isProblemNotFoundError } from '../types/problem-errors'
-import type { FilterResponse, SearchFiltersState } from '../types/problem-library-types'
+import type {
+  FilterOptionsWithCounts,
+  FilterResponse,
+  SearchFiltersState,
+} from '../types/problem-library-types'
 
 /**
  * Query key factory for problem search queries.
@@ -109,12 +113,11 @@ export function useSingleProblem(slug: string | null, enabled = true) {
 
 /**
  * Hook to fetch and paginate problem search results using infinite scroll.
- * Automatically handles caching, retries, and background updates.
  *
  * @param filters - The current filter state to search with
- * @param enabled - Whether the query should run (defaults to true when filters exist)
+ * @param enabled - Whether the query should run
  */
-function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled = true) {
+function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled: boolean) {
   return useInfiniteQuery({
     queryKey: problemQueryKeys.search(filters),
     queryFn: async ({ pageParam, signal }: { pageParam: number; signal: AbortSignal }) => {
@@ -146,11 +149,6 @@ function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled = 
     // Only run if filters are provided and enabled
     enabled: enabled && filters !== null,
 
-    // Don't keep previous data during loading to avoid showing stale filter counts
-    // This prevents the sidebar from showing incorrect counts during filter changes
-    placeholderData: undefined,
-
-    // Retry with exponential backoff (inherited from QueryClient defaults)
     // Don't refetch on window focus for search results (user intent is to adjust filters, not auto-refresh)
     refetchOnWindowFocus: false,
   })
@@ -161,7 +159,7 @@ function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled = 
  * Provides a simpler API for components with all the data they need.
  * Transforms the infinite query structure into flat arrays and clear loading states.
  */
-export function useProblemSearch(filters: SearchFiltersState | null, enabled = true) {
+export function useProblemSearchQuery(filters: SearchFiltersState | null, enabled: boolean) {
   const infiniteQuery = useProblemSearchInfinite(filters, enabled)
 
   // Flatten all pages into a single array of problems for easy rendering
@@ -178,6 +176,15 @@ export function useProblemSearch(filters: SearchFiltersState | null, enabled = t
     const lastPage = pages[pages.length - 1]
     return lastPage?.updatedOptions ?? null
   }, [infiniteQuery.data])
+
+  // Keep previous filter options during loading so sidebar counts remain steady while new results load
+  const stableFilterOptionsRef = useRef<FilterOptionsWithCounts | null>(null)
+  // Only update the ref if we have new filter options
+  if (filterOptions) {
+    stableFilterOptionsRef.current = filterOptions
+  }
+  // Use the stable ref if we don't have new options yet
+  const effectiveFilterOptions = filterOptions ?? stableFilterOptionsRef.current
 
   // Get total count from the first page (stays constant across pagination)
   const totalCount = useMemo(() => {
@@ -203,7 +210,7 @@ export function useProblemSearch(filters: SearchFiltersState | null, enabled = t
   return {
     // Data
     problems,
-    filterOptions,
+    filterOptions: effectiveFilterOptions,
     totalCount,
     hasMore,
 

@@ -26,7 +26,7 @@ import { hasProblemId } from '../utils/url-problem-resolver'
 import { getProblemsPageUrl } from '../utils/url-utils'
 import {
   useInitialFilterData,
-  useProblemSearch as useProblemSearchQuery,
+  useProblemSearchQuery,
   useSingleProblem,
 } from './use-problem-search-query'
 import { useProblemUrlSync } from './use-problem-url-sync'
