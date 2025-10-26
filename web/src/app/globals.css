@@ -344,11 +344,11 @@ input[type='checkbox']:focus:not(:focus-visible) {
 }
 .problem-card-math .katex,
 .problem-card-math math {
-  font-size: 1.1em;
+  font-size: 1.04em;
   line-height: 1;
 }
 .problem-card-math .math-display {
-  font-size: 1.15em;
+  font-size: 1.08em;
 }
 
 /*  Sonner Toast Customization */
