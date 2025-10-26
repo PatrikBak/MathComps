@@ -8,7 +8,7 @@ export function HandoutsHero() {
         <h1 className="text-2xl sm:text-4xl md:text-[2.75rem] font-bold tracking-tight text-white">
           Prehľad materiálov
         </h1>
-        <p className="mt-2.5 sm:mt-4 max-w-3xl text-sm sm:text-lg text-gray-300/90 leading-relaxed">
+        <p className="mt-2.5 sm:mt-4 text-sm sm:text-lg text-gray-300/90 leading-relaxed">
           Pripravujeme materiály určené pre riešiteľov začínajúcich so stredoškolskou Matematickou
           olympiádou. Cieľom je, aby boli zaujímavé aj pre skúsenejších riešiteľov vďaka postupne
           gradujúcim úlohám. Materiály sa budú tvoriť priebežne v&nbsp;školskom roku 2025/2026.
