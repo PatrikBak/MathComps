@@ -113,7 +113,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
     #region Public Methods
 
     /// </<inheritdoc/>
-    public async Task SeedAsync(bool skipExistingProblems)
+    public async Task SeedAsync(bool skipExistingProblems, int? year = null)
     {
         // Log start
         AnsiConsole.MarkupLine("[bold cyan]Starting database seeding process...[/]");
@@ -135,12 +135,18 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         var jsonContent = await File.ReadAllTextAsync(jsonPath);
 
         // Deserialize into a list of parsed problems.
-        var parsedProblems = JsonSerializer.Deserialize<ImmutableList<SkmoParsedProblem>>(jsonContent)
+        var parsedProblems = (JsonSerializer.Deserialize<ImmutableList<SkmoParsedProblem>>(jsonContent)
             // This must not be null if the file is valid JSON.
-            ?? throw new InvalidOperationException("Failed to deserialize the input JSON file.");
+            ?? throw new InvalidOperationException("Failed to deserialize the input JSON file."))
+            // Take only problems from the specified year
+            .Where(problem => !year.HasValue || problem.RawProblem.OlympiadYear == year.Value)
+            // Enumerate
+            .ToImmutableList();
 
-        // Log the number of problems found
-        AnsiConsole.MarkupLine($"[green]Loaded {parsedProblems.Count:N0} problems from dataset[/]");
+        // Log the number of problems
+        AnsiConsole.MarkupLine(year.HasValue
+            ? $"[yellow]Processing {parsedProblems.Count} problems from edition {year.Value}[/]"
+            : $"[green]Processing {parsedProblems.Count} problems from dataset (all years)[/]");
 
         #endregion
 
@@ -325,6 +331,8 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Find problems in the database that are no longer in the JSON file.
         var orphanedProblemSlugs = (await dbContext.Problems
+            // Only from the specified year
+            .Where(problem => !year.HasValue || problem.RoundInstance.Season.EditionNumber == year.Value)
             // Slug as an id
             .Select(problem => problem.Slug)
             // Evaluate

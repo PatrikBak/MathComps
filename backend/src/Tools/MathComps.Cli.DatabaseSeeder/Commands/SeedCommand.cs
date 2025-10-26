@@ -24,6 +24,14 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
         /// Useful when we just add new problems and we want the command to run quick.
         /// </summary>
         public bool SkipExisting { get; set; }
+
+        [CommandOption("-y|--year")]
+        [Description("Only process problems from the specified year")]
+        [DefaultValue(null)]
+        /// <summary>
+        /// When specified, only problems from this year will be processed.
+        /// </summary>
+        public int? Year { get; set; }
     }
 
     /// <inheritdoc/>
@@ -35,7 +43,7 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
         try
         {
             // Execute the seeding operation with the configured options.
-            await seeder.SeedAsync(settings.SkipExisting);
+            await seeder.SeedAsync(settings.SkipExisting, settings.Year);
 
             // Success!
             return 0;
