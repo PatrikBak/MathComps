@@ -111,6 +111,7 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 ### AI-Powered Tools
 
 - **[Tagging Assistant](src/Tools/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization with Gemini
+- **[Translation Assistant](src/Tools/MathComps.Cli.Translation/README.md)** – AI-powered problem translation with Gemini
 - **[Embeddings CLI](src/Tools/MathComps.Cli.Embeddings/README.md)** – Gemini-based vector embedding generator
 - **[Similarity System](src/Tools/MathComps.Cli.Similarity/README.md)** – Problem similarity calculation using embeddings + tags and other things
 

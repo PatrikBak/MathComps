@@ -1,0 +1,185 @@
+using MathComps.Cli.Translation.Dtos;
+using MathComps.Cli.Translation.Enums;
+using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace MathComps.Cli.Translation.Services;
+
+/// <summary>
+/// Provides database operations for problem translations.
+/// </summary>
+/// <param name="dbContextFactory">Factory for creating database contexts.</param>
+public class TranslationDatabaseService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : ITranslationDatabaseService
+{
+    /// <inheritdoc/>
+    public async Task<List<ProblemForTranslationDto>> GetProblemsNeedingTranslationAsync(
+        Language language,
+        int limit,
+        bool forceRetranslate,
+        TranslationScope scope)
+    {
+        // Get DB access
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Start with nicely sorted problems
+        var query = context.Problems.OrderByDefaultProblemSort();
+
+        // Single combined query based on scope and force retranslate flag
+        query = scope switch
+        {
+            // Handle statements-only scope
+            TranslationScope.StatementsOnly => query.Where(problem =>
+                // If not forcing retranslation, check for missing translations
+                ((!forceRetranslate && !problem.Texts.Any(text =>
+                    text.Language == language &&
+                    text.DocumentType == DocumentType.Statement
+                )) || forceRetranslate)
+
+                // We need the statement to translate from
+                && problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Statement)
+            ),
+
+            // Handle solutions-only scope
+            TranslationScope.SolutionsOnly => query.Where(problem =>
+                // If not forcing retranslation, check for missing translations
+                ((!forceRetranslate && !problem.Texts.Any(text =>
+                    text.Language == language &&
+                    text.DocumentType == DocumentType.Solution
+                )) || forceRetranslate)
+
+                // We need the solution to translate from
+                && problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Solution)
+            ),
+
+            // Handle both statements and solutions
+            TranslationScope.Both => query.Where(problem =>
+                // If not forcing retranslation, check for missing translations
+                ((!forceRetranslate && (
+                    !problem.Texts.Any(text =>
+                        text.Language == language &&
+                        text.DocumentType == DocumentType.Statement
+                    ) ||
+                    !problem.Texts.Any(text =>
+                        text.Language == language &&
+                        text.DocumentType == DocumentType.Solution
+                    )
+                )) || forceRetranslate)
+
+                // We need both the statement and the solution to translate from
+                && problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Statement)
+                && problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Solution)
+            ),
+
+            // Unhandled scope
+            _ => throw new ArgumentException($"Unsupported translation scope: {scope}")
+        };
+
+        // Limit the problems
+        query = query.Take(limit);
+
+        // Execute the query with a conversion to DTOs
+        return await query
+            .Select(problem => new ProblemForTranslationDto(
+                problem.Id,
+                problem.Slug,
+                // Get the original language from the first original text
+                problem.Texts
+                    .Where(text => text.IsOriginal)
+                    .Select(text => text.Language)
+                    .First(),
+                // Get statement text from ProblemTexts (original language)
+                problem.Texts
+                    .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
+                    .Select(text => text.RawText)
+                    .First(),
+                // Get solution text from ProblemTexts (original language) if it exists
+                problem.Texts
+                    .Where(text => text.DocumentType == DocumentType.Solution && text.IsOriginal)
+                    .Select(text => text.RawText)
+                    .FirstOrDefault()
+            ))
+            .ToListAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task UpsertTranslationAsync(ProblemTranslationUpsertDto translation)
+    {
+        // Get DB access
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Current timestamp for tracking modifications
+        var now = DateTime.UtcNow;
+
+        // Upsert statement if provided
+        if (translation.StatementText != null)
+        {
+            // Find it in the DB
+            var existingStatement = await context.ProblemTexts
+                .FirstOrDefaultAsync(text =>
+                    text.ProblemId == translation.ProblemId &&
+                    text.Language == translation.Language &&
+                    text.DocumentType == DocumentType.Statement);
+
+            // If the statement exists
+            if (existingStatement != null)
+            {
+                // Update existing statement
+                existingStatement.RawText = translation.StatementText;
+                existingStatement.DateModified = now;
+                existingStatement.IsOriginal = false;
+            }
+            // If the statement doesn't exist
+            else
+            {
+                // Create new statement
+                context.ProblemTexts.Add(new ProblemText
+                {
+                    ProblemId = translation.ProblemId,
+                    Language = translation.Language,
+                    DocumentType = DocumentType.Statement,
+                    RawText = translation.StatementText,
+                    DateModified = now,
+                    IsOriginal = false
+                });
+            }
+        }
+
+        // If the solution exists
+        if (translation.SolutionText != null)
+        {
+            // Find it in the db
+            var existingSolution = await context.ProblemTexts
+                .FirstOrDefaultAsync(text =>
+                    text.ProblemId == translation.ProblemId &&
+                    text.Language == translation.Language &&
+                    text.DocumentType == DocumentType.Solution);
+
+            // If the solution exists
+            if (existingSolution != null)
+            {
+                // Update existing solution
+                existingSolution.RawText = translation.SolutionText;
+                existingSolution.DateModified = now;
+                existingSolution.IsOriginal = false;
+            }
+            // If the solution doesn't exist
+            else
+            {
+                // Create new solution
+                context.ProblemTexts.Add(new ProblemText
+                {
+                    ProblemId = translation.ProblemId,
+                    Language = translation.Language,
+                    DocumentType = DocumentType.Solution,
+                    RawText = translation.SolutionText,
+                    DateModified = now,
+                    IsOriginal = false
+                });
+            }
+        }
+
+        // Save changes
+        await context.SaveChangesAsync();
+    }
+}
