@@ -80,7 +80,21 @@ cd backend/src/Infrastructure/MathComps.Infrastructure
 dotnet ef migrations add <MigrationName> --startup-project ../../Api/MathComps.Api
 ```
 
-### 3. Run the API
+### 3. Configure Gemini API (Optional)
+
+For AI-powered tools (tagging, translation, embeddings), set up your Gemini API key:
+
+```bash
+# From the backend directory
+cd backend
+
+# Set Gemini API key (shared across all tools)
+dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/Api/MathComps.Api
+```
+
+Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+### 4. Run the API
 
 See the [API README](src/Api/MathComps.Api/README.md) for running instructions.
 

@@ -2,6 +2,7 @@ using MathComps.Cli.Tagging.Commands.Helpers;
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
+using MathComps.Infrastructure.Services;
 using MathComps.Shared;
 using Microsoft.Extensions.Options;
 using Spectre.Console;

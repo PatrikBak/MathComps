@@ -1,8 +1,8 @@
 using MathComps.Cli.Embeddings.Commands;
 using MathComps.Cli.Embeddings.Services;
-using MathComps.Cli.Embeddings.Settings;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
