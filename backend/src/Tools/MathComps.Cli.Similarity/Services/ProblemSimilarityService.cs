@@ -1,6 +1,7 @@
 using MathComps.Cli.Similarity.Dtos;
 using MathComps.Cli.Similarity.Settings;
 using MathComps.Domain;
+using MathComps.Domain.Constants;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -76,60 +77,83 @@ public class ProblemSimilarityService(
             .ToList();
 
         // Construct a query to find candidate problems based on a set of criteria.
-        var candidatesQuery = context.Problems
-            // Exclude the current problem
-            .Where(problem => problem.Id != sourceProblemData.ProblemId
+        // We need to join with ProblemEmbeddings to access the embeddings
+        var candidatesQuery =
+            from problem in context.Problems
+            from embedding in context.ProblemEmbeddings
+                // Exclude the current problem
+            where problem.Id != sourceProblemData.ProblemId
+                // We need problem embeddings suitable suitable to be compared to
+                && embedding.DocumentType == DocumentType.ProblemStatement
+                && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument
                 // The candidate must be from a relevant competition.
-                && relevantCompetitionSlug.Contains(problem.RoundInstance.Round.CompositeSlug));
-
-        // The candidate must have at least one tag in common with the source problem if it has any tags
-        candidatesQuery = candidatesQuery.Where(problem =>
-            // From the tags
-            problem.ProblemTagsAll.AsQueryable()
-                // That have good enough quality
-                .Where(ProblemTag.IsGoodEnoughTag)
-                // Check for at least one matches
-                .Any(problemTag => sourceProblemData.TagsIds.Contains(problemTag.TagId)));
-
-        // The candidate's statement must exist...
-        candidatesQuery = candidatesQuery.Where(problem => problem.StatementEmbedding != null &&
-            // And must be be semantically similar to the source problem's statement.
-            problem.StatementEmbedding.CosineDistance(sourceProblemData.StatementEmbedding) <= (1 - settings.Value.MinimalSimilarity));
+                && relevantCompetitionSlug.Contains(problem.RoundInstance.Round.CompositeSlug)
+                // The candidate must have at least one tag in common with the source problem
+                && problem.ProblemTagsAll.AsQueryable()
+                    .Where(ProblemTag.IsGoodEnoughTag)
+                    .Any(problemTag => sourceProblemData.TagsIds.Contains(problemTag.TagId))
+                // The candidate's statement must be semantically similar to the source problem's statement
+                && embedding.Embedding.CosineDistance(sourceProblemData.StatementEmbedding) <= (1 - settings.Value.MinimalSimilarity)
+            select new
+            {
+                Problem = problem,
+                StatementEmbedding = embedding.Embedding
+            };
 
         // If the source problem has a solution...
         if (sourceProblemData.SolutionEmbedding != null)
         {
-            // The candidate...
-            candidatesQuery = candidatesQuery.Where(problem =>
-                // Must either not have a solution, or its solution...
-                problem.SolutionEmbedding == null ||
-                // Or its solution must be semantically similar to the source problem's solution.
-                problem.SolutionEmbedding.CosineDistance(sourceProblemData.SolutionEmbedding) <= (1 - settings.Value.MinimalSimilarity)
-            );
+            // Filter by solution similarity too
+            candidatesQuery =
+                from candidate in candidatesQuery
+                let solutionEmbedding = candidate.Problem.Embeddings
+                    .FirstOrDefault(embedding =>
+                        embedding.DocumentType == DocumentType.ProblemWithSolution &&
+                        embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument)
+                // Either no solution, or similar enough
+                where solutionEmbedding == null ||
+                      solutionEmbedding.Embedding.CosineDistance(sourceProblemData.SolutionEmbedding) <= (1 - settings.Value.MinimalSimilarity)
+                select candidate;
         }
 
-        // We order the candidates...
-        return [.. (await candidatesQuery
+        // Now we need to connect the candidate data with solution embeddings, if they exist
+        var candidatesWithSolutionEmb =
+            from candidate in candidatesQuery
+            let solutionEmbedding = candidate.Problem.Embeddings
+                .Where(embedding =>
+                    embedding.DocumentType == DocumentType.ProblemWithSolution &&
+                    embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument)
+                .Select(embedding => embedding.Embedding)
+                .FirstOrDefault()
+            select new
+            {
+                candidate.Problem,
+                candidate.StatementEmbedding,
+                SolutionEmbedding = solutionEmbedding
+            };
+
+        // Now we can actually order candidates
+        return [.. (await candidatesWithSolutionEmb
             // ...by statement similarity
-            .OrderBy(problem => problem.StatementEmbedding!.CosineDistance(sourceProblemData.StatementEmbedding))
+            .OrderBy(candidate => candidate.StatementEmbedding.CosineDistance(sourceProblemData.StatementEmbedding))
             // ...and take the top N according to the settings
             .Take(settings.Value.TotalCandidateLimit)
             // Retrieve the relevant data
-            .Select(problem => new
+            .Select(candidate => new
             {
                 // The problem's id,
-                problem.Id,
+                candidate.Problem.Id,
 
                 // Statement distance
-                StatementDistance = (double)problem.StatementEmbedding!.CosineDistance(sourceProblemData.StatementEmbedding),
+                StatementDistance = (double)candidate.StatementEmbedding.CosineDistance(sourceProblemData.StatementEmbedding),
 
                 // Solution distance, if both problems have it
-                SolutionDistance = problem.SolutionEmbedding != null && sourceProblemData.SolutionEmbedding != null
-                    ? (double?)problem.SolutionEmbedding.CosineDistance(sourceProblemData.SolutionEmbedding)
+                SolutionDistance = candidate.SolutionEmbedding != null && sourceProblemData.SolutionEmbedding != null
+                    ? (double?)candidate.SolutionEmbedding.CosineDistance(sourceProblemData.SolutionEmbedding)
                     : null,
 
                 // Tags
-                TagIds = problem.ProblemTagsAll.AsQueryable()
+                TagIds = candidate.Problem.ProblemTagsAll.AsQueryable()
                     // Only good enough tags
                     .Where(ProblemTag.IsGoodEnoughTag)
                     // Get their ids
@@ -138,7 +162,7 @@ public class ProblemSimilarityService(
                     .ToImmutableHashSet(),
 
                 // The 'competition-category-round' slug
-                Slug = problem.RoundInstance.Round.CompositeSlug,
+                Slug = candidate.Problem.RoundInstance.Round.CompositeSlug,
             })
             // Evaluate
             .ToListAsync(cancellationToken))
