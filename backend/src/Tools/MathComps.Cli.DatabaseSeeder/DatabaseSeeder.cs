@@ -944,16 +944,40 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             var newProblem = new EfProblem
             {
                 Number = parsedProblem.RawProblem.Order,
-                Statement = parsedProblem.RawProblem.Statement,
-                StatementParsed = serializedStatement,
-                Solution = parsedProblem.RawProblem.Solution,
-                SolutionParsed = serializedSolution,
                 RoundInstanceId = roundInstanceId,
                 Slug = problemSlug
             };
 
             // Remember it
             await dbContext.Problems.AddAsync(newProblem);
+
+            // Create the statement text in Slovak (original)
+            await dbContext.ProblemTexts.AddAsync(new ProblemText
+            {
+                ProblemId = newProblem.Id,
+                DocumentType = DocumentType.Statement,
+                RawText = parsedProblem.RawProblem.Statement,
+                ParsedText = serializedStatement,
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // If we have a solution
+            if (parsedProblem.RawProblem.Solution is not null)
+            {
+                // Create the solution text in Slovak (original) if it exists
+                await dbContext.ProblemTexts.AddAsync(new ProblemText
+                {
+                    ProblemId = newProblem.Id,
+                    DocumentType = DocumentType.Solution,
+                    RawText = parsedProblem.RawProblem.Solution,
+                    ParsedText = serializedSolution,
+                    Language = Language.SK,
+                    DateModified = DateTime.UtcNow,
+                    IsOriginal = true
+                });
+            }
 
             // Handle author
             for (var authorIndex = 0; authorIndex < orderedAuthors.Count; authorIndex++)
@@ -982,24 +1006,108 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         }
         else
         {
-            // Manually check for changes before updating (EF Core change tracking is unreliable with JSON fields).
+            // We will need to manually detect if a problem changed
             var problemChanged =
+                // Firstly, check basic properties
                 existingProblem.Number != parsedProblem.RawProblem.Order ||
-                existingProblem.Statement != parsedProblem.RawProblem.Statement ||
-                existingProblem.Solution != parsedProblem.RawProblem.Solution ||
                 existingProblem.RoundInstanceId != roundInstanceId ||
-                existingProblem.Slug != problemSlug ||
-                GeneralUtilities.JsonEquals(existingProblem.StatementParsed, serializedStatement) ||
-                GeneralUtilities.JsonEquals(existingProblem.SolutionParsed, serializedSolution);
+                existingProblem.Slug != problemSlug;
 
-            // Update all properties
+            // Update basic problem properties
             existingProblem.Number = parsedProblem.RawProblem.Order;
-            existingProblem.Statement = parsedProblem.RawProblem.Statement;
-            existingProblem.Solution = parsedProblem.RawProblem.Solution;
             existingProblem.RoundInstanceId = roundInstanceId;
             existingProblem.Slug = problemSlug;
-            existingProblem.StatementParsed = serializedStatement;
-            existingProblem.SolutionParsed = serializedSolution;
+
+            // Get the SK statement
+            var existingStatementText = await dbContext.ProblemTexts
+                .FirstOrDefaultAsync(text =>
+                    text.ProblemId == existingProblem.Id &&
+                    text.DocumentType == DocumentType.Statement &&
+                    text.Language == Language.SK);
+
+            // If statement exists, update it
+            if (existingStatementText is not null)
+            {
+                // Check the statement changes
+                problemChanged |=
+                    existingStatementText.RawText != parsedProblem.RawProblem.Statement ||
+                    !GeneralUtilities.JsonEquals(existingStatementText.ParsedText, serializedStatement);
+
+                // Update existing statement text
+                existingStatementText.RawText = parsedProblem.RawProblem.Statement;
+                existingStatementText.ParsedText = serializedStatement;
+                existingStatementText.DateModified = DateTime.UtcNow;
+            }
+            // If statement doesn't exist...
+            else
+            {
+                // Create it (handles orphaned problems or schema migrations)
+                await dbContext.ProblemTexts.AddAsync(new ProblemText
+                {
+                    ProblemId = existingProblem.Id,
+                    DocumentType = DocumentType.Statement,
+                    RawText = parsedProblem.RawProblem.Statement,
+                    ParsedText = serializedStatement,
+                    Language = Language.SK,
+                    DateModified = DateTime.UtcNow,
+                    IsOriginal = true
+                });
+
+                // Problem changed for sure
+                problemChanged = true;
+            }
+
+            // Try to get the solution text
+            var existingSolutionText = await dbContext.ProblemTexts
+                .FirstOrDefaultAsync(text =>
+                    text.ProblemId == existingProblem.Id &&
+                    text.DocumentType == DocumentType.Solution &&
+                    text.Language == Language.SK);
+
+            // If we should have a solution
+            if (parsedProblem.RawProblem.Solution is not null)
+            {
+                // And we have found it in the DB
+                if (existingSolutionText is not null)
+                {
+                    // Check the solution changes
+                    problemChanged |=
+                        existingSolutionText.RawText != parsedProblem.RawProblem.Solution ||
+                        !GeneralUtilities.JsonEquals(existingSolutionText.ParsedText, serializedSolution);
+
+                    // Update existing solution text
+                    existingSolutionText.RawText = parsedProblem.RawProblem.Solution;
+                    existingSolutionText.ParsedText = serializedSolution;
+                    existingSolutionText.DateModified = DateTime.UtcNow;
+                }
+                // If we should have a solution and didn't find it in the DB
+                else
+                {
+                    // Create new solution text
+                    await dbContext.ProblemTexts.AddAsync(new ProblemText
+                    {
+                        ProblemId = existingProblem.Id,
+                        DocumentType = DocumentType.Solution,
+                        RawText = parsedProblem.RawProblem.Solution,
+                        ParsedText = serializedSolution,
+                        Language = Language.SK,
+                        DateModified = DateTime.UtcNow,
+                        IsOriginal = true
+                    });
+
+                    // Problem changed for sure
+                    problemChanged = true;
+                }
+            }
+            // If we should not have a solution yet it is in the DB
+            else if (existingSolutionText is not null)
+            {
+                // Remove solution text if it no longer exists
+                dbContext.ProblemTexts.Remove(existingSolutionText);
+
+                // Problem changed for sure
+                problemChanged = true;
+            }
 
             #region Handle Authors
 

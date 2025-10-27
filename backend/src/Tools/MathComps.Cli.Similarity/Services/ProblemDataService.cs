@@ -66,8 +66,8 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
                     // As a set
                     .ToImmutableHashSet(),
 
-                // For validation
-                HasSolution = problem.Solution != null,
+                // We'll need to know whether to load solution embeddings too
+                HasSolution = problem.Texts.Any(text => text.DocumentType == DocumentType.Solution),
             })
             // At most one problem with this id
             .FirstOrDefaultAsync(cancellationToken))
@@ -77,8 +77,8 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
         /// Load statement embeddings. Using <see cref="EmbeddingConstants.Types.RetrievalQuery"/>
         /// for we will be using this problem as a query asking 'is this problem similar to source'?
         var statementEmbedding = await databaseContext.ProblemEmbeddings
-            .Where(embedding => embedding.ProblemId == problemId
-                && embedding.DocumentType == DocumentType.ProblemStatement
+            .Where(embedding => embedding.ProblemText.ProblemId == problemId
+                && embedding.ProblemText.DocumentType == DocumentType.Statement
                 && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalQuery)
             .Select(embedding => embedding.Embedding)
             .FirstOrDefaultAsync(cancellationToken)
@@ -88,8 +88,8 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
         // If we have a solution, also load the solution embedding in the similar manner
         var solutionEmbedding = !data.HasSolution ? null :
             await databaseContext.ProblemEmbeddings
-                .Where(embedding => embedding.ProblemId == problemId
-                    && embedding.DocumentType == DocumentType.ProblemWithSolution
+                .Where(embedding => embedding.ProblemText.ProblemId == problemId
+                    && embedding.ProblemText.DocumentType == DocumentType.Solution
                     && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalQuery)
                 .Select(embedding => embedding.Embedding)
                 .FirstOrDefaultAsync(cancellationToken)

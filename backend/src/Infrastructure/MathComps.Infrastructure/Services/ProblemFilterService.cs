@@ -59,9 +59,16 @@ public class ProblemFilterService(
             // Split query to avoid Cartesian explosion when accessing multiple collections
             .AsSplitQuery()
             // Which projects results to DTOs directly in the database query
-            .Select(problem => new ProblemDto(
-                problem.Slug,
-                problem.StatementParsed,
+            .Select(problem => new ProblemDto(problem.Slug,
+
+                // To get the parsed statement, go through the texts
+                problem.Texts
+                    // That are statements, currently in the original language
+                    .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal && text.ParsedText != null)
+                    // Get the parsed text
+                    .Select(text => text.ParsedText)
+                    // There should be exactly one text like that
+                    .Single(),
 
                 // Problem Source
                 new ProblemSource(
@@ -155,7 +162,16 @@ public class ProblemFilterService(
                                 ),
                             similarProblem.SimilarProblem.Number
                         ),
-                        similarProblem.SimilarProblem.StatementParsed,
+
+                        // Get the first available statement parsed text for similar problem
+                        similarProblem.SimilarProblem.Texts
+                            // That are statements, currently in the original language
+                            .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal && text.ParsedText != null)
+                            // Get the parsed text
+                            .Select(text => text.ParsedText!)
+                            // There should be exactly one text like that
+                            .Single(),
+
                         similarProblem.SimilarityScore,
                         similarProblem.SimilarProblem.Images
                             // Project to ProblemImageDto
@@ -354,14 +370,17 @@ public class ProblemFilterService(
             // This handles cases like "café" matching "cafe" in the database
             var normalizedSearchTerm = $"%{parameters.SearchText.RemoveAccents()}%";
 
-            // Do the search
+            // Do the search across all language texts using PostgreSQL's unaccent() function
+            // The GIN index on unaccent(raw_text) will be used automatically by PostgreSQL's query planner
             problems = problems.Where(problem =>
-                // Search in problem statement (always included)
-                EF.Functions.ILike(PostgresDbFunctions.Unaccent(problem.Statement), normalizedSearchTerm) ||
-                // If we should search in solution and the problem has some...
-                (parameters.SearchInSolution && problem.Solution != null &&
-                    // Search there too
-                    EF.Functions.ILike(PostgresDbFunctions.Unaccent(problem.Solution), normalizedSearchTerm)));
+                // Search in problem statement texts (any language)
+                problem.Texts.Any(text => text.DocumentType == DocumentType.Statement &&
+                    EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm)) ||
+                // If we should search in solution texts...
+                (parameters.SearchInSolution &&
+                    // Search in them too (again any language)
+                    problem.Texts.Any(text => text.DocumentType == DocumentType.Solution &&
+                        EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm))));
         }
 
         // The query is fully built

@@ -1,17 +1,22 @@
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// Represents the type of document being embedded.
+/// Represents the type of document text.
 /// </summary>
 public enum DocumentType
 {
     /// <summary>
-    /// Only the problem statement is embedded.
+    /// Problem statement text.
     /// </summary>
-    ProblemStatement = 0,
+    Statement = 0,
 
     /// <summary>
-    /// Both the problem statement and solution are embedded together.
+    /// Problem solution text.
     /// </summary>
-    ProblemWithSolution = 1
+    Solution = 1,
+
+    /// <summary>
+    /// Both the problem statement and solution combined (used for embeddings).
+    /// </summary>
+    StatementWithSolution = 2
 }

@@ -8,6 +8,11 @@
       "commandName": "Project",
       "commandLineArgs": "--skip-existing",
       "workingDirectory": ".",
+    },
+    "Seed Year": {
+      "commandName": "Project",
+      "commandLineArgs": "--year 74",
+      "workingDirectory": ".",
     }
   }
 }

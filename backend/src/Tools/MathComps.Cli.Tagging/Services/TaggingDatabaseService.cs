@@ -23,8 +23,8 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
 
         // Query problems...
         return await GetProblemDetails(dbContext.Problems
-            // That have a solution
-            .Where(problem => !string.IsNullOrWhiteSpace(problem.Solution))
+            // That have a solution text
+            .Where(problem => problem.Texts.Any(text => text.DocumentType == DocumentType.Solution))
             // In a random order
             .OrderBy(problem => Guid.NewGuid())
             // Take only the requested count
@@ -58,7 +58,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                  join tagName in selectedTags on problemTag.Tag.Name equals tagName
                  select tagName).Count()
                  // Compare against the expected counts based on whether the problem has a solution
-                 != (problem.Solution != null ? targetCountWithSolution : targetCountWithoutSolution));
+                 != (problem.Texts.Any(text => text.DocumentType == DocumentType.Solution) ? targetCountWithSolution : targetCountWithoutSolution));
         }
 
         // Execute the query 
@@ -374,8 +374,20 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
              {
                  problem.Id,
                  problem.Slug,
-                 problem.Statement,
-                 problem.Solution,
+
+                 // Get statement text from ProblemTexts (original language)
+                 Statement = problem.Texts
+                     .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
+                     .Select(text => text.RawText)
+                     .First(),
+
+                 // Get solution text from ProblemTexts (original language) if it exists
+                 Solution = problem.Texts
+                     .Where(text => text.DocumentType == DocumentType.Solution && text.IsOriginal)
+                     .Select(text => text.RawText)
+                     .First(),
+                 
+                 // Collect tag data
                  TagsData = problem.ProblemTagsAll.Select(problemTag => new
                  {
                      problemTag.Tag.Name,

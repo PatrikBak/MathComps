@@ -17,19 +17,14 @@ public class ProblemEmbedding
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
-    /// Foreign key to the problem this embedding belongs to.
+    /// Foreign key to the problem text this embedding was generated from.
     /// </summary>
-    public required Guid ProblemId { get; set; }
+    public required Guid ProblemTextId { get; set; }
 
     /// <summary>
-    /// Navigation to the problem.
+    /// Navigation to the problem text.
     /// </summary>
-    public Problem Problem { get; set; } = null!;
-
-    /// <summary>
-    /// The type of document that was embedded (statement only or statement with solution).
-    /// </summary>
-    public required DocumentType DocumentType { get; set; }
+    public ProblemText ProblemText { get; set; } = null!;
 
     /// <summary>
     /// The task type used for embedding generation. This corresponds to the task_type parameter in the Gemini API.

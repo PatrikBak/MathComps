@@ -6,6 +6,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -89,7 +90,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
 
         // Ensure we start with a completely clean database state for each test run
         await context.Database.EnsureDeletedAsync();
-        await context.Database.EnsureCreatedAsync();
+        await context.Database.MigrateAsync();
 
         // Seed the database with test data
         await SeedData(context);
@@ -601,11 +602,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "75-a-i-1",
-            Statement = "Ostrov je rozdelený na niekoľko kráľovstiev.",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2025_csmo_domestic_A.Id,
             Number = 1
         };
+        p1.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p1.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Ostrov je rozdelený na niekoľko kráľovstiev.",
+            ParsedText = "{}",
+            Language = Language.SK,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p1.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p1.Id,
@@ -619,11 +629,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "75-b-i-1",
-            Statement = "Každej hrane štvorstena priradíme jedno reálne číslo.",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2025_csmo_domestic_B.Id,
             Number = 1
         };
+        p2.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p2.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Každej hrane štvorstena priradíme jedno reálne číslo.",
+            ParsedText = "{}",
+            Language = Language.SK,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p2.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p2.Id,
@@ -636,11 +655,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "75-c-i-1",
-            Statement = "Prirodzené číslo zapísané navzájom rôznymi ciframi nazveme pitoreskné.",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2025_csmo_domestic_C.Id,
             Number = 1
         };
+        p3.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p3.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Prirodzené číslo zapísané navzájom rôznymi ciframi nazveme pitoreskné.",
+            ParsedText = "{}",
+            Language = Language.SK,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p3.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p3.Id,
@@ -653,11 +681,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "75-a-i-2",
-            Statement = "Nech p, q sú reálne čísla také, že rovnici |x^2-1|=px+q...",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2025_csmo_domestic_A.Id,
             Number = 2
         };
+        p4.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p4.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Nech p, q sú reálne čísla také, že rovnici |x^2-1|=px+q...",
+            ParsedText = "{}",
+            Language = Language.SK,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p4.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p4.Id,
@@ -671,11 +708,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "74-z9-i-1",
-            Statement = "Nájdite všetky dvojice celých čísel x a y takých, že x+y je prvočíslo a 3x+5y je 16.",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2024_csmo_domestic_Z9.Id,
             Number = 1
         };
+        p5.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p5.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Nájdite všetky dvojice celých čísel x a y takých, že x+y je prvočíslo a 3x+5y je 16.",
+            ParsedText = "{}",
+            Language = Language.SK,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p5.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p5.Id,
@@ -689,11 +735,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "74-z9-iii-1",
-            Statement = "Do divadla dorazili diváci buď peši, autami alebo autobusmi.",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2024_csmo_regional_Z9.Id,
             Number = 1
         };
+        p6.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p6.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Do divadla dorazili diváci buď peši, autami alebo autobusmi.",
+            ParsedText = "{}",
+            Language = Language.SK,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p6.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p6.Id,
@@ -706,11 +761,20 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             Slug = "imo-2025-1",
-            Statement = "Some IMO problem",
-            StatementParsed = "{}",
             RoundInstanceId = ri_2025_imo.Id,
             Number = 1
         };
+        p7.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p7.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "Some IMO problem",
+            ParsedText = "{}",
+            Language = Language.EN,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
         p7.ProblemAuthors.Add(new ProblemAuthor
         {
             ProblemId = p7.Id,
