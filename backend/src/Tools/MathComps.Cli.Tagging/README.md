@@ -86,12 +86,18 @@ dotnet run -- tag-problems --count 50 --tag-selection-file tags.txt --clear-tags
 
 # Process with multiple threads for faster execution
 dotnet run -- tag-problems --count 50 --num-threads 3
+
+# Preview tagging without making changes (dry run)
+dotnet run -- tag-problems --count 10 --dry-run
 ```
 
-- `--count`: Number of problems to process.
-- `--tag-selection-file`: Consider only tags listed in the specified file (one tag per line).
-- `--clear-tags`: Clear all tags before tagging. If used with `--tag-selection-file`, clears only those tags.
-- `--num-threads`: Number of parallel threads for processing (default: 1). Consider rate limits when setting this.
+**Options:**
+
+- `-n|--count` – Number of problems to process (required)
+- `--tag-selection-file` – Consider only tags listed in the specified file (one tag per line)
+- `--clear-tags` – Clear all tags before tagging. If used with `--tag-selection-file`, clears only those tags
+- `--num-threads` – Number of parallel threads for processing (default: 1). Consider rate limits when setting this
+- `--dry-run` – Preview tag suggestions without making any changes to the database
 
 **Note**: The command automatically skips problems that already have all the specified tags assigned, making it efficient to run multiple times without redundant processing.
 
@@ -111,13 +117,19 @@ dotnet run -- veto-problem-tags --count 50 --tag-selection-file tags.txt
 
 # Veto tags with multiple threads
 dotnet run -- veto-problem-tags --count 50 --num-threads 3
+
+# Preview veto decisions without making changes (dry run)
+dotnet run -- veto-problem-tags --count 10 --dry-run
 ```
 
-- `--count`: Number of problems to process.
-- `--max-confidence`: Only consider tags with confidence less than or equal to this threshold (default: 0).
-- `--max-fit`: Only consider tags with goodness of fit less than or equal to this threshold (0-1, default: 1.0).
-- `--tag-selection-file`: Veto only tags listed in the specified file (one tag per line).
-- `--num-threads`: Number of parallel threads for processing (default: 1). Consider rate limits when setting this.
+**Options:**
+
+- `-n|--count` – Number of problems to process (required)
+- `--max-confidence` – Only consider tags with confidence less than or equal to this threshold (default: 0)
+- `--max-fit` – Only consider tags with goodness of fit less than or equal to this threshold (0-1, default: 1.0)
+- `--tag-selection-file` – Veto only tags listed in the specified file (one tag per line)
+- `--num-threads` – Number of parallel threads for processing (default: 1). Consider rate limits when setting this
+- `--dry-run` – Preview veto decisions without making any changes to the database
 
 ### **prune-tags**
 

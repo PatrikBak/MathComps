@@ -32,7 +32,15 @@ dotnet run -- seed
 
 # Skip existing - only insert new problems, skip updates (much faster)
 dotnet run -- seed --skip-existing
+
+# Process only problems from a specific year
+dotnet run -- seed --year 75
 ```
+
+**Options:**
+
+- `-s|--skip-existing` – Skip updating existing problems (only insert new ones)
+- `-y|--year` – Only process problems from the specified year
 
 ## Setup
 

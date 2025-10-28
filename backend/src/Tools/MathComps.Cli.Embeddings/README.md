@@ -37,10 +37,17 @@ dotnet run -- generate-embeddings -n 5
 
 # Force regeneration of existing embeddings for 10 problems
 dotnet run -- generate-embeddings -n 10 --force
+
+# Use a specific model with custom batch size
+dotnet run -- generate-embeddings -n 100 --model gemini-embedding-001 --batch-size 50
 ```
 
-- `--count` or `-n`: Number of problems to process (required).
-- `--force` or `-f`: Force regeneration of existing embeddings.
+**Options:**
+
+- `-n|--count` – Number of problems to process (required)
+- `-f|--force` – Force regeneration of existing embeddings
+- `--model` – Gemini embedding model to use (default: `gemini-embedding-001`)
+- `-b|--batch-size` – Number of problems to process in a single batch API call (default: 20)
 
 ## Setup
 
