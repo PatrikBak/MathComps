@@ -19,7 +19,6 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
     {
         [CommandOption("-s|--skip-existing")]
         [Description("Skip updating existing problems (only insert new ones)")]
-        [DefaultValue(false)]
         /// <summary>
         /// Useful when we just add new problems and we want the command to run quick.
         /// </summary>
@@ -27,7 +26,6 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
 
         [CommandOption("-y|--year")]
         [Description("Only process problems from the specified year")]
-        [DefaultValue(null)]
         /// <summary>
         /// When specified, only problems from this year will be processed.
         /// </summary>

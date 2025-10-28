@@ -48,7 +48,8 @@ public class GenerateEmbeddingsCommand(
         /// </summary>
         [Description("Gemini embedding model to use")]
         [CommandOption("--model")]
-        public string Model { get; set; } = "gemini-embedding-001";
+        [DefaultValue("gemini-embedding-001")]
+        public string Model { get; set; } = null!;
 
         /// <summary>
         /// Number of problems to process in a single batch API call.
@@ -56,7 +57,8 @@ public class GenerateEmbeddingsCommand(
         /// </summary>
         [Description("Batch size for Gemini requests")]
         [CommandOption("-b|--batch-size")]
-        public int BatchSize { get; set; } = 20;
+        [DefaultValue(20)]
+        public int BatchSize { get; set; }
     }
 
     /// <inheritdoc />

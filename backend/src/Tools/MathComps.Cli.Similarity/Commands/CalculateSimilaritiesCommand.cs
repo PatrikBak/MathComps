@@ -38,7 +38,7 @@ public class CalculateSimilaritiesCommand(
         /// Number of problems to process in this similarity calculation session.
         /// Controls the scope of work for each command execution.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to process for similarity calculation.")]
         public required int Count { get; set; }
 
@@ -48,7 +48,6 @@ public class CalculateSimilaritiesCommand(
         /// </summary>
         [CommandOption("--skip-processed")]
         [Description("Skip problems that already have similarity relationships calculated.")]
-        [DefaultValue(false)]
         public bool SkipProcessed { get; set; }
     }
 

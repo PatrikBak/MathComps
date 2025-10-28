@@ -18,7 +18,7 @@ public class PruneTagsCommand(ITaggingDatabaseService databaseService) : AsyncCo
     /// </summary>
     public class Settings : CommandSettings
     {
-        [CommandOption("-n|--limit")]
+        [CommandOption("-n|--limit", isRequired: true)]
         [Description("Tags used by at most this many problems will be deleted from the database.")]
         public required int Limit { get; set; }
 

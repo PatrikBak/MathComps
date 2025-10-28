@@ -48,13 +48,12 @@ public class TagProblemsCommand(
         /// </summary>
         [CommandOption("--dry-run")]
         [Description("Perform a dry run without making any changes to the database.")]
-        [DefaultValue(false)]
         public bool DryRun { get; set; }
 
         /// <summary>
         /// Batch size limit to control AI API costs and processing time.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to tag.")]
         public required int Count { get; set; }
 
@@ -65,7 +64,6 @@ public class TagProblemsCommand(
         /// </summary>
         [CommandOption("--clear-tags")]
         [Description("Clears all tags before tagging. If specified together with a tag selection, clears only those tags.")]
-        [DefaultValue(false)]
         public bool ClearTags { get; set; }
 
         /// <summary>
@@ -81,7 +79,6 @@ public class TagProblemsCommand(
         /// </summary>
         [CommandOption("--tag-selection-file")]
         [Description("Consider only some subset of tags. Argument should be path to a file, where each line contains the name of one tag.")]
-        [DefaultValue(null)]
         public string? TagSelectionFile { get; set; }
     }
 

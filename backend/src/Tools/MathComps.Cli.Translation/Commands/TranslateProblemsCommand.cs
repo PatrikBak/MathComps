@@ -35,7 +35,7 @@ public class TranslateProblemsCommand(
         /// <summary>
         /// Number of problems to translate.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to translate.")]
         public required int Count { get; set; }
 
@@ -51,7 +51,6 @@ public class TranslateProblemsCommand(
         /// </summary>
         [CommandOption("--force")]
         [Description("Force retranslation even if translations already exist.")]
-        [DefaultValue(false)]
         public bool Force { get; set; }
 
         /// <summary>
@@ -60,7 +59,7 @@ public class TranslateProblemsCommand(
         [CommandOption("--num-threads")]
         [Description("Number of threads to run the translation in parallel. Note: make sure to take into account model rate limits when setting this.")]
         [DefaultValue(1)]
-        public int NumThreads { get; set; } = 1;
+        public int NumThreads { get; set; }
 
         /// <summary>
         /// Scope of translation (statements only, solutions only, or both).

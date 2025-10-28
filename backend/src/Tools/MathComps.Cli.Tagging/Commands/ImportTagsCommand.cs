@@ -36,7 +36,7 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
         [CommandOption("--batch-size|-b")]
         [Description("Batch size for processing CSV rows")]
         [DefaultValue(1000)]
-        public int BatchSize { get; init; } = 1000;
+        public int BatchSize { get; init; }
 
         /// <summary>
         /// Validates the command settings, ensuring the file exists and batch size is positive.

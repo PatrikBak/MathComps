@@ -49,13 +49,12 @@ public class VetoProblemTagsCommand(
         /// </summary>
         [CommandOption("--dry-run")]
         [Description("Perform a dry run without making any changes to the database.")]
-        [DefaultValue(false)]
         public bool DryRun { get; set; }
 
         /// <summary>
         /// Batch size limit to control AI API costs and processing time.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to process.")]
         public required int Count { get; set; }
 
@@ -64,14 +63,16 @@ public class VetoProblemTagsCommand(
         /// </summary>
         [CommandOption("--max-confidence")]
         [Description("Filter only problems with confidence less than or equal to this threshold.")]
-        public int MaxConfidence { get; set; } = 0;
+        [DefaultValue(0)]
+        public int MaxConfidence { get; set; }
 
         /// <summary>
         /// Filters only problems with goodness of fit less than or equal to given threshold (from 0 to 1).
         /// </summary>
         [CommandOption("--max-fit")]
         [Description("Filters only problems with goodness of fit less than or equal to given threshold (from 0 to 1).")]
-        public float MaxGoodnessOfFit { get; set; } = 1.0f;
+        [DefaultValue(1.0f)]
+        public float MaxGoodnessOfFit { get; set; }
 
         /// <summary>
         /// This specified how much we wanna spam Gemini in parallel.
@@ -86,7 +87,6 @@ public class VetoProblemTagsCommand(
         /// </summary>
         [CommandOption("--tag-selection-file")]
         [Description("Veto only some subset of tags. Argument should be path to a file, where each line contains the name of one tag.")]
-        [DefaultValue(null)]
         public string? TagSelectionFile { get; set; }
     }
 

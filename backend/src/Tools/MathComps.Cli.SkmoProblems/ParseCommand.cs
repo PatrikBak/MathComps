@@ -27,7 +27,7 @@ public class ParseCommand : AsyncCommand<ParseCommand.Settings>
         [CommandOption("--mode|-m")]
         [Description("Rendering mode for HTML previews")]
         [DefaultValue(ProblemRenderingMode.NoRendering)]
-        public ProblemRenderingMode Mode { get; init; } = ProblemRenderingMode.NoRendering;
+        public ProblemRenderingMode Mode { get; init; }
 
         /// <summary>
         /// This is useful for debugging or testing specific years without affecting the version-controlled archive.
