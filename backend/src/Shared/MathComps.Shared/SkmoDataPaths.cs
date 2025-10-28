@@ -20,13 +20,13 @@ public static class SkmoDataPaths
 
     /// <summary>
     /// Relative path to the SKMO archive directory containing raw TeX files.
-    /// Used by the SkmoProblems parser to read source TeX files.
+    /// Used by the SkmoParser to read source TeX files.
     /// </summary>
     public const string SkmoArchiveDirectory = SkmoDataDirectory + "/Archive";
 
     /// <summary>
     /// Relative path to the SKMO HTML results directory.
-    /// Used by the SkmoProblems parser to output rendered HTML previews.
+    /// Used by the SkmoParser to output rendered HTML previews.
     /// </summary>
     public const string SkmoHtmlResultsDirectory = SkmoDataDirectory + "/ArchiveHtml";
 

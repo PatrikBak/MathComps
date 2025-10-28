@@ -1,4 +1,4 @@
-namespace MathComps.Cli.SkmoProblems.Rendering;
+namespace MathComps.Cli.SkmoParser.Rendering;
 
 /// <summary>
 /// Different modes of rendering the parsed SKMO problems to HTML files.

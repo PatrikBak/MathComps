@@ -65,7 +65,7 @@ MathComps/
 ## Updating Content
 
 1. **Make changes in data/skmo/archive**
-2. **Run the SKMO problems CLI with default settings** - see [SKMO Problems README](backend/src/Tools/MathComps.Cli.SkmoProblems/README.md) for details
+2. **Run the SKMO parser CLI with default settings** - see [SKMO Parser README](backend/src/Tools/MathComps.Cli.SkmoParser/README.md) for details
 3. **Run the SKMO scraper to scrape links** if there is a new solution link on SKMO - see [SKMO Scraper README](backend/src/Tools/MathComps.Cli.SkmoScraper/README.md) for details
 
 **Deploy (requires DB access):**

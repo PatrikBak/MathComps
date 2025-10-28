@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11121.172 d18.0
@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.TexParser", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.Handouts", "src\Tools\MathComps.Cli.Handouts\MathComps.Cli.Handouts.csproj", "{BA7AEE3D-D7A0-F2B3-B6C8-834A3F953DEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.SkmoProblems", "src\Tools\MathComps.Cli.SkmoProblems\MathComps.Cli.SkmoProblems.csproj", "{7A251D4D-FAA2-A78A-52E2-9FB439276BE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.SkmoParser", "src\Tools\MathComps.Cli.SkmoParser\MathComps.Cli.SkmoParser.csproj", "{7A251D4D-FAA2-A78A-52E2-9FB439276BE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Shared", "src\Shared\MathComps.Shared\MathComps.Shared.csproj", "{BC150150-02C5-0192-A9BA-9C612624C073}"
 EndProject

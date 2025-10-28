@@ -13,7 +13,7 @@ using Spectre.Console;
 using TexParagraph = MathComps.TexParser.Types.Paragraph;
 using TexText = MathComps.TexParser.Types.Text;
 
-namespace MathComps.Cli.SkmoProblems.Rendering;
+namespace MathComps.Cli.SkmoParser.Rendering;
 
 /// <summary>
 /// A static class responsible for parsing raw SKMO TeX problem statements and rendering them into
