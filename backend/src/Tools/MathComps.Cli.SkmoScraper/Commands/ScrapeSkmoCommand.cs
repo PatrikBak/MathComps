@@ -1,8 +1,8 @@
 using MathComps.Cli.SkmoScraper.Services;
+using MathComps.Shared;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
-using System.Text.Json;
 
 namespace MathComps.Cli.SkmoScraper.Commands;
 
@@ -10,9 +10,8 @@ namespace MathComps.Cli.SkmoScraper.Commands;
 /// The command for scraping the SKMO website for solution PDFs
 /// </summary>
 /// <param name="scraperService">The service used to perform the scraping operations.</param>
-/// <param name="jsonSerializerOptions">The options for serializing the output JSON.</param>
 [Description("Scrapes the Slovak Mathematical Olympiad (SKMO) website for solution documents.")]
-public class ScrapeSkmoCommand(ISkmoScraperService scraperService, JsonSerializerOptions jsonSerializerOptions)
+public class ScrapeSkmoCommand(ISkmoScraperService scraperService)
     : AsyncCommand<ScrapeSkmoCommand.Settings>
 {
     /// <summary>
@@ -87,7 +86,7 @@ public class ScrapeSkmoCommand(ISkmoScraperService scraperService, JsonSerialize
         AnsiConsole.MarkupLine($"[green]Scraping complete. Found {scrapedSolutions.Count} solution documents.[/]");
 
         // Serialize the data to a JSON string.
-        var jsonContent = JsonSerializer.Serialize(scrapedSolutions, jsonSerializerOptions);
+        var jsonContent = scrapedSolutions.ToJson();
 
         // Write the JSON content to the specified output file.
         await File.WriteAllTextAsync(settings.OutputPath, jsonContent);

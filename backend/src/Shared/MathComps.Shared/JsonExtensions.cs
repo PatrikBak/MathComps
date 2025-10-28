@@ -47,9 +47,19 @@ public static class JsonExtensions
     /// </summary>
     /// <typeparam name="T">The type of object to serialize.</typeparam>
     /// <param name="value">The object to serialize.</param>
-    /// <param name="writeIndented">Whether to format the JSON with indentation for readability. Defaults to false for compact output.</param>
+    /// <param name="writeIndented">Whether to format the JSON with indentation for readability. Defaults to true for readable output.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static string ToJson<T>(this T value, bool writeIndented = false)
+    public static string ToJson<T>(this T value, bool writeIndented = true)
         // Simple proxy with the right options
         => JsonSerializer.Serialize(value, writeIndented ? _indentedOptions : _compactOptions);
+
+    /// <summary>
+    /// Deserializes a JSON string to an object using compact JSON options.
+    /// </summary>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <returns>The deserialized object.</returns>
+    public static T FromJson<T>(this string json)
+        => JsonSerializer.Deserialize<T>(json, _compactOptions)
+            ?? throw new InvalidOperationException($"Failed to deserialize JSON to type {typeof(T).Name}");
 }

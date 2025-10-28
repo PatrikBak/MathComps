@@ -6,8 +6,6 @@ using MathComps.TexParser.Types;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 using System.Collections.Immutable;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using EfProblem = MathComps.Domain.EfCoreEntities.Problem;
 
@@ -90,25 +88,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
     /// </summary>
     private const int OlympiadBaseYear = 1950;
 
-    /// <summary>
-    /// Centralized JSON serialization options for persisting parsed statement/solution to
-    /// PostgreSQL <c>jsonb</c> columns.
-    /// </summary>
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        // Use compact representation without extra whitespace.
-        WriteIndented = false,
-
-        // Use camelCase for property names to match JavaScript conventions.
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-
-        // Ignore null values to reduce storage size.
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-
-        // Enum values so JS clients can read them as strings.
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     #endregion
 
     #region Public Methods
@@ -136,9 +115,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         var jsonContent = await File.ReadAllTextAsync(jsonPath);
 
         // Deserialize into a list of parsed problems.
-        var parsedProblems = (JsonSerializer.Deserialize<ImmutableList<SkmoParsedProblem>>(jsonContent)
-            // This must not be null if the file is valid JSON.
-            ?? throw new InvalidOperationException("Failed to deserialize the input JSON file."))
+        var parsedProblems = jsonContent.FromJson<ImmutableList<SkmoParsedProblem>>()
             // Take only problems from the specified year
             .Where(problem => !year.HasValue || problem.RawProblem.OlympiadYear == year.Value)
             // Enumerate
@@ -910,8 +887,8 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             problem.RoundInstanceId == roundInstanceId && problem.Number == parsedProblem.RawProblem.Order);
 
         // Serialize the parsed statement and solution into JSON for storage in PostgreSQL jsonb columns.
-        var serializedStatement = JsonSerializer.Serialize(parsedProblem.ParsedStatement, _jsonOptions);
-        var serializedSolution = JsonSerializer.Serialize(parsedProblem.ParsedSolution, _jsonOptions);
+        var serializedStatement = parsedProblem.ParsedStatement.ToJson(writeIndented: false);
+        var serializedSolution = parsedProblem.ParsedSolution.ToJson(writeIndented: false);
 
         // If a problem don't exist...
         if (existingProblem is null)
