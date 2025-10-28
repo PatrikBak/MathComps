@@ -46,6 +46,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Physical images associated with problems.</summary>
     public DbSet<ProblemImage> ProblemImages => Set<ProblemImage>();
 
+    /// <summary>Embeddings for problems.</summary>
+    public DbSet<ProblemEmbedding> ProblemEmbeddings => Set<ProblemEmbedding>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -270,26 +273,37 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasOperators("gin_trgm_ops")
              .HasFilter("solution IS NOT NULL");
 
-            #region Vector indexes for semantic similarity search using cosine distanceyRegion
-
-            e.HasIndex(i => i.StatementEmbedding)
-             .HasDatabaseName("ix_problem_statement_embedding_cosine")
-             .HasMethod("ivfflat")
-             .HasOperators("vector_cosine_ops")
-             .HasStorageParameter("lists", 100)
-             .HasFilter("statement_embedding IS NOT NULL");
-
-            e.HasIndex(i => i.SolutionEmbedding)
-             .HasDatabaseName("ix_problem_solution_embedding_cosine")
-             .HasMethod("ivfflat")
-             .HasOperators("vector_cosine_ops")
-             .HasStorageParameter("lists", 100)
-             .HasFilter("solution_embedding IS NOT NULL");
-
-            #endregion
+            // Embeddings relationship
+            e.HasMany(p => p.Embeddings)
+             .WithOne(pe => pe.Problem)
+             .HasForeignKey(pe => pe.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
 
         #endregion Problem
+
+        #region ProblemEmbedding
+
+        modelBuilder.Entity<ProblemEmbedding>(e =>
+        {
+            // Unique constraint: one embedding per problem, document type, embedding type, and model
+            e.HasIndex(pe => new { pe.ProblemId, pe.DocumentType, pe.EmbeddingType, pe.ModelName })
+             .IsUnique()
+             .HasDatabaseName("ux_problem_embedding_problem_document_type_embedding_type_model");
+
+            // Index for efficient lookup by problem
+            e.HasIndex(pe => pe.ProblemId)
+             .HasDatabaseName("ix_problem_embedding_problem_id");
+
+            // Vector index for semantic similarity search using cosine distance.
+            e.HasIndex(pe => pe.Embedding)
+             .HasDatabaseName("ix_problem_embedding_cosine")
+             .HasMethod("ivfflat")
+             .HasOperators("vector_cosine_ops")
+             .HasStorageParameter("lists", 100);
+        });
+
+        #endregion
 
         #region ProblemImage
 

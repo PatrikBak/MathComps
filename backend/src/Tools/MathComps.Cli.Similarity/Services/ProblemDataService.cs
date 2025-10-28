@@ -1,4 +1,5 @@
 using MathComps.Cli.Similarity.Dtos;
+using MathComps.Domain.Constants;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -55,8 +56,6 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
                 problem.Id,
                 problem.RoundInstance.Round.CompetitionId,
                 problem.RoundInstance.Round.CompositeSlug,
-                problem.StatementEmbedding,
-                problem.SolutionEmbedding,
 
                 // Get tag ids
                 TagIds = problem.ProblemTagsAll.AsQueryable()
@@ -73,7 +72,29 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             // At most one problem with this id
             .FirstOrDefaultAsync(cancellationToken))
             // Make sure any
-            ?? throw new InvalidOperationException($"No probleem with id = {problemId}");
+            ?? throw new InvalidOperationException($"No problem with id = {problemId}");
+
+        /// Load statement embeddings. Using <see cref="EmbeddingConstants.Types.RetrievalQuery"/>
+        /// for we will be using this problem as a query asking 'is this problem similar to source'?
+        var statementEmbedding = await databaseContext.ProblemEmbeddings
+            .Where(embedding => embedding.ProblemId == problemId
+                && embedding.DocumentType == DocumentType.ProblemStatement
+                && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalQuery)
+            .Select(embedding => embedding.Embedding)
+            .FirstOrDefaultAsync(cancellationToken)
+            // Let's hope we have the embeddings
+            ?? throw new Exception($"Problem {problemId} doesn't have statement embedding");
+
+        // If we have a solution, also load the solution embedding in the similar manner
+        var solutionEmbedding = !data.HasSolution ? null :
+            await databaseContext.ProblemEmbeddings
+                .Where(embedding => embedding.ProblemId == problemId
+                    && embedding.DocumentType == DocumentType.ProblemWithSolution
+                    && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalQuery)
+                .Select(embedding => embedding.Embedding)
+                .FirstOrDefaultAsync(cancellationToken)
+                // Let's hope we have the embeddings
+                ?? throw new Exception($"Problem {problemId} has solution but doesn't have solution embedding");
 
         // Create the DTO
         return new ProblemSimilarityData(
@@ -81,9 +102,8 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             data.TagIds,
             data.CompetitionId,
             data.CompositeSlug,
-            // Validate embeddings
-            data.StatementEmbedding ?? throw new Exception($"Problem {problemId} doesn't have statement embedding"),
-            data.HasSolution ? (data.SolutionEmbedding ?? throw new Exception($"Problm {problemId} doesn't have solution embedding")) : null
+            statementEmbedding,
+            solutionEmbedding
         );
     }
 }

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
-using Pgvector;
 
 namespace MathComps.Domain.EfCoreEntities;
 
@@ -102,17 +101,8 @@ public class Problem
     public ICollection<ProblemSimilarity> AppearsInProblems { get; } = [];
 
     /// <summary>
-    /// Vector embedding of the problem statement for semantic similarity calculations.
-    /// Generated using multilingual E5 model, stored as 768-dimensional vector.
+    /// Collection of embeddings for this problem.
+    /// Multiple embeddings can exist for different document types, embedding types, and models.
     /// </summary>
-    [Column(TypeName = "vector(768)")]
-    public Vector? StatementEmbedding { get; set; }
-
-    /// <summary>
-    /// Vector embedding of the problem solution for semantic similarity calculations.
-    /// Optional - only available when problem has a solution text.
-    /// Generated using multilingual E5 model, stored as 768-dimensional vector.
-    /// </summary>
-    [Column(TypeName = "vector(768)")]
-    public Vector? SolutionEmbedding { get; set; }
+    public ICollection<ProblemEmbedding> Embeddings { get; } = [];
 }

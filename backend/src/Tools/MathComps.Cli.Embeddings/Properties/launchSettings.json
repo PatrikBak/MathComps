@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "GenerateNew": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "generate-embeddings --count 10"
+    },
+    "Regenerate": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "generate-embeddings --force --count 10"
+    }
+  }
+}

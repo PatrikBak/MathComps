@@ -27,17 +27,11 @@ For problem search and full functionality:
 
 The frontend automatically connects to `http://localhost:5000` by default (no configuration needed).
 
-### AI Features (Optional)
-
-- **Similarity**: Requires Python embedding service – see [Similarity README](backend/src/Tools/MathComps.Cli.Similarity/README.md)
-- **Tagging**: Requires Gemini API key – see [Tagging README](backend/src/Tools/MathComps.Cli.Tagging/README.md)
-
 ## Prerequisites
 
 - **Node.js** 20+ and npm
 - **PostgreSQL** 16+ with **pgvector extension** (only for backend/problem search)
 - **.NET SDK** 9.0+ (only for backend)
-- **Python** 3.9+ (only for similarity features)
 
 See [Backend README](backend/README.md) for database setup instructions.
 
@@ -51,8 +45,6 @@ MathComps/
 │   │   ├── Core/              # Domain models
 │   │   ├── Infrastructure/    # Database
 │   │   └── Tools/             # CLI tools
-│   └── services/
-│       └── embedding-service/ # Python embedding service
 ├── web/                       # Next.js frontend
 │   └── src/
 │       ├── app/               # Pages
@@ -68,7 +60,7 @@ MathComps/
 - **[Frontend README](web/README.md)** – Development server, testing, commands
 - **[Similarity System](backend/src/Tools/MathComps.Cli.Similarity/README.md)** – Similar problems suggestions
 - **[Tagging Assistant](backend/src/Tools/MathComps.Cli.Tagging/README.md)** – AI categorization
-- **[Embedding Service](backend/services/embedding-service/README.md)** – Python vector service
+- **[Embeddings CLI](backend/src/Tools/MathComps.Cli.Embeddings/README.md)** – Gemini-based embedding generator
 
 ## Updating Content
 

@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddDbContextFactory<MathCompsDbContext>(options =>
             options.UseNpgsql(connectionString,
                 options => options.MapEnum<TagType>("tag_type")
+                                  .MapEnum<DocumentType>("document_type")
             )
         );
 
