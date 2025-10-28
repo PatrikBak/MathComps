@@ -119,7 +119,7 @@ public class TranslateProblemsCommand(
         }
 
         // Log count
-        AnsiConsole.MarkupLine($"[green]Found {problemsToTranslate.Count:N0} problem(s) to translate.[/]");
+        AnsiConsole.MarkupLine($"[green]Found {problemsToTranslate.Count} problem(s) to translate.[/]");
 
         #endregion
 
@@ -171,7 +171,7 @@ public class TranslateProblemsCommand(
                             // Update progress (must be done in semaphore for correct display)
                             processingTask.Increment(1);
                             processingTask.Description =
-                                $"[green]Translating {processingTask.Value:N0}/{problemsToTranslate.Count:N0}[/] [dim]" +
+                                $"[green]Translating {processingTask.Value}/{problemsToTranslate.Count}[/] [dim]" +
                                 $"({problem.Slug.ToUpperInvariant()} -> {targetLanguage.ToString().ToUpper()})[/]";
                         }
                         finally

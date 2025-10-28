@@ -164,7 +164,7 @@ public class InteractiveSimilarityManagerCommand(
         await databaseService.StoreSimilarityResultsAsync(problemId.Value, []);
 
         // Confirm successful operation with clear visual feedback.
-        AnsiConsole.MarkupLine($"[green]✓[/] Cleared all similarity relationships for [cyan]{Markup.Escape(problemSlug)}[/] ({existingSimilarities.Count:N0} relationships removed)");
+        AnsiConsole.MarkupLine($"[green]✓[/] Cleared all similarity relationships for [cyan]{Markup.Escape(problemSlug)}[/] ({existingSimilarities.Count} relationships removed)");
     }
 
     /// <summary>
@@ -217,7 +217,7 @@ public class InteractiveSimilarityManagerCommand(
         if (outgoingSimilarities.Length > 0)
         {
             // Log
-            AnsiConsole.MarkupLine($"  [dim]Similar problems ({outgoingSimilarities.Length:N0}):[/]");
+            AnsiConsole.MarkupLine($"  [dim]Similar problems ({outgoingSimilarities.Length}):[/]");
 
             // Make a nice table
             var table = new Table();

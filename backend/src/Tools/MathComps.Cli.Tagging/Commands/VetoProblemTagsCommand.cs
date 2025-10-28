@@ -165,7 +165,7 @@ public class VetoProblemTagsCommand(
                     var problem = problemsToVeto[problemIndex];
 
                     // Update progress description to show current problem context
-                    processingTask.Description = $"[green]Started {problemIndex + 1:N0} of {problemsToVeto.Count:N0}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
+                    processingTask.Description = $"[green]Started {problemIndex + 1} of {problemsToVeto.Count}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
 
                     // Process statement tags (Area/Goal/Type) for veto decisions
                     var approvalsStatementTask = FilterTags(

@@ -173,7 +173,7 @@ public class TagProblemsCommand(
                         var problem = problemsToTag[problemIndex];
 
                         // Update progress description to show current problem context
-                        processingTask.Description = $"[green]Started {problemIndex + 1:N0} of {problemsToTag.Count:N0}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
+                        processingTask.Description = $"[green]Started {problemIndex + 1} of {problemsToTag.Count}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
 
                         // Process statement tags (Area/Goal/Type) for this problem
                         var statementTagsAsync = TagProblem(

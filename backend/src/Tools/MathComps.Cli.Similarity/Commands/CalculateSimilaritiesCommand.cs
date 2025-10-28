@@ -108,7 +108,7 @@ public class CalculateSimilaritiesCommand(
 
                     // Update progress description to show current problem context and failure count.
                     var processedCountText = processedProblems > 0 ? $" [dim green]({processedProblems} processed)[/]" : "";
-                    processingTask.Description = $"[green]{i + 1:N0} of {problemsToProcess.Count:N0}[/]{processedCountText} [dim]({problem.Slug.ToUpperInvariant()})[/]";
+                    processingTask.Description = $"[green]{i + 1} of {problemsToProcess.Count}[/]{processedCountText} [dim]({problem.Slug.ToUpperInvariant()})[/]";
 
                     try
                     {
@@ -153,7 +153,7 @@ public class CalculateSimilaritiesCommand(
         #region Report results
 
         // Report completion with summary statistics
-        AnsiConsole.MarkupLine($"[bold green]Similarity calculation complete.[/] Created {totalRelationshipsCreated:N0} relationships for {processedProblems:N0} problems.");
+        AnsiConsole.MarkupLine($"[bold green]Similarity calculation complete.[/] Created {totalRelationshipsCreated} relationships for {processedProblems} problems.");
 
         #endregion
 

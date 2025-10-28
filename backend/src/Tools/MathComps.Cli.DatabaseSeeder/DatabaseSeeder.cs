@@ -200,7 +200,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Log preloaded count if we have them
         if (problemsToSkip is not null)
-            AnsiConsole.MarkupLine($"\n[green]Loaded {problemsToSkip.Count:N0} existing problem identifiers for skip mode[/]");
+            AnsiConsole.MarkupLine($"\n[green]Loaded {problemsToSkip.Count} existing problem identifiers for skip mode[/]");
 
         // Use a progress bar for the overall seeding process
         await AnsiConsole.Progress()
@@ -225,7 +225,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                     var parsedProblem = parsedProblems[i];
 
                     // Update task description to show current problem
-                    problemsTask.Description = $"[green]Processing problem {i + 1:N0} of {parsedProblems.Count:N0}[/] [dim]({parsedProblem.RawProblem.Id})[/]";
+                    problemsTask.Description = $"[green]Processing problem {i + 1} of {parsedProblems.Count}[/] [dim]({parsedProblem.RawProblem.Id})[/]";
 
                     #region Gather problem data
 
