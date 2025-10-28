@@ -150,13 +150,14 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
 
         // Process in batches with progress
         await AnsiConsole.Progress()
+            .AutoClear(enabled: false)
             .Columns(
             [
-                new SpinnerColumn(),
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
-                new ElapsedTimeColumn(),
+                new RemainingTimeColumn(),
+                new SpinnerColumn(),
             ])
             .StartAsync(async ctx =>
             {

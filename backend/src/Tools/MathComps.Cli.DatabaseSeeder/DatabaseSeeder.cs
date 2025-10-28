@@ -204,12 +204,13 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Use a progress bar for the overall seeding process
         await AnsiConsole.Progress()
-            .AutoClear(enabled: true)
+            .AutoClear(enabled: false)
             .Columns(
             [
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
+                new RemainingTimeColumn(),
                 new SpinnerColumn(),
             ])
             .StartAsync(async context =>

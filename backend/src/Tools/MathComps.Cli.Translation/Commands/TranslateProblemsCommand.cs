@@ -133,6 +133,7 @@ public class TranslateProblemsCommand(
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
+                new RemainingTimeColumn(),
                 new SpinnerColumn(),
             ])
             .StartAsync(async progressContext =>

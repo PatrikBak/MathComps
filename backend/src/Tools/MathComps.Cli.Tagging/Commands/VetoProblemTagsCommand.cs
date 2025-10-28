@@ -149,6 +149,7 @@ public class VetoProblemTagsCommand(
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
+                new RemainingTimeColumn(),
                 new SpinnerColumn(),
             ])
             .StartAsync(async context =>

@@ -88,10 +88,12 @@ public class CalculateSimilaritiesCommand(
         // Use Spectre.Console's Progress UI to provide a rich, real-time view of the processing.
         await AnsiConsole.Progress()
             .AutoClear(enabled: false)
-            .Columns([
+            .Columns(
+            [
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
+                new RemainingTimeColumn(),
                 new SpinnerColumn(),
             ])
             .StartAsync(async progressContext =>

@@ -101,6 +101,7 @@ public class GenerateEmbeddingsCommand(
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
+                new RemainingTimeColumn(),
                 new SpinnerColumn(),
             ])
             .StartAsync(async ctx =>
