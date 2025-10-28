@@ -7,6 +7,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -47,13 +48,12 @@ public class TagProblemsCommand(
         /// </summary>
         [CommandOption("--dry-run")]
         [Description("Perform a dry run without making any changes to the database.")]
-        [DefaultValue(false)]
         public bool DryRun { get; set; }
 
         /// <summary>
         /// Batch size limit to control AI API costs and processing time.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to tag.")]
         public required int Count { get; set; }
 
@@ -64,7 +64,6 @@ public class TagProblemsCommand(
         /// </summary>
         [CommandOption("--clear-tags")]
         [Description("Clears all tags before tagging. If specified together with a tag selection, clears only those tags.")]
-        [DefaultValue(false)]
         public bool ClearTags { get; set; }
 
         /// <summary>
@@ -80,7 +79,6 @@ public class TagProblemsCommand(
         /// </summary>
         [CommandOption("--tag-selection-file")]
         [Description("Consider only some subset of tags. Argument should be path to a file, where each line contains the name of one tag.")]
-        [DefaultValue(null)]
         public string? TagSelectionFile { get; set; }
     }
 
@@ -146,105 +144,61 @@ public class TagProblemsCommand(
         var logPath = $"{LoggingConstants.LogsDirectory}/{LoggingConstants.TagProblemsLogFile}";
         File.WriteAllText(logPath, "");
 
-        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the tagging process
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async context =>
+        // Use the progress helper to process problems with AI tagging in parallel
+        await ProgressHelper.ExecuteWithProgressInParallelAsync(
+            problemsToTag,
+            "Processing problems for AI tagging...",
+            getItemDescription: problem => problem.Slug.ToUpperInvariant(),
+            numThreads: settings.NumThreads,
+            processItem: async (problem, index, cancellationToken) =>
             {
-                // Create progress task for AI processing phase
-                var processingTask = context.AddTask("[green]Processing problems for AI tagging[/]", maxValue: problemsToTag.Count);
-                processingTask.StartTask();
+                // Process statement tags (Area/Goal/Type) for this problem
+                var statementTagsAsync = TagProblem(
+                    datetimeString,
+                    "statement",
+                    tagProblemsOptions.Value.TagProblemStatement,
+                    tagData => tagData.TagType != TagType.Technique && tagNameFilter(tagData.TagName),
+                    problem);
 
-                // Semaphore to ensure thread-safe database operations
-                SemaphoreSlim semaphore = new(1, 1);
+                // Initialize technique tags as empty (will be populated if solution exists)
+                var techniqueTagsAsync = Task.FromResult(new Dictionary<string, ProblemTagData>().ToImmutableDictionary());
 
-                // Process problems in parallel with configurable thread count
-                await Parallel.ForAsync(0, problemsToTag.Count, new ParallelOptions { MaxDegreeOfParallelism = settings.NumThreads },
-                    async (problemIndex, cancellationToken) =>
-                    {
-                        // Get the current problem to process
-                        var problem = problemsToTag[problemIndex];
+                // Problems with solution
+                if (problem.Solution != null)
+                {
+                    // Get technique tags too
+                    techniqueTagsAsync = TagProblem(
+                        datetimeString,
+                        "solution",
+                        tagProblemsOptions.Value.TagProblemSolution,
+                        tagData => tagData.TagType == TagType.Technique && tagNameFilter(tagData.TagName),
+                        problem
+                    );
+                }
 
-                        // Update progress description to show current problem context
-                        processingTask.Description = $"[green]Started {problemIndex + 1} of {problemsToTag.Count}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
+                // Wait for both statement and technique tag processing to complete
+                var statementTags = await statementTagsAsync;
+                var techniqueTags = await techniqueTagsAsync;
 
-                        // Process statement tags (Area/Goal/Type) for this problem
-                        var statementTagsAsync = TagProblem(
-                            datetimeString,
-                            "statement",
-                            tagProblemsOptions.Value.TagProblemStatement,
-                            tagData => tagData.TagType != TagType.Technique && tagNameFilter(tagData.TagName),
-                            problem);
+                // Combine all suggested tags from both analyses
+                return statementTags.Union(techniqueTags).ToImmutableDictionary();
+            },
+            handleResult: async (suggestedTags, problem, index, cancellationToken) =>
+            {
+                // Apply tag suggestions to database if not in dry-run mode
+                if (suggestedTags.Count > 0 && !settings.DryRun)
+                    await databaseService.AddTagsForProblemAsync(problem.Id, suggestedTags);
 
-                        // Initialize technique tags as empty (will be populated if solution exists)
-                        var techniqueTagsAsync = Task.FromResult(new Dictionary<string, ProblemTagData>().ToImmutableDictionary());
+                // Extract high-confidence tags for logging
+                var tags = suggestedTags
+                    .Where(pair => pair.Value.GoodnessOfFit >= ProblemTag.MinimumGoodnessOfFitThreshold)
+                    .Select(pair => pair.Key)
+                    .ToJoinedString();
 
-                        // Problems with solution
-                        if (problem.Solution != null)
-                        {
-                            // Get technique tags too
-                            techniqueTagsAsync = TagProblem(
-                                datetimeString,
-                                "solution",
-                                tagProblemsOptions.Value.TagProblemSolution,
-                                tagData => tagData.TagType == TagType.Technique && tagNameFilter(tagData.TagName),
-                                problem
-                            );
-                        }
-
-                        // Wait for both statement and technique tag processing to complete
-                        var statementTags = await statementTagsAsync;
-                        var techniqueTags = await techniqueTagsAsync;
-
-                        // Combine all suggested tags from both analyses
-                        var suggestedTags = statementTags.Union(techniqueTags).ToImmutableDictionary();
-
-                        // Apply tag suggestions to database if not in dry-run mode
-                        if (suggestedTags.Count > 0 && !settings.DryRun)
-                        {
-                            // Use semaphore to ensure thread-safe database access
-                            await semaphore.WaitAsync(cancellationToken);
-
-                            try
-                            {
-                                // Add the suggested tags to the problem in the database
-                                await databaseService.AddTagsForProblemAsync(problem.Id, suggestedTags);
-                            }
-                            finally
-                            {
-                                // Release the semaphore for other threads
-                                semaphore.Release();
-                            }
-                        }
-
-                        // Extract high-confidence tags for logging
-                        var tags = suggestedTags
-                            .Where(pair => pair.Value.GoodnessOfFit >= ProblemTag.MinimumGoodnessOfFitThreshold)
-                            .Select(pair => pair.Key)
-                            .ToJoinedString();
-
-                        // Thread-safely
-                        lock (context)
-                        {
-                            // Log the tags assigned to this problem
-                            File.AppendAllText(logPath, $"{problem.Slug}: {tags}\n");
-
-                            // Advance the progress bar to reflect that this problem has been successfully processed
-                            processingTask.Increment(1);
-                        }
-                    });
-
-                // Mark AI processing phase as complete
-                processingTask.StopTask();
-            });
+                // Log the tags assigned to this problem
+                File.AppendAllText(logPath, $"{problem.Slug}: {tags}\n");
+            }
+        );
 
         #endregion
 

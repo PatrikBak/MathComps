@@ -24,7 +24,7 @@ public class ParseCommand : Command<ParseCommand.Settings>
         /// <summary>
         /// File patterns to match handout files (e.g., *-sk.tex for Slovak handouts, or specific file like algebra-1-rozklady-sk.tex).
         /// </summary>
-        [CommandArgument(0, "[patterns]")]
+        [CommandArgument(0, "<patterns>")]
         [Description("File pattern(s) to match handout files.\nExample: *-sk.tex OR algebra-1-rozklady-sk.tex")]
         public required string[] Patterns { get; set; }
     }
@@ -32,9 +32,6 @@ public class ParseCommand : Command<ParseCommand.Settings>
     /// <inheritdoc/>
     public override int Execute(CommandContext context, Settings settings)
     {
-        // Display a fancy header for the tool.
-        AnsiConsole.Write(new FigletText("Handout Parser").Centered().Color(Color.Aqua));
-
         // Fixed paths relative to the tool's project directory.
         var inputDirectory = new DirectoryInfo("../../../../data/handouts");
         var outputDirectory = new DirectoryInfo("../../../../web/src/content/handouts");

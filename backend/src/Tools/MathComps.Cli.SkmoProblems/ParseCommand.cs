@@ -27,7 +27,7 @@ public class ParseCommand : AsyncCommand<ParseCommand.Settings>
         [CommandOption("--mode|-m")]
         [Description("Rendering mode for HTML previews")]
         [DefaultValue(ProblemRenderingMode.NoRendering)]
-        public ProblemRenderingMode Mode { get; init; } = ProblemRenderingMode.NoRendering;
+        public ProblemRenderingMode Mode { get; init; }
 
         /// <summary>
         /// This is useful for debugging or testing specific years without affecting the version-controlled archive.
@@ -40,9 +40,6 @@ public class ParseCommand : AsyncCommand<ParseCommand.Settings>
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Display a fancy header for the tool.
-        AnsiConsole.Write(new FigletText("SKMO Parser").Centered().Color(Color.Aqua));
-
         // Load the TeX cleaning rules for normalizing input.
         var rules = TeXCleanerRules.LoadRules();
 

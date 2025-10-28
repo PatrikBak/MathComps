@@ -32,7 +32,6 @@ public abstract class InteractiveCommandHelper : AsyncCommand
         #region Welcome and setup
 
         // Display startup banner to establish context and available operations.
-        AnsiConsole.Write(new FigletText(ApplicationName).Color(Color.Blue));
         AnsiConsole.MarkupLine($"[dim]{ApplicationDescription}[/]");
         AnsiConsole.MarkupLine($"[dim]{CommandUsageHint}[/]\n");
 

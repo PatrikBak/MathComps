@@ -3,12 +3,12 @@
     "GenerateNew": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "generate-embeddings --count 10"
+      "commandLineArgs": "--count 10"
     },
     "Regenerate": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "generate-embeddings --force --count 10"
+      "commandLineArgs": "--force --count 10"
     }
   }
 }

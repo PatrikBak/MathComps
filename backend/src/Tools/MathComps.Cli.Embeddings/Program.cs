@@ -5,8 +5,12 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+
+// Fancy header
+AnsiConsole.Write(new FigletText("Embeddings").Centered().Color(Color.Aqua));
 
 // We'll use DI
 var services = new ServiceCollection();
@@ -43,17 +47,6 @@ services.AddScoped<IEmbeddingDatabaseService, EmbeddingDatabaseService>();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
-var app = new CommandApp(registrar);
 
-// CLI command configuration defines the available commands and their routing.
-app.Configure(config =>
-{
-    // Commands
-    config.AddCommand<GenerateEmbeddingsCommand>("generate-embeddings");
-
-    // Helps debugging
-    config.PropagateExceptions();
-});
-
-// The application runs with the provided command-line arguments and returns the exit code.
-return await app.RunAsync(args);
+// Single command app
+return await new CommandApp<GenerateEmbeddingsCommand>(registrar).RunAsync(args);

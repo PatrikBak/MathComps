@@ -2,6 +2,8 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
+using MathComps.Shared;
+using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
@@ -34,7 +36,7 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
         [CommandOption("--batch-size|-b")]
         [Description("Batch size for processing CSV rows")]
         [DefaultValue(1000)]
-        public int BatchSize { get; init; } = 1000;
+        public int BatchSize { get; init; }
 
         /// <summary>
         /// Validates the command settings, ensuring the file exists and batch size is positive.
@@ -58,10 +60,6 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Display header
-        AnsiConsole.Write(new FigletText("Import Tags").Centered().Color(Color.Aqua));
-        AnsiConsole.WriteLine();
-
         try
         {
             // Load and parse CSV
@@ -145,49 +143,27 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
         // Accumalate total imported count across all batches
         var totalImported = 0;
 
-        // Calculate total number of batches
-        var totalBatches = (int)Math.Ceiling((double)csvRows.Count / batchSize);
+        // Create batches from the problems list
+        var batches = csvRows.Batch(batchSize).ToList();
 
-        // Process in batches with progress
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async ctx =>
+        // Use the progress helper to process batches sequentially
+        await ProgressHelper.ExecuteWithProgressAsync(
+            batches,
+            "Importing tags in batchees...",
+            getItemDescription: batch => null, // Bad item description, but not a big deal
+            processItem: async (batch, index, cancellationToken) =>
             {
-                // Create the import task for the batch
-                var task = ctx.AddTask("Importing tags", maxValue: totalBatches);
+                // Import batch directly (no conversion needed)
+                var result = await databaseService.ImportTagsAsync(batch);
 
-                // Process each batch
-                for (var i = 0; i < csvRows.Count; i += batchSize)
-                {
-                    // Get the current batch
-                    var batch = csvRows.Skip(i).Take(batchSize).ToList();
+                // Accumulate imported count
+                totalImported += result.ImportedCount;
 
-                    // Calculate current batch number
-                    var batchNumber = (i / batchSize) + 1;
-
-                    // Import batch directly (no conversion needed)
-                    var result = await databaseService.ImportTagsAsync(batch);
-
-                    // Accumulate imported count
-                    totalImported += result.ImportedCount;
-
-                    // Accumulate skipped slugs
-                    foreach (var slug in result.SkippedProblemSlugs)
-                        allSkippedSlugs.Add(slug);
-
-                    // Update progress
-                    task.Description = $"Importing tags (batch {batchNumber}/{totalBatches})";
-                    task.Increment(1);
-                }
-            });
+                // Accumulate skipped slugs
+                foreach (var slug in result.SkippedProblemSlugs)
+                    allSkippedSlugs.Add(slug);
+            }
+        );
 
         // Return the accumulated results
         return new ImportTagsResult(totalImported, [.. allSkippedSlugs]);

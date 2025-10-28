@@ -44,7 +44,7 @@ public class SuggestTagsCommand(
         /// How many problems we sent, usually ~50 already takes too long. Who knows whether
         /// this will even be more useful now, given that the approved tags are already okay.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of random problems with solutions to use for categorized tag suggestions.")]
         public required int Count { get; set; }
     }

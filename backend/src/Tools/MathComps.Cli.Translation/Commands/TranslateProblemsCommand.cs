@@ -5,6 +5,7 @@ using MathComps.Cli.Translation.Settings;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -34,7 +35,7 @@ public class TranslateProblemsCommand(
         /// <summary>
         /// Number of problems to translate.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to translate.")]
         public required int Count { get; set; }
 
@@ -50,7 +51,6 @@ public class TranslateProblemsCommand(
         /// </summary>
         [CommandOption("--force")]
         [Description("Force retranslation even if translations already exist.")]
-        [DefaultValue(false)]
         public bool Force { get; set; }
 
         /// <summary>
@@ -125,66 +125,40 @@ public class TranslateProblemsCommand(
 
         #region Process problems with AI translation
 
-        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the translation process
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async progressContext =>
+        // Use the progress helper to process problems with AI translation in parallel
+        await ProgressHelper.ExecuteWithProgressInParallelAsync(
+            problemsToTranslate,
+            "Translating problems...",
+            getItemDescription: problem => $"{problem.Slug} -> {targetLanguage}".ToUpperInvariant(),
+            processItem: async (problem, index, cancellationToken) =>
             {
-                // Create progress task for AI processing phase
-                var processingTask = progressContext.AddTask("[green]Translating problems[/]", maxValue: problemsToTranslate.Count);
-                processingTask.StartTask();
+                // Translate the problem in parallel
+                return await TranslateProblem(
+                    problem,
+                    targetLanguage,
+                    settings.Scope,
+                    cancellationToken
+                );
+            },
+            numThreads: settings.NumThreads,
+            handleResult: async (result, problem, index, cancellationToken) =>
+            {
+                // Unwrap data
+                var (translationResult, exceptions) = result;
 
-                // Semaphore to ensure thread-safe database operations and progress updates
-                SemaphoreSlim semaphore = new(1, 1);
+                // Display any exceptions that occurred
+                foreach (var exception in exceptions)
+                {
+                    AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()} -> {targetLanguage.ToString().ToUpper()}[/] Gemini service error");
+                    AnsiConsole.WriteException(exception);
+                    AnsiConsole.WriteLine();
+                }
 
-                // Process problems in parallel with configurable thread count
-                await Parallel.ForAsync(0, problemsToTranslate.Count, new ParallelOptions { MaxDegreeOfParallelism = settings.NumThreads },
-                    async (problemIndex, cancellationToken) =>
-                    {
-                        // Get the current problem to process
-                        var problem = problemsToTranslate[problemIndex];
-
-                        // Translate the problem
-                        var translationResult = await TranslateProblem(
-                            problem,
-                            targetLanguage,
-                            settings.Scope,
-                            cancellationToken
-                        );
-
-                        // Use semaphore to ensure thread-safe database access and progress updates
-                        await semaphore.WaitAsync(cancellationToken);
-
-                        try
-                        {
-                            // If translation succeeded, save to database
-                            if (translationResult != null)
-                                await databaseService.UpsertTranslationAsync(translationResult);
-
-                            // Update progress (must be done in semaphore for correct display)
-                            processingTask.Increment(1);
-                            processingTask.Description =
-                                $"[green]Translating {processingTask.Value}/{problemsToTranslate.Count}[/] [dim]" +
-                                $"({problem.Slug.ToUpperInvariant()} -> {targetLanguage.ToString().ToUpper()})[/]";
-                        }
-                        finally
-                        {
-                            // Release the semaphore for other threads
-                            semaphore.Release();
-                        }
-                    });
-
-                // Mark AI processing phase as complete
-                processingTask.StopTask();
-            });
+                // If translation succeeded, save to database
+                if (translationResult != null)
+                    await databaseService.UpsertTranslationAsync(translationResult);
+            }
+        );
 
         #endregion
 
@@ -206,8 +180,8 @@ public class TranslateProblemsCommand(
     /// <param name="targetLanguage">The target language for translation.</param>
     /// <param name="scope">The scope of translation (statements only, solutions only, or both).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The translation result, or null if translation failed.</returns>
-    private async Task<ProblemTranslationUpsertDto?> TranslateProblem(
+    /// <returns>The translation result and any exceptions encountered, or null if translation failed.</returns>
+    private async Task<(ProblemTranslationUpsertDto? result, List<Exception> exceptions)> TranslateProblem(
         ProblemForTranslationDto problem,
         Language targetLanguage,
         TranslationScope scope,
@@ -216,62 +190,66 @@ public class TranslateProblemsCommand(
         // Load the system prompt from file once for both translations
         var systemPrompt = await File.ReadAllTextAsync(translateProblemsOptions.Value.ModelConfig.SystemPromptPath, cancellationToken);
 
-        // Local function to get language name without repetition
-        static string GetLanguageName(Language language) => language switch
+        // Get language name for building prompts
+        var targetLanguageName = targetLanguage switch
         {
             Language.EN => "English",
             Language.CZ => "Czech",
             Language.SK => "Slovak",
-            _ => throw new ArgumentException($"Unsupported language: {language}")
+            _ => throw new ArgumentException($"Unsupported language: {targetLanguage}")
         };
-
-        // Get language names for building prompts
-        var sourceLanguageName = GetLanguageName(problem.OriginalLanguage);
-        var targetLanguageName = GetLanguageName(targetLanguage);
 
         // Get the translations ready
         string? statementTranslation = null;
         string? solutionTranslation = null;
 
+        // Collect exceptions to handle them in synchronized section
+        var exceptions = new List<Exception>();
+
         // If statement should be translated
         if (scope is TranslationScope.StatementsOnly or TranslationScope.Both)
         {
             // Do the translation
-            statementTranslation = await TranslateText(
+            (statementTranslation, var exception) = await TranslateText(
                 problem.StatementText,
-                sourceLanguageName,
                 targetLanguageName,
                 systemPrompt,
                 "statement",
-                problem.Slug,
-                targetLanguage,
                 cancellationToken
             );
+
+            // Remember the exception if there was any
+            if (exception != null)
+                exceptions.Add(exception);
         }
 
         // If solution should be translated and it exists
-        if (scope is TranslationScope.StatementsOnly or TranslationScope.Both && problem.SolutionText is not null)
+        if (scope is TranslationScope.SolutionsOnly or TranslationScope.Both && problem.SolutionText is not null)
         {
             // Do the translation
-            solutionTranslation = await TranslateText(
+            (solutionTranslation, var exception) = await TranslateText(
                 problem.SolutionText,
-                sourceLanguageName,
                 targetLanguageName,
                 systemPrompt,
                 "solution",
-                problem.Slug,
-                targetLanguage,
                 cancellationToken
             );
+
+            // Remember the exception if there was any
+            if (exception != null)
+                exceptions.Add(exception);
         }
 
-        // Return the translation result
-        return new ProblemTranslationUpsertDto(
+        // Prepare the result
+        var result = new ProblemTranslationUpsertDto(
             problem.Id,
             targetLanguage,
             statementTranslation,
             solutionTranslation
         );
+
+        // Return the translation result with exceptions
+        return (result, exceptions);
     }
 
     /// <summary>
@@ -282,28 +260,25 @@ public class TranslateProblemsCommand(
     /// <param name="targetLanguageName">The name of the target language.</param>
     /// <param name="systemPrompt">The system prompt.</param>
     /// <param name="textType">The type of text (statement or solution) used in the prompt.</param>
-    /// <param name="problemSlug">The slug of the problem for logging.</param>
-    /// <param name="targetLanguage">The target language.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The translation result, or null if translation failed.</returns>
-    private async Task<string?> TranslateText(
+    private async Task<(string? translation, Exception? exception)> TranslateText(
         string text,
-        string sourceLanguageName,
         string targetLanguageName,
         string systemPrompt,
         string textType,
-        string problemSlug,
-        Language targetLanguage,
         CancellationToken cancellationToken)
     {
         // Build the user prompt with the text
         var userPrompt = $"""
-            Translate this math problem {textType} from {sourceLanguageName} to {targetLanguageName}:
+            Translate this math problem {textType} to {targetLanguageName}:
 
             ```tex
             {text}
             ```
             """;
+
+        // Track exception for deferred handling
+        Exception? capturedException = null;
 
         // Call the Gemini service to get the translation
         var translationResponse = await GeneralUtilities.TryExecuteAsync(() =>
@@ -314,17 +289,12 @@ public class TranslateProblemsCommand(
                 translateProblemsOptions.Value.ModelConfig.ThinkingBudget,
                 cancellationToken
             ),
-            // Handle AI service errors gracefully
-            exception =>
-            {
-                // Log the problem slug and exception details
-                AnsiConsole.MarkupLine($"[red]{problemSlug.ToUpperInvariant()} -> {targetLanguage.ToString().ToUpper()}[/] Gemini service error");
-                AnsiConsole.WriteException(exception);
-            });
+            // Capture exception for later handling (after semaphore is acquired)
+            exception => capturedException = exception);
 
-        // If AI service failed, return null
+        // If AI service failed, return null with the exception
         if (translationResponse is null)
-            return null;
+            return (null, capturedException);
 
         // Parse the translation response - try multiple strategies
 
@@ -337,7 +307,7 @@ public class TranslateProblemsCommand(
 
         // Return if worked
         if (translationMatch.Success)
-            return translationMatch.Groups[1].Value.Trim();
+            return (translationMatch.Groups[1].Value.Trim(), null);
 
         // Strategy 2: Look for any code block
         translationMatch = System.Text.RegularExpressions.Regex.Match(
@@ -348,15 +318,13 @@ public class TranslateProblemsCommand(
 
         // Return if worked
         if (translationMatch.Success)
-            return translationMatch.Groups[1].Value.Trim();
+            return (translationMatch.Groups[1].Value.Trim(), null);
 
         // Strategy 3: Use the entire response if it looks like LaTeX
         if (translationResponse.Contains('\\') || translationResponse.Contains('{') || translationResponse.Contains('}'))
-            return translationResponse.Trim();
+            return (translationResponse.Trim(), null);
 
-        // Complete failure - log the response for debugging
-        AnsiConsole.MarkupLine($"[red]{problemSlug.ToUpperInvariant()} → {targetLanguage.ToString().ToUpper()}[/] Failed to parse translation response");
-        AnsiConsole.MarkupLine($"[dim]Response preview: {translationResponse[..Math.Min(200, translationResponse.Length)]}...[/]");
-        return null;
+        // Return failed translation with null exception (parsing failure, not API error)
+        return (null, null);
     }
 }

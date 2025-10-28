@@ -1,6 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared;
+using MathComps.Shared.Cli;
 using MathComps.TexParser.Types;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
@@ -203,127 +204,101 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             AnsiConsole.MarkupLine($"\n[green]Loaded {problemsToSkip.Count} existing problem identifiers for skip mode[/]");
 
         // Use a progress bar for the overall seeding process
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async context =>
+        await ProgressHelper.ExecuteWithProgressAsync(
+            items: parsedProblems,
+            progressDescription: "Processing problems...",
+            getItemDescription: problem => problem.RawProblem.Id,
+            processItem: async (parsedProblem, index, token) =>
             {
-                // Process problems with individual progress tracking
-                var problemsTask = context.AddTask("[green]Processing individual problems[/]", maxValue: parsedProblems.Count);
-                problemsTask.StartTask();
+                #region Gather problem data
 
-                // Handle problems sequentially.
-                for (var i = 0; i < parsedProblems.Count; i++)
+                // Resolve competition and round data from the dataset identifiers.
+                var competitionRoundData = GetRoundData(new CompetitionRoundId(
+                    parsedProblem.RawProblem.Category,
+                    parsedProblem.RawProblem.Competition,
+                    parsedProblem.RawProblem.Subcompetition
+                ));
+
+                // Figure out the real start year
+                var startYear = parsedProblem.RawProblem.OlympiadYear + OlympiadBaseYear;
+
+                // Get some useful ids from cache 
+                var seasonId = seasonIds[startYear];
+                var competitionId = competitionIds[competitionRoundData.CompetitionId.ToSlug()];
+
+                // Get category id from cache if a problem belongs to any
+                var categoryId = parsedProblem.RawProblem.Category is null ? (Guid?)null : categoryIds[parsedProblem.RawProblem.Category.ToSlug()];
+
+                // We can get to rounds now
+                var roundData = allRoundData[(competitionId, competitionRoundData.Round?.RoundId.ToSlug() ?? "", categoryId)];
+
+                // Round instance
+                var roundInstanceId = roundInstanceIds[(roundData.RoundId, seasonId)];
+
+                // The slug should be unique and nice in an URL
+                var problemSlug = $"{parsedProblem.RawProblem.OlympiadYear}-{roundData.CompositeSlug}-{parsedProblem.RawProblem.Order}";
+
+                // Track this problem slug for orphan detection later.
+                processedProblemSlugs.Add(problemSlug);
+
+                #endregion
+
+                #region Handle problem skipping
+
+                // If we even want to just skip them and this one is to be skipped, do so
+                if (problemsToSkip is not null && problemsToSkip.Contains((roundInstanceId, parsedProblem.RawProblem.Order)))
                 {
-                    // Get the current problem
-                    var parsedProblem = parsedProblems[i];
+                    // Leave this problem alone
+                    unchangedProblems++;
 
-                    // Update task description to show current problem
-                    problemsTask.Description = $"[green]Processing problem {i + 1} of {parsedProblems.Count}[/] [dim]({parsedProblem.RawProblem.Id})[/]";
-
-                    #region Gather problem data
-
-                    // Resolve competition and round data from the dataset identifiers.
-                    var competitionRoundData = GetRoundData(new CompetitionRoundId(
-                        parsedProblem.RawProblem.Category,
-                        parsedProblem.RawProblem.Competition,
-                        parsedProblem.RawProblem.Subcompetition
-                    ));
-
-                    // Figure out the real start year
-                    var startYear = parsedProblem.RawProblem.OlympiadYear + OlympiadBaseYear;
-
-                    // Get some useful ids from cache 
-                    var seasonId = seasonIds[startYear];
-                    var competitionId = competitionIds[competitionRoundData.CompetitionId.ToSlug()];
-
-                    // Get category id from cache if a problem belongs to any
-                    var categoryId = parsedProblem.RawProblem.Category is null ? (Guid?)null : categoryIds[parsedProblem.RawProblem.Category.ToSlug()];
-
-                    // We can get to rounds now
-                    var roundData = allRoundData[(competitionId, competitionRoundData.Round?.RoundId.ToSlug() ?? "", categoryId)];
-
-                    // Round instance
-                    var roundInstanceId = roundInstanceIds[(roundData.RoundId, seasonId)];
-
-                    // The slug should be unique and nice in an URL
-                    var problemSlug = $"{parsedProblem.RawProblem.OlympiadYear}-{roundData.CompositeSlug}-{parsedProblem.RawProblem.Order}";
-
-                    // Track this problem slug for orphan detection later.
-                    processedProblemSlugs.Add(problemSlug);
-
-                    #endregion
-
-                    #region Handle problem skipping
-
-                    // If we even want to just skip them and this one is to be skipped, do so
-                    if (problemsToSkip is not null && problemsToSkip.Contains((roundInstanceId, parsedProblem.RawProblem.Order)))
-                    {
-                        // Leave this problem alone
-                        unchangedProblems++;
-
-                        // Carry on
-                        continue;
-                    }
-
-                    #endregion
-
-                    #region Handle images
-
-                    // Create the common metadata for image processing
-                    var problemImageMetadata = new ProblemImageProcessor.ProblemMetadata(problemSlug, parsedProblem.RawProblem.OlympiadYear);
-
-                    // Process images: copy them to a public location, update the parsed content,
-                    // and gather the physical image data to be saved to the database.
-                    var statementProcessingResult = ProblemImageProcessor.Process(parsedProblem.ParsedStatement, problemImageMetadata);
-                    var solutionProcessingResult = ProblemImageProcessor.Process(parsedProblem.ParsedSolution, problemImageMetadata);
-
-                    // Update the parsed problem with the new data
-                    parsedProblem = parsedProblem with
-                    {
-                        ParsedStatement = statementProcessingResult.ProcessedText,
-                        ParsedSolution = solutionProcessingResult.ProcessedText,
-                    };
-
-                    // Merge the images from the problem and the statement
-                    var discoveredImages = statementProcessingResult.DiscoveredImages.AddRange(solutionProcessingResult.DiscoveredImages);
-
-                    #endregion
-
-                    // Upsert authors — ensure all authors exist and preserve their original order.
-                    var problemAuthors = await UpsertAuthorsAsync(parsedProblem.RawProblem.Authors, authors);
-
-                    // Get round instance id from cache 
-                    var (inserted, updated, skipped) = await UpsertProblemWithAuthorsAndImagesAsync(
-                        parsedProblem,
-                        problemSlug,
-                        roundInstanceId,
-                        problemAuthors,
-                        discoveredImages
-                    );
-
-                    // Tally results.
-                    insertedProblems += inserted;
-                    updatedProblems += updated;
-                    unchangedProblems += skipped;
-
-                    // Save changes after each problem to trigger immediate constraints checking
-                    if (inserted > 0 || updated > 0)
-                        await dbContext.SaveChangesAsync();
-
-                    // Update progress
-                    problemsTask.Increment(1);
+                    // Carry on
+                    return;
                 }
 
-                // Problems are done
-                problemsTask.StopTask();
+                #endregion
+
+                #region Handle images
+
+                // Create the common metadata for image processing
+                var problemImageMetadata = new ProblemImageProcessor.ProblemMetadata(problemSlug, parsedProblem.RawProblem.OlympiadYear);
+
+                // Process images: copy them to a public location, update the parsed content,
+                // and gather the physical image data to be saved to the database.
+                var statementProcessingResult = ProblemImageProcessor.Process(parsedProblem.ParsedStatement, problemImageMetadata);
+                var solutionProcessingResult = ProblemImageProcessor.Process(parsedProblem.ParsedSolution, problemImageMetadata);
+
+                // Update the parsed problem with the new data
+                parsedProblem = parsedProblem with
+                {
+                    ParsedStatement = statementProcessingResult.ProcessedText,
+                    ParsedSolution = solutionProcessingResult.ProcessedText,
+                };
+
+                // Merge the images from the problem and the statement
+                var discoveredImages = statementProcessingResult.DiscoveredImages.AddRange(solutionProcessingResult.DiscoveredImages);
+
+                #endregion
+
+                // Upsert authors — ensure all authors exist and preserve their original order.
+                var problemAuthors = await UpsertAuthorsAsync(parsedProblem.RawProblem.Authors, authors);
+
+                // Get round instance id from cache 
+                var (inserted, updated, skipped) = await UpsertProblemWithAuthorsAndImagesAsync(
+                    parsedProblem,
+                    problemSlug,
+                    roundInstanceId,
+                    problemAuthors,
+                    discoveredImages
+                );
+
+                // Tally results.
+                insertedProblems += inserted;
+                updatedProblems += updated;
+                unchangedProblems += skipped;
+
+                // Save changes after each problem to trigger immediate constraints checking
+                if (inserted > 0 || updated > 0)
+                    await dbContext.SaveChangesAsync(token);
             });
 
         #endregion
@@ -392,7 +367,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Summary.
         AnsiConsole.MarkupLine(
-            "\n[cyan]Problems:[/]\n" +
+            "[cyan]Problems:[/]\n" +
              $"[green] - Inserted:  {insertedProblems} problems[/]\n" +
             $"[yellow] - Updated:   {updatedProblems} problems[/]\n" +
               $"[blue] - Unchanged: {unchangedProblems} problems[/]\n" +

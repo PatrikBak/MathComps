@@ -2,6 +2,8 @@ using MathComps.Cli.Embeddings.Dtos;
 using MathComps.Cli.Embeddings.Services;
 using MathComps.Domain.Constants;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Shared;
+using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
@@ -46,7 +48,8 @@ public class GenerateEmbeddingsCommand(
         /// </summary>
         [Description("Gemini embedding model to use")]
         [CommandOption("--model")]
-        public string Model { get; set; } = "gemini-embedding-001";
+        [DefaultValue("gemini-embedding-001")]
+        public string Model { get; set; } = null!;
 
         /// <summary>
         /// Number of problems to process in a single batch API call.
@@ -54,7 +57,8 @@ public class GenerateEmbeddingsCommand(
         /// </summary>
         [Description("Batch size for Gemini requests")]
         [CommandOption("-b|--batch-size")]
-        public int BatchSize { get; set; } = 20;
+        [DefaultValue(20)]
+        public int BatchSize { get; set; }
     }
 
     /// <inheritdoc />
@@ -90,72 +94,47 @@ public class GenerateEmbeddingsCommand(
         // Track successfully processed problems for final summary
         var processedCount = 0;
 
-        // Ensure batch size is at least 1 to avoid division by zero
-        var batchSize = Math.Max(1, settings.BatchSize);
+        // Create batches from the problems list
+        var batches = problems.Batch(settings.BatchSize).ToList();
 
-        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the embedding process
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async ctx =>
+        // Use the progress helper to process batches sequentially
+        await ProgressHelper.ExecuteWithProgressAsync(
+            batches,
+            "Generating embeddings in batchees...",
+            getItemDescription: batch => ProgressHelper.NiceBatchDescription(batch, problem => problem.Slug.ToUpperInvariant()),
+            processItem: async (batch, index, cancellationToken) =>
             {
-                // Create progress task for embedding generation phase
-                var task = ctx.AddTask("[cyan]Generating embeddings[/]", maxValue: problems.Count);
-                task.StartTask();
-
-                // Process problems in batches to optimize API calls
-                for (var i = 0; i < problems.Count; i += batchSize)
+                try
                 {
-                    // Slice the next chunk while keeping order stable for deterministic saves
-                    var batch = problems.Skip(i).Take(batchSize).ToList();
+                    // Optimistically process the entire batch via the shared Gemini call
+                    await ProcessBatchAsync(batch, settings.Model);
+                    processedCount += batch.Count;
+                }
+                catch (Exception batchException)
+                {
+                    // Log the batch-level failure with enough detail for investigation
+                    AnsiConsole.MarkupLine($"[red]Error processing batch starting with problem {batch.First().Id}: {batchException.Message}[/]");
+                    AnsiConsole.WriteException(batchException);
 
-                    // Update progress description to show batch being processed
-                    var firstProblem = batch.First();
-                    task.Description = $"[cyan]Embedding batch starting with {firstProblem.Slug.ToUpperInvariant()}[/] [dim]({processedCount + 1}-{processedCount + batch.Count}/{problems.Count})[/]";
-
-                    try
+                    // Fall back to individual processing to salvage what we can
+                    foreach (var problem in batch)
                     {
-                        // Optimistically process the entire batch via the shared Gemini call
-                        await ProcessBatchAsync(batch, settings.Model);
-                        processedCount += batch.Count;
-                        task.Increment(batch.Count);
-                    }
-                    catch (Exception batchException)
-                    {
-                        // Log the batch-level failure with enough detail for investigation
-                        AnsiConsole.MarkupLine($"[red]Error processing batch starting with problem {firstProblem.Id}: {batchException.Message}[/]");
-                        AnsiConsole.WriteException(batchException);
-
-                        // Fall back to individual processing to salvage what we can
-                        foreach (var problem in batch)
+                        try
                         {
-                            try
-                            {
-                                // Process single problem with same logic as batch
-                                await ProcessProblemAsync(problem, settings.Model);
-                                processedCount++;
-                                task.Increment(1);
-                            }
-                            catch (Exception problemException)
-                            {
-                                // Capture the specific problem failure for later retries
-                                AnsiConsole.MarkupLine($"[red]Error processing problem {problem.Id}: {problemException.Message}[/]");
-                                AnsiConsole.WriteException(problemException);
-                            }
+                            // Process single problem with same logic as batch
+                            await ProcessProblemAsync(problem, settings.Model);
+                            processedCount++;
+                        }
+                        catch (Exception problemException)
+                        {
+                            // Capture the specific problem failure for later retries
+                            AnsiConsole.MarkupLine($"[red]Error processing problem {problem.Id}: {problemException.Message}[/]");
+                            AnsiConsole.WriteException(problemException);
                         }
                     }
                 }
-
-                // Mark embedding generation phase as complete
-                task.StopTask();
-            });
+            }
+        );
 
         #endregion
 

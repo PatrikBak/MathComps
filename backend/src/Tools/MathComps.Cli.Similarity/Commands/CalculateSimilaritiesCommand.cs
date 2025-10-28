@@ -1,4 +1,5 @@
 using MathComps.Cli.Similarity.Services;
+using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
@@ -37,7 +38,7 @@ public class CalculateSimilaritiesCommand(
         /// Number of problems to process in this similarity calculation session.
         /// Controls the scope of work for each command execution.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to process for similarity calculation.")]
         public required int Count { get; set; }
 
@@ -47,7 +48,6 @@ public class CalculateSimilaritiesCommand(
         /// </summary>
         [CommandOption("--skip-processed")]
         [Description("Skip problems that already have similarity relationships calculated.")]
-        [DefaultValue(false)]
         public bool SkipProcessed { get; set; }
     }
 
@@ -85,70 +85,39 @@ public class CalculateSimilaritiesCommand(
         var processedProblems = 0;
         var totalRelationshipsCreated = 0;
 
-        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the processing.
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async progressContext =>
+        // Use the progress helper to process problems sequentially
+        await ProgressHelper.ExecuteWithProgressAsync(
+            problemsToProcess,
+            "Processing problem similarities...",
+            getItemDescription: problem => problem.Slug.ToUpperInvariant(),
+            processItem: async (problem, index, cancellationToken) =>
             {
-                // Create progress task for the entire processing pipeline
-                var processingTask = progressContext.AddTask("[green]Processing problem similarities[/]", maxValue: problemsToProcess.Count);
-                processingTask.StartTask();
+                // Check if this problem already has similarity relationships and should be skipped.
+                if (settings.SkipProcessed && await databaseService.HasExistingSimilaritiesAsync(problemId: problem.Id, cancellationToken: cancellationToken))
+                    return;
 
-                // Process each problem individually: calculate similarities and store immediately.
-                for (var i = 0; i < problemsToProcess.Count; i++)
+                try
                 {
-                    // Get the problem
-                    var problem = problemsToProcess[i];
+                    // Load the source problem data needed for similarity calculations.
+                    var sourceProblem = await problemDataService.GetProblemSimilarityDataAsync(problemId: problem.Id, cancellationToken);
 
-                    // Update progress description to show current problem context and failure count.
-                    var processedCountText = processedProblems > 0 ? $" [dim green]({processedProblems} processed)[/]" : "";
-                    processingTask.Description = $"[green]{i + 1} of {problemsToProcess.Count}[/]{processedCountText} [dim]({problem.Slug.ToUpperInvariant()})[/]";
+                    // Calculate comprehensive similarity scores
+                    var similarityResults = await problemSimilarityService.CalculateProblemSimilaritiesAsync(sourceProblem, cancellationToken);
 
-                    try
-                    {
-                        // Check if this problem already has similarity relationships and should be skipped.
-                        if (settings.SkipProcessed && await databaseService.HasExistingSimilaritiesAsync(problemId: problem.Id))
-                        {
-                            // If so, move on
-                            processingTask.Increment(1);
-                            continue;
-                        }
+                    // Store similarity results immediately
+                    await databaseService.StoreSimilarityResultsAsync(problem.Id, similarityResults, cancellationToken);
 
-                        // Load the source problem data needed for similarity calculations.
-                        var sourceProblem = await problemDataService.GetProblemSimilarityDataAsync(problemId: problem.Id);
-
-                        // Calculate comprehensive similarity scores
-                        // This orchestrates candidate identification and similarity calculation in a single operation.
-                        var similarityResults = await problemSimilarityService.CalculateProblemSimilaritiesAsync(sourceProblem);
-
-                        // Store similarity results immediately.
-                        await databaseService.StoreSimilarityResultsAsync(problem.Id, similarityResults);
-
-                        // Update statistics.
-                        processedProblems++;
-                        totalRelationshipsCreated += similarityResults.Count;
-                    }
-                    catch (Exception exception)
-                    {
-                        // Log the error and add to failed list.
-                        AnsiConsole.MarkupLine($"[red]Error processing {problem.Slug.ToUpperInvariant()}: {exception.Message}[/]");
-                    }
-
-                    // One more problem done
-                    processingTask.Increment(1);
+                    // Update statistics
+                    processedProblems++;
+                    totalRelationshipsCreated += similarityResults.Count;
                 }
-
-                // We're done with all problems
-                processingTask.StopTask();
-            });
+                catch (Exception exception)
+                {
+                    // Log the error
+                    AnsiConsole.MarkupLine($"[red]Error processing {problem.Slug.ToUpperInvariant()}: {exception.Message}[/]");
+                }
+            }
+        );
 
         #endregion
 

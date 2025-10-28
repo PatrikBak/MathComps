@@ -7,6 +7,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -48,13 +49,12 @@ public class VetoProblemTagsCommand(
         /// </summary>
         [CommandOption("--dry-run")]
         [Description("Perform a dry run without making any changes to the database.")]
-        [DefaultValue(false)]
         public bool DryRun { get; set; }
 
         /// <summary>
         /// Batch size limit to control AI API costs and processing time.
         /// </summary>
-        [CommandOption("-n|--count")]
+        [CommandOption("-n|--count", isRequired: true)]
         [Description("Number of problems to process.")]
         public required int Count { get; set; }
 
@@ -63,14 +63,16 @@ public class VetoProblemTagsCommand(
         /// </summary>
         [CommandOption("--max-confidence")]
         [Description("Filter only problems with confidence less than or equal to this threshold.")]
-        public int MaxConfidence { get; set; } = 0;
+        [DefaultValue(0)]
+        public int MaxConfidence { get; set; }
 
         /// <summary>
         /// Filters only problems with goodness of fit less than or equal to given threshold (from 0 to 1).
         /// </summary>
         [CommandOption("--max-fit")]
         [Description("Filters only problems with goodness of fit less than or equal to given threshold (from 0 to 1).")]
-        public float MaxGoodnessOfFit { get; set; } = 1.0f;
+        [DefaultValue(1.0f)]
+        public float MaxGoodnessOfFit { get; set; }
 
         /// <summary>
         /// This specified how much we wanna spam Gemini in parallel.
@@ -85,7 +87,6 @@ public class VetoProblemTagsCommand(
         /// </summary>
         [CommandOption("--tag-selection-file")]
         [Description("Veto only some subset of tags. Argument should be path to a file, where each line contains the name of one tag.")]
-        [DefaultValue(null)]
         public string? TagSelectionFile { get; set; }
     }
 
@@ -141,76 +142,49 @@ public class VetoProblemTagsCommand(
         var logPath = $"{LoggingConstants.LogsDirectory}/{LoggingConstants.VetoProblemsLogFile}";
         File.WriteAllText(logPath, "");
 
-        // Use Spectre.Console's Progress UI to provide a rich, real-time view of the veto process
-        await AnsiConsole.Progress()
-            .AutoClear(enabled: false)
-            .Columns(
-            [
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn(),
-            ])
-            .StartAsync(async context =>
+        // Use the progress helper to process problems with AI veto in parallel
+        await ProgressHelper.ExecuteWithProgressInParallelAsync(
+            problemsToVeto,
+            "Processing problems for AI veto...",
+            getItemDescription: problem => problem.Slug.ToUpperInvariant(),
+            numThreads: settings.NumThreads,
+            processItem: async (problem, index, cancellationToken) =>
             {
-                // Create progress task for AI processing phase
-                var processingTask = context.AddTask("[green]Processing problems for AI veto[/]", maxValue: problemsToVeto.Count);
-                processingTask.StartTask();
+                // Process statement tags (Area/Goal/Type) for veto decisions
+                var approvalsStatementTask = FilterTags(
+                    datetimeString,
+                    "statement",
+                    vetoProblemTagsOptions.Value.VetoProblemStatementTags,
+                    settings,
+                    tagInfo => tagInfo.TagType != TagType.Technique && tagNameFilter(tagInfo.TagName),
+                    problem);
 
-                // Process problems in parallel with configurable thread count
-                await Parallel.ForAsync(0, problemsToVeto.Count, new ParallelOptions { MaxDegreeOfParallelism = settings.NumThreads },
-                    async (problemIndex, cancellationToken) =>
-                {
-                    // Get the current problem to process
-                    var problem = problemsToVeto[problemIndex];
+                // Process solution tags (Technique) for veto decisions
+                var approvalsSolutionTask = FilterTags(
+                    datetimeString,
+                    "solution",
+                    vetoProblemTagsOptions.Value.VetoProblemSolutionTags,
+                    settings,
+                    tagInfo => tagInfo.TagType == TagType.Technique && tagNameFilter(tagInfo.TagName),
+                    problem);
 
-                    // Update progress description to show current problem context
-                    processingTask.Description = $"[green]Started {problemIndex + 1} of {problemsToVeto.Count}[/] [dim]({problem.Slug.ToUpperInvariant()})[/]";
+                // Combine statement and solution tag approvals into single result
+                return (await approvalsStatementTask).Union(await approvalsSolutionTask).ToImmutableDictionary();
+            },
+            handleResult: async (approvals, problem, index, cancellationToken) =>
+            {
+                // Apply veto decisions to database if not in dry-run mode
+                if (approvals.Count > 0 && !settings.DryRun)
+                    await databaseService.VetoTagsForProblemAsync(problem.Id, approvals);
 
-                    // Process statement tags (Area/Goal/Type) for veto decisions
-                    var approvalsStatementTask = FilterTags(
-                        datetimeString,
-                        "statement",
-                        vetoProblemTagsOptions.Value.VetoProblemStatementTags,
-                        settings,
-                        tagInfo => tagInfo.TagType != TagType.Technique && tagNameFilter(tagInfo.TagName),
-                        problem);
+                // Extract rejected and approved tag names for logging
+                var rejectedTags = approvals.Where(pair => !pair.Value).Select(pair => pair.Key).ToJoinedString();
+                var approvedTags = approvals.Where(pair => pair.Value).Select(pair => pair.Key).ToJoinedString();
 
-                    // Process solution tags (Technique) for veto decisions
-                    var approvalsSolutionTask = FilterTags(
-                        datetimeString,
-                        "solution",
-                        vetoProblemTagsOptions.Value.VetoProblemSolutionTags,
-                        settings,
-                        tagInfo => tagInfo.TagType == TagType.Technique && tagNameFilter(tagInfo.TagName),
-                        problem);
-
-                    // Combine statement and solution tag approvals into single result
-                    var approvals = (await approvalsStatementTask).Union(await approvalsSolutionTask).ToImmutableDictionary();
-
-                    // Apply veto decisions to database if not in dry-run mode
-                    if (approvals.Count > 0 && !settings.DryRun)
-                        await databaseService.VetoTagsForProblemAsync(problem.Id, approvals);
-
-                    // Extract rejected and approved tag names for logging
-                    var rejectedTags = approvals.Where(pair => !pair.Value).Select(pair => pair.Key).ToJoinedString();
-                    var approvedTags = approvals.Where(pair => pair.Value).Select(pair => pair.Key).ToJoinedString();
-
-                    // Thead safely
-                    lock (context)
-                    {
-                        // Log the veto decisions for this problem
-                        File.AppendAllText(logPath, $"{problem.Slug}: approved {approvedTags}; rejected {rejectedTags}\n");
-
-                        // Increment progress
-                        processingTask.Increment(1);
-                    }
-                });
-
-                // Mark AI processing phase as complete
-                processingTask.StopTask();
-            });
+                // Log the veto decisions for this problem
+                File.AppendAllText(logPath, $"{problem.Slug}: approved {approvedTags}; rejected {rejectedTags}\n");
+            }
+        );
 
         #endregion
 

@@ -18,28 +18,22 @@ This tool generates embeddings for problem statements and solutions using the Ge
 
 3. **Batch Processing**: Efficiently processes multiple problems with configurable batch sizes
 
-## Command Reference
+## Usage
 
 All commands must be run from the tool's directory as it uses relative paths to access configuration files.
 
 ```bash
 # Navigate to the tool's directory
 cd backend/src/Tools/MathComps.Cli.Embeddings
-```
 
-### **generate-embeddings**
-
-Generates embeddings for problems using the Gemini API.
-
-```bash
 # Generate embeddings for 5 problems
-dotnet run -- generate-embeddings -n 5
+dotnet run -- -n 5
 
 # Force regeneration of existing embeddings for 10 problems
-dotnet run -- generate-embeddings -n 10 --force
+dotnet run -- -n 10 --force
 
 # Use a specific model with custom batch size
-dotnet run -- generate-embeddings -n 100 --model gemini-embedding-001 --batch-size 50
+dotnet run -- -n 100 --model gemini-embedding-001 --batch-size 50
 ```
 
 **Options:**
