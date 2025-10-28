@@ -1,4 +1,4 @@
-namespace MathComps.Cli.Embeddings.Settings;
+namespace MathComps.Infrastructure.Options;
 
 /// <summary>
 /// Configuration settings for the Gemini API.

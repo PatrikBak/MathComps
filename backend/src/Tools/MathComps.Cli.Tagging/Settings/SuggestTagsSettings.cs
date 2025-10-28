@@ -1,4 +1,4 @@
-using MathComps.Cli.Tagging.Commands;
+using MathComps.Infrastructure.Options;
 
 namespace MathComps.Cli.Tagging.Settings;
 
@@ -10,12 +10,12 @@ public class SuggestTagsSettings
     /// <summary>
     /// Gemini settings for the tag suggestion phase.
     /// </summary>
-    public required CommandGeminiSettings SuggestTags { get; set; }
+    public required AiModelConfig SuggestTags { get; set; }
 
     /// <summary>
     /// Gemini settings for the tag vetoing/filtering phase.
     /// </summary>
-    public required CommandGeminiSettings VetoTags { get; set; }
+    public required AiModelConfig VetoTags { get; set; }
 
     /// <summary>
     /// The path to the tag rules file that is shared between both the suggest and veto prompts to avoid repetition.

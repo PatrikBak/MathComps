@@ -49,6 +49,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Embeddings for problems.</summary>
     public DbSet<ProblemEmbedding> ProblemEmbeddings => Set<ProblemEmbedding>();
 
+    /// <summary>Texts (statements and solutions) for problems in various languages.</summary>
+    public DbSet<ProblemText> ProblemTexts => Set<ProblemText>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -94,10 +97,11 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         // Required for storing and querying vector embeddings efficiently.
         modelBuilder.HasPostgresExtension("vector");
 
-        // Register custom database function for PostgreSQL's unaccent().
-        // This allows EF Core to translate our C# method calls to SQL unaccent() function calls.
+        // Register custom database function for PostgreSQL's immutable_unaccent().
+        // This allows EF Core to translate our C# method calls to SQL immutable_unaccent() function calls.
+        // We use immutable_unaccent to match the index and ensure consistent behavior.
         modelBuilder.HasDbFunction(typeof(Extensions.PostgresDbFunctions).GetMethod(nameof(Extensions.PostgresDbFunctions.Unaccent))!)
-            .HasName("unaccent")
+            .HasName("immutable_unaccent")
             .HasSchema("public");
 
         // IDs (Guid v7) are generated client-side in entities; tell EF the store does NOT generate them.
@@ -259,24 +263,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             // DB-side guard mirroring [Range]
             e.ToTable(t => t.HasCheckConstraint("ck_problem_number_positive", "\"number\" > 0"));
 
-            // Fast contains on problem statements            
-            e.HasIndex(p => p.Statement)
-             .HasDatabaseName("ix_problem_statement_trgm")
-             .HasMethod("gin")
-             .HasOperators("gin_trgm_ops")
-             .HasFilter("statement IS NOT NULL");
-
-            // Fast contains on solutions statements
-            e.HasIndex(p => p.Solution)
-             .HasDatabaseName("ix_problem_solution_trgm")
-             .HasMethod("gin")
-             .HasOperators("gin_trgm_ops")
-             .HasFilter("solution IS NOT NULL");
-
-            // Embeddings relationship
-            e.HasMany(p => p.Embeddings)
-             .WithOne(pe => pe.Problem)
-             .HasForeignKey(pe => pe.ProblemId)
+            // Texts relationship
+            e.HasMany(p => p.Texts)
+             .WithOne(pt => pt.Problem)
+             .HasForeignKey(pt => pt.ProblemId)
              .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -286,14 +276,20 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<ProblemEmbedding>(e =>
         {
-            // Unique constraint: one embedding per problem, document type, embedding type, and model
-            e.HasIndex(pe => new { pe.ProblemId, pe.DocumentType, pe.EmbeddingType, pe.ModelName })
-             .IsUnique()
-             .HasDatabaseName("ux_problem_embedding_problem_document_type_embedding_type_model");
+            // Relationship to problem text
+            e.HasOne(pe => pe.ProblemText)
+             .WithMany(pt => pt.Embeddings)
+             .HasForeignKey(pe => pe.ProblemTextId)
+             .OnDelete(DeleteBehavior.Cascade);
 
-            // Index for efficient lookup by problem
-            e.HasIndex(pe => pe.ProblemId)
-             .HasDatabaseName("ix_problem_embedding_problem_id");
+            // Unique constraint: one embedding per problem text, embedding type, and model
+            e.HasIndex(pe => new { pe.ProblemTextId, pe.EmbeddingType, pe.ModelName })
+             .IsUnique()
+             .HasDatabaseName("ux_problem_embedding_text_embedding_model");
+
+            // Index for efficient lookup by problem text
+            e.HasIndex(pe => pe.ProblemTextId)
+             .HasDatabaseName("ix_problem_embedding_problem_text_id");
 
             // Vector index for semantic similarity search using cosine distance.
             e.HasIndex(pe => pe.Embedding)
@@ -303,7 +299,54 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasStorageParameter("lists", 100);
         });
 
-        #endregion
+        #endregion ProblemEmbedding
+
+        #region ProblemText
+
+        modelBuilder.Entity<ProblemText>(e =>
+        {
+            // Relationship to problem
+            e.HasOne(pt => pt.Problem)
+             .WithMany(p => p.Texts)
+             .HasForeignKey(pt => pt.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: one text per problem, document type, and language
+            e.HasIndex(pt => new { pt.ProblemId, pt.DocumentType, pt.Language })
+             .IsUnique()
+             .HasDatabaseName("ux_problem_text_problem_document_language");
+
+            // Index for efficient lookup by problem
+            e.HasIndex(pt => pt.ProblemId)
+             .HasDatabaseName("ix_problem_text_problem_id");
+
+            // GIN trigram index on unaccented raw_text for efficient accent-insensitive search
+            // This is an expression index: immutable_unaccent(raw_text)
+            // The actual SQL is created in migration 20251027182303_AddMultiLanguageSupport
+            e.HasIndex(pt => pt.RawText)
+             .HasDatabaseName("ix_problem_text_raw_text_unaccent_trgm")
+             .HasFilter("raw_text IS NOT NULL")
+             .HasAnnotation("Npgsql:IndexExpression", "immutable_unaccent(raw_text)")
+             .HasMethod("gin")
+             .HasOperators("gin_trgm_ops");
+
+            // Check constraint: for each (ProblemId, DocumentType), either all texts are automated
+            // or exactly one text is original (IsOriginal = true)
+            // This ensures: COUNT(*) = 0 OR COUNT(*) WHERE IsOriginal = true = 1
+            // We implement this via a unique partial index: only one original text per (problem, document type)
+            e.HasIndex(pt => new { pt.ProblemId, pt.DocumentType })
+             .IsUnique()
+             .HasFilter("is_original = true")
+             .HasDatabaseName("ux_problem_text_one_original_per_problem_document");
+
+            // Embeddings relationship
+            e.HasMany(pt => pt.Embeddings)
+             .WithOne(pe => pe.ProblemText)
+             .HasForeignKey(pe => pe.ProblemTextId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion ProblemText
 
         #region ProblemImage
 

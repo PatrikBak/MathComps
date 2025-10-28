@@ -1,4 +1,4 @@
-using MathComps.Cli.Embeddings.Settings;
+using MathComps.Infrastructure.Options;
 using MathComps.Shared;
 using Microsoft.Extensions.Options;
 using System.Text;

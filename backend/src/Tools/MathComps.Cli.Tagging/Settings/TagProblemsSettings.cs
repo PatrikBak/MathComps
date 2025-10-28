@@ -1,4 +1,4 @@
-using MathComps.Cli.Tagging.Commands;
+using MathComps.Infrastructure.Options;
 
 namespace MathComps.Cli.Tagging.Settings;
 
@@ -10,10 +10,10 @@ public class TagProblemsSettings
     /// <summary>
     /// Gemini settings for tagging problems based on statement only (Area/Goal/Type tags).
     /// </summary>
-    public required CommandGeminiSettings TagProblemStatement { get; set; }
+    public required AiModelConfig TagProblemStatement { get; set; }
 
     /// <summary>
     /// Gemini settings for tagging problems based on statement and solution (Technique tags).
     /// </summary>
-    public required CommandGeminiSettings TagProblemSolution { get; set; }
+    public required AiModelConfig TagProblemSolution { get; set; }
 }

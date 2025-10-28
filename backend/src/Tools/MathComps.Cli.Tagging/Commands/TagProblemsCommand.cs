@@ -4,6 +4,8 @@ using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Services;
 using MathComps.Shared;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
@@ -277,7 +279,7 @@ public class TagProblemsCommand(
     private async Task<ImmutableDictionary<string, ProblemTagData>> TagProblem(
         string folder,
         string suffix,
-        CommandGeminiSettings geminiSettings,
+        AiModelConfig geminiSettings,
         Func<(string TagName, TagType TagType), bool> tagSelector,
         ProblemDetailsDto problem)
     {

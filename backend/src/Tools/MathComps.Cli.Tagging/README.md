@@ -189,20 +189,8 @@ dotnet run -- interactive
 
 ## Setup
 
-### Configuration
+See the [main backend README](../../../README.md) for Gemini API and database setup.
 
-You'll need to set up Gemeini's API key:
-
-```bash
-# In the `backend` directory
-cd backend
-
-# Set Gemini API key
-dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/Tools/MathComps.Cli.Tagging
-```
-
-For database connection setup, see the [main backend README](../../../README.md) for setup instructions.
-
-### AI Prompts
+## AI prompts
 
 The prompts that guide the AI are located in the `Prompts/` directory.

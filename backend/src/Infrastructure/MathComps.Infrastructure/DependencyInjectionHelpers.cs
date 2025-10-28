@@ -29,6 +29,14 @@ public static class DependencyInjectionHelpers
             .Validate(options => options.MaxSimilarProblems >= 0, $"{nameof(SimilarityOptions.MaxSimilarProblems)} must >= 0.")
             .Validate(options => options.MinSimilarityScore is >= 0 and <= 1, $"{nameof(SimilarityOptions.MinSimilarityScore)} must be between 0 and 1.");
 
+        // Gemini API settings
+        services.AddOptions<GeminiSettings>()
+            .BindConfiguration(GeminiSettings.SectionName)
+            .ValidateDataAnnotations();
+
+        // Gemini service with HttpClient
+        services.AddHttpClient<IGeminiService, GeminiService>();
+
         // DB service
         services.AddScoped<IProblemFilterService, ProblemFilterService>();
         services.AddScoped<IProblemLookupService, ProblemLookupService>();

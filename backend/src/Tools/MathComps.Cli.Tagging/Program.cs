@@ -24,14 +24,6 @@ services.AddSingleton<IConfiguration>(configuration);
 // HttpClient is registered for making HTTP requests to external APIs.
 services.AddHttpClient();
 
-// Gemini API settings are bound from configuration
-services.AddOptions<GeminiSettings>()
-    .Bind(configuration.GetSection(GeminiSettings.SectionName))
-    .ValidateDataAnnotations();
-
-// Bind the Gemini service
-services.AddHttpClient<IGeminiService, GeminiService>();
-
 // Add settings for commands
 services.AddOptions<SuggestTagsSettings>().Bind(configuration.GetSection("SuggestTagsSettings"));
 services.AddOptions<TagProblemsSettings>().Bind(configuration.GetSection("TagProblemsSettings"));

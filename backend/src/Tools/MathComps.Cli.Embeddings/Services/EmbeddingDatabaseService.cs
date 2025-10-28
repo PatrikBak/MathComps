@@ -23,7 +23,7 @@ public class EmbeddingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCo
 
         // If not forcing regeneration, only get problems without embeddings
         if (!forceRegenerate)
-            query = query.Where(problem => !problem.Embeddings.Any());
+            query = query.Where(problem => !problem.Texts.SelectMany(t => t.Embeddings).Any());
 
         // Limit the problems
         query = query.Take(limit);
@@ -33,8 +33,16 @@ public class EmbeddingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCo
             .Select(problem => new ProblemForEmbeddingDto(
                 problem.Id,
                 problem.Slug,
-                problem.Statement,
-                problem.Solution
+                // Get statement text from ProblemTexts (original language)
+                problem.Texts
+                    .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
+                    .Select(text => text.RawText)
+                    .First(),
+                // Get solution text from ProblemTexts (original language) if it exists
+                problem.Texts
+                    .Where(text => text.DocumentType == DocumentType.Solution && text.IsOriginal)
+                    .Select(text => text.RawText)
+                    .FirstOrDefault()
             ))
             .ToListAsync();
     }
@@ -47,15 +55,15 @@ public class EmbeddingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCo
 
         // Load existing embeddings for this problem
         var existingEmbeddings = await context.ProblemEmbeddings
-            .Where(embedding => embedding.ProblemId == problemId)
+            .Where(embedding => embedding.ProblemText.ProblemId == problemId)
             .ToListAsync();
 
         // For each new embedding...
         foreach (var newEmbedding in embeddings)
         {
-            // Check if it exists...(DocumentType, EmbeddingType, ModelName) should be unique
+            // Check if it exists...(ProblemTextId, EmbeddingType, ModelName) should be unique
             var existing = existingEmbeddings.FirstOrDefault(embedding =>
-                embedding.DocumentType == newEmbedding.DocumentType &&
+                embedding.ProblemText.DocumentType == newEmbedding.DocumentType &&
                 embedding.EmbeddingType == newEmbedding.EmbeddingType &&
                 embedding.ModelName == newEmbedding.ModelName);
 
@@ -66,17 +74,21 @@ public class EmbeddingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCo
                 existing.Embedding = new Vector(newEmbedding.Values);
                 existing.ModelName = newEmbedding.ModelName;
                 existing.EmbeddingType = newEmbedding.EmbeddingType;
-                existing.DocumentType = newEmbedding.DocumentType;
                 existing.DateUpdated = newEmbedding.DateUpdated;
             }
             // If new
             else
             {
-                // Insert
+                // Find the original problem text id, it must exist because we did the embedding lol
+                var problemTextId = await context.ProblemTexts
+                    .Where(text => text.ProblemId == problemId && text.DocumentType == newEmbedding.DocumentType && text.IsOriginal)
+                    .Select(text => text.Id)
+                    .SingleAsync();
+
+                // Insert the embedding
                 context.ProblemEmbeddings.Add(new ProblemEmbedding
                 {
-                    ProblemId = problemId,
-                    DocumentType = newEmbedding.DocumentType,
+                    ProblemTextId = problemTextId,
                     EmbeddingType = newEmbedding.EmbeddingType,
                     ModelName = newEmbedding.ModelName,
                     Embedding = new Vector(newEmbedding.Values),

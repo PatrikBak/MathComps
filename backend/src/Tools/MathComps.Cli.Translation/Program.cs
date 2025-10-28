@@ -1,8 +1,8 @@
-using MathComps.Cli.Embeddings.Commands;
-using MathComps.Cli.Embeddings.Services;
+using MathComps.Cli.Translation.Commands;
+using MathComps.Cli.Translation.Services;
+using MathComps.Cli.Translation.Settings;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
@@ -24,22 +24,17 @@ services.AddSingleton<IConfiguration>(configuration);
 // HttpClient is registered for making HTTP requests to external APIs.
 services.AddHttpClient();
 
-// Gemini API settings are bound from configuration
-services.AddOptions<GeminiSettings>()
-    .Bind(configuration.GetSection(GeminiSettings.SectionName))
-    .ValidateDataAnnotations();
-
-// Bind the Gemini embedding service
-services.AddHttpClient<IGeminiEmbeddingService, GeminiEmbeddingService>();
+// Add settings for commands
+services.AddOptions<TranslateProblemsSettings>().Bind(configuration.GetSection("TranslateProblemsSettings"));
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
 
-// Add infrastructure services
+// Add infrastructure services including the shared Gemini service
 services.AddInfrastructureServices();
 
 // Database operations are encapsulated in a dedicated service with scoped lifetime.
-services.AddScoped<IEmbeddingDatabaseService, EmbeddingDatabaseService>();
+services.AddScoped<ITranslationDatabaseService, TranslationDatabaseService>();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
@@ -49,7 +44,7 @@ var app = new CommandApp(registrar);
 app.Configure(config =>
 {
     // Commands
-    config.AddCommand<GenerateEmbeddingsCommand>("generate-embeddings");
+    config.AddCommand<TranslateProblemsCommand>("translate-problems");
 
     // Helps debugging
     config.PropagateExceptions();

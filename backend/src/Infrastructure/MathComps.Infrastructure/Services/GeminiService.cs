@@ -1,10 +1,10 @@
-using MathComps.Cli.Tagging.Settings;
+using MathComps.Infrastructure.Options;
 using MathComps.Shared;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace MathComps.Cli.Tagging.Services;
+namespace MathComps.Infrastructure.Services;
 
 /// <summary>
 /// A service to interact with the Google Gemini API using HttpClient.

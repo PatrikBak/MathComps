@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 namespace MathComps.Domain.EfCoreEntities;
@@ -45,34 +44,15 @@ public class Problem
     public required string Slug { get; set; }
 
     /// <summary>
-    /// Problem statement (plaintext/TeX/markup). Potentially large, stored as TEXT.
-    /// </summary>
-    [Column(TypeName = "text")]
-    public required string Statement { get; set; }
-
-    /// <summary>
-    /// Parsed problem statement as a JSON string.
-    /// </summary>
-    [Column(TypeName = "jsonb")]
-    public required string StatementParsed { get; set; }
-
-    /// <summary>
-    /// Solution text (optional). Potentially large, stored as TEXT.
-    /// </summary>
-    [Column(TypeName = "text")]
-    public string? Solution { get; set; }
-
-    /// <summary>
-    /// Parsed solution as a JSON string (optional).
-    /// </summary>
-    [Column(TypeName = "jsonb")]
-    public string? SolutionParsed { get; set; }
-
-    /// <summary>
     /// Optional external link identifier to the solution (short code/URL key).
     /// </summary>
     [MaxLength(200)]
     public string? SolutionLink { get; set; }
+
+    /// <summary>
+    /// Collection of texts (statements and solutions) in various languages.
+    /// </summary>
+    public ICollection<ProblemText> Texts { get; } = [];
 
     /// <summary>
     /// Authors via the ordered join entity.
@@ -99,10 +79,4 @@ public class Problem
     /// Similarity edges where this problem appears as the similar target.
     /// </summary>
     public ICollection<ProblemSimilarity> AppearsInProblems { get; } = [];
-
-    /// <summary>
-    /// Collection of embeddings for this problem.
-    /// Multiple embeddings can exist for different document types, embedding types, and models.
-    /// </summary>
-    public ICollection<ProblemEmbedding> Embeddings { get; } = [];
 }

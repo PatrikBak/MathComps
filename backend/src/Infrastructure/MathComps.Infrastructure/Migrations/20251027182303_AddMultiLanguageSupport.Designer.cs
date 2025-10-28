@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -13,9 +14,11 @@ using Pgvector;
 namespace MathComps.Infrastructure.Migrations
 {
     [DbContext(typeof(MathCompsDbContext))]
-    partial class MathCompsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027182303_AddMultiLanguageSupport")]
+    partial class AddMultiLanguageSupport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -412,7 +415,7 @@ namespace MathComps.Infrastructure.Migrations
                     b.HasIndex("RawText")
                         .HasDatabaseName("ix_problem_text_raw_text_unaccent_trgm")
                         .HasFilter("raw_text IS NOT NULL")
-                        .HasAnnotation("Npgsql:IndexExpression", "immutable_unaccent(raw_text)");
+                        .HasAnnotation("Npgsql:IndexExpression", "unaccent(raw_text)");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("RawText"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("RawText"), new[] { "gin_trgm_ops" });

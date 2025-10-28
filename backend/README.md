@@ -80,7 +80,21 @@ cd backend/src/Infrastructure/MathComps.Infrastructure
 dotnet ef migrations add <MigrationName> --startup-project ../../Api/MathComps.Api
 ```
 
-### 3. Run the API
+### 3. Configure Gemini API (Optional)
+
+For AI-powered tools (tagging, translation, embeddings), set up your Gemini API key:
+
+```bash
+# From the backend directory
+cd backend
+
+# Set Gemini API key (shared across all tools)
+dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/Api/MathComps.Api
+```
+
+Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+### 4. Run the API
 
 See the [API README](src/Api/MathComps.Api/README.md) for running instructions.
 
@@ -97,6 +111,7 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 ### AI-Powered Tools
 
 - **[Tagging Assistant](src/Tools/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization with Gemini
+- **[Translation Assistant](src/Tools/MathComps.Cli.Translation/README.md)** – AI-powered problem translation with Gemini
 - **[Embeddings CLI](src/Tools/MathComps.Cli.Embeddings/README.md)** – Gemini-based vector embedding generator
 - **[Similarity System](src/Tools/MathComps.Cli.Similarity/README.md)** – Problem similarity calculation using embeddings + tags and other things
 

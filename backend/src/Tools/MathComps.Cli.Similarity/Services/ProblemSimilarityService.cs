@@ -80,11 +80,13 @@ public class ProblemSimilarityService(
         // We need to join with ProblemEmbeddings to access the embeddings
         var candidatesQuery =
             from problem in context.Problems
-            from embedding in context.ProblemEmbeddings
+            from text in problem.Texts
+            from embedding in text.Embeddings
                 // Exclude the current problem
             where problem.Id != sourceProblemData.ProblemId
-                // We need problem embeddings suitable suitable to be compared to
-                && embedding.DocumentType == DocumentType.ProblemStatement
+                // We need problem embeddings suitable to be compared to
+                && text.IsOriginal
+                && text.DocumentType == DocumentType.Statement
                 && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument
                 // The candidate must be from a relevant competition.
                 && relevantCompetitionSlug.Contains(problem.RoundInstance.Round.CompositeSlug)
@@ -106,23 +108,26 @@ public class ProblemSimilarityService(
             // Filter by solution similarity too
             candidatesQuery =
                 from candidate in candidatesQuery
-                let solutionEmbedding = candidate.Problem.Embeddings
-                    .FirstOrDefault(embedding =>
-                        embedding.DocumentType == DocumentType.ProblemWithSolution &&
-                        embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument)
+                let solutionEmbedding = candidate.Problem.Texts
+                    .Where(text => text.DocumentType == DocumentType.Solution && text.IsOriginal)
+                    .SelectMany(text => text.Embeddings)
+                    .Where(embedding => embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument)
+                    .Select(embedding => embedding.Embedding)
+                    .FirstOrDefault()
+
                 // Either no solution, or similar enough
                 where solutionEmbedding == null ||
-                      solutionEmbedding.Embedding.CosineDistance(sourceProblemData.SolutionEmbedding) <= (1 - settings.Value.MinimalSimilarity)
+                      solutionEmbedding.CosineDistance(sourceProblemData.SolutionEmbedding) <= (1 - settings.Value.MinimalSimilarity)
                 select candidate;
         }
 
         // Now we need to connect the candidate data with solution embeddings, if they exist
-        var candidatesWithSolutionEmb =
+        var candidatesWithSolutionEmbedding =
             from candidate in candidatesQuery
-            let solutionEmbedding = candidate.Problem.Embeddings
-                .Where(embedding =>
-                    embedding.DocumentType == DocumentType.ProblemWithSolution &&
-                    embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument)
+            let solutionEmbedding = candidate.Problem.Texts
+                .Where(text => text.DocumentType == DocumentType.Solution && text.IsOriginal)
+                .SelectMany(text => text.Embeddings)
+                .Where(embedding => embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument)
                 .Select(embedding => embedding.Embedding)
                 .FirstOrDefault()
             select new
@@ -133,7 +138,7 @@ public class ProblemSimilarityService(
             };
 
         // Now we can actually order candidates
-        return [.. (await candidatesWithSolutionEmb
+        return [.. (await candidatesWithSolutionEmbedding
             // ...by statement similarity
             .OrderBy(candidate => candidate.StatementEmbedding.CosineDistance(sourceProblemData.StatementEmbedding))
             // ...and take the top N according to the settings

@@ -1,9 +1,9 @@
-namespace MathComps.Cli.Tagging.Settings;
+namespace MathComps.Infrastructure.Options;
 
 /// <summary>
-/// Gemini settings that are specific to a single command.
+/// AI model configuration for a specific command execution.
 /// </summary>
-public class CommandGeminiSettings
+public class AiModelConfig
 {
     /// <summary>
     /// The specific AI model to use (e.g., "gemini-1.5-flash").
@@ -14,7 +14,6 @@ public class CommandGeminiSettings
     /// The path to the system prompt file.
     /// </summary>
     public required string SystemPromptPath { get; set; }
-
 
     /// <summary>
     /// Controls the number of thinking tokens for AI reasoning. Higher values enable more detailed analysis for complex tasks.

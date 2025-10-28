@@ -290,7 +290,7 @@ public class GenerateEmbeddingsCommand(
             {
                 // Semantic
                 new(
-                    DocumentType.ProblemStatement,
+                    DocumentType.Statement,
                     EmbeddingConstants.Types.RetrievalQuery,
                     modelName,
                     semantic,
@@ -298,7 +298,7 @@ public class GenerateEmbeddingsCommand(
 
                 // Retrieval
                 new(
-                    DocumentType.ProblemStatement,
+                    DocumentType.Statement,
                     EmbeddingConstants.Types.RetrievalDocument,
                     modelName,
                     retrival,
@@ -310,7 +310,7 @@ public class GenerateEmbeddingsCommand(
             {
                 // Semantic
                 embeddings.Add(new ProblemEmbeddingUpsertDto(
-                    DocumentType.ProblemWithSolution,
+                    DocumentType.StatementWithSolution,
                     EmbeddingConstants.Types.RetrievalQuery,
                     modelName,
                     combinedSemanticEmbeddings[combinedIndex],
@@ -318,7 +318,7 @@ public class GenerateEmbeddingsCommand(
 
                 // Retrieval
                 embeddings.Add(new ProblemEmbeddingUpsertDto(
-                    DocumentType.ProblemWithSolution,
+                    DocumentType.StatementWithSolution,
                     EmbeddingConstants.Types.RetrievalDocument,
                     modelName,
                     combinedRetrievalEmbeddings[combinedIndex],
