@@ -42,17 +42,6 @@ services.AddScoped<ITranslationDatabaseService, TranslationDatabaseService>();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
-var app = new CommandApp(registrar);
 
-// CLI command configuration defines the available commands and their routing.
-app.Configure(config =>
-{
-    // Commands
-    config.AddCommand<TranslateProblemsCommand>("translate-problems");
-
-    // Helps debugging
-    config.PropagateExceptions();
-});
-
-// The application runs with the provided command-line arguments and returns the exit code.
-return await app.RunAsync(args);
+// Single command app
+return await new CommandApp<TranslateProblemsCommand>(registrar).RunAsync(args);

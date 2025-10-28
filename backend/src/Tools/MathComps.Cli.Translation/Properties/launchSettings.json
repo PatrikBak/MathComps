@@ -3,12 +3,12 @@
     "Translate": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "translate-problems --language EN --num-threads 4 --count 10"
+      "commandLineArgs": "--language EN --num-threads 4 --count 10"
     },
     "Retranslate": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "translate-problems --language EN --num-thread 4 --count 10 --force"
+      "commandLineArgs": "--language EN --num-thread 4 --count 10 --force"
     }
   }
 }

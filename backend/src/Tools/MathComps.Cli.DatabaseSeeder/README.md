@@ -13,28 +13,22 @@ The seeder is designed to be used whenever new data is added to the archive. Whe
 
 The entire process is **idempotent**, meaning you can run it multiple times without creating duplicate data.
 
-## Command Reference
+## Usage
 
 All commands must be run from the tool's directory as it uses relative paths.
 
 ```bash
 # Navigate to the tool's directory
 cd backend/src/Tools/MathComps.Cli.DatabaseSeeder
-```
 
-### **seed**
-
-Seeds the database with problems from the parsed JSON dataset.
-
-```bash
 # Full sync - insert new problems and update existing ones (default)
-dotnet run -- seed
+dotnet run
 
 # Skip existing - only insert new problems, skip updates (much faster)
-dotnet run -- seed --skip-existing
+dotnet run -- --skip-existing
 
 # Process only problems from a specific year
-dotnet run -- seed --year 75
+dotnet run -- --year 75
 ```
 
 **Options:**

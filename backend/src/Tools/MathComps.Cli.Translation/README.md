@@ -14,16 +14,16 @@ AI-powered translation of math problem statements and solutions. Preserves TeX f
 cd backend/src/Tools/MathComps.Cli.Translation
 
 # Translate 10 problems to Czech
-dotnet run -- translate-problems -n 10 -l CZ
+dotnet run -- -n 10 -l CZ
 
 # Translate only statements
-dotnet run -- translate-problems -n 20 -l EN --scope StatementsOnly
+dotnet run -- -n 20 -l EN --scope StatementsOnly
 
 # Translate only solutions
-dotnet run -- translate-problems -n 15 -l SK --scope SolutionsOnly
+dotnet run -- -n 15 -l SK --scope SolutionsOnly
 
 # Force retranslation + parallel processing
-dotnet run -- translate-problems -n 50 -l CZ --force --num-threads 5
+dotnet run -- -n 50 -l CZ --force --num-threads 5
 ```
 
 **Options**:
