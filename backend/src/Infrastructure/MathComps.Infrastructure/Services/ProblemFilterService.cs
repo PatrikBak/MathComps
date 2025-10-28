@@ -26,7 +26,6 @@ public class ProblemFilterService(
     IOptionsSnapshot<PaginationOptions> paginationOptions,
     IOptionsSnapshot<SimilarityOptions> similarityOptions) : IProblemFilterService
 {
-
     /// <inheritdoc/>
     public async Task<FilterResult> FilterAsync(FilterQuery query)
     {
@@ -45,17 +44,37 @@ public class ProblemFilterService(
         if (pageSize > paginationOptions.Value.MaxPageSize)
             throw new ArgumentException($"Page size {pageSize} exceeds maximum allowed {paginationOptions.Value.MaxPageSize}");
 
-        // Apply user-specified filters to narrow down the result set
-        var filteredQuery = ApplyFilters(dbContext.Problems, query.Parameters);
+        // PERFORMANCE OPTIMIZATION: Materialize text search results once
+        // This ensures the expensive text search executes exactly once, not multiple times across facets
+        IQueryable<Problem> textFilteredQuery;
 
-        // Apply consistent sorting for predictable pagination results
-        var sortedQuery = filteredQuery.OrderByDefaultProblemSort();
+        // First, apply text search if present to create a base query for facets
+        if (!string.IsNullOrWhiteSpace(query.Parameters.SearchText))
+        {
+            // Execute the text search ONCE and materialize the problem IDs in memory
+            var matchingProblemIds = await GetMatchingProblemIdsByTextSearchAsync(
+                dbContext,
+                query.Parameters.SearchText,
+                query.Parameters.SearchInSolution);
 
-        // Get total count (this still works on the IQueryable<Problem>)
-        var totalCount = await sortedQuery.CountAsync();
+            // Pre-filter problems to only include those with matching text
+            // Uses cached problem IDs, no database round-trip for text search
+            textFilteredQuery = dbContext.Problems
+                .Where(problem => matchingProblemIds.Contains(problem.Id));
+        }
+        // No text search - start with all problems
+        else textFilteredQuery = dbContext.Problems;
+
+        // Apply remaining filters (years, contests, tags, authors, etc.) on top of text filter
+        var filteredQuery = ApplyFilters(textFilteredQuery, query.Parameters);
+
+        // Get total count
+        var totalCount = await filteredQuery.CountAsync();
 
         // Build a query...
-        var dtoQuery = sortedQuery
+        var dtoQuery = filteredQuery
+            // Apply consistent sorting for predictable pagination results
+            .OrderByDefaultProblemSort()
             // Split query to avoid Cartesian explosion when accessing multiple collections
             .AsSplitQuery()
             // Which projects results to DTOs directly in the database query
@@ -208,8 +227,9 @@ public class ProblemFilterService(
 
         // Build search bar options only for the first page to avoid unnecessary computation
         var searchBarOptions = pageNumber != 1 ? null :
-             // Build search bar options with disjunctive faceting
-             await BuildSearchOptionsAsync(dbContext.Problems, query.Parameters);
+             // Build search bar options with disjunctive faceting on the text-filtered base query
+             // This ensures facets reflect the text search results while maintaining disjunctive behavior
+             await BuildSearchOptionsAsync(textFilteredQuery, query.Parameters);
 
         // Return the complete filter result
         return new FilterResult(pagedResults, searchBarOptions);
@@ -307,7 +327,10 @@ public class ProblemFilterService(
 
                     // We want any tags
                     problems = problems.Where(problem =>
-                        problem.ProblemTagsAll.AsQueryable().Where(ProblemTag.IsGoodEnoughTag).Any(pt => parameters.TagSlugs.Contains(pt.Tag.Slug)));
+                        problem.ProblemTagsAll
+                            .AsQueryable()
+                            .Where(ProblemTag.IsGoodEnoughTag)
+                            .Any(problemTag => parameters.TagSlugs.Contains(problemTag.Tag.Slug)));
 
                     break;
 
@@ -319,7 +342,10 @@ public class ProblemFilterService(
                     {
                         // Each iteration adds one more required tag
                         problems = problems.Where(problem =>
-                            problem.ProblemTagsAll.AsQueryable().Where(ProblemTag.IsGoodEnoughTag).Any(pt => pt.Tag.Slug == tagSlug));
+                            problem.ProblemTagsAll
+                                .AsQueryable()
+                                .Where(ProblemTag.IsGoodEnoughTag)
+                                .Any(problemTag => problemTag.Tag.Slug == tagSlug));
                     }
 
                     break;
@@ -361,26 +387,6 @@ public class ProblemFilterService(
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parameters.TagLogic), parameters.TagLogic, "Invalid tag logic option");
             }
-        }
-
-        // Apply full-text search with accent-insensitive matching
-        if (!string.IsNullOrWhiteSpace(parameters.SearchText))
-        {
-            // Normalize search term by removing accents for consistent matching
-            // This handles cases like "café" matching "cafe" in the database
-            var normalizedSearchTerm = $"%{parameters.SearchText.RemoveAccents()}%";
-
-            // Do the search across all language texts using PostgreSQL's unaccent() function
-            // The GIN index on unaccent(raw_text) will be used automatically by PostgreSQL's query planner
-            problems = problems.Where(problem =>
-                // Search in problem statement texts (any language)
-                problem.Texts.Any(text => text.DocumentType == DocumentType.Statement &&
-                    EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm)) ||
-                // If we should search in solution texts...
-                (parameters.SearchInSolution &&
-                    // Search in them too (again any language)
-                    problem.Texts.Any(text => text.DocumentType == DocumentType.Solution &&
-                        EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm))));
         }
 
         // The query is fully built
@@ -636,5 +642,43 @@ public class ProblemFilterService(
             [.. tagGroups],
             [.. authorGroups]
         );
+    }
+
+    /// <summary>
+    /// Gets problem IDs that match the given search text in statement and/or solution texts.
+    /// Executes the text search efficiently once using PostgreSQL GIN index on unaccented text.
+    /// </summary>
+    /// <param name="dbContext">Database context for accessing problem texts</param>
+    /// <param name="searchText">Text to search for (will be normalized for accent-insensitive matching)</param>
+    /// <param name="searchInSolution">Whether to also search in solution texts or only statements</param>
+    /// <returns>List of distinct problem IDs that contain the search text</returns>
+    private static async Task<List<Guid>> GetMatchingProblemIdsByTextSearchAsync(
+        MathCompsDbContext dbContext,
+        string searchText,
+        bool searchInSolution)
+    {
+        // Extract and normalize the search term for accent-insensitive matching
+        var normalizedSearchTerm = $"%{searchText.RemoveAccents()}%";
+
+        // Start with statement text search (always included)
+        var textSearchQuery = dbContext.ProblemTexts
+            .Where(text =>
+                text.DocumentType == DocumentType.Statement &&
+                EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm));
+
+        // If solution search is enabled...
+        if (searchInSolution)
+        {
+            // We also want the problems that have the search term in their solution texts
+            textSearchQuery = textSearchQuery.Union(
+                dbContext.ProblemTexts
+                    .Where(text =>
+                        text.DocumentType == DocumentType.Solution &&
+                        EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm))
+            );
+        }
+
+        // Return distinct problem IDs to avoid duplicates
+        return await textSearchQuery.Select(text => text.ProblemId).ToListAsync();
     }
 }
