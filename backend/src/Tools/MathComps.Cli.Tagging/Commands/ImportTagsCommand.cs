@@ -60,10 +60,6 @@ public class ImportTagsCommand(ITaggingDatabaseService databaseService) : AsyncC
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Display header
-        AnsiConsole.Write(new FigletText("Import Tags").Centered().Color(Color.Aqua));
-        AnsiConsole.WriteLine();
-
         try
         {
             // Load and parse CSV

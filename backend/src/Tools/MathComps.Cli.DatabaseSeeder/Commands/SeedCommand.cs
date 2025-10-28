@@ -35,9 +35,6 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Fancy header
-        AnsiConsole.Write(new FigletText("Skmo Seeder").Color(Color.Blue));
-
         try
         {
             // Execute the seeding operation with the configured options.

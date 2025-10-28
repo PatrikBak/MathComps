@@ -4,8 +4,12 @@ using MathComps.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+
+// Fancy header
+AnsiConsole.Write(new FigletText("Database Seeder").Centered().Color(Color.Aqua));
 
 // Build a config...
 var configuration = new ConfigurationBuilder()

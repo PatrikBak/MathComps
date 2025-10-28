@@ -40,9 +40,6 @@ public class ParseCommand : AsyncCommand<ParseCommand.Settings>
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Display a fancy header for the tool.
-        AnsiConsole.Write(new FigletText("SKMO Parser").Centered().Color(Color.Aqua));
-
         // Load the TeX cleaning rules for normalizing input.
         var rules = TeXCleanerRules.LoadRules();
 

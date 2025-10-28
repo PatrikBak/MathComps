@@ -5,8 +5,12 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+
+// Fancy header
+AnsiConsole.Write(new FigletText("Embeddings").Centered().Color(Color.Aqua));
 
 // We'll use DI
 var services = new ServiceCollection();

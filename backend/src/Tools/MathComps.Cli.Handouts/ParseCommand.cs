@@ -32,9 +32,6 @@ public class ParseCommand : Command<ParseCommand.Settings>
     /// <inheritdoc/>
     public override int Execute(CommandContext context, Settings settings)
     {
-        // Display a fancy header for the tool.
-        AnsiConsole.Write(new FigletText("Handout Parser").Centered().Color(Color.Aqua));
-
         // Fixed paths relative to the tool's project directory.
         var inputDirectory = new DirectoryInfo("../../../../data/handouts");
         var outputDirectory = new DirectoryInfo("../../../../web/src/content/handouts");

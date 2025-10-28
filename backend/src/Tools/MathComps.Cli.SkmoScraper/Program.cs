@@ -4,10 +4,14 @@ using MathComps.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 using System.Text;
 using System.Text.Json;
+
+// Fancy header
+AnsiConsole.Write(new FigletText("SKMO Scraper").Centered().Color(Color.Aqua));
 
 // We need this to handle window-1250...Crazy
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
