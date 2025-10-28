@@ -1,9 +1,10 @@
-using System.ComponentModel;
-using System.Text.Json;
 using MathComps.Cli.SkmoScraper.Services;
 using MathComps.Shared;
+using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.ComponentModel;
+using System.Text.Json;
 
 namespace MathComps.Cli.SkmoScraper.Commands;
 
@@ -57,66 +58,52 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
         // We'll count how much we've updated
         var totalUpdatedProblems = 0;
 
-        // Process each scraped solution entry
-        await AnsiConsole.Progress()
-            .StartAsync(async progress =>
+        // Use the progress helper to process solution links sequentially
+        await ProgressHelper.ExecuteWithProgressAsync(
+            scrapedSolutions,
+            "Updating solution links...",
+            getItemDescription: solution => solution.Slug,
+            processItem: async (solution, index, cancellationToken) =>
             {
-                // Print nicely
-                var task = progress.AddTask("[bold blue]Updating solution links...[/]", maxValue: scrapedSolutions.Count);
+                // Determine the competition and round slugs based on the mapping algorithm
+                string competitionSlug;
+                string? categorySlug;
+                string? roundSlug;
 
-                // Handle each solution
-                foreach (var solution in scrapedSolutions)
+                // If category is not null, the competition slug is basically 'csmo' because I decided so randomly
+                if (!string.IsNullOrEmpty(solution.Category))
                 {
-                    // Determine the competition and round slugs based on the mapping algorithm
-                    string competitionSlug;
-                    string? categorySlug;
-                    string? roundSlug;
-
-                    // If category is not null, the competition slug is basically 'csmo' because I decided so randomly
-                    if (!string.IsNullOrEmpty(solution.Category))
-                    {
-                        competitionSlug = "csmo";
-                        categorySlug = solution.Category.ToSlug();
-                        roundSlug = solution.CompetitionId.ToSlug();
-                    }
-                    // If category null, we don't have subrounds
-                    else
-                    {
-                        competitionSlug = solution.CompetitionId.ToSlug();
-                        categorySlug = null;
-                        roundSlug = null;
-                    }
-
-                    // Update problems in the database with the solution link
-                    var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(
-                        solution.Year,
-                        competitionSlug,
-                        categorySlug,
-                        roundSlug,
-                        solution.SolutionLink);
-
-                    // Make a nice slug for logging
-                    var slug = $"{solution.Year}-{competitionSlug}" +
-                               $"{(categorySlug == null ? "" : $"-{categorySlug}")}" +
-                               $"{(roundSlug == null ? "" : $"-{roundSlug}")}";
-
-                    // If no problems to update
-                    if (result.TotalProblemsFound == 0)
-                    {
-                        // This is good to know
-                        AnsiConsole.MarkupLine($"[red]Found no problems for [yellow]{slug.ToUpperInvariant()}[/][/]");
-                    }
-
-                    // We'll report the total updated problems
-                    totalUpdatedProblems += result.ProblemsUpdated;
-
-                    // Let's move on onto the next link
-                    task.Increment(1);
+                    competitionSlug = "csmo";
+                    categorySlug = solution.Category.ToSlug();
+                    roundSlug = solution.CompetitionId.ToSlug();
+                }
+                // If category null, we don't have subrounds
+                else
+                {
+                    competitionSlug = solution.CompetitionId.ToSlug();
+                    categorySlug = null;
+                    roundSlug = null;
                 }
 
-                // We're done
-                task.StopTask();
-            });
+                // Update problems in the database with the solution link
+                var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(
+                    solution.Year,
+                    competitionSlug,
+                    categorySlug,
+                    roundSlug,
+                    solution.SolutionLink);
+
+                // If no problems to update
+                if (result.TotalProblemsFound == 0)
+                {
+                    // This is good to know
+                    AnsiConsole.MarkupLine($"[red]Found no problems for [yellow]{solution.Slug}[/][/]");
+                }
+
+                // We'll report the total updated problems
+                totalUpdatedProblems += result.ProblemsUpdated;
+            }
+        );
 
         // Say we're happy
         AnsiConsole.MarkupLine($"[green]Successfully updated {totalUpdatedProblems} problems with solution links.[/]");

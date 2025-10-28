@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace MathComps.Cli.SkmoScraper;
 
 /// <summary>
@@ -12,4 +14,14 @@ public record ScrapedSolution(
     string CompetitionId,
     string? Category,
     string SolutionLink
-);
+)
+{
+    /// <summary>
+    /// A nice problem id usable for logging.
+    /// </summary>
+    [JsonIgnore]
+    public string Slug =>
+        $"{Year}" +
+        $"{(Category == null ? "" : $"-{Category.ToUpperInvariant()}")}" +
+        $"{(CompetitionId == null ? "" : $"-{CompetitionId.ToUpperInvariant()}")}";
+}
