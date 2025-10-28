@@ -11,7 +11,7 @@ namespace MathComps.Cli.Embeddings.Commands;
 /// <summary>
 /// Generates vector embeddings for problem statements and solutions using the Gemini API.
 /// Creates multiple embedding types (semantic and retrieval) for both statement-only and
-/// statement+solution combinations to support different search scenarios.
+/// solution-only to support different search scenarios.
 /// </summary>
 /// <param name="geminiService">The service responsible for making calls to the Gemini embedding API.</param>
 /// <param name="databaseService">The database service for accessing and storing problem embeddings.</param>
@@ -211,8 +211,8 @@ public class GenerateEmbeddingsCommand(
     /// Generates four types of embeddings for each problem:
     /// - Statement semantic (RetrievalQuery): for similarity search on problem statements
     /// - Statement retrieval (RetrievalDocument): for document retrieval on problem statements
-    /// - Combined semantic (RetrievalQuery): for similarity search on statement+solution (if solution exists)
-    /// - Combined retrieval (RetrievalDocument): for document retrieval on statement+solution (if solution exists)
+    /// - Solution semantic (RetrievalQuery): for similarity search on solutions (if solution exists)
+    /// - Solution retrieval (RetrievalDocument): for document retrieval on solutions (if solution exists)
     /// </summary>
     /// <param name="problems">The problems to generate embeddings for.</param>
     /// <param name="modelName">The Gemini model to use for embedding creation.</param>
@@ -241,42 +241,42 @@ public class GenerateEmbeddingsCommand(
             EmbeddingConstants.Types.RetrievalDocument,
             EmbeddingConstants.VectorDimensions);
 
-        // Track problems that include solutions to prepare combined text embeddings
+        // Track problems that include solutions to prepare solution embeddings
         var problemsWithSolutions = problems
             .Select((problem, index) => (problem, index))
             .Where(tuple => !string.IsNullOrEmpty(tuple.problem.Solution))
             .ToArray();
 
-        // Initialize empty arrays for combined embeddings
-        var combinedSemanticEmbeddings = Array.Empty<float[]>();
-        var combinedRetrievalEmbeddings = Array.Empty<float[]>();
-        var combinedIndexLookup = new Dictionary<Guid, int>();
+        // Initialize empty arrays for solution embeddings
+        var solutionSemanticEmbeddings = Array.Empty<float[]>();
+        var solutionRetrievalEmbeddings = Array.Empty<float[]>();
+        var solutionIndexLookup = new Dictionary<Guid, int>();
 
-        // Generate combined embeddings only if there are problems with solutions
+        // Generate solution embeddings only if there are problems with solutions
         if (problemsWithSolutions.Length > 0)
         {
-            // Build the combined statement+solution payloads in the original order
-            var combinedTexts = problemsWithSolutions
-                .Select(tuple => $"{tuple.problem.Statement}\n\nSolution:\n{tuple.problem.Solution}")
+            // Extract the solution texts
+            var solutionTexts = problemsWithSolutions
+                .Select(tuple => tuple.problem.Solution!)
                 .ToArray();
 
-            // Generate embeddings for the combined document semantics (semantic search)
-            combinedSemanticEmbeddings = await geminiService.GenerateEmbeddingsAsync(
+            // Generate embeddings for solution semantics (semantic search)
+            solutionSemanticEmbeddings = await geminiService.GenerateEmbeddingsAsync(
                 modelName,
-                combinedTexts,
+                solutionTexts,
                 EmbeddingConstants.Types.RetrievalQuery,
                 EmbeddingConstants.VectorDimensions);
 
             // Generate embeddings tailored for retrieval scenarios as well
-            combinedRetrievalEmbeddings = await geminiService.GenerateEmbeddingsAsync(
+            solutionRetrievalEmbeddings = await geminiService.GenerateEmbeddingsAsync(
                 modelName,
-                combinedTexts,
+                solutionTexts,
                 EmbeddingConstants.Types.RetrievalDocument,
                 EmbeddingConstants.VectorDimensions);
 
-            // Remember how to map a problem id back to its combined embedding index
+            // Remember how to map a problem id back to its solution embedding index
             for (var problemIndex = 0; problemIndex < problemsWithSolutions.Length; problemIndex++)
-                combinedIndexLookup[problemsWithSolutions[problemIndex].problem.Id] = problemIndex;
+                solutionIndexLookup[problemsWithSolutions[problemIndex].problem.Id] = problemIndex;
         }
 
         // Build the embedding collections for each problem
@@ -305,23 +305,23 @@ public class GenerateEmbeddingsCommand(
                     timestamp)
             };
 
-            // Augment the embedding set with statement+solution vectors when available
-            if (combinedIndexLookup.TryGetValue(problem.Id, out var combinedIndex))
+            // Augment the embedding set with standalone solution vectors when available
+            if (solutionIndexLookup.TryGetValue(problem.Id, out var solutionIndex))
             {
                 // Semantic
                 embeddings.Add(new ProblemEmbeddingUpsertDto(
-                    DocumentType.StatementWithSolution,
+                    DocumentType.Solution,
                     EmbeddingConstants.Types.RetrievalQuery,
                     modelName,
-                    combinedSemanticEmbeddings[combinedIndex],
+                    solutionSemanticEmbeddings[solutionIndex],
                     timestamp));
 
                 // Retrieval
                 embeddings.Add(new ProblemEmbeddingUpsertDto(
-                    DocumentType.StatementWithSolution,
+                    DocumentType.Solution,
                     EmbeddingConstants.Types.RetrievalDocument,
                     modelName,
-                    combinedRetrievalEmbeddings[combinedIndex],
+                    solutionRetrievalEmbeddings[solutionIndex],
                     timestamp));
             }
 

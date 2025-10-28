@@ -13,10 +13,5 @@ public enum DocumentType
     /// <summary>
     /// Problem solution text.
     /// </summary>
-    Solution = 1,
-
-    /// <summary>
-    /// Both the problem statement and solution combined (used for embeddings).
-    /// </summary>
-    StatementWithSolution = 2
+    Solution = 1
 }

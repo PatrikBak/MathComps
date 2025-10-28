@@ -55,6 +55,7 @@ public class EmbeddingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCo
 
         // Load existing embeddings for this problem
         var existingEmbeddings = await context.ProblemEmbeddings
+            .Include(embedding => embedding.ProblemText)
             .Where(embedding => embedding.ProblemText.ProblemId == problemId)
             .ToListAsync();
 
