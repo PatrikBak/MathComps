@@ -54,7 +54,7 @@ public class GenerateEmbeddingsCommand(
         /// </summary>
         [Description("Batch size for Gemini requests")]
         [CommandOption("-b|--batch-size")]
-        public int BatchSize { get; set; } = 7;
+        public int BatchSize { get; set; } = 20;
     }
 
     /// <inheritdoc />
