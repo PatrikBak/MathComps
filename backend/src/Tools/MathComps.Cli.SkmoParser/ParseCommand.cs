@@ -1,5 +1,5 @@
-using MathComps.Cli.SkmoProblems.Parsing;
-using MathComps.Cli.SkmoProblems.Rendering;
+using MathComps.Cli.SkmoParser.Parsing;
+using MathComps.Cli.SkmoParser.Rendering;
 using MathComps.Shared;
 using MathComps.TexParser.TexCleaner;
 using Spectre.Console;
@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Text.Json;
 
-namespace MathComps.Cli.SkmoProblems;
+namespace MathComps.Cli.SkmoParser;
 
 /// <summary>
 /// The command to parse SKMO problems from TeX archive into structured JSON.

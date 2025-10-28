@@ -3,7 +3,7 @@ using MathComps.TexParser.Types;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-namespace MathComps.Cli.SkmoProblems.Parsing;
+namespace MathComps.Cli.SkmoParser.Parsing;
 
 /// <summary>
 /// A static class for parsing the raw TeX files of the Slovak Mathematical Olympiad (SKMO) archive.

@@ -104,7 +104,7 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 ### Data Pipeline Tools
 
-- **[SKMO Problems Parser](src/Tools/MathComps.Cli.SkmoProblems/README.md)** – Parses raw `.tex` archive into structured JSON
+- **[SKMO Parser](src/Tools/MathComps.Cli.SkmoParser/README.md)** – Parses raw `.tex` archive into structured JSON
 - **[Database Seeder](src/Tools/MathComps.Cli.DatabaseSeeder/README.md)** – Populates database from parsed JSON
 - **[SKMO Scraper](src/Tools/MathComps.Cli.SkmoScraper/README.md)** – Scrapes solution links from SKMO website and updates database with these links
 

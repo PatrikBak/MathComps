@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,7 +11,7 @@
     <ProjectReference Include="..\..\Core\MathComps.Domain\MathComps.Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Shared\MathComps.Shared.Cli\MathComps.Shared.Cli.csproj" />
-    <ProjectReference Include="..\MathComps.Cli.SkmoProblems\MathComps.Cli.SkmoProblems.csproj" />
+    <ProjectReference Include="..\MathComps.Cli.SkmoParser\MathComps.Cli.SkmoParser.csproj" />
     <ProjectReference Include="..\..\Shared\MathComps.Shared\MathComps.Shared.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-using MathComps.Cli.SkmoProblems;
+using MathComps.Cli.SkmoParser;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

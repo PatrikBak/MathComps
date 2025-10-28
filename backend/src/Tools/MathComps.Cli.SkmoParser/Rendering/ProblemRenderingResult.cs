@@ -1,7 +1,7 @@
 using MathComps.TexParser.Types;
 using System.Collections.Immutable;
 
-namespace MathComps.Cli.SkmoProblems.Rendering;
+namespace MathComps.Cli.SkmoParser.Rendering;
 
 /// <summary>
 /// Represents the final output for a single problem after parsing and rendering attempts.

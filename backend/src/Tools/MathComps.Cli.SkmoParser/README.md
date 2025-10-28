@@ -1,4 +1,4 @@
-# SKMO Problems Parser CLI
+# SKMO Parser CLI
 
 This is the foundational data processing tool for the MathComps project. It parses the entire raw archive of `.tex` files from the Slovak Mathematical Olympiad (SKMO) and converts them into a clean, structured JSON format that feeds the rest of the system.
 
@@ -18,7 +18,7 @@ This output file is the primary input for the **Database Seeder**, which populat
 Navigate to the tool's directory:
 
 ```bash
-cd backend/src/Tools/MathComps.Cli.SkmoProblems
+cd backend/src/Tools/MathComps.Cli.SkmoParser
 ```
 
 ### Default
