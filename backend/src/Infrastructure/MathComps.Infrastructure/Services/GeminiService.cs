@@ -49,15 +49,16 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
         // The request is sent to the Gemini API...
         var response = await httpClient.PostAsync(url, content, cancellationToken);
 
-        // This will throw an HttpRequestException for non-success status codes (e.g., 4xx, 5xx).
-        response.EnsureSuccessStatusCode();
+        // Read the content
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        // The raw JSON response body is read from the HTTP response.
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        // Handle if API didn't return 400
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Gemini API error {response.StatusCode}: {body}");
 
         // The response JSON is parsed to extract the generated text content.
         // We navigate through the JSON structure to find the model's text response.
-        var json = JsonNode.Parse(responseBody);
+        var json = JsonNode.Parse(body);
         var text = json?["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.GetValue<string>();
 
         // If the expected text content is not found, it indicates an unexpected API response format.
