@@ -8,7 +8,6 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 using System.Text;
-using System.Text.Json;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("SKMO Scraper").Centered().Color(Color.Aqua));
@@ -46,12 +45,6 @@ services.AddTransient<ISkmoDatabaseService, SkmoDatabaseService>();
 
 // Register database context using Infrastructure project's extension method
 services.AddMathCompsDbContext(configuration);
-
-// The JSON serializer is configured to write indented JSON for readability.
-services.AddSingleton(new JsonSerializerOptions
-{
-    WriteIndented = true,
-});
 
 // A custom registrar is used to integrate Spectre.Console.Cli with the DI container.
 using var registrar = new DependencyInjectionRegistrar(services);

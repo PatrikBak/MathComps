@@ -1,11 +1,9 @@
+using MathComps.Shared;
 using MathComps.TexParser;
 using MathComps.TexParser.TexCleaner;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace MathComps.Cli.Handouts;
 
@@ -75,25 +73,6 @@ public class ParseCommand : Command<ParseCommand.Settings>
         // Load the TeX cleaning rules before processing files.
         var rules = TeXCleanerRules.LoadRules();
 
-        // Configure JSON serialization options for the output files.
-        var jsonSerializerOptions = new JsonSerializerOptions
-        {
-            // Make the output JSON human-readable with indentation.
-            WriteIndented = true,
-
-            // Use camelCase for property names in the JSON output (e.g., "title", "sections").
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-
-            // Do not include properties with null values in the JSON output.
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-
-            // Preserve diacritics and special characters in the output.
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-
-            // Ensure enums are serialized as their string names into PascalCase.
-            Converters = { new JsonStringEnumConverter() },
-        };
-
         // Process each discovered handout file.
         foreach (var inputFile in inputFiles)
         {
@@ -109,8 +88,8 @@ public class ParseCommand : Command<ParseCommand.Settings>
                 // Parse the TeX content into the structured Document object model.
                 var (document, unknownCommands) = TexStringParser.ParseDocument(texContent, rules);
 
-                // Serialize the Document object to a JSON string using the configured options.
-                var jsonString = JsonSerializer.Serialize(document, jsonSerializerOptions);
+                // Serialize the Document object to an indented JSON string
+                var jsonString = document.ToJson();
 
                 // Normalize line endings to LF (Unix-style) for Git compatibility
                 var normalizedContent = jsonString.Replace("\r\n", "\n") + "\n";

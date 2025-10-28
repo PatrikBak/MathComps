@@ -18,7 +18,7 @@ builder.Services.AddHealthChecks();
 // Configure JSON serialization for controllers/minimal APIs
 builder.Services.Configure<JsonOptions>(options =>
 {
-    // Nice enums
+    // Nice enums, the frontend likes them
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
