@@ -12,6 +12,7 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react'
+import { useIsomorphicEffect, useOs } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, HelpCircle } from 'lucide-react'
 import * as React from 'react'
 
@@ -113,18 +114,31 @@ function useFacetBase<T extends FacetOption>(config: {
   const labelId = React.useId()
   const popoverId = React.useId()
 
+  // Detect mobile operating systems where virtual keyboards are intrusive
+  // useOs is synchronous and avoids the initial undefined state of media queries
+  const os = useOs()
+  const isMobileOS = os === 'ios' || os === 'android'
+
+  // Auto-focus input on mount, but only on desktop devices
+  // Mobile devices are excluded because virtual keyboards take up significant screen space
+  // and can cause jarring layout shifts when triggered automatically
   const focusAppropriateElement = React.useCallback(() => {
-    // Try to focus search input first, fall back to first input if search is not available
+    // Skip auto-focus on mobile OS to prevent unwanted keyboard popup
+    if (isMobileOS) {
+      ;(document.activeElement as HTMLElement)?.blur()
+      return
+    }
+
+    // Focus search input for better UX
     if (searchRef.current) {
       searchRef.current.focus()
-    } else {
-      // Focus first input if search input is not rendered
-      const firstInput = listRef.current?.querySelector<HTMLInputElement>(
-        `input[type="${inputKind}"]`
-      )
-      firstInput?.focus({ preventScroll: true })
     }
-  }, [inputKind])
+  }, [isMobileOS])
+
+  // Apply auto-focus on component mount
+  useIsomorphicEffect(() => {
+    focusAppropriateElement()
+  }, [focusAppropriateElement])
 
   const { refs, floatingStyles, context, placement } = useFloating({
     open,
