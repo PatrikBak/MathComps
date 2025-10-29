@@ -218,7 +218,7 @@ export function renderRawContentBlock(
         )
       } else {
         return (
-          <span className="math-inline" style={{ display: 'inline', whiteSpace: 'nowrap' }}>
+          <span className="math-inline">
             <MathRendererClient content={`$${mathBody}$`} />
           </span>
         )
