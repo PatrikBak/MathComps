@@ -14,11 +14,6 @@ public class PaginationOptions
     /// Maximum page size the server allows for data queries.
     /// </summary>
     public int MaxPageSize { get; init; } = 100;
-
-    /// <summary>
-    /// Default page size for queries when not specified by the client.
-    /// </summary>
-    public int DefaultPageSize { get; init; } = 50;
 }
 
 

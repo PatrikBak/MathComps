@@ -19,9 +19,7 @@ public static class DependencyInjectionHelpers
         // The options for pagination 
         services.AddOptions<PaginationOptions>()
             .BindConfiguration(PaginationOptions.ConfigurationSectionName)
-            .Validate(options => options.MaxPageSize > 0, $"{nameof(PaginationOptions.MaxPageSize)} must be > 0.")
-            .Validate(options => options.DefaultPageSize > 0, $"{nameof(PaginationOptions.DefaultPageSize)} must be > 0.")
-            .Validate(options => options.DefaultPageSize <= options.MaxPageSize, $"{nameof(PaginationOptions.DefaultPageSize)} cannot be > {nameof(PaginationOptions.MaxPageSize)}.");
+            .Validate(options => options.MaxPageSize > 0, $"{nameof(PaginationOptions.MaxPageSize)} must be > 0.");
 
         // The options for similarity
         services.AddOptions<SimilarityOptions>()
