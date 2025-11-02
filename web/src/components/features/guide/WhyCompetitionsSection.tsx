@@ -4,7 +4,7 @@ import React from 'react'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import { IconBadge } from './layout/IconBadge'
@@ -51,7 +51,7 @@ export default function WhyCompetitionsSection({
 
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.WHY_COMPETITIONS}
+      title={GUIDE_TITLES.WHY_COMPETITIONS}
       description="Matematické súťaže nie sú len o súťažení a matematike 🙂."
       icon={{ type: 'lucide', icon: Trophy }}
       iconColor="text-amber-400"

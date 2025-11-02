@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react'
 import React from 'react'
 
+import { CopyLinkButton } from '@/components/shared/components/CopyLinkButton'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { IconBadge } from './IconBadge'
@@ -26,6 +27,8 @@ export interface SectionHeaderProps {
   title: string
   /** Description text below the title */
   description?: React.ReactNode
+  /** Section slug/ID for anchor link */
+  sectionSlug: string
 }
 
 /**
@@ -38,10 +41,11 @@ export function SectionHeader({
   number,
   title,
   description,
+  sectionSlug,
 }: SectionHeaderProps) {
   return (
     <div className="mb-4 sm:mb-6 md:mb-8">
-      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 border-b border-gray-700 pb-2 sm:pb-3 flex items-center gap-2 sm:gap-3">
+      <h3 className="group text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 border-b border-gray-700 pb-2 sm:pb-3 flex items-center gap-2 sm:gap-3">
         {icon.type === 'lucide' ? (
           <IconBadge icon={icon.icon} color={iconColor} background={iconBackground} />
         ) : (
@@ -57,6 +61,7 @@ export function SectionHeader({
         )}
         <span className="mr-1">{number}</span>
         <span>{title}</span>
+        <CopyLinkButton sectionSlug={sectionSlug} iconSize={18} />
       </h3>
       {description && (
         <div className="text-base sm:text-lg text-slate-400 max-w-4xl leading-relaxed">

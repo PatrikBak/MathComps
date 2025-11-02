@@ -8,7 +8,7 @@ import { BulletList } from './layout/BulletList'
 import { CountryBadge } from './layout/CountryBadge'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import type { Country } from './layout/FlagIcon'
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import { InfoCard } from './layout/InfoCard'
@@ -173,7 +173,7 @@ export default function OtherCompetitionsSection({
   function renderTypeGroup(type: CompetitionType) {
     const typeConfig = {
       Team: {
-        id: GUIDE_SECTION_IDS.OTHER_COMPETITIONS_TEAM,
+        title: GUIDE_TITLES.OTHER_COMPETITIONS_TEAM,
         description:
           'Tímové súťaže sú skvelou príležitosťou na zábavu s kamarátmi. Nie je teda prekvapením, že sú populárne a že ich je toľko.',
         icon: Users,
@@ -181,7 +181,7 @@ export default function OtherCompetitionsSection({
         iconBackground: 'bg-green-500/10',
       },
       Individual: {
-        id: GUIDE_SECTION_IDS.OTHER_COMPETITIONS_INDIVIDUAL,
+        title: GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL,
         description:
           'Individuálne súťaže, ktoré majú iný formát než matematická olympiáda. Všetky nižšie uvedené vyžadujú iba výsledok, čím sa od nej líšia.',
         icon: User,
@@ -196,7 +196,7 @@ export default function OtherCompetitionsSection({
 
     return typeCompetitions.length === 0 ? null : (
       <GuideSection
-        id={typeConfig[type].id}
+        title={typeConfig[type].title}
         description={typeConfig[type].description}
         icon={{ type: 'lucide', icon: typeConfig[type].icon }}
         iconColor={typeConfig[type].iconColor}
@@ -210,7 +210,7 @@ export default function OtherCompetitionsSection({
 
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.OTHER_COMPETITIONS}
+      title={GUIDE_TITLES.OTHER_COMPETITIONS}
       description="Okrem olympiády a seminárov existuje mnoho ďalších súťaží s rôznymi formátmi, pričom väčšinou ide o jednodňové zábavné udalosti, na ktoré sa typicky netrénuje, ale o to menší nátlak na nich je 😌"
       icon={{ type: 'lucide', icon: Star }}
       iconColor="text-violet-400"

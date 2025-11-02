@@ -5,7 +5,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
 import { BulletList } from './layout/BulletList'
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import { IconBadge } from './layout/IconBadge'
@@ -47,7 +47,7 @@ export default function BeginnerGuideSection({
 
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.HOW_TO_START}
+      title={GUIDE_TITLES.HOW_TO_START}
       description="Na začiatku je vždy veľa možností, ako začať. Potom je veľa možností, ako napredovať. Nasledovné rady majú za cieľ týmto procesom pomôcť."
       icon={{ type: 'lucide', icon: Target }}
       iconColor="text-violet-400"

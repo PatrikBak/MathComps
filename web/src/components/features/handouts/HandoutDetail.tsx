@@ -11,7 +11,10 @@ import {
   renderRawContentBlock,
 } from '@/components/math/ContentRenderer'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
+import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { cn } from '@/components/shared/utils/css-utils'
+import { SectionNumberingGenerator } from '@/components/shared/utils/section-numbering-utils'
+import { slugify } from '@/components/shared/utils/string-utils'
 import { MobileTableOfContents } from '@/components/table-of-contents/MobileTableOfContents'
 import { TableOfContents } from '@/components/table-of-contents/TableOfContents'
 import { PAGE_LAYOUT } from '@/constants/common-section-styles'
@@ -46,35 +49,48 @@ function renderDifficultyStars(difficulty: number): React.ReactNode {
   return <sup className="text-purple-400">*</sup>
 }
 
-function computeTableOfContentsItems(
-  documentContent: Document
-): Array<{ id: string; label: string; title: string; level: number }> {
-  const tableOfContentsCounters: number[] = []
-  return documentContent.sections.map((section) => {
+/**
+ * Compute section metadata (ID, numbering, level) for both TOC and rendering.
+ */
+function computeSectionMetadata(documentContent: Document): Array<{
+  id: string
+  label: string
+  title: string
+  level: number
+  sectionIndex: number
+}> {
+  // Use the shared numbering generator
+  const numbering = new SectionNumberingGenerator()
+
+  return documentContent.sections.map((section, index) => {
+    // Ensure section level is at least 1 for valid header hierarchy
     const headerLevel = Math.max(1, section.level)
-    while (tableOfContentsCounters.length < headerLevel) tableOfContentsCounters.push(0)
 
-    tableOfContentsCounters[headerLevel - 1] += 1
-    for (let index = headerLevel; index < tableOfContentsCounters.length; index += 1)
-      tableOfContentsCounters[index] = 0
-    const sectionNumber = tableOfContentsCounters
-      .slice(0, headerLevel)
-      .filter((count) => count > 0)
-      .join('.')
+    // Generate section number using the shared utility (convert to 0-indexed)
+    const sectionNumber = numbering.getNextNumber(headerLevel - 1)
 
-    const sectionId = `sec-${sectionNumber}`
+    // Generate unique ID from section title for anchor links
+    const sectionId = slugify(section.title)
+
     return {
       id: sectionId,
       label: sectionNumber,
       title: section.title,
       level: headerLevel,
+      sectionIndex: index,
     }
   })
 }
 
 function renderDocumentSections(
   documentContent: Document,
-  tableOfContentsItems: Array<{ id: string; label: string; title: string; level: number }>
+  sectionMetadata: Array<{
+    id: string
+    label: string
+    title: string
+    level: number
+    sectionIndex: number
+  }>
 ) {
   const localizedEnvironmentLabelByType: Record<
     'theorem' | 'exercise' | 'example' | 'problem',
@@ -128,50 +144,49 @@ function renderDocumentSections(
     problem: 0,
   }
 
+  // Mapping for Slovak type names used in IDs
+  const environmentTypeSlugMap: Record<'theorem' | 'exercise' | 'example' | 'problem', string> = {
+    theorem: 'tvrdenie',
+    exercise: 'cvicenie',
+    example: 'priklad',
+    problem: 'uloha',
+  }
+
   const getNextEnvironmentNumber = (environmentType: keyof typeof environmentCounters) => {
     environmentCounters[environmentType] += 1
     return `${environmentCounters[environmentType]}`
   }
-  const sectionLevelCounters: number[] = []
 
+  /**
+   * Generate a hierarchical ID for an environment (theorem/problem/example/exercise).
+   * Format: {section-slug}-{type-slug}-{number}
+   * Example: "zakladne-vety-uloha-2"
+   */
+  const generateEnvironmentId = (
+    sectionSlug: string,
+    environmentType: keyof typeof environmentCounters,
+    environmentNumber: string
+  ): string => {
+    const typeSlug = environmentTypeSlugMap[environmentType]
+    return `${sectionSlug}-${typeSlug}-${environmentNumber}`
+  }
   const renderedSections: React.ReactNode[] = []
-  let sectionIndex = -1
   const totalSections = documentContent.sections.length
 
-  for (const section of documentContent.sections) {
-    const headerLevel = Math.max(1, section.level)
-    while (sectionLevelCounters.length < headerLevel) sectionLevelCounters.push(0)
-
-    sectionLevelCounters[headerLevel - 1] += 1
-    for (let index = headerLevel; index < sectionLevelCounters.length; index += 1)
-      sectionLevelCounters[index] = 0
-    const sectionNumber = sectionLevelCounters
-      .slice(0, headerLevel)
-      .filter((count) => count > 0)
-      .join('.')
-
-    sectionIndex += 1
-    const sectionId = tableOfContentsItems[sectionIndex]?.id || `sec-${sectionNumber}`
-    const isLastSection = sectionIndex === totalSections - 1
+  documentContent.sections.forEach((section, index) => {
+    // Get pre-computed metadata for this section (guaranteed to exist at same index)
+    const metadata = sectionMetadata[index]
+    const isLastSection = index === totalSections - 1
 
     renderedSections.push(
-      <section
-        key={`${sectionNumber}-${section.title}`}
-        // Ehm, the min-h to ensure the last TOC click is clickable :D
-        className={cn('max-w-none', isLastSection && 'lg:min-h-[52vh]')}
+      <ArticleSection
+        key={`${metadata.label}-${section.title}`}
+        id={metadata.id}
+        number={metadata.label}
+        title={section.title}
+        titleContent={section.title}
+        isLastSection={isLastSection}
       >
-        <h2
-          id={sectionId}
-          className="text-3xl font-bold text-white mt-16 mb-6 border-b border-gray-700 pb-3"
-        >
-          <span className="mr-4 text-gray-300">{sectionNumber}</span>
-          {/*
-           * The section title is rendered on the client to avoid server-side performance bottlenecks
-           * from rendering complex math equations. By using MathRendererClient, the initial page
-           * load is fast, and math is rendered asynchronously in the browser.
-           */}
-          <MathRendererClient content={section.title} />
-        </h2>
         {section.text.content.map((contentBlock, contentBlockIndex) => {
           if (
             contentBlock.type === 'theorem' ||
@@ -180,6 +195,11 @@ function renderDocumentSections(
             contentBlock.type === 'problem'
           ) {
             const environmentNumber = getNextEnvironmentNumber(contentBlock.type)
+            const environmentId = generateEnvironmentId(
+              metadata.id,
+              contentBlock.type,
+              environmentNumber
+            )
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
             const userProvidedTitle = renderTitle(contentBlock.title)
             const difficultyStars =
@@ -197,14 +217,19 @@ function renderDocumentSections(
 
             if (contentBlock.type === 'theorem') {
               return (
-                <div key={`${sectionNumber}-env-${contentBlockIndex}`}>
-                  <CollapsibleCard type="theorem" title={mainTitle} subtitle={subtitleBadge}>
+                <div key={`${metadata.label}-env-${contentBlockIndex}`}>
+                  <CollapsibleCard
+                    type="theorem"
+                    title={mainTitle}
+                    subtitle={subtitleBadge}
+                    id={environmentId}
+                  >
                     {renderBlocks(contentBlock.body)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.theorem
                           )}
                         >
@@ -238,14 +263,19 @@ function renderDocumentSections(
 
             if (contentBlock.type === 'exercise') {
               return (
-                <div key={`${sectionNumber}-env-${contentBlockIndex}`}>
-                  <CollapsibleCard type="exercise" title={mainTitle} subtitle={subtitleBadge}>
+                <div key={`${metadata.label}-env-${contentBlockIndex}`}>
+                  <CollapsibleCard
+                    type="exercise"
+                    title={mainTitle}
+                    subtitle={subtitleBadge}
+                    id={environmentId}
+                  >
                     {renderBlocks(contentBlock.body)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.exercise
                           )}
                         >
@@ -279,14 +309,19 @@ function renderDocumentSections(
 
             if (contentBlock.type === 'example') {
               return (
-                <div key={`${sectionNumber}-env-${contentBlockIndex}`}>
-                  <CollapsibleCard type="example" title={mainTitle} subtitle={subtitleBadge}>
+                <div key={`${metadata.label}-env-${contentBlockIndex}`}>
+                  <CollapsibleCard
+                    type="example"
+                    title={mainTitle}
+                    subtitle={subtitleBadge}
+                    id={environmentId}
+                  >
                     {renderBlocks(contentBlock.body)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.example
                           )}
                         >
@@ -320,13 +355,18 @@ function renderDocumentSections(
 
             // contentBlock.type === 'problem'
             return (
-              <div key={`${sectionNumber}-env-${contentBlockIndex}`}>
-                <CollapsibleCard type="problem" title={mainTitle} subtitle={subtitleBadge}>
+              <div key={`${metadata.label}-env-${contentBlockIndex}`}>
+                <CollapsibleCard
+                  type="problem"
+                  title={mainTitle}
+                  subtitle={subtitleBadge}
+                  id={environmentId}
+                >
                   <div>{renderBlocks(contentBlock.body)}</div>
                   <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                     {contentBlock.hint1 && (
                       <details className="group">
-                        <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 [&::-webkit-details-marker]:hidden">
+                        <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden">
                           <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
                             <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
                               1
@@ -346,7 +386,7 @@ function renderDocumentSections(
 
                     {contentBlock.hint2 && (
                       <details className="group">
-                        <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 [&::-webkit-details-marker]:hidden">
+                        <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden">
                           <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
                             <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
                               2
@@ -368,7 +408,7 @@ function renderDocumentSections(
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.problem
                           )}
                         >
@@ -402,14 +442,14 @@ function renderDocumentSections(
           }
 
           return (
-            <div key={`${sectionNumber}-blk-${contentBlockIndex}`}>
+            <div key={`${metadata.label}-blk-${contentBlockIndex}`}>
               {renderRawContentBlock(contentBlock as RawContentBlock)}
             </div>
           )
         })}
-      </section>
+      </ArticleSection>
     )
-  }
+  })
 
   return <div className="article--math">{renderedSections}</div>
 }
@@ -418,15 +458,21 @@ function renderDocumentSections(
  * Renders the detailed view of a handout, shifting expensive math rendering to the client.
  *
  * This component is designated as a Client Component ('use client') to delegate the
- * computationally intensive task of rendering LaTeX to the user's browser. This approach
+ * computationally intensive task of rendering TeX to the user's browser. This approach
  * ensures a fast initial page load from the server, with mathematical content being
- * rendered asynchronously on the client-side. It improves perceived performance,
- * especially for large documents with many formulas, by preventing server-side bottlenecks.
+ * rendered asynchronously on the client-side.
  */
 export default function HandoutDetail({ document: documentContent, authors }: HandoutDetailProps) {
-  const tableOfContentsItems = computeTableOfContentsItems(documentContent)
+  // Compute section metadata once for both TOC and rendering
+  const sectionMetadata = computeSectionMetadata(documentContent)
 
-  const renderedSections = renderDocumentSections(documentContent, tableOfContentsItems)
+  // Extract TOC items (subset of metadata)
+  const tableOfContentsItems = sectionMetadata.map(({ id, label, title, level }) => ({
+    id,
+    label,
+    title,
+    level,
+  }))
 
   return (
     <Layout>
@@ -455,7 +501,7 @@ export default function HandoutDetail({ document: documentContent, authors }: Ha
                   </div>
                 )}
 
-                {authors?.length > 0 && (
+                {authors.length > 0 && (
                   <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 leading-5">
                     <div className="flex items-center gap-2">
                       <Users className="size-4 text-gray-400" aria-hidden />
@@ -473,7 +519,7 @@ export default function HandoutDetail({ document: documentContent, authors }: Ha
               </div>
             </header>
 
-            {renderedSections}
+            {renderDocumentSections(documentContent, sectionMetadata)}
           </div>
 
           <aside className="mt-8">

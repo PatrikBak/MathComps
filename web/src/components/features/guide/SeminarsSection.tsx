@@ -7,7 +7,7 @@ import type { SectionNumberer } from '@/components/table-of-contents/SectionNumb
 import { BulletList } from './layout/BulletList'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import { FlagIcon } from './layout/FlagIcon'
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import { SchoolLevelBadge } from './layout/SchoolLevelBadge'
@@ -199,14 +199,14 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
   function renderLevelGroup(level: Level) {
     const levelConfig = {
       ZŠ: {
-        id: GUIDE_SECTION_IDS.SEMINARS_ELEMENTARY,
+        title: GUIDE_TITLES.SEMINARS_ELEMENTARY,
         description:
           'ZŠ seminárov je naozaj dosť. Väčšina z nich je pre všeobecne druhý stupeň ZŠ, pričom ale majú škálované príklady pre všetkých.',
         iconColor: 'text-purple-400',
         iconBackground: 'bg-purple-500/10',
       },
       SŠ: {
-        id: GUIDE_SECTION_IDS.SEMINARS_HIGH_SCHOOL,
+        title: GUIDE_TITLES.SEMINARS_HIGH_SCHOOL,
         description:
           'Dva slovenské, dva české a jeden česko-slovenský. Okrem toho veľa česko-slovenských študentov sa zúčastňuje aj MBL. O zábavu naozaj nie je núdza.',
         iconColor: 'text-orange-400',
@@ -216,7 +216,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
 
     return (
       <GuideSection
-        id={levelConfig[level].id}
+        title={levelConfig[level].title}
         description={levelConfig[level].description}
         icon={{ type: 'custom', icon: <SchoolLevelBadge level={level} /> }}
         iconColor={levelConfig[level].iconColor}
@@ -234,7 +234,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
 
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.SEMINARS}
+      title={GUIDE_TITLES.SEMINARS}
       description={
         <>
           <p>

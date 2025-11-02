@@ -1,34 +1,35 @@
+import { SectionNumberingGenerator } from '@/components/shared/utils/section-numbering-utils'
+import { slugify } from '@/components/shared/utils/string-utils'
 import type { TableOfContentsItem } from '@/components/table-of-contents/table-of-contents-types'
 
 /**
- * Static constants for all guide section IDs to ensure consistency and prevent typos.
- * These constants are used throughout the guide components and structure definition.
+ * Centralized titles for guide sections.
  */
-export const GUIDE_SECTION_IDS = {
+export const GUIDE_TITLES = {
   // Main sections
-  WHY_COMPETITIONS: 'why-competitions',
-  COMPETITIONS: 'competitions',
-  RESOURCES: 'resources',
-  HOW_TO_START: 'how-to-start',
+  WHY_COMPETITIONS: 'Prečo matematické súťaže?',
+  COMPETITIONS: 'Zoznam súťaží',
+  RESOURCES: 'Ďalšie odkazy',
+  HOW_TO_START: 'Ako začať aj pokračovať',
 
   // Competition subsections
-  MATH_OLYMPIAD: 'math-olympiad',
-  SEMINARS: 'seminars',
-  OTHER_COMPETITIONS: 'other-competitions',
+  MATH_OLYMPIAD: 'Matematická olympiáda',
+  SEMINARS: 'Korešpondenčné semináre',
+  OTHER_COMPETITIONS: 'Ďalšie súťaže',
 
   // Seminar subsections
-  SEMINARS_ELEMENTARY: 'seminars-elementary',
-  SEMINARS_HIGH_SCHOOL: 'seminars-high-school',
+  SEMINARS_ELEMENTARY: 'ZŠ semináre',
+  SEMINARS_HIGH_SCHOOL: 'SŠ semináre',
 
   // Other competitions subsections
-  OTHER_COMPETITIONS_TEAM: 'other-competitions-team',
-  OTHER_COMPETITIONS_INDIVIDUAL: 'other-competitions-individual',
+  OTHER_COMPETITIONS_TEAM: 'Tímové súťaže',
+  OTHER_COMPETITIONS_INDIVIDUAL: 'Individuálne súťaže',
 
   // Resource subsections
-  WEBSITES: 'websites',
-  PROGRAMS: 'programs',
-  YOUTUBE: 'youtube',
-  STUDY_TEXTS: 'study-texts',
+  WEBSITES: 'Webstránky a komunity',
+  PROGRAMS: 'Programy a nástroje',
+  YOUTUBE: 'YouTube kanály',
+  STUDY_TEXTS: 'Študijné texty',
 } as const
 
 /**
@@ -36,8 +37,6 @@ export const GUIDE_SECTION_IDS = {
  * Used to define the hierarchical structure of the guide navigation.
  */
 type GuideSection = {
-  /** Unique identifier for the section */
-  id: string
   /** Display title of the section */
   title: string
   /** Optional nested child sections */
@@ -51,72 +50,57 @@ type GuideSection = {
  */
 const GUIDE_STRUCTURE: GuideSection[] = [
   {
-    id: GUIDE_SECTION_IDS.WHY_COMPETITIONS,
-    title: 'Prečo matematické súťaže?',
+    title: GUIDE_TITLES.WHY_COMPETITIONS,
   },
   {
-    id: GUIDE_SECTION_IDS.COMPETITIONS,
-    title: 'Zoznam súťaží',
+    title: GUIDE_TITLES.COMPETITIONS,
     children: [
       {
-        id: GUIDE_SECTION_IDS.MATH_OLYMPIAD,
-        title: 'Matematická olympiáda',
+        title: GUIDE_TITLES.MATH_OLYMPIAD,
       },
       {
-        id: GUIDE_SECTION_IDS.SEMINARS,
-        title: 'Korešpondenčné semináre',
+        title: GUIDE_TITLES.SEMINARS,
         children: [
           {
-            id: GUIDE_SECTION_IDS.SEMINARS_ELEMENTARY,
-            title: 'ZŠ semináre',
+            title: GUIDE_TITLES.SEMINARS_ELEMENTARY,
           },
           {
-            id: GUIDE_SECTION_IDS.SEMINARS_HIGH_SCHOOL,
-            title: 'SŠ semináre',
+            title: GUIDE_TITLES.SEMINARS_HIGH_SCHOOL,
           },
         ],
       },
       {
-        id: GUIDE_SECTION_IDS.OTHER_COMPETITIONS,
-        title: 'Ďalšie súťaže',
+        title: GUIDE_TITLES.OTHER_COMPETITIONS,
         children: [
           {
-            id: GUIDE_SECTION_IDS.OTHER_COMPETITIONS_TEAM,
-            title: 'Tímové súťaže',
+            title: GUIDE_TITLES.OTHER_COMPETITIONS_TEAM,
           },
           {
-            id: GUIDE_SECTION_IDS.OTHER_COMPETITIONS_INDIVIDUAL,
-            title: 'Individuálne súťaže',
+            title: GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL,
           },
         ],
       },
     ],
   },
   {
-    id: GUIDE_SECTION_IDS.RESOURCES,
-    title: 'Ďalšie odkazy',
+    title: GUIDE_TITLES.RESOURCES,
     children: [
       {
-        id: GUIDE_SECTION_IDS.WEBSITES,
-        title: 'Webstránky a komunity',
+        title: GUIDE_TITLES.WEBSITES,
       },
       {
-        id: GUIDE_SECTION_IDS.PROGRAMS,
-        title: 'Programy a nástroje',
+        title: GUIDE_TITLES.PROGRAMS,
       },
       {
-        id: GUIDE_SECTION_IDS.YOUTUBE,
-        title: 'YouTube kanály',
+        title: GUIDE_TITLES.YOUTUBE,
       },
       {
-        id: GUIDE_SECTION_IDS.STUDY_TEXTS,
-        title: 'Študijné texty',
+        title: GUIDE_TITLES.STUDY_TEXTS,
       },
     ],
   },
   {
-    id: GUIDE_SECTION_IDS.HOW_TO_START,
-    title: 'Ako začať aj pokračovať',
+    title: GUIDE_TITLES.HOW_TO_START,
   },
 ]
 
@@ -127,36 +111,21 @@ export const guideTableOfContents = (() => {
   // We'll agreggate the result here
   const navigationItems: TableOfContentsItem[] = []
 
-  // The last seen section we've processed e.g. 1.2.2
-  const levelCounters: number[] = []
+  // Use the shared numbering generator
+  const numbering = new SectionNumberingGenerator()
 
   /**
    * Recursively process a section and its children to build navigation items.
    * Generates hierarchical section numbering (1, 1.1, 1.2, 2, etc.) for TOC display.
    */
   function processSection(section: GuideSection, level: number) {
-    // Initialize counter array to track section numbers at each hierarchy level
-    while (levelCounters.length <= level) {
-      levelCounters.push(0)
-    }
-
-    // Increment the counter for current level to assign this section's number
-    levelCounters[level] += 1
-
-    // Reset all deeper level counters since we're starting a new branch at this level
-    for (let i = level + 1; i < levelCounters.length; i++) {
-      levelCounters[i] = 0
-    }
-
-    // Construct hierarchical section number by joining active counters (e.g., "1.2.3")
-    const sectionNumber = levelCounters
-      .slice(0, level + 1)
-      .filter((count) => count > 0)
-      .join('.')
+    // Generate section number using the shared utility
+    const sectionNumber = numbering.getNextNumber(level)
 
     // Create TOC item with separate number and title fields
+    // ID is auto-generated by slugifying the title
     navigationItems.push({
-      id: section.id,
+      id: slugify(section.title),
       label: sectionNumber,
       title: section.title,
       level: level + 1,
