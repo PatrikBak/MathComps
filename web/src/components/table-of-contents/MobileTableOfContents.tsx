@@ -85,24 +85,30 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
                 TOC_CONTAINER_STYLES,
-                'flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/10'
+                'flex w-full items-center justify-between py-3 text-left transition-colors hover:bg-white/10',
+                isOpen || activeIndex === undefined || !items[activeIndex] ? 'px-4' : 'pl-3 pr-4'
               )}
             >
-              <div className="flex items-center gap-3">
-                <Menu className="h-4 w-4 text-gray-400" />
-                <span className="text-sm font-medium text-white">
-                  {isOpen ? (
-                    'Zavrieť'
-                  ) : activeIndex !== undefined && items[activeIndex] ? (
-                    <>
-                      <span className="mr-1">{items[activeIndex].label}</span>
+              {isOpen || activeIndex === undefined || !items[activeIndex] ? (
+                <div className="flex items-center gap-2.5">
+                  <Menu className="h-4 w-4 text-gray-400 shrink-0" />
+                  <span className="text-sm font-medium text-white">
+                    {isOpen ? 'Zavrieť' : 'Navigácia'}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2.5">
+                  <Menu className="h-4 w-4 text-gray-400 shrink-0" />
+                  <div className="flex items-start gap-2 text-sm">
+                    <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[2rem] pt-0.5">
+                      {items[activeIndex].label}
+                    </span>
+                    <span className="font-medium text-white leading-snug">
                       {items[activeIndex].title}
-                    </>
-                  ) : (
-                    'Navigácia'
-                  )}
-                </span>
-              </div>
+                    </span>
+                  </div>
+                </div>
+              )}
               <ChevronDown
                 className={cn(
                   'h-4 w-4 text-gray-400 transition-transform duration-200',
@@ -112,24 +118,33 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
             </button>
 
             {isOpen && (
-              <div className={cn(TOC_CONTAINER_STYLES, 'mt-3 p-2 max-h-[60vh] overflow-y-auto')}>
-                <nav className="space-y-1">
-                  {items.map((item, index) => (
-                    <button
-                      key={item.id}
-                      ref={activeIndex === index ? activeItemReference : null}
-                      onClick={() => handleNavigationClick(item.id)}
-                      style={{ paddingLeft: `${0.75 + (item.level - 1) * 0.75}rem` }}
-                      className={cn(TOC_LINK_BASE_STYLES, 'w-full py-2 text-left', {
-                        [TOC_LINK_ACTIVE_STYLES]: activeIndex === index,
-                        'font-medium': activeIndex === index,
-                        [TOC_LINK_INACTIVE_STYLES]: activeIndex !== index,
-                      })}
-                    >
-                      <span className="mr-2">{item.label}</span>
-                      {item.title}
-                    </button>
-                  ))}
+              <div className={cn(TOC_CONTAINER_STYLES, 'mt-3 p-3 max-h-[60vh] overflow-y-auto')}>
+                <nav className="space-y-0">
+                  {items.map((item, index) => {
+                    const indentPx = (item.level - 1) * 20
+
+                    return (
+                      <button
+                        key={item.id}
+                        ref={activeIndex === index ? activeItemReference : null}
+                        onClick={() => handleNavigationClick(item.id)}
+                        style={{ marginLeft: `${indentPx}px` }}
+                        className={cn(
+                          TOC_LINK_BASE_STYLES,
+                          'w-full py-1.5 px-3 text-left flex items-start gap-2',
+                          {
+                            [TOC_LINK_ACTIVE_STYLES]: activeIndex === index,
+                            [TOC_LINK_INACTIVE_STYLES]: activeIndex !== index,
+                          }
+                        )}
+                      >
+                        <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right">
+                          {item.label}
+                        </span>
+                        <span className="text-left leading-snug">{item.title}</span>
+                      </button>
+                    )
+                  })}
                 </nav>
               </div>
             )}

@@ -44,30 +44,36 @@ interface TocLinksProps {
  */
 function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: TocLinksProps) {
   return (
-    <ul className="space-y-1 -mx-4">
-      {items.map((item, index) => (
-        <li key={item.id}>
-          <a
-            ref={registerLinkElementRef(index)}
-            href={`#${item.id}`}
-            onClick={(event) => {
-              event.preventDefault()
-              onItemClick(item.id)
-            }}
-            className={cn(TOC_LINK_BASE_STYLES, 'py-1 duration-150 ease-in-out', {
-              [TOC_LINK_ACTIVE_STYLES]: activeIndex === index,
-              [TOC_LINK_INACTIVE_STYLES]: activeIndex !== index,
-            })}
-            style={{
-              paddingLeft: `${(item.level - 1) * 1 + 1}rem`,
-              paddingRight: '1rem',
-            }}
-          >
-            <span className="mr-1">{item.label}</span>
-            {item.title}
-          </a>
-        </li>
-      ))}
+    <ul className="space-y-0">
+      {items.map((item, index) => {
+        // Calculate indentation based on level
+        const indentPx = (item.level - 1) * 20
+
+        return (
+          <li key={item.id}>
+            <a
+              ref={registerLinkElementRef(index)}
+              href={`#${item.id}`}
+              onClick={(event) => {
+                event.preventDefault()
+                onItemClick(item.id)
+              }}
+              className={cn(TOC_LINK_BASE_STYLES, 'py-1.5 px-3 flex items-start gap-2', {
+                [TOC_LINK_ACTIVE_STYLES]: activeIndex === index,
+                [TOC_LINK_INACTIVE_STYLES]: activeIndex !== index,
+              })}
+              style={{
+                marginLeft: `${indentPx}px`,
+              }}
+            >
+              <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right">
+                {item.label}
+              </span>
+              <span className="leading-snug">{item.title}</span>
+            </a>
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -136,11 +142,14 @@ export function TableOfContents({ items }: TableOfContentsProps) {
           ref={containerRef}
           className={cn(
             TOC_CONTAINER_STYLES,
-            'rounded-xl p-4 font-variant-numeric-tabular-nums hyphens-none leading-[1.35] text-[0.95rem] max-h-[80vh] overflow-y-auto'
+            'p-5 font-variant-numeric-tabular-nums hyphens-none leading-relaxed text-[0.95rem] max-h-[80vh] overflow-y-auto'
           )}
         >
-          <h3 className="text-sm font-semibold text-gray-200">Obsah</h3>
-          <nav className="text-sm mt-2">
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+            Obsah
+          </h3>
+          <nav className="text-sm">
             <TocLinks
               items={items}
               activeIndex={activeIndex}
