@@ -8,7 +8,7 @@ import type { SectionNumberer } from '@/components/table-of-contents/SectionNumb
 import { ROUTES } from '@/constants/routes'
 
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import { InfoCard } from './layout/InfoCard'
@@ -22,7 +22,7 @@ type Resource = {
 }
 
 type ResourceCategoryType = {
-  id: string
+  title: string
   icon: LucideIcon
   description?: string | React.ReactNode
   resources: Resource[]
@@ -77,7 +77,7 @@ function ResourceCategory({
 
   return (
     <GuideSection
-      id={category.id}
+      title={category.title}
       description={category.description}
       icon={{ type: 'lucide', icon: CategoryIcon }}
       iconColor={iconScheme.color}
@@ -86,7 +86,7 @@ function ResourceCategory({
     >
       <div className="space-y-3 sm:space-y-4">
         {category.resources.map(renderResourceCard)}
-        {category.id === GUIDE_SECTION_IDS.PROGRAMS && (
+        {category.title === GUIDE_TITLES.PROGRAMS && (
           <TipBox>
             Všetci vidíme, že AI sa v matike zlepšuje. Vie to byť rýchla pomôcka pri učení sa nových
             vecí. Len je treba mať sa na pozore, keďže ono to nemá vždy pravdu a vie si to
@@ -106,7 +106,7 @@ export default function ResourcesSection({
 }) {
   const resourceCategories: ResourceCategoryType[] = [
     {
-      id: GUIDE_SECTION_IDS.WEBSITES,
+      title: GUIDE_TITLES.WEBSITES,
       icon: MessageSquare,
       resources: [
         {
@@ -132,7 +132,7 @@ export default function ResourcesSection({
       ],
     },
     {
-      id: GUIDE_SECTION_IDS.PROGRAMS,
+      title: GUIDE_TITLES.PROGRAMS,
       icon: Wrench,
       resources: [
         {
@@ -161,7 +161,7 @@ export default function ResourcesSection({
       ],
     },
     {
-      id: GUIDE_SECTION_IDS.YOUTUBE,
+      title: GUIDE_TITLES.YOUTUBE,
       icon: Youtube,
       resources: [
         {
@@ -183,7 +183,7 @@ export default function ResourcesSection({
       ],
     },
     {
-      id: GUIDE_SECTION_IDS.STUDY_TEXTS,
+      title: GUIDE_TITLES.STUDY_TEXTS,
       icon: BookOpen,
       description: (
         <>
@@ -244,7 +244,7 @@ export default function ResourcesSection({
 
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.RESOURCES}
+      title={GUIDE_TITLES.RESOURCES}
       description="Stručný zoznam tých najdôležitejších študijných/komunitných zdrojov zo sveta súťažnej matematiky, ktoré sa určite oplatí poznať."
       icon={{ type: 'lucide', icon: Link2 }}
       iconColor="text-blue-400"

@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { CopyLinkButton } from '@/components/shared/components/CopyLinkButton'
 import { cn } from '@/components/shared/utils/css-utils'
 
 type CardType = 'theorem' | 'exercise' | 'example' | 'problem'
@@ -39,6 +40,7 @@ export function CollapsibleCard({
   children,
   detailsTitle,
   details,
+  id,
 }: {
   type: CardType
   title?: React.ReactNode
@@ -46,14 +48,16 @@ export function CollapsibleCard({
   children?: React.ReactNode
   detailsTitle?: string
   details?: React.ReactNode
+  /** Unique ID for anchor linking */
+  id: string
 }) {
   const c = PALETTE[type]
 
   return (
-    <section className={cn('bg-gray-800/50 border-l-4 rounded-r-lg my-6', c.border)}>
+    <section id={id} className={cn('bg-gray-800/50 border-l-4 rounded-r-lg my-6 group', c.border)}>
       <div className="p-5 sm:p-6">
-        {(title || subtitle) && (
-          <div className="mb-2 flex items-center gap-5 flex-wrap">
+        {(title || subtitle || id) && (
+          <div className="mb-2 flex items-center gap-2 flex-wrap">
             {title && (
               <p
                 className={cn(
@@ -63,7 +67,7 @@ export function CollapsibleCard({
               >
                 {title}
               </p>
-            )}{' '}
+            )}
             {subtitle && (
               <span
                 className={`ui-text ui-nums ${c.title} border ${c.tint} bg-white/5
@@ -74,6 +78,7 @@ export function CollapsibleCard({
                 {subtitle}
               </span>
             )}
+            {id && <CopyLinkButton sectionSlug={id} iconSize={16} className="ml-0" />}
           </div>
         )}
         <div className="text-gray-300 leading-relaxed">{children}</div>

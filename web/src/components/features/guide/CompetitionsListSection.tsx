@@ -3,7 +3,7 @@ import React from 'react'
 
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GuideSection } from './layout/GuideSection'
 import MathOlympiadSection from './MathOlympiadSection'
 import OtherCompetitionsSection from './OtherCompetitionsSection'
@@ -16,7 +16,7 @@ export default function CompetitionsListSection({
 }) {
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.COMPETITIONS}
+      title={GUIDE_TITLES.COMPETITIONS}
       description="Najvýznamnejšia súťaž je Matematická olympiáda (MO). Je však kopa ďalších súťaží a aktivít, ktoré sú dobré ako tréning pre MO alebo aj samé osebe 😇."
       icon={{ type: 'lucide', icon: List }}
       iconColor="text-blue-400"

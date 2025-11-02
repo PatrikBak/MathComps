@@ -9,7 +9,7 @@ import type { SectionNumberer } from '@/components/table-of-contents/SectionNumb
 import { BulletList } from './layout/BulletList'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import { type Country, FlagIcon } from './layout/FlagIcon'
-import { GUIDE_SECTION_IDS } from './layout/guide-structure'
+import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import TipBox from './layout/TipBox'
@@ -185,7 +185,7 @@ export default function MathOlympiadSection({
 
   return (
     <GuideSection
-      id={GUIDE_SECTION_IDS.MATH_OLYMPIAD}
+      title={GUIDE_TITLES.MATH_OLYMPIAD}
       description={
         <>
           Súťaž v riešení zaujímavých matematických úloh pre základné aj stredné školy, ktorá začína

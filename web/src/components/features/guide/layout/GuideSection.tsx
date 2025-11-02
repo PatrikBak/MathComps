@@ -1,6 +1,7 @@
 import React from 'react'
 
 import AnimatedSection from '@/components/shared/components/AnimatedSection'
+import { slugify } from '@/components/shared/utils/string-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
 import { SectionHeader, type SectionHeaderProps } from './SectionHeader'
@@ -9,9 +10,9 @@ import { SectionHeader, type SectionHeaderProps } from './SectionHeader'
  * Props for the GuideSection component.
  * Extends SectionHeaderProps to reuse common header properties.
  */
-interface GuideSectionProps extends Omit<SectionHeaderProps, 'title' | 'number'> {
-  /** Unique identifier for the section */
-  id: string
+interface GuideSectionProps extends Omit<SectionHeaderProps, 'title' | 'number' | 'sectionSlug'> {
+  /** Section title */
+  title: string
   /** Section numberer instance for hierarchical numbering */
   sectionNumberer: SectionNumberer
   /** Content to render inside the section */
@@ -23,7 +24,7 @@ interface GuideSectionProps extends Omit<SectionHeaderProps, 'title' | 'number'>
  * for all guide sections. Handles section numbering using the SectionNumberer.
  */
 export function GuideSection({
-  id,
+  title,
   description,
   icon,
   iconColor,
@@ -31,11 +32,14 @@ export function GuideSection({
   sectionNumberer,
   children,
 }: GuideSectionProps) {
-  // Get the number+title for the section
-  const sectionData = sectionNumberer.getSectionData(id)
+  // Generate slug from title
+  const slug = slugify(title)
+
+  // Get the section number from the numberer
+  const sectionData = sectionNumberer.getSectionData(slug)
 
   return (
-    <AnimatedSection anchorId={id}>
+    <AnimatedSection anchorId={slug}>
       <section className="my-8 sm:my-16">
         <div className="max-w-7xl mx-auto px-0.5">
           <SectionHeader
@@ -45,6 +49,7 @@ export function GuideSection({
             number={sectionData.number}
             title={sectionData.title}
             description={description}
+            sectionSlug={slug}
           />
           {children}
         </div>
