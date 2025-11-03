@@ -41,7 +41,7 @@ export type ListStyleType =
 
 /** Represents a primitive, non-nestable content block. */
 export type RawContentBlock =
-  | { type: 'paragraph'; content: RawContentBlock[] }
+  | { type: 'paragraph'; content: RawContentBlock[]; highligted: boolean }
   | { type: 'list'; items: RawContentBlock[][]; styleType: ListStyleType }
   | { type: 'math'; text: string; isDisplay: boolean }
   | { type: 'image'; id: string; scale: number; isInline: boolean }

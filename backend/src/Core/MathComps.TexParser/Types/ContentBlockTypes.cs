@@ -100,7 +100,8 @@ public record RawContentBlock : ContentBlock;
 /// Represents a paragraph of text, which can contain various inline content blocks.
 /// </summary>
 /// <param name="Content">A list of the inline content blocks that make up the paragraph.</param>
-public record Paragraph(ImmutableList<RawContentBlock> Content) : RawContentBlock;
+/// <param name="Highligted">A special flag for a paragraph that should stand out.</param>
+public record Paragraph(ImmutableList<RawContentBlock> Content, bool Highligted) : RawContentBlock;
 
 /// <summary>
 /// Represents a list of items, parsed from a \begitems...\enditems environment.

@@ -128,6 +128,7 @@ public class ParseCommand : Command<ParseCommand.Settings>
                     table.AddRow(fileName, @$"\{command}");
 
             // Render the table to the console.
+            AnsiConsole.WriteLine();
             AnsiConsole.Write(table);
 
             // There shouldn't be unknown commands in production-ready handouts.
