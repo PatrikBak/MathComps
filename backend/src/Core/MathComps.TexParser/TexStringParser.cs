@@ -25,6 +25,7 @@ namespace MathComps.TexParser;
 /// <item><c>\\Theorem{title}{body}{proof}</c></item>
 /// <item><c>\\Exercise{title}{body}{solution}</c></item>
 /// <item><c>\\Problem{difficulty}{title}{body}{hint1}{hint2}{solution}</c></item>
+/// <item><c>\\Highlight{paragraph}</c> (a paragraph that should stand out)</item>
 /// <item><c>\\Example{title}{body}{solution}</c></item>
 /// <item><c>\\begitems ... \\enditems</c> for lists, with <c>\\i</c> for items. Optional style via <c>\\style code</c>.
 /// See <see cref="ListItemStyle"/> for the information about style codes.</item>
@@ -208,7 +209,7 @@ public static class TexStringParser
         var blocks = new List<ContentBlock>();
 
         // Define a regex to find the start of any major block-level command.
-        var commandRegex = new Regex(@"(\\Theorem|\\Exercise|\\Problem|\\Example)");
+        var commandRegex = new Regex(@"\\(Theorem|Exercise|Problem|Example|Highlight)");
 
         // Initialize the cursor for scanning the content string.
         var currentIndex = 0;
@@ -236,7 +237,7 @@ public static class TexStringParser
                 }
 
                 // Parse the command and its braced arguments.
-                var (commandBlock, newIndex) = ParseHighLevelCommandBlock(rawContent, match.Index);
+                var (commandBlock, newIndex) = ParseHighLevelCommandBlock(rawContent, match.Groups[1].Value, match.Index);
 
                 // Remember it
                 blocks.Add(commandBlock);
@@ -266,32 +267,26 @@ public static class TexStringParser
     /// Parses a high-level command block (like Theorem, Exercise) and its arguments.
     /// </summary>
     /// <param name="sourceText">The TeX content to parse from.</param>
+    /// <param name="commandName">Already parsed name of the command (e.g. Theorem, Exercise)</param>
     /// <param name="startIndex">The starting index of the command.</param>
     /// <returns>A tuple containing the parsed block and the index after the block.</returns>
-    private static (ContentBlock block, int endIndex) ParseHighLevelCommandBlock(string sourceText, int startIndex)
+    private static (ContentBlock block, int endIndex) ParseHighLevelCommandBlock(string sourceText, string commandName, int startIndex)
     {
-        // Match the command at the start index.
-        var commandMatch = Regex.Match(sourceText[startIndex..], @"^\\(Theorem|Exercise|Problem|Example)");
-
-        // Make sure we found a valid command.
-        if (!commandMatch.Success)
-            throw new TexParserException($"Malformed high-level command block at: {sourceText.PreviewAt(startIndex)}");
-
-        // Get the command name (e.g., "Theorem").
-        var commandName = commandMatch.Groups[1].Value;
-
         // Determine the number of arguments required by this command.
         var argumentCount = commandName switch
         {
             // Problems have 6 arguments.
             "Problem" => 6,
 
+            // Highlight has 1 argument (it's just a special paragraph)
+            "Highlight" => 1,
+
             // All others have 3 arguments.
             _ => 3,
         };
 
         // Calculate the starting position for parsing arguments.
-        var argumentsStartIndex = startIndex + commandMatch.Length;
+        var argumentsStartIndex = startIndex + commandName.Length;
 
         // Parse the required number of braced arguments.
         var (arguments, newIndex) = ParseBracedArguments(sourceText, argumentsStartIndex, argumentCount);
@@ -328,6 +323,11 @@ public static class TexStringParser
                 Title: ParseAtMostSingleRawBlock(arguments[0]),
                 Body: [.. ParseRawContent(arguments[1])],
                 Solution: [.. ParseRawContent(arguments[2])]
+            ),
+
+            "Highlight" => new Paragraph(
+                Content: [.. ParseRawContent(arguments[0])],
+                Highligted: true
             ),
 
             // This case should be unreachable due to the initial regex match.
@@ -624,7 +624,7 @@ public static class TexStringParser
                 continue;
 
             // Parse the inline blocks to form a paragraph
-            blocks.Add(new Paragraph([.. ParseInlineText(paragraph)]));
+            blocks.Add(new Paragraph([.. ParseInlineText(paragraph)], Highligted: false));
         }
 
         // Return the list of parsed blocks.
@@ -1031,7 +1031,7 @@ public static class TexStringParser
             return blocks[0];
 
         // If multiple blocks were parsed, wrap them in a Paragraph to act as a container.
-        return new Paragraph([.. blocks]);
+        return new Paragraph([.. blocks], Highligted: false);
     }
 
     /// <summary>

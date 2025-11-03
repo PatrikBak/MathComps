@@ -255,7 +255,7 @@ export function renderRawContentBlock(
         const isBlockContent =
           (childBlock.type === 'math' && childBlock.isDisplay) ||
           childBlock.type === 'list' ||
-          childBlock.type === 'paragraph' ||
+          (childBlock.type === 'paragraph' && !childBlock.highligted) ||
           (childBlock.type === 'image' && !(childBlock as { isInline?: boolean }).isInline)
         if (isBlockContent) {
           flushInlineRun()
@@ -273,7 +273,13 @@ export function renderRawContentBlock(
         }
       }
       flushInlineRun()
-      return <>{paragraphParts}</>
+      return block.highligted ? (
+        <div className="relative my-6 rounded-lg border border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 p-4 shadow-lg">
+          <div className="relative">{<>{paragraphParts}</>}</div>
+        </div>
+      ) : (
+        <>{paragraphParts}</>
+      )
     }
     case 'image': {
       const imagePath = getProblemImageUrl(block.id)
