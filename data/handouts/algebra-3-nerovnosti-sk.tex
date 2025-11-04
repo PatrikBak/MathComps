@@ -52,6 +52,8 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     Keďže $a<b$ a $c<d$, tak $y<z$. Rozdiel $x-z$ ani počítať nemusíme a už máme $x<y<z$.
 }
 
+Vyskúšajte si to na úlohe zo školského kola A:
+
 \Exercise{69-CSMO-A-S-1}{
     Predpokladajme, že navzájom rôzne reálne čísla $a$, $b$, $c$, $d$ spĺňajú nerovnosti
     $$
@@ -84,6 +86,8 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     Najmenšie z týchto štyroch čísel je teda $c$.
 }
 
+Ďalší príklad ukazuje, že sa oplatí poznať vzorce, ktoré sme prezentovali v~prvom dieli.
+
 \Example{}{
     Dokážte, že pre reálne čísla $a,b$ s~nezáporným súčtom platí
     $$
@@ -106,6 +110,8 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
 
     Je dôležité zmieniť, že úpravy boli ekvivalentné a~postup vieme obrátiť -- v~matematike vždy vychádzame z~platných predpokladov a pomocou nich dokazujeme nové veci. Alternatívne môžeme dôkaz zapísať my obrátene, začať $(a+b)(a-b)^2 \ge 0$ a~úpravami dôjsť k~$a^3+b^3 \ge a^2b+ab^2$. To ale často vyzerá menej prirodzené než postup od dokazovanej nerovnosti k~platnému tvrdeniu s~dodatkom o~ekvivalentnosti úprav.
 }
+
+Skúste si úlohy na precvičenie základných rozkladov. Všimnime ti, že nasledujúce cvičenie je zovšeobecnením predošlého príkladu. Zopakovať postup z~neho však nebude možné, nie je však ťažké vymyslieť niečo iné :)
 
 \Exercise{}{
     Sú dané kladné reálne čísla $a$, $b$ a prirodzené čísla $m$, $n$. Dokážte, že platí nerovnosť
@@ -168,6 +174,8 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
 
     \textit{Poznámka.} Úlohu je možné vyriešiť aj roznásobením výrazu $(x-y+z)^2$ a následnou úpravou na $(y-z)(x-y)$. Postup s~dvojitým využitím rozdielu štvorcov je však elegantnejší, lebo sa vyhne priamemu roznásobeniu troch členov.
 }
+
+Máličko ťažší, ale stále zvládnuteľný príklad je tento. Všimnite si, že tu máme \textit{celé} čísla:
 
 \Problem{0}{71-CSMO-C-II-1}{
     Dokážte, že pre ľubovoľné celé čísla $a$, $b$ platí nerovnosť
@@ -255,6 +263,8 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     To je však ľahké, druhá rovnica nám dáva $b=c$ a~prvá potom $a=b$, takže naozaj $a=b=c$ je jediný prípad rovnosti.
 }
 
+Teraz ste na rade vy:
+
 \Exercise{}{
     Pre reálne čísla $x$, $y$ dokážte nerovnosť
     $$
@@ -297,6 +307,8 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
 
     Rovnosť nastáva práve keď $a^2=b$ a $b^2=a$. Dosadením $b=a^2$ do druhej rovnosti máme $a^4=a$, teda $a(a^3-1)=0$. Platí teda buď $a=0$, čo dáva $b=0$, alebo $a^3=1$, teda $a=1$, čo dáva $b=1$. Jediné dva možné prípady rovnosti sú $(a,b)=(0,0)$ alebo $(1,1)$.
 }
+
+Takto základné veci postačujú na vyriešenie úlohy z~krajského kola kategórie~A:
 
 \Problem{1}{74-CSMO-A-II-1}{
     Dané sú dve navzájom rôzne reálne čísla $a$, $b$ také, že výrazy $a^3 + b$ a $a + b^3$ majú rovnakú hodnotu. Dokážte, že pre ich súčin platí $-1\le ab<\frac13$.
@@ -530,7 +542,7 @@ Na záver sa pobavme o veľmi všeobecnom koncepte: Nerovnosti sú častokrát �
     Keďže $y>0$, tak $x^2>x+y>x$, čo vďaka $x>0$ dáva $x>1$. Potom $x^2>x+y$ po vynásobení kladným $x$ dáva $x^3>x^2+xy$, čo vďaka $x>1$ dáva $xy>y$, takže dokopy $x^3>x^2+xy>x^2+y$, takže sme hotoví.
 }
 
-Vidíme, že sme vlastne používali len veľmi jasné úvahy a rôzne ich kombinovali s~podmienkou zo zadania. Podobné hrátky je možné previesť aj v~týchto úlohách, môžete vyskúšať.
+Vidíme, že sme vlastne používali len veľmi jasné úvahy a rôzne ich kombinovali s~podmienkou zo zadania. Podobné zábavky je možné previesť aj v~týchto úlohách, môžete vyskúšať.
 
 \Problem{0}{63-CSMO-C-II-3}{
     Pre kladné reálne čísla $a$, $b$, $c$ platí $c^2 + ab = a^2 + b^2$.
@@ -591,7 +603,7 @@ Tieto nerovnosti je dobré pamätať si aj v~spánku.
 $$
 a^2+b^2+c^2 \ge ab+bc+ca
 $$
-\i [Súčet dvoch prevrátaných hodnôt je aspoň $2$] Pre kladné $a,b$
+\i [Súčet dvoch prevrátených hodnôt je aspoň $2$] Pre kladné $a,b$
 $$
 \frac ab + \frac ba \ge 2  \quad\text{resp.}\quad a + \frac 1a \ge 2
 $$

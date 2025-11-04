@@ -291,6 +291,16 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Vyskúšajte si to na úlohe zo školského kola A:"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
               "title": {
                 "type": "paragraph",
@@ -647,6 +657,16 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Ďalší príklad ukazuje, že sa oplatí poznať vzorce, ktoré sme prezentovali v\u00A0prvom dieli."
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "example",
               "body": [
                 {
@@ -793,6 +813,16 @@
                   "highligted": false
                 }
               ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Skúste si úlohy na precvičenie základných rozkladov. Všimnime ti, že nasledujúce cvičenie je zovšeobecnením predošlého príkladu. Zopakovať postup z\u00A0neho však nebude možné, nie je však ťažké vymyslieť niečo iné :)"
+                }
+              ],
+              "highligted": false
             },
             {
               "type": "exercise",
@@ -1290,6 +1320,29 @@
                   "highligted": false
                 }
               ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Máličko ťažší, ale stále zvládnuteľný príklad je tento. Všimnite si, že tu máme "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "celé"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " čísla:"
+                }
+              ],
+              "highligted": false
             },
             {
               "type": "problem",
@@ -2088,6 +2141,16 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Teraz ste na rade vy:"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
               "body": [
                 {
@@ -2411,6 +2474,16 @@
                   "highligted": false
                 }
               ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Takto základné veci postačujú na vyriešenie úlohy z\u00A0krajského kola kategórie\u00A0A:"
+                }
+              ],
+              "highligted": false
             },
             {
               "type": "problem",
@@ -4766,7 +4839,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Vidíme, že sme vlastne používali len veľmi jasné úvahy a rôzne ich kombinovali s\u00A0podmienkou zo zadania. Podobné hrátky je možné previesť aj v\u00A0týchto úlohách, môžete vyskúšať."
+                  "text": "Vidíme, že sme vlastne používali len veľmi jasné úvahy a rôzne ich kombinovali s\u00A0podmienkou zo zadania. Podobné zábavky je možné previesť aj v\u00A0týchto úlohách, môžete vyskúšať."
                 }
               ],
               "highligted": false
@@ -5451,7 +5524,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "[Súčet dvoch prevrátaných hodnôt je aspoň "
+                        "text": "[Súčet dvoch prevrátených hodnôt je aspoň "
                       },
                       {
                         "type": "math",
