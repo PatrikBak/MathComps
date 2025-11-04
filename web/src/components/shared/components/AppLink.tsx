@@ -24,16 +24,26 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
   ({ href, className, prefetch, newTab, external, ...rest }, ref) => {
     const externalLink = external ?? isExternalHref(href)
     const classes = cn('text-slate-400 hover:text-white transition-colors duration-300', className)
+    const target = newTab ? '_blank' : undefined
+    const rel = target ? 'noopener noreferrer' : undefined
 
     // hash anchors ("#..." or "/#...") or explicit external → use <a>
     if (externalLink || href.startsWith('#') || href.startsWith('/#')) {
-      const target = newTab ? '_blank' : undefined
-      const rel = target ? 'noopener noreferrer' : undefined
       return <a ref={ref} href={href} className={classes} target={target} rel={rel} {...rest} />
     }
 
     // internal (including /path#hash and /path?x=1)
-    return <Link ref={ref} href={href} prefetch={prefetch ?? true} className={classes} {...rest} />
+    return (
+      <Link
+        ref={ref}
+        href={href}
+        prefetch={prefetch ?? true}
+        className={classes}
+        target={target}
+        rel={rel}
+        {...rest}
+      />
+    )
   }
 )
 AppLink.displayName = 'AppLink'
