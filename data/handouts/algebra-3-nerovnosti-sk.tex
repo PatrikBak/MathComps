@@ -8,9 +8,14 @@
 
 \sec Úvod
 
+
 Nerovnosti sú jedna zo základných tém nie len v~algebre, ale v~matematike ako takej s~veľa praktickými aplikáciami. Vezmime si napríklad takúto otázku: 
 
-Máme štvorcový kus papiera s dĺžkou strany 12 cm. Chceme vytvoriť otvorenú krabicu tak, že z každého zo štyroch rohov vystrihneme identické štvorce a boky zahneme nahor. Aký je najväčší možný objem krabice?
+\Highlight{
+    Máme štvorcový kus papiera s dĺžkou strany 12 cm. Chceme vytvoriť otvorenú krabicu tak, že z každého zo štyroch rohov vystrihneme identické štvorce a boky zahneme nahor. Aký je najväčší možný objem krabice?
+
+    \Image{box.pdf}{0.4}
+}
 
 Táto úloha nie je veľmi jednoduchá, ale my sa naučíme jej najelegantnejšie riešenie. Priebežne budeme stavať na všeobecne užitočných technikách z~minulých príspevkov ako rozklad na súčin, dopĺňanie na štvorec, usporiadanie, atď.
 
@@ -396,6 +401,8 @@ Konečne je čas prezradiť riešenie motivačnej úlohy z~úvodu:
 
 \Example{The Box Problem}{
     Máme štvorcový kus papiera s dĺžkou strany 12 cm. Chceme vytvoriť otvorenú krabicu tak, že z každého zo štyroch rohov vystrihneme identické štvorce a boky zahneme nahor. Aký je najväčší možný objem krabice?
+
+    \Image{box.pdf}{0.4}
 }{
     Nech $x$ označuje stranu štvorca, ktorý vystrihujeme z~rohu. Potom naša krabica má podstavu v~tvare štvorca so stranou $12-2x$ a výšku $x$. Jej objem je teda $(12-2x)^2x$ a náš cieľ je tento výraz maximalizovať. Máme súčin troch vecí: $12-2x$, $12-2x$, $x$. Ak by sme ich odhadli priamo, tak v~odhade bude súčet týchto vecí -- tým si veľmi nepomôžeme a v~skutočnosti tým úlohu nedoriešime (rovnosť nebude nastávať v~správnom prípade). Keď by sme však použili AG na $12-2x$, $12-2x$, $4x$, tak sa $x$ odčítajú. Túto~4 si však vieme umelo vyrobiť:
     $$
@@ -620,7 +627,7 @@ Je to o hraní sa.
 
 Nerovnosti sa dajú študovať ešte veľmi dlho. Existuje veľa ďalších metód, známych nerovností. Už teraz sme ale vybudovali sériu techník a postupov, ktoré sa dajú použiť na prakticky všetky úlohy v česko-slovenskej olympiáde (vrátane tých v~celoštátnom kole). Niekedy v~ďalšom dieli pokryjeme ešte viac :)
 
-Záujemcom o~ďalšie štúdium odporúčam PraSe seriál Zdolávaní nerovností. Prvá kapitola je určite prístupná každému. Druhá je už trocha ťažšia (úroveň približne celoštátne kolo), rovnako aj úvod tretej. Od sekcie \uv{Tvar SOS} však začínajú síce veľmi zaujímavé ale v~dnešnej dobe nie až tak použiteľné metódy na súťažiach (kde je snaha dávať úlohy, ktoré sa nedajú \uv{zabiť} znalosťami ale sú skôr o kreativite). Rozhodne však nie je na škodu o nich vedieť.
+Záujemcom o~ďalšie štúdium odporúčam \Link[https://prase.cz/]{PraSe} seriál \Link[zdolavani-nerovnosti.pdf]{Zdolávaní nerovností}. Prvá kapitola je určite prístupná každému. Druhá je už trocha ťažšia (úroveň približne celoštátne kolo), rovnako aj úvod tretej. Od sekcie \uv{Tvar SOS} však začínajú síce veľmi zaujímavé ale v~dnešnej dobe nie až tak použiteľné metódy na súťažiach (kde je snaha dávať úlohy, ktoré sa nedajú \uv{zabiť} znalosťami ale sú skôr o kreativite). Rozhodne však nie je na škodu o nich vedieť.
 
 \sec Úlohy
 
