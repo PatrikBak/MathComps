@@ -13,7 +13,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Nerovnosti sú jedna zo základných tém nie len v\u00A0algebre, ale v\u00A0matematike ako takej s\u00A0veľa praktickými aplikáciami. Vezmime si napríklad takúto otázku:"
+                  "text": "Nerovnosti sú jedna zo základných tém nielen v\u00A0algebre, ale v\u00A0matematike ako takej s\u00A0veľa praktickými aplikáciami. Vezmime si napríklad takúto otázku:"
                 }
               ],
               "highligted": false
@@ -69,7 +69,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V\u00A0príspevku sa zamierame na najzákladnejšie postupy. Úplný základ prakticky všetkých algebier sú úpravy výrazov, tými začneme. Potom sa pozrieme na nerovnosti, ktoré využívajú kladnosť štvorcov. Následne si predstavíme známu AG nerovnosť dokonca aj s\u00A0dôkazom. Na záver si ako zaujímavosť ukážeme niekoľko netradičnejších ale stále jednoduchých úloh, kde sa šikovne používajú zaujímavé podmienky zo zadania."
+                  "text": "V\u00A0príspevku sa zameriame na najzákladnejšie postupy. Úplný základ prakticky všetkých algebier sú úpravy výrazov, tými začneme. Potom sa pozrieme na nerovnosti, ktoré využívajú kladnosť štvorcov. Následne si predstavíme známu AG nerovnosť dokonca aj s\u00A0dôkazom. Na záver si ako zaujímavosť ukážeme niekoľko netradičnejších, ale stále jednoduchých úloh, kde sa šikovne používajú zaujímavé podmienky zo zadania."
                 }
               ],
               "highligted": false
@@ -87,7 +87,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako roznásobovanie, rozkladanie na súčin a podobne. Takýmito úlohami začneme a\u00A0v\u00A0ďalších sekciách pridáme ďalšie už postupy."
+                  "text": "Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako roznásobovanie, rozkladanie na súčin a podobne. Takýmito úlohami začneme a\u00A0v\u00A0ďalších sekciách pridáme ďalšie postupy."
                 }
               ],
               "highligted": false
@@ -209,12 +209,12 @@
                     },
                     {
                       "type": "math",
-                      "text": "b<",
+                      "text": "b<c",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "c, tak "
+                      "text": ", tak "
                     },
                     {
                       "type": "math",
@@ -778,7 +778,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0úpravy dôjsť k\u00A0"
+                      "text": " a\u00A0úpravami dôjsť k\u00A0"
                     },
                     {
                       "type": "math",
@@ -1394,7 +1394,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú celé čísla, teda ja "
+                      "text": " sú celé čísla, teda aj "
                     },
                     {
                       "type": "math",
@@ -1746,7 +1746,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Ďašia veľmi bežná skupina úloh sú tie, ktoré používajú zremý fakt, že pre každé reálne číslo "
+                  "text": "Ďalšia veľmi bežná skupina úloh sú tie, ktoré používajú zrejmý fakt, že pre každé reálne číslo "
                 },
                 {
                   "type": "math",
@@ -1777,7 +1777,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "x=a+b",
+                  "text": "x=a-b",
                   "isDisplay": false
                 },
                 {
@@ -1786,7 +1786,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "(a+b)^2\\ge 0",
+                  "text": "(a-b)^2\\ge 0",
                   "isDisplay": false
                 },
                 {
@@ -1897,7 +1897,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "2a^2+2b^2+2c^2 \\ge 2ab+2bc+ca,",
+                  "text": "2a^2+2b^2+2c^2 \\ge 2ab+2bc+2ca,",
                   "isDisplay": true
                 },
                 {
@@ -1995,7 +1995,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Plán je preniesť si všetko na jedno stranu a pozrieť sa na nerovnosť ako na kvadratickú nerovnicu v\u00A0premennej\u00A0"
+                      "text": " Plán je preniesť si všetko na jednu stranu a pozrieť sa na nerovnosť ako na kvadratickú nerovnicu v\u00A0premennej\u00A0"
                     },
                     {
                       "type": "math",
@@ -2497,7 +2497,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Presuňte všetko na ľavú stránku a\u00A0rozložte na súčin."
+                      "text": ". Presuňte všetko na ľavú stranu a\u00A0rozložte na súčin."
                     }
                   ],
                   "highligted": false
@@ -2509,7 +2509,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Z\u00A0podmienky vďaka vieme s\u00A0použitím vzorca "
+                      "text": "Z\u00A0podmienky vieme s\u00A0použitím vzorca "
                     },
                     {
                       "type": "math",
@@ -2796,7 +2796,7 @@
                 },
                 {
                   "type": "text",
-                  "text": ". Ukážeme, že táto jednoduchá nerovnosť sa dá zovšebecniť na niečo netriviálne."
+                  "text": ". Ukážeme, že táto jednoduchá nerovnosť sa dá zovšeobecniť na niečo netriviálne."
                 }
               ],
               "highligted": false
@@ -2806,7 +2806,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Artimeticý priemer sa týka súčtu, geometrický súčinu. Než prezradíme presné znenie AG a jej dôkaz, predpríprava je nasledovný príklad:"
+                  "text": "Aritmetický priemer sa týka súčtu, geometrický súčinu. Než prezradíme presné znenie AG a jej dôkaz, predpríprava je nasledovný príklad:"
                 }
               ],
               "highligted": false
@@ -2895,7 +2895,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Čím menšia vzdialenosť, tým menšia tým, a tým väčší ich súčin "
+                      "text": ". Čím menšia vzdialenosť, tým menšia "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", \u00A0a teda aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\delta^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže tým väčší je ich súčin "
                     },
                     {
                       "type": "math",
@@ -2984,7 +3002,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Naša taktika bude nasledovná: zafixujeme súčet premenných a teda aj ich artimetický priemer\u00A0"
+                      "text": "Naša taktika bude nasledovná: zafixujeme súčet premenných a teda aj ich aritmetický priemer\u00A0"
                     },
                     {
                       "type": "math",
@@ -3094,7 +3112,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Podľa tvrdenie z\u00A0predošlého cvičenia platí, že ak tieto dve premenné priblížime k\u00A0sebe a zachávame pritom ich súčet, tak zväčšíme ich súčin, takže zväčšíme aj súčin všetkých premenných. Toto zväčšenie spravíme tak, že premennú bližšiu k\u00A0"
+                      "text": "Podľa tvrdenia z\u00A0predošlého cvičenia platí, že ak tieto dve premenné priblížime k\u00A0sebe a zachávame pritom ich súčet, tak zväčšíme ich súčin, takže zväčšíme aj súčin všetkých premenných. Toto zväčšenie spravíme tak, že premennú bližšiu k\u00A0"
                     },
                     {
                       "type": "math",
@@ -3130,7 +3148,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " premených rovných "
+                      "text": " premenných rovných "
                     },
                     {
                       "type": "math",
@@ -3194,7 +3212,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je ich počet), zatiaľčo súčet zvyšných je "
+                      "text": " je ich počet), zatiaľ čo súčet zvyšných je "
                     },
                     {
                       "type": "math",
@@ -3240,7 +3258,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Existuje veľmi veľa rôznych dôkazov tejto známej nerovnosti s rôznou úroveňou technickosti. Veríme však, že tejto je najintuitívnejší z\u00A0hľadiska, že najlepšie vysvetľuje, čo sa to vlastne deje."
+                      "text": " Existuje veľmi veľa rôznych dôkazov tejto známej nerovnosti s rôznou úrovňou technickosti. Veríme však, že tento je najintuitívnejší z\u00A0hľadiska, že najlepšie vysvetľuje, čo sa to vlastne deje."
                     }
                   ],
                   "highligted": false
@@ -3610,7 +3628,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Rovnosť nasáva práve keď všetky odhadované členy sú rovnaké, teda keď "
+                      "text": "Rovnosť nastáva práve keď všetky odhadované členy sú rovnaké, teda keď "
                     },
                     {
                       "type": "math",
@@ -3619,7 +3637,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", čo čáva "
+                      "text": ", čo dáva "
                     },
                     {
                       "type": "math",
@@ -3982,7 +4000,7 @@
                 },
                 {
                   "type": "text",
-                  "text": ", kedy znamená"
+                  "text": ", keď znamená"
                 }
               ],
               "highligted": false
@@ -4069,7 +4087,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Použitím nerovnost "
+                      "text": "Použitím nerovnosti "
                     },
                     {
                       "type": "math",
@@ -4377,7 +4395,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "takže dokopy máme."
+                      "text": "takže dokopy máme"
                     }
                   ],
                   "highligted": false
@@ -4636,7 +4654,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Takto zapísané riešenie ukazuje myšlienkový postup vedúci k\u00A0riešeniu. Na súťaží by sme riešenie mohli zapísať takto:"
+                      "text": " Takto zapísané riešenie ukazuje myšlienkový postup vedúci k\u00A0riešeniu. Na súťaži by sme riešenie mohli zapísať takto:"
                     }
                   ],
                   "highligted": false
@@ -4868,7 +4886,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nie je najmenšie ani ani najväčšie číslo medzi "
+                      "text": " nie je najmenšie ani najväčšie číslo medzi "
                     },
                     {
                       "type": "math",
@@ -5226,7 +5244,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "b\\frac12",
+                      "text": "b>\\frac12",
                       "isDisplay": false
                     },
                     {
@@ -5657,7 +5675,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " však začínajú síce veľmi zaujímavé ale v\u00A0dnešnej dobe nie až tak použiteľné metódy na súťažiach (kde je snaha dávať úlohy, ktoré sa nedajú "
+                  "text": " však začínajú síce veľmi zaujímavé, ale v\u00A0dnešnej dobe nie až tak použiteľné metódy na súťažiach (kde je snaha dávať úlohy, ktoré sa nedajú "
                 },
                 {
                   "type": "quote",
@@ -5688,7 +5706,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Rôznorodé úlohy, kde na všetky z\u00A0nich stačia prebraté koncepty, aj keď ako to už pri nerovnostiach býva, riešenie býva môže ľubovoľne ťažko viditeľné. Veľa šťastia\u00A0:)"
+                  "text": "Rôznorodé úlohy, kde na všetky z\u00A0nich stačia prebraté koncepty, aj keď ako to už pri nerovnostiach býva, riešenie býva ľubovoľne ťažko viditeľné. Veľa šťastia\u00A0:)"
                 }
               ],
               "highligted": false
@@ -5785,7 +5803,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sa dá rozložiť na súčin technicou dopĺňania na štvorec, doplňte na štvorec "
+                      "text": " sa dá rozložiť na súčin technikou dopĺňania na štvorec, doplňte na štvorec "
                     },
                     {
                       "type": "math",
@@ -6192,7 +6210,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Toto je trocha teórie čísel. Elegantné riešenie spočíta v\u00A0pripočítaní\u00A01 k\u00A0obom stranám a\u00A0rozklade na súčin, čím dostaneme:"
+                      "text": ". Toto je trocha teórie čísel. Elegantné riešenie spočíva v\u00A0pripočítaní\u00A01 k\u00A0obom stranám a\u00A0rozklade na súčin, čím dostaneme:"
                     }
                   ],
                   "highligted": false
@@ -7352,7 +7370,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "2 = x^2+y^6 \\ge 2xy^3 \\quad \\text{práve keď} \\quad 1 \\ge xy^2,",
+                  "text": "2 = x^2+y^6 \\ge 2xy^3 \\quad \\text{práve keď} \\quad 1 \\ge xy^3,",
                   "isDisplay": true
                 },
                 {

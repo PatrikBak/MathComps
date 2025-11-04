@@ -8,8 +8,7 @@
 
 \sec Úvod
 
-
-Nerovnosti sú jedna zo základných tém nie len v~algebre, ale v~matematike ako takej s~veľa praktickými aplikáciami. Vezmime si napríklad takúto otázku: 
+Nerovnosti sú jedna zo základných tém nielen v~algebre, ale v~matematike ako takej s~veľa praktickými aplikáciami. Vezmime si napríklad takúto otázku: 
 
 \Highlight{
     Máme štvorcový kus papiera s dĺžkou strany 12 cm. Chceme vytvoriť otvorenú krabicu tak, že z každého zo štyroch rohov vystrihneme identické štvorce a boky zahneme nahor. Aký je najväčší možný objem krabice?
@@ -21,11 +20,11 @@ Táto úloha nie je veľmi jednoduchá, ale my sa naučíme jej najelegantnejši
 
 \sec Teória 
 
-V~príspevku sa zamierame na najzákladnejšie postupy. Úplný základ prakticky všetkých algebier sú úpravy výrazov, tými začneme. Potom sa pozrieme na nerovnosti, ktoré využívajú kladnosť štvorcov. Následne si predstavíme známu AG nerovnosť dokonca aj s~dôkazom. Na záver si ako zaujímavosť ukážeme niekoľko netradičnejších ale stále jednoduchých úloh, kde sa šikovne používajú zaujímavé podmienky zo zadania.
+V~príspevku sa zameriame na najzákladnejšie postupy. Úplný základ prakticky všetkých algebier sú úpravy výrazov, tými začneme. Potom sa pozrieme na nerovnosti, ktoré využívajú kladnosť štvorcov. Následne si predstavíme známu AG nerovnosť dokonca aj s~dôkazom. Na záver si ako zaujímavosť ukážeme niekoľko netradičnejších, ale stále jednoduchých úloh, kde sa šikovne používajú zaujímavé podmienky zo zadania.
 
 \secc Základné úpravy
 
-Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako roznásobovanie, rozkladanie na súčin a podobne. Takýmito úlohami začneme a~v~ďalších sekciách pridáme ďalšie už postupy.
+Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako roznásobovanie, rozkladanie na súčin a podobne. Takýmito úlohami začneme a~v~ďalších sekciách pridáme ďalšie postupy.
 
 \Example{}{
     Sú dané reálne čísla $a$, $b$, $c$, $d$ spĺňajúce $a<b<c<d$. Usporiadajte čísla 
@@ -44,7 +43,7 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     x-y = (a+b)(c+d) - (a+c)(b+d) =\\= (ac+ad+bc+bd)-(ab+ad+bc+cd) =\\=  ac+bd-ab-cd = (a-d)(c-b)
     \endgather
     $$
-    Keďže $a<d$ a $b<$c, tak $x<y$. Podobne spočítajme 
+    Keďže $a<d$ a $b<c$, tak $x<y$. Podobne spočítajme 
     $$
     \gather
     y-z = (a+c)(b+d) - (a+d)(b+c) =\\= (ab+ad+bc+cd) - (ab+ac+bd+cd) =\\= ad+bc-ac-bd = (a-b)(d-c)
@@ -105,7 +104,7 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     $$
     Vidíme, že ľavá strana je súčinom dvoch nezáporných čísel $a+b$ (predpoklad) a $(a-b)^2$ (štvorec), takže aj ich súčin je nezáporný. Rovnosť nastáva práve keď $a+b=0$ alebo $a=b$.
 
-    Je dôležité zmieniť, že úpravy boli ekvivalentné a~postup vieme obrátiť -- v~matematike vždy vychádzame z~platných predpokladov a pomocou nich dokazujeme nové veci. Alternatívne môžeme dôkaz zapísať my obrátene, začať $(a+b)(a-b)^2 \ge 0$ a~úpravy dôjsť k~$a^3+b^3 \ge a^2b+ab^2$. To ale často vyzerá menej prirodzené než postup od dokazovanej nerovnosti k~platnému tvrdeniu s~dodatkom o~ekvivalentnosti úprav.
+    Je dôležité zmieniť, že úpravy boli ekvivalentné a~postup vieme obrátiť -- v~matematike vždy vychádzame z~platných predpokladov a pomocou nich dokazujeme nové veci. Alternatívne môžeme dôkaz zapísať my obrátene, začať $(a+b)(a-b)^2 \ge 0$ a~úpravami dôjsť k~$a^3+b^3 \ge a^2b+ab^2$. To ale často vyzerá menej prirodzené než postup od dokazovanej nerovnosti k~platnému tvrdeniu s~dodatkom o~ekvivalentnosti úprav.
 }
 
 \Exercise{}{
@@ -179,7 +178,7 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
 }{
     Má zmysel premiestniť všetko na jednu stranu a rozložiť na súčin.
 }{
-    Po úspešnom vykonaní rozkladu by nám malo stačiť dokázať $(a-b)(a-b+1) \ge 0$, teda $k(k+1) \ge 0$. Tu musíme využiť, že $a,b$ sú celé čísla, teda ja $k$ je celé.
+    Po úspešnom vykonaní rozkladu by nám malo stačiť dokázať $(a-b)(a-b+1) \ge 0$, teda $k(k+1) \ge 0$. Tu musíme využiť, že $a,b$ sú celé čísla, teda aj $k$ je celé.
 }{
     Roznásobíme výrazy na ľavej strane, presunieme člen $2ab$ z pravej strany na ľavú, a~rozložíme na súčin:
     $$
@@ -205,7 +204,7 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
 
 \secc Kladné štvorce
 
-Ďašia veľmi bežná skupina úloh sú tie, ktoré používajú zremý fakt, že pre každé reálne číslo $x$ platí $x^2 \ge 0$, pričom rovnosť nastáva len pre $x=0$. Dosadením $x=a+b$ môžeme z~tohto odvodiť nerovnosť $(a+b)^2\ge 0$, ktorá sa dá ekvivalentne prepísať ako $a^2+b^2 \ge 2ab$. Tá nám na prvý pohľad nemusí byť hneď zrejmá. Podobnými hrátkami môžeme odvádzať viac a~viac nerovností. Zopakujme si najprv tento veľmi známy príklad:
+Ďalšia veľmi bežná skupina úloh sú tie, ktoré používajú zrejmý fakt, že pre každé reálne číslo $x$ platí $x^2 \ge 0$, pričom rovnosť nastáva len pre $x=0$. Dosadením $x=a-b$ môžeme z~tohto odvodiť nerovnosť $(a-b)^2\ge 0$, ktorá sa dá ekvivalentne prepísať ako $a^2+b^2 \ge 2ab$. Tá nám na prvý pohľad nemusí byť hneď zrejmá. Podobnými hrátkami môžeme odvádzať viac a~viac nerovností. Zopakujme si najprv tento veľmi známy príklad:
 
 \Example{}{
     Dokážte, že pre všetky reálne čísla $a$, $b$, $c$ platí 
@@ -219,7 +218,7 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     $$
     čo je vlastne 
     $$
-    2a^2+2b^2+2c^2 \ge 2ab+2bc+ca,
+    2a^2+2b^2+2c^2 \ge 2ab+2bc+2ca,
     $$
     teda naša dokazovaná nerovnosť vynásobená dvomi. Rovnosť nastáva práve keď v~našich čiastkových nerovnostiach nastáva rovnosť, teda keď $a=b$, $b=c$, $c=a$, skrátene $a=b=c$.
 
@@ -231,7 +230,7 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
     
     Ukážeme si však ešte iné menej bežné, ale priamočiare riešenie. 
 
-    \textit{Alternatívne riešenie.} Plán je preniesť si všetko na jedno stranu a pozrieť sa na nerovnosť ako na kvadratickú nerovnicu v~premennej~$a$. Potom môžeme dopĺňať na štvorec:
+    \textit{Alternatívne riešenie.} Plán je preniesť si všetko na jednu stranu a pozrieť sa na nerovnosť ako na kvadratickú nerovnicu v~premennej~$a$. Potom môžeme dopĺňať na štvorec:
     $$
     \align
     (a^2 + b^2 + c^2) - (ab + bc + ca) &\ge 0 \\
@@ -302,9 +301,9 @@ Veľa príkladov ide vyriešiť iba tým, že používame bežné úpravy ako ro
 \Problem{1}{74-CSMO-A-II-1}{
     Dané sú dve navzájom rôzne reálne čísla $a$, $b$ také, že výrazy $a^3 + b$ a $a + b^3$ majú rovnakú hodnotu. Dokážte, že pre ich súčin platí $-1\le ab<\frac13$.
 }{
-    Prvý krok je odomknúť podmienku $a^3+b=a+b^3$. Presuňte všetko na ľavú stránku a~rozložte na súčin.
+    Prvý krok je odomknúť podmienku $a^3+b=a+b^3$. Presuňte všetko na ľavú stranu a~rozložte na súčin.
 }{
-    Z~podmienky vďaka vieme s~použitím vzorca $a^3-b^3=(a-b)(a^2+ab+b^2)$ odvodiť $(a-b)(a^2+ab+b^2-1)$, teda vďaka $a \neq b$ máme $a^2+ab+b^2=1$. Teraz skúste $a^2+b^2$ doplniť na štvorec, ide to dokonca dvoma spôsobmi.
+    Z~podmienky vieme s~použitím vzorca $a^3-b^3=(a-b)(a^2+ab+b^2)$ odvodiť $(a-b)(a^2+ab+b^2-1)$, teda vďaka $a \neq b$ máme $a^2+ab+b^2=1$. Teraz skúste $a^2+b^2$ doplniť na štvorec, ide to dokonca dvoma spôsobmi.
 }{
     Zo zadania máme $a^3 + b = a + b^3$. Presunutím členov na jednu stranu a rozkladom na súčin dostaneme
     $$
@@ -334,16 +333,16 @@ V tejto časti sa pozrieme na najznámejšiu pomenovanú nerovnosť, a síce ner
 $$
 a^2+b^2 \ge 2ab,
 $$
-čo je dôsledkom $(a-b)^2 \ge 0$. Ukážeme, že táto jednoduchá nerovnosť sa dá zovšebecniť na niečo netriviálne.
+čo je dôsledkom $(a-b)^2 \ge 0$. Ukážeme, že táto jednoduchá nerovnosť sa dá zovšeobecniť na niečo netriviálne.
 
-Artimeticý priemer sa týka súčtu, geometrický súčinu. Než prezradíme presné znenie AG a jej dôkaz, predpríprava je nasledovný príklad:
+Aritmetický priemer sa týka súčtu, geometrický súčinu. Než prezradíme presné znenie AG a jej dôkaz, predpríprava je nasledovný príklad:
 
 \Example{}{
     Rozmyslite si a formálne dokážte, že ak máme dve kladné čísla, ktorých súčet je daný, tak čím bližšie sú tieto čísla pri sebe, tým väčší súčin majú.
 }{
     Nech $s$ je priemer našich čísel a~$\delta$ ich vzdialenosť od priemeru. Potom sú naše čísla rovné $s-\delta$ a $s+\delta$. Ich súčin je rovný $(s-\delta)(s+\delta)=s^2-\delta^2$. 
     
-    Keďže súčet čísel je fixný, je fixný aj ich priemer. Vzdialenosť našich čísel je zrejme $2 \delta$. Čím menšia vzdialenosť, tým menšia tým, a tým väčší ich súčin $s^2-\delta^2$, čo bolo treba dokázať. 
+    Keďže súčet čísel je fixný, je fixný aj ich priemer. Vzdialenosť našich čísel je zrejme $2 \delta$. Čím menšia vzdialenosť, tým menšia $\delta$, ~a teda aj $\delta^2$, takže tým väčší je ich súčin $s^2-\delta^2$, čo bolo treba dokázať. 
 }
 
 Toto nám pomôže pri dôkaze všeobecnej AG nerovnosti:
@@ -356,15 +355,15 @@ Toto nám pomôže pri dôkaze všeobecnej AG nerovnosti:
 }{
     Nerovnosť je zrejmá, keď je nejaké z~čísel nulové. Predpokladajme, že sú všetky nenulové. 
 
-    Naša taktika bude nasledovná: zafixujeme súčet premenných a teda aj ich artimetický priemer~$p$ a dokážeme, že najväčší súčin majú práve vtedy, keď sú všetky rovné~$p$. Dôkaz prevedieme sporom.
+    Naša taktika bude nasledovná: zafixujeme súčet premenných a teda aj ich aritmetický priemer~$p$ a dokážeme, že najväčší súčin majú práve vtedy, keď sú všetky rovné~$p$. Dôkaz prevedieme sporom.
 
     Predpokladajme najprv, že máme aspoň dve premenné, ktoré nie sú rovné priemeru~$p$. Ak by všetky premenné rôzne od $p$ boli menšie ako $p$, tak súčet všetkých premenných by bol zrejme menší ako $np$. Podobne nemôže platiť, že všetky premenné rôzne od $p$ sú väčšie ako $p$, vtedy by bol súčet priveľký. Nutne teda máme jednu premennú menšiu ako $p$ a druhú väčšiu ako $p$. 
 
-    Podľa tvrdenie z~predošlého cvičenia platí, že ak tieto dve premenné priblížime k~sebe a zachávame pritom ich súčet, tak zväčšíme ich súčin, takže zväčšíme aj súčin všetkých premenných. Toto zväčšenie spravíme tak, že premennú bližšiu k~$p$ nahradíme $p$ a druhú premennú nahradíme tak, aby sa súčet zachoval. Týmto sme dosiahli, že sme zachovali súčet, zväčšili súčin, a tiež zmenšili počet premenných rôznych od $p$. Konečným opakovaním tohto algoritmu dôjdeme do stavu, kedy máme aspoň $n-1$ premených rovných $p$. 
+    Podľa tvrdenia z~predošlého cvičenia platí, že ak tieto dve premenné priblížime k~sebe a zachávame pritom ich súčet, tak zväčšíme ich súčin, takže zväčšíme aj súčin všetkých premenných. Toto zväčšenie spravíme tak, že premennú bližšiu k~$p$ nahradíme $p$ a druhú premennú nahradíme tak, aby sa súčet zachoval. Týmto sme dosiahli, že sme zachovali súčet, zväčšili súčin, a tiež zmenšili počet premenných rôznych od $p$. Konečným opakovaním tohto algoritmu dôjdeme do stavu, kedy máme aspoň $n-1$ premenných rovných $p$. 
 
-    Ak je práve $n-1$ z~nich rovných $p$, tak hodnotu poslednej získame, keď od súčtu všetkých premenných odpočítame súčet zvyšných. Súčet všetkých je $np$ (keďže $p$ je priemer a $n$ je ich počet), zatiaľčo súčet zvyšných je $(n-1)p$ (keďže sú všetky rovné $p$). Vidíme, že aj posledná premenná musí byť rovná $p$, čo je spor.
+    Ak je práve $n-1$ z~nich rovných $p$, tak hodnotu poslednej získame, keď od súčtu všetkých premenných odpočítame súčet zvyšných. Súčet všetkých je $np$ (keďže $p$ je priemer a $n$ je ich počet), zatiaľ čo súčet zvyšných je $(n-1)p$ (keďže sú všetky rovné $p$). Vidíme, že aj posledná premenná musí byť rovná $p$, čo je spor.
 
-    \textit{Poznámka.} Existuje veľmi veľa rôznych dôkazov tejto známej nerovnosti s rôznou úroveňou technickosti. Veríme však, že tejto je najintuitívnejší z~hľadiska, že najlepšie vysvetľuje, čo sa to vlastne deje.
+    \textit{Poznámka.} Existuje veľmi veľa rôznych dôkazov tejto známej nerovnosti s rôznou úrovňou technickosti. Veríme však, že tento je najintuitívnejší z~hľadiska, že najlepšie vysvetľuje, čo sa to vlastne deje.
 }
 
 Dobré pohľady, ako nazerať na AG nerovnosť:
@@ -413,7 +412,7 @@ Konečne je čas prezradiť riešenie motivačnej úlohy z~úvodu:
     128.
     \endgather
     $$
-    Rovnosť nasáva práve keď všetky odhadované členy sú rovnaké, teda keď $12-2x=12-2x=4x$, čo čáva $x=2$. Potrebujeme teda vystrihnúť štvorec so stranou $x=2$ a vo výsledku dostaneme krabicu s~rozmermi $8 \times 8 \times 2$.
+    Rovnosť nastáva práve keď všetky odhadované členy sú rovnaké, teda keď $12-2x=12-2x=4x$, čo dáva $x=2$. Potrebujeme teda vystrihnúť štvorec so stranou $x=2$ a vo výsledku dostaneme krabicu s~rozmermi $8 \times 8 \times 2$.
 
     \textit{Poznámka.} Všeobecne pre štvorec so stranou $a$ máme $\displaystyle x=\frac a6$.
 }
@@ -457,7 +456,7 @@ Zapamätaniahodný dôsledok AG nerovnosti je nerovnosť
 $$
 \frac ab + \frac ba \ge 2
 $$
-platná pre kladné $a,b$. Častokrát sa objaví aj pre $b=1$, kedy znamená 
+platná pre kladné $a,b$. Častokrát sa objaví aj pre $b=1$, keď znamená 
 $$
 a+\frac 1a \ge 2,
 $$
@@ -476,7 +475,7 @@ teda súčet kladného čísla a jeho prevrátenej hodnoty je aspoň 2.
     \left(\frac{a}{c} + \frac{c}{a}\right) + \left(\frac{b}{c} + \frac{c}{b}\right) + \left(\frac{a}{b} + \frac{b}{a}\right).
     \endgather
     $$
-    Použitím nerovnost $\frac xy + \frac yx \ge 2$ na každú zátvorku potom máme
+    Použitím nerovnosti $\frac xy + \frac yx \ge 2$ na každú zátvorku potom máme
     $$
     \left(\frac{a}{c} + \frac{c}{a}\right) + \left(\frac{b}{c} + \frac{c}{b}\right) + \left(\frac{a}{b} + \frac{b}{a}\right) \ge 2 + 2 + 2 = 6.
     $$
@@ -510,7 +509,7 @@ teda súčet kladného čísla a jeho prevrátenej hodnoty je aspoň 2.
     $$
     2cd + \frac 1{cd} \ge 2\sqrt{2cd \cdot \frac 1{cd}} = 2\sqrt{2},
     $$
-    takže dokopy máme.
+    takže dokopy máme
     $$
     ab + cd = \left(2cd + \frac{1}{cd}\right) + 2 \ge 2\sqrt{2} + 2.
     $$
@@ -526,7 +525,7 @@ Na záver sa pobavme o veľmi všeobecnom koncepte: Nerovnosti sú častokrát �
 }{
     Podmienku zo zadania vynásobme kladným $x$, máme $x^3 > x^2 + xy$. Teraz stačí dokázať, že $x^2 + xy > x^2 + y$, teda $xy > y$. K~tomu by nám stačilo dokázať, že $x>1$. To ale rýchlo nahliadneme z~podmienky: $x^2>x+y$ nám z~kladnosti $y$ dáva $x^2>x$, čo po vydelení kladným $x$ dáva $x>1$, čo sme chceli dokázať.
 
-    \textit{Poznámka.} Takto zapísané riešenie ukazuje myšlienkový postup vedúci k~riešeniu. Na súťaží by sme riešenie mohli zapísať takto:
+    \textit{Poznámka.} Takto zapísané riešenie ukazuje myšlienkový postup vedúci k~riešeniu. Na súťaži by sme riešenie mohli zapísať takto:
 
     Keďže $y>0$, tak $x^2>x+y>x$, čo vďaka $x>0$ dáva $x>1$. Potom $x^2>x+y$ po vynásobení kladným $x$ dáva $x^3>x^2+xy$, čo vďaka $x>1$ dáva $xy>y$, takže dokopy $x^3>x^2+xy>x^2+y$, takže sme hotoví.
 }
@@ -539,7 +538,7 @@ Vidíme, že sme vlastne používali len veľmi jasné úvahy a rôzne ich kombi
 }{
     Najprv analyzujte dokazovanú nerovnosť, nie je tam rozklad na súčin?
 }{
-    Dokazovaná nerovnosť je ekvivalentná s $c^2-ac+(ab-bc) \leq 0$, čo sa dá upraviť na $(c-a)(c-b) \leq 0$. Stačí teda zdôvodniť, že $c$ nie je najmenšie ani ani najväčšie číslo medzi $a,b,c$. Skúste sporom a~rozoberte dva prípady.
+    Dokazovaná nerovnosť je ekvivalentná s $c^2-ac+(ab-bc) \leq 0$, čo sa dá upraviť na $(c-a)(c-b) \leq 0$. Stačí teda zdôvodniť, že $c$ nie je najmenšie ani najväčšie číslo medzi $a,b,c$. Skúste sporom a~rozoberte dva prípady.
 }{
     Dokazovaná nerovnosť $c^2 + ab \le ac + bc$ je ekvivalentná s nerovnosťou
     $$
@@ -571,7 +570,7 @@ $$
 }{
     Zabudnite na dokazovanú nerovnosť -- kľúčom je porozumieť, akým spôsobom veľkostné limity súvisia s~podmienkou.
 }{
-    Skúste aplikovať $a>\frac12$, $b\frac12$ do podmienky, konkrétne odhadnite zdola výraz $ab+bc+ca$. Čo nám výsledná nerovnosť hovorí o~$c$? 
+    Skúste aplikovať $a>\frac12$, $b>\frac12$ do podmienky, konkrétne odhadnite zdola výraz $ab+bc+ca$. Čo nám výsledná nerovnosť hovorí o~$c$? 
 }{
     Zo zadania vieme, že $a > \frac12$ a $b > \frac12$. Použitím týchto odhadov v~podmienke dostaneme:
     $$
@@ -627,11 +626,11 @@ Je to o hraní sa.
 
 Nerovnosti sa dajú študovať ešte veľmi dlho. Existuje veľa ďalších metód, známych nerovností. Už teraz sme ale vybudovali sériu techník a postupov, ktoré sa dajú použiť na prakticky všetky úlohy v česko-slovenskej olympiáde (vrátane tých v~celoštátnom kole). Niekedy v~ďalšom dieli pokryjeme ešte viac :)
 
-Záujemcom o~ďalšie štúdium odporúčam \Link[https://prase.cz/]{PraSe} seriál \Link[zdolavani-nerovnosti.pdf]{Zdolávaní nerovností}. Prvá kapitola je určite prístupná každému. Druhá je už trocha ťažšia (úroveň približne celoštátne kolo), rovnako aj úvod tretej. Od sekcie \uv{Tvar SOS} však začínajú síce veľmi zaujímavé ale v~dnešnej dobe nie až tak použiteľné metódy na súťažiach (kde je snaha dávať úlohy, ktoré sa nedajú \uv{zabiť} znalosťami ale sú skôr o kreativite). Rozhodne však nie je na škodu o nich vedieť.
+Záujemcom o~ďalšie štúdium odporúčam \Link[https://prase.cz/]{PraSe} seriál \Link[zdolavani-nerovnosti.pdf]{Zdolávaní nerovností}. Prvá kapitola je určite prístupná každému. Druhá je už trocha ťažšia (úroveň približne celoštátne kolo), rovnako aj úvod tretej. Od sekcie \uv{Tvar SOS} však začínajú síce veľmi zaujímavé, ale v~dnešnej dobe nie až tak použiteľné metódy na súťažiach (kde je snaha dávať úlohy, ktoré sa nedajú \uv{zabiť} znalosťami ale sú skôr o kreativite). Rozhodne však nie je na škodu o nich vedieť.
 
 \sec Úlohy
 
-Rôznorodé úlohy, kde na všetky z~nich stačia prebraté koncepty, aj keď ako to už pri nerovnostiach býva, riešenie býva môže ľubovoľne ťažko viditeľné. Veľa šťastia~:)
+Rôznorodé úlohy, kde na všetky z~nich stačia prebraté koncepty, aj keď ako to už pri nerovnostiach býva, riešenie býva ľubovoľne ťažko viditeľné. Veľa šťastia~:)
 
 \Problem{0}{}{
     Sú dané nezáporné reálne čísla $x$ a $y$.
@@ -642,7 +641,7 @@ $$
 }{
     Jeden zo spôsobov, ako si úlohu spraviť krajšiu, je použiť substitúciu $x=a^2$, $y=b^2$. Vďaka nej nemáme odmocniny. Naľavo potom máme $a^4+a^2b^2+b^4$. S~týmto výrazom sa dá niečo zaujímavé urobiť.
 }{
-    Výraz $a^4+a^2b^2+b^4$ sa dá rozložiť na súčin technicou dopĺňania na štvorec, doplňte na štvorec $a^4+b^4$. Následne bude celá nerovnosť dávať zmysel.
+    Výraz $a^4+a^2b^2+b^4$ sa dá rozložiť na súčin technikou dopĺňania na štvorec, doplňte na štvorec $a^4+b^4$. Následne bude celá nerovnosť dávať zmysel.
 }{
     Použijeme substitúciu $x=a^2$ a $y=b^2$ pre nezáporné $a,b$, kde aspoň jedno je kladné. Nerovnosť sa prepíše na
     $$
@@ -704,7 +703,7 @@ $$
     $$
     \big( (xy-1) - (x+y) \big)^2 \ge 0.
     $$
-    Táto nerovnosť zjavne platí. Rovnosť nastáva, práve keď $(xy-1) - (x+y) = 0$, čiže $xy - x - y = 1$. Toto je trocha teórie čísel. Elegantné riešenie spočíta v~pripočítaní~1  k~obom stranám a~rozklade na súčin, čím dostaneme: 
+    Táto nerovnosť zjavne platí. Rovnosť nastáva, práve keď $(xy-1) - (x+y) = 0$, čiže $xy - x - y = 1$. Toto je trocha teórie čísel. Elegantné riešenie spočíva v~pripočítaní~1  k~obom stranám a~rozklade na súčin, čím dostaneme: 
     $$
     \align 
     xy - x - y + 1 &= 1 \\
@@ -812,7 +811,7 @@ $$
     $$
     Túto nerovnosť dokážeme pomocou podmienky $x^2+y^6=2$ a AG nerovnosti:
     $$
-    2 = x^2+y^6 \ge 2xy^3 \quad \text{práve keď} \quad 1 \ge xy^2,
+    2 = x^2+y^6 \ge 2xy^3 \quad \text{práve keď} \quad 1 \ge xy^3,
     $$
     takže sme hotoví. Rovnosť nastáva, keď nastáva rovnosť v~oboch použitých AG nerovnostiach:
     \begitems \style i
