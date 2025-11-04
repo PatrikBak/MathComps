@@ -2730,7 +2730,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "(a+b)^2-ab = 1 \\quad\\text{a} (a-b)^2 + 3ab = 1.",
+                  "text": "(a+b)^2-ab = 1 \\quad\\text{a}\\quad (a-b)^2 + 3ab = 1.",
                   "isDisplay": true
                 },
                 {
