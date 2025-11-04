@@ -1,8 +1,11 @@
 using MathComps.Shared;
 using MathComps.TexParser;
+using MathComps.TexParser.Images;
 using MathComps.TexParser.TexCleaner;
+using MathComps.TexParser.Types;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Collections.Immutable;
 using System.ComponentModel;
 
 namespace MathComps.Cli.Handouts;
@@ -88,8 +91,18 @@ public class ParseCommand : Command<ParseCommand.Settings>
                 // Parse the TeX content into the structured Document object model.
                 var (document, unknownCommands) = TexStringParser.ParseDocument(texContent, rules);
 
-                // Serialize the Document object to an indented JSON string
-                var jsonString = document.ToJson();
+                // Process images in the document content and collect their metadata
+                var (processedDocument, discoveredImages) = ProcessHandoutImages(document, inputFile.Name);
+
+                // Create a wrapper object containing both document and images
+                var handoutData = new
+                {
+                    Document = processedDocument,
+                    Images = discoveredImages
+                };
+
+                // Serialize the handout data (document + images) to an indented JSON string
+                var jsonString = handoutData.ToJson();
 
                 // Normalize line endings to LF (Unix-style) for Git compatibility
                 var normalizedContent = jsonString.Replace("\r\n", "\n") + "\n";
@@ -107,7 +120,8 @@ public class ParseCommand : Command<ParseCommand.Settings>
             catch (Exception exception)
             {
                 // If an error occurs during processing, display it and mark the overall operation as failed.
-                AnsiConsole.MarkupLine($"[red]Error processing {Markup.Escape(inputFile.Name)}:[/] {Markup.Escape(exception.Message)}");
+                AnsiConsole.MarkupLine($"[red]Error processing {Markup.Escape(inputFile.Name)}[/]");
+                AnsiConsole.WriteException(exception);
                 anyErrors = true;
             }
         }
@@ -128,6 +142,7 @@ public class ParseCommand : Command<ParseCommand.Settings>
                     table.AddRow(fileName, @$"\{command}");
 
             // Render the table to the console.
+            AnsiConsole.WriteLine();
             AnsiConsole.Write(table);
 
             // There shouldn't be unknown commands in production-ready handouts.
@@ -143,5 +158,51 @@ public class ParseCommand : Command<ParseCommand.Settings>
 
         // Return the exit code indicating if there were any errors.
         return anyErrors ? 1 : 0;
+    }
+
+    /// <summary>
+    /// Processes images in a handout document by walking through all sections and their content.
+    /// </summary>
+    /// <param name="document">The parsed handout document.</param>
+    /// <param name="sourceFileName">The source .tex file name (e.g., "algebra-1-rozklady-sk.tex").</param>
+    /// <returns>A tuple containing the processed document and a list of discovered image metadata.</returns>
+    private static (Document ProcessedDocument, ImmutableList<ImageData> DiscoveredImages) ProcessHandoutImages(Document document, string sourceFileName)
+    {
+        // Extract the handout identifier from the filename (e.g., "algebra-1-rozklady-sk.tex" -> "algebra-1-rozklady-sk")
+        var handoutId = Path.GetFileNameWithoutExtension(sourceFileName);
+
+        // Define the output directory for handout images
+        var outputDirectory = "../../../../backend/src/Api/MathComps.Api/wwwroot/images/handouts";
+        var handoutsDirectory = "../../../../data/handouts/Images";
+
+        // Configure the image processor for this handout
+        var config = new ImageProcessingConfig(
+            ImageSourceResolver: imageId => Path.Combine(handoutsDirectory, $"{imageId.RemoveEnd(".pdf")}.svg"),
+            FileNamePrefix: handoutId,
+            OutputDirectory: outputDirectory,
+            OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutId}[/] has a missing image: {imageId}")
+        );
+
+        // Collect all discovered images from all sections
+        var allDiscoveredImages = ImmutableList.CreateBuilder<ImageData>();
+
+        // Process each section's content because we need to
+        // change image ids to svg ids + get images into wwwroot
+        var processedSections = document.Sections.Select(section =>
+        {
+            // Process the section's text
+            var result = TexImageProcessor.Process(section.Text, config)
+                // It should just work out
+                ?? throw new InvalidOperationException("Processing result is null");
+
+            // Accumulate discovered images
+            allDiscoveredImages.AddRange(result.DiscoveredImages);
+
+            // Return the section with processed text
+            return section with { Text = result.ProcessedText };
+        });
+
+        // Return the document with processed sections and all discovered images
+        return (document with { Sections = [.. processedSections] }, allDiscoveredImages.ToImmutable());
     }
 }

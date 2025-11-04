@@ -69,4 +69,27 @@ public static class StringExtensions
         // Normalize these characters into default form.
         return normalizedText.Normalize(NormalizationForm.FormC);
     }
+
+    /// <summary>
+    /// Removes the specified suffix from the end of the string if it is present.
+    /// </summary>
+    /// <param name="text">The source text.</param>
+    /// <param name="suffix">The suffix to remove when present.</param>
+    /// <param name="comparisonType">String comparison option used to match the suffix.</param>
+    /// <returns>The original string without the suffix if it was present; otherwise, the original string.</returns>
+    public static string RemoveEnd(this string text, string suffix, StringComparison comparisonType = StringComparison.Ordinal)
+    {
+        // Text must exist
+        if (text is null)
+            throw new ArgumentNullException(nameof(text));
+
+        // Suffix must exist
+        if (string.IsNullOrEmpty(suffix))
+            return text;
+
+        // Remove suffix if it exists
+        return text.EndsWith(suffix, comparisonType)
+            ? text[..^suffix.Length]
+            : text;
+    }
 }

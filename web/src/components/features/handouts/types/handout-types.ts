@@ -41,7 +41,7 @@ export type ListStyleType =
 
 /** Represents a primitive, non-nestable content block. */
 export type RawContentBlock =
-  | { type: 'paragraph'; content: RawContentBlock[] }
+  | { type: 'paragraph'; content: RawContentBlock[]; highligted: boolean }
   | { type: 'list'; items: RawContentBlock[][]; styleType: ListStyleType }
   | { type: 'math'; text: string; isDisplay: boolean }
   | { type: 'image'; id: string; scale: number; isInline: boolean }
@@ -106,6 +106,20 @@ export type Document = {
   title: string | null
   subtitle?: string | null
   sections: DocumentSection[]
+}
+
+/** Image metadata for handouts, matching the backend ImageData structure */
+export type HandoutImage = {
+  contentId: string
+  width: string
+  height: string
+  scale: number
+}
+
+/** Wrapper type for handout JSON files that includes both document and images */
+export type HandoutData = {
+  document: Document
+  images: HandoutImage[]
 }
 
 // #endregion

@@ -1,70 +1,48 @@
-using MathComps.Shared;
 using MathComps.TexParser.Types;
-using Spectre.Console;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using TexImage = MathComps.TexParser.Types.Image;
 using TexParagraph = MathComps.TexParser.Types.Paragraph;
 using TexText = MathComps.TexParser.Types.Text;
 
-namespace MathComps.Cli.DatabaseSeeder;
+namespace MathComps.TexParser.Images;
 
 /// <summary>
 /// Provides discovery, normalization, and persistence for images referenced inside parsed TeX content.
-/// Walks a <see cref="TexText"/> tree, copies image assets into the API's public folder,
-/// and rewrites image identifiers to stable, URL-friendly content ids that tie to DB metadata.
+/// Walks a <see cref="TexText"/> tree, copies image assets into a specified output folder,
+/// and rewrites image identifiers to reasonably-named URL-friendly ids.
 /// </summary>
-public static class ProblemImageProcessor
+public static class TexImageProcessor
 {
-    #region Private records
-
-    /// <summary>
-    /// Problem data relevant to image processing.
-    /// </summary>
-    /// <param name="Slug">The unique human-readable ID used in the DB for the problem.</param>
-    /// <param name="OlympiadYear">The olympiad year of the problem (e.g. 75)</param>
-    public record ProblemMetadata(string Slug, int OlympiadYear);
-
-    #endregion
-
-    #region Private Constants
-
-    /// <summary>
-    /// Relative path to the API's public problem images directory.
-    /// </summary>
-    private const string PublicImagesRelativePath = "../../Api/MathComps.Api/wwwroot/images/problems";
-
-    #endregion
-
     #region Public API
 
     /// <summary>
-    /// Traverses the content of a <see cref="Text"/> object, processing any images found.
-    /// Returns a new <see cref="Text"/> instance with updated image references and a list of discovered image metadata.
+    /// Traverses the content of a <see cref="TexText"/> object, processing any images found.
+    /// Returns a new <see cref="TexText"/> instance with updated image references and a list of discovered image metadata.
     /// </summary>
     /// <param name="text">Parsed TeX content tree to scan. May be <see langword="null"/>.</param>
-    /// <param name="metadata">Problem metadata used for deterministic file names and path lookups.</param>
+    /// <param name="config">Configuration for image processing including naming and output paths.</param>
     /// <returns>Processed text (or <see langword="null"/>) and an immutable list of discovered images.</returns>
-    public static ProblemImageProcessingResult Process(TexText? text, ProblemMetadata metadata)
+    public static ImageProcessingResult Process(TexText? text, ImageProcessingConfig config)
     {
         // If there is no text, nothing needs to be processed; return an empty image set and null text.
         if (text is null)
-            return new ProblemImageProcessingResult(null, []);
+            return new ImageProcessingResult(null, []);
 
         // Initialize a deterministic suffix counter so generated file names are stable across runs.
         var imageCounter = 1;
 
         // Prepare a collector for discovered image metadata.
-        var discoveredImages = ImmutableList.CreateBuilder<ProblemImageData>();
+        var discoveredImages = ImmutableList.CreateBuilder<ImageData>();
 
         // Walk and transform the content tree, rewriting images and collecting metadata as we go.
-        var updatedContent = ProcessBlocks(text.Content, metadata, ref imageCounter, discoveredImages);
+        var updatedContent = ProcessBlocks(text.Content, config, ref imageCounter, discoveredImages);
 
         // Reconstruct the text with transformed blocks.
         var updatedText = text with { Content = updatedContent };
 
         // We're done
-        return new ProblemImageProcessingResult(updatedText, discoveredImages.ToImmutable());
+        return new ImageProcessingResult(updatedText, discoveredImages.ToImmutable());
     }
 
     #endregion
@@ -75,15 +53,15 @@ public static class ProblemImageProcessor
     /// Recursively processes a list of content blocks, transforming images and rewriting container children.
     /// </summary>
     /// <param name="blocks">Blocks to transform.</param>
-    /// <param name="problemData">Problem metadata for naming and lookups.</param>
+    /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed immutable list of blocks.</returns>
     private static ImmutableList<ContentBlock> ProcessBlocks(
         ImmutableList<ContentBlock> blocks,
-        ProblemMetadata problemData,
+        ImageProcessingConfig config,
         ref int imageCounter,
-        ImmutableList<ProblemImageData>.Builder discoveredImages
+        ImmutableList<ImageData>.Builder discoveredImages
     )
     {
         // Accumulate transformed blocks in order to preserve layout and sequencing.
@@ -91,7 +69,7 @@ public static class ProblemImageProcessor
 
         // Handle each block
         foreach (var block in blocks)
-            builder.Add(ProcessBlock(block, problemData, ref imageCounter, discoveredImages));
+            builder.Add(ProcessBlock(block, config, ref imageCounter, discoveredImages));
 
         // Freeze results into an immutable list to match the domain model's preference for immutability.
         return builder.ToImmutable();
@@ -102,28 +80,54 @@ public static class ProblemImageProcessor
     /// image nodes are resolved, copied into the public folder, and rewritten to a stable content id.
     /// </summary>
     /// <param name="block">Block to transform.</param>
-    /// <param name="problemData">Problem metadata for naming and lookups.</param>
+    /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>The transformed block.</returns>
     private static ContentBlock ProcessBlock(
         ContentBlock block,
-        ProblemMetadata problemData,
+        ImageProcessingConfig config,
         ref int imageCounter,
-        ImmutableList<ProblemImageData>.Builder discoveredImages
+        ImmutableList<ImageData>.Builder discoveredImages
     )
     => block switch
     {
         // The actual image
-        TexImage image => ProcessImage(image, problemData, ref imageCounter, discoveredImages),
+        TexImage image => ProcessImage(image, config, ref imageCounter, discoveredImages),
 
-        // Current parsing
-        TexParagraph paragraph => paragraph with { Content = ProcessRawBlocks(paragraph.Content, problemData, ref imageCounter, discoveredImages) },
-        ItemList list => list with { Items = ProcessListOfLists(list.Items, problemData, ref imageCounter, discoveredImages) },
-        BoldText bold => bold with { Content = ProcessRawBlocks(bold.Content, problemData, ref imageCounter, discoveredImages) },
-        ItalicText italic => italic with { Content = ProcessRawBlocks(italic.Content, problemData, ref imageCounter, discoveredImages) },
-        QuoteText quote => quote with { Content = ProcessRawBlocks(quote.Content, problemData, ref imageCounter, discoveredImages) },
-        Footnote footnote => footnote with { Content = ProcessRawBlocks(footnote.Content, problemData, ref imageCounter, discoveredImages) },
+        // Complex nested blocks
+        TexParagraph paragraph => paragraph with { Content = ProcessRawBlocks(paragraph.Content, config, ref imageCounter, discoveredImages) },
+        ItemList list => list with { Items = ProcessListOfLists(list.Items, config, ref imageCounter, discoveredImages) },
+        BoldText bold => bold with { Content = ProcessRawBlocks(bold.Content, config, ref imageCounter, discoveredImages) },
+        ItalicText italic => italic with { Content = ProcessRawBlocks(italic.Content, config, ref imageCounter, discoveredImages) },
+        QuoteText quote => quote with { Content = ProcessRawBlocks(quote.Content, config, ref imageCounter, discoveredImages) },
+        Footnote footnote => footnote with { Content = ProcessRawBlocks(footnote.Content, config, ref imageCounter, discoveredImages) },
+        Theorem theorem => theorem with
+        {
+            Title = ProcessOptionalRawBlock(theorem.Title, config, ref imageCounter, discoveredImages),
+            Body = ProcessRawBlocks(theorem.Body, config, ref imageCounter, discoveredImages),
+            Proof = ProcessRawBlocks(theorem.Proof, config, ref imageCounter, discoveredImages)
+        },
+        Exercise exercise => exercise with
+        {
+            Title = ProcessOptionalRawBlock(exercise.Title, config, ref imageCounter, discoveredImages),
+            Body = ProcessRawBlocks(exercise.Body, config, ref imageCounter, discoveredImages),
+            Solution = ProcessRawBlocks(exercise.Solution, config, ref imageCounter, discoveredImages)
+        },
+        Problem problem => problem with
+        {
+            Title = ProcessOptionalRawBlock(problem.Title, config, ref imageCounter, discoveredImages),
+            Body = ProcessRawBlocks(problem.Body, config, ref imageCounter, discoveredImages),
+            Hint1 = ProcessRawBlocks(problem.Hint1, config, ref imageCounter, discoveredImages),
+            Hint2 = ProcessRawBlocks(problem.Hint2, config, ref imageCounter, discoveredImages),
+            Solution = ProcessRawBlocks(problem.Solution, config, ref imageCounter, discoveredImages)
+        },
+        Example example => example with
+        {
+            Title = ProcessOptionalRawBlock(example.Title, config, ref imageCounter, discoveredImages),
+            Body = ProcessRawBlocks(example.Body, config, ref imageCounter, discoveredImages),
+            Solution = ProcessRawBlocks(example.Solution, config, ref imageCounter, discoveredImages)
+        },
 
         // Blocks without images
         MathTex or PlainText => block,
@@ -136,15 +140,15 @@ public static class ProblemImageProcessor
     /// Processes a list of list-items (each item is a list of raw blocks), transforming each item independently.
     /// </summary>
     /// <param name="listOfLists">List-items to transform.</param>
-    /// <param name="problemData">Problem metadata for naming and lookups.</param>
+    /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed immutable list of list-items.</returns>
     private static ImmutableList<ImmutableList<RawContentBlock>> ProcessListOfLists(
         ImmutableList<ImmutableList<RawContentBlock>> listOfLists,
-        ProblemMetadata problemData,
+        ImageProcessingConfig config,
         ref int imageCounter,
-        ImmutableList<ProblemImageData>.Builder discoveredImages
+        ImmutableList<ImageData>.Builder discoveredImages
     )
     {
         // Build each new list item
@@ -152,7 +156,7 @@ public static class ProblemImageProcessor
 
         // Handle each list item
         foreach (var listItemBlocks in listOfLists)
-            outerBuilder.Add(ProcessRawBlocks(listItemBlocks, problemData, ref imageCounter, discoveredImages));
+            outerBuilder.Add(ProcessRawBlocks(listItemBlocks, config, ref imageCounter, discoveredImages));
 
         // We're happy
         return outerBuilder.ToImmutable();
@@ -162,15 +166,15 @@ public static class ProblemImageProcessor
     /// Transforms a list of raw content blocks by delegating to the general content block transformer.
     /// </summary>
     /// <param name="blocks">Raw blocks to transform.</param>
-    /// <param name="problemData">Problem metadata for naming and lookups.</param>
+    /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed immutable list of raw blocks.</returns>
     private static ImmutableList<RawContentBlock> ProcessRawBlocks(
         ImmutableList<RawContentBlock> blocks,
-        ProblemMetadata problemData,
+        ImageProcessingConfig config,
         ref int imageCounter,
-        ImmutableList<ProblemImageData>.Builder discoveredImages
+        ImmutableList<ImageData>.Builder discoveredImages
     )
     {
         // Build new list of blocks
@@ -178,56 +182,77 @@ public static class ProblemImageProcessor
 
         // Handle each block
         foreach (var block in blocks)
-            builder.Add((RawContentBlock)ProcessBlock(block, problemData, ref imageCounter, discoveredImages));
+            builder.Add((RawContentBlock)ProcessBlock(block, config, ref imageCounter, discoveredImages));
 
         // We're happy
         return builder.ToImmutable();
     }
 
     /// <summary>
+    /// Transforms a single optional raw content block by delegating to the general content block transformer.
+    /// </summary>
+    /// <param name="block">Optional raw block to transform.</param>
+    /// <param name="config">Configuration for image processing.</param>
+    /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="discoveredImages">Collector for discovered image metadata.</param>
+    /// <returns>Transformed optional raw block.</returns>
+    private static RawContentBlock? ProcessOptionalRawBlock(
+        RawContentBlock? block,
+        ImageProcessingConfig config,
+        ref int imageCounter,
+        ImmutableList<ImageData>.Builder discoveredImages
+    )
+    => block is null
+        ? null
+        : (RawContentBlock)ProcessBlock(block, config, ref imageCounter, discoveredImages);
+
+    /// <summary>
     /// Resolves, copies, and rewrites a single image node, recording discovered metadata for persistence.
     /// </summary>
     /// <param name="image">Image node to process.</param>
-    /// <param name="problemData">Problem metadata for naming and lookups.</param>
+    /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Updated image node with a stable content id.</returns>
     private static TexImage ProcessImage(
         TexImage image,
-        ProblemMetadata problemData,
+        ImageProcessingConfig config,
         ref int imageCounter,
-        ImmutableList<ProblemImageData>.Builder discoveredImages)
+        ImmutableList<ImageData>.Builder discoveredImages)
     {
-        // Resolve the image source path based on the TeX id and problem context.
-        var sourcePath = SkmoImageHelper.FindImageSourcePath(image.Id, problemData.OlympiadYear);
+        // Resolve the image source path using the provided resolver.
+        var sourcePath = config.ImageSourceResolver(image.Id);
 
         // If the source is missing...
         if (sourcePath == null)
         {
-            // Make aware
-            AnsiConsole.MarkupLine($"[yellow]Warning:[/] Problem [yellow]{problemData.Slug}[/] has a missing image: {image.Id}");
+            // Notify via the configured handler
+            config.OnMissingImage?.Invoke(image.Id);
 
             // No image changes
             return image;
         }
 
         // Build a deterministic file name for stable URLs.
-        var newFileName = $"{problemData.Slug}-{imageCounter}.svg";
+        var newFileName = $"{config.FileNamePrefix}-{imageCounter}.svg";
 
-        // Find its path in the public image dir
-        var newFilePath = Path.Combine(PublicImagesRelativePath, newFileName);
+        // Find its path in the output directory
+        var newFilePath = Path.Combine(config.OutputDirectory, newFileName);
 
-        // Copy the discovered source file into the public directory (overwrite to keep idempotence).
+        // Ensure the output directory exists
+        Directory.CreateDirectory(config.OutputDirectory);
+
+        // Copy the discovered source file into the output directory (overwrite to keep idempotence).
         File.Copy(sourcePath, newFilePath, overwrite: true);
 
-        // Use the new file name as the content id to link content JSON with DB metadata rows.
+        // Use the new file name as the content id to link content JSON with metadata.
         var contentId = newFileName;
 
         // Read intrinsic dimensions from the SVG to support better layout in the UI.
         var (width, height) = GetSvgDimensions(sourcePath);
 
         // We have an image
-        discoveredImages.Add(new ProblemImageData(
+        discoveredImages.Add(new ImageData(
             contentId,
             width,
             height,
