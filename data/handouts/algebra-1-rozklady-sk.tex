@@ -145,7 +145,10 @@ Bežný školský postup postupného rozkladu funguje aj v~ťažších úlohách
 \Example{}{
 	Rozložte výraz $a^4-a-b^4+b$ na súčin. 
 }{
-	Bez toho, aby sme videli výsledný rozklad, tak vieme povedať, že v~ňom bude $a-b$, pretože skúmaný výraz je pre $a=b$ rovný 0. Vďaka tomu cieľavedome preusporiadame členy ako $(a^4-b^4)+(a-b)$. Teraz vieme z~oboch výrazov vybrať $a-b$ pred zátvorku a~máme $(a-b)(a^3+a^2b+ab^2+b^3)+(a-b)=(a-b)(a^3+a^2b+ab^2+b^3+1)$.
+	Bez toho, aby sme videli výsledný rozklad, tak vieme povedať, že v~ňom bude $a-b$, pretože skúmaný výraz je pre $a=b$ rovný 0. Vďaka tomu cieľavedome preusporiadame členy ako $(a^4-b^4)+(a-b)$. Teraz vieme z~oboch výrazov vybrať $a-b$ pred zátvorku a~máme 
+	$$
+	(a-b)(a^3+a^2b+ab^2+b^3)-(a-b)=(a-b)(a^3+a^2b+ab^2+b^3-1).
+	$$
 }
 
 Tento pohľad vysvetľuje, prečo vo vzorcoch $a^n-b^n$ a~$a^n+b^n$ z~predošlej sekcie máme $a-b$ a~$a+b$; a~tiež prečo druhý vyžaduje nepárne $n$ -- pre $a=b$ resp. $a=-b$ sú $a^n-b^n$ resp. $a^n + b^n$ nulové.
@@ -301,18 +304,18 @@ Z~toho už ľahko odvodíme vzorec pre riešenia kvadratickej rovnice.
 Vo všeobecnosti sme vlastne použili $a^2+2ab = (a+b)^2 - b^2$. Dopĺňať na štvorec však môžeme aj tak, že \uv{vyrobíme} prostredný koeficient, teda použijeme vzorec $a^2+b^2=(a+b)^2-2ab$. Toto si demonštrujeme na nasledovnom príklade:
 
 \Example{}{
-	Rozložte $n^4+m^2n^2+n^4$ na súčin.
+    Rozložte $m^4+m^2n^2+n^4$ na súčin.
 }{
-	Prvé, čo nám môže napadnúť, je doplniť $n^4+m^2n^2$ na štvorec. Tým dostaneme 
-	$$
-	n^4+m^2n^2+m^4= \(n^2 +\frac{m^2}2\)^2 + \frac{3m^2}4.
-	$$
-	Toto nám veľmi nepomohlo. Skúsme niečo iné, doplňme na štvorec $n^4+m^4$. Potom máme 
-	$$
-	\gather
-	n^4+n^2m^2+m^4 = (n^4+m^4)+n^2m^2 = (n^2+m^2)^2 - 2n^2m^2 + n^2m^2 = \\ = (n^2+m^2)^2 - n^2m^2 = (n^2+m^2-nm)(n^2+m^2+nm).
-	\endgather
-	$$
+    Prvé, čo nám môže napadnúť, je doplniť $m^4+m^2n^2$ na štvorec. Tým dostaneme 
+    $$
+    m^4+m^2n^2+n^4= \(m^2 +\frac{n^2}2\)^2 + \frac{3n^4}4.
+    $$
+    Toto nám veľmi nepomohlo. Skúsme niečo iné, doplňme na štvorec $m^4+n^4$. Potom máme 
+    $$
+    \gather
+    m^4+m^2n^2+n^4 = (m^4+n^4)+m^2n^2 = (m^2+n^2)^2 - 2m^2n^2 + m^2n^2 = \\ = (m^2+n^2)^2 - m^2n^2 = (m^2+n^2-mn)(m^2+n^2+mn).
+    \endgather
+    $$
 }
 
 Precvičte si to na odvodení známej identity:
