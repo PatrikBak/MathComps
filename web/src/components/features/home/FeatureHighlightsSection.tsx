@@ -14,7 +14,7 @@ export default function FeatureHighlights() {
       description: (
         <>
           Databáza súťažných úloh s&nbsp;možnosťou vyhľadávať podľa kľúčových slov a ďalších
-          kritérii.
+          kritérií.
         </>
       ),
     },
