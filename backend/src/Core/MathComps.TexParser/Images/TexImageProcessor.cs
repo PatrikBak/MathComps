@@ -102,6 +102,7 @@ public static class TexImageProcessor
         ItalicText italic => italic with { Content = ProcessRawBlocks(italic.Content, config, ref imageCounter, discoveredImages) },
         QuoteText quote => quote with { Content = ProcessRawBlocks(quote.Content, config, ref imageCounter, discoveredImages) },
         Footnote footnote => footnote with { Content = ProcessRawBlocks(footnote.Content, config, ref imageCounter, discoveredImages) },
+        Link link => link with { Content = ProcessRawBlocks(link.Content, config, ref imageCounter, discoveredImages) },
         Theorem theorem => theorem with
         {
             Title = ProcessOptionalRawBlock(theorem.Title, config, ref imageCounter, discoveredImages),

@@ -49,6 +49,7 @@ export type RawContentBlock =
   | { type: 'italic'; content: RawContentBlock[] }
   | { type: 'quote'; content: RawContentBlock[] }
   | { type: 'footnote'; content: RawContentBlock[] }
+  | { type: 'link'; url: string; content: RawContentBlock[] }
   | { type: 'text'; text: string }
 
 /** Represents a theorem environment with an optional title, a body, and a proof. */

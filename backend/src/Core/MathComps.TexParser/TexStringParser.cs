@@ -786,8 +786,69 @@ public static class TexStringParser
                 // Extract the command name from the input (may be empty if there were no letters).
                 var commandName = sourceText[commandNameStartIndex..scanIndex];
 
+                // Handle the Link command which has a bracketed argument and a braced argument.
+                if (commandName == "Link")
+                {
+                    // Flush any text that was being accumulated before this command
+                    FlushAccumulatedText();
+
+                    // Move the main cursor to just after the command name.
+                    currentIndexRef = scanIndex;
+
+                    // Skip any whitespace that may appear between the command and its opening bracket.
+                    while (currentIndexRef < sourceText.Length && char.IsWhiteSpace(sourceText[currentIndexRef]))
+                        currentIndexRef++;
+
+                    // Parse the optional bracketed argument [url]
+                    string url;
+                    if (currentIndexRef < sourceText.Length && sourceText[currentIndexRef] == '[')
+                    {
+                        // Find the closing bracket
+                        var closingBracketIndex = sourceText.IndexOf(']', currentIndexRef + 1);
+
+                        // Ensure it's there
+                        if (closingBracketIndex < 0)
+                            throw new TexParserException($"Unclosed bracket in \\Link at: {sourceText.PreviewAt(currentIndexRef)}");
+
+                        // Extract the URL
+                        url = sourceText[(currentIndexRef + 1)..closingBracketIndex].Trim();
+
+                        // Advance past the closing bracket
+                        currentIndexRef = closingBracketIndex + 1;
+                    }
+                    // The [ should be there
+                    else throw new TexParserException($"Missing bracketed URL argument in \\Link at: {sourceText.PreviewAt(currentIndexRef)}");
+
+                    // Skip any whitespace between the bracket and the brace
+                    while (currentIndexRef < sourceText.Length && char.IsWhiteSpace(sourceText[currentIndexRef]))
+                        currentIndexRef++;
+
+                    // If we do not find an opening brace, it's an error
+                    if (currentIndexRef >= sourceText.Length || sourceText[currentIndexRef] != '{')
+                        throw new TexParserException($"Missing braced text argument in \\Link at: {sourceText.PreviewAt(currentIndexRef)}");
+
+                    // Consume the opening brace so the recursive call starts inside the group.
+                    currentIndexRef++;
+
+                    // Create a temporary container for the link's inner content.
+                    var linkContent = new List<RawContentBlock>();
+
+                    // Recursively parse until the matching '}' of this command's argument.
+                    ParseInlineRecursive(
+                        sourceText: sourceText,
+                        currentIndexRef: ref currentIndexRef,
+                        terminatorCharacter: '}',
+                        outputBlocks: linkContent
+                    );
+
+                    // Create the link block
+                    outputBlocks.Add(new Link(url, [.. linkContent]));
+
+                    // Continue parsing after the command's closing brace.
+                    continue;
+                }
                 // Handle the image command which has one or two braced arguments.
-                if (commandName == "Image")
+                else if (commandName == "Image")
                 {
                     // Flush any text that was being accumulated before this command
                     FlushAccumulatedText();
@@ -1242,6 +1303,7 @@ public static class TexStringParser
             ItalicText italic => GatherFromRaw(italic.Content),
             QuoteText quote => GatherFromRaw(quote.Content),
             Footnote footnote => GatherFromRaw(footnote.Content),
+            Link link => GatherFromRaw(link.Content),
 
             // Handle all blocks from all items
             ItemList list => GatherFromRaw(list.Items.Flatten()),

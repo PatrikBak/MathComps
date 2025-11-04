@@ -53,6 +53,17 @@ export function getProblemImageUrl(contentId: string, type: ImageType): string {
 }
 
 /**
+ * Builds the API URL for downloading a document asset by its identifier.
+ *
+ * @param documentId - The unique identifier of the document asset
+ * @returns The API URL path to the document asset
+ */
+export function getDocumentUrl(documentId: string): string {
+  const baseUrl = getApiBaseUrl()
+  return `${baseUrl}/documents/${documentId}`
+}
+
+/**
  * Builds the API URL for fetching a single problem by its slug.
  * The slug is URL-encoded to handle special characters safely.
  *

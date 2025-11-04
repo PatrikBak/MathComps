@@ -20,6 +20,7 @@ namespace MathComps.TexParser.Types;
 [JsonDerivedType(typeof(BoldText), typeDiscriminator: "bold")]
 [JsonDerivedType(typeof(ItalicText), typeDiscriminator: "italic")]
 [JsonDerivedType(typeof(QuoteText), typeDiscriminator: "quote")]
+[JsonDerivedType(typeof(Link), typeDiscriminator: "link")]
 public abstract record ContentBlock;
 
 /// <summary>
@@ -94,6 +95,7 @@ public record Example(
 [JsonDerivedType(typeof(BoldText), typeDiscriminator: "bold")]
 [JsonDerivedType(typeof(ItalicText), typeDiscriminator: "italic")]
 [JsonDerivedType(typeof(QuoteText), typeDiscriminator: "quote")]
+[JsonDerivedType(typeof(Link), typeDiscriminator: "link")]
 public record RawContentBlock : ContentBlock;
 
 /// <summary>
@@ -157,3 +159,10 @@ public record MathTex(string Text, bool IsDisplay) : RawContentBlock;
 /// </summary>
 /// <param name="Text">The raw text to be printed as it is.</param>
 public record PlainText(string Text) : RawContentBlock;
+
+/// <summary>
+/// Represents a hyperlink with a URL and display text. Corresponds to the \Link[url]{text} command.
+/// </summary>
+/// <param name="Url">The URL or file path to link to.</param>
+/// <param name="Content">The inline content that should be displayed as the link text.</param>
+public record Link(string Url, ImmutableList<RawContentBlock> Content) : RawContentBlock;

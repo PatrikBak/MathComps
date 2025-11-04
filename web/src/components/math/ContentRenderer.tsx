@@ -6,9 +6,10 @@ import type {
   ListStyleType,
   RawContentBlock,
 } from '@/components/features/handouts/types/handout-types'
-import { getProblemImageUrl } from '@/components/features/problems/utils/url-utils'
+import { getDocumentUrl, getProblemImageUrl } from '@/components/features/problems/utils/url-utils'
 import FootnoteRef from '@/components/math/FootnoteRef'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'
+import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { ProblemImage } from '../features/problems/types/problem-api-types'
@@ -215,6 +216,24 @@ export function renderRawContentBlock(
           ))}
         </q>
       )
+    case 'link': {
+      // Detect if the URL is an external URL or a file path
+      const isExternalUrl = /^https?:\/\//i.test(block.url)
+      const href = isExternalUrl ? block.url : getDocumentUrl(block.url)
+
+      return (
+        <AppLink
+          href={href}
+          className="text-blue-400 hover:text-blue-300 underline transition-colors"
+          external={isExternalUrl}
+          newTab
+        >
+          {block.content.map((child, index) => (
+            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
+          ))}
+        </AppLink>
+      )
+    }
     case 'footnote': {
       return (
         <FootnoteRef>
