@@ -12,18 +12,14 @@ import { parseDimensions } from '@/components/math/utils/dimension-parser'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { ProblemImage } from '../features/problems/types/problem-api-types'
+import type { ImageType } from '../features/problems/utils/url-utils'
 import { MathRendererClient } from './MathRendererClient'
 
 type ContentRendererProps = {
   content: RawContentBlock[]
+  imagesById: Record<string, ProblemImage>
+  imageType: ImageType
   className?: string
-  imagesById?: Record<string, ProblemImage>
-}
-
-function InlineText({ text }: { text: string }) {
-  // Using a non-breaking space for the leading space to prevent it from
-  // being collapsed when rendered inside a flex container.
-  return <>{text.replace(/^ /, '\u00A0')}</>
 }
 
 function ImageWithPlaceholder({
@@ -43,7 +39,19 @@ function ImageWithPlaceholder({
   isInline: boolean
   scale: number
 }) {
-  const { widthPx, heightPx } = parseDimensions(width, height)
+  // Parse dimensions
+  let { widthPx, heightPx } = parseDimensions(width, height)
+
+  // Ensure parsing dimensions was successful
+  if (!widthPx || !heightPx) {
+    console.error('Invalid dimensions for image:', { width, height })
+
+    // Fallback to default dimensions
+    widthPx = 200
+    heightPx = 200
+  }
+
+  // Track image load state
   const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>('loading')
 
   // Handle successful image load - Next.js Image component uses onLoad
@@ -61,8 +69,8 @@ function ImageWithPlaceholder({
     <div
       className="flex items-center justify-center absolute inset-0"
       style={{
-        width: widthPx,
-        height: heightPx,
+        width: widthPx * scale,
+        height: heightPx * scale,
       }}
     >
       <Loader2 className="text-gray-400 animate-spin" size={isInline ? 16 : 24} strokeWidth={2} />
@@ -74,8 +82,8 @@ function ImageWithPlaceholder({
     <div
       className="flex items-center justify-center absolute inset-0"
       style={{
-        width: widthPx,
-        height: heightPx,
+        width: widthPx * scale,
+        height: heightPx * scale,
       }}
     >
       <ImageOff className="text-gray-500" size={isInline ? 16 : 24} strokeWidth={1.5} />
@@ -87,13 +95,12 @@ function ImageWithPlaceholder({
       <span
         className="inline-flex items-center justify-center align-middle relative bg-white rounded p-1"
         style={{
-          zoom: scale,
           display: 'inline-flex',
           verticalAlign: 'middle',
           margin: '0 0.25em',
           lineHeight: 0,
-          width: widthPx,
-          height: heightPx,
+          width: widthPx * scale,
+          height: heightPx * scale,
         }}
       >
         {loadState === 'loading' && <LoadingPlaceholder />}
@@ -121,8 +128,8 @@ function ImageWithPlaceholder({
       <div
         className="flex items-center justify-center relative bg-white rounded-lg p-1"
         style={{
-          width: widthPx,
-          height: heightPx,
+          width: widthPx * scale,
+          height: heightPx * scale,
         }}
       >
         {loadState === 'loading' && <LoadingPlaceholder />}
@@ -165,19 +172,30 @@ function getOrderedListStyleClass({ style }: { style?: ListStyleType | null }) {
   }
 }
 
+/**
+ * Renders a raw content block (a parsed block which can contain text, math, lists, etc.).
+ *
+ * @param block - The raw content block to render
+ * @param imagesById - Optional mapping of image IDs to ProblemImage objects
+ * @param imageType - Optional type of the image (problems or handouts)
+ * @returns The rendered content block
+ */
 export function renderRawContentBlock(
   block: RawContentBlock,
-  imagesById?: Record<string, ProblemImage>
+  imagesById: Record<string, ProblemImage>,
+  imageType: ImageType
 ): React.ReactNode {
   switch (block.type) {
     case 'text':
-      // Inline text with math
-      return <InlineText text={block.text} />
+      // Inline text
+      // Using a non-breaking space for the leading space to prevent it from
+      // being collapsed when rendered inside a flex container.
+      return <>{block.text.replace(/^ /, '\u00A0')}</>
     case 'bold':
       return (
         <strong>
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById)}</span>
+            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
           ))}
         </strong>
       )
@@ -185,7 +203,7 @@ export function renderRawContentBlock(
       return (
         <em>
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById)}</span>
+            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
           ))}
         </em>
       )
@@ -193,7 +211,7 @@ export function renderRawContentBlock(
       return (
         <q className="italic">
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById)}</span>
+            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
           ))}
         </q>
       )
@@ -202,7 +220,8 @@ export function renderRawContentBlock(
         <FootnoteRef>
           {renderRawContentBlock(
             { type: 'paragraph', content: block.content } as RawContentBlock,
-            imagesById
+            imagesById,
+            imageType
           )}
         </FootnoteRef>
       )
@@ -227,7 +246,7 @@ export function renderRawContentBlock(
     case 'list': {
       const listStyle = getOrderedListStyleClass({ style: block.styleType })
       const renderListItem = (listItem: RawContentBlock[]) => {
-        return renderInlineContent(listItem, imagesById)
+        return renderInlineContent(listItem, imagesById, imageType)
       }
       return (
         <ul className={cn('mb-4 pl-6 space-y-1 text-gray-300', listStyle.className)}>
@@ -261,13 +280,13 @@ export function renderRawContentBlock(
           flushInlineRun()
           paragraphParts.push(
             <div key={`b-${paragraphParts.length}`}>
-              {renderRawContentBlock(childBlock, imagesById)}
+              {renderRawContentBlock(childBlock, imagesById, imageType)}
             </div>
           )
         } else {
           inlineRun.push(
             <React.Fragment key={childIndex}>
-              {renderRawContentBlock(childBlock, imagesById)}
+              {renderRawContentBlock(childBlock, imagesById, imageType)}
             </React.Fragment>
           )
         }
@@ -282,18 +301,31 @@ export function renderRawContentBlock(
       )
     }
     case 'image': {
-      const imagePath = getProblemImageUrl(block.id)
+      const imagePath = getProblemImageUrl(block.id, imageType)
       const scale = block.scale || 1
       const isInline = block.isInline
       const meta = imagesById?.[block.id]
+
+      if (!meta) {
+        // Log
+        console.error(`Image metadata not found for image: ${imagePath}`)
+
+        // Image metadata not found - render error placeholder
+        return (
+          <span className="inline-flex items-center gap-1 text-gray-500 text-sm">
+            <ImageOff size={16} strokeWidth={1.5} />
+            <span className="italic">Obrázok sa stratil</span>
+          </span>
+        )
+      }
 
       if (isInline) {
         return (
           <ImageWithPlaceholder
             src={imagePath}
             alt=""
-            width={meta?.width}
-            height={meta?.height}
+            width={meta.width}
+            height={meta.height}
             className="inline-block align-middle"
             isInline={isInline}
             scale={scale}
@@ -304,8 +336,8 @@ export function renderRawContentBlock(
           <ImageWithPlaceholder
             src={imagePath}
             alt=""
-            width={meta?.width}
-            height={meta?.height}
+            width={meta.width}
+            height={meta.height}
             className="block"
             isInline={isInline}
             scale={scale}
@@ -325,7 +357,8 @@ export function renderRawContentBlock(
  */
 export function renderInlineContent(
   content: RawContentBlock[],
-  imagesById?: Record<string, ProblemImage>
+  imagesById: Record<string, ProblemImage>,
+  imageType: ImageType
 ): React.ReactNode {
   const inlineNodes: React.ReactNode[] = []
 
@@ -337,13 +370,15 @@ export function renderInlineContent(
         const child = block.content[j]
         inlineNodes.push(
           <React.Fragment key={`p-${i}-${j}`}>
-            {renderRawContentBlock(child, imagesById)}
+            {renderRawContentBlock(child, imagesById, imageType)}
           </React.Fragment>
         )
       }
     } else {
       inlineNodes.push(
-        <React.Fragment key={i}>{renderRawContentBlock(block, imagesById)}</React.Fragment>
+        <React.Fragment key={i}>
+          {renderRawContentBlock(block, imagesById, imageType)}
+        </React.Fragment>
       )
     }
   }
@@ -357,7 +392,8 @@ export function renderInlineContent(
  */
 export function renderBlocks(
   blocks: RawContentBlock[] | null | undefined,
-  imagesById?: Record<string, ProblemImage>
+  imagesById: Record<string, ProblemImage>,
+  imageType: ImageType
 ): React.ReactNode {
   if (!blocks) {
     return null
@@ -365,14 +401,23 @@ export function renderBlocks(
   return (
     <>
       {blocks.map((block, index) => (
-        <React.Fragment key={index}>{renderRawContentBlock(block, imagesById)}</React.Fragment>
+        <React.Fragment key={index}>
+          {renderRawContentBlock(block, imagesById, imageType)}
+        </React.Fragment>
       ))}
     </>
   )
 }
 
-export function ContentRenderer({ content, className, imagesById }: ContentRendererProps) {
+export function ContentRenderer({
+  content,
+  className,
+  imagesById,
+  imageType,
+}: ContentRendererProps) {
   return (
-    <div className={cn('content-renderer', className)}>{renderBlocks(content, imagesById)}</div>
+    <div className={cn('content-renderer', className)}>
+      {renderBlocks(content, imagesById, imageType)}
+    </div>
   )
 }

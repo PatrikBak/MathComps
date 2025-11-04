@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import type {
-  Document,
+  HandoutData,
   HandoutEntry,
   HandoutSection,
 } from '@/components/features/handouts/types/handout-types'
@@ -18,11 +18,11 @@ import { generatePageMetadata } from '@/lib/metadata'
  * the provided slug, then dynamically imports its JSON content from the content directory.
  *
  * @param slug - The URL-friendly identifier for the handout
- * @returns An object containing the loaded document and its metadata entry
+ * @returns An object containing the loaded document, images, and its metadata entry
  */
 async function loadDocumentBySlug(
   slug: string
-): Promise<{ document: Document; entry: HandoutEntry }> {
+): Promise<{ handout: HandoutData; entry: HandoutEntry }> {
   // Load the handout index and flatten all sections into a single array of entries
   const sections = handoutIndex as unknown as HandoutSection[]
   const flatEntries = sections.flatMap((section) => section.handouts)
@@ -36,10 +36,11 @@ async function loadDocumentBySlug(
   // Dynamically import the handout's JSON file from the content directory.
   // This enables Next.js to code-split and only load the specific handout being viewed,
   // rather than bundling all handout content into the initial page load.
-  const documentModule = await import(`@/content/handouts/${entry.data.filename}`)
+  const handoutModule = await import(`@/content/handouts/${entry.data.filename}`)
+  const handoutData = handoutModule.default as HandoutData
 
-  // Return the parsed document and its metadata
-  return { document: documentModule.default as Document, entry }
+  // Return the parsed handout data and its metadata entry
+  return { handout: handoutData, entry }
 }
 
 /**
@@ -119,14 +120,14 @@ export default async function RenderPage({ params }: { params: Promise<{ slug: s
   const { slug } = await params
 
   try {
-    // Attempt to load the handout document and its metadata
-    const { document, entry } = await loadDocumentBySlug(slug)
+    // Attempt to load the handout document, images, and its metadata
+    const { handout, entry } = await loadDocumentBySlug(slug)
 
     // Ensure data exists (should always be true after loadDocumentBySlug)
     if (!entry.data) throw new Error('Invalid handout data')
 
-    // Render the handout detail component with the loaded document and author information
-    return <HandoutDetail document={document} authors={entry.data.authors} />
+    // Render the handout detail component with the loaded document, images, and author information
+    return <HandoutDetail handout={handout} authors={entry.data.authors} />
   } catch {
     // If the handout doesn't exist or fails to load, show Next.js's 404 page
     notFound()

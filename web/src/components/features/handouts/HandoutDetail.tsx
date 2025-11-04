@@ -3,7 +3,12 @@
 import { ChevronRight, Users } from 'lucide-react'
 import React from 'react'
 
-import type { Document, RawContentBlock } from '@/components/features/handouts/types/handout-types'
+import type {
+  Document,
+  HandoutData,
+  HandoutImage,
+  RawContentBlock,
+} from '@/components/features/handouts/types/handout-types'
 import Layout from '@/components/layout/Layout'
 import {
   renderBlocks,
@@ -22,12 +27,21 @@ import { PAGE_LAYOUT } from '@/constants/common-section-styles'
 import { CollapsibleCard } from './Cards'
 
 type HandoutDetailProps = {
-  document: Document
+  handout: HandoutData
   authors: string[]
 }
 
+/**
+ * All images are of type 'handouts', obviously. This is passed to the
+ * render functions to ensure fetching images from a correct endpoint.
+ */
+const imageType = 'handouts'
+
 // Render a title that can be either a string or RawContentBlock
-function renderTitle(title: RawContentBlock | null | undefined): React.ReactNode {
+function renderTitle(
+  title: RawContentBlock | null | undefined,
+  imagesById: Record<string, HandoutImage>
+): React.ReactNode {
   if (!title) return null
 
   if (title.type === 'text') {
@@ -37,11 +51,11 @@ function renderTitle(title: RawContentBlock | null | undefined): React.ReactNode
   // For complex titles, render as React elements to preserve formatting.
   // Crucially, use renderInlineContent to avoid block-level wrappers like <p>.
   if (title.type === 'paragraph' || title.type === 'bold' || title.type === 'italic') {
-    return renderInlineContent(title.content)
+    return renderInlineContent(title.content, imagesById, imageType)
   }
 
   // Fallback for unexpected types, though paragraph should cover most cases.
-  return renderRawContentBlock(title)
+  return renderRawContentBlock(title, imagesById, imageType)
 }
 
 function renderDifficultyStars(difficulty: number): React.ReactNode {
@@ -90,7 +104,8 @@ function renderDocumentSections(
     title: string
     level: number
     sectionIndex: number
-  }>
+  }>,
+  imagesById: Record<string, HandoutImage>
 ) {
   const localizedEnvironmentLabelByType: Record<
     'theorem' | 'exercise' | 'example' | 'problem',
@@ -201,7 +216,7 @@ function renderDocumentSections(
               environmentNumber
             )
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
-            const userProvidedTitle = renderTitle(contentBlock.title)
+            const userProvidedTitle = renderTitle(contentBlock.title, imagesById)
             const difficultyStars =
               contentBlock.type === 'problem'
                 ? renderDifficultyStars(contentBlock.difficulty)
@@ -224,7 +239,7 @@ function renderDocumentSections(
                     subtitle={subtitleBadge}
                     id={environmentId}
                   >
-                    {renderBlocks(contentBlock.body)}
+                    {renderBlocks(contentBlock.body, imagesById, imageType)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
@@ -252,7 +267,7 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.proof)}
+                          {renderBlocks(contentBlock.proof, imagesById, imageType)}
                         </div>
                       </details>
                     </div>
@@ -270,7 +285,7 @@ function renderDocumentSections(
                     subtitle={subtitleBadge}
                     id={environmentId}
                   >
-                    {renderBlocks(contentBlock.body)}
+                    {renderBlocks(contentBlock.body, imagesById, imageType)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
@@ -298,7 +313,7 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.solution)}
+                          {renderBlocks(contentBlock.solution, imagesById, imageType)}
                         </div>
                       </details>
                     </div>
@@ -316,7 +331,7 @@ function renderDocumentSections(
                     subtitle={subtitleBadge}
                     id={environmentId}
                   >
-                    {renderBlocks(contentBlock.body)}
+                    {renderBlocks(contentBlock.body, imagesById, imageType)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
@@ -344,7 +359,7 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.solution)}
+                          {renderBlocks(contentBlock.solution, imagesById, imageType)}
                         </div>
                       </details>
                     </div>
@@ -362,7 +377,7 @@ function renderDocumentSections(
                   subtitle={subtitleBadge}
                   id={environmentId}
                 >
-                  <div>{renderBlocks(contentBlock.body)}</div>
+                  <div>{renderBlocks(contentBlock.body, imagesById, imageType)}</div>
                   <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                     {contentBlock.hint1 && (
                       <details className="group">
@@ -379,7 +394,7 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.hint1)}
+                          {renderBlocks(contentBlock.hint1, imagesById, imageType)}
                         </div>
                       </details>
                     )}
@@ -399,7 +414,7 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.hint2)}
+                          {renderBlocks(contentBlock.hint2, imagesById, imageType)}
                         </div>
                       </details>
                     )}
@@ -431,7 +446,7 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.solution)}
+                          {renderBlocks(contentBlock.solution, imagesById, imageType)}
                         </div>
                       </details>
                     )}
@@ -443,7 +458,7 @@ function renderDocumentSections(
 
           return (
             <div key={`${metadata.label}-blk-${contentBlockIndex}`}>
-              {renderRawContentBlock(contentBlock as RawContentBlock)}
+              {renderRawContentBlock(contentBlock as RawContentBlock, imagesById, imageType)}
             </div>
           )
         })}
@@ -462,7 +477,15 @@ function renderDocumentSections(
  * ensures a fast initial page load from the server, with mathematical content being
  * rendered asynchronously on the client-side.
  */
-export default function HandoutDetail({ document: documentContent, authors }: HandoutDetailProps) {
+export default function HandoutDetail({ handout, authors }: HandoutDetailProps) {
+  const { document: documentContent, images } = handout
+  // Create images lookup map
+  const imagesById = React.useMemo(() => {
+    const map: Record<string, HandoutImage> = {}
+    for (const image of images) map[image.contentId] = image
+    return map
+  }, [images])
+
   // Compute section metadata once for both TOC and rendering
   const sectionMetadata = computeSectionMetadata(documentContent)
 
@@ -519,7 +542,7 @@ export default function HandoutDetail({ document: documentContent, authors }: Ha
               </div>
             </header>
 
-            {renderDocumentSections(documentContent, sectionMetadata)}
+            {renderDocumentSections(documentContent, sectionMetadata, imagesById)}
           </div>
 
           <aside className="mt-8">

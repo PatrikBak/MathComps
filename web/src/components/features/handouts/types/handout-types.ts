@@ -108,4 +108,18 @@ export type Document = {
   sections: DocumentSection[]
 }
 
+/** Image metadata for handouts, matching the backend ImageData structure */
+export type HandoutImage = {
+  contentId: string
+  width: string
+  height: string
+  scale: number
+}
+
+/** Wrapper type for handout JSON files that includes both document and images */
+export type HandoutData = {
+  document: Document
+  images: HandoutImage[]
+}
+
 // #endregion

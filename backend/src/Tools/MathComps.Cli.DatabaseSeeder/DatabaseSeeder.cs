@@ -2,6 +2,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared;
 using MathComps.Shared.Cli;
+using MathComps.TexParser.Images;
 using MathComps.TexParser.Types;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
@@ -18,6 +19,15 @@ namespace MathComps.Cli.DatabaseSeeder;
 /// <param name="dbContext">The database context used for all data operations.</param>
 public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 {
+    #region Constants
+
+    /// <summary>
+    /// Relative path to the API's public problem images directory.
+    /// </summary>
+    private const string ProblemImagesOutputDirectory = "../../Api/MathComps.Api/wwwroot/images/problems";
+
+    #endregion
+
     #region Helper types
 
     /// <summary>
@@ -236,13 +246,18 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
                 #region Handle images
 
-                // Create the common metadata for image processing
-                var problemImageMetadata = new ProblemImageProcessor.ProblemMetadata(problemSlug, parsedProblem.RawProblem.OlympiadYear);
+                // Configure image processing for this problem
+                var imageConfig = new ImageProcessingConfig(
+                    ImageSourceResolver: imageId => SkmoImageHelper.FindImageSourcePath(imageId, parsedProblem.RawProblem.OlympiadYear),
+                    FileNamePrefix: problemSlug,
+                    OutputDirectory: ProblemImagesOutputDirectory,
+                    OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Problem [yellow]{problemSlug}[/] has a missing image: {imageId}")
+                );
 
                 // Process images: copy them to a public location, update the parsed content,
                 // and gather the physical image data to be saved to the database.
-                var statementProcessingResult = ProblemImageProcessor.Process(parsedProblem.ParsedStatement, problemImageMetadata);
-                var solutionProcessingResult = ProblemImageProcessor.Process(parsedProblem.ParsedSolution, problemImageMetadata);
+                var statementProcessingResult = TexImageProcessor.Process(parsedProblem.ParsedStatement, imageConfig);
+                var solutionProcessingResult = TexImageProcessor.Process(parsedProblem.ParsedSolution, imageConfig);
 
                 // Update the parsed problem with the new data
                 parsedProblem = parsedProblem with
@@ -879,7 +894,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         string problemSlug,
         Guid roundInstanceId,
         List<Author> orderedAuthors,
-        ImmutableList<ProblemImageData> images)
+        ImmutableList<ImageData> images)
     {
         // Try to fetch this problem for update logic...
         var existingProblem = await dbContext.Problems.SingleOrDefaultAsync(problem =>
