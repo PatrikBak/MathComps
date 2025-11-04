@@ -215,12 +215,13 @@ input[type='checkbox']:focus:not(:focus-visible) {
 /* On mobile, keep inline math intact but scrollable */
 @media (max-width: 640px) {
   .math-inline {
-    white-space: nowrap;
     display: inline-flex;
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+    /* This is to prevent some weird random not-needed scrollbars */
+    padding-inline: 2px;
   }
 
   /* Reduce inline math size in article context */
@@ -256,6 +257,8 @@ input[type='checkbox']:focus:not(:focus-visible) {
 .katex-display > .katex,
 .article--math .math-display {
   font-size: 1.05em;
+  /* This is to prevent some weird random not-needed scrollbars */
+  padding-block: 2px;
 }
 .katex-display {
   margin-block: 1.2rem;

@@ -1451,19 +1451,15 @@
                     },
                     {
                       "type": "text",
-                      "text": " pred zátvorku a\u00A0máme "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(a-b)(a^3+a^2b+ab^2+b^3)+(a-b)=(a-b)(a^3+a^2b+ab^2+b^3+1)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
+                      "text": " pred zátvorku a\u00A0máme"
                     }
                   ],
                   "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a-b)(a^3+a^2b+ab^2+b^3)-(a-b)=(a-b)(a^3+a^2b+ab^2+b^3-1).",
+                  "isDisplay": true
                 }
               ]
             },
@@ -2448,7 +2444,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "n^4+m^2n^2+n^4",
+                      "text": "m^4+m^2n^2+n^4",
                       "isDisplay": false
                     },
                     {
@@ -2469,7 +2465,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "n^4+m^2n^2",
+                      "text": "m^4+m^2n^2",
                       "isDisplay": false
                     },
                     {
@@ -2481,7 +2477,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "n^4+m^2n^2+m^4= \\left(n^2 +\\frac{m^2}2\\right)^2 + \\frac{3m^2}4.",
+                  "text": "m^4+m^2n^2+n^4= \\left(m^2 +\\frac{n^2}2\\right)^2 + \\frac{3n^4}4.",
                   "isDisplay": true
                 },
                 {
@@ -2493,7 +2489,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "n^4+m^4",
+                      "text": "m^4+n^4",
                       "isDisplay": false
                     },
                     {
@@ -2505,7 +2501,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\begin{gather*}\nn^4+n^2m^2+m^4 = (n^4+m^4)+n^2m^2 = (n^2+m^2)^2 - 2n^2m^2 + n^2m^2 = \\\\ = (n^2+m^2)^2 - n^2m^2 = (n^2+m^2-nm)(n^2+m^2+nm).\n\\end{gather*}",
+                  "text": "\\begin{gather*}\nm^4+m^2n^2+n^4 = (m^4+n^4)+m^2n^2 = (m^2+n^2)^2 - 2m^2n^2 + m^2n^2 = \\\\ = (m^2+n^2)^2 - m^2n^2 = (m^2+n^2-mn)(m^2+n^2+mn).\n\\end{gather*}",
                   "isDisplay": true
                 }
               ]
