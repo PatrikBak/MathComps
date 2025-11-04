@@ -2,6 +2,11 @@ import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 import { ROUTES } from '@/constants/routes'
 
 /**
+ * The suffix for the URL endpoint for images for different types of content.
+ */
+export type ImageType = 'problems' | 'handouts'
+
+/**
  * Retrieves the base API URL from environment variables.
  *
  * @returns The base API URL with no trailing slash
@@ -39,11 +44,12 @@ function buildApiUrl(path: string): string {
  * Builds a public URL to a problem image by its content id.
  *
  * @param contentId - The unique identifier of the problem content/image
+ * @param type - The type of the image (problems or handouts)
  * @returns The API URL path to the problem image
  */
-export function getProblemImageUrl(contentId: string): string {
+export function getProblemImageUrl(contentId: string, type: ImageType): string {
   const baseUrl = getApiBaseUrl()
-  return `${baseUrl}/images/problems/${contentId}`
+  return `${baseUrl}/images/${type}/${contentId}`
 }
 
 /**
