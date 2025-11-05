@@ -31,15 +31,15 @@ const NavigationLink = ({ href, children, onClick }: NavigationLinkProps) => (
 )
 
 /**
- * Mobile-friendly navigation drawer that slides out from the left side.
+ * Mobile-friendly navigation drawer that slides down from the top.
  * Contains the main navigation links in a mobile-optimized layout.
  *
  * Features:
- * - Smooth slide animation from left
+ * - Smooth slide animation from top
  * - Backdrop overlay with blur effect
  * - Escape key and backdrop click to close
  * - Prevents background scrolling when open
- * - Full-height layout optimized for mobile screens
+ * - Full-width layout optimized for mobile screens
  */
 export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDrawerProps) => {
   // Prevent background scrolling when drawer is open
@@ -83,13 +83,13 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
         <Transition.Child
           as={Fragment}
           enter="transition-transform ease-out duration-300"
-          enterFrom="-translate-x-full"
-          enterTo="translate-x-0"
+          enterFrom="-translate-y-full"
+          enterTo="translate-y-0"
           leave="transition-transform ease-in duration-200"
-          leaveFrom="translate-x-0"
-          leaveTo="-translate-x-full"
+          leaveFrom="translate-y-0"
+          leaveTo="-translate-y-full"
         >
-          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-slate-800 shadow-xl">
+          <div className="fixed left-0 top-0 w-full bg-slate-800 shadow-xl">
             {/* Header with logo and close button */}
             <div className="flex items-center justify-between border-b border-slate-600/60 p-3 h-14 sm:h-16 lg:h-20">
               <MathCompsLogo />
@@ -103,7 +103,7 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
             </div>
 
             {/* Navigation Content */}
-            <div className="h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] overflow-y-auto">
+            <div className="max-h-[calc(100vh-3.5rem)] sm:max-h-[calc(100vh-4rem)] lg:max-h-[calc(100vh-5rem)] overflow-y-auto">
               <div className="p-6">
                 <nav className="space-y-1">
                   <NavigationLink href={ROUTES.PROBLEMS} onClick={onClose}>
