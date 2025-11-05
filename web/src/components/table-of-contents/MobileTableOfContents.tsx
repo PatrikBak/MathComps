@@ -97,13 +97,13 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Menu className="h-4 w-4 text-gray-400 shrink-0" />
-                  <div className="flex items-start gap-2 text-sm">
+                  <div className="flex items-start gap-2 text-sm min-w-0 flex-1">
                     <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[2rem] pt-0.5">
                       {items[activeIndex].label}
                     </span>
-                    <span className="font-medium text-white leading-snug">
+                    <span className="font-medium text-white leading-snug line-clamp-1">
                       {items[activeIndex].title}
                     </span>
                   </div>

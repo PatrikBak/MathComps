@@ -9,7 +9,7 @@ export default function Footer() {
   let dot = <span className="mx-2 text-lgborder-1 leading-0">•</span>
   return (
     <footer className="bg-slate-950/80 border-t border-slate-800/50">
-      <div className="max-w-5xl mx-auto px-6 pt-6 sm:pt-8 pb-4 sm:pb-6">
+      <div className="max-w-5xl mx-auto px-6 pt-6 sm:pt-8 pb-22 lg:pb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 text-base">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 pr-8">
