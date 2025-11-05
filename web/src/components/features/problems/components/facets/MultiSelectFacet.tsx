@@ -1,4 +1,4 @@
-import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-react'
+import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -132,12 +132,81 @@ export default function MultiSelectFacet({
     return initial
   })
 
+  // Track collapsed state for each group (only used when grouping is enabled)
+  const [collapsedGroups, setCollapsedGroups] = React.useState<Record<string, boolean>>(() => {
+    if (!grouping) return {}
+    const initial: Record<string, boolean> = {}
+    grouping.keys.forEach((key) => {
+      initial[key] = false // All groups start expanded
+    })
+    return initial
+  })
+
   // Capture the current selected state and filtered options without making them dependencies
   const selectedRef = React.useRef(selected)
   const filteredRef = React.useRef(facet.filtered)
   selectedRef.current = selected
   filteredRef.current = facet.filtered
 
+  // Store the collapse state before search starts, so we can restore it when search stops
+  const preSearchCollapseStateRef = React.useRef<Record<string, boolean> | null>(null)
+  // Track the previous query to detect when search starts/stops
+  const previousQueryRef = React.useRef<string>('')
+  // Capture the current collapsed groups state to read it synchronously
+  const collapsedGroupsRef = React.useRef(collapsedGroups)
+  collapsedGroupsRef.current = collapsedGroups
+
+  /**
+   * Helper function to group options by their groupKey.
+   * Returns a map of group keys to arrays of options.
+   */
+  const groupOptions = React.useCallback(
+    (opts: MultiSelectFacetOption[]) => {
+      if (!grouping) return {}
+
+      // Initialize groups based on provided keys
+      const groups: Record<string, MultiSelectFacetOption[]> = {}
+      grouping.keys.forEach((key) => {
+        groups[key] = []
+      })
+
+      // Distribute options into groups
+      opts.forEach((option) => {
+        if (option.groupKey && groups[option.groupKey]) {
+          groups[option.groupKey].push(option)
+        }
+      })
+
+      // Sort options within each group based on the group's sort mode
+      Object.keys(groups).forEach((key) => {
+        const sortMode = groupSortModes[key] || SORT_MODES[0].key
+
+        groups[key].sort((a, b) => {
+          switch (sortMode) {
+            case 'alpha':
+              return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+
+            case 'count-desc':
+            case 'count-asc': {
+              const aCount = typeof a.count === 'number' ? a.count : 0
+              const bCount = typeof b.count === 'number' ? b.count : 0
+              // If counts are equal, fall back to alphabetical
+              if (aCount === bCount) {
+                return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+              }
+              return sortMode === 'count-desc' ? bCount - aCount : aCount - bCount
+            }
+
+            default:
+              throw new Error(`Unknown sort mode: ${sortMode}`)
+          }
+        })
+      })
+
+      return groups
+    },
+    [grouping, groupSortModes]
+  )
   // This effect handles the one-time sort when the popover opens.
   React.useEffect(() => {
     // Only run this logic when the popover transitions from closed to open
@@ -180,6 +249,60 @@ export default function MultiSelectFacet({
     }
   }, [facet.filtered, facet.query, facet.open])
 
+  // This effect manages group collapse state based on search query.
+  // When searching, all groups containing matching results are expanded.
+  // When search stops, groups return to their previous state before search started.
+  React.useEffect(() => {
+    // Only apply this logic when grouping is enabled
+    if (!grouping) return
+
+    const wasSearching = previousQueryRef.current.length > 0
+    const isSearching = facet.query.length > 0
+
+    // Detect transition from no search to search (search started)
+    if (!wasSearching && isSearching) {
+      // Save current collapse state before modifying it
+      preSearchCollapseStateRef.current = { ...collapsedGroupsRef.current }
+    }
+
+    // Detect transition from search to no search (search stopped)
+    if (wasSearching && !isSearching) {
+      // Restore the previous state
+      if (preSearchCollapseStateRef.current !== null) {
+        setCollapsedGroups(preSearchCollapseStateRef.current)
+        preSearchCollapseStateRef.current = null
+      }
+      // Update the previous query ref before returning
+      previousQueryRef.current = facet.query
+      return
+    }
+
+    // When searching: expand groups with results
+    if (isSearching) {
+      const groups = groupOptions(facet.filtered)
+      const groupsWithResults = new Set<string>()
+
+      // Find all groups that have matching results
+      Object.keys(groups).forEach((key) => {
+        if (groups[key] && groups[key].length > 0) {
+          groupsWithResults.add(key)
+        }
+      })
+
+      // Expand all groups with results
+      setCollapsedGroups((prev) => {
+        const next = { ...prev }
+        grouping.keys.forEach((key) => {
+          // Collapse groups without results, expand those with results
+          next[key] = !groupsWithResults.has(key)
+        })
+        return next
+      })
+    }
+
+    // Update the previous query ref
+    previousQueryRef.current = facet.query
+  }, [facet.query, facet.filtered, grouping, groupOptions])
   // A helper function to reset the facet
   function clearAll() {
     if (selected.length) onChange([])
@@ -188,55 +311,6 @@ export default function MultiSelectFacet({
 
     // Reset to original options order when reset is pressed
     setCurrentOptions(facet.filtered)
-  }
-
-  /**
-   * Helper function to group options by their groupKey.
-   * Returns a map of group keys to arrays of options.
-   */
-  function groupOptions(opts: MultiSelectFacetOption[]) {
-    if (!grouping) return {}
-
-    // Initialize groups based on provided keys
-    const groups: Record<string, MultiSelectFacetOption[]> = {}
-    grouping.keys.forEach((key) => {
-      groups[key] = []
-    })
-
-    // Distribute options into groups
-    opts.forEach((option) => {
-      if (option.groupKey && groups[option.groupKey]) {
-        groups[option.groupKey].push(option)
-      }
-    })
-
-    // Sort options within each group based on the group's sort mode
-    Object.keys(groups).forEach((key) => {
-      const sortMode = groupSortModes[key] || SORT_MODES[0].key
-
-      groups[key].sort((a, b) => {
-        switch (sortMode) {
-          case 'alpha':
-            return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
-
-          case 'count-desc':
-          case 'count-asc': {
-            const aCount = typeof a.count === 'number' ? a.count : 0
-            const bCount = typeof b.count === 'number' ? b.count : 0
-            // If counts are equal, fall back to alphabetical
-            if (aCount === bCount) {
-              return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
-            }
-            return sortMode === 'count-desc' ? bCount - aCount : aCount - bCount
-          }
-
-          default:
-            throw new Error(`Unknown sort mode: ${sortMode}`)
-        }
-      })
-    })
-
-    return groups
   }
 
   const renderOption = React.useCallback(
@@ -305,6 +379,16 @@ export default function MultiSelectFacet({
     },
     [onChange, selected, showCounts]
   )
+
+  /**
+   * Toggles the collapsed state of a group
+   */
+  function toggleGroupCollapse(groupKey: string) {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }))
+  }
 
   /**
    * Cycles through sort modes: alpha -> count-desc -> count-asc -> alpha
@@ -459,13 +543,35 @@ export default function MultiSelectFacet({
                 // Hide empty sections
                 if (sectionOptions.length === 0) return null
 
+                const isCollapsed = collapsedGroups[groupKey] || false
+
                 return (
                   <div key={groupKey}>
-                    <div className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-slate-800 border-b border-slate-700 sticky top-0 z-10 flex items-center gap-2">
-                      <span>{grouping.labels[groupKey]}</span>
+                    <div
+                      className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-slate-800 border-b border-slate-700 sticky top-0 z-10 flex items-center gap-2 cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => toggleGroupCollapse(groupKey)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          toggleGroupCollapse(groupKey)
+                        }
+                      }}
+                      aria-expanded={!isCollapsed}
+                      aria-label={isCollapsed ? 'Rozbaliť skupinu' : 'Zbaliť skupinu'}
+                    >
+                      <ChevronDown
+                        className={cn(
+                          'h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200',
+                          isCollapsed && '-rotate-90'
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1 text-left">{grouping.labels[groupKey]}</span>
                       <GroupSortButton groupKey={groupKey} />
                     </div>
-                    {sectionOptions.map(renderOption)}
+                    {!isCollapsed && sectionOptions.map(renderOption)}
                   </div>
                 )
               })
