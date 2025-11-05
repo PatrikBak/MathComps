@@ -21,10 +21,10 @@
         }
       },
       {
-        "title": "Nerovnosti",
-        "slug": "nerovnosti",
+        "title": "Úvod do nerovností",
+        "slug": "uvod-do-nerovnosti",
         "data": {
-          "filename": "algebra-3-nerovnosti-sk.json",
+          "filename": "algebra-3-uvod-do-nerovnosti-sk.json",
           "authors": ["Patrik Bak"],
           "description": "Základné techniky riešenia súťažných nerovností. Pokrýva ekvivalentné úpravy, kladné štvorce, AG nerovnosť."
         }
