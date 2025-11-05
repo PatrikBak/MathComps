@@ -1,6 +1,8 @@
+import { useLongPress } from '@mantine/hooks'
 import * as React from 'react'
 
 import { cn } from '../../../shared/utils/css-utils'
+import { LONG_PRESS_THRESHOLD_MS } from '../../../shared/utils/event-utils'
 
 /**
  * Chip Component for individual filter items.
@@ -20,6 +22,24 @@ export default function Chip({
   title?: string
   className?: string
 }) {
+  // Long-press handler for exclusive selection on mobile
+  const longPressHandlers = useLongPress(
+    () => {
+      if (clickable && onClick) {
+        // Create a synthetic event that will be treated as exclusive selection
+        // by checking for a custom property
+        const syntheticEvent = {
+          ctrlKey: true,
+          metaKey: false,
+        } as React.MouseEvent
+        onClick(syntheticEvent)
+      }
+    },
+    {
+      threshold: LONG_PRESS_THRESHOLD_MS,
+    }
+  )
+
   // Determine styling based on selected state and clickable state
   const getChipStyling = () => {
     const baseStyles =
@@ -40,12 +60,13 @@ export default function Chip({
 
   return (
     <span
-      className={cn(getChipStyling(), className)}
+      className={cn(getChipStyling(), clickable && 'select-none', className)}
       onClick={(event) => {
         if (clickable && onClick) {
           onClick(event)
         }
       }}
+      {...(clickable ? longPressHandlers : {})}
       data-clickable={clickable ? 'true' : undefined}
       title={title || (typeof children === 'string' ? children : undefined)}
     >
