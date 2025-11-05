@@ -58,14 +58,16 @@ export function CollapsibleChipGroup({ chips, mode, onModeToggle }: CollapsibleC
     <div className="min-w-0">
       {mode && visibleChips.length >= 2 ? (
         // Chips with joiners
-        <div className="flex flex-wrap items-center gap-y-1.5">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
           <JoinedChips items={visibleChips} mode={mode} onModeToggle={onModeToggle} />
           {shouldCollapse && (
-            <ExpandCollapseButton
-              isExpanded={isExpanded}
-              hiddenCount={hiddenCount}
-              onToggle={() => setIsExpanded(!isExpanded)}
-            />
+            <span className="inline-flex items-center flex-shrink-0">
+              <ExpandCollapseButton
+                isExpanded={isExpanded}
+                hiddenCount={hiddenCount}
+                onToggle={() => setIsExpanded(!isExpanded)}
+              />
+            </span>
           )}
         </div>
       ) : (
@@ -87,11 +89,13 @@ export function CollapsibleChipGroup({ chips, mode, onModeToggle }: CollapsibleC
             </Chip>
           ))}
           {shouldCollapse && (
-            <ExpandCollapseButton
-              isExpanded={isExpanded}
-              hiddenCount={hiddenCount}
-              onToggle={() => setIsExpanded(!isExpanded)}
-            />
+            <span className="inline-flex items-center flex-shrink-0">
+              <ExpandCollapseButton
+                isExpanded={isExpanded}
+                hiddenCount={hiddenCount}
+                onToggle={() => setIsExpanded(!isExpanded)}
+              />
+            </span>
           )}
         </div>
       )}
@@ -161,7 +165,7 @@ function JoinedChips({ items, mode, onModeToggle }: JoinedChipsProps) {
   const currentModeLabel = mode === 'and' ? 'AND (všetky)' : 'OR (aspoň jedno)'
 
   return (
-    <div className="flex flex-wrap items-center gap-y-1.5">
+    <>
       {items.map((item, index) => (
         <span key={item.id} className="inline-flex items-center">
           <Chip
@@ -203,6 +207,6 @@ function JoinedChips({ items, mode, onModeToggle }: JoinedChipsProps) {
           )}
         </span>
       ))}
-    </div>
+    </>
   )
 }
