@@ -6,6 +6,7 @@ import {
   FloatingPortal,
   offset,
   shift,
+  size,
   useDismiss,
   useFloating,
   useFocus,
@@ -44,13 +45,26 @@ export default function Tooltip({ children, content, placement = 'top' }: Toolti
   // - `middleware`: An array of functions to dynamically adjust the position.
   //   - `offset(5)`: Adds a 5px gap between the trigger and the tooltip.
   //   - `flip()`: Flips the tooltip to the opposite side if it overflows the viewport.
-  //   - `shift()`: Pushes the tooltip back into view if it partially overflows.
+  //   - `shift({ padding: 16 })`: Pushes the tooltip back into view with 16px padding from viewport edges.
+  //   - `size()`: Constrains the tooltip size based on available space to prevent overflow.
   // - `whileElementsMounted: autoUpdate`: Keeps the tooltip position updated on scroll or resize.
   const { x, y, refs, context } = useFloating({
     placement,
     open,
     onOpenChange: setOpen,
-    middleware: [offset(5), flip(), shift({ padding: 8 })],
+    middleware: [
+      offset(5),
+      flip({ padding: 16 }),
+      shift({ padding: 16 }),
+      size({
+        apply({ availableWidth, availableHeight, elements }) {
+          // Constrain the tooltip width/height to fit within available space
+          elements.floating.style.maxWidth = `${availableWidth}px`
+          elements.floating.style.maxHeight = `${availableHeight}px`
+        },
+        padding: 16,
+      }),
+    ],
     whileElementsMounted: autoUpdate,
   })
 
@@ -88,7 +102,7 @@ export default function Tooltip({ children, content, placement = 'top' }: Toolti
               {...getFloatingProps({
                 ref: refs.setFloating,
                 className:
-                  'z-[9999] max-w-xs rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm',
+                  'z-[9999] max-w-xs rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm overflow-y-auto',
                 style: {
                   position: context.strategy,
                   top: y ?? 0,
