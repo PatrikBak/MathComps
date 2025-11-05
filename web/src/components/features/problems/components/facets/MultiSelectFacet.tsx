@@ -1,3 +1,4 @@
+import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -20,6 +21,16 @@ import { toggleOptionSelection } from './utils/facet-logic'
 export type MultiSelectFacetOption = FacetOption
 /** The logical mode for combining multiple selected options. */
 type MultiSelectFacetMode = 'or' | 'and'
+/** Shared sort modes configuration with order, icons, and labels */
+const SORT_MODES = [
+  { key: 'alpha' as const, icon: ArrowDownAZ, label: 'Zoradiť podľa názvu (A-Z)' },
+  {
+    key: 'count-desc' as const,
+    icon: ArrowDownWideNarrow,
+    label: 'Zoradiť podľa počtu (zostupne)',
+  },
+  { key: 'count-asc' as const, icon: ArrowUpNarrowWide, label: 'Zoradiť podľa počtu (vzostupne)' },
+] as const
 
 /** Configuration for logic toggle behavior. */
 type MultiSelectFacetLogicConfig = {
@@ -109,6 +120,18 @@ export default function MultiSelectFacet({
   // We'll keep track of the way options are displayed since we wanna sort
   const [currentOptions, setCurrentOptions] = React.useState(options)
 
+  // Track sort mode for each group (only used when grouping is enabled)
+  const [groupSortModes, setGroupSortModes] = React.useState<
+    Record<string, (typeof SORT_MODES)[number]['key']>
+  >(() => {
+    if (!grouping) return {}
+    const initial: Record<string, (typeof SORT_MODES)[number]['key']> = {}
+    grouping.keys.forEach((key) => {
+      initial[key] = SORT_MODES[0].key
+    })
+    return initial
+  })
+
   // Capture the current selected state and filtered options without making them dependencies
   const selectedRef = React.useRef(selected)
   const filteredRef = React.useRef(facet.filtered)
@@ -187,11 +210,30 @@ export default function MultiSelectFacet({
       }
     })
 
-    // Sort options within each group alphabetically
+    // Sort options within each group based on the group's sort mode
     Object.keys(groups).forEach((key) => {
-      groups[key].sort((a, b) =>
-        a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
-      )
+      const sortMode = groupSortModes[key] || SORT_MODES[0].key
+
+      groups[key].sort((a, b) => {
+        switch (sortMode) {
+          case 'alpha':
+            return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+
+          case 'count-desc':
+          case 'count-asc': {
+            const aCount = typeof a.count === 'number' ? a.count : 0
+            const bCount = typeof b.count === 'number' ? b.count : 0
+            // If counts are equal, fall back to alphabetical
+            if (aCount === bCount) {
+              return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+            }
+            return sortMode === 'count-desc' ? bCount - aCount : aCount - bCount
+          }
+
+          default:
+            throw new Error(`Unknown sort mode: ${sortMode}`)
+        }
+      })
     })
 
     return groups
@@ -263,6 +305,46 @@ export default function MultiSelectFacet({
     },
     [onChange, selected, showCounts]
   )
+
+  /**
+   * Cycles through sort modes: alpha -> count-desc -> count-asc -> alpha
+   */
+  function cycleSortMode(groupKey: string) {
+    setGroupSortModes((prev) => {
+      const current = prev[groupKey] || SORT_MODES[0].key
+      const currentIndex = SORT_MODES.findIndex((mode) => mode.key === current)
+      const nextIndex = (currentIndex + 1) % SORT_MODES.length
+      const next = SORT_MODES[nextIndex].key
+      return { ...prev, [groupKey]: next }
+    })
+  }
+
+  /**
+   * Renders a sort toggle button for a group header
+   */
+  function GroupSortButton({ groupKey }: { groupKey: string }) {
+    // Get the current sort mode for this group, defaulting to the first mode if not set
+    const sortMode = groupSortModes[groupKey] || SORT_MODES[0].key
+
+    // Find the matching sort mode configuration, or fall back to the first mode
+    const currentMode =
+      SORT_MODES.find((sortModeConfig) => sortModeConfig.key === sortMode) || SORT_MODES[0]
+
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          cycleSortMode(groupKey)
+        }}
+        className="ml-auto p-1 rounded hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        title={currentMode.label}
+        aria-label={currentMode.label}
+      >
+        <currentMode.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+      </button>
+    )
+  }
 
   function LogicToggle(props: {
     value: MultiSelectFacetMode
@@ -379,8 +461,9 @@ export default function MultiSelectFacet({
 
                 return (
                   <div key={groupKey}>
-                    <div className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
-                      {grouping.labels[groupKey]}
+                    <div className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-slate-800 border-b border-slate-700 sticky top-0 z-10 flex items-center gap-2">
+                      <span>{grouping.labels[groupKey]}</span>
+                      <GroupSortButton groupKey={groupKey} />
                     </div>
                     {sectionOptions.map(renderOption)}
                   </div>
