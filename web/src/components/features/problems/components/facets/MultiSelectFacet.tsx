@@ -328,7 +328,9 @@ export default function MultiSelectFacet({
         // exclusive selection (deselect all others, select only this one)
         if (
           (nativeEvent instanceof MouseEvent && (nativeEvent.ctrlKey || nativeEvent.metaKey)) ||
-          (nativeEvent instanceof TouchEvent && nativeEvent.touches.length === 1)
+          (typeof TouchEvent !== 'undefined' &&
+            nativeEvent instanceof TouchEvent &&
+            nativeEvent.touches.length === 1)
         ) {
           onChange([option.id])
           return
