@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { cn } from '../../../shared/utils/css-utils'
 import { CHIP_CONSTANTS } from '../constants/filter-constants'
 import Chip from './Chip'
 
@@ -14,8 +15,10 @@ export type ChipData = {
   displayName: string
   /** Optional full name displayed in tooltip when hovering over the chip */
   fullName?: string
-  /** Callback invoked when user clicks the chip's remove (×) button */
-  onRemove: () => void
+  /** Callback invoked when user clicks the chip (supports Ctrl/Cmd+Click for exclusive selection) */
+  onClick: (event: React.MouseEvent) => void
+  /** Whether this chip is currently selected (for visual highlighting) */
+  isSelected?: boolean
 }
 
 /**
@@ -27,6 +30,8 @@ type CollapsibleChipGroupProps = {
   chips: ChipData[]
   /** Logical mode determining which joiner symbol to display between chips */
   mode?: 'and' | 'or'
+  /** Optional callback invoked when user clicks on a joiner to toggle the logic mode */
+  onModeToggle?: () => void
 }
 
 /**
@@ -34,7 +39,7 @@ type CollapsibleChipGroupProps = {
  * When the number of chips exceeds CHIP_COLLAPSE_THRESHOLD, it shows only
  * the first few chips plus a "... and X more" button.
  */
-export function CollapsibleChipGroup({ chips, mode }: CollapsibleChipGroupProps) {
+export function CollapsibleChipGroup({ chips, mode, onModeToggle }: CollapsibleChipGroupProps) {
   // Are chips currently expnanded? Initially no
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -53,14 +58,16 @@ export function CollapsibleChipGroup({ chips, mode }: CollapsibleChipGroupProps)
     <div className="min-w-0">
       {mode && visibleChips.length >= 2 ? (
         // Chips with joiners
-        <div className="flex flex-wrap items-center gap-y-1.5">
-          <JoinedChips items={visibleChips} mode={mode} />
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
+          <JoinedChips items={visibleChips} mode={mode} onModeToggle={onModeToggle} />
           {shouldCollapse && (
-            <ExpandCollapseButton
-              isExpanded={isExpanded}
-              hiddenCount={hiddenCount}
-              onToggle={() => setIsExpanded(!isExpanded)}
-            />
+            <span className="inline-flex items-center flex-shrink-0">
+              <ExpandCollapseButton
+                isExpanded={isExpanded}
+                hiddenCount={hiddenCount}
+                onToggle={() => setIsExpanded(!isExpanded)}
+              />
+            </span>
           )}
         </div>
       ) : (
@@ -69,7 +76,9 @@ export function CollapsibleChipGroup({ chips, mode }: CollapsibleChipGroupProps)
           {visibleChips.map((chip) => (
             <Chip
               key={chip.id}
-              onRemove={chip.onRemove}
+              onClick={chip.onClick}
+              clickable={true}
+              isSelected={chip.isSelected}
               title={
                 'fullName' in chip && chip.fullName && chip.fullName !== chip.displayName
                   ? (chip as { fullName: string }).fullName
@@ -80,11 +89,13 @@ export function CollapsibleChipGroup({ chips, mode }: CollapsibleChipGroupProps)
             </Chip>
           ))}
           {shouldCollapse && (
-            <ExpandCollapseButton
-              isExpanded={isExpanded}
-              hiddenCount={hiddenCount}
-              onToggle={() => setIsExpanded(!isExpanded)}
-            />
+            <span className="inline-flex items-center flex-shrink-0">
+              <ExpandCollapseButton
+                isExpanded={isExpanded}
+                hiddenCount={hiddenCount}
+                onToggle={() => setIsExpanded(!isExpanded)}
+              />
+            </span>
           )}
         </div>
       )}
@@ -138,39 +149,64 @@ type JoinedChipsProps = {
   items: ChipData[]
   /** Logical mode: 'and' displays ∧ symbol, 'or' displays ∨ symbol */
   mode: 'and' | 'or'
+  /** Optional callback invoked when user clicks on a joiner to toggle the logic mode */
+  onModeToggle?: () => void
 }
 
 /**
  * Helper component for rendering chips with math joiners (∧ for AND, ∨ for OR).
  * Used for logical tag/author combinations.
+ * Joiners are clickable when onModeToggle is provided, allowing users to toggle
+ * between AND and OR logic.
  */
-function JoinedChips({ items, mode }: JoinedChipsProps) {
+function JoinedChips({ items, mode, onModeToggle }: JoinedChipsProps) {
+  const joinerSymbol = mode === 'and' ? '∧' : '∨'
+  const nextModeLabel = mode === 'and' ? 'OR (aspoň jedno)' : 'AND (všetky)'
+  const currentModeLabel = mode === 'and' ? 'AND (všetky)' : 'OR (aspoň jedno)'
+
   return (
-    <div className="flex flex-wrap items-center gap-y-1.5">
+    <>
       {items.map((item, index) => (
-        <span
-          key={item.id}
-          className={[
-            'inline-flex items-center',
-            index === items.length - 1
-              ? 'after:hidden'
-              : [
-                  mode === 'and' ? 'after:content-["∧"]' : 'after:content-["∨"]',
-                  'after:inline-flex after:items-center after:justify-center',
-                  'after:mx-1.5 after:px-1.5 after:py-0.5',
-                  'after:text-indigo-100',
-                  'after:text-[11px] after:font-medium after:leading-none',
-                ].join(' '),
-          ].join(' ')}
-        >
+        <span key={item.id} className="inline-flex items-center">
           <Chip
-            onRemove={item.onRemove}
+            onClick={item.onClick}
+            clickable={true}
+            isSelected={item.isSelected}
             title={item.fullName && item.fullName !== item.displayName ? item.fullName : undefined}
           >
             {item.displayName}
           </Chip>
+          {index < items.length - 1 && (
+            <button
+              onClick={onModeToggle}
+              className={onModeToggle ? 'cursor-pointer' : 'cursor-default'}
+              title={
+                onModeToggle
+                  ? `Aktuálne: ${currentModeLabel}. Kliknutím prepnete na ${nextModeLabel}`
+                  : undefined
+              }
+              aria-label={
+                onModeToggle
+                  ? `Prepnúť logiku z ${currentModeLabel} na ${nextModeLabel}`
+                  : `Logika: ${currentModeLabel}`
+              }
+              type="button"
+              disabled={!onModeToggle}
+            >
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center mx-1.5 px-1.5 py-0.5',
+                  'text-indigo-100 text-[11px] font-medium leading-none',
+                  onModeToggle &&
+                    'hover:text-indigo-200 hover:bg-indigo-400/10 rounded transition-colors'
+                )}
+              >
+                {joinerSymbol}
+              </span>
+            </button>
+          )}
         </span>
       ))}
-    </div>
+    </>
   )
 }

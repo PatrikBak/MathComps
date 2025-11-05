@@ -1,7 +1,9 @@
-import { X } from 'lucide-react'
+import { Lightbulb, X } from 'lucide-react'
 import React, { useRef } from 'react'
 
+import Tooltip from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 import {
   useSearchFiltersLogic,
@@ -14,6 +16,73 @@ import TreeSelectFacet from './facets/TreeSelectFacet'
 
 // Defines the type of filter change to distinguish between immediate and debounced search
 type FilterType = 'text' | 'discrete'
+
+/**
+ * A tooltip icon component that provides helpful information
+ * about search functionality and selection shortcuts.
+ */
+function TipsAndTricks() {
+  const { isMac, isTouchOnly } = useDeviceCapabilities()
+
+  const modifierKey = isMac ? '⌘' : 'Ctrl'
+  const modifierName = isMac ? 'Cmd' : 'Ctrl'
+
+  const explanationText =
+    'v strome súťaží alebo ďalších filtrov vyberie len túto možnosť (bežné kliknutie položku pridáva/odoberá). Funguje tiež na kľúčové slová v kartičke s úlohami, meno autora a v paneli s aktívnymi filtrami.'
+
+  const tooltipContent = (
+    <div className="space-y-3 max-w-xs text-xs sm:text-sm">
+      {/* Search languages */}
+      <div>
+        <div className="font-medium text-slate-200 mb-1.5">Vyhľadávanie</div>
+        <p className="text-slate-300/90">
+          Vyhľadávanie funguje v slovenčine, češtine a angličtine. Prednastavene sa hľadá v texte
+          úlohy, môžete však zapnúť hľadanie aj v riešení.
+        </p>
+      </div>
+
+      {/* Exclusive selection */}
+      <div>
+        <div className="font-medium text-slate-200 mb-1.5">Výlučný výber</div>
+        {isTouchOnly ? (
+          <p className="text-slate-300/90">Dlhé podržanie na položke {explanationText}</p>
+        ) : (
+          <p className="text-slate-300/90">
+            Stlačenie{' '}
+            <kbd className="px-1 py-0.5 rounded bg-slate-600/50 text-xs font-mono">
+              {modifierKey}
+            </kbd>{' '}
+            ({modifierName}) + kliknutie na položku {explanationText}
+          </p>
+        )}
+      </div>
+
+      {/* Logic toggle */}
+      <div>
+        <div className="font-medium text-slate-200 mb-1.5">Prepínanie logiky filtrov</div>
+        <p className="text-slate-300/90">
+          V paneli s aktívnymi filtrami môžete kliknutím na symbol{' '}
+          <span className="font-mono text-indigo-200">∧</span> (AND) alebo{' '}
+          <span className="font-mono text-indigo-200">∨</span> (OR) medzi filtrami kľúčových slov
+          alebo autorov prepnúť logiku. AND znamená, že musia platiť všetky vybrané filtre, OR
+          znamená, že stačí aspoň jeden.
+        </p>
+      </div>
+    </div>
+  )
+
+  return (
+    <Tooltip content={tooltipContent} placement="left">
+      <button
+        type="button"
+        className="p-1 rounded text-slate-400 hover:text-amber-400/80 hover:bg-slate-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        aria-label="Tipy a triky"
+      >
+        <Lightbulb className="h-4 w-4" />
+      </button>
+    </Tooltip>
+  )
+}
 
 type SearchFiltersProps = {
   filters: SearchFiltersState
@@ -61,12 +130,12 @@ export const SearchFilters = ({
         <div className="space-y-3 sm:space-y-4">
           {/* Section 1: Full-text search */}
           <div>
-            <label
-              htmlFor="search"
-              className="mb-2 sm:mb-3 block text-xs sm:text-sm font-semibold text-slate-200"
-            >
-              Vyhľadávanie
-            </label>
+            <div className="mb-2 sm:mb-3 flex items-center justify-between gap-2">
+              <label htmlFor="search" className="text-xs sm:text-sm font-semibold text-slate-200">
+                Vyhľadávanie
+              </label>
+              <TipsAndTricks />
+            </div>
             <div className="relative">
               <input
                 ref={searchTextRef}
@@ -180,6 +249,15 @@ export const SearchFilters = ({
                 mode: filters.tagLogic,
                 onChange: (m) => updateFilter('tagLogic', m, 'discrete'),
                 labels: { or: 'Aspoň jedno', and: 'Všetky' },
+              }}
+              grouping={{
+                keys: ['Area', 'Type', 'Goal', 'Technique'],
+                labels: {
+                  Area: 'Oblasť',
+                  Type: 'Výskyt',
+                  Goal: 'Cieľ',
+                  Technique: 'Technika',
+                },
               }}
             />
 

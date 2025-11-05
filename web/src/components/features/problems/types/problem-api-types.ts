@@ -12,9 +12,10 @@ export type FacetOption = {
   displayName: string
   fullName?: string
   count: number
+  tagType?: TagType
 }
 
-export type TagType = 'Area' | 'Type' | 'Technique'
+export type TagType = 'Area' | 'Type' | 'Goal' | 'Technique'
 
 export type TagDto = {
   slug: string

@@ -1,7 +1,9 @@
 import { useMediaQuery } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX } from 'lucide-react'
+import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { slovakPlural } from '../../../shared/utils/string-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
@@ -83,7 +85,7 @@ export default function ActiveFiltersBar({
     }
   }, [activeFilterCount])
 
-  // --- Handlers for removing filters ---
+  // --- Handlers for clearing filters ---
   const handleClearAll = () => {
     onFiltersChange(
       {
@@ -93,18 +95,94 @@ export default function ActiveFiltersBar({
     )
   }
 
-  const handleRemoveMulti = (key: 'tags' | 'authors' | 'seasons', idToRemove: string) => {
-    const updatedValues = filters[key].filter((item) => item.slug !== idToRemove)
-    onFiltersChange({ ...filters, [key]: updatedValues }, 'discrete')
-  }
+  // --- Handlers for toggling filters (with Ctrl+Click support) ---
+  const handleToggleMulti = (
+    key: 'tags' | 'authors' | 'seasons' | 'problemNumbers',
+    idToToggle: string | number,
+    event: React.MouseEvent
+  ) => {
+    // Handle problemNumbers separately (array of numbers)
+    if (key === 'problemNumbers') {
+      const numToToggle = idToToggle as number
+      // Ctrl/Cmd+Click: exclusive selection (keep only this one)
+      if (isExclusiveSelection(event)) {
+        onFiltersChange({ ...filters, problemNumbers: [numToToggle] }, 'discrete')
+        return
+      }
 
-  const handleRemoveProblemNumber = (numToRemove: number) => {
-    const updated = filters.problemNumbers.filter((n) => n !== numToRemove)
-    onFiltersChange({ ...filters, problemNumbers: updated }, 'discrete')
-  }
+      // Normal click: toggle this number
+      const isSelected = filters.problemNumbers.includes(numToToggle)
+      if (isSelected) {
+        // Remove the number
+        const updated = filters.problemNumbers.filter((number) => number !== numToToggle)
+        onFiltersChange({ ...filters, problemNumbers: updated }, 'discrete')
+      } else {
+        // Add the number (sorted)
+        onFiltersChange(
+          {
+            ...filters,
+            problemNumbers: [...filters.problemNumbers, numToToggle].sort((a, b) => a - b),
+          },
+          'discrete'
+        )
+      }
+      return
+    }
 
-  const handleRemoveSearchText = () => {
+    // Handle tags/authors/seasons (arrays of objects with slug)
+    const slugToToggle = idToToggle as string
+    // Ctrl/Cmd+Click: exclusive selection (keep only this one)
+    if (isExclusiveSelection(event)) {
+      const item = filters[key].find((item) => item.slug === slugToToggle)
+      if (item) {
+        onFiltersChange({ ...filters, [key]: [item] }, 'discrete')
+      }
+      return
+    }
+
+    // Normal click: toggle this item
+    const isSelected = filters[key].some((item) => item.slug === slugToToggle)
+    if (isSelected) {
+      // Remove the item
+      const updatedValues = filters[key].filter((item) => item.slug !== slugToToggle)
+      onFiltersChange({ ...filters, [key]: updatedValues }, 'discrete')
+    } else {
+      // Add the item (find it from options)
+      const itemToAdd =
+        filterOptions[key].find((item) => item.slug === slugToToggle) ||
+        baseOptions[key].find((item) => item.slug === slugToToggle)
+      if (itemToAdd) {
+        onFiltersChange({ ...filters, [key]: [...filters[key], itemToAdd] }, 'discrete')
+      }
+    }
+  }
+  const handleToggleSearchText = (event: React.MouseEvent) => {
+    // Ctrl/Cmd+Click: exclusive selection (keep only search, remove all other filters)
+    if (isExclusiveSelection(event)) {
+      onFiltersChange(
+        {
+          ...initialFilters,
+          searchText: filters.searchText,
+          searchInSolution: filters.searchInSolution,
+        },
+        'text'
+      )
+      return
+    }
+
+    // Normal click: remove search text
     onFiltersChange({ ...filters, searchText: '', searchInSolution: false }, 'text')
+  }
+
+  // --- Handlers for toggling logic modes ---
+  const handleToggleTagLogic = () => {
+    const newLogic = filters.tagLogic === 'and' ? 'or' : 'and'
+    onFiltersChange({ ...filters, tagLogic: newLogic }, 'discrete')
+  }
+
+  const handleToggleAuthorLogic = () => {
+    const newLogic = filters.authorLogic === 'and' ? 'or' : 'and'
+    onFiltersChange({ ...filters, authorLogic: newLogic }, 'discrete')
   }
 
   // --- Data Transformation and Grouping ---
@@ -167,7 +245,7 @@ export default function ActiveFiltersBar({
       ? {
           id: 'search-text',
           displayName: `"${filters.searchText}"${filters.searchInSolution ? ' (v zadaní aj riešení)' : ''}`,
-          onRemove: handleRemoveSearchText,
+          onClick: handleToggleSearchText,
         }
       : null
 
@@ -206,36 +284,38 @@ export default function ActiveFiltersBar({
     },
     {
       label: 'Ročníky',
-      chips: sortedSeasons.map((item) => ({
-        id: `season-${item.slug}`,
-        displayName: getLabel(seasonOptions, item.slug, seasonOptionsBase),
-        onRemove: () => handleRemoveMulti('seasons', item.slug),
+      chips: sortedSeasons.map((season) => ({
+        id: `season-${season.slug}`,
+        displayName: getLabel(seasonOptions, season.slug, seasonOptionsBase),
+        onClick: (event: React.MouseEvent) => handleToggleMulti('seasons', season.slug, event),
       })),
     },
     {
       label: 'Poradie úlohy',
-      chips: sortedProblemNumbers.map((n) => ({
-        id: `number-${n}`,
-        displayName: String(n),
-        onRemove: () => handleRemoveProblemNumber(n),
+      chips: sortedProblemNumbers.map((number) => ({
+        id: `number-${number}`,
+        displayName: String(number),
+        onClick: (event: React.MouseEvent) => handleToggleMulti('problemNumbers', number, event),
       })),
     },
     {
       label: 'Kľúčové slová',
       logic: filters.tagLogic,
-      chips: sortedTags.map((item) => ({
-        id: `tag-${item.slug}`,
-        displayName: getLabel(tagOptions, item.slug, tagOptionsBase),
-        onRemove: () => handleRemoveMulti('tags', item.slug),
+      onLogicToggle: handleToggleTagLogic,
+      chips: sortedTags.map((keyword) => ({
+        id: `tag-${keyword.slug}`,
+        displayName: getLabel(tagOptions, keyword.slug, tagOptionsBase),
+        onClick: (event: React.MouseEvent) => handleToggleMulti('tags', keyword.slug, event),
       })),
     },
     {
       label: 'Autori',
       logic: filters.authorLogic,
-      chips: sortedAuthors.map((item) => ({
-        id: `author-${item.slug}`,
-        displayName: getLabel(authorOptions, item.slug, authorOptionsBase),
-        onRemove: () => handleRemoveMulti('authors', item.slug),
+      onLogicToggle: handleToggleAuthorLogic,
+      chips: sortedAuthors.map((author) => ({
+        id: `author-${author.slug}`,
+        displayName: getLabel(authorOptions, author.slug, authorOptionsBase),
+        onClick: (event: React.MouseEvent) => handleToggleMulti('authors', author.slug, event),
       })),
     },
   ].filter((group) => group.chips.length > 0)
@@ -364,7 +444,11 @@ export default function ActiveFiltersBar({
                       {group.label}:
                     </span>
 
-                    <CollapsibleChipGroup chips={group.chips as ChipData[]} mode={group.logic} />
+                    <CollapsibleChipGroup
+                      chips={group.chips as ChipData[]}
+                      mode={group.logic}
+                      onModeToggle={group.onLogicToggle}
+                    />
                   </div>
 
                   {/* Divider between groups on mobile only (not after the last one) */}

@@ -14,7 +14,8 @@ export const sortTagsByCategory = (tags: TagDto[]): TagDto[] => {
   const tagTypePriority: Record<TagType, number> = {
     Area: 1,
     Type: 2,
-    Technique: 3,
+    Goal: 3,
+    Technique: 4,
   }
 
   // Sort tags first by category priority, then alphabetically by data within each category

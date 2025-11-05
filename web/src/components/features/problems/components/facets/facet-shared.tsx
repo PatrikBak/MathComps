@@ -12,12 +12,13 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react'
-import { useIsomorphicEffect, useOs } from '@mantine/hooks'
+import { useIsomorphicEffect } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, HelpCircle } from 'lucide-react'
 import * as React from 'react'
 
 import Tooltip from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 import { filterOptionsBySearch, getVisibleOptions } from './utils/facet-logic'
 
@@ -30,12 +31,14 @@ import { filterOptionsBySearch, getVisibleOptions } from './utils/facet-logic'
  * @property displayName - Display name for the option.
  * @property fullName - Optional full name (for tooltips or details).
  * @property count - Optional count of items matching this option.
+ * @property groupKey - Optional key for grouping options into sections.
  */
 export type FacetOption = {
   id: string
   displayName: string
   fullName?: string
   count?: number
+  groupKey?: string
 }
 
 /** The type of input to render for each item in the facet list. */
@@ -115,9 +118,7 @@ function useFacetBase<T extends FacetOption>(config: {
   const popoverId = React.useId()
 
   // Detect mobile operating systems where virtual keyboards are intrusive
-  // useOs is synchronous and avoids the initial undefined state of media queries
-  const os = useOs()
-  const isMobileOS = os === 'ios' || os === 'android'
+  const { isMobileOS } = useDeviceCapabilities()
 
   // Auto-focus input on mount, but only on desktop devices
   // Mobile devices are excluded because virtual keyboards take up significant screen space
@@ -504,14 +505,19 @@ type FacetListContainerProps = {
   listRef: React.RefObject<HTMLDivElement | null>
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void
   children: React.ReactNode
+  /** When true, removes top padding from the container. Useful when grouping is enabled. */
+  noTopPadding?: boolean
 }
 
 function FacetListContainer(props: FacetListContainerProps) {
-  const { role, labelId, listRef, onKeyDown, children } = props
+  const { role, labelId, listRef, onKeyDown, children, noTopPadding = false } = props
   return (
     <div
       ref={listRef}
-      className={facetUI.listContainer}
+      className={cn(
+        'max-h-[32vh] overflow-y-auto',
+        noTopPadding ? 'px-0.5 sm:px-1 pb-0.5 sm:pb-1' : 'p-0.5 sm:p-1'
+      )}
       role={role}
       aria-labelledby={labelId}
       onKeyDown={onKeyDown}
