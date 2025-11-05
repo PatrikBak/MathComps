@@ -710,7 +710,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             var editionNumber = startYear - OlympiadBaseYear;
 
             // Slovak names ftw
-            var editionLabel = $"{editionNumber}. ročník";
+            var editionLabel = $"{editionNumber}. ročník ({startYear}/{startYear + 1})";
 
             // Check if season already exists
             if (existingSeasons.TryGetValue(startYear, out var existingSeason))
