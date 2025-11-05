@@ -12,12 +12,13 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react'
-import { useIsomorphicEffect, useOs } from '@mantine/hooks'
+import { useIsomorphicEffect } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, HelpCircle } from 'lucide-react'
 import * as React from 'react'
 
 import Tooltip from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 import { filterOptionsBySearch, getVisibleOptions } from './utils/facet-logic'
 
@@ -117,9 +118,7 @@ function useFacetBase<T extends FacetOption>(config: {
   const popoverId = React.useId()
 
   // Detect mobile operating systems where virtual keyboards are intrusive
-  // useOs is synchronous and avoids the initial undefined state of media queries
-  const os = useOs()
-  const isMobileOS = os === 'ios' || os === 'android'
+  const { isMobileOS } = useDeviceCapabilities()
 
   // Auto-focus input on mount, but only on desktop devices
   // Mobile devices are excluded because virtual keyboards take up significant screen space

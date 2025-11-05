@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 
 import type { FacetOption } from './facet-shared'
 import {
@@ -223,11 +224,18 @@ export default function TreeSelectFacet({
     /**
      * Handles toggling the selection of a node using utility function.
      * Uses the shared tree logic that properly handles parent-child selection relationships.
+     * Supports exclusive selection via Ctrl/Cmd+Click or long press.
      */
-    function handleParentToggle() {
+    function handleParentToggle(event: React.MouseEvent | React.TouchEvent) {
       if (!originalNode) return
 
-      // Use the utility function with the full tree context
+      // Ctrl/Cmd+Click: exclusive selection (deselect all others, select only this node)
+      if (isExclusiveSelection(event)) {
+        onChange([node.id])
+        return
+      }
+
+      // Normal click: toggle this node in the selection
       const nextSelected = toggleNodeSelection(originalNode, selected, options)
 
       // Expand to show context if this is a parent being selected

@@ -88,7 +88,7 @@ export default function Tooltip({ children, content, placement = 'top' }: Toolti
               {...getFloatingProps({
                 ref: refs.setFloating,
                 className:
-                  'z-50 max-w-xs rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm',
+                  'z-[9999] max-w-xs rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm',
                 style: {
                   position: context.strategy,
                   top: y ?? 0,

@@ -2,6 +2,7 @@ import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 
 import type { FacetOption } from './facet-shared'
 import {
@@ -321,22 +322,19 @@ export default function MultiSelectFacet({
       // Determine if the option has zero matches (for visual dimming)
       const isZeroCount = typeof option.count === 'number' && option.count <= 0
 
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const nativeEvent = event.nativeEvent
-
-        // Ctrl/Cmd+Click Or long-press on the phone:
-        // exclusive selection (deselect all others, select only this one)
-        if (
-          (nativeEvent instanceof MouseEvent && (nativeEvent.ctrlKey || nativeEvent.metaKey)) ||
-          (typeof TouchEvent !== 'undefined' &&
-            nativeEvent instanceof TouchEvent &&
-            nativeEvent.touches.length === 1)
-        ) {
+      const handleClick = (event: React.MouseEvent<HTMLLabelElement>) => {
+        // Ctrl/Cmd+Click: exclusive selection (deselect all others, select only this one)
+        if (isExclusiveSelection(event)) {
+          event.preventDefault()
           onChange([option.id])
           return
         }
+        // Normal click: let default behavior happen (checkbox onChange will handle it)
+      }
 
+      const handleChange = () => {
         // Normal click: toggle this option in the selection
+        // Ctrl/Cmd+Click is handled in onClick and prevented from reaching here
         onChange(toggleOptionSelection(option.id, selected))
       }
 
@@ -350,6 +348,7 @@ export default function MultiSelectFacet({
             // Dim options with zero count
             isZeroCount && 'opacity-50'
           )}
+          onClick={handleClick}
         >
           {/* Left side: checkbox + label */}
           <div className="min-w-0 flex items-center gap-2">
@@ -420,11 +419,11 @@ export default function MultiSelectFacet({
     return (
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation()
+        onClick={(event) => {
+          event.stopPropagation()
           cycleSortMode(groupKey)
         }}
-        className="ml-auto p-1 rounded hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className="p-1 rounded hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         title={currentMode.label}
         aria-label={currentMode.label}
       >
