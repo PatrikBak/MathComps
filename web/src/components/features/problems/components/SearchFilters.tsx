@@ -56,6 +56,18 @@ function TipsAndTricks() {
           </p>
         )}
       </div>
+
+      {/* Logic toggle */}
+      <div>
+        <div className="font-medium text-slate-200 mb-1.5">Prepínanie logiky filtrov</div>
+        <p className="text-slate-300/90">
+          V paneli s aktívnymi filtrami môžete kliknutím na symbol{' '}
+          <span className="font-mono text-indigo-200">∧</span> (AND) alebo{' '}
+          <span className="font-mono text-indigo-200">∨</span> (OR) medzi filtrami kľúčových slov
+          alebo autorov prepnúť logiku. AND znamená, že musia platiť všetky vybrané filtre, OR
+          znamená, že stačí aspoň jeden.
+        </p>
+      </div>
     </div>
   )
 

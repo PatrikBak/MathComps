@@ -174,6 +174,17 @@ export default function ActiveFiltersBar({
     onFiltersChange({ ...filters, searchText: '', searchInSolution: false }, 'text')
   }
 
+  // --- Handlers for toggling logic modes ---
+  const handleToggleTagLogic = () => {
+    const newLogic = filters.tagLogic === 'and' ? 'or' : 'and'
+    onFiltersChange({ ...filters, tagLogic: newLogic }, 'discrete')
+  }
+
+  const handleToggleAuthorLogic = () => {
+    const newLogic = filters.authorLogic === 'and' ? 'or' : 'and'
+    onFiltersChange({ ...filters, authorLogic: newLogic }, 'discrete')
+  }
+
   // --- Data Transformation and Grouping ---
 
   /**
@@ -290,6 +301,7 @@ export default function ActiveFiltersBar({
     {
       label: 'Kľúčové slová',
       logic: filters.tagLogic,
+      onLogicToggle: handleToggleTagLogic,
       chips: sortedTags.map((keyword) => ({
         id: `tag-${keyword.slug}`,
         displayName: getLabel(tagOptions, keyword.slug, tagOptionsBase),
@@ -299,6 +311,7 @@ export default function ActiveFiltersBar({
     {
       label: 'Autori',
       logic: filters.authorLogic,
+      onLogicToggle: handleToggleAuthorLogic,
       chips: sortedAuthors.map((author) => ({
         id: `author-${author.slug}`,
         displayName: getLabel(authorOptions, author.slug, authorOptionsBase),
@@ -431,7 +444,11 @@ export default function ActiveFiltersBar({
                       {group.label}:
                     </span>
 
-                    <CollapsibleChipGroup chips={group.chips as ChipData[]} mode={group.logic} />
+                    <CollapsibleChipGroup
+                      chips={group.chips as ChipData[]}
+                      mode={group.logic}
+                      onModeToggle={group.onLogicToggle}
+                    />
                   </div>
 
                   {/* Divider between groups on mobile only (not after the last one) */}
