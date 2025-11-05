@@ -11,6 +11,7 @@ import { ProblemCardSkeleton } from '@/components/features/problems/components/P
 import { ACTIVE_FILTERS_CONSTANTS } from '@/components/features/problems/constants/filter-constants'
 import { PREFETCH_THRESHOLD } from '@/components/features/problems/constants/pagination-constants'
 import { VIRTUOSO_INCREASE_VIEWPORT_BY } from '@/components/features/problems/constants/problem-list-constants'
+import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 
 import { useProblemSearch } from '../hooks/use-problem-search'
 import { countActiveFilters } from '../utils/filter-validation'
@@ -101,10 +102,16 @@ export default function ProblemsLibrary() {
   )
 
   // Handle tag clicks to toggle them in filters
-  const handleTagClick = (tag: { displayName: string; slug: string }) => {
+  const handleTagClick = (tag: { displayName: string; slug: string }, event: React.MouseEvent) => {
     if (!filters) return
 
-    // Check if tag is already in filters
+    // Ctrl/Cmd+Click: exclusive selection (keep only this tag)
+    if (isExclusiveSelection(event)) {
+      handleFiltersChange({ ...filters, tags: [tag] })
+      return
+    }
+
+    // Normal click: toggle this tag
     const isTagAlreadySelected = filters.tags.some((existingTag) => existingTag.slug === tag.slug)
 
     const newFilters = {
@@ -120,10 +127,19 @@ export default function ProblemsLibrary() {
   }
 
   // Handle author clicks to toggle them in filters
-  const handleAuthorClick = (author: { displayName: string; slug: string }) => {
+  const handleAuthorClick = (
+    author: { displayName: string; slug: string },
+    event: React.MouseEvent
+  ) => {
     if (!filters) return
 
-    // Check if author is already in filters
+    // Ctrl/Cmd+Click: exclusive selection (keep only this author)
+    if (isExclusiveSelection(event)) {
+      handleFiltersChange({ ...filters, authors: [author] })
+      return
+    }
+
+    // Normal click: toggle this author
     const isAuthorAlreadySelected = filters.authors.some(
       (existingAuthor) => existingAuthor.slug === author.slug
     )

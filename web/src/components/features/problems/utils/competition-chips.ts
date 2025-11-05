@@ -1,3 +1,6 @@
+import type * as React from 'react'
+
+import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { buildSelectionsFromTreeIds } from './filter-ids'
 
@@ -12,8 +15,8 @@ type CompetitionChip = {
   displayName: string
   /** Full descriptive name shown in tooltip when hovering over the chip */
   fullName?: string
-  /** Callback invoked when user clicks the remove button on the chip */
-  onRemove: () => void
+  /** Callback invoked when user clicks the chip (supports Ctrl/Cmd+Click for exclusive selection) */
+  onClick: (event: React.MouseEvent) => void
 }
 
 /**
@@ -93,8 +96,16 @@ export function generateCompetitionChips(
       id: chipId,
       displayName: selection.displayName,
       fullName: selection.fullName,
-      onRemove: () => {
-        // Remove this specific selection
+      onClick: (event: React.MouseEvent) => {
+        // Ctrl/Cmd+Click: exclusive selection (remove all others, keep only this one)
+        if (isExclusiveSelection(event)) {
+          // Keep only this selection
+          const exclusiveSelection = [selection]
+          onFiltersChange({ ...filters, contestSelection: exclusiveSelection }, 'discrete')
+          return
+        }
+
+        // Normal click: remove this specific selection
         const filteredSelections = filters.contestSelection.filter((filterSelection) => {
           // The entire competition selection
           switch (selection.type) {

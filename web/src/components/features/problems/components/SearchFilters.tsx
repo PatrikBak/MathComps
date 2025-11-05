@@ -28,7 +28,7 @@ function TipsAndTricks() {
   const modifierName = isMac ? 'Cmd' : 'Ctrl'
 
   const explanationText =
-    'v strome súťaží alebo ďalších filtrov vyberie len túto možnosť (bežné kliknutie položku pridáva/odoberá)'
+    'v strome súťaží alebo ďalších filtrov vyberie len túto možnosť (bežné kliknutie položku pridáva/odoberá). Funguje tiež na kľúčové slová v kartičke s úlohami, meno autora a v paneli s aktívnymi filtrami.'
 
   const tooltipContent = (
     <div className="space-y-3 max-w-xs text-xs sm:text-sm">

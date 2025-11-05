@@ -14,8 +14,10 @@ export type ChipData = {
   displayName: string
   /** Optional full name displayed in tooltip when hovering over the chip */
   fullName?: string
-  /** Callback invoked when user clicks the chip's remove (×) button */
-  onRemove: () => void
+  /** Callback invoked when user clicks the chip (supports Ctrl/Cmd+Click for exclusive selection) */
+  onClick: (event: React.MouseEvent) => void
+  /** Whether this chip is currently selected (for visual highlighting) */
+  isSelected?: boolean
 }
 
 /**
@@ -69,7 +71,9 @@ export function CollapsibleChipGroup({ chips, mode }: CollapsibleChipGroupProps)
           {visibleChips.map((chip) => (
             <Chip
               key={chip.id}
-              onRemove={chip.onRemove}
+              onClick={chip.onClick}
+              clickable={true}
+              isSelected={chip.isSelected}
               title={
                 'fullName' in chip && chip.fullName && chip.fullName !== chip.displayName
                   ? (chip as { fullName: string }).fullName
@@ -164,7 +168,9 @@ function JoinedChips({ items, mode }: JoinedChipsProps) {
           ].join(' ')}
         >
           <Chip
-            onRemove={item.onRemove}
+            onClick={item.onClick}
+            clickable={true}
+            isSelected={item.isSelected}
             title={item.fullName && item.fullName !== item.displayName ? item.fullName : undefined}
           >
             {item.displayName}

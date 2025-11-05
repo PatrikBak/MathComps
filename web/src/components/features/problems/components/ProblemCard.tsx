@@ -30,10 +30,10 @@ export type ProblemCardProps = {
   problem: Problem
   ordinalNumber: number
   areTechniquesGloballyVisible: boolean
-  onTagClick: (tag: { displayName: string; slug: string }) => void
+  onTagClick: (tag: { displayName: string; slug: string }, event: React.MouseEvent) => void
   selectedTagSlugs: Set<string>
   activeTechniqueFilterSlugs: Set<string>
-  onAuthorClick: (author: { displayName: string; slug: string }) => void
+  onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
   selectedAuthorSlugs: Set<string>
 }
 
@@ -190,7 +190,7 @@ export function ProblemCard({
                 return (
                   <span key={author.slug} className="flex items-center">
                     <button
-                      onClick={() => onAuthorClick(author)}
+                      onClick={(event) => onAuthorClick(author, event)}
                       className={cn(
                         'text-sm transition-colors duration-200 hover:underline',
                         authorClassName
@@ -232,7 +232,9 @@ export function ProblemCard({
                 .map((tag) => (
                   <Chip
                     key={tag.slug}
-                    onClick={() => onTagClick({ displayName: tag.displayName, slug: tag.slug })}
+                    onClick={(event) =>
+                      onTagClick({ displayName: tag.displayName, slug: tag.slug }, event)
+                    }
                     clickable={true}
                     isSelected={selectedTagSlugs.has(tag.slug)}
                   >
