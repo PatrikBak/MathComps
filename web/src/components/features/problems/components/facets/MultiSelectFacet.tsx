@@ -303,6 +303,7 @@ export default function MultiSelectFacet({
     // Update the previous query ref
     previousQueryRef.current = facet.query
   }, [facet.query, facet.filtered, grouping, groupOptions])
+
   // A helper function to reset the facet
   function clearAll() {
     if (selected.length) onChange([])
@@ -545,6 +546,11 @@ export default function MultiSelectFacet({
 
                 const isCollapsed = collapsedGroups[groupKey] || false
 
+                // Count how many selected items are in this group
+                const selectedCount = sectionOptions.filter((option) =>
+                  selected.includes(option.id)
+                ).length
+
                 return (
                   <div key={groupKey}>
                     <div
@@ -568,7 +574,17 @@ export default function MultiSelectFacet({
                         )}
                         aria-hidden="true"
                       />
-                      <span className="flex-1 text-left">{grouping.labels[groupKey]}</span>
+                      <span className="flex-1 text-left flex items-center gap-2">
+                        {grouping.labels[groupKey]}
+                        {selectedCount > 0 && (
+                          <span
+                            className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
+                            aria-label={`${selectedCount} vybraných`}
+                          >
+                            {selectedCount}
+                          </span>
+                        )}
+                      </span>
                       <GroupSortButton groupKey={groupKey} />
                     </div>
                     {!isCollapsed && sectionOptions.map(renderOption)}
