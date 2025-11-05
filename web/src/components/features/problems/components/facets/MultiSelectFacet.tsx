@@ -63,6 +63,17 @@ type MultiSelectFacetProps = {
   showCounts?: boolean
   /** Optional text to display in a tooltip next to the title. */
   titleTooltip?: string
+  /**
+   * Configuration for grouping options into sections.
+   * Provide an array of group keys in display order and a mapping of keys to labels.
+   * @example { keys: ['area', 'type'], labels: { area: 'Area', type: 'Type' } }
+   */
+  grouping?: {
+    /** Array of group keys in the order they should be displayed */
+    keys: string[]
+    /** Mapping of group keys to display labels */
+    labels: Record<string, string>
+  }
 }
 
 /**
@@ -86,6 +97,7 @@ export default function MultiSelectFacet({
   searchThreshold = SEARCH_THRESHOLD,
   showCounts = true,
   titleTooltip,
+  grouping,
 }: MultiSelectFacetProps) {
   // Create the facet which handled internal logic
   const facet = useFacetBase<MultiSelectFacetOption>({
@@ -110,24 +122,30 @@ export default function MultiSelectFacet({
     if (facet.open || !facet.query) {
       // Use setTimeout to make sorting asynchronous and prevent UI blocking
       const timeoutId = setTimeout(() => {
-        // Sort with selected items first - use refs to get current state
-        setCurrentOptions(
-          [...filteredRef.current].sort((a, b) => {
-            const aSelected = selectedRef.current.includes(a.id)
-            const bSelected = selectedRef.current.includes(b.id)
+        // Skip selected-first sorting when grouping is enabled
+        // (sections maintain their own alphabetical order)
+        if (grouping) {
+          setCurrentOptions(filteredRef.current)
+        } else {
+          // Sort with selected items first - use refs to get current state
+          setCurrentOptions(
+            [...filteredRef.current].sort((a, b) => {
+              const aSelected = selectedRef.current.includes(a.id)
+              const bSelected = selectedRef.current.includes(b.id)
 
-            // If both are selected or both are unselected, maintain original order
-            if (aSelected === bSelected) return 0
+              // If both are selected or both are unselected, maintain original order
+              if (aSelected === bSelected) return 0
 
-            // Selected items come first
-            return aSelected ? -1 : 1
-          })
-        )
+              // Selected items come first
+              return aSelected ? -1 : 1
+            })
+          )
+        }
       }, 0)
 
       return () => clearTimeout(timeoutId)
     }
-  }, [facet.open, facet.query])
+  }, [facet.open, facet.query, grouping])
 
   // This effect keeps the list in sync with the search filter.
   React.useEffect(() => {
@@ -148,6 +166,103 @@ export default function MultiSelectFacet({
     // Reset to original options order when reset is pressed
     setCurrentOptions(facet.filtered)
   }
+
+  /**
+   * Helper function to group options by their groupKey.
+   * Returns a map of group keys to arrays of options.
+   */
+  function groupOptions(opts: MultiSelectFacetOption[]) {
+    if (!grouping) return {}
+
+    // Initialize groups based on provided keys
+    const groups: Record<string, MultiSelectFacetOption[]> = {}
+    grouping.keys.forEach((key) => {
+      groups[key] = []
+    })
+
+    // Distribute options into groups
+    opts.forEach((option) => {
+      if (option.groupKey && groups[option.groupKey]) {
+        groups[option.groupKey].push(option)
+      }
+    })
+
+    // Sort options within each group alphabetically
+    Object.keys(groups).forEach((key) => {
+      groups[key].sort((a, b) =>
+        a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+      )
+    })
+
+    return groups
+  }
+
+  const renderOption = React.useCallback(
+    (option: MultiSelectFacetOption) => {
+      // Check if this option is currently selected
+      const checked = selected.includes(option.id)
+      // Determine if the option has zero matches (for visual dimming)
+      const isZeroCount = typeof option.count === 'number' && option.count <= 0
+
+      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const nativeEvent = event.nativeEvent
+
+        // Ctrl/Cmd+Click Or long-press on the phone:
+        // exclusive selection (deselect all others, select only this one)
+        if (
+          (nativeEvent instanceof MouseEvent && (nativeEvent.ctrlKey || nativeEvent.metaKey)) ||
+          (nativeEvent instanceof TouchEvent && nativeEvent.touches.length === 1)
+        ) {
+          onChange([option.id])
+          return
+        }
+
+        // Normal click: toggle this option in the selection
+        onChange(toggleOptionSelection(option.id, selected))
+      }
+
+      return (
+        <label
+          key={option.id}
+          className={cn(
+            facetUI.itemBase,
+            // Apply selected or hover styling based on checked state
+            checked ? facetUI.itemSelected : facetUI.itemHover,
+            // Dim options with zero count
+            isZeroCount && 'opacity-50'
+          )}
+        >
+          {/* Left side: checkbox + label */}
+          <div className="min-w-0 flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={handleChange}
+              className="form-checkbox"
+            />
+            <span
+              className={facetUI.itemLabel}
+              // Show full name as tooltip if it differs from display name
+              title={
+                option.fullName && option.fullName !== option.displayName
+                  ? option.fullName
+                  : undefined
+              }
+            >
+              {option.displayName}
+            </span>
+          </div>
+          {/* Right side: count badge (if enabled and available) */}
+          {showCounts && typeof option.count === 'number' && (
+            <span className={cn(facetUI.itemCount, 'shrink-0')} aria-hidden="true">
+              {option.count}
+            </span>
+          )}
+        </label>
+      )
+    },
+    [onChange, selected, showCounts]
+  )
 
   function LogicToggle(props: {
     value: MultiSelectFacetMode
@@ -254,44 +369,27 @@ export default function MultiSelectFacet({
             <div className="px-3 py-3 text-sm text-slate-400">Žiadne výsledky</div>
           )}
           {(() => {
-            return currentOptions.map((option) => {
-              const checked = selected.includes(option.id)
-              const isZeroCount = typeof option.count === 'number' && option.count <= 0
-              return (
-                <label
-                  key={option.id}
-                  className={cn(
-                    facetUI.itemBase,
-                    checked ? facetUI.itemSelected : facetUI.itemHover,
-                    isZeroCount && 'opacity-50'
-                  )}
-                >
-                  <div className="min-w-0 flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => onChange(toggleOptionSelection(option.id, selected))}
-                      className="form-checkbox"
-                    />
-                    <span
-                      className={facetUI.itemLabel}
-                      title={
-                        option.fullName && option.fullName !== option.displayName
-                          ? option.fullName
-                          : undefined
-                      }
-                    >
-                      {option.displayName}
-                    </span>
+            // Render options with or without sections based on grouping prop
+            if (grouping) {
+              const groups = groupOptions(currentOptions)
+              return grouping.keys.map((groupKey) => {
+                const sectionOptions = groups[groupKey] || []
+                // Hide empty sections
+                if (sectionOptions.length === 0) return null
+
+                return (
+                  <div key={groupKey}>
+                    <div className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
+                      {grouping.labels[groupKey]}
+                    </div>
+                    {sectionOptions.map(renderOption)}
                   </div>
-                  {showCounts && typeof option.count === 'number' && (
-                    <span className={cn(facetUI.itemCount, 'shrink-0')} aria-hidden="true">
-                      {option.count}
-                    </span>
-                  )}
-                </label>
-              )
-            })
+                )
+              })
+            } else {
+              // Original linear list rendering
+              return currentOptions.map(renderOption)
+            }
           })()}
         </FacetListContainer>
       </FacetPopover>

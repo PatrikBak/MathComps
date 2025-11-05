@@ -30,12 +30,14 @@ import { filterOptionsBySearch, getVisibleOptions } from './utils/facet-logic'
  * @property displayName - Display name for the option.
  * @property fullName - Optional full name (for tooltips or details).
  * @property count - Optional count of items matching this option.
+ * @property groupKey - Optional key for grouping options into sections.
  */
 export type FacetOption = {
   id: string
   displayName: string
   fullName?: string
   count?: number
+  groupKey?: string
 }
 
 /** The type of input to render for each item in the facet list. */

@@ -48,6 +48,7 @@ function buildFacetOptions(
         displayName: option.displayName,
         fullName: option.fullName,
         count: countBySlug.get(option.slug) ?? 0,
+        groupKey: option.tagType,
       }))
       // Apply the requested sort mode
       .sort((first, second) => {

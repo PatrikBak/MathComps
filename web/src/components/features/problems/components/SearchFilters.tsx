@@ -181,6 +181,15 @@ export const SearchFilters = ({
                 onChange: (m) => updateFilter('tagLogic', m, 'discrete'),
                 labels: { or: 'Aspoň jedno', and: 'Všetky' },
               }}
+              grouping={{
+                keys: ['Area', 'Type', 'Goal', 'Technique'],
+                labels: {
+                  Area: 'Oblasť',
+                  Type: 'Výskyt',
+                  Goal: 'Cieľ',
+                  Technique: 'Technika',
+                },
+              }}
             />
 
             <MultiSelectFacet

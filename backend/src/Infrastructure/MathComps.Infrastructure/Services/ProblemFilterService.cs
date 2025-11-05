@@ -448,21 +448,22 @@ public class ProblemFilterService(
             // Extract tags for grouping
             .SelectMany(Problem.GoodTags)
             .Select(pt => pt.Tag)
-            // Group by unique tag (name + slug)
-            .GroupBy(tag => new { tag.Name, tag.Slug })
+            // Group by unique tag (name + slug + type)
+            .GroupBy(tag => new { tag.Name, tag.Slug, tag.TagType })
             // Project to intermediate structure with counts
             .Select(tagGroup => new
             {
                 tagGroup.Key.Name,
                 tagGroup.Key.Slug,
+                tagGroup.Key.TagType,
                 Count = tagGroup.Count()
             })
             // Most popular tags first
             .OrderByDescending(tag => tag.Count)
             // Then alphabetical
             .ThenBy(tag => tag.Name)
-            // Project to FacetOption
-            .Select(tag => new FacetOption(tag.Slug, tag.Name, tag.Name, tag.Count))
+            // Project to TagFacetOption with type information
+            .Select(tag => new TagFacetOption(tag.Slug, tag.Name, tag.Name, tag.Count, tag.TagType))
             // Execute the query
             .ToListAsync();
 
