@@ -1,8 +1,12 @@
+import { useLongPress } from '@mantine/hooks'
 import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
+import {
+  isExclusiveSelection,
+  LONG_PRESS_THRESHOLD_MS,
+} from '@/components/shared/utils/event-utils'
 
 import type { FacetOption } from './facet-shared'
 import {
@@ -20,6 +24,92 @@ import { toggleOptionSelection } from './utils/facet-logic'
 
 /** An option for the `MultiSelectFacet`. It extends the base `FacetOption`. */
 export type MultiSelectFacetOption = FacetOption
+
+/**
+ * Individual option component that can use hooks.
+ * Defined outside the main component to ensure it's stable and doesn't need to be in dependency arrays.
+ */
+const OptionItem = React.memo(function OptionItem({
+  option,
+  checked,
+  isZeroCount,
+  onExclusiveSelect,
+  onToggle,
+  showCounts,
+}: {
+  option: MultiSelectFacetOption
+  checked: boolean
+  isZeroCount: boolean
+  onExclusiveSelect: () => void
+  onToggle: () => void
+  showCounts: boolean
+}) {
+  const handleClick = (event: React.MouseEvent<HTMLLabelElement>) => {
+    // Ctrl/Cmd+Click: exclusive selection (deselect all others, select only this one)
+    if (isExclusiveSelection(event)) {
+      event.preventDefault()
+      onExclusiveSelect()
+      return
+    }
+    // Normal click: let default behavior happen (checkbox onChange will handle it)
+  }
+
+  const handleChange = () => {
+    // Normal click: toggle this option in the selection
+    onToggle()
+  }
+
+  // Long-press handler for exclusive selection on mobile
+  const longPressHandlers = useLongPress(
+    () => {
+      onExclusiveSelect()
+    },
+    {
+      threshold: LONG_PRESS_THRESHOLD_MS,
+    }
+  )
+
+  return (
+    <label
+      key={option.id}
+      className={cn(
+        facetUI.itemBase,
+        // Apply selected or hover styling based on checked state
+        checked ? facetUI.itemSelected : facetUI.itemHover,
+        // Dim options with zero count
+        isZeroCount && 'opacity-50',
+        'select-none'
+      )}
+      onClick={handleClick}
+      {...longPressHandlers}
+    >
+      {/* Left side: checkbox + label */}
+      <div className="min-w-0 flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={handleChange}
+          className="form-checkbox"
+        />
+        <span
+          className={facetUI.itemLabel}
+          // Show full name as tooltip if it differs from display name
+          title={
+            option.fullName && option.fullName !== option.displayName ? option.fullName : undefined
+          }
+        >
+          {option.displayName}
+        </span>
+      </div>
+      {/* Right side: count badge (if enabled and available) */}
+      {showCounts && typeof option.count === 'number' && (
+        <span className={cn(facetUI.itemCount, 'shrink-0')} aria-hidden="true">
+          {option.count}
+        </span>
+      )}
+    </label>
+  )
+})
 /** The logical mode for combining multiple selected options. */
 type MultiSelectFacetMode = 'or' | 'and'
 /** Shared sort modes configuration with order, icons, and labels */
@@ -322,61 +412,16 @@ export default function MultiSelectFacet({
       // Determine if the option has zero matches (for visual dimming)
       const isZeroCount = typeof option.count === 'number' && option.count <= 0
 
-      const handleClick = (event: React.MouseEvent<HTMLLabelElement>) => {
-        // Ctrl/Cmd+Click: exclusive selection (deselect all others, select only this one)
-        if (isExclusiveSelection(event)) {
-          event.preventDefault()
-          onChange([option.id])
-          return
-        }
-        // Normal click: let default behavior happen (checkbox onChange will handle it)
-      }
-
-      const handleChange = () => {
-        // Normal click: toggle this option in the selection
-        // Ctrl/Cmd+Click is handled in onClick and prevented from reaching here
-        onChange(toggleOptionSelection(option.id, selected))
-      }
-
       return (
-        <label
+        <OptionItem
           key={option.id}
-          className={cn(
-            facetUI.itemBase,
-            // Apply selected or hover styling based on checked state
-            checked ? facetUI.itemSelected : facetUI.itemHover,
-            // Dim options with zero count
-            isZeroCount && 'opacity-50'
-          )}
-          onClick={handleClick}
-        >
-          {/* Left side: checkbox + label */}
-          <div className="min-w-0 flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={checked}
-              onChange={handleChange}
-              className="form-checkbox"
-            />
-            <span
-              className={facetUI.itemLabel}
-              // Show full name as tooltip if it differs from display name
-              title={
-                option.fullName && option.fullName !== option.displayName
-                  ? option.fullName
-                  : undefined
-              }
-            >
-              {option.displayName}
-            </span>
-          </div>
-          {/* Right side: count badge (if enabled and available) */}
-          {showCounts && typeof option.count === 'number' && (
-            <span className={cn(facetUI.itemCount, 'shrink-0')} aria-hidden="true">
-              {option.count}
-            </span>
-          )}
-        </label>
+          option={option}
+          checked={checked}
+          isZeroCount={isZeroCount}
+          onExclusiveSelect={() => onChange([option.id])}
+          onToggle={() => onChange(toggleOptionSelection(option.id, selected))}
+          showCounts={showCounts}
+        />
       )
     },
     [onChange, selected, showCounts]

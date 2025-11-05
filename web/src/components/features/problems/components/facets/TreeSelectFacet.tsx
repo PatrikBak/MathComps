@@ -1,8 +1,12 @@
+import { useLongPress } from '@mantine/hooks'
 import { ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
+import {
+  isExclusiveSelection,
+  LONG_PRESS_THRESHOLD_MS,
+} from '@/components/shared/utils/event-utils'
 
 import type { FacetOption } from './facet-shared'
 import {
@@ -204,6 +208,112 @@ export default function TreeSelectFacet({
   }
 
   /**
+   * Individual tree node component that can use hooks
+   */
+  const TreeNodeRow = React.memo(function TreeNodeRow({
+    node,
+    level,
+    isExpanded,
+    hasChildren,
+    showChevron,
+    isChecked,
+    parentState,
+    onToggle,
+    onExclusiveSelect,
+    onToggleExpansion,
+    showCounts,
+  }: {
+    node: TreeSelectFacetOption
+    level: number
+    isExpanded: boolean
+    hasChildren: boolean
+    showChevron: boolean
+    isChecked: boolean
+    parentState: 'checked' | 'unchecked' | 'indeterminate'
+    onToggle: (event: React.MouseEvent | React.TouchEvent) => void
+    onExclusiveSelect: () => void
+    onToggleExpansion: () => void
+    showCounts: boolean
+  }) {
+    // Long-press handler for exclusive selection on mobile
+    const longPressHandlers = useLongPress(
+      () => {
+        onExclusiveSelect()
+      },
+      {
+        threshold: LONG_PRESS_THRESHOLD_MS,
+      }
+    )
+
+    return (
+      <div
+        className={cn(
+          'flex items-center rounded-md px-3 py-2 transition-colors hover:bg-slate-700/50 cursor-pointer',
+          node.count === 0 && 'opacity-50',
+          'select-none'
+        )}
+        onClick={onToggle}
+        {...longPressHandlers}
+      >
+        {/* Indentation spacer */}
+        <div className="shrink-0" style={{ width: `${level * 16}px` }} />
+
+        {/* Expander Chevron: fixed width to prevent layout shift */}
+        <div className="w-6 h-6 flex items-center justify-center shrink-0">
+          {showChevron && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation() // Prevent triggering the row's selection handler
+                onToggleExpansion()
+              }}
+              className="w-5 h-5 hover:bg-slate-100/10 rounded flex items-center justify-center"
+            >
+              <ChevronRight
+                className={cn(
+                  'h-4 w-4 transition-transform text-slate-400',
+                  isExpanded && 'rotate-90'
+                )}
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Checkbox - fixed position */}
+        <div className="flex items-center shrink-0 mr-2">
+          <input
+            type="checkbox"
+            className="form-checkbox pointer-events-none"
+            checked={isChecked}
+            ref={(element) => {
+              if (!element) return
+              // Indeterminate only when not explicitly selected and some descendants are
+              if (hasChildren) {
+                element.indeterminate = !isChecked && parentState === 'indeterminate'
+              }
+            }}
+            readOnly
+          />
+        </div>
+
+        {/* Label - grows to fill space */}
+        <div className="flex flex-grow min-w-0 items-center">
+          <span
+            className={facetUI.itemLabel}
+            title={node.fullName && node.fullName !== node.displayName ? node.fullName : undefined}
+          >
+            {node.displayName}
+          </span>
+        </div>
+
+        {/* Count - pushed to the right */}
+        {showCounts && (
+          <span className={cn(facetUI.itemCount, 'shrink-0 ml-auto')}>{node.count}</span>
+        )}
+      </div>
+    )
+  })
+
+  /**
    * Recursively renders a node and its children.
    *
    * @param node - The node to render.
@@ -254,70 +364,19 @@ export default function TreeSelectFacet({
 
     return (
       <React.Fragment key={node.id}>
-        <div
-          className={cn(
-            'flex items-center rounded-md px-3 py-2 transition-colors hover:bg-slate-700/50 cursor-pointer',
-            node.count === 0 && 'opacity-50'
-          )}
-          onClick={handleParentToggle}
-        >
-          {/* Indentation spacer */}
-          <div className="shrink-0" style={{ width: `${level * 16}px` }} />
-
-          {/* Expander Chevron: fixed width to prevent layout shift */}
-          <div className="w-6 h-6 flex items-center justify-center shrink-0">
-            {showChevron && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation() // Prevent triggering the row's selection handler
-                  toggleNodeExpansion(node.id)
-                }}
-                className="w-5 h-5 hover:bg-slate-100/10 rounded flex items-center justify-center"
-              >
-                <ChevronRight
-                  className={cn(
-                    'h-4 w-4 transition-transform text-slate-400',
-                    isExpanded && 'rotate-90'
-                  )}
-                />
-              </button>
-            )}
-          </div>
-
-          {/* Checkbox - fixed position */}
-          <div className="flex items-center shrink-0 mr-2">
-            <input
-              type="checkbox"
-              className="form-checkbox pointer-events-none"
-              checked={isChecked}
-              ref={(element) => {
-                if (!element) return
-                // Indeterminate only when not explicitly selected and some descendants are
-                if (hasChildren) {
-                  element.indeterminate = !isChecked && parentState === 'indeterminate'
-                }
-              }}
-              readOnly
-            />
-          </div>
-
-          {/* Label - grows to fill space */}
-          <div className="flex flex-grow min-w-0 items-center">
-            <span
-              className={facetUI.itemLabel}
-              title={
-                node.fullName && node.fullName !== node.displayName ? node.fullName : undefined
-              }
-            >
-              {node.displayName}
-            </span>
-          </div>
-
-          {/* Count - pushed to the right */}
-          {showCounts && (
-            <span className={cn(facetUI.itemCount, 'shrink-0 ml-auto')}>{node.count}</span>
-          )}
-        </div>
+        <TreeNodeRow
+          node={node}
+          level={level}
+          isExpanded={isExpanded}
+          hasChildren={hasChildren}
+          showChevron={showChevron}
+          isChecked={isChecked}
+          parentState={parentState}
+          onToggle={handleParentToggle}
+          onExclusiveSelect={() => onChange([node.id])}
+          onToggleExpansion={() => toggleNodeExpansion(node.id)}
+          showCounts={showCounts}
+        />
         {/* Render Children if Expanded */}
         {hasChildren && isExpanded && node.children && node.children.length > 0 && (
           <div>{node.children.map((child) => renderNode(child, level + 1))}</div>

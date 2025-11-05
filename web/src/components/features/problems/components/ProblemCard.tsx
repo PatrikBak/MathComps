@@ -1,11 +1,14 @@
 'use client'
 
+import { useLongPress } from '@mantine/hooks'
 import { ChevronDown, ExternalLink, Eye, EyeOff, Link, User } from 'lucide-react'
+import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
+import { LONG_PRESS_THRESHOLD_MS } from '@/components/shared/utils/event-utils'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
 import type { Problem } from '../types/problem-api-types'
@@ -36,6 +39,54 @@ export type ProblemCardProps = {
   onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
   selectedAuthorSlugs: Set<string>
 }
+
+/**
+ * Author button component that can use hooks for long-press
+ */
+const AuthorButton = React.memo(function AuthorButton({
+  author,
+  isSelected,
+  onAuthorClick,
+}: {
+  author: { displayName: string; slug: string }
+  isSelected: boolean
+  onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
+}) {
+  const authorStyling = {
+    selected: 'text-slate-200 font-medium',
+    unselected: 'text-gray-400 hover:text-gray-200',
+  }
+  const authorClassName = authorStyling[isSelected ? 'selected' : 'unselected']
+
+  // Long-press handler for exclusive selection on mobile
+  const longPressHandlers = useLongPress(
+    () => {
+      // Create a synthetic event that will be treated as exclusive selection
+      const syntheticEvent = {
+        ctrlKey: true,
+        metaKey: false,
+      } as React.MouseEvent
+      onAuthorClick(author, syntheticEvent)
+    },
+    {
+      threshold: LONG_PRESS_THRESHOLD_MS,
+    }
+  )
+
+  return (
+    <button
+      onClick={(event) => onAuthorClick(author, event)}
+      {...longPressHandlers}
+      className={cn(
+        'text-sm transition-colors duration-200 hover:underline select-none',
+        authorClassName
+      )}
+      title={`Filtrovať podľa autora: ${author.displayName}`}
+    >
+      {author.displayName}
+    </button>
+  )
+})
 
 /**
  * Renders a problem card with interactive features for filtering, permalink sharing, and technique visibility.
@@ -179,26 +230,13 @@ export function ProblemCard({
             <User size={14} className="mr-1.5 flex-shrink-0" />
             <div className="flex flex-wrap items-center gap-1">
               {problem.authors.map((author, authorIndex) => {
-                // Determine author styling based on selection state
-                const authorStyling = {
-                  selected: 'text-slate-200 font-medium',
-                  unselected: 'text-gray-400 hover:text-gray-200',
-                }
-                const isAuthorSelected = selectedAuthorSlugs.has(author.slug)
-                const authorClassName = authorStyling[isAuthorSelected ? 'selected' : 'unselected']
-
                 return (
                   <span key={author.slug} className="flex items-center">
-                    <button
-                      onClick={(event) => onAuthorClick(author, event)}
-                      className={cn(
-                        'text-sm transition-colors duration-200 hover:underline',
-                        authorClassName
-                      )}
-                      title={`Filtrovať podľa autora: ${author.displayName}`}
-                    >
-                      {author.displayName}
-                    </button>
+                    <AuthorButton
+                      author={author}
+                      isSelected={selectedAuthorSlugs.has(author.slug)}
+                      onAuthorClick={onAuthorClick}
+                    />
                     {/* Add comma separator between multiple authors */}
                     {authorIndex < problem.authors.length - 1 && (
                       <span className="mx-1 text-gray-500">,</span>
