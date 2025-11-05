@@ -531,6 +531,7 @@ export default function MultiSelectFacet({
           labelId={facet.labelId}
           listRef={facet.listRef}
           onKeyDown={facet.onListKeyDown}
+          noTopPadding={!!grouping}
         >
           {facet.filtered.length === 0 && (
             <div className="px-3 py-3 text-sm text-slate-400">Žiadne výsledky</div>
@@ -539,58 +540,62 @@ export default function MultiSelectFacet({
             // Render options with or without sections based on grouping prop
             if (grouping) {
               const groups = groupOptions(currentOptions)
-              return grouping.keys.map((groupKey) => {
-                const sectionOptions = groups[groupKey] || []
-                // Hide empty sections
-                if (sectionOptions.length === 0) return null
+              const visibleGroups = grouping.keys
+                .map((groupKey) => ({ groupKey, options: groups[groupKey] || [] }))
+                .filter(({ options }) => options.length > 0)
 
-                const isCollapsed = collapsedGroups[groupKey] || false
+              return (
+                <>
+                  {visibleGroups.map(({ groupKey, options: sectionOptions }) => {
+                    const isCollapsed = collapsedGroups[groupKey] || false
 
-                // Count how many selected items are in this group
-                const selectedCount = sectionOptions.filter((option) =>
-                  selected.includes(option.id)
-                ).length
+                    // Count how many selected items are in this group
+                    const selectedCount = sectionOptions.filter((option) =>
+                      selected.includes(option.id)
+                    ).length
 
-                return (
-                  <div key={groupKey}>
-                    <div
-                      className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-slate-800 border-b border-slate-700 sticky top-0 z-10 flex items-center gap-2 cursor-pointer"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => toggleGroupCollapse(groupKey)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          toggleGroupCollapse(groupKey)
-                        }
-                      }}
-                      aria-expanded={!isCollapsed}
-                      aria-label={isCollapsed ? 'Rozbaliť skupinu' : 'Zbaliť skupinu'}
-                    >
-                      <ChevronDown
-                        className={cn(
-                          'h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200',
-                          isCollapsed && '-rotate-90'
-                        )}
-                        aria-hidden="true"
-                      />
-                      <span className="flex-1 text-left flex items-center gap-2">
-                        {grouping.labels[groupKey]}
-                        {selectedCount > 0 && (
-                          <span
-                            className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
-                            aria-label={`${selectedCount} vybraných`}
-                          >
-                            {selectedCount}
+                    return (
+                      <div key={groupKey}>
+                        <div
+                          className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white border-b border-slate-700 bg-gray-800 sticky top-0 z-10 flex items-center gap-2 cursor-pointer"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => toggleGroupCollapse(groupKey)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              toggleGroupCollapse(groupKey)
+                            }
+                          }}
+                          aria-expanded={!isCollapsed}
+                          aria-label={isCollapsed ? 'Rozbaliť skupinu' : 'Zbaliť skupinu'}
+                        >
+                          <ChevronDown
+                            className={cn(
+                              'h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200',
+                              isCollapsed && '-rotate-90'
+                            )}
+                            aria-hidden="true"
+                          />
+                          <span className="flex-1 text-left flex items-center gap-2">
+                            {grouping.labels[groupKey]}
+                            {selectedCount > 0 && (
+                              <span
+                                className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
+                                aria-label={`${selectedCount} vybraných`}
+                              >
+                                {selectedCount}
+                              </span>
+                            )}
                           </span>
-                        )}
-                      </span>
-                      <GroupSortButton groupKey={groupKey} />
-                    </div>
-                    {!isCollapsed && sectionOptions.map(renderOption)}
-                  </div>
-                )
-              })
+                          <GroupSortButton groupKey={groupKey} />
+                        </div>
+                        {!isCollapsed && sectionOptions.map(renderOption)}
+                      </div>
+                    )
+                  })}
+                </>
+              )
             } else {
               // Original linear list rendering
               return currentOptions.map(renderOption)

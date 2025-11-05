@@ -506,14 +506,19 @@ type FacetListContainerProps = {
   listRef: React.RefObject<HTMLDivElement | null>
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void
   children: React.ReactNode
+  /** When true, removes top padding from the container. Useful when grouping is enabled. */
+  noTopPadding?: boolean
 }
 
 function FacetListContainer(props: FacetListContainerProps) {
-  const { role, labelId, listRef, onKeyDown, children } = props
+  const { role, labelId, listRef, onKeyDown, children, noTopPadding = false } = props
   return (
     <div
       ref={listRef}
-      className={facetUI.listContainer}
+      className={cn(
+        'max-h-[32vh] overflow-y-auto',
+        noTopPadding ? 'px-0.5 sm:px-1 pb-0.5 sm:pb-1' : 'p-0.5 sm:p-1'
+      )}
       role={role}
       aria-labelledby={labelId}
       onKeyDown={onKeyDown}
