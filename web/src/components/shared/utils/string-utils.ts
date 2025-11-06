@@ -3,6 +3,28 @@
  */
 
 /**
+ * Soft hyphen character (Unicode U+00AD)
+ * Equivalent to &shy; HTML entity. Use this to specify manual hyphenation points in text.
+ *
+ * @example
+ * <span>kľú{SHY}čo{SHY}vých</span> // Will break as "kľú-čo-vých" when needed
+ */
+const SHY = '\u00AD'
+
+/**
+ * Converts TeX-style hyphenation hints (\-) to soft hyphen characters.
+ * This allows you to write hyphenation hints in a TeX-like syntax.
+ *
+ * @param text - Text with TeX-style hyphenation marks (\-)
+ * @returns Text with soft hyphen characters (U+00AD)
+ *
+ * @example
+ * parseTexHyphens('kľú\\-čo\\-vých') // returns 'kľú\u00ADčo\u00ADvých'
+ * parseTexHyphens('some regular text') // returns 'some regular text'
+ */
+export const parseTexHyphens = (text: string): string => text.replace(/\\-/g, SHY)
+
+/**
  * Slugifies a string preserving only URL-safe characters
  * @param input - The string to convert to a URL-friendly slug
  * @returns A URL-safe slug with only lowercase letters, numbers, and hyphens
