@@ -83,8 +83,6 @@ export const facetUI = {
   searchInput:
     'h-8 sm:h-9 flex-1 rounded-md border border-transparent bg-slate-900/70 px-2.5 sm:px-3 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400/70',
 
-  listContainer: 'max-h-[32vh] overflow-y-auto p-0.5 sm:p-1',
-
   itemBase:
     'flex items-center justify-between gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors',
 
@@ -95,8 +93,6 @@ export const facetUI = {
   itemLabel: 'truncate text-xs sm:text-sm font-medium',
 
   itemCount: 'w-7 sm:w-8 text-right text-[10px] sm:text-xs tabular-nums text-slate-400',
-
-  input: 'h-4 w-4 accent-indigo-400',
 }
 
 // #endregion
