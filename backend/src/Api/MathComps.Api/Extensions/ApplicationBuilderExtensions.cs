@@ -28,6 +28,9 @@ public static class ApplicationBuilderExtensions
         // Add security headers to protect against common attacks
         app.Use(async (context, next) =>
         {
+            // No need to index API
+            context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
+
             // Prevent clickjacking attacks
             context.Response.Headers.Append("X-Frame-Options", "DENY");
 
