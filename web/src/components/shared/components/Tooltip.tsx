@@ -59,7 +59,9 @@ export default function Tooltip({ children, content, placement = 'top' }: Toolti
       size({
         apply({ availableWidth, availableHeight, elements }) {
           // Constrain the tooltip width/height to fit within available space
-          elements.floating.style.maxWidth = `${availableWidth}px`
+          // Cap max width to reduce excessive wrapping while keeping tooltips readable
+          const maxWidth = Math.min(availableWidth, 480)
+          elements.floating.style.maxWidth = `${maxWidth}px`
           elements.floating.style.maxHeight = `${availableHeight}px`
         },
         padding: 16,
@@ -102,11 +104,13 @@ export default function Tooltip({ children, content, placement = 'top' }: Toolti
               {...getFloatingProps({
                 ref: refs.setFloating,
                 className:
-                  'z-[9999] max-w-xs rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm overflow-y-auto',
+                  'z-[9999] max-h-48 rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm overflow-y-auto',
                 style: {
                   position: context.strategy,
                   top: y ?? 0,
                   left: x ?? 0,
+                  overflowWrap: 'break-word',
+                  lineHeight: '1.5',
                 },
               })}
             >

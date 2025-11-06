@@ -1,6 +1,7 @@
 import { Lightbulb, X } from 'lucide-react'
 import React, { useRef } from 'react'
 
+import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
 import Tooltip from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
@@ -63,9 +64,9 @@ function TipsAndTricks() {
         <p className="text-slate-300/90">
           V paneli s aktívnymi filtrami môžete kliknutím na symbol{' '}
           <span className="font-mono text-indigo-200">∧</span> (AND) alebo{' '}
-          <span className="font-mono text-indigo-200">∨</span> (OR) medzi filtrami kľúčových slov
-          alebo autorov prepnúť logiku. AND znamená, že musia platiť všetky vybrané filtre, OR
-          znamená, že stačí aspoň jeden.
+          <span className="font-mono text-indigo-200">∨</span> (OR) medzi filtrami{' '}
+          <ManualHyphens text="kľú\-čo\-vých" /> slov alebo autorov prepnúť logiku. AND znamená, že
+          musia platiť všetky vybrané filtre, OR znamená, že stačí aspoň jeden.
         </p>
       </div>
     </div>
