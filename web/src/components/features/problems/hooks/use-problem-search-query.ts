@@ -179,12 +179,58 @@ export function useProblemSearchQuery(filters: SearchFiltersState | null, enable
 
   // Keep previous filter options during loading so sidebar counts remain steady while new results load
   const stableFilterOptionsRef = useRef<FilterOptionsWithCounts | null>(null)
+  // Track which filters produced the stable ref to detect stale data
+  const stableFiltersRef = useRef<SearchFiltersState | null>(null)
+
   // Only update the ref if we have new filter options
   if (filterOptions) {
     stableFilterOptionsRef.current = filterOptions
+    stableFiltersRef.current = filters
   }
-  // Use the stable ref if we don't have new options yet
-  const effectiveFilterOptions = filterOptions ?? stableFilterOptionsRef.current
+
+  // Helper to check if filters represent a "reset" (empty/minimal state)
+  const isResetState = (filters: SearchFiltersState | null): boolean => {
+    if (!filters) return true
+    return (
+      filters.tags.length === 0 &&
+      filters.authors.length === 0 &&
+      filters.contestSelection.length === 0 &&
+      filters.seasons.length === 0 &&
+      filters.problemNumbers.length === 0 &&
+      !filters.searchText
+    )
+  }
+
+  // Helper to check if filters are "similar enough" to use stable ref
+  // Similar = not a reset, and we're just refining filters (not a major change)
+  const areFiltersSimilar = (
+    current: SearchFiltersState | null,
+    stable: SearchFiltersState | null
+  ): boolean => {
+    if (!current || !stable) return false
+    // If current is a reset, they're not similar
+    if (isResetState(current)) return false
+    // If stable was a reset but current isn't, not similar
+    if (isResetState(stable)) return false
+    // Otherwise, consider them similar enough to prevent flicker during loading
+    return true
+  }
+
+  // Check if we're using stale ref with mismatched filters
+  const filtersMatchStable =
+    filters && stableFiltersRef.current
+      ? JSON.stringify(filters) === JSON.stringify(stableFiltersRef.current)
+      : false
+  const filtersAreSimilar = areFiltersSimilar(filters, stableFiltersRef.current)
+
+  // Use the stable ref if:
+  // 1. We have new filter options (use them)
+  // 2. OR we're loading and filters match exactly (same query, just loading more)
+  // 3. OR we're loading and filters are similar (refining, prevent flicker)
+  // 4. Otherwise return null (forces fallback to baseOptions, especially on reset)
+  const effectiveFilterOptions =
+    filterOptions ??
+    (filtersMatchStable || filtersAreSimilar ? stableFilterOptionsRef.current : null)
 
   // Get total count from the first page (stays constant across pagination)
   const totalCount = useMemo(() => {

@@ -349,11 +349,40 @@ export const useProblemSearch = () => {
     handleFiltersChange,
   })
 
+  // Step 5: Get the final filter options.
+  // Now a weird bunch of hacks come which should prevent random hard-to-trace race
+  // conditions. One day I'd like to learn how a pretty code of this entire thing
+  // would look like and work because this has turned into something real sus....
+
+  // Check if UI filters match the query filters that produced the cached results
+  // If they don't match, we're in a transition state and shouldn't show stale counts
+  const filtersMatchQuery = JSON.stringify(uiState.filters) === JSON.stringify(queryFilters)
+
+  // Additional safety: if we're searching with different filters, don't trust cached data
+  // This catches the case where queryFilters hasn't updated yet but search is still running
+  const isSearchingWithMismatchedFilters = searchQuery.isSearching && !filtersMatchQuery
+
   // The options with adjusted counts after filtering (e.g. by text)
+  // Only use searchQuery.filterOptions if filters match to avoid showing stale cached counts
+  // Also don't use it if we're searching with mismatched filters (transition state)
   const filterOptions =
+    // Case 1: Viewing a single problem by ID (URL has ?id=slug)
+    // Happens when user navigates to a specific problem page
     singleProblemQuery.data?.options ??
-    searchQuery.filterOptions ??
+    // Case 2: Normal search results with matching filters
+    // Happens when: filters match queryFilters AND we're not in a transition state
+    // This is the happy path - user has applied filters, search completed, counts are accurate
+    (filtersMatchQuery && !isSearchingWithMismatchedFilters ? searchQuery.filterOptions : null) ??
+    // Case 3: Base options fallback (initial state, reset, or during filter transitions)
+    // Happens when:
+    //   - Initial page load (before first search completes)
+    //   - User clicks "Reset" (filters cleared, waiting for new search)
+    //   - Filter transition state (filters changed but query hasn't updated yet)
+    //   - Any time we can't trust searchQuery.filterOptions (prevents stale counts)
     initialDataQuery.data?.updatedOptions ??
+    // Case 4: No data available yet
+    // Happens only during very early mount, before initialDataQuery completes
+    // Should be rare - initialDataQuery loads quickly on page load
     null
 
   // The options we stared with
