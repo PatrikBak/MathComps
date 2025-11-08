@@ -467,6 +467,11 @@ export default function MultiSelectFacet({
 
     // Reset to original options order when reset is pressed
     setCurrentOptions(facet.filtered)
+
+    // Scroll to top of the list container
+    if (facet.listRef.current) {
+      facet.listRef.current.scrollTop = 0
+    }
   }
 
   const renderOption = React.useCallback(
