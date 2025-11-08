@@ -27,14 +27,23 @@ dotnet run
 # Skip existing - only insert new problems, skip updates (much faster)
 dotnet run -- --skip-existing
 
-# Process only problems from a specific year
-dotnet run -- --year 75
+# Process only problems from specific year(s)
+dotnet run -- 75
+
+# Process problems from multiple years (space-separated)
+dotnet run -- 72 59 41
+
+# Combine options: skip existing and process specific years
+dotnet run -- --skip-existing 74 75
 ```
 
 **Options:**
 
 - `-s|--skip-existing` – Skip updating existing problems (only insert new ones)
-- `-y|--year` – Only process problems from the specified year
+
+**Arguments:**
+
+- `[years]...` – Optional positional arguments specifying which year(s) to process. If not provided, all years are processed. Multiple years can be specified space-separated (e.g., `72 59 41`)
 
 ## Setup
 

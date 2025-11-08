@@ -11,6 +11,6 @@ public interface IDatabaseSeeder
     /// problems for performance.
     /// </summary>
     /// <param name="skipExistingProblems">If true, existing problems will be skipped without checking for updates.</param>
-    /// <param name="year">Optional year to filter problems by. If null, all years are included.</param>
-    Task SeedAsync(bool skipExistingProblems, int? year = null);
+    /// <param name="years">An array of years to filter problems by. If empty, all years are included.</param>
+    Task SeedAsync(bool skipExistingProblems, int[] years);
 }
