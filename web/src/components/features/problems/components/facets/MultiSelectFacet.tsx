@@ -292,18 +292,78 @@ export default function MultiSelectFacet({
     },
     [grouping, groupSortModes]
   )
+  /**
+   * Helper function to sort options within a group based on the group's sort mode.
+   * Used for sorting both selected and unselected items within a group.
+   */
+  const sortOptionsByMode = React.useCallback(
+    (options: MultiSelectFacetOption[], sortMode: (typeof SORT_MODES)[number]['key']) => {
+      return [...options].sort((a, b) => {
+        switch (sortMode) {
+          case 'alpha':
+            return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+
+          case 'count-desc':
+          case 'count-asc': {
+            const aCount = typeof a.count === 'number' ? a.count : 0
+            const bCount = typeof b.count === 'number' ? b.count : 0
+            // If counts are equal, fall back to alphabetical
+            if (aCount === bCount) {
+              return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+            }
+            // Otherwise comparing by count asc/desc
+            return sortMode === 'count-desc' ? bCount - aCount : aCount - bCount
+          }
+
+          default:
+            throw new Error(`Unknown sort mode: ${sortMode}`)
+        }
+      })
+    },
+    []
+  )
+
   // This effect updates the displayed options when the popover is open and there's no search query.
-  // When grouping is enabled, it just updates the options (groups handle their own sorting).
+  // When grouping is enabled, it sorts options with selected items first within each group,
+  // then applies the group's sort mode to both selected and unselected items.
   // When grouping is disabled, it sorts options with selected items first.
   React.useEffect(() => {
     // Only run this logic when the popover is open and there's no search query
     if (facet.open && !facet.query) {
       // Use setTimeout to make sorting asynchronous and prevent UI blocking
       const timeoutId = setTimeout(() => {
-        // Skip selected-first sorting when grouping is enabled
-        // (sections maintain their own alphabetical order)
         if (grouping) {
-          setCurrentOptions(facet.filtered)
+          // Group options and sort with selected items first within each group
+          const groups = groupOptions(facet.filtered)
+
+          // We'll have final options here
+          const sortedOptions: MultiSelectFacetOption[] = []
+
+          // Process each group in order
+          grouping.keys.forEach((groupKey) => {
+            // Get group data
+            const groupOptionsList = groups[groupKey]
+            const sortMode = groupSortModes[groupKey]
+
+            // Separate selected and unselected items
+            const selectedInGroup = groupOptionsList.filter((option) =>
+              selected.includes(option.id)
+            )
+            const unselectedInGroup = groupOptionsList.filter(
+              (option) => !selected.includes(option.id)
+            )
+
+            // Sort selected items by the group's sort mode
+            const sortedSelected = sortOptionsByMode(selectedInGroup, sortMode)
+            // Sort unselected items by the group's sort mode
+            const sortedUnselected = sortOptionsByMode(unselectedInGroup, sortMode)
+
+            // Combine: selected first, then unselected
+            sortedOptions.push(...sortedSelected, ...sortedUnselected)
+          })
+
+          // The options are ready
+          setCurrentOptions(sortedOptions)
         } else {
           // Sort with selected items first
           setCurrentOptions(
@@ -323,7 +383,16 @@ export default function MultiSelectFacet({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [facet.open, facet.query, facet.filtered, grouping, selected])
+  }, [
+    facet.open,
+    facet.query,
+    facet.filtered,
+    grouping,
+    selected,
+    groupOptions,
+    groupSortModes,
+    sortOptionsByMode,
+  ])
 
   // This effect keeps the list in sync with the search filter.
   React.useEffect(() => {
@@ -574,7 +643,20 @@ export default function MultiSelectFacet({
           {(() => {
             // Render options with or without sections based on grouping prop
             if (grouping) {
-              const groups = groupOptions(currentOptions)
+              // Group currentOptions without re-sorting
+              const groups: Record<string, MultiSelectFacetOption[]> = {}
+              grouping.keys.forEach((key) => {
+                groups[key] = []
+              })
+
+              // Distribute currentOptions into groups, preserving their order
+              currentOptions.forEach((option) => {
+                if (option.groupKey && groups[option.groupKey]) {
+                  groups[option.groupKey].push(option)
+                }
+              })
+
+              // Find the visible groups
               const visibleGroups = grouping.keys
                 .map((groupKey) => ({ groupKey, options: groups[groupKey] || [] }))
                 .filter(({ options }) => options.length > 0)
