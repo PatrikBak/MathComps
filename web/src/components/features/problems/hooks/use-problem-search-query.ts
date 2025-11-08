@@ -6,8 +6,8 @@ import { useCallback, useMemo, useRef } from 'react'
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { CACHE_TIMING } from '../constants/timing-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
-import { isProblemNotFoundError } from '../types/problem-errors'
 import type { Problem } from '../types/problem-api-types'
+import { isProblemNotFoundError } from '../types/problem-errors'
 import type {
   FilterOptionsWithCounts,
   FilterResponse,

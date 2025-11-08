@@ -3,10 +3,9 @@
 import { useLocalStorage } from '@mantine/hooks'
 import { isEqual } from 'lodash'
 import { Loader2, WifiOff } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { Virtuoso } from 'react-virtuoso'
-import { toast } from 'sonner'
 
 import { ProblemCardSkeleton } from '@/components/features/problems/components/ProblemCardSkeleton'
 import { PREFETCH_THRESHOLD } from '@/components/features/problems/constants/pagination-constants'
