@@ -18,18 +18,17 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
     public class Settings : CommandSettings
     {
         [CommandOption("-s|--skip-existing")]
-        [Description("Skip updating existing problems (only insert new ones)")]
-        /// <summary>
-        /// Useful when we just add new problems and we want the command to run quick.
-        /// </summary>
+        [Description(
+            """
+            Skip updating existing problems (only insert new ones). 
+            Useful when we just add new problems and we want the command to run quick.
+            """
+        )]
         public bool SkipExisting { get; set; }
 
-        [CommandOption("-y|--year")]
-        [Description("Only process problems from the specified year")]
-        /// <summary>
-        /// When specified, only problems from this year will be processed.
-        /// </summary>
-        public int? Year { get; set; }
+        [CommandArgument(0, "[years]")]
+        [Description("Only process problems from the specified year(s), space-separated (e.g., '72 59 41')")]
+        public int[] Years { get; set; } = [];
     }
 
     /// <inheritdoc/>
@@ -37,8 +36,9 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
     {
         try
         {
+            // If not specified, Years will be an empty array, meaning we're updating everything
             // Execute the seeding operation with the configured options.
-            await seeder.SeedAsync(settings.SkipExisting, settings.Year);
+            await seeder.SeedAsync(settings.SkipExisting, settings.Years);
 
             // Success!
             return 0;

@@ -103,7 +103,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
     #region Public Methods
 
     /// </<inheritdoc/>
-    public async Task SeedAsync(bool skipExistingProblems, int? year = null)
+    public async Task SeedAsync(bool skipExistingProblems, int[] years)
     {
         // Log start
         AnsiConsole.MarkupLine("[bold cyan]Starting database seeding process...[/]");
@@ -126,14 +126,14 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Deserialize into a list of parsed problems.
         var parsedProblems = jsonContent.FromJson<ImmutableList<SkmoParsedProblem>>()
-            // Take only problems from the specified year
-            .Where(problem => !year.HasValue || problem.RawProblem.OlympiadYear == year.Value)
+            // Take only problems from the specified years
+            .Where(problem => years.Length == 0 || years.Contains(problem.RawProblem.OlympiadYear))
             // Enumerate
             .ToImmutableList();
 
         // Log the number of problems
-        AnsiConsole.MarkupLine(year.HasValue
-            ? $"[yellow]Processing {parsedProblems.Count} problems from edition {year.Value}[/]"
+        AnsiConsole.MarkupLine(years.Length != 0
+            ? $"[green]Processing {parsedProblems.Count} problems from edition(s) {years.Order().ToJoinedString()}[/]"
             : $"[green]Processing {parsedProblems.Count} problems from dataset (all years)[/]");
 
         #endregion
@@ -299,8 +299,8 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Find problems in the database that are no longer in the JSON file.
         var orphanedProblemSlugs = (await dbContext.Problems
-            // Only from the specified year
-            .Where(problem => !year.HasValue || problem.RoundInstance.Season.EditionNumber == year.Value)
+            // Only from the specified years, if specified
+            .Where(problem => years.Length == 0 || years.Contains(problem.RoundInstance.Season.EditionNumber))
             // Slug as an id
             .Select(problem => problem.Slug)
             // Evaluate
