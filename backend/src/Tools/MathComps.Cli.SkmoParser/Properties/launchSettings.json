@@ -4,6 +4,11 @@
       "commandName": "Project",
       "workingDirectory": "."
     },
+    "Parse Archive With Rendering": {
+      "commandName": "Project",
+      "commandLineArgs": "--mode SplitByYears",
+      "workingDirectory": "."
+    },
     "Test One Year": {
       "commandName": "Project",
       "commandLineArgs": "--years 75 --mode AllInOneFile",
