@@ -480,9 +480,8 @@ export default function MultiSelectFacet({
   function LogicToggle(props: {
     value: MultiSelectFacetMode
     onChange: (m: MultiSelectFacetMode) => void
-    disabled: boolean
   }) {
-    const { value, onChange, disabled } = props
+    const { value, onChange } = props
     const baseBtn =
       'px-2 sm:px-2.5 h-6 sm:h-7 rounded-md text-[11px] sm:text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
     return (
@@ -495,7 +494,6 @@ export default function MultiSelectFacet({
           )}
           role="radiogroup"
           aria-label="Logika výberu"
-          title={disabled ? 'Platí pri ≥ 2 vybraných' : undefined}
         >
           <button
             type="button"
@@ -565,11 +563,7 @@ export default function MultiSelectFacet({
         )}
 
         {logic && (logic.enabled ?? true) && (
-          <LogicToggle
-            value={logic.mode}
-            onChange={logic.onChange}
-            disabled={selected.length <= 1}
-          />
+          <LogicToggle value={logic.mode} onChange={logic.onChange} />
         )}
 
         <FacetListContainer
