@@ -479,7 +479,7 @@ export default function MultiSelectFacet({
 
   function LogicToggle(props: {
     value: MultiSelectFacetMode
-    onChange: (m: MultiSelectFacetMode) => void
+    onChange: (mode: MultiSelectFacetMode) => void
   }) {
     const { value, onChange } = props
     const baseBtn =
