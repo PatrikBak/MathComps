@@ -1238,10 +1238,8 @@ public static class TexStringParser
         // Combine all captured text into a single blob for scanning.
         var combined = allTexts.ToJoinedString(" ");
 
-        // Find all commands in the raw texts
-        return [.. Regex.Matches(combined, @"\\[A-Za-z]+")
-            // Extract actual commands
-            .Select(match => match.Value[1..]),];
+        // Match backslash followed by Unicode letters (including diacritics)
+        return [.. Regex.Matches(combined, @"\\[\p{L}]+").Select(match => match.Value[1..])];
     }
 
     /// <summary>
