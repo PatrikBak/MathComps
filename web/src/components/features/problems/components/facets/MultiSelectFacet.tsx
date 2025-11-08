@@ -233,12 +233,6 @@ export default function MultiSelectFacet({
     return initial
   })
 
-  // Capture the current selected state and filtered options without making them dependencies
-  const selectedRef = React.useRef(selected)
-  const filteredRef = React.useRef(facet.filtered)
-  selectedRef.current = selected
-  filteredRef.current = facet.filtered
-
   // Store the collapse state before search starts, so we can restore it when search stops
   const preSearchCollapseStateRef = React.useRef<Record<string, boolean> | null>(null)
   // Track the previous query to detect when search starts/stops
@@ -298,23 +292,24 @@ export default function MultiSelectFacet({
     },
     [grouping, groupSortModes]
   )
-  // This effect handles the one-time sort when the popover opens.
+  // This effect updates the displayed options when the popover is open and there's no search query.
+  // When grouping is enabled, it just updates the options (groups handle their own sorting).
+  // When grouping is disabled, it sorts options with selected items first.
   React.useEffect(() => {
-    // Only run this logic when the popover transitions from closed to open
-    // or when the user deleted the content of the search filter
-    if (facet.open || !facet.query) {
+    // Only run this logic when the popover is open and there's no search query
+    if (facet.open && !facet.query) {
       // Use setTimeout to make sorting asynchronous and prevent UI blocking
       const timeoutId = setTimeout(() => {
         // Skip selected-first sorting when grouping is enabled
         // (sections maintain their own alphabetical order)
         if (grouping) {
-          setCurrentOptions(filteredRef.current)
+          setCurrentOptions(facet.filtered)
         } else {
-          // Sort with selected items first - use refs to get current state
+          // Sort with selected items first
           setCurrentOptions(
-            [...filteredRef.current].sort((a, b) => {
-              const aSelected = selectedRef.current.includes(a.id)
-              const bSelected = selectedRef.current.includes(b.id)
+            [...facet.filtered].sort((a, b) => {
+              const aSelected = selected.includes(a.id)
+              const bSelected = selected.includes(b.id)
 
               // If both are selected or both are unselected, maintain original order
               if (aSelected === bSelected) return 0
@@ -328,7 +323,7 @@ export default function MultiSelectFacet({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [facet.open, facet.query, facet.filtered, grouping])
+  }, [facet.open, facet.query, facet.filtered, grouping, selected])
 
   // This effect keeps the list in sync with the search filter.
   React.useEffect(() => {
