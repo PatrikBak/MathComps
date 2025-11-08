@@ -1,5 +1,5 @@
 import { useMediaQuery } from '@mantine/hooks'
-import { ChevronDown, ChevronUp, FilterX } from 'lucide-react'
+import { ChevronDown, ChevronUp, FilterX, Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -364,14 +364,17 @@ export default function ActiveFiltersBar({
           {/* Separator */}
           <div className="h-6 w-px bg-slate-600/40 flex-shrink-0" />
 
-          {/* Compact count - show loading skeleton when searching */}
+          {/* Compact count with spinner when searching */}
           {isSearching ? (
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <div className="h-3.5 w-16 animate-pulse rounded bg-slate-700" />
-            </div>
+            <Loader2
+              className="h-3 w-3 animate-spin text-slate-400 flex-shrink-0"
+              aria-label="Vyhľadávam"
+            />
           ) : (
-            <div className="text-slate-400 flex-shrink-0 whitespace-nowrap text-xs">
-              {problemCount} {slovakPlural(problemCount, ['úloha', 'úlohy', 'úloh'])}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <div className="text-slate-400 flex-shrink-0 whitespace-nowrap text-xs">
+                {problemCount} {slovakPlural(problemCount, ['úloha', 'úlohy', 'úloh'])}
+              </div>
             </div>
           )}
         </div>

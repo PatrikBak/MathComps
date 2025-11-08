@@ -32,8 +32,9 @@ export default function ProblemsLibrary() {
   const { state, handleFiltersChange, loadMore } = useProblemSearch()
   const {
     isLoading,
-    isSearching,
+    isSearchingInBackground,
     isLoadingMore,
+    isSearchingWithNoData,
     filters,
     initialFilters,
     filterOptions,
@@ -52,10 +53,7 @@ export default function ProblemsLibrary() {
   })
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
-  // Keep filters visible during search to maintain user context
-  // Only hide filters during initial loading or when critical data is missing
-  // On initial load, wait for both filters AND problem data before showing the real bar
-  // Also prevent flicker when transitioning from single problem to search mode
+  // We'll track whether we have the needed data. Before that, we show skeletons
   const isPageReady =
     !isLoading && filters && filterOptions && initialFilters && hasInitialDataLoaded
 
@@ -139,7 +137,7 @@ export default function ProblemsLibrary() {
 
   // Animation state management
   const [searchBatchId, setSearchBatchId] = useState(0)
-  const prevIsSearchingRef = React.useRef(isSearching)
+  const previousIsSearchingInBackground = React.useRef(isSearchingInBackground)
   const isInitialLoadRef = React.useRef(true)
 
   // Track visible range for viewport animations
@@ -152,19 +150,25 @@ export default function ProblemsLibrary() {
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null)
   const lastScrollTopRef = React.useRef(0)
 
-  // Detect when search completes to trigger batch animations and scroll
+  // Detect when initial search completes to trigger batch animations
+  // Only runs once on initial load, not on filter changes
   useEffect(() => {
-    const wasSearching = prevIsSearchingRef.current
-    const searchJustCompleted = wasSearching && !isSearching
+    // Detect transition from searching → not searching
+    // prevIsSearchingRef ensures we only trigger on the transition, not on initial mount
+    const searchJustCompleted = previousIsSearchingInBackground.current && !isSearchingInBackground
 
-    if (searchJustCompleted && !isLoadingMore) {
-      // Trigger batch animation when search completes (not infinite scroll)
+    // If initial load completed...
+    if (searchJustCompleted && !isLoadingMore && isInitialLoadRef.current) {
+      // This should trigger animation
       setSearchBatchId((prev) => prev + 1)
+
+      // We will not trigger it again
       isInitialLoadRef.current = false
     }
 
-    prevIsSearchingRef.current = isSearching
-  }, [isSearching, isLoadingMore, isOfflineMode, problems.length])
+    // Track current searching state for next render
+    previousIsSearchingInBackground.current = isSearchingInBackground
+  }, [isSearchingInBackground, isLoadingMore, isOfflineMode, problems.length])
 
   // Scroll to top when problems set changes (new search), but not during infinite scroll
   useEffect(() => {
@@ -260,7 +264,7 @@ export default function ProblemsLibrary() {
           <div className="grid h-full grid-cols-1 gap-8 lg:grid-cols-[var(--problems-sidebar-width)_1fr]">
             {/* Left Column: Filters */}
             <aside className="hidden h-full flex-col overflow-y-auto shadow-lg lg:flex [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {isPageReady ? (
+              {isPageReady && filters && filterOptions ? (
                 <SearchFilters
                   filters={filters}
                   onFiltersChange={handleFiltersChange}
@@ -276,7 +280,7 @@ export default function ProblemsLibrary() {
             <div className="flex flex-col overflow-hidden">
               {/* ActiveFiltersBar  */}
               <div className="mb-2 sm:mb-4 lg:mb-6 flex-shrink-0">
-                {isPageReady ? (
+                {isPageReady && filters && filterOptions && initialFilters ? (
                   <ActiveFiltersBar
                     filters={filters}
                     filterOptions={filterOptions}
@@ -287,7 +291,7 @@ export default function ProblemsLibrary() {
                     showTechniqueTags={showTechniqueTags}
                     onShowTagsChange={setShowTechniqueTags}
                     onMobileFilterClick={() => setIsMobileFilterOpen(true)}
-                    isSearching={isSearching}
+                    isSearching={isSearchingInBackground}
                   />
                 ) : (
                   <ActiveFiltersBarSkeleton />
@@ -296,7 +300,7 @@ export default function ProblemsLibrary() {
 
               {/* The problem list container */}
               <div className="relative flex-1 overflow-hidden">
-                {!isPageReady || isSearching ? (
+                {!isPageReady || isSearchingWithNoData ? (
                   <div className="h-full">
                     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                       <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
@@ -321,7 +325,7 @@ export default function ProblemsLibrary() {
                         }
                       }}
                       endReached={() => {
-                        if (hasMore && !isLoadingMore && !isSearching) {
+                        if (hasMore && !isLoadingMore && !isSearchingInBackground) {
                           loadMore()
                         }
                       }}
@@ -350,7 +354,7 @@ export default function ProblemsLibrary() {
                         if (
                           hasMore &&
                           !isLoadingMore &&
-                          !isSearching &&
+                          !isSearchingInBackground &&
                           problems.length - endIndex <= PREFETCH_THRESHOLD
                         ) {
                           loadMore()
@@ -383,7 +387,7 @@ export default function ProblemsLibrary() {
         </main>
 
         {/* Mobile Filter Drawer */}
-        {isPageReady && (
+        {isPageReady && filters && filterOptions && (
           <MobileFilterDrawer
             isOpen={isMobileFilterOpen}
             onClose={() => setIsMobileFilterOpen(false)}
@@ -391,7 +395,7 @@ export default function ProblemsLibrary() {
             onFiltersChange={handleFiltersChange}
             filterOptions={filterOptions}
             baseOptions={baseOptions ?? filterOptions}
-            activeFilterCount={filters ? countActiveFilters(filters) : 0}
+            activeFilterCount={countActiveFilters(filters)}
           />
         )}
       </div>

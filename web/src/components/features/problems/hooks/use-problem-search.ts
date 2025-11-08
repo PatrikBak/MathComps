@@ -460,12 +460,21 @@ export const useProblemSearch = () => {
   const totalCount = singleProblemQuery.data ? 1 : searchQuery.totalCount
   const hasMore = singleProblemQuery.data ? false : searchQuery.hasMore
 
+  // Always track if we're searching in the background (for subtle UI indicators like count spinner)
+  // This is used to prevent loadMore/prefetch during searches and show spinner in count
+  const isSearchingInBackground = !problemId && searchQuery.isSearching
+
+  // Track if we're searching but have no data to show yet (should show skeleton, not empty state)
+  // This is only relevant for search queries, not single problem views
+  const isSearchingWithNoData = !problemId && searchQuery.isSearchingWithNoData
+
   // Combine state from multiple sources into a single API
   const state = {
     // Loading states
     isLoading,
-    isSearching: !problemId && searchQuery.isSearching,
+    isSearchingInBackground,
     isLoadingMore: !problemId && searchQuery.isLoadingMore,
+    isSearchingWithNoData,
     hasInitialDataLoaded,
 
     // Filter state
