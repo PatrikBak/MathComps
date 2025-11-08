@@ -208,9 +208,6 @@ export default function MultiSelectFacet({
     selected,
   })
 
-  // We'll keep track of the way options are displayed since we wanna sort
-  const [currentOptions, setCurrentOptions] = React.useState(options)
-
   // Track sort mode for each group (only used when grouping is enabled)
   const [groupSortModes, setGroupSortModes] = React.useState<
     Record<string, (typeof SORT_MODES)[number]['key']>
@@ -323,86 +320,65 @@ export default function MultiSelectFacet({
     []
   )
 
-  // This effect updates the displayed options when the popover is open and there's no search query.
-  // When grouping is enabled, it sorts options with selected items first within each group,
-  // then applies the group's sort mode to both selected and unselected items.
-  // When grouping is disabled, it sorts options with selected items first.
-  React.useEffect(() => {
-    // Only run this logic when the popover is open and there's no search query
-    if (facet.open && !facet.query) {
-      // Use setTimeout to make sorting asynchronous and prevent UI blocking
-      const timeoutId = setTimeout(() => {
-        if (grouping) {
-          // Group options and sort with selected items first within each group
-          const groups = groupOptions(facet.filtered)
+  // This memo returns the list of display options for the facet,
+  // respecting current open/search state and grouping configuration.
+  const displayOptions = React.useMemo(() => {
+    // If the dropdown is closed, or if searching, just show current filtered options in order.
+    if (!facet.open || facet.query) {
+      return facet.filtered
+    }
 
-          // We'll have final options here
-          const sortedOptions: MultiSelectFacetOption[] = []
+    // If grouping is enabled, preserve group order from `grouping.keys`
+    if (grouping) {
+      // Group options according to grouping.keys, sorted within groups.
+      const groups = groupOptions(facet.filtered)
 
-          // Process each group in order
-          grouping.keys.forEach((groupKey) => {
-            // Get group data
-            const groupOptionsList = groups[groupKey]
-            const sortMode = groupSortModes[groupKey]
+      // This will accumulate all options in the defined order, selected first in each group.
+      const sortedOptions: MultiSelectFacetOption[] = []
 
-            // Separate selected and unselected items
-            const selectedInGroup = groupOptionsList.filter((option) =>
-              selected.includes(option.id)
-            )
-            const unselectedInGroup = groupOptionsList.filter(
-              (option) => !selected.includes(option.id)
-            )
+      // For every groupKey, preserve display order specified in `grouping.keys`
+      grouping.keys.forEach((groupKey) => {
+        // Get all options for this group (may be empty array)
+        const groupOptionsList = groups[groupKey]
+        // Get this group's sort mode (e.g. alpha, count-desc)
+        const sortMode = groupSortModes[groupKey]
 
-            // Sort selected items by the group's sort mode
-            const sortedSelected = sortOptionsByMode(selectedInGroup, sortMode)
-            // Sort unselected items by the group's sort mode
-            const sortedUnselected = sortOptionsByMode(unselectedInGroup, sortMode)
+        // Separate out selected/unselected for "selected first" behavior
+        const selectedInGroup = groupOptionsList.filter((option) => selected.includes(option.id))
+        const unselectedInGroup = groupOptionsList.filter((option) => !selected.includes(option.id))
 
-            // Combine: selected first, then unselected
-            sortedOptions.push(...sortedSelected, ...sortedUnselected)
-          })
+        // Sort each partition within the group by group's sort mode
+        const sortedSelected = sortOptionsByMode(selectedInGroup, sortMode)
+        const sortedUnselected = sortOptionsByMode(unselectedInGroup, sortMode)
 
-          // The options are ready
-          setCurrentOptions(sortedOptions)
-        } else {
-          // Sort with selected items first
-          setCurrentOptions(
-            [...facet.filtered].sort((a, b) => {
-              const aSelected = selected.includes(a.id)
-              const bSelected = selected.includes(b.id)
+        // Add to overall array: selected first, then unselected
+        sortedOptions.push(...sortedSelected, ...sortedUnselected)
+      })
 
-              // If both are selected or both are unselected, maintain original order
-              if (aSelected === bSelected) return 0
+      // Final flattened result
+      return sortedOptions
+    } else {
+      // No grouping: selected options first, then unselected, order otherwise unchanged
+      return [...facet.filtered].sort((a, b) => {
+        const aSelected = selected.includes(a.id)
+        const bSelected = selected.includes(b.id)
 
-              // Selected items come first
-              return aSelected ? -1 : 1
-            })
-          )
-        }
-      }, 0)
-
-      return () => clearTimeout(timeoutId)
+        // If both are selected or both unselected, retain original order
+        if (aSelected === bSelected) return 0
+        // Otherwise, selected options first
+        return aSelected ? -1 : 1
+      })
     }
   }, [
     facet.open,
     facet.query,
     facet.filtered,
     grouping,
-    selected,
     groupOptions,
     groupSortModes,
+    selected,
     sortOptionsByMode,
   ])
-
-  // This effect keeps the list in sync with the search filter.
-  React.useEffect(() => {
-    // If the popover is closed OR if there's a search query,
-    // the displayed options should always match the filtered list.
-    // This correctly resets the list when closed and allows searching to work.
-    if (!facet.open || facet.query) {
-      setCurrentOptions(facet.filtered)
-    }
-  }, [facet.filtered, facet.query, facet.open])
 
   // This effect manages group collapse state based on search query.
   // When searching, all groups containing matching results are expanded.
@@ -464,9 +440,6 @@ export default function MultiSelectFacet({
     if (selected.length) onChange([])
     if (facet.query.length) facet.setQuery('')
     if (facet.open) facet.focusAppropriateElement()
-
-    // Reset to original options order when reset is pressed
-    setCurrentOptions(facet.filtered)
 
     // Scroll to top of the list container
     if (facet.listRef.current) {
@@ -655,7 +628,7 @@ export default function MultiSelectFacet({
               })
 
               // Distribute currentOptions into groups, preserving their order
-              currentOptions.forEach((option) => {
+              displayOptions.forEach((option) => {
                 if (option.groupKey && groups[option.groupKey]) {
                   groups[option.groupKey].push(option)
                 }
@@ -720,7 +693,7 @@ export default function MultiSelectFacet({
               )
             } else {
               // Original linear list rendering
-              return currentOptions.map(renderOption)
+              return displayOptions.map(renderOption)
             }
           })()}
         </FacetListContainer>
