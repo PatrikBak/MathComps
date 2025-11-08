@@ -1210,8 +1210,8 @@ public static class TexStringParser
         // Replace escape signs for literal characters
         textContent = Regex.Replace(textContent, @"\s*\\%", "%");
 
-        // Remove escaped dashes used for hyphenation hints
-        textContent = Regex.Replace(textContent, @"\\-", "");
+        // Convert TeX-style hyphenation hints (\-) to soft hyphens
+        textContent = Regex.Replace(textContent, @"\\-", "\u00AD");
 
         // All done
         return textContent;
