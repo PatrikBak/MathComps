@@ -227,8 +227,9 @@ public class ProblemFilterService(
 
         // Build search bar options only for the first page to avoid unnecessary computation
         var searchBarOptions = pageNumber != 1 ? null :
-             // Build search bar options with disjunctive faceting on the text-filtered base query
-             // This ensures facets reflect the text search results while maintaining disjunctive behavior
+             // Build search bar options with faceting on the text-filtered base query
+             // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
+             // when AND logic is selected with at least one item
              await BuildSearchOptionsAsync(textFilteredQuery, query.Parameters);
 
         // Return the complete filter result
@@ -394,12 +395,15 @@ public class ProblemFilterService(
     }
 
     /// <summary>
-    /// Builds search bar facet options with accurate counts using disjunctive faceting.
-    /// Each facet shows counts based on other active filters while ignoring its own selections,
-    /// providing users with meaningful "available options" even when filters are active.
+    /// Builds search bar facet options with accurate counts using disjunctive or conjunctive faceting.
+    /// Most facets use disjunctive faceting: each facet shows counts based on other active filters
+    /// while ignoring its own selections, providing users with meaningful "available options" even when filters are active.
+    /// Tags and authors use conjunctive faceting when AND logic is selected with at least one item:
+    /// counts show "how many results if I add this tag/author" instead of "how many results are available",
+    /// helping users understand the impact of adding additional filters in AND mode.
     /// </summary>
     /// <param name="baseQuery">Base queryable with all necessary includes</param>
-    /// <param name="parameters">Current filter parameters to exclude from facet calculations</param>
+    /// <param name="parameters">Current filter parameters used to determine facet counting behavior</param>
     /// <returns>Complete search bar options with facet counts and metadata</returns>
     private static async Task<SearchBarOptions> BuildSearchOptionsAsync(
         IQueryable<Problem> baseQuery,
@@ -410,8 +414,18 @@ public class ProblemFilterService(
         var seasonsScope = ApplyFilters(baseQuery, parameters with { OlympiadYears = [] });
         var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] });
         var competitionsAndRoundsScope = ApplyFilters(baseQuery, parameters with { Contests = [] });
-        var tagsScope = ApplyFilters(baseQuery, parameters with { TagSlugs = [] });
-        var authorsScope = ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] });
+
+        // For tags: use conjunctive counting when AND logic is selected with at least one tag
+        // This shows "how many results if I add this tag" instead of "how many results are available"
+        // Otherwise, use disjunctive counting (exclude selected tags)
+        var tagsScope = parameters.TagLogic == LogicToggle.And && parameters.TagSlugs.Count > 0
+            ? ApplyFilters(baseQuery, parameters)
+            : ApplyFilters(baseQuery, parameters with { TagSlugs = [] });
+
+        // For authors: Analogous logic to that of with tags
+        var authorsScope = parameters.AuthorLogic == LogicToggle.And && parameters.AuthorSlugs.Count > 0
+            ? ApplyFilters(baseQuery, parameters)
+            : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] });
 
         // Build season facet options with problem counts
         var seasonGroups = (await seasonsScope
