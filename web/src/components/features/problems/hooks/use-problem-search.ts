@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 
 import { ROUTES } from '@/constants/routes'
 
+import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import {
   isNetworkError,
@@ -19,6 +20,7 @@ import {
   needsLabelResolution,
   resolveContestSelectionLabels,
 } from '../utils/contest-selection-resolver'
+import { countActiveFilters } from '../utils/filter-validation'
 import { isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { createDefaultFilters } from '../utils/url-initialization'
@@ -307,6 +309,13 @@ export const useProblemSearch = () => {
   // The main function exposed to the UI for handling filter changes
   const handleFiltersChange = useCallback(
     (newFilters: SearchFiltersState, type?: 'discrete' | 'text') => {
+      // Validate filter count to prevent excessive URL length and maintain performance
+      const filterCount = countActiveFilters(newFilters)
+      if (filterCount > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
+        toast.warning(`Môžete vybrať maximálne ${ACTIVE_FILTERS_CONSTANTS.maxFilterLimit} filtrov`)
+        return
+      }
+
       // If we're viewing a single problem and user changes filters, exit single problem view
       if (problemId) {
         // Clear the ?id parameter from URL to enable search

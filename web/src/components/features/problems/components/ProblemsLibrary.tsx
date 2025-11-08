@@ -8,7 +8,6 @@ import { Virtuoso } from 'react-virtuoso'
 import { toast } from 'sonner'
 
 import { ProblemCardSkeleton } from '@/components/features/problems/components/ProblemCardSkeleton'
-import { ACTIVE_FILTERS_CONSTANTS } from '@/components/features/problems/constants/filter-constants'
 import { PREFETCH_THRESHOLD } from '@/components/features/problems/constants/pagination-constants'
 import { VIRTUOSO_INCREASE_VIEWPORT_BY } from '@/components/features/problems/constants/problem-list-constants'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
@@ -30,7 +29,7 @@ const ActiveFiltersBarSkeleton = () => (
 )
 
 export default function ProblemsLibrary() {
-  const { state, handleFiltersChange: handleFiltersChangeInternal, loadMore } = useProblemSearch()
+  const { state, handleFiltersChange, loadMore } = useProblemSearch()
   const {
     isLoading,
     isSearching,
@@ -46,24 +45,6 @@ export default function ProblemsLibrary() {
     hasInitialDataLoaded,
     isOfflineMode,
   } = state
-
-  // Wrap filter change handler with validation to prevent excessive URL length
-  const handleFiltersChange = useCallback(
-    (newFilters: Parameters<typeof handleFiltersChangeInternal>[0]) => {
-      // Count total active filters in the new filter state
-      const filterCount = countActiveFilters(newFilters)
-
-      // Enforce maximum filter limit to prevent URL overflow and maintain performance
-      if (filterCount > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
-        toast.warning(`Môžete vybrať maximálne ${ACTIVE_FILTERS_CONSTANTS.maxFilterLimit} filtrov`)
-        return
-      }
-
-      // All validation passed, apply the filter changes
-      handleFiltersChangeInternal(newFilters)
-    },
-    [handleFiltersChangeInternal]
-  )
 
   const [showTechniqueTags, setShowTechniqueTags] = useLocalStorage({
     key: 'showTechniqueTags',
