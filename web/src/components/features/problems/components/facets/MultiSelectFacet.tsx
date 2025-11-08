@@ -328,7 +328,7 @@ export default function MultiSelectFacet({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [facet.open, facet.query, grouping])
+  }, [facet.open, facet.query, facet.filtered, grouping])
 
   // This effect keeps the list in sync with the search filter.
   React.useEffect(() => {
