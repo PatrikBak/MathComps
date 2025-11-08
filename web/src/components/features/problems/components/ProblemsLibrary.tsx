@@ -264,7 +264,7 @@ export default function ProblemsLibrary() {
           <div className="grid h-full grid-cols-1 gap-8 lg:grid-cols-[var(--problems-sidebar-width)_1fr]">
             {/* Left Column: Filters */}
             <aside className="hidden h-full flex-col overflow-y-auto shadow-lg lg:flex [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {isPageReady && filters && filterOptions ? (
+              {isPageReady ? (
                 <SearchFilters
                   filters={filters}
                   onFiltersChange={handleFiltersChange}
@@ -280,7 +280,7 @@ export default function ProblemsLibrary() {
             <div className="flex flex-col overflow-hidden">
               {/* ActiveFiltersBar  */}
               <div className="mb-2 sm:mb-4 lg:mb-6 flex-shrink-0">
-                {isPageReady && filters && filterOptions && initialFilters ? (
+                {isPageReady ? (
                   <ActiveFiltersBar
                     filters={filters}
                     filterOptions={filterOptions}
@@ -387,7 +387,7 @@ export default function ProblemsLibrary() {
         </main>
 
         {/* Mobile Filter Drawer */}
-        {isPageReady && filters && filterOptions && (
+        {isPageReady && (
           <MobileFilterDrawer
             isOpen={isMobileFilterOpen}
             onClose={() => setIsMobileFilterOpen(false)}
