@@ -46,6 +46,10 @@ CANDIDATE TAGS:
 You must output a JSON (and only this JSON) with the following format:
 {[tag]: {"Approved": true | false, "Justification": string}}
 
-Each tag from among the candidate tags must be exactly once in the output JSON.
-You should provide a justification only if the tag is rejected i.e. "Approved" is false;
-otherwise, leave the justification empty.
+Final check:
+- Each tag from among the candidate tags must appear exactly once in the output JSON.
+- You should provide a justification only if the tag is rejected i.e. "Approved" is false;
+  otherwise, leave the justification empty.
+- Escape all double quotes in strings.
+- Escape all TeX commands.
+- The output must be a valid JSON.
