@@ -62,6 +62,17 @@ public static class TaggingHelpers
     }
 
     /// <summary>
+    /// Reads tag names from a file, where each line contains one tag name.
+    /// Trims whitespace from each line and filters out empty lines and commented-out lines (starting with #).
+    /// </summary>
+    /// <param name="filePath">Path to the file containing tag names, one per line.</param>
+    /// <returns>A hash set of tag names read from the file.</returns>
+    public static HashSet<string> ReadTagsFromFile(string filePath)
+        => [.. File.ReadAllLines(filePath)
+            .Select(line => line.Trim())
+            .Where(line => line != "" && !line.StartsWith('#'))];
+
+    /// <summary>
     /// Cleans AI response by removing markdown code block markers that interfere with JSON parsing.
     /// </summary>
     /// <param name="aiResponse">Raw AI response that may contain markdown formatting.</param>

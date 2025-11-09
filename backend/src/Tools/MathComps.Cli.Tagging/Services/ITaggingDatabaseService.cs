@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using MathComps.Cli.Tagging.Dtos;
+using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Cli.Tagging.Services;
 
@@ -79,10 +80,13 @@ public interface ITaggingDatabaseService
     Task<ImportTagsResult> ImportTagsAsync(List<TagImportDto> tagImports);
 
     /// <summary>
-    /// Removes the specified tags from the database completely, including all associations with problems.
+    /// Removes ProblemTag associations for the specified tags, optionally filtering by assigned status.
+    /// When <paramref name="onlyAssigned"/> is false, also deletes the Tag entities themselves, completely removing the tags from the database.
     /// </summary>
-    /// <param name="tags">The tags to delete.</param>
-    Task RemoveTagsFromAllProblemsAsync(string[] tags);
+    /// <param name="tags">The tag names to remove associations for.</param>
+    /// <param name="onlyAssigned">If true, only removes those that fit <see cref="ProblemTag.IsGoodEnoughTag"/> and keeps Tag entities.
+    /// If false, removes all <see cref="ProblemTag"/> entities and also deletes the Tag entities themselves.</param>
+    Task RemoveProblemTagsAsync(string[] tags, bool onlyAssigned);
 
     /// <summary>
     /// Performs a soft removal of a specific tag association from a single problem by tag name.
@@ -100,4 +104,15 @@ public interface ITaggingDatabaseService
     /// <param name="problemId">Database ID of the target problem.</param>
     /// <returns>A dictionary containing tag data for each qualifying tag associated with the problem.</returns>
     Task<ImmutableDictionary<string, ProblemTagData>> GetTagsForProblemAsync(Guid problemId);
+
+    /// <summary>
+    /// Merges two tags by replacing all occurrences of tagToDelete with tagToReplace.
+    /// For each problem that has tagToDelete, creates or updates a ProblemTag with tagToReplace
+    /// using the same metadata (goodness of fit, justification, confidence), then removes tagToDelete.
+    /// This operation is performed in a single database transaction for efficiency.
+    /// </summary>
+    /// <param name="tagToDelete">The name of the tag to be merged and removed.</param>
+    /// <param name="tagToReplace">The name of the tag that will replace tagToDelete.</param>
+    /// <returns>The number of problems that actually had this tag.</returns>
+    Task<int> MergeTagsAsync(string tagToDelete, string tagToReplace);
 }

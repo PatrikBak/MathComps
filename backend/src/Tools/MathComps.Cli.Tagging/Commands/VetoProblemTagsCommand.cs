@@ -106,7 +106,7 @@ public class VetoProblemTagsCommand(
         if (settings.TagSelectionFile != null)
         {
             // Read the specified tags from the file
-            var tags = File.ReadAllLines(settings.TagSelectionFile).ToHashSet();
+            var tags = TaggingHelpers.ReadTagsFromFile(settings.TagSelectionFile);
 
             // We will select only from there tags
             tagNameFilter = tags.Contains;
@@ -282,13 +282,8 @@ public class VetoProblemTagsCommand(
                 userPrompt,
                 geminiSettings.ThinkingBudget
             ),
-            // Handle AI service errors gracefully
-            exception =>
-            {
-                // Log the problem slug and exception details
-                AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] Gemini service errors");
-                AnsiConsole.WriteException(exception);
-            });
+            // Provide an exception with more context
+            exception => throw new InvalidOperationException("Gemini error", exception));
 
         // If AI service failed, return empty result
         if (aiResponseRaw is null)
@@ -302,13 +297,8 @@ public class VetoProblemTagsCommand(
         var approvals = GeneralUtilities.TryExecute(() =>
             // Parse the AI response to extract tag approval decisions
             TaggingHelpers.ParseTagApprovals(aiResponseRaw).ToImmutableDictionary(pair => pair.Key, pair => pair.Value.Approved),
-            // Handle JSON parsing errors gracefully
-            exception =>
-            {
-                // Log the problem slug and parsing exception details
-                AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] AI response parsing problem");
-                AnsiConsole.WriteException(exception);
-            });
+            // Provide an exception with more context
+            exception => throw new InvalidOperationException("Parsing AI response failed", exception));
 
         // If parsing failed, return empty result
         if (approvals is null)

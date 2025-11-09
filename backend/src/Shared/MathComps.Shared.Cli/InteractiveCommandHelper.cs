@@ -21,11 +21,6 @@ public abstract class InteractiveCommandHelper : AsyncCommand
     /// </summary>
     protected abstract string ApplicationDescription { get; }
 
-    /// <summary>
-    /// Gets the command usage hint displayed in the startup banner.
-    /// </summary>
-    protected abstract string CommandUsageHint { get; }
-
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context)
     {
@@ -33,7 +28,7 @@ public abstract class InteractiveCommandHelper : AsyncCommand
 
         // Display startup banner to establish context and available operations.
         AnsiConsole.MarkupLine($"[dim]{ApplicationDescription}[/]");
-        AnsiConsole.MarkupLine($"[dim]{CommandUsageHint}[/]\n");
+        AnsiConsole.MarkupLine("[dim]Type [cyan]help[/] for available commands[/]\n");
 
         #endregion
 
@@ -120,11 +115,16 @@ public abstract class InteractiveCommandHelper : AsyncCommand
             return [];
 
         // Use regex to split on spaces while preserving quoted strings.
-        // This allows arguments with spaces to be properly captured.
-        var matches = Regex.Matches(input, @"[\""].+?[\""]|[^ ]+");
+        // Pattern matches: quoted strings (with any content including empty) OR unquoted tokens.
+        // The quoted string pattern uses a capture group to extract content without quotes.
+        var matches = Regex.Matches(input, @"""([^""]*)""|[^\s]+");
 
-        // Extract matched values and remove surrounding quotes from quoted strings.
-        return [.. matches.Select(match => match.Value.Trim('"'))];
+        // Extract matched values: use capture group for quoted strings, full match for unquoted tokens.
+        return [.. matches.Select(match =>
+        {
+            // If the match has a captured group (quoted string), use it; otherwise use the full match.
+            return match.Groups[1].Success ? match.Groups[1].Value : match.Value;
+        })];
     }
 
     /// <summary>

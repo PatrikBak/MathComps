@@ -1,7 +1,6 @@
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
-
 namespace MathComps.Infrastructure;
 
 /// <summary>
@@ -30,10 +29,15 @@ public static class DependencyInjectionHelpers
         // Gemini API settings
         services.AddOptions<GeminiSettings>()
             .BindConfiguration(GeminiSettings.SectionName)
+            .Validate(options => options.TimeoutSeconds > 0, $"{nameof(GeminiSettings.TimeoutSeconds)} must be > 0.")
             .ValidateDataAnnotations();
 
         // Gemini service with HttpClient
-        services.AddHttpClient<IGeminiService, GeminiService>();
+        services.AddHttpClient<IGeminiService, GeminiService>(client =>
+        {
+            // Set infinite timeout on HttpClient so the timeout is controlled by CancellationToken in the service
+            client.Timeout = Timeout.InfiniteTimeSpan;
+        });
 
         // DB service
         services.AddScoped<IProblemFilterService, ProblemFilterService>();

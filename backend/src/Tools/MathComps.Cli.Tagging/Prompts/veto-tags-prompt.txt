@@ -30,3 +30,9 @@ You must output a JSON (and only this JSON) with the following format:
 i.e. the individual tags are the keys of the JSON object, the values are JSON objects/dicts
 saying whether the tag has been approved and the reason behind the decision. For each tag,
 specify a non-empty string as "Reason" only if that tag has been rejected.
+
+Final check:
+- Each tag from among the candidate tags must appear exactly once in the output JSON.
+- Escape all double quotes in strings.
+- Escape all TeX commands.
+- The output must be a valid JSON.

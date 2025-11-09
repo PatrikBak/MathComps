@@ -248,15 +248,28 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
     }
 
     /// <inheritdoc />
-    public async Task RemoveTagsFromAllProblemsAsync(string[] tags)
+    public async Task RemoveProblemTagsAsync(string[] tags, bool onlyAssigned)
     {
         // Get DB access
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Do the delete and trust the cascade delete to clean up associations
-        await dbContext.Tags
-            .Where(tag => tags.Contains(tag.Name))
-            .ExecuteDeleteAsync();
+        // If doing a complete wipe-down...
+        if (!onlyAssigned)
+        {
+            // Just delete the tags and count on the cascade delete
+            await dbContext.Tags
+                .Where(tag => tags.Contains(tag.Name))
+                .ExecuteDeleteAsync();
+        }
+        // If deleting just good tags..
+        else
+        {
+            // Just delete good tag associations
+            await dbContext.ProblemTags
+                .Where(problemTag => tags.Contains(problemTag.Tag.Name))
+                .Where(ProblemTag.IsGoodEnoughTag)
+                .ExecuteDeleteAsync();
+        }
     }
 
     /// <inheritdoc />
@@ -318,6 +331,83 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             .ToListAsync())
             // Run-time conversion to immutable dictionary
             .ToImmutableDictionary();
+    }
+
+    /// <inheritdoc />
+    public async Task<int> MergeTagsAsync(string tagToDelete, string tagToReplace)
+    {
+        // Get DB access
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        // Find the tag to delete
+        var tagToDeleteEntity = await dbContext.Tags
+            .FirstOrDefaultAsync(tag => tag.Name == tagToDelete);
+
+        // If tag doesn't exist, nothing to merge
+        if (tagToDeleteEntity == null)
+            return 0;
+
+        // Get or create the tag to replace
+        var tagToReplaceEntity = (await GetOrCreateTagEntitiesAsync(dbContext, [(tagToReplace, tagToDeleteEntity.TagType)])).Values.Single();
+
+        // Load all ProblemTag entries that have tagToDelete, including their tag navigation
+        var problemTagsToMerge = await dbContext.ProblemTags
+            .Include(problemTag => problemTag.Tag)
+            .Where(problemTag => problemTag.TagId == tagToDeleteEntity.Id)
+            .ToListAsync();
+
+        // If no problems have this tag, nothing to merge
+        if (problemTagsToMerge.Count == 0)
+            return 0;
+
+        // Group by problem ID to handle cases where a problem might have multiple entries
+        // (though this shouldn't happen, we'll take the first one per problem)
+        var problemTagsByProblem = problemTagsToMerge
+            .GroupBy(problemTag => problemTag.ProblemId)
+            .ToDictionary(group => group.Key, group => group.First());
+
+        // Load all existing ProblemTag entries for tagToReplace in one query
+        var existingProblemTagsToReplace = await dbContext.ProblemTags
+            .Where(problemTag => problemTag.TagId == tagToReplaceEntity.Id)
+            .ToDictionaryAsync(problemTag => problemTag.ProblemId);
+
+        // Track how many problems we're updating that had "good" tags (above threshold)
+        var updatedCount = 0;
+
+        // For each problem that has tagToDelete
+        foreach (var (problemId, problemTagToDelete) in problemTagsByProblem)
+        {
+            // Check if this problem already has tagToReplace
+            if (existingProblemTagsToReplace.TryGetValue(problemId, out var existingProblemTagToReplace))
+            {
+                // Update existing ProblemTag with metadata from tagToDelete
+                existingProblemTagToReplace.GoodnessOfFit = problemTagToDelete.GoodnessOfFit;
+                existingProblemTagToReplace.Justification = problemTagToDelete.Justification;
+                existingProblemTagToReplace.Confidence = problemTagToDelete.Confidence;
+            }
+            // If the problem doesn't have the tag association assign the tag
+            else dbContext.ProblemTags.Add(new ProblemTag
+            {
+                ProblemId = problemId,
+                TagId = tagToReplaceEntity.Id,
+                GoodnessOfFit = problemTagToDelete.GoodnessOfFit,
+                Justification = problemTagToDelete.Justification,
+                Confidence = problemTagToDelete.Confidence
+            });
+
+            // Count only problems that had "good" tags (above the minimum threshold)
+            if (problemTagToDelete.GoodnessOfFit >= ProblemTag.MinimumGoodnessOfFitThreshold)
+                updatedCount++;
+        }
+
+        // Delete the tagToDelete Tag entity itself, it will trigger cascade delete
+        dbContext.Tags.Remove(tagToDeleteEntity);
+
+        // Save all changes in a single transaction
+        await dbContext.SaveChangesAsync();
+
+        // The final updated count
+        return updatedCount;
     }
 
     /// <summary>
@@ -484,7 +574,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                 .ToList();
 
             // Add all ProblemTag associations for this problem
-            dbContext.Set<ProblemTag>().AddRange(problemTagEntities);
+            dbContext.ProblemTags.AddRange(problemTagEntities);
 
             // Assume all imported (not precise if we didn't clear before)
             importedCount += problemTagEntities.Count;

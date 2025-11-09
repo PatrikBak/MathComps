@@ -23,6 +23,10 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("Gemini API key is not configured. Please set it in user secrets.");
 
+        // Create a timeout cancellation token that combines with the provided one
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(geminiSettings.Value.TimeoutSeconds));
+        using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
         // The request URL is constructed with the model endpoint. 
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
@@ -47,10 +51,10 @@ public class GeminiService(HttpClient httpClient, IOptions<GeminiSettings> gemin
         using var content = new StringContent(payload.ToJson(), Encoding.UTF8, "application/json");
 
         // The request is sent to the Gemini API...
-        var response = await httpClient.PostAsync(url, content, cancellationToken);
+        var response = await httpClient.PostAsync(url, content, combinedCts.Token);
 
         // Read the content
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(combinedCts.Token);
 
         // Handle if API didn't return 400
         if (!response.IsSuccessStatusCode)

@@ -10,15 +10,16 @@ namespace MathComps.Shared.Cli;
 public static class ProgressHelper
 {
     /// <summary>
-    /// 
+    /// Creates a concise description of a batch by showing the first and last items.
+    /// Useful for displaying batch ranges like "item-1 to item-100" in progress indicators.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="batch"></param>
-    /// <param name="itemDescription"></param>
-    /// <returns></returns>
+    /// <typeparam name="T">The type of items in the batch.</typeparam>
+    /// <param name="batch">The list of items to describe.</param>
+    /// <param name="itemDescription">Function that converts an item to its string representation.</param>
+    /// <returns>A string showing the first item, or "first last" if batch has multiple items.</returns>
     public static string NiceBatchDescription<T>(List<T> batch, Func<T, string> itemDescription)
         // Print the first item and potentially the last too
-        => $"{itemDescription(batch.First())}{(batch.Count == 1 ? "" : $" {itemDescription(batch.Last())}")}";
+        => $"{itemDescription(batch.First())}{(batch.Count == 1 ? "" : $" - {itemDescription(batch.Last())}")}";
 
     /// <summary>
     /// Executes a simple operation on a collection of items with progress tracking.
@@ -105,7 +106,6 @@ public static class ProgressHelper
         // Spectre's progress is dope
         await AnsiConsole.Progress()
             // We can't let Spectre do UI operations because we'd lose synchronization
-            .AutoClear(enabled: false)
             .AutoRefresh(enabled: false)
             // Fancy things to display
             .Columns(
@@ -132,16 +132,38 @@ public static class ProgressHelper
                         // Get the current item to process
                         var item = items[itemIndex];
 
-                        // Process the item (parallel section)
-                        var result = await processItemAsync(item, itemIndex, token);
+                        // Prepare the processing results
+                        TResult? result = default;
+                        Exception? exception = null;
+
+                        try
+                        {
+                            // Process the item (parallel section)
+                            result = await processItemAsync(item, itemIndex, token);
+                        }
+                        catch (Exception innerException)
+                        {
+                            // Capture exception to handle in synchronized section
+                            exception = innerException;
+                        }
 
                         // Use semaphore to ensure thread-safe database access and progress updates
                         await semaphore.WaitAsync(token);
 
                         try
                         {
-                            // Handle the result (synchronized section) if handler is provided
-                            if (handleResultAsync != null)
+                            // Handle exception if one occurred
+                            if (exception != null)
+                            {
+                                // Write it nicely
+                                AnsiConsole.Write(new Panel(exception.GetRenderable(ExceptionFormats.ShortenEverything))
+                                    .Header($"[red]{getItemDescription(item)}[/]")
+                                    .BorderColor(Color.Red)
+                                    .Collapse());
+                            }
+
+                            // Handle the result if found and the handler provided
+                            if (result != null && handleResultAsync != null)
                                 await handleResultAsync(result, item, itemIndex, token);
 
                             // Update progress

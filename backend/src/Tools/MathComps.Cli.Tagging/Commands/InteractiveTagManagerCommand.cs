@@ -1,8 +1,6 @@
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
-using MathComps.Shared;
 using MathComps.Shared.Cli;
 using Spectre.Console;
 using System.Collections.Immutable;
@@ -29,9 +27,6 @@ public class InteractiveTagManagerCommand(
     protected override string ApplicationDescription => "Interactive tag management for MathComps problems";
 
     /// <inheritdoc/>
-    protected override string CommandUsageHint => "Commands: add <slug> \"<tag>\" <type> | remove <slug> \"<tag>\" | clear <slug> | clearTag \"<tag>\" | list <slug> | help | exit";
-
-    /// <inheritdoc/>
     protected override async Task HandleCommandAsync(string[] commandParts)
     {
         // Dispatch to specific operation handlers based on command verb.
@@ -56,6 +51,11 @@ public class InteractiveTagManagerCommand(
                 await HandleClear(commandParts);
                 break;
 
+            // Merge two tags by replacing one with another
+            case "merge":
+                await HandleMerge(commandParts);
+                break;
+
             // List the tags of a problem
             case "list":
                 await HandleList(commandParts);
@@ -73,89 +73,131 @@ public class InteractiveTagManagerCommand(
     }
 
     /// <summary>
-    /// Handles the 'add' command to associate a new tag with a specified problem.
-    /// Creates the tag if it doesn't exist, using the provided tag type for categorization.
-    /// Expected format: add <problem-slug> "<tag-name>" <tag-type>
+    /// Gets tag usage information by name, logging an error message if the tag doesn't exist.
+    /// </summary>
+    /// <param name="tagName">The name of the tag to find.</param>
+    /// <returns>The tag usage DTO if the tag exists, null otherwise.</returns>
+    private async Task<TagUsageDto?> GetTagUsageAsync(string tagName)
+    {
+        // Find all tag usages to get its ID
+        var usage = (await databaseService.GetAllTagUsageAsync())
+            // So we can find the current one
+            .FirstOrDefault(usage => usage.Name == tagName);
+
+        // Make aware if we don't have it
+        if (usage is null)
+            AnsiConsole.MarkupLine($"[red]Tag not found:[/] {Markup.Escape(tagName)}");
+
+        // Return what we have, might be null
+        return usage;
+    }
+
+    /// <summary>
+    /// Handles the 'add' command to associate a new tag with one or more problems.
+    /// The tag type is automatically derived from the approved tags file.
+    /// Expected format: add "<tag-name>" <problem-slug1> [<problem-slug2> ...]
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleAdd(string[] parts)
     {
         // Validate command structure for required parameters.
-        if (parts.Length != 4)
-            throw new ArgumentException("Add command requires: add <problem-slug> \"<tag-name>\" <tag-type>");
+        if (parts.Length < 3)
+            throw new ArgumentException("Add command requires: add \"<tag-name>\" <problem-slug1> [<problem-slug2> ...]");
 
-        // Parse args
-        var problemSlug = parts[1];
-        var tagName = parts[2];
-        var tagTypeString = parts[3];
+        // Parse args - tag name comes first, followed by one or more problem slugs
+        var tagName = parts[1];
+        var problemSlugs = parts.Skip(2).ToArray();
 
-        // Validate and parse tag type against allowed enumeration values.
-        if (!Enum.TryParse<TagType>(tagTypeString, ignoreCase: true, out var tagType))
-            throw new ArgumentException($"Tag type must be one of: {Enum.GetNames<TagType>().ToJoinedString()}");
-
-        // Retrieve the problem ID for database operations.
-        var problemId = await problemLookupService.GetProblemIdBySlugAsync(problemSlug);
-
-        // Make sure we have it
-        if (problemId == null)
+        // Look up the tag in approved tags to get its type
+        if (!TagFilesHelper.GetCategorizedApprovedTags().MapTagsToTheirData().TryGetValue(tagName, out var tagData))
         {
-            // Log and quit if not
-            AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
+            // Log error if tag is not found in approved tags
+            AnsiConsole.MarkupLine($"[red]Tag not found in approved tags:[/] {Markup.Escape(tagName)}");
+            AnsiConsole.MarkupLine("[dim]Tags must be added to Data/approved-tags.json before they can be assigned to problems.[/]");
             return;
         }
 
-        // Construct tag collection in the format expected by the database service.
-        // The existing service requires categorized collections rather than individual tags.
-        var tags = new Dictionary<string, ProblemTagData>
+        // Adding will be one by one
+        foreach (var problemSlug in problemSlugs)
         {
-            // Manual tags gets the best fit
-            [tagName] = new ProblemTagData(tagType, 1.0f)
-        };
+            // Retrieve the problem ID for database operations.
+            var problemId = await problemLookupService.GetProblemIdBySlugAsync(problemSlug);
 
-        // Execute the database update using single-problem operation.
-        await databaseService.AddTagsForProblemAsync(problemId.Value, tags.ToImmutableDictionary());
+            // Make sure we have it
+            if (problemId == null)
+            {
+                // Log and continue to next problem
+                AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
+                continue;
+            }
 
-        // Log success
-        AnsiConsole.MarkupLine(
-            $"[green]✓[/] Added [yellow]{Markup.Escape(tagName)}[/] " +
-            $"([dim]{tagType.ToString().ToLower()}[/])" +
-            $" to [cyan]{Markup.Escape(problemSlug)}[/]"
-        );
+            // Construct tag collection in the format expected by the database service.
+            // The existing service requires categorized collections rather than individual tags.
+            var tags = new Dictionary<string, ProblemTagData>
+            {
+                // Manual tags gets the best fit
+                [tagName] = new ProblemTagData(tagData.Type, 1.0f)
+            };
+
+            // Execute the database update using single-problem operation.
+            await databaseService.AddTagsForProblemAsync(problemId.Value, tags.ToImmutableDictionary());
+
+            // Log success
+            AnsiConsole.MarkupLine(
+                $"[green]✓[/] Added [yellow]{Markup.Escape(tagName)}[/] " +
+                $"([dim]{tagData.Type.ToString().ToLower()}[/])" +
+                $" to [cyan]{Markup.Escape(problemSlug)}[/]"
+            );
+        }
     }
 
     /// <summary>
-    /// Handles the 'remove' command to disassociate a specific tag from a problem.
+    /// Handles the 'remove' command to disassociate a specific tag from one or more problems.
     /// Removes only the association; the tag remains available for other problems.
-    /// Expected format: remove <problem-slug> "<tag-name>"
+    /// Expected format: remove "<tag-name>" <problem-slug1> [<problem-slug2> ...]
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleRemove(string[] parts)
     {
         // Validate command structure for required parameters.
-        if (parts.Length != 3)
-            throw new ArgumentException("Remove command requires: remove <problem-slug> \"<tag-name>\"");
+        if (parts.Length < 3)
+            throw new ArgumentException("Remove command requires: remove \"<tag-name>\" <problem-slug1> [<problem-slug2> ...]");
 
-        // Parse args
-        var problemSlug = parts[1];
-        var tagName = parts[2];
+        // Parse args - tag name comes first, followed by one or more problem slugs
+        var tagName = parts[1];
+        var problemSlugs = parts.Skip(2).ToArray();
 
-        // Retrieve the problem ID for database operations.
-        var problemId = await problemLookupService.GetProblemIdBySlugAsync(problemSlug);
-
-        // Make sure we have it
-        if (problemId == null)
+        // Removing will be one by one
+        foreach (var problemSlug in problemSlugs)
         {
-            // Log and quit if not
-            AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
+            // Retrieve the problem ID for database operations.
+            var problemId = await problemLookupService.GetProblemIdBySlugAsync(problemSlug);
 
-            return;
+            // Make sure we have it
+            if (problemId == null)
+            {
+                // Log and continue to next problem
+                AnsiConsole.MarkupLine($"[red]Problem not found:[/] {Markup.Escape(problemSlug)}");
+                continue;
+            }
+
+            // Check if the tag actually exists on this problem before attempting removal.
+            if (!(await databaseService.GetTagsForProblemAsync(problemId.Value)).ContainsKey(tagName))
+            {
+                // Log error if tag doesn't exist on this problem and continue to next problem
+                AnsiConsole.MarkupLine(
+                    $"[yellow]{Markup.Escape(tagName)}[/] " +
+                    $"is not assigned to [cyan]{Markup.Escape(problemSlug)}[/]"
+                );
+                continue;
+            }
+
+            // Execute tag removal through direct database service call.
+            await databaseService.RemoveSpecificTagFromProblemAsync(problemId.Value, tagName);
+
+            // Confirm successful operation with clear visual feedback.
+            AnsiConsole.MarkupLine($"[green]✓[/] Removed [yellow]{Markup.Escape(tagName)}[/] from [cyan]{Markup.Escape(problemSlug)}[/]");
         }
-
-        // Execute tag removal through direct database service call.
-        await databaseService.RemoveSpecificTagFromProblemAsync(problemId.Value, tagName);
-
-        // Confirm successful operation with clear visual feedback.
-        AnsiConsole.MarkupLine($"[green]✓[/] Removed [yellow]{Markup.Escape(tagName)}[/] from [cyan]{Markup.Escape(problemSlug)}[/]");
     }
 
     /// <summary>
@@ -172,21 +214,15 @@ public class InteractiveTagManagerCommand(
         // Parse args
         var tagName = parts[1];
 
-        // Find all tag usages to get its ID
-        var usage = (await databaseService.GetAllTagUsageAsync())
-            // So we can find the current one
-            .FirstOrDefault(usage => usage.Name == tagName);
+        // Get the tag data from the DB
+        var usage = await GetTagUsageAsync(tagName);
 
-        // Make sure we have it
+        // Ensure we have the tag
         if (usage is null)
-        {
-            // Log and quit if not
-            AnsiConsole.MarkupLine($"[red]Tag not found:[/] {Markup.Escape(tagName)}");
             return;
-        }
 
-        // Do the removal
-        await databaseService.RemoveTagsFromAllProblemsAsync([usage.Name]);
+        // Do the removal (completely remove tags from database)
+        await databaseService.RemoveProblemTagsAsync([usage.Name], onlyAssigned: false);
 
         // Log with the numbers of affected problems
         AnsiConsole.MarkupLine(
@@ -225,6 +261,44 @@ public class InteractiveTagManagerCommand(
 
         // Confirm successful operation with clear visual feedback.
         AnsiConsole.MarkupLine($"[green]✓[/] Cleared all tags from [cyan]{Markup.Escape(problemSlug)}[/]");
+    }
+
+    /// <summary>
+    /// Handles the 'merge' command to merge two tags by replacing all occurrences of one tag with another.
+    /// For each problem that has tagToDelete, assigns tagToReplace, then removes tagToDelete.
+    /// Expected format: merge "<tagToDelete>" "<tagToReplace>"
+    /// </summary>
+    /// <param name="parts">Parsed command components from user input.</param>
+    private async Task HandleMerge(string[] parts)
+    {
+        // Validate command structure for required parameters.
+        if (parts.Length != 3)
+            throw new ArgumentException("Merge command requires: merge \"<tagToDelete>\" \"<tagToReplace>\"");
+
+        // Parse args
+        var tagToDelete = parts[1];
+        var tagToReplace = parts[2];
+
+        // The tag must exist
+        if (await GetTagUsageAsync(tagToDelete) is null)
+            return;
+
+        // Perform the merge in a single database operation
+        var processedCount = await databaseService.MergeTagsAsync(tagToDelete, tagToReplace);
+
+        // If no problems were updated, inform user
+        if (processedCount == 0)
+        {
+            // Log and quit if we don't
+            AnsiConsole.MarkupLine($"[yellow]No problems found with tag:[/] {Markup.Escape(tagToDelete)}");
+            return;
+        }
+
+        // Log success with details
+        AnsiConsole.MarkupLine(
+            $"[green]✓[/] Merged [yellow]{Markup.Escape(tagToDelete)}[/] into [yellow]{Markup.Escape(tagToReplace)}[/] " +
+            $"on {processedCount} problem{(processedCount == 1 ? "" : "s")}"
+        );
     }
 
     /// <summary>
@@ -298,13 +372,15 @@ public class InteractiveTagManagerCommand(
     {
         AnsiConsole.MarkupLine("[bold]Available Commands:[/]");
         AnsiConsole.MarkupLine("");
-        AnsiConsole.MarkupLine("[cyan]add[/] <problem-slug> \"<tag-name>\" <tag-type>");
-        AnsiConsole.MarkupLine("  Add a tag to a problem. Tag type must be: area, type, technique, or goal");
-        AnsiConsole.MarkupLine("  Example: [dim]add 75-csmo-a-i-1 \"Kombinatorická geometria\" area[/]");
+        AnsiConsole.MarkupLine("[cyan]add[/] \"<tag-name>\" <problem-slug1> [<problem-slug2> ...]");
+        AnsiConsole.MarkupLine("  Add a tag to one or more problems. Tag type is automatically derived from approved tags.");
+        AnsiConsole.MarkupLine("  Example: [dim]add \"Kombinatorická geometria\" 75-csmo-a-i-1[/]");
+        AnsiConsole.MarkupLine("  Example: [dim]add \"Kombinatorická geometria\" 75-csmo-a-i-1 75-csmo-a-i-2 75-csmo-a-i-3[/]");
         AnsiConsole.MarkupLine("");
-        AnsiConsole.MarkupLine("[cyan]remove[/] <problem-slug> \"<tag-name>\"");
-        AnsiConsole.MarkupLine("  Remove a specific tag from a problem");
-        AnsiConsole.MarkupLine("  Example: [dim]remove 75-csmo-a-i-1 \"Geometria\"[/]");
+        AnsiConsole.MarkupLine("[cyan]remove[/] \"<tag-name>\" <problem-slug1> [<problem-slug2> ...]");
+        AnsiConsole.MarkupLine("  Remove a specific tag from one or more problems");
+        AnsiConsole.MarkupLine("  Example: [dim]remove \"Geometria\" 75-csmo-a-i-1[/]");
+        AnsiConsole.MarkupLine("  Example: [dim]remove \"Geometria\" 75-csmo-a-i-1 75-csmo-a-i-2 75-csmo-a-i-3[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]clear[/] <problem-slug>");
         AnsiConsole.MarkupLine("  Remove all tags from a problem");
@@ -313,6 +389,10 @@ public class InteractiveTagManagerCommand(
         AnsiConsole.MarkupLine("[cyan]clearTag[/] \"<tag-name>\"");
         AnsiConsole.MarkupLine("  Remove the tag from all problems");
         AnsiConsole.MarkupLine("  Example: [dim]clearTag \"Teória kúziel\"[/]");
+        AnsiConsole.MarkupLine("");
+        AnsiConsole.MarkupLine("[cyan]merge[/] \"<tagToDelete>\" \"<tagToReplace>\"");
+        AnsiConsole.MarkupLine("  Merge two tags by replacing all occurrences of tagToDelete with tagToReplace");
+        AnsiConsole.MarkupLine("  Example: [dim]merge \"Old Tag\" \"New Tag\"[/]");
         AnsiConsole.MarkupLine("");
         AnsiConsole.MarkupLine("[cyan]list[/] <problem-slug>");
         AnsiConsole.MarkupLine("  Show all tags currently assigned to a problem");

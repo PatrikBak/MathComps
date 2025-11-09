@@ -8,6 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using System.Text;
+
+// Configure console encoding to properly handle UTF-8 characters (e.g., Slovak diacritics)
+// This is essential on Windows where the default console code page doesn't support UTF-8
+Console.InputEncoding = Encoding.UTF8;
+Console.OutputEncoding = Encoding.UTF8;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("Tagging").Centered().Color(Color.Aqua));
