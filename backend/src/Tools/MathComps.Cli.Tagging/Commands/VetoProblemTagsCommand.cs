@@ -106,7 +106,7 @@ public class VetoProblemTagsCommand(
         if (settings.TagSelectionFile != null)
         {
             // Read the specified tags from the file
-            var tags = File.ReadAllLines(settings.TagSelectionFile).ToHashSet();
+            var tags = TaggingHelpers.ReadTagsFromFile(settings.TagSelectionFile);
 
             // We will select only from there tags
             tagNameFilter = tags.Contains;

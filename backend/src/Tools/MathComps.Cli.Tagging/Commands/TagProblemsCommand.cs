@@ -57,14 +57,14 @@ public class TagProblemsCommand(
         [Description("Number of problems to tag.")]
         public required int Count { get; set; }
 
-
         /// <summary>
-        /// If set, clears all tags of all problems. If specified together with a tag selection,
+        /// Specifies which tags should be cleared before tagging. If specified together with a tag selection,
         /// clears only the tags from the tag selection.
         /// </summary>
-        [CommandOption("--clear-tags")]
-        [Description("Clears all tags before tagging. If specified together with a tag selection, clears only those tags.")]
-        public bool ClearTags { get; set; }
+        [CommandOption("--clear-mode")]
+        [Description("Specifies which tags to clear before tagging.")]
+        [DefaultValue(ClearMode.None)]
+        public ClearMode ClearMode { get; set; }
 
         /// <summary>
         /// This specified how much we wanna spam Gemini in parallel.
@@ -100,7 +100,7 @@ public class TagProblemsCommand(
         if (settings.TagSelectionFile != null)
         {
             // Read the specified tags from the file
-            var tags = File.ReadAllLines(settings.TagSelectionFile).ToHashSet();
+            var tags = TaggingHelpers.ReadTagsFromFile(settings.TagSelectionFile);
 
             // Filter out the loaded tags from the approved ones
             tagsSelection = tagsSelection.Filter(
@@ -113,9 +113,20 @@ public class TagProblemsCommand(
             tagNameFilter = tags.Contains;
         }
 
-        // If specified, clear existing tags before tagging
-        if (settings.ClearTags)
-            await databaseService.RemoveTagsFromAllProblemsAsync([.. tagsSelection.Data.Values.Flatten()]);
+        // If there's any tag clearing
+        if (settings.ClearMode != ClearMode.None)
+        {
+            // Get the tags to clear
+            var tagsToClear = tagsSelection.Data.Values.Flatten().ToArray();
+
+            // Do the cleanup configured by whether only good tags should be gone
+            await databaseService.RemoveProblemTagsAsync(tagsToClear, onlyAssigned: settings.ClearMode switch
+            {
+                ClearMode.OnlyAssigned => true,
+                ClearMode.AssignedAndUnassigned => false,
+                _ => throw new InvalidOperationException($"Unexpected {nameof(ClearMode)}: {settings.ClearMode}")
+            });
+        }
 
         // Retrieve the problems that need tagging based on user settings
         var problemsToTag = await databaseService.GetProblemsToTagAsync(

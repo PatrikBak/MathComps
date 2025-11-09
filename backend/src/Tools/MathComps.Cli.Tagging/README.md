@@ -32,7 +32,7 @@ The tagging process is a workflow that combines AI suggestions with human oversi
 - The AI then selects the most appropriate tags from the list. For each of the tags, it assigns a _goodness of fit_ and a justification for that tag. Tags are considered approved if their goodness of fit is at least 0.5, otherwise they are considered rejected.
 - **Note**: If a problem has no solution, the AI is forbidden from assigning **Technique** tags.
 - You can choose to apply tags only from some subset using the `--tag-selection-file` command line option. This is useful e.g. when re-tagging a select few tags (e.g. you find out the AI doesn't process them well, adjust the description in `approved-tags.json` and want to apply the changes).
-- You can use `--clear-tags` to clear all the tags from the tag selection file before doing the tagging. (If no tag selection file is provided, it clears _all_ tags.)
+- You can use `--clear-mode` to control which tags are cleared before tagging. Options: `None` (default, no clearing), `OnlyAssigned` (clears only tags with GoodnessOfFit >= 0.5), or `AssignedAndUnassigned` (clears all tags completely). If used with `--tag-selection-file`, clears only those tags. (If no tag selection file is provided, it clears _all_ tags.)
 - The database stores not only the approved tags, but also the rejected tags. This ensures that the next time `tag-problems` is called, it automatically ignores problems that have all the specified tags already processed. This is useful especially together with `--tag-selection-file`.
 
 ### 5. Filter bad AI tags
@@ -81,8 +81,11 @@ Applies the official, approved tags to problems.
 # Process 50 problems
 dotnet run -- tag-problems --count 50
 
-# Process with specific tag selection and clear existing tags
-dotnet run -- tag-problems --count 50 --tag-selection-file tags.txt --clear-tags
+# Process with specific tag selection and clear only assigned tags
+dotnet run -- tag-problems --count 50 --tag-selection-file tags.txt --clear-mode OnlyAssigned
+
+# Process with specific tag selection and clear all tags completely
+dotnet run -- tag-problems --count 50 --tag-selection-file tags.txt --clear-mode AssignedAndUnassigned
 
 # Process with multiple threads for faster execution
 dotnet run -- tag-problems --count 50 --num-threads 3
@@ -95,7 +98,7 @@ dotnet run -- tag-problems --count 10 --dry-run
 
 - `-n|--count` – Number of problems to process (required)
 - `--tag-selection-file` – Consider only tags listed in the specified file (one tag per line)
-- `--clear-tags` – Clear all tags before tagging. If used with `--tag-selection-file`, clears only those tags
+- `--clear-mode` – Specifies which tags to clear before tagging: `None` (default, no clearing), `OnlyAssigned` (clears only tags with GoodnessOfFit >= 0.5), or `AssignedAndUnassigned` (clears all tags completely). If used with `--tag-selection-file`, clears only those tags
 - `--num-threads` – Number of parallel threads for processing (default: 1). Consider rate limits when setting this
 - `--dry-run` – Preview tag suggestions without making any changes to the database
 
@@ -189,15 +192,16 @@ dotnet run -- interactive
 
 - **Commands**:
 
-  - `add <problem-slug> "<tag-name>" <tag-type>` - Add a tag to a problem (tag-type: area, type, technique, or goal)
-  - `remove <problem-slug> "<tag-name>"` - Remove a specific tag from a problem
-  - `clearTag "<tag-name>"` - Remove the tag from all problems
+  - `add "<tag-name>" <problem-slug1> [<problem-slug2> ...]` - Add a tag to one or more problems (tag type is automatically derived from approved tags)
+  - `remove "<tag-name>" <problem-slug1> [<problem-slug2> ...]` - Remove a specific tag from one or more problems (soft removal: sets goodness-of-fit to 0)
+  - `clearTag "<tag-name>"` - Remove the tag from all problems and delete the tag entity completely from the database
   - `clear <problem-slug>` - Remove all tags from a problem
+  - `merge "<tagToDelete>" "<tagToReplace>"` - Merge two tags by replacing all occurrences of tagToDelete with tagToReplace, then removes tagToDelete
   - `list <problem-slug>` - Show all tags assigned to a problem
   - `help` - Show help information
   - `exit` - Exit the interactive session
 
-- Note that `clearTag` removes the tag from the database; it _does not_ merely set the goodness-of-fit to 0.
+- Note that `clearTag` completely removes the tag from the database (deletes both ProblemTag associations and the Tag entity itself); it _does not_ merely set the goodness-of-fit to 0. This is different from `remove`, which only soft-removes a tag from a single problem.
 
 ## Setup
 
