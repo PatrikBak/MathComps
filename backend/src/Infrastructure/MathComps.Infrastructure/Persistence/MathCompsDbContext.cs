@@ -40,6 +40,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Grades for problems (age/level categories like A/B/C).</summary>
     public DbSet<Category> Categories => Set<Category>();
 
+    /// <summary>Tags for problems.</summary>
+    public DbSet<ProblemTag> ProblemTags => Set<ProblemTag>();
+
     /// <summary>Similarity links between problems.</summary>
     public DbSet<ProblemSimilarity> ProblemSimilarities => Set<ProblemSimilarity>();
 
@@ -393,6 +396,8 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<ProblemTag>(e =>
         {
+            e.ToTable("problem_tag");
+
             e.HasKey(x => new { x.ProblemId, x.TagId });
 
             e.HasOne(pa => pa.Problem)
