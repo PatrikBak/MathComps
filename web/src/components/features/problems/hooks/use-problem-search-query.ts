@@ -6,6 +6,7 @@ import { useCallback, useMemo, useRef } from 'react'
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { CACHE_TIMING } from '../constants/timing-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
+import type { Problem } from '../types/problem-api-types'
 import { isProblemNotFoundError } from '../types/problem-errors'
 import type {
   FilterOptionsWithCounts,
@@ -162,10 +163,41 @@ function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled: b
 export function useProblemSearchQuery(filters: SearchFiltersState | null, enabled: boolean) {
   const infiniteQuery = useProblemSearchInfinite(filters, enabled)
 
+  // Store previous problems array for efficient comparison (order-dependent)
+  const previousProblemsRef = useRef<Problem[]>([])
+
   // Flatten all pages into a single array of problems for easy rendering
+  // Compare with previous problems to return same reference if contents and order are identical
+  // Keep previous problems visible while searching to prevent flicker
   const problems = useMemo(() => {
-    return infiniteQuery.data?.pages.flatMap((page) => page.problems.items) ?? []
-  }, [infiniteQuery.data])
+    // Flatten the results from all pages
+    const newProblems = infiniteQuery.data?.pages.flatMap((page) => page.problems.items) ?? []
+
+    // Get the old currently visible problems
+    const previousProblems = previousProblemsRef.current
+
+    // If we're searching and have no new data yet, keep showing previous problems
+    // This prevents the empty state flicker when filters change
+    if (infiniteQuery.isFetching) {
+      return previousProblems
+    }
+
+    // Compare lengths first
+    if (
+      newProblems.length === previousProblems.length &&
+      // Otherwise we need order-dependent comparison: check if all problems are equal in order and slug
+      newProblems.every((problem, index) => problem.slug === previousProblems[index]?.slug)
+    ) {
+      // Same problems (same slugs, same order), return previous reference to prevent re-render
+      return previousProblems
+    }
+
+    // Problems changed (different slugs or order)...Update the problems
+    previousProblemsRef.current = newProblems
+
+    // The new problems will be displayed
+    return newProblems
+  }, [infiniteQuery.data, infiniteQuery.isFetching])
 
   // Get the most recent filter options (from the last page) to keep filter dropdowns in sync
   const filterOptions = useMemo(() => {
@@ -253,6 +285,18 @@ export function useProblemSearchQuery(filters: SearchFiltersState | null, enable
     infiniteQuery.refetch()
   }, [infiniteQuery])
 
+  // Determine if we're searching but have no data to show yet
+  // Check the ref directly to avoid timing issues - if we have previous problems, we should show them
+  // This prevents flicker when filters change (previous problems stay visible)
+  const isSearchingWithNoData = useMemo(() => {
+    const isSearching = infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage
+    // Check the ref directly - if we have previous problems stored, we should show them, not skeleton
+    // This ensures we don't show skeleton when filters change (previous problems are kept visible)
+    const hasPreviousProblems = previousProblemsRef.current.length > 0
+    // Only show skeleton if we're searching AND have no previous problems to show
+    return isSearching && !hasPreviousProblems
+  }, [infiniteQuery.isFetching, infiniteQuery.isFetchingNextPage])
+
   return {
     // Data
     problems,
@@ -264,6 +308,8 @@ export function useProblemSearchQuery(filters: SearchFiltersState | null, enable
     isLoading: infiniteQuery.isLoading,
     isSearching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
     isLoadingMore: infiniteQuery.isFetchingNextPage,
+    // Indicates we're searching but have no data to show yet (should show skeleton)
+    isSearchingWithNoData,
 
     // Error state
     error: infiniteQuery.error?.message ?? null,

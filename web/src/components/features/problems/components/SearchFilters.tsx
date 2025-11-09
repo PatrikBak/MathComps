@@ -248,7 +248,7 @@ export const SearchFilters = ({
               searchPlaceholder="Hľadať kľúčové slová"
               logic={{
                 mode: filters.tagLogic,
-                onChange: (m) => updateFilter('tagLogic', m, 'discrete'),
+                onChange: (mode) => updateFilter('tagLogic', mode, 'discrete'),
                 labels: { or: 'Aspoň jedno', and: 'Všetky' },
               }}
               grouping={{
@@ -277,7 +277,7 @@ export const SearchFilters = ({
               searchPlaceholder="Hľadať autorov…"
               logic={{
                 mode: filters.authorLogic,
-                onChange: (node) => updateFilter('authorLogic', node, 'discrete'),
+                onChange: (mode) => updateFilter('authorLogic', mode, 'discrete'),
               }}
             />
           </div>

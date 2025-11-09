@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 
 import { ROUTES } from '@/constants/routes'
 
+import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import {
   isNetworkError,
@@ -19,6 +20,7 @@ import {
   needsLabelResolution,
   resolveContestSelectionLabels,
 } from '../utils/contest-selection-resolver'
+import { countActiveFilters } from '../utils/filter-validation'
 import { isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { createDefaultFilters } from '../utils/url-initialization'
@@ -32,24 +34,54 @@ import {
 import { useProblemUrlSync } from './use-problem-url-sync'
 
 /**
- * UI state managed by this hook (separate from React Query state).
- * This handles immediate UI updates for filters before queries execute.
+ * Manages the UI-facing state of the search filters, separate from the state
+ * used by React Query. This separation is crucial for a responsive user
+ * experience. It allows the UI to update instantly when a user changes a
+ * filter, while the actual data fetching (which can be debounced or throttled)
+ * happens in the background.
  */
 type OrchestratorState = {
-  // Current filter values (updated immediately for responsive UI)
+  /**
+   * The current, live state of the filters as displayed in the UI.
+   * This is updated immediately on every user interaction to provide instant
+   * feedback. It may not match the filters used for the most recent search query
+   * while a debounced/throttled search is pending.
+   */
   filters: SearchFiltersState | null
-  // Initial filters on page load (for URL initialization)
+
+  /**
+   * The initial state of the filters when the page loads.
+   * This is typically derived from URL search parameters or a default state.
+   * It's preserved to allow the user to reset the filters to their original
+   * state.
+   */
   initialFilters: SearchFiltersState | null
-  // Controls when React Query search is allowed to run.
-  // Prevents search from firing before filters are initialized (would search with null filters).
-  // Becomes true after: (1) initial filter setup, or (2) user changes any filter.
+
+  /**
+   * A gatekeeper flag to control when the `useProblemSearchQuery` is allowed to run.
+   * This prevents the search from executing with empty or incomplete filters
+   * during initial page load. It is set to `true` only after the initial filters
+   * have been properly initialized from the URL or defaults.
+   */
   shouldSearch: boolean
 }
 
+/**
+ * Defines the set of actions that can be dispatched to modify the `OrchestratorState`.
+ * Each action represents a specific, intentional state mutation.
+ */
 type OrchestratorAction =
+  /** Sets the initial filter state upon page load. */
   | { type: 'SET_INITIAL_FILTERS'; payload: SearchFiltersState }
+  /** Updates the filters in response to user input. */
   | { type: 'UPDATE_FILTERS'; payload: SearchFiltersState }
+  /**
+   * Updates only the contest selection part of the filters. This is used after
+   * resolving human-readable labels for contest IDs that may have been loaded
+   * from a URL.
+   */
   | { type: 'SET_RESOLVED_SELECTIONS'; payload: SearchFiltersState['contestSelection'] }
+  /** Enables the search query to run after initialization is complete. */
   | { type: 'ENABLE_SEARCH' }
 
 const initialState: OrchestratorState = {
@@ -58,34 +90,53 @@ const initialState: OrchestratorState = {
   shouldSearch: false,
 }
 
+/**
+ * The reducer function responsible for handling state transitions for the search UI.
+ * It takes the current state and an action, and returns the new state.
+ *
+ * @param state - The current `OrchestratorState`.
+ * @param action - The `OrchestratorAction` to process.
+ * @returns The new `OrchestratorState`.
+ */
 function orchestratorReducer(
   state: OrchestratorState,
   action: OrchestratorAction
 ): OrchestratorState {
   switch (action.type) {
+    // Fired once on page load to establish the baseline filter state.
     case 'SET_INITIAL_FILTERS':
       return {
         ...state,
+        // Both `filters` and `initialFilters` are set to the same payload.
+        // `filters` drives the live UI.
         filters: action.payload,
+        // `initialFilters` is stored for the "Reset" button functionality.
         initialFilters: action.payload,
       }
 
+    // Fired every time the user changes a filter value.
     case 'UPDATE_FILTERS':
       return {
         ...state,
+        // Updates the live UI filters. This provides immediate feedback.
         filters: action.payload,
       }
 
+    // Fired after resolving labels for contest selections from the URL.
     case 'SET_RESOLVED_SELECTIONS':
+      // Guard against running before filters are initialized.
       if (!state.filters) return state
       return {
         ...state,
         filters: {
           ...state.filters,
+          // Merges the resolved contest selections into the existing filters,
+          // preserving all other filter values.
           contestSelection: action.payload,
         },
       }
 
+    // Fired after initial filters are set, allowing the search to proceed.
     case 'ENABLE_SEARCH':
       return {
         ...state,
@@ -258,6 +309,13 @@ export const useProblemSearch = () => {
   // The main function exposed to the UI for handling filter changes
   const handleFiltersChange = useCallback(
     (newFilters: SearchFiltersState, type?: 'discrete' | 'text') => {
+      // Validate filter count to prevent excessive URL length and maintain performance
+      const filterCount = countActiveFilters(newFilters)
+      if (filterCount > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
+        toast.warning(`Môžete vybrať maximálne ${ACTIVE_FILTERS_CONSTANTS.maxFilterLimit} filtrov`)
+        return
+      }
+
       // If we're viewing a single problem and user changes filters, exit single problem view
       if (problemId) {
         // Clear the ?id parameter from URL to enable search
@@ -402,12 +460,21 @@ export const useProblemSearch = () => {
   const totalCount = singleProblemQuery.data ? 1 : searchQuery.totalCount
   const hasMore = singleProblemQuery.data ? false : searchQuery.hasMore
 
+  // Always track if we're searching in the background (for subtle UI indicators like count spinner)
+  // This is used to prevent loadMore/prefetch during searches and show spinner in count
+  const isSearchingInBackground = !problemId && searchQuery.isSearching
+
+  // Track if we're searching but have no data to show yet (should show skeleton, not empty state)
+  // This is only relevant for search queries, not single problem views
+  const isSearchingWithNoData = !problemId && searchQuery.isSearchingWithNoData
+
   // Combine state from multiple sources into a single API
   const state = {
     // Loading states
     isLoading,
-    isSearching: !problemId && searchQuery.isSearching,
+    isSearchingInBackground,
     isLoadingMore: !problemId && searchQuery.isLoadingMore,
+    isSearchingWithNoData,
     hasInitialDataLoaded,
 
     // Filter state

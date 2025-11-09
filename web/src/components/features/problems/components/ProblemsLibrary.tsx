@@ -1,19 +1,19 @@
 'use client'
 
 import { useLocalStorage } from '@mantine/hooks'
+import { isEqual } from 'lodash'
 import { Loader2, WifiOff } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { Virtuoso } from 'react-virtuoso'
-import { toast } from 'sonner'
 
 import { ProblemCardSkeleton } from '@/components/features/problems/components/ProblemCardSkeleton'
-import { ACTIVE_FILTERS_CONSTANTS } from '@/components/features/problems/constants/filter-constants'
 import { PREFETCH_THRESHOLD } from '@/components/features/problems/constants/pagination-constants'
 import { VIRTUOSO_INCREASE_VIEWPORT_BY } from '@/components/features/problems/constants/problem-list-constants'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 
 import { useProblemSearch } from '../hooks/use-problem-search'
+import type { SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
 import ActiveFiltersBar from './ActiveFilterBar'
 import { AnimatedProblemCard } from './AnimatedProblemCard'
@@ -30,11 +30,12 @@ const ActiveFiltersBarSkeleton = () => (
 )
 
 export default function ProblemsLibrary() {
-  const { state, handleFiltersChange: handleFiltersChangeInternal, loadMore } = useProblemSearch()
+  const { state, handleFiltersChange, loadMore } = useProblemSearch()
   const {
     isLoading,
-    isSearching,
+    isSearchingInBackground,
     isLoadingMore,
+    isSearchingWithNoData,
     filters,
     initialFilters,
     filterOptions,
@@ -47,34 +48,13 @@ export default function ProblemsLibrary() {
     isOfflineMode,
   } = state
 
-  // Wrap filter change handler with validation to prevent excessive URL length
-  const handleFiltersChange = useCallback(
-    (newFilters: Parameters<typeof handleFiltersChangeInternal>[0]) => {
-      // Count total active filters in the new filter state
-      const filterCount = countActiveFilters(newFilters)
-
-      // Enforce maximum filter limit to prevent URL overflow and maintain performance
-      if (filterCount > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
-        toast.warning(`Môžete vybrať maximálne ${ACTIVE_FILTERS_CONSTANTS.maxFilterLimit} filtrov`)
-        return
-      }
-
-      // All validation passed, apply the filter changes
-      handleFiltersChangeInternal(newFilters)
-    },
-    [handleFiltersChangeInternal]
-  )
-
   const [showTechniqueTags, setShowTechniqueTags] = useLocalStorage({
     key: 'showTechniqueTags',
     defaultValue: false,
   })
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
-  // Keep filters visible during search to maintain user context
-  // Only hide filters during initial loading or when critical data is missing
-  // On initial load, wait for both filters AND problem data before showing the real bar
-  // Also prevent flicker when transitioning from single problem to search mode
+  // We'll track whether we have the needed data. Before that, we show skeletons
   const isPageReady =
     !isLoading && filters && filterOptions && initialFilters && hasInitialDataLoaded
 
@@ -158,8 +138,62 @@ export default function ProblemsLibrary() {
 
   // Animation state management
   const [searchBatchId, setSearchBatchId] = useState(0)
-  const prevIsSearchingRef = React.useRef(isSearching)
+  const previousIsSearchingInBackground = React.useRef(isSearchingInBackground)
   const isInitialLoadRef = React.useRef(true)
+
+  // Track previous filter state to detect logic toggle changes
+  const previousFiltersRef = React.useRef<SearchFiltersState | null>(null)
+
+  // Calculate if results can change when searching in background
+  // Results can't change when we just switched from OR to AND with <= 1 selected option
+  // (because with 1 option, OR and AND produce the same results)
+  const isSearchingInBackgroundAndResultsCanChange = useMemo(() => {
+    // We must be searching in the first place
+    if (!isSearchingInBackground) return false
+
+    // Render first-renders with no data
+    if (!filters || !previousFiltersRef.current) return isSearchingInBackground
+
+    // Normalize filters: if there's <= 1 selected option, set logic to 'or'
+    // This makes OR and AND equivalent when there's only one option
+    const normalizeFilters = (filterState: SearchFiltersState): SearchFiltersState => {
+      return {
+        ...filterState,
+        tagLogic: filterState.tags.length <= 1 ? 'or' : filterState.tagLogic,
+        authorLogic: filterState.authors.length <= 1 ? 'or' : filterState.authorLogic,
+      }
+    }
+
+    // Normalize both the previous and current ref
+    const normalizedPrevious = normalizeFilters(previousFiltersRef.current)
+    const normalizedCurrent = normalizeFilters(filters)
+
+    // If normalized filters are equal, results can't change
+    return !isEqual(normalizedPrevious, normalizedCurrent)
+  }, [isSearchingInBackground, filters])
+
+  // Update previous filters ref when filters change
+  useEffect(() => {
+    if (filters) {
+      previousFiltersRef.current = filters
+    }
+  }, [filters])
+
+  // Keep stable count when results can't change to prevent flickering
+  // Store the last "real" count value when we're not in a stable state
+  const lastRealCountRef = React.useRef(totalCount)
+
+  // Compute the count of problems to display
+  const displayCount = useMemo(() => {
+    // Use stable value only when searching in background AND results can't change
+    if (isSearchingInBackground && !isSearchingInBackgroundAndResultsCanChange) {
+      return lastRealCountRef.current
+    }
+
+    // If we have potentially a new value, update ref with the current count and return it
+    lastRealCountRef.current = totalCount
+    return totalCount
+  }, [totalCount, isSearchingInBackground, isSearchingInBackgroundAndResultsCanChange])
 
   // Track visible range for viewport animations
   const [, setVisibleRange] = useState<{ startIndex: number; endIndex: number }>({
@@ -171,19 +205,25 @@ export default function ProblemsLibrary() {
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null)
   const lastScrollTopRef = React.useRef(0)
 
-  // Detect when search completes to trigger batch animations and scroll
+  // Detect when initial search completes to trigger batch animations
+  // Only runs once on initial load, not on filter changes
   useEffect(() => {
-    const wasSearching = prevIsSearchingRef.current
-    const searchJustCompleted = wasSearching && !isSearching
+    // Detect transition from searching → not searching
+    // prevIsSearchingRef ensures we only trigger on the transition, not on initial mount
+    const searchJustCompleted = previousIsSearchingInBackground.current && !isSearchingInBackground
 
-    if (searchJustCompleted && !isLoadingMore) {
-      // Trigger batch animation when search completes (not infinite scroll)
+    // If initial load completed...
+    if (searchJustCompleted && !isLoadingMore && isInitialLoadRef.current) {
+      // This should trigger animation
       setSearchBatchId((prev) => prev + 1)
+
+      // We will not trigger it again
       isInitialLoadRef.current = false
     }
 
-    prevIsSearchingRef.current = isSearching
-  }, [isSearching, isLoadingMore, isOfflineMode, problems.length])
+    // Track current searching state for next render
+    previousIsSearchingInBackground.current = isSearchingInBackground
+  }, [isSearchingInBackground, isLoadingMore, isOfflineMode, problems.length])
 
   // Scroll to top when problems set changes (new search), but not during infinite scroll
   useEffect(() => {
@@ -302,11 +342,11 @@ export default function ProblemsLibrary() {
                     baseOptions={baseOptions ?? filterOptions}
                     initialFilters={initialFilters}
                     onFiltersChange={handleFiltersChange}
-                    problemCount={totalCount}
+                    problemCount={displayCount}
                     showTechniqueTags={showTechniqueTags}
                     onShowTagsChange={setShowTechniqueTags}
                     onMobileFilterClick={() => setIsMobileFilterOpen(true)}
-                    isSearching={isSearching}
+                    isSearching={isSearchingInBackgroundAndResultsCanChange}
                   />
                 ) : (
                   <ActiveFiltersBarSkeleton />
@@ -315,7 +355,7 @@ export default function ProblemsLibrary() {
 
               {/* The problem list container */}
               <div className="relative flex-1 overflow-hidden">
-                {!isPageReady || isSearching ? (
+                {!isPageReady || isSearchingWithNoData ? (
                   <div className="h-full">
                     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                       <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
@@ -340,7 +380,7 @@ export default function ProblemsLibrary() {
                         }
                       }}
                       endReached={() => {
-                        if (hasMore && !isLoadingMore && !isSearching) {
+                        if (hasMore && !isLoadingMore && !isSearchingInBackground) {
                           loadMore()
                         }
                       }}
@@ -369,7 +409,7 @@ export default function ProblemsLibrary() {
                         if (
                           hasMore &&
                           !isLoadingMore &&
-                          !isSearching &&
+                          !isSearchingInBackground &&
                           problems.length - endIndex <= PREFETCH_THRESHOLD
                         ) {
                           loadMore()
@@ -410,7 +450,7 @@ export default function ProblemsLibrary() {
             onFiltersChange={handleFiltersChange}
             filterOptions={filterOptions}
             baseOptions={baseOptions ?? filterOptions}
-            activeFilterCount={filters ? countActiveFilters(filters) : 0}
+            activeFilterCount={countActiveFilters(filters)}
           />
         )}
       </div>
