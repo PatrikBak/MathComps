@@ -2,7 +2,6 @@ import { useLongPress } from '@mantine/hooks'
 import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
-import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 import {
   isExclusiveSelection,
@@ -12,6 +11,7 @@ import {
 import type { FacetOption } from './facet-shared'
 import {
   FacetHeader,
+  FacetItemLabel,
   FacetListContainer,
   FacetPopover,
   FacetPopoverHeader,
@@ -92,11 +92,11 @@ const OptionItem = React.memo(function OptionItem({
           onChange={handleChange}
           className="form-checkbox shrink-0"
         />
-        <TruncatedText className={facetUI.itemLabel}>{option.displayName}</TruncatedText>
+        <FacetItemLabel>{option.displayName}</FacetItemLabel>
       </label>
       {/* Right side: count badge (if enabled and available) */}
       {showCounts && typeof option.count === 'number' && (
-        <span className={cn(facetUI.itemCount, 'shrink-0')} aria-hidden="true">
+        <span className={facetUI.itemCount} aria-hidden="true">
           {option.count}
         </span>
       )}
