@@ -4,7 +4,6 @@ using MathComps.Cli.Translation.Services;
 using MathComps.Cli.Translation.Settings;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
-using MathComps.Shared;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
@@ -65,7 +64,7 @@ public class TranslateProblemsCommand(
         /// Scope of translation (statements only, solutions only, or both).
         /// </summary>
         [CommandOption("--scope")]
-        [Description("Translation scope: both, statements-only, or solutions-only.")]
+        [Description("Translation scope: Both, StatementsOnly, or SolutionsOnly.")]
         [DefaultValue(TranslationScope.Both)]
         public TranslationScope Scope { get; set; }
     }
@@ -129,7 +128,7 @@ public class TranslateProblemsCommand(
         await ProgressHelper.ExecuteWithProgressInParallelAsync(
             problemsToTranslate,
             "Translating problems...",
-            getItemDescription: problem => $"{problem.Slug} -> {targetLanguage}".ToUpperInvariant(),
+            getItemDescription: problem => problem.Slug.ToUpperInvariant(),
             processItem: async (problem, index, cancellationToken) =>
             {
                 // Translate the problem in parallel
@@ -141,22 +140,10 @@ public class TranslateProblemsCommand(
                 );
             },
             numThreads: settings.NumThreads,
-            handleResult: async (result, problem, index, cancellationToken) =>
+            handleResult: async (translationResult, problem, index, cancellationToken) =>
             {
-                // Unwrap data
-                var (translationResult, exceptions) = result;
-
-                // Display any exceptions that occurred
-                foreach (var exception in exceptions)
-                {
-                    AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()} -> {targetLanguage.ToString().ToUpper()}[/] Gemini service error");
-                    AnsiConsole.WriteException(exception);
-                    AnsiConsole.WriteLine();
-                }
-
                 // If translation succeeded, save to database
-                if (translationResult != null)
-                    await databaseService.UpsertTranslationAsync(translationResult);
+                await databaseService.UpsertTranslationAsync(translationResult);
             }
         );
 
@@ -175,13 +162,14 @@ public class TranslateProblemsCommand(
     /// <summary>
     /// Translates a single problem into the target language.
     /// Makes separate API calls for statement and solution to improve efficiency and reliability.
+    /// Throws exceptions that will be caught and handled by the progress helper.
     /// </summary>
     /// <param name="problem">The problem to translate.</param>
     /// <param name="targetLanguage">The target language for translation.</param>
     /// <param name="scope">The scope of translation (statements only, solutions only, or both).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The translation result and any exceptions encountered, or null if translation failed.</returns>
-    private async Task<(ProblemTranslationUpsertDto? result, List<Exception> exceptions)> TranslateProblem(
+    /// <returns>The translation result, or null if translation failed.</returns>
+    private async Task<ProblemTranslationUpsertDto> TranslateProblem(
         ProblemForTranslationDto problem,
         Language targetLanguage,
         TranslationScope scope,
@@ -203,65 +191,52 @@ public class TranslateProblemsCommand(
         string? statementTranslation = null;
         string? solutionTranslation = null;
 
-        // Collect exceptions to handle them in synchronized section
-        var exceptions = new List<Exception>();
-
         // If statement should be translated
         if (scope is TranslationScope.StatementsOnly or TranslationScope.Both)
         {
-            // Do the translation
-            (statementTranslation, var exception) = await TranslateText(
+            // Do the translation (may throw exception - will be caught by progress helper)
+            statementTranslation = await TranslateText(
                 problem.StatementText,
                 targetLanguageName,
                 systemPrompt,
                 "statement",
                 cancellationToken
             );
-
-            // Remember the exception if there was any
-            if (exception != null)
-                exceptions.Add(exception);
         }
 
         // If solution should be translated and it exists
         if (scope is TranslationScope.SolutionsOnly or TranslationScope.Both && problem.SolutionText is not null)
         {
-            // Do the translation
-            (solutionTranslation, var exception) = await TranslateText(
+            // Do the translation (may throw exception - will be caught by progress helper)
+            solutionTranslation = await TranslateText(
                 problem.SolutionText,
                 targetLanguageName,
                 systemPrompt,
                 "solution",
                 cancellationToken
             );
-
-            // Remember the exception if there was any
-            if (exception != null)
-                exceptions.Add(exception);
         }
 
-        // Prepare the result
-        var result = new ProblemTranslationUpsertDto(
+        // Prepare and return the result
+        return new ProblemTranslationUpsertDto(
             problem.Id,
             targetLanguage,
             statementTranslation,
             solutionTranslation
         );
-
-        // Return the translation result with exceptions
-        return (result, exceptions);
     }
 
     /// <summary>
     /// Translates a single text into the target language.
+    /// Throws exceptions on failure which will be handled by the progress helper.
     /// </summary>
     /// <param name="text">The text to translate.</param>
-    /// <param name="sourceLanguageName">The name of the source language.</param>
     /// <param name="targetLanguageName">The name of the target language.</param>
     /// <param name="systemPrompt">The system prompt.</param>
     /// <param name="textType">The type of text (statement or solution) used in the prompt.</param>
-    /// <returns>The translation result, or null if translation failed.</returns>
-    private async Task<(string? translation, Exception? exception)> TranslateText(
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The translated text.</returns>
+    private async Task<string> TranslateText(
         string text,
         string targetLanguageName,
         string systemPrompt,
@@ -277,24 +252,14 @@ public class TranslateProblemsCommand(
             ```
             """;
 
-        // Track exception for deferred handling
-        Exception? capturedException = null;
-
-        // Call the Gemini service to get the translation
-        var translationResponse = await GeneralUtilities.TryExecuteAsync(() =>
-            geminiService.GenerateContentAsync(
-                translateProblemsOptions.Value.ModelConfig.Model,
-                systemPrompt,
-                userPrompt,
-                translateProblemsOptions.Value.ModelConfig.ThinkingBudget,
-                cancellationToken
-            ),
-            // Capture exception for later handling (after semaphore is acquired)
-            exception => capturedException = exception);
-
-        // If AI service failed, return null with the exception
-        if (translationResponse is null)
-            return (null, capturedException);
+        // Call the Gemini service to get the translation (exceptions will propagate)
+        var translationResponse = await geminiService.GenerateContentAsync(
+            translateProblemsOptions.Value.ModelConfig.Model,
+            systemPrompt,
+            userPrompt,
+            translateProblemsOptions.Value.ModelConfig.ThinkingBudget,
+            cancellationToken
+        );
 
         // Parse the translation response - try multiple strategies
 
@@ -307,7 +272,7 @@ public class TranslateProblemsCommand(
 
         // Return if worked
         if (translationMatch.Success)
-            return (translationMatch.Groups[1].Value.Trim(), null);
+            return translationMatch.Groups[1].Value.Trim();
 
         // Strategy 2: Look for any code block
         translationMatch = System.Text.RegularExpressions.Regex.Match(
@@ -318,13 +283,13 @@ public class TranslateProblemsCommand(
 
         // Return if worked
         if (translationMatch.Success)
-            return (translationMatch.Groups[1].Value.Trim(), null);
+            return translationMatch.Groups[1].Value.Trim();
 
         // Strategy 3: Use the entire response if it looks like LaTeX
         if (translationResponse.Contains('\\') || translationResponse.Contains('{') || translationResponse.Contains('}'))
-            return (translationResponse.Trim(), null);
+            return translationResponse.Trim();
 
-        // Return failed translation with null exception (parsing failure, not API error)
-        return (null, null);
+        // If we couldn't parse the translation, throw an exception
+        throw new InvalidOperationException($"Failed to parse translation response for {textType}. Response: {translationResponse}");
     }
 }

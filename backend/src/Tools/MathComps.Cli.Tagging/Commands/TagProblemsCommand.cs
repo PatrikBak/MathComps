@@ -316,13 +316,8 @@ public class TagProblemsCommand(
                 userPrompt,
                 geminiSettings.ThinkingBudget
             ),
-            // Handle AI service errors gracefully
-            exception =>
-            {
-                // Log the problem slug and exception details
-                AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] Gemini service errors");
-                AnsiConsole.WriteException(exception);
-            });
+            // Provide an exception with more context
+            exception => throw new InvalidOperationException("Gemini error", exception));
 
         // If AI service failed, return empty result
         if (aiResponseRaw is null)
@@ -346,13 +341,8 @@ public class TagProblemsCommand(
                 )
             )
             .ToImmutableDictionary(),
-            // Handle JSON parsing errors gracefully
-            exception =>
-            {
-                // Log the problem slug and parsing exception details
-                AnsiConsole.MarkupLine($"[red]{problem.Slug.ToUpperInvariant()}[/] AI response parsing problem");
-                AnsiConsole.WriteException(exception);
-            });
+            // Provide an exception with more context
+            exception => throw new InvalidOperationException("Parsing AI response failed", exception));
 
         // If parsing failed, return empty result
         if (suggestedTags is null)
