@@ -10,6 +10,7 @@ import {
   facetUI,
   useFacetBase,
 } from '@/components/features/problems/components/facets/facet-shared'
+import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 
 interface SimpleSelectProps {
@@ -93,7 +94,7 @@ export default function SimpleSelect({
       >
         {/* Left: label */}
         <span className="min-w-0 flex items-center gap-2 truncate">
-          <span className="truncate text-slate-200">{displayText}</span>
+          <TruncatedText className="text-slate-200">{displayText}</TruncatedText>
         </span>
 
         {/* Right: chevron state icon */}
@@ -139,9 +140,9 @@ export default function SimpleSelect({
                     <IconComponent className="h-4 w-4 text-slate-300 flex-shrink-0" />
                   ) : null
                 })()}
-                <span className="truncate text-xs sm:text-sm font-medium text-slate-100">
+                <TruncatedText className="truncate text-xs sm:text-sm font-medium text-slate-100">
                   {facetOption.displayName}
-                </span>
+                </TruncatedText>
               </div>
             </label>
           ))}

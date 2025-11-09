@@ -11,6 +11,7 @@ import {
 import type { FacetOption } from './facet-shared'
 import {
   FacetHeader,
+  FacetItemLabel,
   FacetListContainer,
   FacetPopover,
   FacetSearchRow,
@@ -297,18 +298,11 @@ export default function TreeSelectFacet({
 
         {/* Label - grows to fill space */}
         <div className="flex flex-grow min-w-0 items-center">
-          <span
-            className={facetUI.itemLabel}
-            title={node.fullName && node.fullName !== node.displayName ? node.fullName : undefined}
-          >
-            {node.displayName}
-          </span>
+          <FacetItemLabel>{node.displayName}</FacetItemLabel>
         </div>
 
         {/* Count - pushed to the right */}
-        {showCounts && (
-          <span className={cn(facetUI.itemCount, 'shrink-0 ml-auto')}>{node.count}</span>
-        )}
+        {showCounts && <span className={facetUI.itemCount}>{node.count}</span>}
       </div>
     )
   })

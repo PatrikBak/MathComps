@@ -11,6 +11,7 @@ import {
 import type { FacetOption } from './facet-shared'
 import {
   FacetHeader,
+  FacetItemLabel,
   FacetListContainer,
   FacetPopover,
   FacetPopoverHeader,
@@ -70,8 +71,7 @@ const OptionItem = React.memo(function OptionItem({
   )
 
   return (
-    <label
-      key={option.id}
+    <div
       className={cn(
         facetUI.itemBase,
         // Apply selected or hover styling based on checked state
@@ -80,36 +80,30 @@ const OptionItem = React.memo(function OptionItem({
         isZeroCount && 'opacity-50',
         'select-none'
       )}
-      onClick={handleClick}
-      {...longPressHandlers}
     >
-      {/* Left side: checkbox + label */}
-      <div className="min-w-0 flex items-center gap-2">
+      <label
+        className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
+        onClick={handleClick}
+        {...longPressHandlers}
+      >
         <input
           type="checkbox"
           checked={checked}
           onChange={handleChange}
-          className="form-checkbox"
+          className="form-checkbox shrink-0"
         />
-        <span
-          className={facetUI.itemLabel}
-          // Show full name as tooltip if it differs from display name
-          title={
-            option.fullName && option.fullName !== option.displayName ? option.fullName : undefined
-          }
-        >
-          {option.displayName}
-        </span>
-      </div>
+        <FacetItemLabel>{option.displayName}</FacetItemLabel>
+      </label>
       {/* Right side: count badge (if enabled and available) */}
       {showCounts && typeof option.count === 'number' && (
-        <span className={cn(facetUI.itemCount, 'shrink-0')} aria-hidden="true">
+        <span className={facetUI.itemCount} aria-hidden="true">
           {option.count}
         </span>
       )}
-    </label>
+    </div>
   )
 })
+
 /** The logical mode for combining multiple selected options. */
 type MultiSelectFacetMode = 'or' | 'and'
 /** Shared sort modes configuration with order, icons, and labels */

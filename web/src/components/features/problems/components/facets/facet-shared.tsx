@@ -16,7 +16,8 @@ import { useIsomorphicEffect } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, HelpCircle } from 'lucide-react'
 import * as React from 'react'
 
-import Tooltip from '@/components/shared/components/Tooltip'
+import { Tooltip } from '@/components/shared/components/Tooltip'
+import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
@@ -92,7 +93,7 @@ export const facetUI = {
 
   itemLabel: 'truncate text-xs sm:text-sm font-medium',
 
-  itemCount: 'w-7 sm:w-8 text-right text-[10px] sm:text-xs tabular-nums text-slate-400',
+  itemCount: 'text-right text-[10px] sm:text-xs tabular-nums text-slate-400 shrink-0 ml-auto',
 }
 
 // #endregion
@@ -318,8 +319,8 @@ export function FacetHeader({
           {title}
         </h3>
         {titleTooltip && (
-          <Tooltip content={titleTooltip}>
-            <HelpCircle className="h-4 w-4 text-slate-400/80" />
+          <Tooltip placement="top" content={titleTooltip}>
+            <HelpCircle className="h-4 w-4 cursor-help text-slate-400/80" />
           </Tooltip>
         )}
       </div>
@@ -523,11 +524,27 @@ function FacetListContainer(props: FacetListContainerProps) {
   )
 }
 
+/**
+ * Wrapper for TruncatedText that ensures proper flex behavior in facet items.
+ * The min-w-0 wrapper allows the text to shrink below its content width,
+ * enabling proper truncation in flex containers.
+ *
+ * @param children - The text content to display
+ */
+function FacetItemLabel({ children }: { children: string }) {
+  return (
+    <div className="min-w-0">
+      <TruncatedText className={facetUI.itemLabel}>{children}</TruncatedText>
+    </div>
+  )
+}
+
 // #endregion
 
 // #region Exports
 
 export {
+  FacetItemLabel,
   FacetListContainer,
   FacetPopover,
   FacetPopoverHeader,

@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../shared/components/DropdownMenu'
-import Tooltip from '../../../shared/components/Tooltip'
+import { Tooltip } from '../../../shared/components/Tooltip'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import { ShareButton } from './ShareButton'
 
@@ -105,14 +105,11 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
                 {showTechniqueTags ? 'Skryť techniky' : 'Zobraziť techniky'}
               </span>
             </div>
-            <Tooltip content="Ovláda viditeľnosť tagov označujúcich techniky riešenia (napr. substitúcia, rozklad, úprava výrazu). Tieto tagy pomáhajú identifikovať matematické metódy použité v úlohách.">
-              <div
-                className="p-1"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                }}
-              >
+            <Tooltip
+              placement="top"
+              content="Ovláda viditeľnosť tagov označujúcich techniky riešenia (napr. substitúcia, rozklad, úprava výrazu). Tieto tagy pomáhajú identifikovať matematické metódy použité v úlohách."
+            >
+              <div className="p-1">
                 <HelpCircle className="h-4 w-4 cursor-help text-slate-500 hover:text-slate-400" />
               </div>
             </Tooltip>

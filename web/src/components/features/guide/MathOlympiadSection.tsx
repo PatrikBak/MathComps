@@ -2,7 +2,7 @@ import { ExternalLink, HelpCircle, MedalIcon } from 'lucide-react'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
-import Tooltip from '@/components/shared/components/Tooltip'
+import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
@@ -265,6 +265,7 @@ export default function MathOlympiadSection({
               <>
                 V kategórii A navyše celoštátne kolo, z neho možný postup na výberové sústredenie{' '}
                 <Tooltip
+                  placement="top"
                   content={
                     <>
                       Obe krajiny majú rôzne pravidlá pre postup, na Slovensku je k tomu treba ešte
