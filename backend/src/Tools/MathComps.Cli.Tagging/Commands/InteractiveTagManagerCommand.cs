@@ -29,9 +29,6 @@ public class InteractiveTagManagerCommand(
     protected override string ApplicationDescription => "Interactive tag management for MathComps problems";
 
     /// <inheritdoc/>
-    protected override string CommandUsageHint => "Commands: add <slug> \"<tag>\" <type> | remove <slug> \"<tag>\" | clear <slug> | clearTag \"<tag>\" | list <slug> | help | exit";
-
-    /// <inheritdoc/>
     protected override async Task HandleCommandAsync(string[] commandParts)
     {
         // Dispatch to specific operation handlers based on command verb.

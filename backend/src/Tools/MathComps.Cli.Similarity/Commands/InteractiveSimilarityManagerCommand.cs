@@ -26,9 +26,6 @@ public class InteractiveSimilarityManagerCommand(
     protected override string ApplicationDescription => "Interactive similarity management for MathComps problems";
 
     /// <inheritdoc/>
-    protected override string CommandUsageHint => "Commands: remove <source-slug> <target-slug> | clear <source-slug> | list <slug> | help | exit";
-
-    /// <inheritdoc/>
     protected override async Task HandleCommandAsync(string[] commandParts)
     {
         // Dispatch to specific operation handlers based on command verb.
