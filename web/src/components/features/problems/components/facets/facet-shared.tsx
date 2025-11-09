@@ -16,7 +16,7 @@ import { useIsomorphicEffect } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, HelpCircle } from 'lucide-react'
 import * as React from 'react'
 
-import Tooltip from '@/components/shared/components/Tooltip'
+import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
@@ -318,8 +318,8 @@ export function FacetHeader({
           {title}
         </h3>
         {titleTooltip && (
-          <Tooltip content={titleTooltip}>
-            <HelpCircle className="h-4 w-4 text-slate-400/80" />
+          <Tooltip placement="top" content={titleTooltip}>
+            <HelpCircle className="h-4 w-4 cursor-help text-slate-400/80" />
           </Tooltip>
         )}
       </div>

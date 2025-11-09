@@ -2,6 +2,7 @@ import { useLongPress } from '@mantine/hooks'
 import { ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
+import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 import {
   isExclusiveSelection,
@@ -297,12 +298,7 @@ export default function TreeSelectFacet({
 
         {/* Label - grows to fill space */}
         <div className="flex flex-grow min-w-0 items-center">
-          <span
-            className={facetUI.itemLabel}
-            title={node.fullName && node.fullName !== node.displayName ? node.fullName : undefined}
-          >
-            {node.displayName}
-          </span>
+          <TruncatedText className={facetUI.itemLabel}>{node.displayName}</TruncatedText>
         </div>
 
         {/* Count - pushed to the right */}

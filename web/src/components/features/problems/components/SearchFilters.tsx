@@ -2,7 +2,7 @@ import { Lightbulb, X } from 'lucide-react'
 import React, { useRef } from 'react'
 
 import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
-import Tooltip from '@/components/shared/components/Tooltip'
+import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
