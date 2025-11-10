@@ -81,7 +81,7 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
     // Open tooltip on hover (with short delay/rest, disables on touch)
     useHover(context, { move: false, restMs: 80, mouseOnly: true }),
     // Also open tooltip on click (touch devices etc.)
-    useClick(context),
+    useClick(context, { ignoreMouse: true }),
     // Allow dismissing tooltip via outside click, Escape key, or ancestor scroll
     useDismiss(context, {
       outsidePress: true,

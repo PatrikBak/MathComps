@@ -20,7 +20,7 @@ export default function FootnoteRef({ children }: { children: React.ReactNode })
       }
       placement="top"
     >
-      <span className="group inline-block align-super footnote-ref font-bold text-blue-600 cursor-pointer">
+      <span className="group inline-block align-super footnote-ref font-bold text-blue-600 cursor-help">
         †
       </span>
     </Tooltip>

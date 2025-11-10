@@ -74,13 +74,12 @@ function TipsAndTricks() {
 
   return (
     <Tooltip content={tooltipContent} placement="left">
-      <button
-        type="button"
-        className="p-1 rounded text-slate-400 hover:text-amber-400/80 hover:bg-slate-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      <span
+        className="p-1 rounded text-slate-400 hover:text-amber-400/80 hover:bg-slate-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-help"
         aria-label="Tipy a triky"
       >
         <Lightbulb className="h-4 w-4" />
-      </button>
+      </span>
     </Tooltip>
   )
 }
