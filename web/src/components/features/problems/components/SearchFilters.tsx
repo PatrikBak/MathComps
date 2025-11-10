@@ -198,13 +198,13 @@ export const SearchFilters = ({
               title="Ročník"
               options={seasonOpts}
               selected={filters.seasons.map((item) => item.slug)}
-              onChange={(next) =>
+              onChange={(next) => {
                 updateFilter(
                   'seasons',
-                  next.map((slug) => ({ slug, displayName: slug })),
+                  next.map((slug: string) => ({ slug, displayName: slug })),
                   'discrete'
                 )
-              }
+              }}
               searchPlaceholder="Hľadať ročníky…"
               closedLabel={'Všetky ročníky'}
             />
@@ -214,17 +214,16 @@ export const SearchFilters = ({
               title="Poradie úlohy"
               options={numberOpts}
               selected={filters.problemNumbers.map(String)}
-              onChange={(nextIds: string[]) => {
+              onChange={(next) => {
                 onFiltersChange(
                   {
                     ...filters,
-                    problemNumbers: nextIds.map((id) => parseInt(id, 10)),
+                    problemNumbers: next.map((id: string) => parseInt(id, 10)),
                   },
                   'discrete'
                 )
               }}
               showSearch={false}
-              showCounts={true}
               closedLabel={'Ľubovoľné poradie'}
             />
           </div>
@@ -237,13 +236,13 @@ export const SearchFilters = ({
               closedLabel={'Vyberte kľúčové slová'}
               options={tagOpts}
               selected={filters.tags.map((item) => item.slug)}
-              onChange={(newTags) =>
+              onChange={(next) => {
                 updateFilter(
                   'tags',
-                  newTags.map((slug) => ({ slug, displayName: slug })),
+                  next.map((slug: string) => ({ slug, displayName: slug })),
                   'discrete'
                 )
-              }
+              }}
               searchPlaceholder="Hľadať kľúčové slová"
               logic={{
                 mode: filters.tagLogic,
@@ -266,13 +265,13 @@ export const SearchFilters = ({
               closedLabel={'Vyberte autorov'}
               options={authorOpts}
               selected={filters.authors.map((item) => item.slug)}
-              onChange={(newAuthors) =>
+              onChange={(next) => {
                 updateFilter(
                   'authors',
-                  newAuthors.map((slug) => ({ slug, displayName: slug })),
+                  next.map((slug: string) => ({ slug, displayName: slug })),
                   'discrete'
                 )
-              }
+              }}
               searchPlaceholder="Hľadať autorov…"
               logic={{
                 mode: filters.authorLogic,

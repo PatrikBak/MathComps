@@ -23,60 +23,77 @@ import {
 } from './facet-shared'
 import { toggleOptionSelection } from './utils/facet-logic'
 
-/** An option for the `MultiSelectFacet`. It extends the base `FacetOption`. */
+/**
+ * Option data consumed by {@link MultiSelectFacet}. It extends the shared {@link FacetOption}.
+ */
 export type MultiSelectFacetOption = FacetOption
 
 /**
- * Individual option component that can use hooks.
- * Defined outside the main component to ensure it's stable and doesn't need to be in dependency arrays.
+ * Props for the {@link OptionItem} component that renders a selectable facet option.
+ */
+type OptionItemProps = {
+  /** Facet data from {@link MultiSelectFacetOption} that provides labels, identifiers, and counts. */
+  option: MultiSelectFacetOption
+  /** Indicates whether this {@link MultiSelectFacetOption} is currently selected. */
+  checked: boolean
+  /** Flags that the option has no matching results and should appear muted in {@link OptionItem}. */
+  isZeroCount: boolean
+  /** Callback function that updates the selected option identifiers for {@link MultiSelectFacet}. */
+  onChange: (next: (previous: string[]) => string[]) => void
+}
+
+/**
+ * Individual option renderer used inside {@link MultiSelectFacet}.
+ *
+ * @param props - Component properties defined by {@link OptionItemProps}.
+ * @returns React element that renders a selectable option row within {@link FacetListContainer}.
  */
 const OptionItem = React.memo(function OptionItem({
   option,
   checked,
   isZeroCount,
-  onExclusiveSelect,
-  onToggle,
-  showCounts,
-}: {
-  option: MultiSelectFacetOption
-  checked: boolean
-  isZeroCount: boolean
-  onExclusiveSelect: () => void
-  onToggle: () => void
-  showCounts: boolean
-}) {
+  onChange,
+}: OptionItemProps) {
+  // A function to toggle the selection state of this option (add if not selected, remove if selected)
+  const onToggle = React.useCallback(() => {
+    onChange((previousSelected) => toggleOptionSelection(option.id, previousSelected))
+  }, [onChange, option.id])
+
+  // A function to exclusively select this option (deselect all others)
+  const onExclusiveSelect = React.useCallback(() => {
+    onChange(() => [option.id])
+  }, [onChange, option.id])
+  // A function to handle mouse click on the option label
   const handleClick = (event: React.MouseEvent<HTMLLabelElement>) => {
-    // Ctrl/Cmd+Click: exclusive selection (deselect all others, select only this one)
+    // Handle execlusive selectton, i.e. only this option intended to be selected
     if (isExclusiveSelection(event)) {
       event.preventDefault()
       onExclusiveSelect()
       return
     }
-    // Normal click: let default behavior happen (checkbox onChange will handle it)
+    // Otherwise, fall through: normal click lets the checkbox handle selection
   }
 
-  const handleChange = () => {
-    // Normal click: toggle this option in the selection
-    onToggle()
-  }
-
-  // Long-press handler for exclusive selection on mobile
+  // A long-press handler for exclusive selection on touch screens
   const longPressHandlers = useLongPress(
     () => {
       onExclusiveSelect()
     },
-    {
-      threshold: LONG_PRESS_THRESHOLD_MS,
-    }
+    { threshold: LONG_PRESS_THRESHOLD_MS }
   )
+
+  // A function to handle checkbox state change (user toggled the selection)
+  const handleChange = () => {
+    onToggle()
+  }
 
   return (
     <div
       className={cn(
         facetUI.itemBase,
-        // Apply selected or hover styling based on checked state
+        // Highlight style: use "selected" style if checked, otherwise "hover" style
         checked ? facetUI.itemSelected : facetUI.itemHover,
-        // Dim options with zero count
+        // Visually dim the option if it has a count of zero (no matches)
         isZeroCount && 'opacity-50',
         'select-none'
       )}
@@ -94,8 +111,8 @@ const OptionItem = React.memo(function OptionItem({
         />
         <FacetItemLabel>{option.displayName}</FacetItemLabel>
       </label>
-      {/* Right side: count badge (if enabled and available) */}
-      {showCounts && typeof option.count === 'number' && (
+      {/* Count badge at the right (if enabled and count is present) */}
+      {typeof option.count === 'number' && (
         <span className={facetUI.itemCount} aria-hidden="true">
           {option.count}
         </span>
@@ -104,9 +121,65 @@ const OptionItem = React.memo(function OptionItem({
   )
 })
 
-/** The logical mode for combining multiple selected options. */
+/** Logical modes supported by {@link LogicToggle} within {@link MultiSelectFacet}. */
 type MultiSelectFacetMode = 'or' | 'and'
-/** Shared sort modes configuration with order, icons, and labels */
+
+/** Configuration object for the logic toggle rendered by {@link LogicToggle}. */
+type MultiSelectFacetLogicConfig = {
+  /** When true, the logic toggle is enabled within {@link MultiSelectFacet}. @default true */
+  enabled?: boolean
+  /** The current logic mode applied by {@link LogicToggle}. */
+  mode: MultiSelectFacetMode
+  /** Callback to handle mode changes emitted by {@link LogicToggle}. */
+  onChange: (next: MultiSelectFacetMode) => void
+  /** Custom labels for the buttons inside {@link LogicToggle}. */
+  labels?: {
+    /** Label displayed when {@link LogicToggle} is in the OR state. */
+    or?: string
+    /** Label displayed when {@link LogicToggle} is in the AND state. */
+    and?: string
+  }
+}
+
+/** Props consumed by the {@link MultiSelectFacet} component. */
+type MultiSelectFacetProps = {
+  /** The title displayed in {@link FacetHeader} and {@link FacetTrigger}. */
+  title: string
+  /** The list of {@link MultiSelectFacetOption} entries to display in the facet. */
+  options: MultiSelectFacetOption[]
+  /** Array of selected option identifiers drawn from {@link MultiSelectFacetOption.id}. */
+  selected: string[]
+  /** Callback invoked when selection changes within {@link MultiSelectFacet}. */
+  onChange: (next: string[]) => void
+  /** Additional CSS class name(s) to apply to the outermost <div> element that wraps the entire {@link MultiSelectFacet} component. */
+  className?: string
+  /** Placeholder text for the {@link FacetSearchRow} input. */
+  searchPlaceholder?: string
+  /**
+   * Whether to render {@link FacetSearchRow} inside the popover when theres too many options,
+   * specifically at least {@link SEARCH_THRESHOLD}.
+   */
+  showSearch?: boolean
+  /** Text displayed on the closed {@link FacetTrigger}. */
+  closedLabel: string
+  /** Configuration for the AND/OR logic toggle provided by {@link MultiSelectFacetLogicConfig}. */
+  logic?: MultiSelectFacetLogicConfig
+  /** Optional tooltip text displayed next to the title inside {@link FacetHeader}. */
+  titleTooltip?: string
+  /**
+   * Configuration for grouping options into sections rendered by {@link MultiSelectFacet}.
+   * Provide an array of group keys in display order and a mapping of keys to labels.
+   * @example { keys: ['area', 'type'], labels: { area: 'Area', type: 'Type' } }
+   */
+  grouping?: {
+    /** Array of group keys in the order they should be displayed, matching {@link MultiSelectFacetOption.groupKey}. */
+    keys: string[]
+    /** Mapping of group keys to display labels shown in section headers. */
+    labels: Record<string, string>
+  }
+}
+
+/** Preconfigured sort modes shared by {@link GroupSortButton} and {@link MultiSelectFacet}. */
 const SORT_MODES = [
   { key: 'alpha' as const, icon: ArrowDownAZ, label: 'Zoradiť podľa názvu (A-Z)' },
   {
@@ -117,67 +190,12 @@ const SORT_MODES = [
   { key: 'count-asc' as const, icon: ArrowUpNarrowWide, label: 'Zoradiť podľa počtu (vzostupne)' },
 ] as const
 
-/** Configuration for logic toggle behavior. */
-type MultiSelectFacetLogicConfig = {
-  /** When true, the logic toggle is enabled. @default true */
-  enabled?: boolean
-  /** The current logic mode ('or' or 'and'). */
-  mode: MultiSelectFacetMode
-  /** Callback to handle mode changes. */
-  onChange: (next: MultiSelectFacetMode) => void
-  /** Custom labels for the toggle buttons. */
-  labels?: {
-    or?: string
-    and?: string
-  }
-}
-
-type MultiSelectFacetProps = {
-  /** The title of the facet, displayed above the trigger. */
-  title: string
-  /** The list of options to display in the facet. */
-  options: MultiSelectFacetOption[]
-  /** An array of the currently selected option IDs. */
-  selected: string[]
-  /** Callback function invoked when the selected values change. */
-  onChange: (next: string[]) => void
-  /** Placeholder text for the search input. */
-  searchPlaceholder?: string
-  /** Additional CSS class name to apply to the root element. */
-  className?: string
-  /** Whether to show the search input in the popover. @default true */
-  showSearch?: boolean
-  /** When true, the facet is rendered but cannot be opened/changed. */
-  disabled?: boolean
-  /** Text to show on the closed trigger button. */
-  closedLabel: string
-  /** Configuration for the AND/OR logic toggle. */
-  logic?: MultiSelectFacetLogicConfig
-  /** Show search when option count ≥ this threshold. @default SEARCH_THRESHOLD */
-  searchThreshold?: number
-  /** When false, hides per-option counts from the list UI. @default true */
-  showCounts?: boolean
-  /** Optional text to display in a tooltip next to the title. */
-  titleTooltip?: string
-  /**
-   * Configuration for grouping options into sections.
-   * Provide an array of group keys in display order and a mapping of keys to labels.
-   * @example { keys: ['area', 'type'], labels: { area: 'Area', type: 'Type' } }
-   */
-  grouping?: {
-    /** Array of group keys in the order they should be displayed */
-    keys: string[]
-    /** Mapping of group keys to display labels */
-    labels: Record<string, string>
-  }
-}
-
 /**
- * A facet component that allows selecting multiple values from a list of options.
- * It includes features like searching, clearing selections, and an optional logic toggle
- * for AND/OR filtering.
+ * Facet component that allows selecting multiple values from a list of {@link MultiSelectFacetOption}s.
+ * It includes search, clear, grouping, and AND/OR logic toggling via {@link LogicToggle}.
  *
- * @param {MultiSelectFacetProps} props - The props for the component.
+ * @param props - The props consumed by {@link MultiSelectFacet}.
+ * @returns React element that renders the full multi-select facet surface.
  */
 export default function MultiSelectFacet({
   title,
@@ -187,11 +205,8 @@ export default function MultiSelectFacet({
   searchPlaceholder = 'Hľadať…',
   className,
   showSearch = true,
-  disabled = false,
   closedLabel,
   logic,
-  searchThreshold = SEARCH_THRESHOLD,
-  showCounts = true,
   titleTooltip,
   grouping,
 }: MultiSelectFacetProps) {
@@ -231,10 +246,15 @@ export default function MultiSelectFacet({
   // Capture the current collapsed groups state to read it synchronously
   const collapsedGroupsRef = React.useRef(collapsedGroups)
   collapsedGroupsRef.current = collapsedGroups
+  // Keep the latest selection in a ref so callbacks can stay stable while observing fresh values
+  const selectedRef = React.useRef(selected)
+  selectedRef.current = selected
 
   /**
-   * Helper function to group options by their groupKey.
-   * Returns a map of group keys to arrays of options.
+   * Groups options by their `groupKey` and applies the appropriate {@link SORT_MODES} ordering.
+   *
+   * @param opts - Options generated by {@link useFacetBase} for {@link MultiSelectFacet}.
+   * @returns Mapping of group keys to grouped {@link MultiSelectFacetOption} arrays.
    */
   const groupOptions = React.useCallback(
     (opts: MultiSelectFacetOption[]) => {
@@ -284,8 +304,11 @@ export default function MultiSelectFacet({
     [grouping, groupSortModes]
   )
   /**
-   * Helper function to sort options within a group based on the group's sort mode.
-   * Used for sorting both selected and unselected items within a group.
+   * Sorts options within a group based on the group's current {@link SORT_MODES} selection.
+   *
+   * @param options - Options scoped to a single group within {@link MultiSelectFacet}.
+   * @param sortMode - Key of the sort mode provided by {@link SORT_MODES}.
+   * @returns New array of {@link MultiSelectFacetOption} sorted for rendering.
    */
   const sortOptionsByMode = React.useCallback(
     (options: MultiSelectFacetOption[], sortMode: (typeof SORT_MODES)[number]['key']) => {
@@ -441,40 +464,45 @@ export default function MultiSelectFacet({
     }
   }
 
-  const renderOption = React.useCallback(
-    (option: MultiSelectFacetOption) => {
-      // Check if this option is currently selected
-      const checked = selected.includes(option.id)
-      // Determine if the option has zero matches (for visual dimming)
-      const isZeroCount = typeof option.count === 'number' && option.count <= 0
-
-      return (
-        <OptionItem
-          key={option.id}
-          option={option}
-          checked={checked}
-          isZeroCount={isZeroCount}
-          onExclusiveSelect={() => onChange([option.id])}
-          onToggle={() => onChange(toggleOptionSelection(option.id, selected))}
-          showCounts={showCounts}
-        />
-      )
+  // Internal wrapper that converts function-form updates to direct array updates (expected by OptionItem)
+  const internalOnChange = React.useCallback(
+    (next: (_previous: string[]) => string[]) => {
+      const nextArray = next(selectedRef.current)
+      onChange(nextArray)
     },
-    [onChange, selected, showCounts]
+    [onChange]
+  )
+
+  // A function to create an option item component from its properties
+  const renderOption = React.useCallback(
+    (option: MultiSelectFacetOption) => (
+      <OptionItem
+        key={option.id}
+        option={option}
+        checked={selected.includes(option.id)}
+        isZeroCount={typeof option.count === 'number' && option.count <= 0}
+        onChange={internalOnChange}
+      />
+    ),
+    [internalOnChange, selected]
   )
 
   /**
-   * Toggles the collapsed state of a group
+   * Toggles the collapsed state of a group header within {@link MultiSelectFacet}.
+   *
+   * @param groupKey - Identifier of the group defined in {@link MultiSelectFacetProps.grouping}.
    */
   function toggleGroupCollapse(groupKey: string) {
-    setCollapsedGroups((prev) => ({
-      ...prev,
-      [groupKey]: !prev[groupKey],
+    setCollapsedGroups((previous) => ({
+      ...previous,
+      [groupKey]: !previous[groupKey],
     }))
   }
 
   /**
-   * Cycles through sort modes: alpha -> count-desc -> count-asc -> alpha
+   * Cycles through sort modes defined in {@link SORT_MODES} for a given group.
+   *
+   * @param groupKey - Identifier of the group defined in {@link MultiSelectFacetProps.grouping}.
    */
   function cycleSortMode(groupKey: string) {
     setGroupSortModes((prev) => {
@@ -487,7 +515,11 @@ export default function MultiSelectFacet({
   }
 
   /**
-   * Renders a sort toggle button for a group header
+   * Renders the sort toggle button used in each group header within {@link MultiSelectFacet}.
+   *
+   * @param props - Component props for the {@link GroupSortButton}.
+   * @param props.groupKey - Identifier of the group defined in {@link MultiSelectFacetProps.grouping}.
+   * @returns Button element that cycles the group's {@link SORT_MODES}.
    */
   function GroupSortButton({ groupKey }: { groupKey: string }) {
     // Get the current sort mode for this group, defaulting to the first mode if not set
@@ -513,6 +545,14 @@ export default function MultiSelectFacet({
     )
   }
 
+  /**
+   * Logic toggle control that switches between {@link MultiSelectFacetMode} values.
+   *
+   * @param props - Control props specifying current value and change handler.
+   * @param props.value - Current {@link MultiSelectFacetMode} applied in {@link MultiSelectFacet}.
+   * @param props.onChange - Callback invoked when the mode toggles within {@link LogicToggle}.
+   * @returns React element rendering the AND/OR toggle.
+   */
   function LogicToggle(props: {
     value: MultiSelectFacetMode
     onChange: (mode: MultiSelectFacetMode) => void
@@ -524,17 +564,14 @@ export default function MultiSelectFacet({
       <div className="flex items-center justify-between gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs text-slate-400">
         <span className="whitespace-nowrap">Logika</span>
         <div
-          className={cn(
-            'inline-flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-600 p-0.5',
-            disabled && 'opacity-50 cursor-not-allowed pointer-events-none'
-          )}
+          className="inline-flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-600 p-0.5"
           role="radiogroup"
           aria-label="Logika výberu"
         >
           <button
             type="button"
             className={cn(baseBtn, value === 'or' && 'bg-indigo-900 text-white')}
-            onClick={() => !disabled && onChange('or')}
+            onClick={() => onChange('or')}
             aria-pressed={value === 'or'}
           >
             {logic?.labels?.or ?? 'Aspoň jeden'}
@@ -542,7 +579,7 @@ export default function MultiSelectFacet({
           <button
             type="button"
             className={cn(baseBtn, value === 'and' && 'bg-indigo-900 text-white')}
-            onClick={() => !disabled && onChange('and')}
+            onClick={() => onChange('and')}
             aria-pressed={value === 'and'}
           >
             {logic?.labels?.and ?? 'Všetci'}
@@ -570,7 +607,6 @@ export default function MultiSelectFacet({
         getReferenceProps={facet.getReferenceProps}
         closedLabel={closedLabel}
         title={title}
-        disabled={disabled}
         count={selected.length}
       />
 
@@ -587,7 +623,8 @@ export default function MultiSelectFacet({
           <FacetPopoverHeader title={title} onClear={clearAll} count={() => selected.length} />
         )}
 
-        {showSearch && options.length >= searchThreshold && (
+        {/* Only show the search row when the option count meets the configured threshold. */}
+        {showSearch && options.length >= SEARCH_THRESHOLD && (
           <FacetSearchRow
             query={facet.query}
             setQuery={facet.setQuery}
