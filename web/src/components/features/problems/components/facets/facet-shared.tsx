@@ -13,7 +13,7 @@ import {
   useRole,
 } from '@floating-ui/react'
 import { useIsomorphicEffect } from '@mantine/hooks'
-import { ChevronDown, ChevronUp, FilterX, HelpCircle } from 'lucide-react'
+import { ChevronDown, ChevronUp, FilterX, HelpCircle, X } from 'lucide-react'
 import * as React from 'react'
 
 import { Tooltip } from '@/components/shared/components/Tooltip'
@@ -79,10 +79,14 @@ export const facetUI = {
     'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
 
   searchRow:
-    'flex items-center gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
+    'relative flex items-center gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
 
+  searchInputWrapper: 'relative flex-1',
   searchInput:
-    'h-8 sm:h-9 flex-1 rounded-md border border-transparent bg-slate-900/70 px-2.5 sm:px-3 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400/70',
+    'h-8 sm:h-9 w-full rounded-md border border-transparent bg-slate-900/70 px-2.5 sm:px-3 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400/70',
+  searchInputWithClear: 'pr-8 sm:pr-9',
+  searchClearButton:
+    'absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded text-slate-400 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors',
 
   itemBase:
     'flex items-center justify-between gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors',
@@ -474,24 +478,60 @@ type FacetSearchRowProps = {
   onArrowDownToList: () => void
 }
 
+/**
+ * Search input row component for facet filters.
+ * Includes a clear button that appears when there's text in the search field.
+ *
+ * @param props - Component properties defined by {@link FacetSearchRowProps}.
+ * @returns React element rendering a search input with optional clear button.
+ */
 function FacetSearchRow(props: FacetSearchRowProps) {
   const { query, setQuery, searchRef, title, placeholder = 'Hľadať…', onArrowDownToList } = props
+
+  // A function to clear the searchbox
+  const handleClear = React.useCallback(() => {
+    // Setup empty query
+    setQuery('')
+    // Refocus the input after clearing for better UX
+    searchRef.current?.focus()
+  }, [setQuery, searchRef])
+
   return (
     <div className={facetUI.searchRow}>
-      <input
-        ref={searchRef as React.RefObject<HTMLInputElement>}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') {
-            e.preventDefault()
-            onArrowDownToList()
-          }
-        }}
-        aria-label={`Hľadať ${title.toLowerCase()}`}
-        placeholder={placeholder}
-        className={facetUI.searchInput}
-      />
+      <div className={facetUI.searchInputWrapper}>
+        <input
+          ref={searchRef as React.RefObject<HTMLInputElement>}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            // Arrow-down goes to the list
+            if (event.key === 'ArrowDown') {
+              event.preventDefault()
+              onArrowDownToList()
+            }
+            // Allow Escape key to clear the search
+            if (event.key === 'Escape' && query.length > 0) {
+              event.preventDefault()
+              handleClear()
+            }
+          }}
+          aria-label={`Hľadať ${title.toLowerCase()}`}
+          placeholder={placeholder}
+          className={cn(facetUI.searchInput, query.length > 0 && facetUI.searchInputWithClear)}
+        />
+        {/** The X button */}
+        {query.length > 0 && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className={facetUI.searchClearButton}
+            aria-label={`Vymazať vyhľadávanie v „${title.toLowerCase()}"`}
+            title="Vymazať"
+          >
+            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
+          </button>
+        )}
+      </div>
     </div>
   )
 }
