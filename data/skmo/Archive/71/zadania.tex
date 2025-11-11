@@ -451,28 +451,51 @@ Výraz $\nsd(a,b)$ označuje najväčšieho spoločného deliteľa čísel $a,b$
 ...}
 \podpis{...}
 
-{%%%%%   IMO, priklad 1
-...}
+{%%%%%  IMO, priklad 1
+Osloská banka vydáva mince dvoch druhov -- alumíniové (označené A) a bronzové (označené B). Ingrid má $n$ alumíniových a $n$ bronzových mincí a zoradí ich v lubovoľnom poradí zľava doprava. Pod blokom rozumieme podpostupnosť susedných mincí rovnakého druh. Nech $k$ je pevné kladné celé číslo také, že $k \leq 2 n$, Ingrid potom opakovane vykonáva nasledujúcu operáciu: Nájde najdlhší blok obsahujúci $k$. mincu zlava a presunie všetky mince tohto bloku na začiatok radu. Napríklad ak $n=4$ a $k=4$, tak proces začínajúci sa rozmiestnením AABBBABA bude
+
+$$
+\text{AABBBABA} \rightarrow \text{BBBAAABA} \rightarrow \text{AAABBBBA} \rightarrow \text{BBBBAAAA} \rightarrow \text{BBBBAAAA} \rightarrow \ldots
+$$
+
+Nájdite všetky dvojice $(n, k)$ kladných celých čísel také, že $k \leq 2 n$ a pre toto $k$ a lubovoľné začiatočné rozmiestnenie bude v niektorom okamihu príslušného procesu prvých $n$ mincí zlava z rovnakého kovu.
+}
 \podpis{...}
 
-{%%%%%   IMO, priklad 2
-...}
+{%%%%%  IMO, priklad 2
+Nájdite všetky funkcie $f$, kde $f: \mathbb{R}^{+} \rightarrow \mathbb{R}^{+}$, také, že pre každé $x$ z množiny $\mathbb{R}^{+}$existuje práve jedno $y z$ množiny $\mathbb{R}^{+}$také, že
+
+$$
+xf(y)+yf(x) \leq 2.
+$$
+
+($\mathbb{R}^{+}$ je množina všetkých kladných reálnych čísel.)}
 \podpis{...}
 
-{%%%%%   IMO, priklad 3
-...}
+{%%%%%  IMO, priklad 3
+Nech $k$ je kladné celé číslo a $S$ je konečná množina nepárnych prvočísel. Dokážte, že existuje najviac jeden spôsob (až na otočenie a osovú súmernost), ako rovnomerne rozmiestnit prvky $S$ na danú kružnicu tak, že súčin každých dvoch susedných čísel má tvar $x^{2}+x+k$ pre nejaké kladné celé číslo $x$.}
 \podpis{...}
 
-{%%%%%   IMO, priklad 4
-...}
+{%%%%%  IMO, priklad 4
+Nech $A B C D E$ je konvexný pätuholník taký, že $|B C|=|D E|$. Podobne nech vnútri $A B C D E$ existuje bod $T$ taký, že $|T B|=|T D|$, $|T C|=|T E|$ a $|\angle A B T|=|\angle T E A|$. Nech priamka $A B$ pretína priamky $C D$ a $C T$ postupne v bodoch $P$ a $Q$ tak, že body $P, B, A, Q$ ležia na jednej priamke v tomto poradí. Nech priamka $A E$ pretína priamky $C D$ a $D T$ postupne v bodoch $R$ a $S$ tak, že body $R, E, A, S$ ležia na jednej priamke v tomto poradí. Dokážte, že body $P, S, Q, R$ ležia na jednej kružnici.}
+\podpis{Patrik Bak}
+
+{%%%%%  IMO, priklad 5
+Nájdite všetky trojice $(a, b, p)$ kladných celých čísel takých, že $p$ je prvočíslo a
+
+$$
+a^{p}=b!+p.
+$$}
 \podpis{...}
 
-{%%%%%   IMO, priklad 5
-...}
-\podpis{...}
+{%%%%%  IMO, priklad 6
+Nech $n$ je kladné celé číslo. Nordickým štvorcom rozmeru $n$ budeme nazývať tabuľku $n \times n$ obsahujúcu všetky celé čísla od 1 do $n^{2}$ tak, že každé políčko obsahuje práve jedno číslo. Dve políčka považujeme za susedné práve vtedy, keď majú spoločnú stranu. Políčko susediace len s políčkami s väčším číslom nazveme dolina. Pod stupákom rozumieme postupnost jedného alebo viacerých políčok tabuľky takú, že platí:
 
-{%%%%%   IMO, priklad 6
-...}
+\item{(i)} Prvé políčko tejto postupnosti je dolina.
+\item{(ii)} Každé dalšie políčko tejto postupnosti susedí s predchádzajúcim políčkom.
+\item{(iii)} Čísla napísané v políčkach postupnosti sú v rastúcom poradí.
+
+Nájdite najmenší možný počet stupákov v nordickom štvorci rozmeru $n$.}
 \podpis{...}
 
 {%%%%%   MEMO, priklad 1

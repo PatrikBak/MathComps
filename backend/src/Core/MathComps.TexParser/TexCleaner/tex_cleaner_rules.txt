@@ -164,6 +164,7 @@ gamma
 gcd
 ge
 geq
+geqslant
 hbox
 heartsuit
 hline
@@ -181,6 +182,7 @@ ldots
 le
 left
 leq
+leqslant
 lfloor
 log
 mathbb
@@ -200,6 +202,7 @@ notin
 nparallel
 Omega
 omega
+operatorname
 over
 overbrace
 overline
