@@ -3347,7 +3347,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\begin{align*}\n(x+y)^5 &= 64z, \\\\\n(y+z)^5 &= 64x, \\\\\n(z+x)^5 &= 64y. \\\\\n\\end{align*}",
+                  "text": "\\begin{align*}\n(x+y)^5 &= 32z, \\\\\n(y+z)^5 &= 32x, \\\\\n(z+x)^5 &= 32y. \\\\\n\\end{align*}",
                   "isDisplay": true
                 }
               ],
@@ -3370,7 +3370,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "64x \\ge 64y \\ge 64z",
+                      "text": "32x \\ge 32y \\ge 32z",
                       "isDisplay": false
                     },
                     {
@@ -3454,7 +3454,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "(2x)^5=64x",
+                      "text": "(2x)^5=32x",
                       "isDisplay": false
                     },
                     {
@@ -3466,7 +3466,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "64x^5-64x=0 \\implies x(x^5-1)=0,",
+                  "text": "32x^5-32x=0 \\implies x(x^5-1)=0,",
                   "isDisplay": true
                 },
                 {
