@@ -409,7 +409,7 @@ export default function TreeSelectFacet({
         popoverId={facet.popoverId}
         labelId={facet.labelId}
       >
-        {showSearch && options.length >= searchThreshold && (
+        {showSearch && originalNodeIndex.size >= searchThreshold && (
           <FacetSearchRow
             query={facet.query}
             setQuery={facet.setQuery}
