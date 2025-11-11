@@ -54,21 +54,23 @@ public class TranslationDatabaseService(IDbContextFactory<MathCompsDbContext> db
 
             // Handle both statements and solutions
             TranslationScope.Both => query.Where(problem =>
+                // We need at least the statement to translate from (solution is optional)
+                problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Statement)
+
                 // If not forcing retranslation, check for missing translations
-                ((!forceRetranslate && (
+                && ((!forceRetranslate && (
+                    // Check if statement translation is missing (only if statement exists)
                     !problem.Texts.Any(text =>
                         text.Language == language &&
                         text.DocumentType == DocumentType.Statement
                     ) ||
-                    !problem.Texts.Any(text =>
+                    // Check if solution translation is missing (only if solution exists in original)
+                    (problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Solution) &&
+                     !problem.Texts.Any(text =>
                         text.Language == language &&
                         text.DocumentType == DocumentType.Solution
-                    )
+                    ))
                 )) || forceRetranslate)
-
-                // We need both the statement and the solution to translate from
-                && problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Statement)
-                && problem.Texts.Any(text => text.IsOriginal && text.DocumentType == DocumentType.Solution)
             ),
 
             // Unhandled scope
