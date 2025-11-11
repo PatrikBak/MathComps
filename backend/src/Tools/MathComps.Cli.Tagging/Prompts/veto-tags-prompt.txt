@@ -34,5 +34,5 @@ specify a non-empty string as "Reason" only if that tag has been rejected.
 Final check:
 - Each tag from among the candidate tags must appear exactly once in the output JSON.
 - Escape all double quotes in strings.
-- Escape all TeX commands.
+- Escape all TeX commands. This is very important!
 - The output must be a valid JSON.

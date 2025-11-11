@@ -26,5 +26,5 @@ Final check:
 - Each tag from among the candidate tags must appear exactly once in the output JSON.
 - The field "GoodnessOfFit" must be a real number between 0 and 1, representing how good of a fit the tag is (0 = no fit, 1 = perfect fit).
 - Escape all double quotes in strings.
-- Escape all TeX commands.
+- Escape all TeX commands. This is very important!
 - The output must be a valid JSON.

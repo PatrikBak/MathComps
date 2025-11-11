@@ -51,5 +51,5 @@ Final check:
 - You should provide a justification only if the tag is rejected i.e. "Approved" is false;
   otherwise, leave the justification empty.
 - Escape all double quotes in strings.
-- Escape all TeX commands.
+- Escape all TeX commands. This is very important!
 - The output must be a valid JSON.
