@@ -127,7 +127,7 @@ export default function ResourcesSection({
           title: 'Evan Chen stránka',
           description:
             'Osobná stránka svetoznámeho olympiádneho experta. Cez jeho stránku sa možno preklikať na veľa nielen jeho materiálov alebo ďalších zdrojov a informácií.',
-          link: 'http://web.evanchen.cc/',
+          link: 'https://web.evanchen.cc/',
         },
       ],
     },
