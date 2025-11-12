@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
 import KatexSetup from '@/components/math/KatexSetup'
+import ProgressBarProvider from '@/components/shared/providers/ProgressBarProvider'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { ToastProvider } from '@/components/shared/providers/ToastProvider'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={cn(inter.className, 'antialiased')}>
         <QueryProvider>
           <KatexSetup />
-          {children}
+          <ProgressBarProvider>{children}</ProgressBarProvider>
         </QueryProvider>
         <ToastProvider />
       </body>

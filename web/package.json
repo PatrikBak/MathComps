@@ -21,6 +21,7 @@
     "ci": "npm run check && npm run test:run && npm run build"
   },
   "dependencies": {
+    "@bprogress/next": "^3.2.12",
     "@floating-ui/react": "^0.27.15",
     "@headlessui/react": "^2.2.7",
     "@hookform/resolvers": "^5.2.2",
