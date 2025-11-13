@@ -35,7 +35,7 @@ export default function SponsorshipSection() {
 
           <div className="max-w-xs sm:max-w-md md:max-w-lg mx-auto">
             <GlassCard title="Hlavný sponzor projektu" titleElement="h3">
-              <div className="mb-4 sm:mb-6">
+              <div className="mt-4 sm:mt-6 mb-4 sm:mb-6">
                 <AppLink
                   href="https://www.wincent.com/"
                   className="inline-flex items-center text-[#B49032] hover:text-[#B49032]/80 transition-colors duration-300"
