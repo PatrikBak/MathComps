@@ -45,7 +45,7 @@ export default function WhyCompetitionsSection({
       iconBg: 'bg-emerald-500/10',
       title: 'Veľké uplatnenie',
       description:
-        'Ľudia z prostredia matematických súťaží sú tí najžiadanejší na rôzne pozície vyžadujúce riešenie ťažkých problémov, napr. v oblasti financií. Vďaka nadobudnutým schopnostiam a kontaktom z komunity ich potom ľahko získavajú.',
+        'Ľudia z prostredia matematických súťaží sú tí najžiadanejší na rôzne pozície vyžadujúce riešenie ťažkých problémov, napr. v oblasti AI, algoritmického obchodovia atď. Vďaka nadobudnutým schopnostiam a kontaktom z komunity ich potom ľahko získavajú.',
     },
   ]
 
