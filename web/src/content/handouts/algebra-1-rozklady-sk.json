@@ -1074,7 +1074,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Nájdite tri rôzne dvojice "
+                      "text": "Nájdite tri rôzne dvojice prirodzených čísel "
                     },
                     {
                       "type": "math",
@@ -1083,7 +1083,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " také, že "
+                      "text": " také, že číslo "
                     },
                     {
                       "type": "math",
@@ -1092,7 +1092,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " je číslo deliteľné\u00A07 a\u00A0"
+                      "text": " je deliteľné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
                     },
                     {
                       "type": "math",
@@ -4215,7 +4224,7 @@
                           "content": [
                             {
                               "type": "text",
-                              "text": "atď, fantázií autorov úloh sa medze nekladajú..."
+                              "text": "atď, fantázii autorov úloh sa medze nekladajú..."
                             }
                           ],
                           "highligted": false
