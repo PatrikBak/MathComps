@@ -1,4 +1,5 @@
 import { AppLink } from '@/components/shared/components/AppLink'
+
 import AboutPanelSection from './layout/AboutPanelSection'
 
 export const StorySection = () => (
