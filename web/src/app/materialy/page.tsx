@@ -4,7 +4,6 @@ import { HandoutSectionList } from '@/components/features/handouts/HandoutSectio
 import { HandoutsHero } from '@/components/features/handouts/HandoutsHero'
 import type { HandoutSection } from '@/components/features/handouts/types/handout-types'
 import Layout from '@/components/layout/Layout'
-import { PAGE_LAYOUT } from '@/constants/common-section-styles'
 import { ROUTES } from '@/constants/routes'
 import handoutData from '@/content/handouts/handouts.json'
 import { generatePageMetadata } from '@/lib/metadata'
@@ -23,13 +22,8 @@ export default function HandoutsPage() {
 
   return (
     <Layout>
-      <div className={PAGE_LAYOUT.headerSpacing} />
-      <div
-        className={`${PAGE_LAYOUT.maxWidth} ${PAGE_LAYOUT.bottomMargin} ${PAGE_LAYOUT.padding} mx-auto`}
-      >
-        <HandoutsHero />
-        <HandoutSectionList sections={sections} />
-      </div>
+      <HandoutsHero />
+      <HandoutSectionList sections={sections} />
     </Layout>
   )
 }
