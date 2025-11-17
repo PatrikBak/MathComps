@@ -15,7 +15,6 @@ export default function GradientText({ children, className }: GradientTextProps)
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    animation: 'gradientShift 8s ease-in-out infinite',
   }
 
   return (
