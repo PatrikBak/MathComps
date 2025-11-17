@@ -17,6 +17,7 @@
 @layer base {
   body {
     background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 50%);
+    background-attachment: fixed;
   }
 
   @supports (scrollbar-width: thin) {
