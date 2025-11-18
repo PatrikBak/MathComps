@@ -48,7 +48,7 @@ export function ArticleSection({
         className={cn(
           'max-w-none',
           // Add min-height to last section to ensure TOC links are clickable
-          isLastSection && 'lg:min-h-[52vh]',
+          isLastSection && 'lg:min-h-[50vh]',
           className
         )}
       >

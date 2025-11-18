@@ -27,9 +27,22 @@ npm install
 
 ### 2. Environment Configuration (Optional)
 
-The application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form functionality.
+Most of the application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form or authentication functionality.
 
-**For contact form emails, create a `.env.local` file:**
+#### Authentication (Clerk)
+
+To enable user authentication, configure Clerk in your `.env.local` file. The necessary credentials can be found in the Clerk dashboard.
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+```
+
+**Development Mode:** Leave Clerk variables empty to disable authentication entirely. The app will work normally without login functionality.
+
+#### Contact Form Emails (Resend)
+
+**For contact form emails, configure in `.env.local`:**
 
 ```bash
 # Email Configuration (for contact form)
@@ -45,7 +58,7 @@ CONTACT_EMAIL=contact@yourdomain.com
 SENDER_EMAIL=noreply@yourdomain.com
 ```
 
-**Development Mode:** If you leave the email variables empty, the contact form will work in development mode without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
+**Development Mode:** Leave email variables empty for development - the contact form will work without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
 
 **Other available variables (have good defaults):**
 

@@ -9,7 +9,7 @@ import type {
   HandoutImage,
   RawContentBlock,
 } from '@/components/features/handouts/types/handout-types'
-import Layout from '@/components/layout/Layout'
+import type { SectionMetadata } from '@/components/features/handouts/utils/handout-utils'
 import {
   renderBlocks,
   renderInlineContent,
@@ -18,14 +18,19 @@ import {
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { cn } from '@/components/shared/utils/css-utils'
-import { SectionNumberingGenerator } from '@/components/shared/utils/section-numbering-utils'
-import { slugify } from '@/components/shared/utils/string-utils'
 
 import { CollapsibleCard } from './Cards'
 
+/**
+ * Props for the HandoutDetail component.
+ */
 type HandoutDetailProps = {
+  /** The handout data */
   handout: HandoutData
+  /** The authors of the handout */
   authors: string[]
+  /** Metadata for each section in the handout */
+  sectionMetadata: SectionMetadata[]
 }
 
 /**
@@ -58,39 +63,6 @@ function renderTitle(
 function renderDifficultyStars(difficulty: number): React.ReactNode {
   if (difficulty === 0) return null
   return <sup className="text-purple-400">*</sup>
-}
-
-/**
- * Compute section metadata (ID, numbering, level) for both TOC and rendering.
- */
-function computeSectionMetadata(documentContent: Document): Array<{
-  id: string
-  label: string
-  title: string
-  level: number
-  sectionIndex: number
-}> {
-  // Use the shared numbering generator
-  const numbering = new SectionNumberingGenerator()
-
-  return documentContent.sections.map((section, index) => {
-    // Ensure section level is at least 1 for valid header hierarchy
-    const headerLevel = Math.max(1, section.level)
-
-    // Generate section number using the shared utility (convert to 0-indexed)
-    const sectionNumber = numbering.getNextNumber(headerLevel - 1)
-
-    // Generate unique ID from section title for anchor links
-    const sectionId = slugify(section.title)
-
-    return {
-      id: sectionId,
-      label: sectionNumber,
-      title: section.title,
-      level: headerLevel,
-      sectionIndex: index,
-    }
-  })
 }
 
 function renderDocumentSections(
@@ -474,7 +446,7 @@ function renderDocumentSections(
  * ensures a fast initial page load from the server, with mathematical content being
  * rendered asynchronously on the client-side.
  */
-export default function HandoutDetail({ handout, authors }: HandoutDetailProps) {
+export default function HandoutDetail({ handout, authors, sectionMetadata }: HandoutDetailProps) {
   const { document: documentContent, images } = handout
   // Create images lookup map
   const imagesById = React.useMemo(() => {
@@ -483,19 +455,8 @@ export default function HandoutDetail({ handout, authors }: HandoutDetailProps) 
     return map
   }, [images])
 
-  // Compute section metadata once for both TOC and rendering
-  const sectionMetadata = computeSectionMetadata(documentContent)
-
-  // Extract TOC items (subset of metadata)
-  const tableOfContentsItems = sectionMetadata.map(({ id, label, title, level }) => ({
-    id,
-    label,
-    title,
-    level,
-  }))
-
   return (
-    <Layout tocItems={tableOfContentsItems}>
+    <>
       {/* Header */}
       <header className="lg:mb-12">
         <div className="mb-6">
@@ -533,6 +494,6 @@ export default function HandoutDetail({ handout, authors }: HandoutDetailProps) 
 
       {/* Math Sections */}
       {renderDocumentSections(documentContent, sectionMetadata, imagesById)}
-    </Layout>
+    </>
   )
 }
