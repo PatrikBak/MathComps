@@ -20,6 +20,11 @@
     background-attachment: fixed;
   }
 
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
   @supports (scrollbar-width: thin) {
     * {
       scrollbar-width: thin;
