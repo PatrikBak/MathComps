@@ -20,9 +20,6 @@ import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { cn } from '@/components/shared/utils/css-utils'
 import { SectionNumberingGenerator } from '@/components/shared/utils/section-numbering-utils'
 import { slugify } from '@/components/shared/utils/string-utils'
-import { MobileTableOfContents } from '@/components/table-of-contents/MobileTableOfContents'
-import { TableOfContents } from '@/components/table-of-contents/TableOfContents'
-import { PAGE_LAYOUT } from '@/constants/common-section-styles'
 
 import { CollapsibleCard } from './Cards'
 
@@ -498,61 +495,44 @@ export default function HandoutDetail({ handout, authors }: HandoutDetailProps) 
   }))
 
   return (
-    <Layout>
-      <div className="h-20" />
-      <div className={`${PAGE_LAYOUT.padding} pt-8`}>
-        <div
-          className={`${PAGE_LAYOUT.maxWidthWide} mx-auto lg:grid lg:grid-cols-[9fr_280px] lg:gap-8`}
-        >
-          <div>
-            <header className="mb-16 pt-4">
-              <div className="mb-6">
-                <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
-                  <MathRendererClient
-                    content={documentContent.subtitle || documentContent.title || ''}
-                  />
-                </h1>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                {documentContent.subtitle && (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/15 to-purple-500/15 border border-blue-400/20">
-                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                    <span className="text-blue-200 font-medium text-sm">
-                      <MathRendererClient content={documentContent.title || ''} />
-                    </span>
-                  </div>
-                )}
-
-                {authors.length > 0 && (
-                  <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 leading-5">
-                    <div className="flex items-center gap-2">
-                      <Users className="size-4 text-gray-400" aria-hidden />
-                      <span className="text-sm uppercase font-semibold text-gray-400">
-                        {' '}
-                        {authors.length > 1 ? 'Autori' : 'Autor'}{' '}
-                      </span>
-                    </div>
-                    <span className="text-gray-200 font-semi-bold text-sm">
-                      {' '}
-                      {authors.join(', ')}{' '}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </header>
-
-            {renderDocumentSections(documentContent, sectionMetadata, imagesById)}
-          </div>
-
-          <aside className="mt-8">
-            <TableOfContents items={tableOfContentsItems} key={documentContent.title} />
-          </aside>
+    <Layout tocItems={tableOfContentsItems}>
+      {/* Header */}
+      <header className="lg:mb-12">
+        <div className="mb-6">
+          <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
+            <MathRendererClient content={documentContent.subtitle || documentContent.title || ''} />
+          </h1>
         </div>
-      </div>
 
-      {/* Mobile fixed navigation bar */}
-      <MobileTableOfContents items={tableOfContentsItems} key={documentContent.title} />
+        {/* Title */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {documentContent.subtitle && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/15 to-purple-500/15 border border-blue-400/20">
+              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+              <span className="text-blue-200 font-medium text-sm">
+                <MathRendererClient content={documentContent.title || ''} />
+              </span>
+            </div>
+          )}
+
+          {/* Authors */}
+          {authors.length > 0 && (
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 leading-5">
+              <div className="flex items-center gap-2">
+                <Users className="size-4 text-gray-400" aria-hidden />
+                <span className="text-sm uppercase font-semibold text-gray-400">
+                  {' '}
+                  {authors.length > 1 ? 'Autori' : 'Autor'}{' '}
+                </span>
+              </div>
+              <span className="text-gray-200 font-semi-bold text-sm"> {authors.join(', ')} </span>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Math Sections */}
+      {renderDocumentSections(documentContent, sectionMetadata, imagesById)}
     </Layout>
   )
 }

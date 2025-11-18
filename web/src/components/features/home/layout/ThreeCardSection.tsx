@@ -42,38 +42,36 @@ export default function ThreeCardSection({
 
   return (
     <AnimatedSection className={HOME_ABOUT_STYLES.sectionWrapper} anchorId={id}>
-      <section id={id}>
-        <div className={HOME_ABOUT_STYLES.containerWide}>
-          <div className={HOME_ABOUT_STYLES.headerContainer}>{headerContent}</div>
+      <div className={HOME_ABOUT_STYLES.containerWide}>
+        <div className={HOME_ABOUT_STYLES.headerContainer}>{headerContent}</div>
 
-          <div className={HOME_ABOUT_STYLES.threeCardGrid}>
-            {cards.map((item, index) => {
-              // Select the color scheme based on the card's index.
-              const colorScheme = colorSchemes[index % colorSchemes.length]
-              const Icon = item.iconComponent
+        <div className={HOME_ABOUT_STYLES.threeCardGrid}>
+          {cards.map((item, index) => {
+            // Select the color scheme based on the card's index.
+            const colorScheme = colorSchemes[index % colorSchemes.length]
+            const Icon = item.iconComponent
 
-              return (
-                <GlassCard
-                  key={index}
-                  iconProps={{
-                    icon: (
-                      <Icon
-                        size={20}
-                        className={cn(colorScheme.iconColor, 'sm:w-7 sm:h-7 lg:w-8 lg:h-8')}
-                      />
-                    ),
-                    iconGradient: colorScheme.iconGradient,
-                  }}
-                  title={item.title}
-                  description={item.description}
-                />
-              )
-            })}
-          </div>
-
-          {footer && <div className={HOME_ABOUT_STYLES.sectionFooter}>{footer}</div>}
+            return (
+              <GlassCard
+                key={index}
+                iconProps={{
+                  icon: (
+                    <Icon
+                      size={20}
+                      className={cn(colorScheme.iconColor, 'sm:w-7 sm:h-7 lg:w-8 lg:h-8')}
+                    />
+                  ),
+                  iconGradient: colorScheme.iconGradient,
+                }}
+                title={item.title}
+                description={item.description}
+              />
+            )
+          })}
         </div>
-      </section>
+
+        {footer && <div className={HOME_ABOUT_STYLES.sectionFooter}>{footer}</div>}
+      </div>
     </AnimatedSection>
   )
 }

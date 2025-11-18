@@ -34,7 +34,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 z-50">
+      <header className="sticky top-0 left-0 right-0 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 z-50">
         <nav className="max-w-7xl mx-auto flex justify-between items-center px-3 py-2 sm:px-4 sm:py-3 lg:px-6 lg:py-4 min-w-0">
           <MathCompsLogo />
 

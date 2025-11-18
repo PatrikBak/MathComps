@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import GuideDetail from '@/components/features/guide/GuideDetail'
-import Layout from '@/components/layout/Layout'
 import { ROUTES } from '@/constants/routes'
 import { generatePageMetadata } from '@/lib/metadata'
 
@@ -15,9 +14,5 @@ export const metadata: Metadata = generatePageMetadata({
 })
 
 export default function GuidePage() {
-  return (
-    <Layout>
-      <GuideDetail />
-    </Layout>
-  )
+  return <GuideDetail />
 }

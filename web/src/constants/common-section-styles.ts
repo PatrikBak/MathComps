@@ -29,34 +29,3 @@ export const HOME_ABOUT_STYLES = {
   // Footer text for sections
   sectionFooter: 'text-center mt-10 sm:mt-14 md:mt-24 text-sm text-slate-500 max-w-xl mx-auto',
 } as const
-
-/**
- * Common layout values used across all pages for consistency.
- * Change these values to update spacing/padding across the entire app.
- */
-export const PAGE_LAYOUT = {
-  // Standard responsive padding used across all pages
-  padding: 'px-4 sm:px-6 md:px-8',
-
-  // Standard header spacing (space below header)
-  headerSpacing: 'h-12 sm:h-16 md:h-20',
-
-  // Standard bottom margin for page content
-  bottomMargin: 'mb-12 sm:mb-16 md:mb-12',
-
-  // Standard max-width for most pages
-  maxWidth: 'max-w-6xl',
-
-  // Wide max-width for pages with sidebars
-  maxWidthWide: 'max-w-7xl',
-
-  // Hero section specific values
-  hero: {
-    // Hero top margin (space from header)
-    topMargin: 'mt-20 sm:mt-24 lg:mt-32',
-    // Hero content max-width
-    maxWidth: 'max-w-4xl',
-    // Hero content padding
-    padding: 'px-4',
-  },
-} as const
