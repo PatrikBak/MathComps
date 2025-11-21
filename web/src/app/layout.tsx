@@ -35,7 +35,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={SITE_LANGUAGE}>
+    <html lang={SITE_LANGUAGE} suppressHydrationWarning>
       <body className={cn(inter.className, 'antialiased')}>
         <QueryProvider>
           <KatexSetup />
