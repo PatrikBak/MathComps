@@ -95,6 +95,8 @@ export default function AuthForm() {
   const [enteredEmail, setEnteredEmail] = useState<string>('')
   // State to store the URL to redirect to after successful authentication
   const [returnUrl, setReturnUrl] = useState<string | null>(null)
+  // State to track if we are currently redirecting to an OAuth provider
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   // Next.js router for navigation
   const router = useRouter()
@@ -160,7 +162,8 @@ export default function AuthForm() {
   }, [searchParams])
 
   // Don't render form if user is already logged in (they'll be redirected)
-  if (user) {
+  // or if we are currently redirecting to an OAuth provider
+  if (user || isRedirecting) {
     return (
       <div className="flex justify-center p-8">
         <LoadingSpinner />
@@ -451,14 +454,21 @@ export default function AuthForm() {
     // I suppose this should never happen
     if (!signIn) return
 
-    // Try to authenticate with the OAuth provider
-    await executeWithLoading(async () => {
+    // Show the loading spinner immediately
+    setIsRedirecting(true)
+
+    try {
+      // Try to authenticate with the OAuth provider
       await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: ROUTES.SSO_CALLBACK,
         redirectUrlComplete: returnUrl || ROUTES.PROFILE,
       })
-    })
+    } catch (error) {
+      // If it fails, stop showing the spinner and show the error
+      setIsRedirecting(false)
+      setGlobalError(getErrorMessage(error))
+    }
   }
 
   /**
