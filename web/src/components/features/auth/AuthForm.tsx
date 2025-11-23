@@ -521,7 +521,7 @@ export default function AuthForm() {
       const values = methods.getValues()
 
       // Clear password fields when switching screens
-      const mutableValues = values as Record<string, any>
+      const mutableValues = values as Record<string, unknown>
       if (mutableValues.password) {
         mutableValues.password = ''
       }

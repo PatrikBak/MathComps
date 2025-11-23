@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z, type ZodRawShape } from 'zod'
 
 import type { AuthScreenWithValidation } from './AuthForm'
 
@@ -52,7 +52,7 @@ const codeVerificationSchema = z.object({
 /**
  * Helper to add password matching refinement to a schema.
  */
-const addPasswordMatchRefinement = <T extends z.ZodObject<any>>(schema: T) =>
+const addPasswordMatchRefinement = <T extends z.ZodObject<ZodRawShape>>(schema: T) =>
   schema.refine((data) => data.password === data.confirmPassword, {
     message: 'Heslá sa nezhodujú',
     path: ['confirmPassword'],
