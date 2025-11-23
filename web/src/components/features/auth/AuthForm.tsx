@@ -119,9 +119,9 @@ export default function AuthForm() {
   useEffect(() => {
     // Do the redirect only if the user is loaded and logged in
     if (isUserLoaded && user) {
-      router.push(ROUTES.PROFILE)
+      router.push(returnUrl || ROUTES.PROFILE)
     }
-  }, [isUserLoaded, user, router])
+  }, [isUserLoaded, user, router, returnUrl])
 
   // Capture return URL on mount - from query param, referrer, or default to home
   useEffect(() => {
@@ -153,8 +153,8 @@ export default function AuthForm() {
           }
         }
 
-        // Default to home
-        return ROUTES.HOME
+        // Default to null (let the consumer decide, usually defaults to profile)
+        return null
       })()
     )
   }, [searchParams])
