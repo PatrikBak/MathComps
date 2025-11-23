@@ -76,14 +76,12 @@ export default function Footer({ hasToc }: FooterProps) {
 
       {/* Bottom Section */}
       <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-800/50 flex flex-col items-center text-center gap-2">
-        <p className="text-slate-400 text-sm sm:text-base">
-          <span className="whitespace-nowrap">MathComps</span>
+        <p className="text-slate-400 text-sm sm:text-base whitespace-nowrap">
+          <span>© 2025 MathComps</span>
           {dot}
-          <span className="whitespace-nowrap">© 2025</span>
+          <AppLink href={`${ROUTES.ABOUT}#aboutAuthor`}>Patrik Bak</AppLink>
           {dot}
-          <AppLink href={`${ROUTES.ABOUT}#aboutAuthor`} className="whitespace-nowrap">
-            Patrik Bak
-          </AppLink>
+          <AppLink href={ROUTES.PRIVACY}>Súkromie a podmienky</AppLink>
         </p>
       </div>
     </footer>

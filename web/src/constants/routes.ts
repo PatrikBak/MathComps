@@ -11,4 +11,5 @@ export const ROUTES = {
   LOGIN: '/prihlasit-sa',
   PROFILE: '/profil',
   SSO_CALLBACK: '/sso-callback',
+  PRIVACY: '/ochrana-sukromia',
 } as const

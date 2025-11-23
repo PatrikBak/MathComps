@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
+import { AppLink } from '@/components/shared/components/AppLink'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { ROUTES } from '@/constants/routes'
 
@@ -616,6 +617,16 @@ export default function AuthForm() {
           </form>
         </FormProvider>
       )}
+      {/* Privacy Policy Link */}
+      <div className="mt-6 text-center text-xs text-slate-400">
+        Pokračovaním súhlasíte <br />s{' '}
+        <AppLink
+          href={ROUTES.PRIVACY}
+          className="text-slate-300 hover:text-white underline transition-colors"
+        >
+          podmienkami a ochranou súkromia
+        </AppLink>
+      </div>
     </div>
   )
 }
