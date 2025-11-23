@@ -456,7 +456,7 @@ export default function AuthForm() {
       await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: ROUTES.SSO_CALLBACK,
-        redirectUrlComplete: returnUrl || ROUTES.HOME,
+        redirectUrlComplete: returnUrl || ROUTES.PROFILE,
       })
     })
   }
