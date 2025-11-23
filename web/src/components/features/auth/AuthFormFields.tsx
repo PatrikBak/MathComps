@@ -32,12 +32,12 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
       {/* Name Field */}
       {screen === 'signup-with-email' && (
         <InputField
-          id="name"
-          label="Meno"
+          id="username"
+          label="Používateľské meno"
           icon={User}
-          placeholder="Zadajte vaše meno"
-          error={'name' in errors ? errors.name : undefined}
-          registration={register('name')}
+          placeholder="Zadajte vaše meno alebo prezývku"
+          error={'username' in errors ? errors.username : undefined}
+          registration={register('username')}
         />
       )}
 

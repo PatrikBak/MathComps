@@ -11,6 +11,7 @@ import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { ROUTES } from '@/constants/routes'
 
 import { checkEmailExists } from './actions'
+import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import AuthFormActions from './AuthFormActions'
 import AuthFormFields from './AuthFormFields'
 import AuthFormHeader from './AuthFormHeader'
@@ -192,7 +193,7 @@ export default function AuthForm() {
     } catch (error) {
       // Either set the generic provided message or figure
       // out the error message from Clerk
-      setGlobalError(getErrorMessage(error))
+      setGlobalError(getClerkErrorMessage(error))
     } finally {
       // No loading state after the operation
       setLoading(false)
@@ -218,7 +219,7 @@ export default function AuthForm() {
 
       // If the email has changed, we want to clear the name and code fields
       if (data.email !== enteredEmail) {
-        methods.setValue('name', '')
+        methods.setValue('username', '')
         methods.setValue('code', '')
       }
     })
@@ -267,7 +268,7 @@ export default function AuthForm() {
       const result = await signUp.create({
         emailAddress: data.email,
         password: data.password,
-        firstName: data.name,
+        username: data.username,
       })
 
       // If sign up was successful
@@ -468,45 +469,8 @@ export default function AuthForm() {
     } catch (error) {
       // If it fails, stop showing the spinner and show the error
       setIsRedirecting(false)
-      setGlobalError(getErrorMessage(error))
+      setGlobalError(getClerkErrorMessage(error))
     }
-  }
-
-  /**
-   * Converts Clerk error objects to user-friendly Slovak messages.
-   *
-   * @param error - The error object from Clerk
-   *
-   * @returns A localized error message string
-   */
-  const getErrorMessage = (error: unknown) => {
-    // A map of Clerk error codes to user-friendly messages
-    const errorMessages: Record<string, string> = {
-      form_password_incorrect: 'Nesprávny email alebo heslo',
-      form_identifier_not_found: 'Nesprávny email alebo heslo',
-      form_password_pwned: 'Toto heslo bolo nájdené v databáze úniku dát. Použite iné heslo.',
-      form_password_length_too_short: 'Heslo musí mať aspoň 8 znakov',
-      form_identifier_exists: 'Účet s týmto emailom už existuje',
-      too_many_attempts: 'Príliš mnoho pokusov. Skúste to prosím neskôr.',
-      form_code_incorrect: 'Nesprávny kód.',
-      form_verification_failed: 'Overenie kódu zlyhalo. Skúste to prosím znova.',
-      session_exists: 'Už ste prihlásený. Obnovte stránku.',
-      session_already_exists: 'Už ste prihlásený. Obnovte stránku.',
-    }
-
-    // Extract error code and message from Clerk error
-    const { code, message } = getClerkErrorDetails(error)
-
-    // Return the appropriate error message
-    if (code && errorMessages[code]) {
-      return errorMessages[code]
-    }
-
-    // Log the error for debugging purposes
-    console.error('Unexpected Clerk error:', message)
-
-    // By default a generic error message is returned
-    return 'Vyskytla sa chyba. Skúste to prosím znova.'
   }
 
   /**

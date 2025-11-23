@@ -18,9 +18,12 @@ const passwordSchema = z.string().min(1, 'Heslo je povinné').min(8, 'Heslo mus�
 const confirmPasswordSchema = z.string().min(1, 'Potvrdenie hesla je povinné')
 
 /**
- * Base schema for user name validation.
+ * Base schema for username validation.
  */
-const nameSchema = z.string().min(1, 'Meno je povinné').min(2, 'Meno musí mať aspoň 2 znaky')
+const usernameSchema = z
+  .string()
+  .min(1, 'Používateľské meno je povinné')
+  .min(2, 'Používateľské meno musí mať aspoň 2 znaky')
 
 /**
  * Base schema for verification code validation.
@@ -63,7 +66,7 @@ const addPasswordMatchRefinement = <T extends z.ZodObject<ZodRawShape>>(schema: 
  */
 const signupSchema = addPasswordMatchRefinement(
   z.object({
-    name: nameSchema,
+    username: usernameSchema,
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: confirmPasswordSchema,
