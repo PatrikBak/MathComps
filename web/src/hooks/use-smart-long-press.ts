@@ -6,7 +6,7 @@ import { useLongPress } from 'use-long-press'
  *
  * @param callback - Function to call when long press completes
  *
- * @returns The event handle to spread onto your element
+ * @returns The event handlers to spread onto your element
  */
 export function useSmartLongPress(callback: () => void) {
   return useLongPress(callback, {
@@ -19,5 +19,5 @@ export function useSmartLongPress(callback: () => void) {
       }
       return true
     },
-  })
+  })()
 }
