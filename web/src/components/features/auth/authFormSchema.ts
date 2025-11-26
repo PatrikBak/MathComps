@@ -23,7 +23,21 @@ const confirmPasswordSchema = z.string().min(1, 'Potvrdenie hesla je povinné')
 const usernameSchema = z
   .string()
   .min(1, 'Používateľské meno je povinné')
-  .min(2, 'Používateľské meno musí mať aspoň 2 znaky')
+  .min(4, 'Používateľské meno musí mať aspoň 4 znaky')
+  .max(15, 'Používateľské meno môže mať maximálne 15 znakov')
+  .regex(
+    /^[a-zA-Z0-9_-]+$/,
+    'Povolené sú len písmená, čísla, podčiarkovník a pomlčka (bez medzier).'
+  )
+
+/**
+ * Schema for display name validation.
+ */
+export const displayNameSchema = z
+  .string()
+  .min(1, 'Meno je povinné')
+  .min(3, 'Meno musí mať aspoň 3 znaky')
+  .max(20, 'Meno môže mať maximálne 20 znakov')
 
 /**
  * Base schema for verification code validation.

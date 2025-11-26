@@ -41,7 +41,7 @@ export const UserAvatarImage = ({
       alt={altText}
       width={width}
       height={height}
-      className={cn('rounded-full border border-white/20 object-cover', className)}
+      className={cn('rounded-full', className)}
       onError={(event) => {
         // Ensure future renders use the fallback when the original image fails
         event.currentTarget.src = defaultAvatar

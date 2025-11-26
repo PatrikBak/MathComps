@@ -8,10 +8,10 @@ import { FormProvider, useForm } from 'react-hook-form'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { ROUTES } from '@/constants/routes'
 
 import { checkEmailExists } from './actions'
-import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import AuthFormActions from './AuthFormActions'
 import AuthFormFields from './AuthFormFields'
 import AuthFormHeader from './AuthFormHeader'
@@ -46,39 +46,6 @@ export type AuthScreen =
  * Authentication screens that require validation.
  */
 export type AuthScreenWithValidation = Exclude<AuthScreen, 'hub'>
-
-/**
- * Structure of error objects returned by Clerk API.
- */
-type ClerkErrorPayload = {
-  /** Error code identifying the specific type of error */
-  code?: string
-  /** Human-readable error message */
-  message?: string
-  /** Array of detailed error objects, each with its own code and message */
-  errors?: Array<{ code?: string; message?: string }>
-}
-
-/**
- * Extracts the error code and message from a Clerk error object.
- *
- * @param error - The error object to extract details from
- *
- * @returns An object containing the error code and message
- */
-const getClerkErrorDetails = (error: unknown) => {
-  // Expect a Clerk error payload
-  const clerkErrorPayload = error as ClerkErrorPayload
-
-  // Take just the first error
-  const firstError = clerkErrorPayload.errors?.[0]
-
-  // Return the error code and message or some defaults
-  return {
-    code: firstError?.code || clerkErrorPayload.code,
-    message: firstError?.message || clerkErrorPayload.message || '',
-  }
-}
 
 /**
  * Main authentication form component handling the new hub-based flow.

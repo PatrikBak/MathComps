@@ -1,15 +1,40 @@
 'use client'
 
 import { SignOutButton, useUser } from '@clerk/nextjs'
-import { LogOut, Mail } from 'lucide-react'
+import { CalendarDays, LogOut, Mail, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
+import { displayNameSchema } from '@/components/features/auth/authFormSchema'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
+import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { cn } from '@/components/shared/utils/css-utils'
-import { getUserDisplayName } from '@/components/shared/utils/user-utils'
 import { ROUTES } from '@/constants/routes'
+
+/**
+ * Props for the ProfileInfoField component
+ */
+type ProfileInfoFieldProps = {
+  /** The icon to display */
+  icon: React.ElementType
+  /** The label to display */
+  label: string
+}
+
+/**
+ * A component that displays a profile info field
+ */
+function ProfileInfoField({ icon: Icon, label }: ProfileInfoFieldProps) {
+  return (
+    <div className="text-slate-200 font-medium text-base md:text-right flex items-center justify-start md:justify-end gap-2 pt-4 md:pt-0">
+      <Icon className="w-5 h-5" />
+      <span className="whitespace-nowrap">{label}</span>
+    </div>
+  )
+}
 
 /**
  * Content component for the profile page.
@@ -21,6 +46,9 @@ export default function ProfilePageContent() {
 
   // Load user data from Clerk
   const { user, isLoaded } = useUser()
+
+  // Ref for the file input
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // If no user is logged in, redirect to the login page
   useEffect(() => {
@@ -40,59 +68,165 @@ export default function ProfilePageContent() {
     return null
   }
 
+  /**
+   * Updates the user's display name
+   *
+   * @param newName The new display name
+   */
+  const onUpdateDisplayName = async (newName?: string) => {
+    // We need to have something to update
+    if (!user || !newName) return
+
+    try {
+      // Issue the update
+      await user.update({
+        firstName: newName,
+      })
+    } catch (error) {
+      // Show errors in a toast
+      toast.error(getClerkErrorMessage(error))
+    }
+  }
+
+  /**
+   * Handles the file selection for avatar update
+   */
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Get the file from the input
+    const file = event.target.files?.[0]
+
+    // Ensure we have both the file and the user
+    if (!file || !user) return
+
+    try {
+      // Use Clerk's API to update the user's profile image
+      await user.setProfileImage({ file })
+
+      // This worked out fine
+      toast.success('Profilová fotka nahraná, aktualizácia potrvá pár sekúnd')
+    } catch (error) {
+      toast.error(getClerkErrorMessage(error))
+    }
+  }
+
+  /** The class for the font of the text inside the data fields */
+  const commonFontStyle = 'truncate text-base font-medium'
+  /** The class for the container of the data fields */
+  const containerClassName = 'py-2 px-3 bg-slate-800/30 rounded-lg border border-slate-800'
+  /** The class for the read-only data fields */
+  const readOnlyContainerClassName = cn(
+    containerClassName,
+    'truncate text-slate-500 cursor-not-allowed'
+  )
+
   return (
-    <div className="flex items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
-      <div className="bg-slate-900/95 rounded-2xl border border-slate-700/60 overflow-hidden">
-        {/* Avatar */}
-        <div className="h-32 bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border-b border-slate-700/50 relative">
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-32 h-32 rounded-full ring-4 ring-indigo-500/20">
-            <UserAvatarImage
-              imageUrl={user.imageUrl}
-              altText={getUserDisplayName(user)}
-              width={128}
-              height={128}
-              className="w-full h-full"
+    <div className="flex items-center justify-center px-4 py-8 sm:py-12 md:py-16 lg:py-20 sm:px-6 lg:px-8">
+      <div className="w-full max-w-2xl bg-slate-900/95 rounded-2xl border border-slate-700/60 overflow-hidden shadow-xl backdrop-blur-sm">
+        {/* Header with Avatar */}
+        <div className="relative h-24 sm:h-28 md:h-32 bg-gradient-to-r from-indigo-900/40 via-purple-900/40 to-pink-900/40">
+          {/* Texture Overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.15]"
+            style={{
+              backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)',
+              backgroundSize: '16px 16px',
+            }}
+          ></div>
+
+          {/* Avatar container */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-12 sm:-bottom-14 md:-bottom-16 z-10 flex flex-col items-center">
+            {/* Avatar file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
+              accept="image/*"
             />
+
+            {/* Clickable avatar container */}
+            <div
+              className="relative group cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {/* Avatar gradient */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full opacity-75 group-hover:opacity-100 transition duration-200 blur"></div>
+
+              {/* Avatar image */}
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-slate-900 overflow-hidden bg-slate-800">
+                <UserAvatarImage
+                  imageUrl={user.imageUrl}
+                  altText={user.firstName || user.username || 'User'}
+                  width={128}
+                  height={128}
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* User info */}
-        <div className="pt-20 pb-8 px-6 sm:px-8">
-          <div className="text-center mb-8">
-            {/* Name */}
-            <div className="text-2xl font-semibold text-white">{getUserDisplayName(user)}</div>
+        {/* User info Grid */}
+        <div className="px-4 sm:px-6 md:px-12 pb-8 sm:pb-10 md:pb-12 pt-16 sm:pt-20 md:pt-30">
+          <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(250px,1fr)] justify-items-start items-center gap-x-8 gap-y-4 md:gap-y-9 [&>div:nth-child(2n)]:w-full">
+            {/* Row 1, Col 1 - Display name label */}
+            <ProfileInfoField icon={User} label="Meno / Prezývka" />
 
-            {/* Mail */}
-            {user.primaryEmailAddress?.emailAddress && (
-              <div className="flex items-center justify-center gap-2 text-slate-400 mt-3">
-                <Mail className="w-4 h-4" />
-                <span className="text-sm">{user.primaryEmailAddress.emailAddress}</span>
-              </div>
-            )}
-          </div>
+            {/* Row 1, Col 2 - Display name input */}
+            <EditableTextField
+              value={user.firstName || ''}
+              onSave={onUpdateDisplayName}
+              schema={displayNameSchema}
+              label="Zadajte vaše meno"
+              textClassName={cn(commonFontStyle, 'text-slate-200')}
+              innerContainerClassName={containerClassName}
+              iconClassName="w-3.5 h-3.5"
+            />
 
-          {/* Sign out button */}
-          <div className="flex justify-center">
-            <SignOutButton>
-              <button
-                className={cn(
-                  'inline-flex items-center justify-center gap-2',
-                  'rounded-xl font-semibold transition-colors duration-200',
-                  'px-6 py-3 text-base text-white',
-                  'bg-red-700/60 hover:bg-red-700/70',
-                  'border border-red-600/40 hover:border-red-600/50',
-                  'backdrop-blur-sm',
-                  'shadow-md hover:shadow-lg',
-                  'active:scale-[0.98]',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                  'focus-visible:ring-red-600/40 focus-visible:ring-offset-slate-900'
-                )}
-              >
-                <LogOut className={cn('w-5 h-5')} />
-                <span>Odhlásiť sa</span>
-              </button>
-            </SignOutButton>
+            {/* Row 2, Col 1 - Email label */}
+            <ProfileInfoField icon={Mail} label="Email" />
+
+            {/* Row 2, Col 2 - Email read-only */}
+            <div className={readOnlyContainerClassName}>
+              <span className={commonFontStyle}>{user.primaryEmailAddress?.emailAddress}</span>
+            </div>
+
+            {/* Row 3, Col 1 - Member since label */}
+            <ProfileInfoField icon={CalendarDays} label="Členom od" />
+
+            {/* Row 3, Col 2 - Member since read-only */}
+            <div className={readOnlyContainerClassName}>
+              <span className={commonFontStyle}>
+                {user &&
+                  user.createdAt &&
+                  new Date(user.createdAt).toLocaleDateString('sk-SK', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+              </span>
+            </div>
           </div>
+        </div>
+
+        {/* Sign out button */}
+        <div className="py-6 border-t border-slate-800 flex flex-col items-center gap-4">
+          <SignOutButton>
+            <button
+              className={cn(
+                'inline-flex items-center justify-center gap-2',
+                'rounded-lg font-medium transition-all duration-200',
+                'px-5 py-2.5 text-sm text-red-400',
+                'bg-red-950/20 hover:bg-red-900/30',
+                'border border-red-900/30 hover:border-red-800/50',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                'focus-visible:ring-red-900/40 focus-visible:ring-offset-slate-900'
+              )}
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Odhlásiť sa</span>
+            </button>
+          </SignOutButton>
         </div>
       </div>
     </div>

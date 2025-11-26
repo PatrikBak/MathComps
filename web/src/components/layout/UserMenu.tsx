@@ -8,7 +8,6 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import { getUserDisplayName } from '@/components/shared/utils/user-utils'
 import { ROUTES } from '@/constants/routes'
 
 import { UserAvatarImage } from './UserAvatarImage'
@@ -69,10 +68,10 @@ export default function UserMenu() {
     <DropdownMenu.Root modal={false}>
       {/* Trigger Button */}
       <DropdownMenu.Trigger asChild>
-        <UserMenuTrigger aria-label="User menu">
+        <UserMenuTrigger aria-label="Používateľské menu">
           <UserAvatarImage
             imageUrl={user.imageUrl}
-            altText={getUserDisplayName(user)}
+            altText={user.firstName || user.username || 'Používateľ'}
             width={32}
             height={32}
             className="w-8 h-8"

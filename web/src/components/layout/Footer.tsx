@@ -14,7 +14,6 @@ type FooterProps = {
 }
 
 export default function Footer({ hasToc }: FooterProps) {
-  let dot = <span className="mx-2 text-lgborder-1 leading-0">•</span>
   return (
     <footer
       className={cn(
@@ -76,12 +75,20 @@ export default function Footer({ hasToc }: FooterProps) {
 
       {/* Bottom Section */}
       <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-800/50 flex flex-col items-center text-center gap-2">
-        <p className="text-slate-400 text-sm sm:text-base whitespace-nowrap">
-          <span>© 2025 MathComps</span>
-          {dot}
-          <AppLink href={`${ROUTES.ABOUT}#aboutAuthor`}>Patrik Bak</AppLink>
-          {dot}
-          <AppLink href={ROUTES.PRIVACY}>Súkromie a podmienky</AppLink>
+        <p className="text-slate-400 text-sm sm:text-base flex flex-wrap justify-center items-center gap-x-2">
+          <span className="whitespace-nowrap">© 2025 MathComps</span>
+          <span className="whitespace-nowrap">
+            <span className="text-lg">•</span>
+            <span className="ml-2">
+              <AppLink href={`${ROUTES.ABOUT}#aboutAuthor`}>Patrik Bak</AppLink>
+            </span>
+          </span>
+          <span className="whitespace-nowrap">
+            <span className="text-lg">•</span>
+            <span className="ml-2">
+              <AppLink href={ROUTES.PRIVACY}>Súkromie a podmienky</AppLink>
+            </span>
+          </span>
         </p>
       </div>
     </footer>

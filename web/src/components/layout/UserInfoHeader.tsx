@@ -26,13 +26,13 @@ type UserInfoHeaderProps = {
 const sizeConfig = {
   sm: {
     avatar: { width: 44, height: 44, className: 'w-11 h-11' },
-    name: 'text-sm',
-    email: 'text-xs',
+    displayName: 'text-sm',
+    handle: 'text-xs',
   },
   md: {
     avatar: { width: 48, height: 48, className: 'w-12 h-12' },
-    name: 'text-base',
-    email: 'text-sm',
+    displayName: 'text-base',
+    handle: 'text-sm',
   },
 } as const
 
@@ -46,9 +46,6 @@ export const UserInfoHeader = ({
   avatarClassName,
   size = 'sm',
 }: UserInfoHeaderProps) => {
-  // Figure out the display name
-  const displayName = user.fullName || user.firstName || user.username || '???'
-
   // Get the size config
   const config = sizeConfig[size]
 
@@ -56,16 +53,20 @@ export const UserInfoHeader = ({
     <div className={cn('flex items-center gap-3', className)}>
       <UserAvatarImage
         imageUrl={user.imageUrl}
-        altText={displayName}
+        altText={user.firstName || user.username || 'Používateľ'}
         width={config.avatar.width}
         height={config.avatar.height}
         className={cn(config.avatar.className, avatarClassName)}
       />
       <div className="flex-1 min-w-0">
-        <p className={cn('font-semibold text-white truncate', config.name)}>{displayName}</p>
-        {user.primaryEmailAddress?.emailAddress && (
-          <p className={cn('text-white/50 truncate mt-0.5', config.email)}>
-            {user.primaryEmailAddress.emailAddress}
+        {user.firstName && (
+          <p className={cn('font-semibold text-white truncate', config)}>{user.firstName}</p>
+        )}
+        {user.username && (
+          <p
+            className={cn('text-white/60 truncate', user.firstName ? 'mt-0.5' : '', config.handle)}
+          >
+            #{user.username}
           </p>
         )}
       </div>
