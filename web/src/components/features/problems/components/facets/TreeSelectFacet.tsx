@@ -1,12 +1,9 @@
-import { useLongPress } from '@mantine/hooks'
 import { ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import {
-  isExclusiveSelection,
-  LONG_PRESS_THRESHOLD_MS,
-} from '@/components/shared/utils/event-utils'
+import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
+import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
 import type { FacetOption } from './facet-shared'
 import {
@@ -237,14 +234,9 @@ export default function TreeSelectFacet({
     showCounts: boolean
   }) {
     // Long-press handler for exclusive selection on mobile
-    const longPressHandlers = useLongPress(
-      () => {
-        onExclusiveSelect()
-      },
-      {
-        threshold: LONG_PRESS_THRESHOLD_MS,
-      }
-    )
+    const longPressHandlers = useSmartLongPress(() => {
+      onExclusiveSelect()
+    })
 
     return (
       <div

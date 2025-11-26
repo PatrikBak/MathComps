@@ -1,11 +1,4 @@
 /**
- * Long-press timing constant for exclusive selection on touch devices.
- * This threshold (in milliseconds) determines how long a user must press
- * before triggering exclusive selection behavior.
- */
-export const LONG_PRESS_THRESHOLD_MS = 400
-
-/**
  * Checks if a mouse event indicates an exclusive selection attempt.
  * Exclusive selection is triggered by Ctrl/Cmd+Click (desktop).
  * Long-press detection on mobile is handled separately using Mantine's useLongPress hook.
@@ -33,5 +26,6 @@ export function isExclusiveSelection(event: React.MouseEvent | React.TouchEvent)
     return nativeEvent.ctrlKey || nativeEvent.metaKey
   }
 
+  // Not a mouse event?
   return false
 }

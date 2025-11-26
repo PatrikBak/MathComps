@@ -1,6 +1,5 @@
 'use client'
 
-import { useLongPress } from '@mantine/hooks'
 import { ChevronDown, ExternalLink, Eye, EyeOff, Link, User } from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -8,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
-import { LONG_PRESS_THRESHOLD_MS } from '@/components/shared/utils/event-utils'
+import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
 import type { Problem } from '../types/problem-api-types'
@@ -52,34 +51,19 @@ const AuthorButton = React.memo(function AuthorButton({
   isSelected: boolean
   onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
 }) {
-  const authorStyling = {
-    selected: 'text-slate-200 font-medium',
-    unselected: 'text-gray-400 hover:text-gray-200',
-  }
-  const authorClassName = authorStyling[isSelected ? 'selected' : 'unselected']
-
-  // Long-press handler for exclusive selection on mobile
-  const longPressHandlers = useLongPress(
-    () => {
-      // Create a synthetic event that will be treated as exclusive selection
-      const syntheticEvent = {
-        ctrlKey: true,
-        metaKey: false,
-      } as React.MouseEvent
-      onAuthorClick(author, syntheticEvent)
-    },
-    {
-      threshold: LONG_PRESS_THRESHOLD_MS,
-    }
-  )
-
   return (
     <button
       onClick={(event) => onAuthorClick(author, event)}
-      {...longPressHandlers}
+      // Long-press handler for exclusive selection
+      {...useSmartLongPress(() => {
+        onAuthorClick(author, {
+          ctrlKey: true,
+          metaKey: false,
+        } as React.MouseEvent)
+      })}
       className={cn(
         'text-sm transition-colors duration-200 hover:underline select-none',
-        authorClassName
+        isSelected ? 'text-slate-200 font-medium' : 'text-gray-400 hover:text-gray-200'
       )}
       title={`Filtrovať podľa autora: ${author.displayName}`}
     >
