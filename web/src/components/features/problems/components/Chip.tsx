@@ -1,8 +1,8 @@
-import { useLongPress } from '@mantine/hooks'
 import * as React from 'react'
 
+import { useSmartLongPress } from '@/hooks/use-smart-long-press'
+
 import { cn } from '../../../shared/utils/css-utils'
-import { LONG_PRESS_THRESHOLD_MS } from '../../../shared/utils/event-utils'
 
 /**
  * Chip Component for individual filter items.
@@ -23,22 +23,14 @@ export default function Chip({
   className?: string
 }) {
   // Long-press handler for exclusive selection on mobile
-  const longPressHandlers = useLongPress(
-    () => {
-      if (clickable && onClick) {
-        // Create a synthetic event that will be treated as exclusive selection
-        // by checking for a custom property
-        const syntheticEvent = {
-          ctrlKey: true,
-          metaKey: false,
-        } as React.MouseEvent
-        onClick(syntheticEvent)
-      }
-    },
-    {
-      threshold: LONG_PRESS_THRESHOLD_MS,
+  const longPressHandlers = useSmartLongPress(() => {
+    if (clickable && onClick) {
+      onClick({
+        ctrlKey: true,
+        metaKey: false,
+      } as React.MouseEvent)
     }
-  )
+  })
 
   // Determine styling based on selected state and clickable state
   const getChipStyling = () => {
