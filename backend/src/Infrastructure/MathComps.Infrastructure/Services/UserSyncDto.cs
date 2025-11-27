@@ -11,7 +11,7 @@ namespace MathComps.Infrastructure.Services;
 /// <param name="LastName"><inheritdoc cref="User.LastName" path="/summary"/></param>
 public record UserSyncDto(
     string ExternalId,
-    string Email,
+    string? Email,
     string? FirstName,
     string? LastName
 );
