@@ -1,12 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "ignoreDependencies": [
-    "eslint-config-next",
-    "tw-animate-css",
-    "tailwindcss",
-    "eslint-config-prettier",
-    "@tailwindcss/forms"
-  ],
+  "ignoreDependencies": ["eslint-config-next", "eslint-config-prettier"],
   "eslint": {
     "config": ["eslint.config.{js,mjs,cjs}"]
   }
