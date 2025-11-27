@@ -55,6 +55,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Texts (statements and solutions) for problems in various languages.</summary>
     public DbSet<ProblemText> ProblemTexts => Set<ProblemText>();
 
+    /// <summary>Users synced from Clerk.</summary>
+    public DbSet<User> Users => Set<User>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -451,6 +454,16 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemSimilarity
+
+        #region User
+
+        modelBuilder.Entity<User>(e =>
+        {
+            e.HasIndex(u => u.ExternalId).IsUnique().HasDatabaseName("ux_user_external_id");
+            e.HasIndex(u => u.Email).IsUnique().HasDatabaseName("ux_user_email");
+        });
+
+        #endregion User
     }
 
     #endregion OnModelCreating

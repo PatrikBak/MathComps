@@ -41,9 +41,9 @@ See [Backend README](backend/README.md) for database setup instructions.
 MathComps/
 ├── backend/                   # .NET backend (API + CLI tools)
 │   ├── src/
-│   │   ├── Api/               # Web API
+│   │   ├── Api/               # Web API + Webhooks
 │   │   ├── Core/              # Domain models
-│   │   ├── Infrastructure/    # Database
+│   │   ├── Infrastructure/    # Database & user management
 │   │   └── Tools/             # CLI tools
 ├── web/                       # Next.js frontend
 │   └── src/

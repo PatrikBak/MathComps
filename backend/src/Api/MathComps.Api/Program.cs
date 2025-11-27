@@ -37,6 +37,7 @@ app.ConfigureStandardPipeline();
 
 // Actual endpoints mappings happen here
 app.MapApiEndpoints();
+app.MapWebhookEndpoints();
 
 // Run the API
 await app.RunAsync();
