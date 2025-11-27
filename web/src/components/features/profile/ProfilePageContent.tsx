@@ -211,7 +211,7 @@ export default function ProfilePageContent() {
 
         {/* Sign out button */}
         <div className="py-6 border-t border-slate-800 flex flex-col items-center gap-4">
-          <SignOutButton>
+          <SignOutButton redirectUrl={ROUTES.HOME}>
             <button
               className={cn(
                 'inline-flex items-center justify-center gap-2',

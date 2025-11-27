@@ -2,6 +2,7 @@
 
 import { useSignIn, useSignUp, useUser } from '@clerk/nextjs'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSessionStorage } from '@mantine/hooks'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -62,8 +63,6 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false)
   // State to store the email entered in the initial step
   const [enteredEmail, setEnteredEmail] = useState<string>('')
-  // State to store the URL to redirect to after successful authentication
-  const [returnUrl, setReturnUrl] = useState<string | null>(null)
   // State to track if we are currently redirecting to an OAuth provider
   const [isRedirecting, setIsRedirecting] = useState(false)
 
@@ -77,6 +76,11 @@ export default function AuthForm() {
   const { signUp, setActive: setActiveSignUp } = useSignUp()
   // Clerk hook to get current user data
   const { user, isLoaded: isUserLoaded } = useUser()
+  // Session storage for preserving return URL (persists through OAuth redirect cycle)
+  const [returnUrl, setReturnUrl] = useSessionStorage<string | null>({
+    key: 'auth_return_url',
+    defaultValue: null,
+  })
 
   // React Hook Form setup with Zod validation schema based on current screen
   const methods = useForm<AuthFormValues>({
@@ -86,49 +90,24 @@ export default function AuthForm() {
     mode: 'onSubmit',
   })
 
-  // Redirect logged-in users to profile page
+  // Redirect logged-in users to the return URL or the profile page
   useEffect(() => {
-    // Do the redirect only if the user is loaded and logged in
     if (isUserLoaded && user) {
       router.push(returnUrl || ROUTES.PROFILE)
     }
   }, [isUserLoaded, user, router, returnUrl])
 
-  // Capture return URL on mount - from query param, referrer, or default to home
+  // Capture return URL on mount and persist in session storage for OAuth flows
   useEffect(() => {
-    // Get return URL from query param or referrer
-    const urlParam = searchParams.get('returnUrl') || searchParams.get('redirect')
-    const referrer = typeof window !== 'undefined' ? document.referrer : null
+    // Get return URL from query param (passed by LoginNavItem)
+    const urlParam = searchParams.get('returnUrl')
 
-    // Determines the return URL based on query params, referrer, or defaults to home.
-    setReturnUrl(
-      (() => {
-        // Prefer query param if available
-        if (urlParam) {
-          return urlParam
-        }
+    // Use query param if available, otherwise default to profile
+    const determinedUrl = urlParam || ROUTES.PROFILE
 
-        // Check referrer if it's not the auth page itself
-        if (referrer && !referrer.includes(ROUTES.LOGIN)) {
-          try {
-            // Reconstruct the referrer URL
-            const referrerUrl = new URL(referrer)
-
-            // Only use referrer if it's from the same origin
-            if (referrerUrl.origin === window.location.origin) {
-              // Remove any query parameters that might have been added by Clerk
-              return referrerUrl.pathname + referrerUrl.search
-            }
-          } catch {
-            // Invalid URL, fall through to default
-          }
-        }
-
-        // Default to null (let the consumer decide, usually defaults to profile)
-        return null
-      })()
-    )
-  }, [searchParams])
+    // Store in session storage (persists through OAuth redirect cycle)
+    setReturnUrl(determinedUrl)
+  }, [searchParams, setReturnUrl])
 
   // Don't render form if user is already logged in (they'll be redirected)
   // or if we are currently redirecting to an OAuth provider
@@ -427,11 +406,14 @@ export default function AuthForm() {
     setIsRedirecting(true)
 
     try {
+      // Construct absolute URL for redirectUrlComplete (OAuth requires absolute URLs)
+      const absoluteRedirectUrl = `${window.location.origin}${returnUrl}`
+
       // Try to authenticate with the OAuth provider
       await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: ROUTES.SSO_CALLBACK,
-        redirectUrlComplete: returnUrl || ROUTES.PROFILE,
+        redirectUrlComplete: absoluteRedirectUrl,
       })
     } catch (error) {
       // If it fails, stop showing the spinner and show the error

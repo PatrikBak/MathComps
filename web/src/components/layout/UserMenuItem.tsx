@@ -1,6 +1,7 @@
 import { SignOutButton } from '@clerk/nextjs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { LogOut, User } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import type { ComponentType } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -67,6 +68,8 @@ type UserMenuItemProps = {
  * Supports both dropdown menu (Radix) and mobile drawer contexts.
  */
 export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserMenuItemProps) => {
+  // Get the current pathname for logout redirect
+  const pathname = usePathname()
   // Get the styles for the type
   const config = menuItemConfig[type]
 
@@ -100,7 +103,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
         case 'sign-out':
           return (
             <DropdownMenu.Item asChild>
-              <SignOutButton>
+              <SignOutButton redirectUrl={pathname}>
                 <button className={cn('w-full', baseClasses)}>{content}</button>
               </SignOutButton>
             </DropdownMenu.Item>
@@ -134,7 +137,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
       switch (type) {
         case 'sign-out':
           return (
-            <SignOutButton>
+            <SignOutButton redirectUrl={pathname}>
               <button onClick={onClick} className={mobileClasses}>
                 {content}
               </button>

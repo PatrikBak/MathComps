@@ -1,4 +1,7 @@
+'use client'
+
 import { LogIn } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/constants/routes'
@@ -18,14 +21,18 @@ type LoginNavItemProps = {
 /**
  * Navigation entry that links to the login route and pairs the {@link NavLink}
  * styling with the {@link LogIn} icon for both desktop and mobile menus.
+ * Automatically captures the current page to redirect back after login.
  */
 export const LoginNavItem = ({ className, onClick }: LoginNavItemProps) => {
+  // Construct login URL with current page as return URL (unless already on login page)
+  const pathname = usePathname()
+  const loginUrl =
+    pathname === ROUTES.LOGIN
+      ? ROUTES.LOGIN
+      : `${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(pathname)}`
+
   return (
-    <NavLink
-      href={ROUTES.LOGIN}
-      className={cn(className, 'flex items-center gap-2')}
-      onClick={onClick}
-    >
+    <NavLink href={loginUrl} className={cn(className, 'flex items-center gap-2')} onClick={onClick}>
       <LogIn className="w-5 h-5" />
       <span>Prihlásiť sa</span>
     </NavLink>
