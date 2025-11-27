@@ -1,9 +1,11 @@
 'use client'
 
-import { useLongPress } from '@mantine/hooks'
-import { ChevronDown, ExternalLink, Eye, EyeOff, Link, User } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
+import { useLongPress, useToggle } from '@mantine/hooks'
+import { ChevronDown, ExternalLink, Eye, EyeOff, Heart, Link, User } from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
@@ -112,6 +114,8 @@ export function ProblemCard({
 }: ProblemCardProps) {
   const [expandedView, setExpandedView] = useState<SimilarProblemViewMode>(null)
   const [areTechniquesLocallyVisible, setAreTechniquesLocallyVisible] = useState(false)
+  const [isLiked, toggleIsLiked] = useToggle()
+  const { user } = useUser()
   const { copyPermalink } = useProblemPermalink()
 
   /**
@@ -129,6 +133,20 @@ export function ProblemCard({
   const handlePermalinkCopy = useCallback(() => {
     copyPermalink(problem.slug)
   }, [problem.slug, copyPermalink])
+
+  /**
+   * Handles toggling the like state for the current problem.
+   * If user is not logged in, shows a toast notification.
+   */
+  const handleLikeToggle = useCallback(() => {
+    if (!user) {
+      toast.warning('Pre lajkovanie úloh sa musíte prihlásiť')
+      return
+    }
+
+    // Toggle the like state locally (backend integration will be added later)
+    toggleIsLiked()
+  }, [user, toggleIsLiked])
 
   // Reset local reveal state when global techniques are hidden
   useEffect(() => {
@@ -173,8 +191,24 @@ export function ProblemCard({
           {/* Problem identifier in uppercase for consistency */}
           <h2 className="text-base font-medium text-gray-100">{problem.slug.toUpperCase()}</h2>
         </div>
-        {/* Action buttons for solution link and permalink sharing */}
+        {/* Action buttons for solution link, permalink sharing, and likes */}
         <div className="flex items-center gap-2 flex-wrap justify-end">
+          {/* Like button */}
+          <button
+            onClick={handleLikeToggle}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm transition-all duration-200 rounded-md hover:bg-slate-700/50',
+              isLiked ? 'text-red-500 hover:text-red-400' : 'text-gray-400 hover:text-gray-200'
+            )}
+            title={isLiked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
+          >
+            <Heart
+              size={16}
+              className={cn('transition-all duration-200', isLiked && 'fill-current')}
+            />
+            {/* Like count with optimistic update */}
+            <span className="font-medium tabular-nums">{isLiked ? 1 : 0}</span>
+          </button>
           {/* External solution link if available */}
           {problem.solutionLink && (
             <a
