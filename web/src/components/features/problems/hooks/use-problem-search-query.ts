@@ -1,7 +1,7 @@
-'use client'
-
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo, useRef } from 'react'
+
+import { useApi } from '@/hooks/useApi'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { CACHE_TIMING } from '../constants/timing-constants'
@@ -23,27 +23,39 @@ const problemQueryKeys = {
   all: ['problems'] as const,
 
   // Key for initial filter data (all available options)
-  initialData: () => [...problemQueryKeys.all, 'initial'] as const,
+  initialData: (userId: string | null) => [...problemQueryKeys.all, 'initial', userId] as const,
 
-  // Key for problem search results with specific filters
-  search: (filters: SearchFiltersState | null) =>
-    [...problemQueryKeys.all, 'search', filters] as const,
+  // Key for problem search results with specific filters + for the current user
+  search: (filters: SearchFiltersState | null, userId: string | null) =>
+    [...problemQueryKeys.all, 'search', filters, userId] as const,
 
   // Key for a single problem by slug
-  single: (slug: string | null) => [...problemQueryKeys.all, 'single', slug] as const,
+  single: (slug: string | null, userId: string | null) =>
+    [...problemQueryKeys.all, 'single', slug, userId] as const,
 }
 
 /**
  * Hook to fetch initial filter data, i.e. filter options + the first batch of problems
  * Used during the initial page load to populate filter dropdowns.
+ *
+ * @param userId - The current user's ID (or null if anonymous)
+ * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing initial filter options
  */
-export function useInitialFilterData() {
+export function useInitialFilterData(userId: string | null, enabled: boolean) {
+  // Get the API caller
+  const api = useApi({ requireAuth: false })
+
   // Construct the React Query
   const query = useQuery({
-    queryKey: problemQueryKeys.initialData(),
+    queryKey: problemQueryKeys.initialData(userId),
     queryFn: async () => {
+      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
+      if (api.state !== 'ready') throw new Error('API not ready')
+
       // Fetch the initial filter options from the server
-      const result = await getInitialFilterData()
+      const result = await getInitialFilterData(api.apiCall)
 
       // Throw typed error if the server request failed so React Query can retry
       if (!result.isSuccess) {
@@ -61,8 +73,10 @@ export function useInitialFilterData() {
     // Initial data rarely changes, so we can cache it aggressively
     staleTime: CACHE_TIMING.staleTime,
     gcTime: CACHE_TIMING.gcTime,
+    enabled: enabled && api.state === 'ready',
   })
 
+  // Return the query result
   return {
     ...query,
     // Expose retry state - failureCount > 0 means we're retrying after failure (show toast even between retries)
@@ -75,19 +89,29 @@ export function useInitialFilterData() {
  * Used when the URL contains an `id` parameter pointing to a specific problem.
  *
  * @param slug - The problem slug from the URL (null if not viewing a single problem)
+ * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing the single problem data
  */
-export function useSingleProblem(slug: string | null, enabled = true) {
+export function useSingleProblem(slug: string | null, userId: string | null, enabled: boolean) {
+  // Get the API caller
+  const api = useApi({ requireAuth: false })
+
+  // Construct the React Query
   return useQuery({
-    queryKey: problemQueryKeys.single(slug),
+    queryKey: problemQueryKeys.single(slug, userId),
     queryFn: async () => {
       // Guard against missing slug (should be prevented by enabled flag, but provides safety)
       if (!slug) {
         throw new Error('Problem slug is required')
       }
 
+      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
+      if (api.state !== 'ready') throw new Error('API not ready')
+
       // Fetch the problem details from the server
-      const result = await getProblemBySlug(slug)
+      const result = await getProblemBySlug(api.apiCall, slug)
 
       // Throw typed error if the server request failed so React Query can handle it
       if (!result.isSuccess) {
@@ -97,7 +121,7 @@ export function useSingleProblem(slug: string | null, enabled = true) {
       return result.value
     },
     // Only run the query when enabled and we have a valid slug
-    enabled: enabled && slug !== null,
+    enabled: enabled && slug !== null && api.state === 'ready',
     // Individual problems change rarely, so we can cache them
     staleTime: CACHE_TIMING.staleTime,
     // Use global retry defaults (infinite retries) EXCEPT for 404 errors (permanent failures)
@@ -116,19 +140,39 @@ export function useSingleProblem(slug: string | null, enabled = true) {
  * Hook to fetch and paginate problem search results using infinite scroll.
  *
  * @param filters - The current filter state to search with
+ * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing the search results
  */
-function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled: boolean) {
+function useProblemSearchInfinite(
+  filters: SearchFiltersState | null,
+  userId: string | null,
+  enabled: boolean
+) {
+  // Get the API caller
+  const api = useApi({ requireAuth: false })
+
+  // Construct the React Query
   return useInfiniteQuery({
-    queryKey: problemQueryKeys.search(filters),
+    queryKey: problemQueryKeys.search(filters, userId),
     queryFn: async ({ pageParam, signal }: { pageParam: number; signal: AbortSignal }) => {
       // Guard against missing filters (should be prevented by enabled flag, but provides safety)
       if (!filters) {
         throw new Error('Filters are required for search')
       }
 
+      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
+      if (api.state !== 'ready') throw new Error('API not ready')
+
       // Fetch the page of problems from the server with abort support for request cancellation
-      const result = await searchProblems(filters, DEFAULT_PAGE_SIZE, pageParam, signal)
+      const result = await searchProblems(
+        api.apiCall,
+        filters,
+        DEFAULT_PAGE_SIZE,
+        pageParam,
+        signal
+      )
 
       // Throw typed error if the server request failed so React Query can retry
       if (!result.isSuccess) {
@@ -148,7 +192,7 @@ function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled: b
     },
 
     // Only run if filters are provided and enabled
-    enabled: enabled && filters !== null,
+    enabled: enabled && filters !== null && api.state === 'ready',
 
     // Don't refetch on window focus for search results (user intent is to adjust filters, not auto-refresh)
     refetchOnWindowFocus: false,
@@ -156,12 +200,23 @@ function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled: b
 }
 
 /**
- * Enhanced hook that wraps useProblemSearchInfinite with computed properties.
+ * Enhanced hook that wraps {@link useProblemSearchInfinite} with computed properties.
  * Provides a simpler API for components with all the data they need.
  * Transforms the infinite query structure into flat arrays and clear loading states.
+ *
+ * @param filters - The current filter state to search with
+ * @param userId - The current user's ID (or null if anonymous)
+ * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing the search results
  */
-export function useProblemSearchQuery(filters: SearchFiltersState | null, enabled: boolean) {
-  const infiniteQuery = useProblemSearchInfinite(filters, enabled)
+export function useProblemSearchQuery(
+  filters: SearchFiltersState | null,
+  userId: string | null,
+  enabled: boolean
+) {
+  // Construct the infinite query
+  const infiniteQuery = useProblemSearchInfinite(filters, userId, enabled)
 
   // Store previous problems array for efficient comparison (order-dependent)
   const previousProblemsRef = useRef<Problem[]>([])

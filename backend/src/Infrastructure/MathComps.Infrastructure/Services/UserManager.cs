@@ -1,5 +1,7 @@
+using Clerk.BackendAPI;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 namespace MathComps.Infrastructure.Services;
@@ -9,28 +11,80 @@ namespace MathComps.Infrastructure.Services;
 /// </summary>
 /// <param name="dbContext">The database context.</param>
 /// <param name="logger">The logger.</param>
-public class UserManager(MathCompsDbContext dbContext, ILogger<UserManager> logger) : IUserManager
+public class UserManager(
+    MathCompsDbContext dbContext,
+    ClerkBackendApi clerkClient,
+    ILogger<UserManager> logger
+) : IUserManager
 {
     /// <inheritdoc />
-    public async Task SyncUserAsync(UserSyncDto userDto, CancellationToken cancellationToken = default)
+    public async Task<Guid> SyncUserAsync(UserSyncDto userDto, CancellationToken cancellationToken = default)
     {
         // Timestamp pressence
         var now = DateTime.UtcNow;
 
+        // Create a user
+        var user = new User
+        {
+            ExternalId = userDto.ExternalId,
+            FirstName = userDto.FirstName,
+            LastName = userDto.LastName,
+            Email = userDto.Email,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
         // This cool little library compiles this onto a native upsert
         await dbContext.Users
-            .Upsert(new User
-            {
-                ExternalId = userDto.ExternalId,
-                FirstName = userDto.FirstName,
-                LastName = userDto.LastName,
-                Email = userDto.Email,
-                CreatedAt = now,
-                UpdatedAt = now
-            })
+            .Upsert(user)
             .On(user => user.ExternalId)
             .Exclude(user => user.CreatedAt)
             .RunAsync(cancellationToken);
+
+        // Return the user ID (auto-generated client-side)
+        return user.Id;
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid?> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default)
+    {
+        // Query for user ID
+        var userId = await dbContext.Users
+            .Where(user => user.ExternalId == externalId)
+            .Select(user => (Guid?)user.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // If user exists, return the ID
+        if (userId != null)
+            return userId.Value;
+
+        // If the user does not exist, then the webhook probably failed / wasn't quick enough
+        logger.LogWarning("User {ExternalId} not found in DB, fetching from Clerk...", externalId);
+
+        // Never mind, since I'm a perfection, we won't give up, let us call Clerk
+        var clerkUser = await GeneralUtilities.TryExecuteAsync(
+            async () => (await clerkClient.Users.GetAsync(externalId)).User,
+            error => throw new Exception($"Error fetching user {externalId} from Clerk", error)
+        );
+
+        // Okay, unknown user user after all?
+        if (clerkUser == null)
+        {
+            // Should be real weird...
+            logger.LogWarning("User {ExternalId} not found in Clerk.", externalId);
+            return null;
+        }
+
+        // Happy path, we have the user
+        var userDto = new UserSyncDto(
+            clerkUser.Id,
+            clerkUser.EmailAddresses?.FirstOrDefault()?.EmailAddressValue ?? "",
+            clerkUser.FirstName,
+            clerkUser.LastName
+        );
+
+        // Sync user to DB
+        return await SyncUserAsync(userDto, cancellationToken);
     }
 
     /// <inheritdoc />

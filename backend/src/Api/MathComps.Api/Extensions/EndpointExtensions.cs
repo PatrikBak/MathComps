@@ -19,10 +19,17 @@ public static class EndpointExtensions
     public static WebApplication MapApiEndpoints(this WebApplication app)
     {
         // The endpoint for doing problem archive filtering
-        app.MapPost("/problems/filter", async (FilterQuery query, IProblemFilterService problemService) =>
+        // Allows anonymous access but provides personalized data if authenticated
+        app.MapPost("/problems/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService) =>
         {
+            // Get user ID (optional)
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // Create service options
+            var options = new ProblemFilterOptions(query, userId);
+
             // Just call the service
-            var response = await problemService.FilterAsync(query);
+            var response = await problemService.FilterAsync(options);
 
             // We're happy
             return Results.Ok(response);
@@ -31,7 +38,8 @@ public static class EndpointExtensions
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
 
         // The endpoint for getting the data for a filter
-        app.MapGet("/problems/{slug}", async (string slug, IProblemLookupService lookupService, IProblemFilterService filterService) =>
+        // Allows anonymous access but provides personalized data if authenticated
+        app.MapGet("/problems/{slug}", async (string slug, HttpContext context, IUserManager userManager, IProblemLookupService lookupService, IProblemFilterService filterService) =>
         {
             // Get problem metadata to construct appropriate filters
             var lookupResult = await lookupService.GetProblemLookupDataAsync(slug);
@@ -39,6 +47,9 @@ public static class EndpointExtensions
             // This is sad
             if (lookupResult == null)
                 return Results.NotFound(new { message = "Problem not found" });
+
+            // Get user ID (optional)
+            var userId = await GetUserIdAsync(context, userManager);
 
             // Get the filters state
             var filters = new FilterParameters(
@@ -53,8 +64,14 @@ public static class EndpointExtensions
                 AuthorLogic: LogicToggle.Or
             );
 
+            // Construct filter options
+            var filterOptions = new ProblemFilterOptions(
+                new FilterQuery(filters, PageSize: 1, PageNumber: 1),
+                userId
+            );
+
             // Use the existing filter service to get the results
-            var response = await filterService.FilterAsync(new FilterQuery(filters, PageSize: 1, PageNumber: 1));
+            var response = await filterService.FilterAsync(filterOptions);
 
             // We're happy
             return Results.Ok(response);
@@ -62,10 +79,58 @@ public static class EndpointExtensions
         // Apply standard rate limiting
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
+        // The endpoint for toggling a like on a problem
+        app.MapPost("/problems/{slug}/like", async (
+            string slug,
+            HttpContext context,
+            IUserManager userManager,
+            IProblemLookupService problemLookupService,
+            IUserProblemService userProblemService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // No user is very sus, let's say unauthorized
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Get the internal problem ID
+            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug);
+
+            // Ensure the problem exists 
+            if (problemId == null)
+                return Results.NotFound(new { message = "Problem not found" });
+
+            // Toggle like
+            await userProblemService.ToggleLikeAsync(userId.Value, problemId.Value);
+
+            // No reason to return anything?
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         // Add health check endpoint for monitoring
         app.MapHealthChecks("/health");
 
         // Return the app for chaining
         return app;
+    }
+
+    /// <summary>
+    /// Extracts the internal user ID from the HTTP context if a user is authenticated.
+    /// </summary>
+    /// <param name="context">The HTTP context containing user claims.</param>
+    /// <param name="userManager">User manager for resolving external to internal user IDs.</param>
+    /// <returns>The internal user ID if authenticated, otherwise null.</returns>
+    private static async Task<Guid?> GetUserIdAsync(HttpContext context, IUserManager userManager)
+    {
+        // Extract Clerk user ID from JWT claims
+        var userExternalId = context.User.FindFirst("sub")?.Value;
+
+        // If we have a user, get their internal ID
+        return !string.IsNullOrEmpty(userExternalId)
+            ? await userManager.GetUserIdAsync(userExternalId)
+            : null;
     }
 }

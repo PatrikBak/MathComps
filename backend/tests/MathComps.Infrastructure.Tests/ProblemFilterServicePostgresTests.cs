@@ -131,13 +131,13 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     }
 
     /// <summary>
-    /// Executes a filter query using the ProblemFilterService and returns the result.
-    /// This helper method encapsulates the common pattern of creating a service scope,
-    /// executing a filter query, and ensuring proper disposal of resources.
+    /// Executes filtering using the <see cref="IProblemFilterService"/>. This helper method
+    /// encapsulates the common pattern of creating a service scope, executing a filter query,
+    /// and ensuring proper disposal of resources.
     /// </summary>
-    /// <param name="filterQuery">The filter query to execute.</param>
-    /// <returns>The filter result from the ProblemFilterService.</returns>
-    private async Task<FilterResult> ExecuteFilterQuery(FilterQuery filterQuery)
+    /// <param name="filterOptions">The filter options to execute.</param>
+    /// <returns>The filter result from the <see cref="IProblemFilterService"/>.</returns>
+    private async Task<FilterResult> ExecuteFiltering(ProblemFilterOptions filterOptions)
     {
         // Create a new service provider for each test to ensure proper isolation.
         using var serviceProvider = CreateServiceProvider();
@@ -146,7 +146,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         // Get the service
         return await scope.ServiceProvider.GetRequiredService<IProblemFilterService>()
             // Execute the filter query
-            .FilterAsync(filterQuery);
+            .FilterAsync(filterOptions);
     }
 
     /// <summary>
@@ -158,10 +158,26 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterInitialLoadReturnsAllProblemsAndOptions()
     {
         // Arrange - create a query with no filters to test the baseline behavior
-        var initialQuery = new FilterQuery(new FilterParameters(string.Empty, false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var initialQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the filter with no criteria
-        var initialResult = await ExecuteFilterQuery(initialQuery);
+        var initialResult = await ExecuteFiltering(initialQuery);
 
         // Assert - verify we get all problems and all available filter options
         Assert.Equal(7, initialResult.Problems.TotalCount);
@@ -181,10 +197,25 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterBySearchTextReturnsMatchingProblems()
     {
         // Arrange - search for "štvorstena" (tetrahedron in Slovak) which appears in problem 75-b-i-1
-        var textSearchQuery = new FilterQuery(new FilterParameters("štvorstena", false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var textSearchQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "štvorstena",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the text search
-        var textSearchResult = await ExecuteFilterQuery(textSearchQuery);
+        var textSearchResult = await ExecuteFiltering(textSearchQuery);
 
         // Assert - verify we get exactly one matching problem
         Assert.Single(textSearchResult.Problems.Items);
@@ -206,22 +237,82 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     {
         // Arrange - test various text normalization scenarios that users might encounter
         // Test 1: lowercase without accents should match "štvorstena" (with accents)
-        var lowercaseQuery = new FilterQuery(new FilterParameters("stvorstena", false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var lowercaseQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "stvorstena",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                        ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Test 2: UPPERCASE without accents should match "štvorstena" (lowercase with accents)
-        var uppercaseQuery = new FilterQuery(new FilterParameters("STVORSTENA", false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var uppercaseQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "STVORSTENA",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Test 3: UPPERCASE without accents should match "Prirodzené" (different case with accents)
-        var mixedCaseQuery = new FilterQuery(new FilterParameters("PRIRODZENE", false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var mixedCaseQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "PRIRODZENE",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Test 4: lowercase without accents should match "Prirodzené" (different case with accents)
-        var lowerToTitleQuery = new FilterQuery(new FilterParameters("prirodzene", false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var lowerToTitleQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "prirodzene",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute all search variations
-        var lowercaseResult = await ExecuteFilterQuery(lowercaseQuery);
-        var uppercaseResult = await ExecuteFilterQuery(uppercaseQuery);
-        var mixedCaseResult = await ExecuteFilterQuery(mixedCaseQuery);
-        var lowerToTitleResult = await ExecuteFilterQuery(lowerToTitleQuery);
+        var lowercaseResult = await ExecuteFiltering(lowercaseQuery);
+        var uppercaseResult = await ExecuteFiltering(uppercaseQuery);
+        var mixedCaseResult = await ExecuteFiltering(mixedCaseQuery);
+        var lowerToTitleResult = await ExecuteFiltering(lowerToTitleQuery);
 
         // Assert - all variations should find their respective problems
         // Test 1: lowercase "stvorstena" → "štvorstena"
@@ -250,10 +341,25 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterBySingleAuthorReturnsCorrectProblems()
     {
         // Arrange - filter by Patrik Bak, who authored 5 problems in our test data
-        var authorQuery = new FilterQuery(new FilterParameters(string.Empty, false, [], [], [], [], LogicToggle.Or, ["patrik-bak"], LogicToggle.Or), 10, 1);
+        var authorQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                        ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: ["patrik-bak"],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the author filter
-        var authorResult = await ExecuteFilterQuery(authorQuery);
+        var authorResult = await ExecuteFiltering(authorQuery);
 
         // Assert - verify we get all 5 problems by Patrik Bak
         Assert.Equal(5, authorResult.Problems.TotalCount);
@@ -269,10 +375,25 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterByMultipleTagsWithOrLogicReturnsCorrectProblems()
     {
         // Arrange - filter by algebra OR number-theory tags (should return 2 problems)
-        var tagsOrQuery = new FilterQuery(new FilterParameters(string.Empty, false, [], [], [], ["algebra", "number-theory"], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var tagsOrQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: ["algebra", "number-theory"],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the OR tag filter
-        var tagsOrResult = await ExecuteFilterQuery(tagsOrQuery);
+        var tagsOrResult = await ExecuteFiltering(tagsOrQuery);
 
         // Assert - verify we get problems with either algebra OR number-theory tags
         Assert.Equal(2, tagsOrResult.Problems.TotalCount);
@@ -287,10 +408,25 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterByMultipleTagsWithAndLogicReturnsNoProblemsWhenNoneMatchAll()
     {
         // Arrange - filter by algebra AND number-theory tags (no problems have both in our test data)
-        var tagsAndQuery = new FilterQuery(new FilterParameters(string.Empty, false, [], [], [], ["algebra", "number-theory"], LogicToggle.And, [], LogicToggle.Or), 10, 1);
+        var tagsAndQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: ["algebra", "number-theory"],
+                    TagLogic: LogicToggle.And,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the AND tag filter
-        var tagsAndResult = await ExecuteFilterQuery(tagsAndQuery);
+        var tagsAndResult = await ExecuteFiltering(tagsAndQuery);
 
         // Assert - verify we get no results since no problems have both tags
         Assert.Empty(tagsAndResult.Problems.Items);
@@ -305,10 +441,25 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterWithComplexQueryReturnsCorrectProblems()
     {
         // Arrange - filter by season 75 AND geometry tag (should return 2 problems)
-        var complexQuery = new FilterQuery(new FilterParameters(string.Empty, false, [75], [], [], ["geometry"], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var complexQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [75],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: ["geometry"],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the complex multi-criteria filter
-        var complexQueryResult = await ExecuteFilterQuery(complexQuery);
+        var complexQueryResult = await ExecuteFiltering(complexQuery);
 
         // Assert - verify we get exactly 2 problems that match both season 75 and geometry tag
         Assert.Equal(2, complexQueryResult.Problems.Items.Count);
@@ -328,12 +479,42 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterWithPaginationReturnsCorrectPages()
     {
         // Arrange - create queries for page 1 (4 items) and page 2 (remaining items)
-        var page1Query = new FilterQuery(new FilterParameters(string.Empty, false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 4, 1);
-        var page2Query = new FilterQuery(new FilterParameters(string.Empty, false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 4, 2);
+        var page1Query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                        ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 4,
+                PageNumber: 1
+            )
+        );
+        var page2Query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 4,
+                PageNumber: 2
+            )
+        );
 
         // Act - execute both page queries
-        var page1Result = await ExecuteFilterQuery(page1Query);
-        var page2Result = await ExecuteFilterQuery(page2Query);
+        var page1Result = await ExecuteFiltering(page1Query);
+        var page2Result = await ExecuteFiltering(page2Query);
 
         // Assert - verify pagination works correctly with 7 total problems
         Assert.Equal(4, page1Result.Problems.Items.Count);
@@ -351,14 +532,103 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     public async Task FilterWithNoMatchingCriteriaReturnsEmptyResult()
     {
         // Arrange - search for text that doesn't exist in any problem statement
-        var noResultsQuery = new FilterQuery(new FilterParameters("non_existent_text_gibrish", false, [], [], [], [], LogicToggle.Or, [], LogicToggle.Or), 10, 1);
+        var noResultsQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "non_existent_text_gibrish",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
 
         // Act - execute the query that should return no results
-        var noResultsResult = await ExecuteFilterQuery(noResultsQuery);
+        var noResultsResult = await ExecuteFiltering(noResultsQuery);
 
         // Assert - verify we get an empty result set with zero total count
         Assert.Empty(noResultsResult.Problems.Items);
         Assert.Equal(0, noResultsResult.Problems.TotalCount);
+    }
+    /// <summary>
+    /// Verifies that filtering returns correct like information (Liked status and LikeCount).
+    /// This test ensures that:
+    /// 1. LikeCount accurately reflects the total number of likes.
+    /// 2. Liked is true for problems liked by the requesting user.
+    /// 3. Liked is false for problems not liked by the requesting user.
+    /// 4. Liked is false when no user is provided (anonymous access).
+    /// </summary>
+    [Fact]
+    public async Task FilterReturnsCorrectLikeInformation()
+    {
+        // Arrange - Use seeded users
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        // Act 1: Query as User 1
+        var baseQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1
+            )
+        );
+        var resultUser1 = await ExecuteFiltering(baseQuery with { UserId = user1Id });
+
+        // Act 2: Query as User 2
+        var resultUser2 = await ExecuteFiltering(baseQuery with { UserId = user2Id });
+
+        // Act 3: Query as Anonymous
+        var resultAnon = await ExecuteFiltering(baseQuery);
+
+        // Assert 1: User 1
+        var p1User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
+        var p2User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-b-i-1");
+        var p3User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-c-i-1");
+
+        Assert.True(p1User1.Liked);
+        Assert.Equal(1, p1User1.LikeCount);
+
+        Assert.True(p2User1.Liked);
+        Assert.Equal(2, p2User1.LikeCount);
+
+        Assert.False(p3User1.Liked);
+        Assert.Equal(0, p3User1.LikeCount);
+
+        // Assert 2: User 2
+        var p1User2 = resultUser2.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
+        var p2User2 = resultUser2.Problems.Items.First(problem => problem.Slug == "75-b-i-1");
+
+        Assert.False(p1User2.Liked); // Liked by user1, not user2
+        Assert.Equal(1, p1User2.LikeCount);
+
+        Assert.True(p2User2.Liked); // Liked by both
+        Assert.Equal(2, p2User2.LikeCount);
+
+        // Assert 3: Anonymous
+        var p1Anon = resultAnon.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
+        var p2Anon = resultAnon.Problems.Items.First(problem => problem.Slug == "75-b-i-1");
+
+        Assert.False(p1Anon.Liked);
+        Assert.Equal(1, p1Anon.LikeCount);
+
+        Assert.False(p2Anon.Liked);
+        Assert.Equal(2, p2Anon.LikeCount);
     }
 
     /// <summary>
@@ -792,6 +1062,21 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         // - Algebra tag: 1 problem (p4)
         // - Number theory tag: 1 problem (p5)
         context.Problems.AddRange(p1, p2, p3, p4, p5, p6, p7);
+
+        // Add users and likes for testing
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        context.Users.Add(new User { Id = user1Id, ExternalId = "user1", Email = "user1@example.com", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
+        context.Users.Add(new User { Id = user2Id, ExternalId = "user2", Email = "user2@example.com", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
+
+        // p1 (75-a-i-1): Liked by user1
+        context.ProblemLikes.Add(new ProblemLike { UserId = user1Id, ProblemId = p1.Id, CreatedAt = DateTimeOffset.UtcNow });
+
+        // p2 (75-b-i-1): Liked by user1 and user2
+        context.ProblemLikes.Add(new ProblemLike { UserId = user1Id, ProblemId = p2.Id, CreatedAt = DateTimeOffset.UtcNow });
+        context.ProblemLikes.Add(new ProblemLike { UserId = user2Id, ProblemId = p2.Id, CreatedAt = DateTimeOffset.UtcNow });
+
         await context.SaveChangesAsync();
     }
 }

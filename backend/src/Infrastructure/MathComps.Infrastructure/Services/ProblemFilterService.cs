@@ -27,10 +27,10 @@ public class ProblemFilterService(
     IOptionsSnapshot<SimilarityOptions> similarityOptions) : IProblemFilterService
 {
     /// <inheritdoc/>
-    public async Task<FilterResult> FilterAsync(FilterQuery query)
+    public async Task<FilterResult> FilterAsync(ProblemFilterOptions options)
     {
         // Convenient deconstruct
-        var (parameters, pageSize, pageNumber) = query;
+        var ((parameters, pageSize, pageNumber), userId) = options;
 
         // Positive page numbers indexed from 1
         if (pageNumber <= 0)
@@ -49,13 +49,13 @@ public class ProblemFilterService(
         IQueryable<Problem> textFilteredQuery;
 
         // First, apply text search if present to create a base query for facets
-        if (!string.IsNullOrWhiteSpace(query.Parameters.SearchText))
+        if (!string.IsNullOrWhiteSpace(parameters.SearchText))
         {
             // Execute the text search ONCE and materialize the problem IDs in memory
             var matchingProblemIds = await GetMatchingProblemIdsByTextSearchAsync(
                 dbContext,
-                query.Parameters.SearchText,
-                query.Parameters.SearchInSolution);
+                parameters.SearchText,
+                parameters.SearchInSolution);
 
             // Pre-filter problems to only include those with matching text
             // Uses cached problem IDs, no database round-trip for text search
@@ -66,7 +66,7 @@ public class ProblemFilterService(
         else textFilteredQuery = dbContext.Problems;
 
         // Apply remaining filters (years, contests, tags, authors, etc.) on top of text filter
-        var filteredQuery = ApplyFilters(textFilteredQuery, query.Parameters);
+        var filteredQuery = ApplyFilters(textFilteredQuery, parameters);
 
         // Get total count
         var totalCount = await filteredQuery.CountAsync();
@@ -213,13 +213,19 @@ public class ProblemFilterService(
                     // Evaluate
                     .ToImmutableList(),
 
-                problem.SolutionLink
+                problem.SolutionLink,
+
+                // Liked
+                options.UserId != null && problem.Likes.Any(like => like.UserId == options.UserId),
+
+                // LikeCount
+                problem.Likes.Count
             ));
 
         // Retrieve the current page of DTOs
         var currentPageDtos = await dtoQuery
-            .Skip((query.PageNumber - 1) * query.PageSize)
-            .Take(query.PageSize)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         // Create paginated result set
@@ -230,7 +236,7 @@ public class ProblemFilterService(
              // Build search bar options with faceting on the text-filtered base query
              // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
              // when AND logic is selected with at least one item
-             await BuildSearchOptionsAsync(textFilteredQuery, query.Parameters);
+             await BuildSearchOptionsAsync(textFilteredQuery, parameters);
 
         // Return the complete filter result
         return new FilterResult(pagedResults, searchBarOptions);

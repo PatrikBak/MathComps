@@ -12,6 +12,10 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// <param name="Tags">Associated tags with type categorization.</param>
 /// <param name="Authors">Associated authors.</param>
 /// <param name="SimilarProblems">Recommended similar problems and their similarity scores.</param>
+/// <param name="Images">The collection of images associated with this problem.</param>
+/// <param name="SolutionLink">Optional external link identifier to the solution (short code/URL key).</param>
+/// <param name="Liked">Whether the current user has liked this problem.</param>
+/// <param name="LikeCount">Total number of likes for this problem.</param>
 public record ProblemDto(
     string Slug,
     string? StatementParsed,
@@ -20,5 +24,7 @@ public record ProblemDto(
     ImmutableList<LabeledSlug> Authors,
     ImmutableList<SimilarProblemDto> SimilarProblems,
     ImmutableList<ProblemImageDto> Images,
-    string? SolutionLink
+    string? SolutionLink,
+    bool Liked,
+    int LikeCount
 );

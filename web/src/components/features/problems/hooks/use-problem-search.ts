@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
 import { debounce, throttle } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
@@ -24,8 +25,7 @@ import { countActiveFilters } from '../utils/filter-validation'
 import { isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { createDefaultFilters } from '../utils/url-initialization'
-import { hasProblemId } from '../utils/url-problem-resolver'
-import { getProblemsPageUrl } from '../utils/url-utils'
+import { getProblemsPageUrl, hasProblemId } from '../utils/url-utils'
 import {
   useInitialFilterData,
   useProblemSearchQuery,
@@ -164,21 +164,38 @@ export const useProblemSearch = () => {
   const searchParams = useSearchParams()
   const problemId = hasProblemId(searchParams) ? searchParams.get('id') : null
 
+  // Get the current user
+  const { userId, isLoaded: isUserDataLoaded } = useAuth()
+
+  // Get the user ID which is either string or null...We will lose the
+  // information that the user is not loaded, but this will be re-used
+  // by passing whether a query is enabled or not...
+  const safeUserId = isUserDataLoaded ? (userId ?? null) : null
+
   // Step 2: Fetch initial filter options
-  const initialDataQuery = useInitialFilterData()
+  // Only fetch when auth is loaded to ensure we have the correct user context (for likes)
+  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
+  const initialDataQuery = useInitialFilterData(safeUserId, isUserDataLoaded)
 
   // Track the query filters separately from UI filters
   // This prevents React Query from creating cache entries for every keystroke
   const [queryFilters, setQueryFilters] = useState<SearchFiltersState | null>(null)
 
   // Step 3a: Fetch single problem if ID is in URL
-  const singleProblemQuery = useSingleProblem(problemId, !!problemId)
+  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
+  const singleProblemQuery = useSingleProblem(
+    problemId,
+    safeUserId,
+    !!problemId && isUserDataLoaded
+  )
 
   // Step 3b: Search for problems based on current filters (disabled if viewing single problem)
   // Use queryFilters (not uiState.filters) to prevent React Query cache pollution from every keystroke
+  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
   const searchQuery = useProblemSearchQuery(
     queryFilters,
-    !problemId && uiState.shouldSearch && !initialDataQuery.isLoading
+    safeUserId,
+    !problemId && uiState.shouldSearch && !initialDataQuery.isLoading && isUserDataLoaded
   )
 
   // Store the filters in a ref for debounced/throttled functions

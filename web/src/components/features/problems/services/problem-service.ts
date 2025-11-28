@@ -1,315 +1,258 @@
+import type { ApiCaller } from '@/hooks/useApi'
+
 import type { FilterParameters } from '../types/problem-api-types'
-import type { ProblemError, ProblemNotFoundError } from '../types/problem-errors'
+import type { ProblemNotFoundError, ServiceResult } from '../types/problem-errors'
 import type {
   ContestSelection,
   FilterResponse,
   SearchFiltersState,
   SingleProblemResult,
 } from '../types/problem-library-types'
-import { getProblemBySlugApiUrl, getProblemsFilterApiUrl } from '../utils/url-utils'
-
-/**
- * Error message constants for consistent error reporting.
- */
-const ERROR_MESSAGES = {
-  PROBLEM_NOT_FOUND: (slug: string) => `Problem "${slug}" not found`,
-  SERVER_NON_JSON: 'API returned non-JSON response - server may be down',
-  NETWORK_ERROR: (status: number, statusText: string) =>
-    `API request failed with status ${status}: ${statusText}`,
-  UNEXPECTED_ERROR: 'An unexpected error occurred',
-} as const
+import {
+  getProblemBySlugApiUrl,
+  getProblemsFilterApiUrl,
+  getToggleProblemLikeApiUrl,
+} from '../utils/url-utils'
 
 /**
  * Fetches a single problem by its slug from the API.
- * Returns the problem with its associated filters and options for the ProblemsLibrary component.
+ *
+ * @param apiCall - The API caller function.
+ * @param slug - The slug of the problem to fetch.
+ *
+ * @returns A promise that resolves to a {@link ServiceResult} containing the {@link SingleProblemResult}
+ *          if the request is successful, or a {@link ProblemError} if the request fails.
  */
 export async function getProblemBySlug(
+  apiCall: ApiCaller,
   slug: string
-): Promise<
-  { isSuccess: true; value: SingleProblemResult } | { isSuccess: false; error: ProblemError }
-> {
-  try {
-    const apiUrl = getProblemBySlugApiUrl(slug)
+): Promise<ServiceResult<SingleProblemResult>> {
+  // Fetch the problem by slug
+  const result = await apiCall<FilterResponse>(() => getProblemBySlugApiUrl(slug), {
+    method: 'GET',
+  })
 
-    // Use the specific problem slug endpoint
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return {
-          isSuccess: false,
-          error: {
-            type: 'PROBLEM_NOT_FOUND',
-            slug,
-            message: ERROR_MESSAGES.PROBLEM_NOT_FOUND(slug),
-          } as ProblemNotFoundError,
-        }
-      }
-
+  // Handle incorrect response
+  if (!result.success) {
+    // Handle 404 not found
+    if (result.error.type === 'network' && result.error.statusCode === 404) {
       return {
         isSuccess: false,
         error: {
-          type: 'NETWORK_ERROR',
-          message: ERROR_MESSAGES.NETWORK_ERROR(response.status, response.statusText),
-          status: response.status,
-        },
+          type: 'PROBLEM_NOT_FOUND',
+          slug,
+          message: 'Problem not found',
+        } as ProblemNotFoundError,
       }
     }
 
-    const contentType = response.headers.get('content-type')
-    if (!contentType || !contentType.includes('application/json')) {
-      return {
-        isSuccess: false,
-        error: {
-          type: 'SERVER_ERROR',
-          message: ERROR_MESSAGES.SERVER_NON_JSON,
-        },
-      }
-    }
-
-    const data = await response.json()
-
-    // Backend returns a filter response with exactly one problem (pageSize: 1)
-    // The problem is guaranteed to exist because 404 is handled above
-    const problem = data.problems.items[0]
-
-    // Create filters based on the specific problem's metadata
-    const source = problem.source
-    let selection: ContestSelection | null = null
-    if (source) {
-      if (source.round) {
-        selection = {
-          type: 'round',
-          competitionSlug: source.competition.slug,
-          categorySlug: source.category?.slug,
-          roundSlug: source.round.slug,
-          displayName: source.round.displayName,
-          fullName: source.round.fullName,
-        }
-      } else if (source.category) {
-        selection = {
-          type: 'category',
-          competitionSlug: source.competition.slug,
-          categorySlug: source.category.slug,
-          displayName: source.category.displayName,
-          fullName: source.category.fullName,
-        }
-      } else {
-        selection = {
-          type: 'competition',
-          competitionSlug: source.competition.slug,
-          displayName: source.competition.displayName,
-          fullName: source.competition.fullName,
-        }
-      }
-    }
-    const filters: SearchFiltersState = {
-      searchText: '',
-      searchInSolution: false,
-      seasons: problem.source?.season ? [problem.source.season] : [],
-      contestSelection: selection ? [selection] : [],
-      problemNumbers: problem.source?.number ? [problem.source.number] : [],
-      tags: [],
-      tagLogic: 'or',
-      authors: [],
-      authorLogic: 'or',
-    }
-
-    // Create the result structure expected by the page
-    const result: SingleProblemResult = {
-      problem,
-      filters,
-      options: data.updatedOptions || {
-        competitions: [],
-        seasons: [],
-        problemNumbers: [],
-        tags: [],
-        authors: [],
-      },
-    }
-
-    return {
-      isSuccess: true,
-      value: result,
-    }
-  } catch (error) {
-    // Handle null/undefined errors more gracefully
-    const errorMessage =
-      error instanceof Error ? error.message : error?.toString() || ERROR_MESSAGES.UNEXPECTED_ERROR
+    // Handle generic error, assume network error
     return {
       isSuccess: false,
       error: {
         type: 'NETWORK_ERROR',
-        message: errorMessage,
+        message: result.error.message,
       },
     }
+  }
+
+  // Backend returns a filter response with exactly one problem (pageSize: 1)
+  // The problem is guaranteed to exist because 404 is handled above
+  const problem = result.data.problems.items[0]
+
+  // Create filters based on the specific problem's metadata
+  const source = problem.source
+  let selection: ContestSelection | null = null
+  if (source.round) {
+    selection = {
+      type: 'round',
+      competitionSlug: source.competition.slug,
+      categorySlug: source.category?.slug,
+      roundSlug: source.round.slug,
+      displayName: source.round.displayName,
+      fullName: source.round.fullName,
+    }
+  } else if (source.category) {
+    selection = {
+      type: 'category',
+      competitionSlug: source.competition.slug,
+      categorySlug: source.category.slug,
+      displayName: source.category.displayName,
+      fullName: source.category.fullName,
+    }
+  } else if (source.competition) {
+    selection = {
+      type: 'competition',
+      competitionSlug: source.competition.slug,
+      displayName: source.competition.displayName,
+      fullName: source.competition.fullName,
+    }
+  }
+
+  // Create filters
+  const filters: SearchFiltersState = {
+    searchText: '',
+    searchInSolution: false,
+    seasons: problem.source?.season ? [problem.source.season] : [],
+    contestSelection: selection ? [selection] : [],
+    problemNumbers: problem.source?.number ? [problem.source.number] : [],
+    tags: [],
+    tagLogic: 'or',
+    authors: [],
+    authorLogic: 'or',
+  }
+
+  // Create the result structure expected by the page
+  const resultValue: SingleProblemResult = {
+    problem,
+    filters,
+    options: result.data.updatedOptions || {
+      competitions: [],
+      seasons: [],
+      problemNumbers: [],
+      tags: [],
+      authors: [],
+    },
+  }
+
+  // Return success
+  return {
+    isSuccess: true,
+    value: resultValue,
   }
 }
 
 /**
  * Fetches initial filter data for the problem library.
- * Returns empty problem list with all available filter options.
+ *
+ * @param apiCall - The API caller function.
+ *
+ * @returns A promise that resolves to a {@link ServiceResult} containing the filter data
+ *          if the request is successful, or a {@link ProblemError} if the request fails.
  */
-export async function getInitialFilterData(): Promise<
-  { isSuccess: true; value: FilterResponse } | { isSuccess: false; error: ProblemError }
-> {
-  try {
-    const apiUrl = getProblemsFilterApiUrl()
-
-    // Fetch initial data with empty filters to get all filter options
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        parameters: {
-          searchText: '',
-          searchInSolution: false,
-          olympiadYears: [],
-          contests: [],
-          problemNumbers: [],
-          tagSlugs: [],
-          tagLogic: 'or',
-          authorSlugs: [],
-          authorLogic: 'or',
-        },
-        pageSize: 20,
-        pageNumber: 1,
-      }),
-    })
-
-    if (!response.ok) {
-      return {
-        isSuccess: false,
-        error: {
-          type: 'NETWORK_ERROR',
-          message: ERROR_MESSAGES.NETWORK_ERROR(response.status, response.statusText),
-          status: response.status,
-        },
-      }
-    }
-
-    const contentType = response.headers.get('content-type')
-    if (!contentType || !contentType.includes('application/json')) {
-      return {
-        isSuccess: false,
-        error: {
-          type: 'SERVER_ERROR',
-          message: ERROR_MESSAGES.SERVER_NON_JSON,
-        },
-      }
-    }
-
-    const data = await response.json()
-
-    const result: FilterResponse = {
-      problems: data.problems,
-      updatedOptions: data.updatedOptions || {
-        competitions: [],
-        seasons: [],
+export async function getInitialFilterData(
+  apiCall: ApiCaller
+): Promise<ServiceResult<FilterResponse>> {
+  // Fetch initial data with empty filters to get all filter options
+  const result = await apiCall<FilterResponse>(() => getProblemsFilterApiUrl(), {
+    method: 'POST',
+    body: JSON.stringify({
+      parameters: {
+        searchText: '',
+        searchInSolution: false,
+        olympiadYears: [],
+        contests: [],
         problemNumbers: [],
-        tags: [],
-        authors: [],
+        tagSlugs: [],
+        tagLogic: 'or',
+        authorSlugs: [],
+        authorLogic: 'or',
       },
-    }
+      pageSize: 20,
+      pageNumber: 1,
+    }),
+  })
 
-    return {
-      isSuccess: true,
-      value: result,
-    }
-  } catch (error) {
+  // Handle incorrect response
+  if (!result.success) {
     return {
       isSuccess: false,
       error: {
         type: 'NETWORK_ERROR',
-        message: error instanceof Error ? error.message : ERROR_MESSAGES.UNEXPECTED_ERROR,
+        message: result.error.message,
       },
     }
+  }
+
+  // When response successful, we have non-null data
+  const data = result.data
+
+  // Create the result structure expected by the page
+  const resultValue: FilterResponse = {
+    problems: data.problems,
+    updatedOptions: data.updatedOptions || {
+      competitions: [],
+      seasons: [],
+      problemNumbers: [],
+      tags: [],
+      authors: [],
+    },
+  }
+
+  // Return success
+  return {
+    isSuccess: true,
+    value: resultValue,
   }
 }
 
 /**
  * Searches for problems based on the provided filters.
- * Returns filtered problems and updated filter options.
+ *
+ * @param apiCall - The API caller function.
+ * @param filters - The search filters to apply.
+ * @param pageSize - The number of problems to return per page.
+ * @param pageNumber - The page number to return.
+ * @param signal - An optional {@link AbortSignal} to cancel the request.
+ *
+ * @returns A promise that resolves to a {@link ServiceResult} containing the {@link FilterResponse}
+ *          if the request is successful, or a {@link ProblemError} if the request fails.
  */
 export async function searchProblems(
+  apiCall: ApiCaller,
   filters: SearchFiltersState,
   pageSize: number,
   pageNumber: number,
   signal?: AbortSignal
-): Promise<{ isSuccess: true; value: FilterResponse } | { isSuccess: false; error: ProblemError }> {
-  try {
-    const apiUrl = getProblemsFilterApiUrl()
+): Promise<ServiceResult<FilterResponse>> {
+  // Convert frontend filters to backend format
+  const filterParameters = searchFiltersStateToFilterParameters(filters)
 
-    // Convert frontend filters to backend format
-    const filterParameters = searchFiltersStateToFilterParameters(filters)
+  // Search for problems with the provided filters
+  const result = await apiCall<FilterResponse>(() => getProblemsFilterApiUrl(), {
+    method: 'POST',
+    body: JSON.stringify({
+      parameters: filterParameters,
+      pageSize,
+      pageNumber,
+    }),
+    signal,
+  })
 
-    // Search for problems with the provided filters
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        parameters: filterParameters,
-        pageSize,
-        pageNumber,
-      }),
-      signal,
-    })
-
-    if (!response.ok) {
-      return {
-        isSuccess: false,
-        error: {
-          type: 'NETWORK_ERROR',
-          message: ERROR_MESSAGES.NETWORK_ERROR(response.status, response.statusText),
-          status: response.status,
-        },
-      }
-    }
-
-    const contentType = response.headers.get('content-type')
-    if (!contentType || !contentType.includes('application/json')) {
-      return {
-        isSuccess: false,
-        error: {
-          type: 'SERVER_ERROR',
-          message: ERROR_MESSAGES.SERVER_NON_JSON,
-        },
-      }
-    }
-
-    const data = await response.json()
-
-    const result: FilterResponse = {
-      problems: data.problems,
-      updatedOptions: data.updatedOptions || null,
-    }
-
-    return {
-      isSuccess: true,
-      value: result,
-    }
-  } catch (error) {
-    // Abort errors are intentional (user navigated away) - let them bubble up
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw error
-    }
-
+  // Handle incorrect response
+  if (!result.success) {
     return {
       isSuccess: false,
       error: {
         type: 'NETWORK_ERROR',
-        message: error instanceof Error ? error.message : ERROR_MESSAGES.UNEXPECTED_ERROR,
+        message: result.error.message,
       },
     }
+  }
+
+  // When response successful, we have non-null data
+  const data = result.data
+
+  // Create the result structure expected by the page
+  const resultValue: FilterResponse = {
+    problems: data.problems,
+    updatedOptions: data.updatedOptions || null,
+  }
+
+  // Return success
+  return {
+    isSuccess: true,
+    value: resultValue,
   }
 }
 
 /**
  * Converts SearchFiltersState to FilterParameters by extracting only the data needed for filtering.
  * Removes UI-specific LabeledSlug objects and converts them to the core identifiers.
+ *
+ * @param state - The search filters to convert.
+ *
+ * @returns The converted filter parameters.
  */
 function searchFiltersStateToFilterParameters(state: SearchFiltersState): FilterParameters {
   // Extract olympiad edition numbers from LabeledSlug objects
@@ -333,6 +276,7 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
     roundSlug: selection.roundSlug,
   }))
 
+  // Return the converted filter parameters
   return {
     searchText: state.searchText,
     searchInSolution: state.searchInSolution,
@@ -343,5 +287,42 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
     tagLogic: state.tagLogic,
     authorSlugs,
     authorLogic: state.authorLogic,
+  }
+}
+
+/**
+ * Toggles a user's like on a problem.
+ * Requires authentication - the Clerk token must be provided.
+ *
+ * @param slug - The problem slug to toggle like for
+ * @param apiCall - The API caller function
+ *
+ * @returns A promise that resolves to a {@link ServiceResult} with nothing in it
+ *          if the request is successful, or a {@link ProblemError} if the request fails.
+ */
+export async function toggleProblemLike(
+  apiCall: ApiCaller,
+  slug: string
+): Promise<ServiceResult<void>> {
+  // Call the API to toggle the like
+  const result = await apiCall<void>(() => getToggleProblemLikeApiUrl(slug), {
+    method: 'POST',
+  })
+
+  // Handle incorrect response
+  if (!result.success) {
+    return {
+      isSuccess: false,
+      error: {
+        type: 'NETWORK_ERROR',
+        message: result.error.message,
+      },
+    }
+  }
+
+  // Return success
+  return {
+    isSuccess: true,
+    value: undefined,
   }
 }

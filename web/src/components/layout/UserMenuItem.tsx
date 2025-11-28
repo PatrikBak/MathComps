@@ -1,11 +1,11 @@
-import { SignOutButton } from '@clerk/nextjs'
+import { useClerk } from '@clerk/nextjs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { LogOut, User } from 'lucide-react'
-import { usePathname } from 'next/navigation'
 import type { ComponentType } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/constants/routes'
+import { useCurrentUrl } from '@/hooks/useCurrentUrl'
 
 import { AppLink } from '../shared/components/AppLink'
 
@@ -68,8 +68,18 @@ type UserMenuItemProps = {
  * Supports both dropdown menu (Radix) and mobile drawer contexts.
  */
 export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserMenuItemProps) => {
-  // Get the current pathname for logout redirect
-  const pathname = usePathname()
+  // Get the current URL for logout redirect
+  const { signOut } = useClerk()
+  // Get the current URL getter for logout redirect
+  const getCurrentUrl = useCurrentUrl()
+  // A function to handle sign out
+  const handleSignOut = () => {
+    // Call clerk sign out with the most up-to-date redirect URL
+    signOut({ redirectUrl: getCurrentUrl() })
+    // Call the onClick handler if provided
+    onClick?.()
+  }
+
   // Get the styles for the type
   const config = menuItemConfig[type]
 
@@ -103,9 +113,9 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
         case 'sign-out':
           return (
             <DropdownMenu.Item asChild>
-              <SignOutButton redirectUrl={pathname}>
-                <button className={cn('w-full', baseClasses)}>{content}</button>
-              </SignOutButton>
+              <button onClick={handleSignOut} className={cn('w-full', baseClasses)}>
+                {content}
+              </button>
             </DropdownMenu.Item>
           )
         case 'profile':
@@ -137,11 +147,9 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
       switch (type) {
         case 'sign-out':
           return (
-            <SignOutButton redirectUrl={pathname}>
-              <button onClick={onClick} className={mobileClasses}>
-                {content}
-              </button>
-            </SignOutButton>
+            <button onClick={handleSignOut} className={mobileClasses}>
+              {content}
+            </button>
           )
         case 'profile':
           return (

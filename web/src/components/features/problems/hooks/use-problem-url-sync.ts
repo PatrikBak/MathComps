@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { initializeFiltersFromUrl } from '../utils/url-initialization'
-import { hasProblemId } from '../utils/url-problem-resolver'
+import { hasProblemId } from '../utils/url-utils'
 
 /**
  * Parameters required for URL synchronization of problem search filters.

@@ -104,6 +104,7 @@ cd backend/src/Api/MathComps.Api
 
 # Set Clerk webhook secret
 dotnet user-secrets set "Clerk:WebhookSecret" "your-clerk-webhook-secret"
+dotnet user-secrets set "Clerk:ClientSecret" "your-clerk-client-secret"
 ```
 
 The webhook endpoint synchronizes user data from Clerk to the local database. For details about events handled and testing instructions, see the [API README](src/Api/MathComps.Api/README.md#webhooks).

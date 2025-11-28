@@ -11,6 +11,7 @@ import { ProblemCardSkeleton } from '@/components/features/problems/components/P
 import { PREFETCH_THRESHOLD } from '@/components/features/problems/constants/pagination-constants'
 import { VIRTUOSO_INCREASE_VIEWPORT_BY } from '@/components/features/problems/constants/problem-list-constants'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
+import { SHOW_TECHNIQUE_TAGS_STORAGE_KEY } from '@/constants/local-storage-constants'
 
 import { useProblemSearch } from '../hooks/use-problem-search'
 import type { SearchFiltersState } from '../types/problem-library-types'
@@ -49,7 +50,7 @@ export default function ProblemsLibrary() {
   } = state
 
   const [showTechniqueTags, setShowTechniqueTags] = useLocalStorage({
-    key: 'showTechniqueTags',
+    key: SHOW_TECHNIQUE_TAGS_STORAGE_KEY,
     defaultValue: false,
   })
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)

@@ -57,6 +57,8 @@ export type Problem = {
   authors: LabeledSlug[]
   similarProblems: SimilarProblem[]
   images: ProblemImage[]
+  liked: boolean
+  likeCount: number
 }
 
 export type FilterParameters = {

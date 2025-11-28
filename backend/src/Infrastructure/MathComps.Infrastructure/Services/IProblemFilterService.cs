@@ -9,11 +9,11 @@ namespace MathComps.Infrastructure.Services;
 public interface IProblemFilterService
 {
     /// <summary>
-    /// Applies a <see cref="FilterQuery"/> to retrieve a page of problems and, when applicable,
+    /// Applies a <see cref="ProblemFilterOptions"/> to retrieve a page of problems and, when applicable,
     /// refreshed facet options with counts for the search bar.
     /// </summary>
-    /// <param name="query">Complete query containing selected filters, sort, and paging.</param>
+    /// <param name="options">Complete options containing selected filters, sort, paging, and user context.</param>
     /// <returns>Filtered page of problems and optionally updated facet options.</returns>
-    Task<FilterResult> FilterAsync(FilterQuery query);
+    Task<FilterResult> FilterAsync(ProblemFilterOptions options);
 }
 

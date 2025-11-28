@@ -85,6 +85,16 @@ export function getProblemsFilterApiUrl(): string {
 }
 
 /**
+ * Builds the API URL for toggling a like on a problem by its slug.
+ *
+ * @param slug - The problem slug
+ * @returns The API URL path to toggle the like
+ */
+export function getToggleProblemLikeApiUrl(slug: string): string {
+  return buildApiUrl(`/problems/${slug}/like`)
+}
+
+/**
  * Builds the frontend URL for the problems page with optional query parameters.
  * If queryString is empty, returns the base problems URL without a query string.
  *
@@ -93,4 +103,14 @@ export function getProblemsFilterApiUrl(): string {
  */
 export function getProblemsPageUrl(queryString?: string): string {
   return queryString ? `${ROUTES.PROBLEMS}?${queryString}` : ROUTES.PROBLEMS
+}
+
+/**
+ * Checks if the URL contains a problem ID parameter.
+ *
+ * @param searchParams - The URL search parameters to check
+ * @returns True if the URL contains a problem ID parameter, false otherwise
+ */
+export function hasProblemId(searchParams: URLSearchParams): boolean {
+  return searchParams.has('id') && searchParams.get('id') !== null && searchParams.get('id') !== ''
 }

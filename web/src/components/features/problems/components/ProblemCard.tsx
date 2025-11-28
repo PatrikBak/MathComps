@@ -1,7 +1,6 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
-import { useLongPress, useToggle } from '@mantine/hooks'
+import { useLocalStorage, useLongPress } from '@mantine/hooks'
 import { ChevronDown, ExternalLink, Eye, EyeOff, Heart, Link, User } from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -9,10 +8,16 @@ import { toast } from 'sonner'
 
 import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
+import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
 import { LONG_PRESS_THRESHOLD_MS } from '@/components/shared/utils/event-utils'
+import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
+import { ROUTES } from '@/constants/routes'
+import { useApi } from '@/hooks/useApi'
+import { useCurrentUrl } from '@/hooks/useCurrentUrl'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
+import { toggleProblemLike } from '../services/problem-service'
 import type { Problem } from '../types/problem-api-types'
 import { sortTagsByCategory } from '../utils/tag-utils'
 import Chip from './Chip'
@@ -114,9 +119,15 @@ export function ProblemCard({
 }: ProblemCardProps) {
   const [expandedView, setExpandedView] = useState<SimilarProblemViewMode>(null)
   const [areTechniquesLocallyVisible, setAreTechniquesLocallyVisible] = useState(false)
-  const [isLiked, toggleIsLiked] = useToggle()
-  const { user } = useUser()
+  const [isLiked, setIsLiked] = useState(problem.liked)
+  const [likeCount, setLikeCount] = useState(problem.likeCount)
   const { copyPermalink } = useProblemPermalink()
+  const api = useApi()
+  const [pendingLikeSlug, setPendingLikeSlug] = useLocalStorage<string | null>({
+    key: PENDING_PROBLEM_LIKE_STORAGE_KEY,
+    defaultValue: null,
+  })
+  const getCurrentUrl = useCurrentUrl()
 
   /**
    * Toggles the expanded view for similar problems section.
@@ -137,16 +148,75 @@ export function ProblemCard({
   /**
    * Handles toggling the like state for the current problem.
    * If user is not logged in, shows a toast notification.
+   * Implements optimistic updates with rollback on error.
    */
-  const handleLikeToggle = useCallback(() => {
-    if (!user) {
-      toast.warning('Pre lajkovanie úloh sa musíte prihlásiť')
-      return
-    }
+  const handleLikeToggle = useCallback(async () => {
+    // Handle different authentication states
+    switch (api.state) {
+      // Still loading Clerk's data
+      case 'loading':
+        toast.info('Overujem prihlásenie...')
+        break
 
-    // Toggle the like state locally (backend integration will be added later)
-    toggleIsLiked()
-  }, [user, toggleIsLiked])
+      // User is not signed in
+      case 'unauthenticated':
+        // Ensure we remember they liked the problem so we can apply it after login
+        setPendingLikeSlug(problem.slug)
+
+        // Show a toast notification to prompt the user to log in
+        toast.warning(
+          <>
+            Pre lajkovanie úloh sa musíte{' '}
+            <AppLink
+              href={`${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(getCurrentUrl())}`}
+              className="text-indigo-700 font-medium hover:underline"
+              onClick={() => toast.dismiss()}
+            >
+              prihlásiť
+            </AppLink>
+            .
+          </>
+        )
+        break
+
+      // User is signed in
+      case 'ready':
+        // Optimistic update - toggle immediately for responsive UI
+        const newIsLiked = !isLiked
+        setIsLiked(newIsLiked)
+        setLikeCount((previous) => (newIsLiked ? previous + 1 : previous - 1))
+
+        // Call the backend API to toggle the like
+        const result = await toggleProblemLike(api.apiCall, problem.slug)
+
+        // If the API call fails
+        if (!result.isSuccess) {
+          // Rollback the optimistic update
+          setIsLiked(!newIsLiked)
+          setLikeCount((prev) => (newIsLiked ? prev - 1 : prev + 1))
+          toast.error('Nepodarilo sa zmeniť stav lajku')
+          console.error('Failed to toggle like:', result.error)
+        }
+        break
+    }
+  }, [api, setPendingLikeSlug, problem, getCurrentUrl, isLiked])
+
+  /**
+   * Check for pending like action when user becomes authenticated
+   */
+  useEffect(() => {
+    // If we have an authenticated user
+    if (api.state === 'ready') {
+      // And they liked this problem while unauthenticated
+      if (pendingLikeSlug === problem.slug) {
+        // Apply the like action
+        handleLikeToggle()
+
+        // Clear the pending like.
+        setPendingLikeSlug(null)
+      }
+    }
+  }, [api.state, problem.slug, handleLikeToggle, pendingLikeSlug, setPendingLikeSlug])
 
   // Reset local reveal state when global techniques are hidden
   useEffect(() => {
@@ -171,7 +241,7 @@ export function ProblemCard({
   }, [problem.tags, activeTechniqueFilterSlugs])
 
   // Determine if the "reveal techniques" chip should be shown
-  // Only show when techniques are globally hidden, locally not revealed, and there are hidden techniques
+  // Only show when techniques are globally hidden, locally revealed, and there are hidden techniques
   const showRevealChip =
     !areTechniquesGloballyVisible && !areTechniquesLocallyVisible && hiddenTechniqueCount > 0
 
@@ -207,7 +277,7 @@ export function ProblemCard({
               className={cn('transition-all duration-200', isLiked && 'fill-current')}
             />
             {/* Like count with optimistic update */}
-            <span className="font-medium tabular-nums">{isLiked ? 1 : 0}</span>
+            <span className="font-medium tabular-nums">{likeCount}</span>
           </button>
           {/* External solution link if available */}
           {problem.solutionLink && (

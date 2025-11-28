@@ -10,6 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
+import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { ROUTES } from '@/constants/routes'
 
 import { checkEmailExists } from './actions'
@@ -78,7 +79,7 @@ export default function AuthForm() {
   const { user, isLoaded: isUserLoaded } = useUser()
   // Session storage for preserving return URL (persists through OAuth redirect cycle)
   const [returnUrl, setReturnUrl] = useSessionStorage<string | null>({
-    key: 'auth_return_url',
+    key: AUTH_RETURN_URL_STORAGE_KEY,
     defaultValue: null,
   })
 

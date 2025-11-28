@@ -14,4 +14,9 @@ public class ClerkSettings
     /// The secret key used to verify Clerk webhooks.
     /// </summary>
     public string WebhookSecret { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The secret key used to authenticate with the Clerk API.
+    /// </summary>
+    public string SecretKey { get; set; } = string.Empty;
 }
