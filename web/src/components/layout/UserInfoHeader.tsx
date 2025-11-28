@@ -53,7 +53,7 @@ export const UserInfoHeader = ({
     <div className={cn('flex items-center gap-3', className)}>
       <UserAvatarImage
         imageUrl={user.imageUrl}
-        altText={user.firstName || user.username || 'Používateľ'}
+        altText={user.firstName || 'Používateľ'}
         width={config.avatar.width}
         height={config.avatar.height}
         className={cn(config.avatar.className, avatarClassName)}
@@ -62,11 +62,11 @@ export const UserInfoHeader = ({
         {user.firstName && (
           <p className={cn('font-semibold text-white truncate', config)}>{user.firstName}</p>
         )}
-        {user.username && (
+        {user.emailAddresses && user.emailAddresses.length > 0 && (
           <p
             className={cn('text-white/60 truncate', user.firstName ? 'mt-0.5' : '', config.handle)}
           >
-            #{user.username}
+            {user.emailAddresses[0].emailAddress}
           </p>
         )}
       </div>

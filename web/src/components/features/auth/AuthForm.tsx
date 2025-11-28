@@ -110,6 +110,18 @@ export default function AuthForm() {
     setReturnUrl(determinedUrl)
   }, [searchParams, setReturnUrl])
 
+  // Focus appropriate field when screen changes
+  useEffect(() => {
+    if (screen === 'login-with-email') {
+      // Focus password field when switching to login screen
+      // Use setTimeout to ensure the DOM has updated
+      setTimeout(() => methods.setFocus('password'), 0)
+    } else if (screen === 'signup-with-email') {
+      // Focus name field when switching to signup screen
+      setTimeout(() => methods.setFocus('firstName'), 0)
+    }
+  }, [screen, methods])
+
   // Don't render form if user is already logged in (they'll be redirected)
   // or if we are currently redirecting to an OAuth provider
   if (user || isRedirecting) {
@@ -166,7 +178,7 @@ export default function AuthForm() {
 
       // If the email has changed, we want to clear the name and code fields
       if (data.email !== enteredEmail) {
-        methods.setValue('username', '')
+        methods.setValue('firstName', '')
         methods.setValue('code', '')
       }
     })
@@ -196,6 +208,7 @@ export default function AuthForm() {
       }
       // Otherwise throw an error
       else {
+        console.error('Sign-in failed with status:', result.status, result)
         throw new Error('Unexpected error while signing in')
       }
     })
@@ -215,7 +228,7 @@ export default function AuthForm() {
       const result = await signUp.create({
         emailAddress: data.email,
         password: data.password,
-        username: data.username,
+        firstName: data.firstName,
       })
 
       // If sign up was successful

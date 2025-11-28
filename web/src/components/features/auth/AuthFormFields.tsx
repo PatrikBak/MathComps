@@ -29,18 +29,6 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
 
   return (
     <div className="space-y-4">
-      {/* Name Field */}
-      {screen === 'signup-with-email' && (
-        <InputField
-          id="username"
-          label="Používateľské meno"
-          icon={User}
-          placeholder="Zadajte vaše meno alebo prezývku"
-          error={'username' in errors ? errors.username : undefined}
-          registration={register('username')}
-        />
-      )}
-
       {/* Email Field  */}
       {(screen === 'login-with-email' ||
         screen === 'signup-with-email' ||
@@ -50,10 +38,22 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
           id="email"
           label="Email"
           icon={AtSign}
-          placeholder="Zadajte váš email"
+          placeholder="Zadajte email"
           type="email"
           error={'email' in errors ? errors.email : undefined}
           registration={register('email')}
+        />
+      )}
+
+      {/* Name Field */}
+      {screen === 'signup-with-email' && (
+        <InputField
+          id="firstName"
+          label="Meno alebo prezývka"
+          icon={User}
+          placeholder="Zadajte meno alebo prezývku"
+          error={'firstName' in errors ? errors.firstName : undefined}
+          registration={register('firstName')}
         />
       )}
 
@@ -95,9 +95,7 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
           id="password"
           label={screen === 'enter-new-password' ? 'Nové heslo' : 'Heslo'}
           icon={Lock}
-          placeholder={
-            screen === 'enter-new-password' ? 'Zadajte nové heslo' : 'Zadajte vaše heslo'
-          }
+          placeholder={screen === 'enter-new-password' ? 'Zadajte nové heslo' : 'Zadajte heslo'}
           type="password"
           error={'password' in errors ? errors.password : undefined}
           registration={register('password')}

@@ -71,7 +71,7 @@ export default function UserMenu() {
         <UserMenuTrigger aria-label="Používateľské menu">
           <UserAvatarImage
             imageUrl={user.imageUrl}
-            altText={user.firstName || user.username || 'Používateľ'}
+            altText={user.firstName || 'Používateľ'}
             width={32}
             height={32}
             className="w-8 h-8"

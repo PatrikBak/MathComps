@@ -18,19 +18,6 @@ const passwordSchema = z.string().min(1, 'Heslo je povinné').min(8, 'Heslo mus�
 const confirmPasswordSchema = z.string().min(1, 'Potvrdenie hesla je povinné')
 
 /**
- * Base schema for username validation.
- */
-const usernameSchema = z
-  .string()
-  .min(1, 'Používateľské meno je povinné')
-  .min(4, 'Používateľské meno musí mať aspoň 4 znaky')
-  .max(15, 'Používateľské meno môže mať maximálne 15 znakov')
-  .regex(
-    /^[a-zA-Z0-9_-]+$/,
-    'Povolené sú len písmená, čísla, podčiarkovník a pomlčka (bez medzier).'
-  )
-
-/**
  * Schema for display name validation.
  */
 export const displayNameSchema = z
@@ -80,7 +67,7 @@ const addPasswordMatchRefinement = <T extends z.ZodObject<ZodRawShape>>(schema: 
  */
 const signupSchema = addPasswordMatchRefinement(
   z.object({
-    username: usernameSchema,
+    firstName: displayNameSchema,
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: confirmPasswordSchema,

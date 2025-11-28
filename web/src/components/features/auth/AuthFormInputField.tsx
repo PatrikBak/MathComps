@@ -58,7 +58,7 @@ export function InputField({
           placeholder={placeholder}
           maxLength={maxLength}
           className={cn(
-            'w-full bg-slate-800/60 border text-slate-200 rounded-lg text-sm px-3 py-2.5 pl-10 transition-all outline-none focus:border-indigo-500/70 focus:bg-slate-800/80 focus:ring-2 focus:ring-indigo-500/30 hover:border-slate-400/60 hover:bg-slate-800/70',
+            'w-full bg-slate-800/60 border text-slate-200 rounded-lg text-sm px-3 py-2.5 pl-10 transition-all outline-none focus:border-indigo-500/70 focus:bg-slate-800/80 focus:ring-2 focus:ring-indigo-500/30 hover:border-slate-400/60 hover:bg-slate-800/70 truncate',
             !!error ? 'border-red-500/70' : 'border-slate-500/50',
             className
           )}
