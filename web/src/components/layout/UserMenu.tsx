@@ -90,7 +90,7 @@ export default function UserMenu() {
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           className={cn(
-            'w-64 rounded-lg',
+            'w-full rounded-lg',
             'bg-slate-900/95 backdrop-blur-sm border border-white/10',
             'shadow-lg',
             'overflow-hidden z-50',

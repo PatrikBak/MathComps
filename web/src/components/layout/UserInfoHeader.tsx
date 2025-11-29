@@ -58,9 +58,11 @@ export const UserInfoHeader = ({
         height={config.avatar.height}
         className={cn(config.avatar.className, avatarClassName)}
       />
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0">
         {user.firstName && (
-          <p className={cn('font-semibold text-white truncate', config)}>{user.firstName}</p>
+          <p className={cn('font-semibold text-white truncate', config.displayName)}>
+            {user.firstName}
+          </p>
         )}
         {user.emailAddresses && user.emailAddresses.length > 0 && (
           <p
