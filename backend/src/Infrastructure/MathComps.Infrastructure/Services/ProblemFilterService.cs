@@ -300,10 +300,15 @@ public class ProblemFilterService(
             // Add any round-level selections
             foreach (var (competitionSlug, categorySlug, roundSlug) in roundLevelSelections)
             {
-                // Include them...
+                // Include those...
                 combinedSelectionPredicate = combinedSelectionPredicate.Or(problem =>
+                    // Where competition matches
                     problem.RoundInstance.Round.Competition.Slug == competitionSlug &&
-                    problem.RoundInstance.Round.Category!.Slug == categorySlug &&
+                    // And category matches (if specified)
+                    (categorySlug == null
+                        ? problem.RoundInstance.Round.Category == null
+                        : problem.RoundInstance.Round.Category!.Slug == categorySlug) &&
+                    // And round matches
                     problem.RoundInstance.Round.Slug == roundSlug);
             }
 
