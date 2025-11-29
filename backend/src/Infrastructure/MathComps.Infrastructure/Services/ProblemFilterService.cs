@@ -305,9 +305,7 @@ public class ProblemFilterService(
                     // Where competition matches
                     problem.RoundInstance.Round.Competition.Slug == competitionSlug &&
                     // And category matches (if specified)
-                    (categorySlug == null
-                        ? problem.RoundInstance.Round.Category == null
-                        : problem.RoundInstance.Round.Category!.Slug == categorySlug) &&
+                    problem.RoundInstance.Round.Category!.Slug == categorySlug &&
                     // And round matches
                     problem.RoundInstance.Round.Slug == roundSlug);
             }
@@ -600,8 +598,8 @@ public class ProblemFilterService(
 
                 // Handle rounds without categories (direct competition rounds)
                 var roundsWithoutCategory = competitionGroup
-                    // Only consider rounds without categories and exclude default rounds
-                    .Where(roundData => roundData.CategoryName == null && !roundData.IsDefault)
+                    // Only consider rounds without categories
+                    .Where(roundData => roundData.CategoryName == null)
                     // Sort rounds by predefined sort order
                     .OrderBy(roundData => roundData.RoundSortOrder)
                     // Project to FacetOption
