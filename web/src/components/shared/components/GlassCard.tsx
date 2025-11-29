@@ -1,26 +1,43 @@
 import type { ReactNode } from 'react'
 
+import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import styles from './GlassCard.module.css'
-
+/**
+ * Icon configuration for the {@link GlassCard} component
+ */
 type GlassCardIconProps = {
-  icon?: ReactNode
-  iconGradient?: string
+  /** Icon element to display */
+  icon: ReactNode
+  /** Tailwind gradient classes for icon background */
+  iconGradient: string
+  /** Custom glow color for the icon */
   glowColor?: string
 }
 
+/**
+ * Props for the {@link GlassCard} component
+ */
 type GlassCardProps = {
-  badge?: ReactNode
+  /** Card title content */
   title: ReactNode
+  /** HTML element to use for the title */
   titleElement?: 'h1' | 'h2' | 'h3' | 'h4' | 'div'
+  /** Text alignment within the card */
   align?: 'left' | 'center'
+  /** Icon configuration - {@link GlassCardIconProps} */
   iconProps?: GlassCardIconProps
+  /** Description text displayed below the title */
   description?: ReactNode
+  /** Additional content rendered at the bottom of the card */
   children?: ReactNode
+  /** Optional href to make the card clickable - wraps content in {@link AppLink} */
+  href?: string
 }
 
-// Create a mapping from the heading element to a Tailwind font-size class.
+/**
+ * A mapping from the heading element to a Tailwind font-size class.
+ */
 const titleSizeClasses = {
   h1: 'text-2xl sm:text-4xl lg:text-5xl',
   h2: 'text-xl sm:text-3xl lg:text-4xl',
@@ -29,21 +46,22 @@ const titleSizeClasses = {
   div: 'text-base sm:text-xl lg:text-2xl',
 }
 
+/**
+ * A reusable card component. Supports optional icons and can be made
+ * clickable by providing an href.
+ */
 export default function GlassCard({
   title,
-  badge,
   iconProps,
   description,
   children,
   align = 'center',
   titleElement: TitleElement = 'h3',
+  href,
 }: GlassCardProps) {
-  return (
-    <div
-      className={`${styles.glassCard} p-2 sm:p-4 lg:p-6 rounded-2xl group hover:scale-105 transition-all duration-500
-        ${align == 'center' ? 'text-center' : ''}`}
-    >
-      {badge}
+  // The JSX content of the card
+  const cardContent = (
+    <>
       {iconProps && (
         <div
           className={cn(
@@ -70,6 +88,24 @@ export default function GlassCard({
         </div>
       )}
       {children && <div className="mt-2 sm:mt-4">{children}</div>}
-    </div>
+    </>
   )
+
+  // Common card styles used for both clickable and non-clickable cards
+  const cardClassName = cn(
+    'relative overflow-hidden bg-slate-800/40 backdrop-blur-md border border-violet-500/20 p-2 sm:p-4 lg:p-6 rounded-2xl group hover:scale-105 transition-all duration-500',
+    align === 'center' && 'text-center'
+  )
+
+  // If href is provided, wrap the card in an AppLink
+  if (href) {
+    return (
+      <AppLink href={href} className={cn(cardClassName, 'block no-underline')}>
+        {cardContent}
+      </AppLink>
+    )
+  }
+
+  // Otherwise, render as a regular div
+  return <div className={cardClassName}>{cardContent}</div>
 }
