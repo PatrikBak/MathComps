@@ -20,15 +20,11 @@ public static class TexImageProcessor
     /// Traverses the content of a <see cref="TexText"/> object, processing any images found.
     /// Returns a new <see cref="TexText"/> instance with updated image references and a list of discovered image metadata.
     /// </summary>
-    /// <param name="text">Parsed TeX content tree to scan. May be <see langword="null"/>.</param>
+    /// <param name="text">Parsed TeX content tree to scan.</param>
     /// <param name="config">Configuration for image processing including naming and output paths.</param>
-    /// <returns>Processed text (or <see langword="null"/>) and an immutable list of discovered images.</returns>
-    public static ImageProcessingResult Process(TexText? text, ImageProcessingConfig config)
+    /// <returns>Processed text and an immutable list of discovered images.</returns>
+    public static ImageProcessingResult Process(TexText text, ImageProcessingConfig config)
     {
-        // If there is no text, nothing needs to be processed; return an empty image set and null text.
-        if (text is null)
-            return new ImageProcessingResult(null, []);
-
         // Initialize a deterministic suffix counter so generated file names are stable across runs.
         var imageCounter = 1;
 

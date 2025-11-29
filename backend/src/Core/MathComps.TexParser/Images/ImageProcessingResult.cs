@@ -8,4 +8,4 @@ namespace MathComps.TexParser.Images;
 /// </summary>
 /// <param name="ProcessedText">The updated Text object with image IDs replaced by stable content IDs.</param>
 /// <param name="DiscoveredImages">A list of the physical image data discovered during processing.</param>
-public record ImageProcessingResult(TexText? ProcessedText, ImmutableList<ImageData> DiscoveredImages);
+public record ImageProcessingResult(TexText ProcessedText, ImmutableList<ImageData> DiscoveredImages);

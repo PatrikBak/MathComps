@@ -9,6 +9,7 @@ using Spectre.Console;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using EfProblem = MathComps.Domain.EfCoreEntities.Problem;
+using Text = MathComps.TexParser.Types.Text;
 
 namespace MathComps.Cli.DatabaseSeeder;
 
@@ -254,20 +255,30 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                     OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Problem [yellow]{problemSlug}[/] has a missing image: {imageId}")
                 );
 
+                // A helper to either process text or return null if it's null
+                ImageProcessingResult? ProcessTextOrNull(Text? text)
+                    => text is null
+                    ? null
+                    : TexImageProcessor.Process(text, imageConfig);
+
                 // Process images: copy them to a public location, update the parsed content,
                 // and gather the physical image data to be saved to the database.
-                var statementProcessingResult = TexImageProcessor.Process(parsedProblem.ParsedStatement, imageConfig);
-                var solutionProcessingResult = TexImageProcessor.Process(parsedProblem.ParsedSolution, imageConfig);
+                var statementProcessingResult = ProcessTextOrNull(parsedProblem.ParsedStatement);
+                var solutionProcessingResult = ProcessTextOrNull(parsedProblem.ParsedSolution);
 
                 // Update the parsed problem with the new data
                 parsedProblem = parsedProblem with
                 {
-                    ParsedStatement = statementProcessingResult.ProcessedText,
-                    ParsedSolution = solutionProcessingResult.ProcessedText,
+                    ParsedStatement = statementProcessingResult?.ProcessedText,
+                    ParsedSolution = solutionProcessingResult?.ProcessedText,
                 };
 
                 // Merge the images from the problem and the statement
-                var discoveredImages = statementProcessingResult.DiscoveredImages.AddRange(solutionProcessingResult.DiscoveredImages);
+                var discoveredImages =
+                    // Take discovered images from the statement
+                    (statementProcessingResult?.DiscoveredImages ?? [])
+                    // Add discovered images from the solution
+                    .AddRange(solutionProcessingResult?.DiscoveredImages ?? []);
 
                 #endregion
 
