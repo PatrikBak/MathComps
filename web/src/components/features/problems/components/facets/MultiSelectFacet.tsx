@@ -1,12 +1,9 @@
-import { useLongPress } from '@mantine/hooks'
 import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import {
-  isExclusiveSelection,
-  LONG_PRESS_THRESHOLD_MS,
-} from '@/components/shared/utils/event-utils'
+import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
+import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
 import type { FacetOption } from './facet-shared'
 import {
@@ -75,12 +72,9 @@ const OptionItem = React.memo(function OptionItem({
   }
 
   // A long-press handler for exclusive selection on touch screens
-  const longPressHandlers = useLongPress(
-    () => {
-      onExclusiveSelect()
-    },
-    { threshold: LONG_PRESS_THRESHOLD_MS }
-  )
+  const longPressHandlers = useSmartLongPress(() => {
+    onExclusiveSelect()
+  })
 
   // A function to handle checkbox state change (user toggled the selection)
   const handleChange = () => {
