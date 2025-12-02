@@ -16,7 +16,6 @@ public class ClerkWebhook(
     IOptions<ClerkSettings> clerkSettings,
     IUserManager userManager,
     ILogger<ClerkWebhook> logger) : IClerkWebhookService
-
 {
     /// <summary>
     /// Processes a Clerk webhook event.

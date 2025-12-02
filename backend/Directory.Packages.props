@@ -1,6 +1,5 @@
 <Project>
   <ItemGroup>
-    <!-- Application Packages -->
     <PackageVersion Include="Clerk.BackendAPI" Version="0.14.0" />
     <PackageVersion Include="Clerk.Net" Version="1.15.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
