@@ -16,6 +16,7 @@ const createTestFilters = (overrides: Partial<SearchFiltersState>): SearchFilter
   authors: [],
   authorLogic: 'or',
   contestSelection: [],
+  favoritesOnly: false,
   ...overrides,
 })
 
