@@ -50,7 +50,7 @@ export default function PrivacyPage() {
           <h2>3. Cookies</h2>
           <p>
             Súbory cookies sú používané výhradne na funkcionality stránky (napr. udržanie
-            prihlásenia). Nie sú predávané tretím stranám.
+            prihlásenia). Nie sú postupované tretím stranám.
           </p>
         </section>
 
