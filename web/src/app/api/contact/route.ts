@@ -4,6 +4,7 @@ import { Resend } from 'resend'
 
 import { contactFormSchema, getReasonLabel } from '@/components/features/contact/contactFormSchema'
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
+import { generateContactEmail } from '@/lib/email/notification-emails'
 
 // Honeypot field to catch bots
 function isLikelyBot(body: Record<string, unknown>): boolean {
@@ -49,26 +50,13 @@ export async function POST(request: NextRequest) {
     const contactEmail = getRequiredEnv('CONTACT_EMAIL')
     const senderEmail = getRequiredEnv('SENDER_EMAIL')
 
-    // Create email content
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #4f46e5; border-bottom: 2px solid #4f46e5; padding-bottom: 10px;">
-          Nová správa z kontaktného formulára
-        </h2>
-        
-        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #334155; margin-top: 0;">Kontaktné údaje</h3>
-          <p><strong>Meno:</strong> ${validatedData.name}</p>
-          <p><strong>Email:</strong> ${validatedData.email}</p>
-          <p><strong>Dôvod:</strong> ${getReasonLabel(validatedData.reason)}</p>
-        </div>
-        
-        <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #334155; margin-top: 0;">Správa</h3>
-          <p style="white-space: pre-wrap; line-height: 1.6;">${validatedData.message}</p>
-        </div>
-      </div>
-    `
+    // Generate email HTML using unified template
+    const emailHtml = generateContactEmail({
+      name: validatedData.name,
+      email: validatedData.email,
+      reason: getReasonLabel(validatedData.reason),
+      message: validatedData.message,
+    })
 
     // Initialize Resend with the API key
     const resend = new Resend(resendApiKey)
