@@ -45,13 +45,25 @@ MathComps/
 │   │   ├── Core/              # Domain models
 │   │   ├── Infrastructure/    # Database & user management
 │   │   └── Tools/             # CLI tools
-├── web/                       # Next.js frontend
+├── web/                       # Next.js frontend + Webhooks
 │   └── src/
 │       ├── app/               # Pages
 │       └── components/        # React components
 └── data/                      # Raw data files
     ├── skmo/                  # SKMO competition data
     └── handouts/              # TeX handouts
+
+## Webhooks Architecture
+
+The application uses two separate Clerk webhooks to handle different responsibilities:
+
+- **Frontend (`/api/webhooks/clerk`)**: Handles **Email Delivery**.
+  - **Event**: `email.created`
+  - **Purpose**: Intercepts Clerk's email requests to send custom-branded verification emails (signup, password reset) via Resend.
+
+- **Backend (`/api/webhooks/clerk`)**: Handles **User Synchronization**.
+  - **Events**: `user.created`, `user.updated`, `user.deleted`
+  - **Purpose**: Syncs Clerk user data to the local PostgreSQL database for relational data integrity.
 ```
 
 ## Documentation

@@ -474,9 +474,6 @@ export default function AuthForm() {
 
   return (
     <div className="w-full max-w-[350px] m-4 sm:m-8 md:m-12 p-8 bg-slate-900/50 backdrop-blur-xl rounded-xl border border-slate-700/50 shadow-2xl">
-      {/* Required for Clerk CAPTCHA widget */}
-      <div id="clerk-captcha" />
-
       {/* Header */}
       <AuthFormHeader screen={screen} />
 
@@ -485,6 +482,9 @@ export default function AuthForm() {
 
       {/* Success Message */}
       {successMessage && <AuthMessage type="success" message={successMessage} />}
+
+      {/* Required for Clerk CAPTCHA widget */}
+      <div id="clerk-captcha" />
 
       {/* Hub Screen */}
       {screen === 'hub' && (

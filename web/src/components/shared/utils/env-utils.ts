@@ -7,7 +7,7 @@ const envMap = {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   CONTACT_EMAIL: process.env.CONTACT_EMAIL,
-  SENDER_EMAIL: process.env.SENDER_EMAIL,
+  CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
 }
 
 /**
@@ -19,7 +19,8 @@ type EnvKey = keyof typeof envMap
  * Gets a required environment variable, throwing an error if not defined.
  *
  * @param key - The environment variable name
- * @returns The environment variable value with trailing slashes removed
+ *
+ * @returns The environment variable value
  */
 export function getRequiredEnv(key: EnvKey): string {
   // Try to get the value from the env map
@@ -32,4 +33,15 @@ export function getRequiredEnv(key: EnvKey): string {
 
   // This is just a string now
   return value
+}
+
+/**
+ * Gets an optional environment variable, returning undefined if not defined.
+ *
+ * @param key - The environment variable name
+ *
+ * @returns The environment variable value, or undefined if not defined
+ */
+export function getOptionalEnv(key: EnvKey): string | undefined {
+  return envMap[key]
 }

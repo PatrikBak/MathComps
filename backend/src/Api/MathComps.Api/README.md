@@ -42,6 +42,8 @@ This webhook receives events from Clerk to synchronize user data with the local 
 
 The webhook verifies request signatures using Svix to ensure authenticity.
 
+> **Note:** Email events (`email.created`) are handled by the **Frontend** webhook to send custom emails via Resend.
+
 **Testing the webhook locally:**
 
 To test the webhook during development, you need to expose your local API to the internet so Clerk can send events to it:
