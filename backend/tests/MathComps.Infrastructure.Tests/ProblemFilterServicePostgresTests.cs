@@ -1162,8 +1162,8 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
-        context.Users.Add(new User { Id = user1Id, ExternalId = "user1", Email = "user1@example.com", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
-        context.Users.Add(new User { Id = user2Id, ExternalId = "user2", Email = "user2@example.com", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
+        context.Users.Add(new User { Id = user1Id, ExternalId = "user1", DisplayName = "User 1", Email = "user1@example.com", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
+        context.Users.Add(new User { Id = user2Id, ExternalId = "user2", DisplayName = "User 2", Email = "user2@example.com", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
 
         // p1 (75-a-i-1): Liked by user1
         context.ProblemLikes.Add(new ProblemLike { UserId = user1Id, ProblemId = p1.Id, CreatedAt = DateTimeOffset.UtcNow });

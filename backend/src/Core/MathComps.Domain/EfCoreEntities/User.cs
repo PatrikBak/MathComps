@@ -25,16 +25,10 @@ public class User
     public string? Email { get; set; }
 
     /// <summary>
-    /// First name (optional).
+    /// Display name of the user.
     /// </summary>
     [MaxLength(100)]
-    public string? FirstName { get; set; }
-
-    /// <summary>
-    /// Last name (optional).
-    /// </summary>
-    [MaxLength(100)]
-    public string? LastName { get; set; }
+    public required string DisplayName { get; set; }
 
     /// <summary>
     /// Whether the user has been soft deleted.

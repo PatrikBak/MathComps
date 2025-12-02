@@ -70,10 +70,15 @@ public class ClerkWebhook(
 
                     // Extract names
                     var firstName = data.GetProperty("first_name").GetString();
-                    var lastName = data.GetProperty("last_name").GetString();
+                    var username = data.GetProperty("username").GetString();
+
+                    // The display name should be the first name if available, otherwise the username.
+                    var displayName = firstName ?? username
+                        // If no name is available, it's sus
+                        ?? throw new ArgumentException("A user without a first name or username should not exist.");
 
                     // Create DTO for synchronization.
-                    var userDto = new UserSyncDto(clerkId, email, firstName, lastName);
+                    var userDto = new UserSyncDto(clerkId, email, displayName);
 
                     // Delegate synchronization to the user manager.
                     await userManager.SyncUserAsync(userDto, cancellationToken);

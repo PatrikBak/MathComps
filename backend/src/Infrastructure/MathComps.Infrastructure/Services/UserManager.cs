@@ -27,8 +27,7 @@ public class UserManager(
         var user = new User
         {
             ExternalId = userDto.ExternalId,
-            FirstName = userDto.FirstName,
-            LastName = userDto.LastName,
+            DisplayName = userDto.DisplayName,
             Email = userDto.Email,
             CreatedAt = now,
             UpdatedAt = now
@@ -75,12 +74,16 @@ public class UserManager(
             return null;
         }
 
+        // The display name should be the first name if available, otherwise the username.
+        var displayName = clerkUser.FirstName ?? clerkUser.Username
+            // If no name is available, it's sus
+            ?? throw new ArgumentException("A user without a first name or username should not exist.");
+
         // Happy path, we have the user
         var userDto = new UserSyncDto(
             clerkUser.Id,
             clerkUser.EmailAddresses?.FirstOrDefault()?.EmailAddressValue ?? "",
-            clerkUser.FirstName,
-            clerkUser.LastName
+            displayName
         );
 
         // Sync user to DB
@@ -102,8 +105,7 @@ public class UserManager(
         }
 
         // Anonymize personal information.
-        user.FirstName = null;
-        user.LastName = null;
+        user.DisplayName = "Deleted User";
         user.Email = null;
 
         // Mark the user as soft-deleted
