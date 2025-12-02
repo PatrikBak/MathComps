@@ -19,6 +19,7 @@ export const createDefaultFilters = (): SearchFiltersState => ({
   authors: [],
   authorLogic: 'or',
   contestSelection: [],
+  favoritesOnly: false,
 })
 
 /**

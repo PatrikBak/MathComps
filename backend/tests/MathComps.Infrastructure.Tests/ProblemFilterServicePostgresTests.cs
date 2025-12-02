@@ -172,8 +172,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorLogic: LogicToggle.Or
                 ),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the filter with no criteria
@@ -210,8 +212,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the text search
@@ -250,8 +254,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Test 2: UPPERCASE without accents should match "štvorstena" (lowercase with accents)
@@ -268,8 +274,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Test 3: UPPERCASE without accents should match "Prirodzené" (different case with accents)
@@ -286,8 +294,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Test 4: lowercase without accents should match "Prirodzené" (different case with accents)
@@ -304,8 +314,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute all search variations
@@ -354,8 +366,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: ["patrik-bak"],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the author filter
@@ -388,8 +402,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the OR tag filter
@@ -421,8 +437,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the AND tag filter
@@ -454,8 +472,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the complex multi-criteria filter
@@ -492,8 +512,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 4,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
         var page2Query = new ProblemFilterOptions(
             new FilterQuery(
@@ -508,8 +530,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 4,
-                PageNumber: 2
-            )
+                PageNumber: 2,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute both page queries
@@ -545,8 +569,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
 
         // Act - execute the query that should return no results
@@ -585,8 +611,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
                     AuthorSlugs: [],
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
-                PageNumber: 1
-            )
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
         );
         var resultUser1 = await ExecuteFiltering(baseQuery with { UserId = user1Id });
 
@@ -629,6 +657,73 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
 
         Assert.False(p2Anon.Liked);
         Assert.Equal(2, p2Anon.LikeCount);
+    }
+
+    /// <summary>
+    /// Verifies that filtering with FavoritesOnly returns only problems liked by the requesting user.
+    /// This test ensures that:
+    /// 1. When FavoritesOnly is true and a user is provided, only problems liked by that user are returned.
+    /// 2. When FavoritesOnly is false, all problems are returned regardless of like status.
+    /// 3. When FavoritesOnly is true but no user is provided, no problems are returned (anonymous users have no favorites).
+    /// </summary>
+    [Fact]
+    public async Task FilterWithFavoritesOnlyReturnsOnlyLikedProblems()
+    {
+        // Arrange - Use seeded users
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        // Create base query with FavoritesOnly = true
+        var favoritesQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: true
+            ),
+            UserId: null
+        );
+
+        // Act 1: Query favorites for User 1 (liked 75-a-i-1 and 75-b-i-1)
+        var resultUser1Favorites = await ExecuteFiltering(favoritesQuery with { UserId = user1Id });
+
+        // Act 2: Query favorites for User 2 (liked only 75-b-i-1)
+        var resultUser2Favorites = await ExecuteFiltering(favoritesQuery with { UserId = user2Id });
+
+        // Act 3: Query favorites for Anonymous (should return nothing)
+        var resultAnonFavorites = await ExecuteFiltering(favoritesQuery);
+
+        // Act 4: Query all problems for User 1 (FavoritesOnly = false)
+        var allProblemsQuery = favoritesQuery with { Query = favoritesQuery.Query with { FavoritesOnly = false } };
+        var resultUser1All = await ExecuteFiltering(allProblemsQuery with { UserId = user1Id });
+
+        // Assert 1: User 1 favorites - should get 2 problems (75-a-i-1 and 75-b-i-1)
+        Assert.Equal(2, resultUser1Favorites.Problems.TotalCount);
+        Assert.Contains(resultUser1Favorites.Problems.Items, p => p.Slug == "75-a-i-1");
+        Assert.Contains(resultUser1Favorites.Problems.Items, p => p.Slug == "75-b-i-1");
+        Assert.All(resultUser1Favorites.Problems.Items, p => Assert.True(p.Liked));
+
+        // Assert 2: User 2 favorites - should get 1 problem (75-b-i-1)
+        Assert.Single(resultUser2Favorites.Problems.Items);
+        Assert.Equal("75-b-i-1", resultUser2Favorites.Problems.Items[0].Slug);
+        Assert.True(resultUser2Favorites.Problems.Items[0].Liked);
+
+        // Assert 3: Anonymous favorites - should get 0 problems
+        Assert.Empty(resultAnonFavorites.Problems.Items);
+        Assert.Equal(0, resultAnonFavorites.Problems.TotalCount);
+
+        // Assert 4: User 1 all problems - should get all 7 problems
+        Assert.Equal(7, resultUser1All.Problems.TotalCount);
     }
 
     /// <summary>
@@ -1080,5 +1175,6 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         await context.SaveChangesAsync();
     }
 }
+
 
 

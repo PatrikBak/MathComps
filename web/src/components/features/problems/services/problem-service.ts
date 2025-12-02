@@ -100,6 +100,7 @@ export async function getProblemBySlug(
     tagLogic: 'or',
     authors: [],
     authorLogic: 'or',
+    favoritesOnly: false,
   }
 
   // Create the result structure expected by the page
@@ -150,6 +151,7 @@ export async function getInitialFilterData(
       },
       pageSize: 20,
       pageNumber: 1,
+      favoritesOnly: false,
     }),
   })
 
@@ -215,6 +217,7 @@ export async function searchProblems(
       parameters: filterParameters,
       pageSize,
       pageNumber,
+      favoritesOnly: filters.favoritesOnly,
     }),
     signal,
   })

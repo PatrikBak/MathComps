@@ -13,6 +13,7 @@ import { VIRTUOSO_INCREASE_VIEWPORT_BY } from '@/components/features/problems/co
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { SHOW_TECHNIQUE_TAGS_STORAGE_KEY } from '@/constants/local-storage-constants'
 
+import { usePendingProblemLike } from '../hooks/use-pending-problem-like'
 import { useProblemSearch } from '../hooks/use-problem-search'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
@@ -31,29 +32,38 @@ const ActiveFiltersBarSkeleton = () => (
 )
 
 export default function ProblemsLibrary() {
-  const { state, handleFiltersChange, loadMore } = useProblemSearch()
+  // The hook to handle all difficult logic of problem search
   const {
-    isLoading,
-    isSearchingInBackground,
-    isLoadingMore,
-    isSearchingWithNoData,
-    filters,
-    initialFilters,
-    filterOptions,
-    baseOptions,
-    problems,
-    totalCount,
-    hasMore,
-    error,
-    hasInitialDataLoaded,
-    isOfflineMode,
-  } = state
+    state: {
+      isLoading,
+      isSearchingInBackground,
+      isLoadingMore,
+      isSearchingWithNoData,
+      filters,
+      initialFilters,
+      filterOptions,
+      baseOptions,
+      problems,
+      totalCount,
+      hasMore,
+      error,
+      hasInitialDataLoaded,
+    },
+    handleFiltersChange,
+    loadMore,
+  } = useProblemSearch()
 
+  // In the local storage, we'll store whether the user wants to see technique tags
   const [showTechniqueTags, setShowTechniqueTags] = useLocalStorage({
     key: SHOW_TECHNIQUE_TAGS_STORAGE_KEY,
     defaultValue: false,
   })
+
+  // State for mobile filter drawer
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+
+  // Handle pending problem likes after user authentication
+  usePendingProblemLike()
 
   // We'll track whether we have the needed data. Before that, we show skeletons
   const isPageReady =
@@ -92,19 +102,18 @@ export default function ProblemsLibrary() {
       return
     }
 
-    // Normal click: toggle this tag
+    // Check if the tag is already selected
     const isTagAlreadySelected = filters.tags.some((existingTag) => existingTag.slug === tag.slug)
 
-    const newFilters = {
+    // Update the filters
+    handleFiltersChange({
       ...filters,
       tags: isTagAlreadySelected
         ? // Remove the tag if it's already selected
           filters.tags.filter((existingTag) => existingTag.slug !== tag.slug)
         : // Add the tag if it's not selected
           [...filters.tags, tag],
-    }
-
-    handleFiltersChange(newFilters)
+    })
   }
 
   // Handle author clicks to toggle them in filters
@@ -120,21 +129,20 @@ export default function ProblemsLibrary() {
       return
     }
 
-    // Normal click: toggle this author
+    // Check if the author is already selected
     const isAuthorAlreadySelected = filters.authors.some(
       (existingAuthor) => existingAuthor.slug === author.slug
     )
 
-    const newFilters = {
+    // Update the filters
+    handleFiltersChange({
       ...filters,
       authors: isAuthorAlreadySelected
         ? // Remove the author if it's already selected
           filters.authors.filter((existingAuthor) => existingAuthor.slug !== author.slug)
         : // Add the author if it's not selected
           [...filters.authors, author],
-    }
-
-    handleFiltersChange(newFilters)
+    })
   }
 
   // Animation state management
@@ -224,7 +232,7 @@ export default function ProblemsLibrary() {
 
     // Track current searching state for next render
     previousIsSearchingInBackground.current = isSearchingInBackground
-  }, [isSearchingInBackground, isLoadingMore, isOfflineMode, problems.length])
+  }, [isSearchingInBackground, isLoadingMore, problems.length])
 
   // Scroll to top when problems set changes (new search), but not during infinite scroll
   useEffect(() => {
@@ -385,10 +393,10 @@ export default function ProblemsLibrary() {
                           loadMore()
                         }
                       }}
-                      itemContent={(index, problem) => (
+                      itemContent={(index, problemSlug) => (
                         <AnimatedProblemCard
-                          key={problem.slug}
-                          problem={problem}
+                          key={problemSlug}
+                          problemSlug={problemSlug}
                           ordinalNumber={index + 1}
                           index={index}
                           isNewBatch={searchBatchId > 0}

@@ -1,6 +1,9 @@
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+
+import { ROUTES } from '@/constants/routes'
+import { useCurrentUrl } from '@/hooks/useCurrentUrl'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
@@ -19,19 +22,36 @@ type UrlSyncParams = {
   baseOptions: FilterOptionsWithCounts | null
   /** Callback to apply parsed URL filters to component state - bridges URL and React state */
   handleFiltersChange: (filters: SearchFiltersState) => void
+  /** Whether Clerk auth has finished loading */
+  isLoaded: boolean
+  /** Whether the user is signed in */
+  isSignedIn: boolean
 }
 
 /**
  * Handles the one-time side effect of synchronizing the problem search state
- * with the URL's search parameters when the component mounts. This allows for
- * bookmarking and sharing specific search views.
+ * with the URL's search parameters when the component mounts.
  *
  * @param params - An object containing the current filters, base filter options,
  * and the handler for filter changes.
  */
-export const useProblemUrlSync = ({ filters, baseOptions, handleFiltersChange }: UrlSyncParams) => {
+export const useProblemUrlSync = ({
+  filters,
+  baseOptions,
+  handleFiltersChange,
+  isLoaded,
+  isSignedIn,
+}: UrlSyncParams) => {
   // Access URL search parameters to enable bookmarkable filter states
   const searchParams = useSearchParams()
+
+  // Access router to enable navigation to login page
+  // (when we try to get favorites and user is not signed in)
+  const router = useRouter()
+
+  // Get the current URL function to pass it to the login page triggered
+  // by the favorites button in case the user is not signed in
+  const currentUrl = useCurrentUrl()
 
   // Prevent multiple URL syncs during component lifecycle - this is a one-time operation
   const isInitializedFromUrl = useRef(false)
@@ -39,7 +59,6 @@ export const useProblemUrlSync = ({ filters, baseOptions, handleFiltersChange }:
   // Synchronize URL parameters with component state on mount, enabling shareable search URLs
   useEffect(() => {
     // Wait for server data to be available before attempting URL synchronization
-    // This prevents race conditions where URL parsing happens before filter options are loaded
     if (!baseOptions || isInitializedFromUrl.current) {
       return
     }
@@ -53,6 +72,20 @@ export const useProblemUrlSync = ({ filters, baseOptions, handleFiltersChange }:
     // Skip filter synchronization when viewing individual problems to avoid conflicts
     // Individual problem pages handle their own URL state management
     if (hasProblemId(searchParams)) {
+      return
+    }
+
+    // Check if favorites mode is requested in URL
+    const favoritesRequested = searchParams.get('favorites') === 'true'
+
+    // If favorites is requested, wait for auth to load before proceeding
+    if (favoritesRequested && !isLoaded) {
+      return
+    }
+
+    // If favorites is requested and user is not signed in, redirect to login
+    if (favoritesRequested && !isSignedIn) {
+      router.push(`${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(currentUrl())}`)
       return
     }
 
@@ -71,13 +104,23 @@ export const useProblemUrlSync = ({ filters, baseOptions, handleFiltersChange }:
     })
 
     // Notify users about malformed URL parameters that couldn't be applied
-    // This provides feedback when shared URLs contain invalid or outdated parameters
     if (hasInvalidParams) {
       toast.warning('Niektoré parametre v URL boli ignorované')
-    } else if (hasTooManyFilters) {
+    }
+    // Notify users about too many filters in URL
+    else if (hasTooManyFilters) {
       toast.warning(
         `URL obsahuje príliš veľa filtrov (maximálne ${ACTIVE_FILTERS_CONSTANTS.maxFilterLimit})`
       )
     }
-  }, [baseOptions, searchParams, filters, handleFiltersChange])
+  }, [
+    baseOptions,
+    searchParams,
+    filters,
+    handleFiltersChange,
+    isLoaded,
+    isSignedIn,
+    currentUrl,
+    router,
+  ])
 }

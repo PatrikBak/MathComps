@@ -66,7 +66,12 @@ public static class EndpointExtensions
 
             // Construct filter options
             var filterOptions = new ProblemFilterOptions(
-                new FilterQuery(filters, PageSize: 1, PageNumber: 1),
+                new FilterQuery(
+                    filters,
+                    PageSize: 1,
+                    PageNumber: 1,
+                    FavoritesOnly: false
+                ),
                 userId
             );
 

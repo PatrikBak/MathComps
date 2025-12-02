@@ -389,7 +389,6 @@ input[type='checkbox']:focus:not(:focus-visible) {
   --width: 480px !important;
 }
 [data-sonner-toast] {
-  /* Base glassmorphism styling */
   backdrop-filter: blur(12px) saturate(180%) !important;
   border-radius: 12px !important;
   border-width: 1px !important;
@@ -400,41 +399,179 @@ input[type='checkbox']:focus:not(:focus-visible) {
   /* Prevent glitchy animations */
   will-change: transform, opacity;
   transform: translateZ(0);
+  break-inside: avoid;
 }
 
-/* Success toast - vibrant green with glassmorphism */
+/* Toast icon styling */
+[data-sonner-toast] [data-icon] {
+  margin-right: 12px;
+}
+
+/* Toast content */
+[data-sonner-toast] [data-content] {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25rem !important;
+}
+
+/* Toast title/description */
+[data-sonner-toast] [data-title] {
+  font-weight: 400 !important;
+}
+
+/* Toast button hover */
+[data-sonner-toast] [data-button]:hover {
+  transform: scale(1.05);
+}
+
+/* Toast button active */
+[data-sonner-toast] [data-button]:active {
+  transform: scale(0.95);
+}
+
+/* Toast close button (X) */
+[data-sonner-toast] > [data-close-button='true'] {
+  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Toast close button (X) hover */
+[data-sonner-toast] > [data-close-button='true']:hover {
+  background: #f0f0f0 !important;
+  border-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Success toast */
 [data-sonner-toast][data-type='success'] {
   background: rgba(22, 163, 74, 0.9) !important;
   border-color: rgba(34, 197, 94, 0.3) !important;
   color: rgb(220, 252, 231) !important;
 }
 
-/* Error toast - vibrant red */
+/* Success toast button */
+[data-sonner-toast][data-type='success'] [data-button='true'] {
+  background: rgba(220, 252, 231, 0.2) !important;
+  border: 1px solid rgba(220, 252, 231, 0.3) !important;
+  color: rgb(220, 252, 231) !important;
+}
+
+/* Success toast button hover */
+[data-sonner-toast][data-type='success'] [data-button='true']:hover {
+  background: rgba(220, 252, 231, 0.3) !important;
+  border-color: rgba(220, 252, 231, 0.4) !important;
+}
+
+/* Success toast data description */
+[data-sonner-toast][data-type='success'] [data-description] {
+  color: rgb(220, 252, 231) !important;
+  opacity: 0.85 !important;
+}
+
+/* Error toast */
 [data-sonner-toast][data-type='error'] {
   background: rgba(220, 38, 38, 0.9) !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
   color: rgb(254, 226, 226) !important;
 }
 
-/* Info toast - vibrant blue */
+/* Error toast button */
+[data-sonner-toast][data-type='error'] [data-button='true'] {
+  background: rgba(254, 226, 226, 0.2) !important;
+  border: 1px solid rgba(254, 226, 226, 0.3) !important;
+  color: rgb(254, 226, 226) !important;
+}
+
+/* Error toast button hover */
+[data-sonner-toast][data-type='error'] [data-button='true']:hover {
+  background: rgba(254, 226, 226, 0.3) !important;
+  border-color: rgba(254, 226, 226, 0.4) !important;
+}
+
+/* Error toast data description */
+[data-sonner-toast][data-type='error'] [data-description] {
+  color: rgb(254, 226, 226) !important;
+  opacity: 0.85 !important;
+}
+
+/* Info toast */
 [data-sonner-toast][data-type='info'] {
   background: rgba(37, 99, 235, 0.9) !important;
   border-color: rgba(59, 130, 246, 0.3) !important;
   color: rgb(219, 234, 254) !important;
 }
 
-/* Warning toast - vibrant yellow with dark text for readability */
+/* Info toast button */
+[data-sonner-toast][data-type='info'] [data-button='true'] {
+  background: rgba(219, 234, 254, 0.2) !important;
+  border: 1px solid rgba(219, 234, 254, 0.3) !important;
+  color: rgb(219, 234, 254) !important;
+}
+
+/* Info toast button hover */
+[data-sonner-toast][data-type='info'] [data-button='true']:hover {
+  background: rgba(219, 234, 254, 0.3) !important;
+  border-color: rgba(219, 234, 254, 0.4) !important;
+}
+
+/* Info toast data description */
+[data-sonner-toast][data-type='info'] [data-description] {
+  color: rgb(219, 234, 254) !important;
+  opacity: 0.85 !important;
+}
+
+/* Warning toast */
 [data-sonner-toast][data-type='warning'] {
   background: rgba(234, 179, 8, 0.95) !important;
   border-color: rgba(250, 204, 21, 0.4) !important;
   color: rgb(20, 20, 20) !important;
 }
 
-/* Loading toast - vibrant orange */
+/* Warning toast button */
+[data-sonner-toast][data-type='warning'] [data-button='true'] {
+  background: transparent !important;
+  border: 1px solid rgba(20, 20, 20, 0.6) !important;
+  color: rgb(20, 20, 20) !important;
+  font-weight: 500 !important;
+}
+
+/* Warning toast button hover */
+[data-sonner-toast][data-type='warning'] [data-button='true']:hover {
+  background: rgba(20, 20, 20, 0.1) !important;
+  border-color: rgb(20, 20, 20) !important;
+}
+
+/* Warning toast data description */
+[data-sonner-toast][data-type='warning'] [data-description] {
+  color: rgb(20, 20, 20) !important;
+  opacity: 0.75 !important;
+}
+
+/* Loading toast */
 [data-sonner-toast][data-type='loading'] {
   background: rgba(249, 115, 22, 0.9) !important;
   border-color: rgba(251, 146, 60, 0.3) !important;
   color: rgb(254, 237, 227) !important;
+}
+
+/* Loading toast button */
+[data-sonner-toast][data-type='loading'] [data-button='true'] {
+  background: rgba(254, 237, 227, 0.2) !important;
+  border: 1px solid rgba(254, 237, 227, 0.3) !important;
+  color: rgb(254, 237, 227) !important;
+}
+
+/* Loading toast button hover */
+[data-sonner-toast][data-type='loading'] [data-button='true']:hover {
+  background: rgba(254, 237, 227, 0.3) !important;
+  border-color: rgba(254, 237, 227, 0.4) !important;
+}
+
+/* Loading toast data description */
+[data-sonner-toast][data-type='loading'] [data-description] {
+  color: rgb(254, 237, 227) !important;
+  opacity: 0.85 !important;
+  margin-left: 8px !important;
 }
 
 /* Animated dots for loading toast - appear inline at the end of text */
@@ -445,8 +582,7 @@ input[type='checkbox']:focus:not(:focus-visible) {
   display: inline !important;
 }
 
-[data-sonner-toast][data-type='loading'] [data-title]::after,
-[data-sonner-toast][data-type='loading'] [data-description]::after {
+[data-sonner-toast][data-type='loading'] [data-title]::after {
   content: '';
   display: inline-block;
   vertical-align: baseline;
@@ -520,46 +656,4 @@ input[type='checkbox']:focus:not(:focus-visible) {
   animation: error-pulse 0.6s ease-out;
   outline: 1px solid transparent;
   outline-offset: 2px;
-}
-
-/* Toast icon styling */
-[data-sonner-toast] [data-icon] {
-  margin-right: 12px;
-}
-
-/* Toast content */
-[data-sonner-toast] [data-content] {
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  line-height: 1.25rem !important;
-}
-
-/* Toast title/description */
-[data-sonner-toast] [data-title] {
-  font-weight: 500 !important;
-}
-
-/* Toast close button */
-[data-sonner-toast] [data-button] {
-  margin-left: 12px;
-  opacity: 0.8;
-  transition: all 200ms ease;
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
-  padding: 4px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-}
-
-[data-sonner-toast] [data-button]:hover {
-  opacity: 1;
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  transform: scale(1.05);
-}
-
-[data-sonner-toast] [data-button]:active {
-  transform: scale(0.95);
 }

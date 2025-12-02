@@ -1,9 +1,11 @@
-import { Lightbulb, X } from 'lucide-react'
-import React, { useRef } from 'react'
+import { useAuth } from '@clerk/nextjs'
+import { Heart, Layers, Lightbulb, X } from 'lucide-react'
+import React, { useEffect, useRef } from 'react'
 
 import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 import {
@@ -12,11 +14,56 @@ import {
 } from '../hooks/use-search-filters-logic'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { createFilterUpdater } from '../utils/filter-update-utils'
+import { serializeFilters } from '../utils/search-url-serialization'
+import { getProblemsPageUrl } from '../utils/url-utils'
 import MultiSelectFacet from './facets/MultiSelectFacet'
 import TreeSelectFacet from './facets/TreeSelectFacet'
 
-// Defines the type of filter change to distinguish between immediate and debounced search
-type FilterType = 'text' | 'discrete'
+/**
+ * Defines the type of filter change to distinguish between immediate and debounced search
+ */
+export type FilterType = 'text' | 'discrete'
+
+/**
+ * Props for {@link ModeToggleButton}
+ */
+type ModeToggleButtonProps = {
+  /** Whether this button is active */
+  isActive: boolean
+  /** Click handler */
+  onClick: () => void
+  /** Button label */
+  label: string
+  /** Icon to show before label */
+  icon?: React.ReactElement
+  /** Whether button should show loading state */
+  isLoading?: boolean
+}
+
+/**
+ * Individual button within the mode toggle segmented control.
+ */
+const ModeToggleButton = ({ isActive, onClick, label, icon, isLoading }: ModeToggleButtonProps) => {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200',
+        icon && 'flex items-center justify-center gap-1.5',
+        isActive ? 'text-white' : 'text-gray-400 hover:text-gray-300',
+        isLoading && 'opacity-50 cursor-wait'
+      )}
+    >
+      {React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
+        className: cn(
+          'h-3.5 w-3.5 transition-all duration-200',
+          isActive ? 'fill-white text-white' : 'fill-none text-gray-400'
+        ),
+      })}
+      {label}
+    </button>
+  )
+}
 
 /**
  * A tooltip icon component that provides helpful information
@@ -49,7 +96,7 @@ function TipsAndTricks() {
           <p className="text-slate-300/90">Dlhé podržanie na položke {explanationText}</p>
         ) : (
           <p className="text-slate-300/90">
-            Stlačenie{' '}
+            Dlhé podržanie na položke alebo stlačenie{' '}
             <kbd className="px-1 py-0.5 rounded bg-slate-600/50 text-xs font-mono">
               {modifierKey}
             </kbd>{' '}
@@ -102,7 +149,11 @@ export const SearchFilters = ({
   filterOptions,
   baseOptions,
 }: SearchFiltersProps) => {
+  // Ref for the search input
   const searchTextRef = useRef<HTMLInputElement | null>(null)
+
+  // Auth state
+  const { isLoaded, isSignedIn } = useAuth()
 
   const {
     competitionTreeOpts,
@@ -123,11 +174,68 @@ export const SearchFilters = ({
   // A helper function to update filters
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
 
+  // A function to show the login prompt toast to access favorites
+  const showLoginPrompt = useLoginPromptToast()
+
+  // Handle favorites button click
+  const handleFavoritesClick = () => {
+    // Still loading, do nothing
+    if (!isLoaded) {
+      return
+    }
+
+    // User is not signed in, show login prompt
+    if (!isSignedIn) {
+      // Create filters with favorites enabled to redirect correctly after login
+      const nextFilters = { ...filters, favoritesOnly: true }
+      const queryString = serializeFilters(nextFilters)
+      const redirectUrl = getProblemsPageUrl(queryString)
+
+      // Show login prompt with a redirect URL to the filter with favorite problems
+      showLoginPrompt({ reason: 'zobrazenie obľúbených úloh', redirectUrl })
+      return
+    }
+
+    // User is signed in, toggle favorites
+    updateFilter('favoritesOnly', true, 'discrete')
+  }
+
+  // Clear favoritesOnly when user logs out
+  useEffect(() => {
+    if (isLoaded && !isSignedIn && filters.favoritesOnly) {
+      updateFilter('favoritesOnly', false, 'discrete')
+    }
+  }, [isLoaded, isSignedIn, filters.favoritesOnly, updateFilter])
+
   return (
     <div className="flex flex-col rounded-lg border border-slate-600/40 bg-slate-800/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">
       {/* Filters Body */}
       <div className="flex-grow overflow-y-auto p-3 sm:p-4 lg:p-5 lg:min-h-0">
         <div className="space-y-3 sm:space-y-4">
+          {/* Section 0: Mode Switch - All vs Favorites */}
+          <div className="mb-6">
+            <div className="flex w-full rounded-lg p-1 border border-slate-600/40">
+              <ModeToggleButton
+                isActive={!filters.favoritesOnly}
+                onClick={() => updateFilter('favoritesOnly', false, 'discrete')}
+                icon={<Layers />}
+                label="Všetky úlohy"
+              />
+              <ModeToggleButton
+                isActive={filters.favoritesOnly}
+                onClick={handleFavoritesClick}
+                isLoading={!isLoaded}
+                icon={<Heart />}
+                label="Moje obľúbené"
+              />
+            </div>
+            {isLoaded && !isSignedIn && filters.favoritesOnly && (
+              <p className="mt-2 text-xs text-slate-500 text-center px-2">
+                Pre zobrazenie obľúbených úloh sa musíte prihlásiť.
+              </p>
+            )}
+          </div>
+
           {/* Section 1: Full-text search */}
           <div>
             <div className="mb-2 sm:mb-3 flex items-center justify-between gap-2">

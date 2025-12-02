@@ -1,49 +1,42 @@
-'use client'
-
-import { useLocalStorage } from '@mantine/hooks'
 import { ChevronDown, ExternalLink, Eye, EyeOff, Heart, Link, User } from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 
 import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
-import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
-import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { ROUTES } from '@/constants/routes'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
-import { useApi } from '@/hooks/useApi'
-import { useCurrentUrl } from '@/hooks/useCurrentUrl'
+import { useProblem } from '@/stores/problem-store'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
-import { toggleProblemLike } from '../services/problem-service'
-import type { Problem } from '../types/problem-api-types'
+import { useToggleProblemLike } from '../hooks/use-toggle-problem-like'
 import { sortTagsByCategory } from '../utils/tag-utils'
 import Chip from './Chip'
 import type { SimilarProblemViewMode } from './SimilarProblemView'
 import { SimilarProblemView } from './SimilarProblemView'
 
 /**
- * Props for the ProblemCard component that displays a mathematical problem with its metadata and interactive features.
- *
- * @param problem - The problem data containing statement, tags, authors, and similar problems
- * @param ordinalNumber - Sequential number to display in the card header
- * @param areTechniquesGloballyVisible - Whether solution techniques should be shown globally across all cards
- * @param onTagClick - Callback when a tag is clicked for filtering
- * @param selectedTagSlugs - Set of currently selected tag slugs for highlighting
- * @param activeTechniqueFilterSlugs - Set of technique tag slugs that are actively being filtered (useful when technique tags are hidden in general - these should not be hidden though)
- * @param onAuthorClick - Callback when an author name is clicked for filtering
- * @param selectedAuthorSlugs - Set of currently selected author slugs for highlighting
+ * Props for the {@link ProblemCard} component.
  */
 export type ProblemCardProps = {
-  problem: Problem
+  /** The slug of the problem to display */
+  problemSlug: string
+  /** Sequential number to display in the card header */
   ordinalNumber: number
+  /** Whether solution techniques should be shown globally across all cards */
   areTechniquesGloballyVisible: boolean
+  /** Callback when a tag is clicked for filtering */
   onTagClick: (tag: { displayName: string; slug: string }, event: React.MouseEvent) => void
+  /** Set of currently selected tag slugs for highlighting */
   selectedTagSlugs: Set<string>
+  /**
+   * Set of technique tag slugs that are actively being filtered
+   * (useful when technique tags are hidden in general - these should not be hidden though)
+   */
   activeTechniqueFilterSlugs: Set<string>
+  /** Callback when an author name is clicked for filtering */
   onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
+  /** Set of currently selected author slugs for highlighting */
   selectedAuthorSlugs: Set<string>
 }
 
@@ -88,12 +81,13 @@ const AuthorButton = React.memo(function AuthorButton({
  * - Filtering by tags and authors
  * - Sharing permalinks
  * - Viewing similar problems
+ * - Toggling likes
  *
  * @param props - The component props containing problem data and interaction handlers
  * @returns JSX element representing the problem card
  */
 export function ProblemCard({
-  problem,
+  problemSlug,
   ordinalNumber,
   areTechniquesGloballyVisible,
   onTagClick,
@@ -102,17 +96,21 @@ export function ProblemCard({
   onAuthorClick,
   selectedAuthorSlugs,
 }: ProblemCardProps) {
+  // Get the problem data from the global store
+  const problem = useProblem(problemSlug)
+
+  // Stores if the similar problems view is expanded
   const [expandedView, setExpandedView] = useState<SimilarProblemViewMode>(null)
+
+  // Stores if the techniques are locally visible (in this card
+  // (even when they are globally hidden, we can show them per card basis)
   const [areTechniquesLocallyVisible, setAreTechniquesLocallyVisible] = useState(false)
-  const [isLiked, setIsLiked] = useState(problem.liked)
-  const [likeCount, setLikeCount] = useState(problem.likeCount)
+
+  // Function for copying permalinks on problems
   const { copyPermalink } = useProblemPermalink()
-  const api = useApi()
-  const [pendingLikeSlug, setPendingLikeSlug] = useLocalStorage<string | null>({
-    key: PENDING_PROBLEM_LIKE_STORAGE_KEY,
-    defaultValue: null,
-  })
-  const getCurrentUrl = useCurrentUrl()
+
+  // The hook to toggle likes
+  const toggleLike = useToggleProblemLike()
 
   /**
    * Toggles the expanded view for similar problems section.
@@ -127,81 +125,10 @@ export function ProblemCard({
    * Handles copying the permalink for the current problem to clipboard.
    */
   const handlePermalinkCopy = useCallback(() => {
-    copyPermalink(problem.slug)
-  }, [problem.slug, copyPermalink])
-
-  /**
-   * Handles toggling the like state for the current problem.
-   * If user is not logged in, shows a toast notification.
-   * Implements optimistic updates with rollback on error.
-   */
-  const handleLikeToggle = useCallback(async () => {
-    // Handle different authentication states
-    switch (api.state) {
-      // Still loading Clerk's data
-      case 'loading':
-        toast.info('Overujem prihlásenie...')
-        break
-
-      // User is not signed in
-      case 'unauthenticated':
-        // Ensure we remember they liked the problem so we can apply it after login
-        setPendingLikeSlug(problem.slug)
-
-        // Show a toast notification to prompt the user to log in
-        toast.warning(
-          <>
-            Pre lajkovanie úloh sa musíte{' '}
-            <AppLink
-              href={`${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(getCurrentUrl())}`}
-              className="text-indigo-700 font-medium hover:underline"
-              onClick={() => toast.dismiss()}
-            >
-              prihlásiť
-            </AppLink>
-            .
-          </>
-        )
-        break
-
-      // User is signed in
-      case 'ready':
-        // Optimistic update - toggle immediately for responsive UI
-        const newIsLiked = !isLiked
-        setIsLiked(newIsLiked)
-        setLikeCount((previous) => (newIsLiked ? previous + 1 : previous - 1))
-
-        // Call the backend API to toggle the like
-        const result = await toggleProblemLike(api.apiCall, problem.slug)
-
-        // If the API call fails
-        if (!result.isSuccess) {
-          // Rollback the optimistic update
-          setIsLiked(!newIsLiked)
-          setLikeCount((prev) => (newIsLiked ? prev - 1 : prev + 1))
-          toast.error('Nepodarilo sa zmeniť stav lajku')
-          console.error('Failed to toggle like:', result.error)
-        }
-        break
+    if (problem) {
+      copyPermalink(problem.slug)
     }
-  }, [api, setPendingLikeSlug, problem, getCurrentUrl, isLiked])
-
-  /**
-   * Check for pending like action when user becomes authenticated
-   */
-  useEffect(() => {
-    // If we have an authenticated user
-    if (api.state === 'ready') {
-      // And they liked this problem while unauthenticated
-      if (pendingLikeSlug === problem.slug) {
-        // Apply the like action
-        handleLikeToggle()
-
-        // Clear the pending like.
-        setPendingLikeSlug(null)
-      }
-    }
-  }, [api.state, problem.slug, handleLikeToggle, pendingLikeSlug, setPendingLikeSlug])
+  }, [problem, copyPermalink])
 
   // Reset local reveal state when global techniques are hidden
   useEffect(() => {
@@ -212,23 +139,41 @@ export function ProblemCard({
 
   // Calculate technique tag visibility based on global settings and active filters
   const { hiddenTechniqueCount, hasVisibleTechniques } = useMemo(() => {
+    // We need to have a problem to return something meaningful
+    if (!problem) {
+      return {
+        hiddenTechniqueCount: 0,
+        hasVisibleTechniques: false,
+      }
+    }
+
+    // Get all technique tags
     const allTechniqueTags = problem.tags.filter((tag) => tag.tagType === 'Technique')
+
+    // Get technique tags that are part of an active filter
     const visibleDueToFilter = allTechniqueTags.filter((tag) =>
       activeTechniqueFilterSlugs.has(tag.slug)
     )
 
     // Technique tags are hidden if they're not part of an active filter
     const hiddenCount = allTechniqueTags.length - visibleDueToFilter.length
+
+    // Return the number of hidden technique tags and whether any are visible
     return {
       hiddenTechniqueCount: hiddenCount,
       hasVisibleTechniques: visibleDueToFilter.length > 0,
     }
-  }, [problem.tags, activeTechniqueFilterSlugs])
+  }, [problem, activeTechniqueFilterSlugs])
 
   // Determine if the "reveal techniques" chip should be shown
   // Only show when techniques are globally hidden, locally revealed, and there are hidden techniques
   const showRevealChip =
     !areTechniquesGloballyVisible && !areTechniquesLocallyVisible && hiddenTechniqueCount > 0
+
+  // If problem hasn't loaded yet, nothing to render or do
+  if (!problem) {
+    return null
+  }
 
   return (
     <div
@@ -250,19 +195,21 @@ export function ProblemCard({
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Like button */}
           <button
-            onClick={handleLikeToggle}
+            onClick={() => toggleLike(problem.slug)}
             className={cn(
               'flex items-center gap-1.5 px-2.5 py-1.5 text-sm transition-all duration-200 rounded-md hover:bg-slate-700/50',
-              isLiked ? 'text-red-500 hover:text-red-400' : 'text-gray-400 hover:text-gray-200'
+              problem.liked
+                ? 'text-red-400 hover:text-red-500'
+                : 'text-gray-400 hover:text-gray-200'
             )}
-            title={isLiked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
+            title={problem.liked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
           >
             <Heart
               size={16}
-              className={cn('transition-all duration-200', isLiked && 'fill-current')}
+              className={cn('transition-all duration-200', problem.liked && 'fill-current')}
             />
             {/* Like count with optimistic update */}
-            <span className="font-medium tabular-nums">{likeCount}</span>
+            <span className="font-medium tabular-nums">{problem.likeCount}</span>
           </button>
           {/* External solution link if available */}
           {problem.solutionLink && (

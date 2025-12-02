@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
 import KatexSetup from '@/components/math/KatexSetup'
+import { AuthStoreSync } from '@/components/shared/auth/AuthStoreSync'
 import ProgressBarProvider from '@/components/shared/providers/ProgressBarProvider'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { ToastProvider } from '@/components/shared/providers/ToastProvider'
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children?: React.ReactNode })
             <ProgressBarProvider>{children}</ProgressBarProvider>
           </QueryProvider>
           <ToastProvider />
+          <AuthStoreSync />
         </ClerkProvider>
       </body>
     </html>

@@ -5,8 +5,8 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// Wraps a <see cref="FilterQuery"/> with optional user ID for personalized data.
 /// </summary>
 /// <param name="Query">The base filter query from the API.</param>
-/// <param name="UserId">Optional ID of the requesting user for personalized data (e.g. likes).</param>
+/// <param name="UserId">ID of the requesting user for personalized data (e.g. likes).</param>
 public record ProblemFilterOptions(
     FilterQuery Query,
-    Guid? UserId = null
+    Guid? UserId
 );

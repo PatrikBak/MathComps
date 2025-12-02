@@ -6,8 +6,10 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// <param name="Parameters">Core filtering parameters for database queries.</param>
 /// <param name="PageSize">Requested number of results per page. Limited by server configuration to prevent DoS attacks.</param>
 /// <param name="PageNumber">1-based page index to retrieve. Must be positive.</param>
+/// <param name="FavoritesOnly">Whether to show only problems liked by the user.</param>
 public record FilterQuery(
     FilterParameters Parameters,
     int PageSize,
-    int PageNumber
+    int PageNumber,
+    bool FavoritesOnly
 );
