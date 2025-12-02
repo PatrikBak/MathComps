@@ -74,10 +74,10 @@ public class UserManager(
             return null;
         }
 
-        // The display name should be the first name if available, otherwise the username.
-        var displayName = clerkUser.FirstName ?? clerkUser.Username
-            // If no name is available, it's sus
-            ?? throw new ArgumentException("A user without a first name or username should not exist.");
+        // The display name should be the first name
+        var displayName = clerkUser.FirstName
+            // And it should exist - either from social or email login
+            ?? throw new ArgumentException("A user without a first name should not exist.");
 
         // Happy path, we have the user
         var userDto = new UserSyncDto(
