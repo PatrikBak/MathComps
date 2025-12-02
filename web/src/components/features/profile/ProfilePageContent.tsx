@@ -78,9 +78,11 @@ export default function ProfilePageContent() {
     if (!user || !newName) return
 
     try {
-      // Issue the update
+      // Issue the update...
+      // Forget the last name (that might have come from social login)
       await user.update({
         firstName: newName,
+        lastName: '',
       })
     } catch (error) {
       // Show errors in a toast
