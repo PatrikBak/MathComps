@@ -48,19 +48,24 @@ const ModeToggleButton = ({ isActive, onClick, label, icon, isLoading }: ModeTog
     <button
       onClick={onClick}
       className={cn(
-        'flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200',
-        icon && 'flex items-center justify-center gap-1.5',
+        'flex-1 rounded-md px-2 py-2 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 min-w-0',
         isActive ? 'text-white' : 'text-gray-400 hover:text-gray-300',
         isLoading && 'opacity-50 cursor-wait'
       )}
+      title={label}
     >
-      {React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-        className: cn(
-          'h-3.5 w-3.5 transition-all duration-200',
-          isActive ? 'fill-white text-white' : 'fill-none text-gray-400'
-        ),
-      })}
-      {label}
+      {/* Icon wrapper  */}
+      <div className="shrink-0">
+        {React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
+          className: cn(
+            'h-3.5 w-3.5 transition-all duration-200',
+            isActive ? 'fill-white text-white' : 'fill-none text-gray-400'
+          ),
+        })}
+      </div>
+
+      {/* Label */}
+      <span className="truncate whitespace-nowrap">{label}</span>
     </button>
   )
 }

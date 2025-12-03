@@ -4,14 +4,7 @@
 
 :root {
   scroll-behavior: smooth;
-  --scroll-offset: 96px;
-  --problems-sidebar-width: 300px;
-}
-
-@media (min-width: 1280px) {
-  :root {
-    --problems-sidebar-width: 350px;
-  }
+  --problems-sidebar-width: 335px;
 }
 
 @layer base {
