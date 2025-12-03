@@ -178,11 +178,12 @@ export function useToggleProblemLike() {
       // Look up the current like state from the store
       const problem = useProblemStore.getState().problems[problemSlug]
 
-      // If the problem is found, i.e. it is in the store, toggle the like state
+      // If the problem is found, i.e. it is in the store, call the mutation
+      // which will handle authentication checks and API calls
       if (problem) {
-        toggleProblemLikeInStore(problemSlug)
+        mutate({ problemSlug, isLiked: problem.liked })
       }
     },
-    [toggleProblemLikeInStore]
+    [mutate]
   )
 }
