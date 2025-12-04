@@ -1,29 +1,42 @@
+'use client'
+
 import { AuthenticateWithRedirectCallback } from '@clerk/nextjs'
+import { useSessionStorage } from '@mantine/hooks'
 
-import { generatePageMetadata } from '@/lib/metadata'
+import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
+import { ROUTES } from '@/constants/routes'
 
-export const metadata = {
-  ...generatePageMetadata({
-    title: 'SSO Callback',
-    description: 'Interná stránka na dokončenie SSO',
-    path: '/sso-callback',
-  }),
-  // No reason to index
-  robots: {
-    index: false,
-    follow: false,
-  },
-}
-
+/**
+ * SSO Callback page that handles OAuth redirects.
+ * This page is shown after a user authenticates with an OAuth provider (Google, Facebook, etc.)
+ * and is responsible for completing the authentication flow and redirecting the user.
+ */
 export default function SSOCallbackPage() {
-  // Coppied from the Clerk docs
-  return (
-    <>
-      {/* Prebuilt component handling redirect flow */}
-      <AuthenticateWithRedirectCallback />
+  // Get the return where the user was before the SSO callback
+  const [returnUrl] = useSessionStorage<string | null>({
+    key: AUTH_RETURN_URL_STORAGE_KEY,
+    defaultValue: null,
+  })
 
-      {/* Required for sign-up flows */}
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      {/* Prebuilt component handling redirect flow */}
+      <AuthenticateWithRedirectCallback
+        signInForceRedirectUrl={returnUrl || ROUTES.PROFILE}
+        signUpForceRedirectUrl={returnUrl || ROUTES.PROFILE}
+      />
+
+      {/* Lovely captcha will show here if Cloudflare decides */}
       <div id="clerk-captcha" />
-    </>
+
+      {/* Loading indicator */}
+      <div className="mt-8">
+        <LoadingSpinner />
+      </div>
+
+      {/* Status message */}
+      <p className="mt-4 text-slate-400 text-center">Presmerovávam...</p>
+    </div>
   )
 }

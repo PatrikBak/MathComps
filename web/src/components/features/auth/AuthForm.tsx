@@ -483,7 +483,7 @@ export default function AuthForm() {
       {/* Success Message */}
       {successMessage && <AuthMessage type="success" message={successMessage} />}
 
-      {/* Required for Clerk CAPTCHA widget */}
+      {/* Lovely captcha will show here if Cloudflare decides */}
       <div id="clerk-captcha" />
 
       {/* Hub Screen */}
