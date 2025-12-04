@@ -468,7 +468,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         modelBuilder.Entity<User>(e =>
         {
             e.HasIndex(u => u.ExternalId).IsUnique().HasDatabaseName("ux_user_external_id");
-            e.HasIndex(u => u.Email).IsUnique().HasDatabaseName("ux_user_email");
         });
 
         #endregion User
