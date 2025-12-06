@@ -14,7 +14,7 @@ public static class WebhookExtensions
     public static void MapWebhookEndpoints(this IEndpointRouteBuilder app)
     {
         // The endpoint to sync users from Clerk
-        app.MapPost("/api/webhooks/clerk", async (
+        app.MapPost("/webhooks/clerk", async (
             HttpContext context,
             IClerkWebhookService webhookService) =>
         {
