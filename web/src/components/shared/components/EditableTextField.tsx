@@ -89,6 +89,8 @@ export function EditableTextField({
   const [inputValue, setInputValue] = useState(value)
   // State to track if the save operation is in progress
   const [isSaving, setIsSaving] = useState(false)
+  // Ref to prevent double save calls (race condition between onBlur and onClick in production)
+  const isSavingRef = useRef(false)
   // State to store validation errors
   const [error, setError] = useState<string | null>(null)
   // State to trigger error pulse animation on validation error
@@ -117,6 +119,10 @@ export function EditableTextField({
    * Validates, calls onSave callback, and exits edit mode.
    */
   const handleSave = async () => {
+    // Guard against double save calls (race condition between onBlur and onClick)
+    if (isSavingRef.current) return
+    isSavingRef.current = true
+
     // Trim the input value
     const trimmedValue = inputValue?.trim()
 
@@ -126,6 +132,7 @@ export function EditableTextField({
     // Don't save if value hasn't changed
     if (trimmedValue === startValueRef.current) {
       setIsEditing(false)
+      isSavingRef.current = false
       return
     }
 
@@ -141,6 +148,7 @@ export function EditableTextField({
       setIsPulsing(true)
       setTimeout(() => setIsPulsing(false), 500)
       // We'll stay in the edit mode
+      isSavingRef.current = false
       return
     }
 
@@ -165,6 +173,7 @@ export function EditableTextField({
     } finally {
       // Saving done in any case
       setIsSaving(false)
+      isSavingRef.current = false
     }
   }
 
