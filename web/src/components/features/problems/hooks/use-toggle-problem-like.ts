@@ -137,18 +137,19 @@ export function useToggleProblemLike() {
           })
 
           // Show undo toast only when:
-          // 1. We unliked a problem (not liked)
+          // 1. We unliked a problem (isLiked was true before the toggle)
           // 2. AND we're currently viewing favorites only
           // This makes sense because the problem just disappeared from the view
           // In other contexts, the problem stays visible so undo is less critical
-          if (!isLiked && currentFilters?.favoritesOnly) {
+          if (isLiked && currentFilters?.favoritesOnly) {
             toast.info('Úloha bola odstránená z obľúbených', {
               action: {
                 label: 'Vrátiť',
                 onClick: () => {
-                  // Re-call the mutation with isLiked: true to undo the unlike
+                  // Re-call the mutation to undo the unlike
+                  // isLiked: false because the problem is currently unliked (before this re-like toggle)
                   // This reuses all the logic: optimistic updates, error handling, etc.
-                  mutate({ problemSlug, isLiked: true })
+                  mutate({ problemSlug, isLiked: false })
                 },
               },
             })
