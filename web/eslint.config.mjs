@@ -1,26 +1,59 @@
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
 import tsParser from '@typescript-eslint/parser'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import importPlugin from 'eslint-plugin-import'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import globals from 'globals'
-
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-  recommendedConfig: js.configs.recommended,
-})
+import nextPlugin from '@next/eslint-plugin-next'
+import reactPlugin from 'eslint-plugin-react'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import prettierConfig from 'eslint-config-prettier'
 
 const config = [
   {
-    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      'dist/**',
+      'coverage/**',
+      'public/**',
+    ],
   },
+  // React configuration
   {
-    ignores: ['**/node_modules/**', '.next/**', 'dist/**', 'out/**', 'coverage/**', 'public/**'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
+      '@next/next': nextPlugin,
+    },
+    rules: {
+      ...reactPlugin.configs.recommended.rules,
+      ...reactPlugin.configs['jsx-runtime'].rules,
+      // Only use the standard hooks rules, not the React Compiler rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+      // Disable prop-types - TypeScript handles this
+      'react/prop-types': 'off',
+      // Allow display name to be inferred
+      'react/display-name': 'off',
+      // Allow unescaped entities (Next.js default)
+      'react/no-unescaped-entities': 'off',
+      // Allow styled-jsx properties (jsx, global)
+      'react/no-unknown-property': ['error', { ignore: ['jsx', 'global'] }],
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
   },
-  ...compat.config({
-    extends: ['next/core-web-vitals', 'prettier'],
-  }),
+  // Prettier config (disables conflicting rules)
+  prettierConfig,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
