@@ -1,6 +1,4 @@
-'use client'
-
-import { ChevronDown, ExternalLink, Eye, EyeOff, Link, User } from 'lucide-react'
+import { ChevronDown, ExternalLink, Eye, EyeOff, Heart, Link, User } from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -8,34 +6,37 @@ import type { RawContentBlock } from '@/components/features/handouts/types/hando
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
+import { useProblem } from '@/stores/problem-store'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
-import type { Problem } from '../types/problem-api-types'
+import { useToggleProblemLike } from '../hooks/use-toggle-problem-like'
 import { sortTagsByCategory } from '../utils/tag-utils'
 import Chip from './Chip'
 import type { SimilarProblemViewMode } from './SimilarProblemView'
 import { SimilarProblemView } from './SimilarProblemView'
 
 /**
- * Props for the ProblemCard component that displays a mathematical problem with its metadata and interactive features.
- *
- * @param problem - The problem data containing statement, tags, authors, and similar problems
- * @param ordinalNumber - Sequential number to display in the card header
- * @param areTechniquesGloballyVisible - Whether solution techniques should be shown globally across all cards
- * @param onTagClick - Callback when a tag is clicked for filtering
- * @param selectedTagSlugs - Set of currently selected tag slugs for highlighting
- * @param activeTechniqueFilterSlugs - Set of technique tag slugs that are actively being filtered (useful when technique tags are hidden in general - these should not be hidden though)
- * @param onAuthorClick - Callback when an author name is clicked for filtering
- * @param selectedAuthorSlugs - Set of currently selected author slugs for highlighting
+ * Props for the {@link ProblemCard} component.
  */
 export type ProblemCardProps = {
-  problem: Problem
+  /** The slug of the problem to display */
+  problemSlug: string
+  /** Sequential number to display in the card header */
   ordinalNumber: number
+  /** Whether solution techniques should be shown globally across all cards */
   areTechniquesGloballyVisible: boolean
+  /** Callback when a tag is clicked for filtering */
   onTagClick: (tag: { displayName: string; slug: string }, event: React.MouseEvent) => void
+  /** Set of currently selected tag slugs for highlighting */
   selectedTagSlugs: Set<string>
+  /**
+   * Set of technique tag slugs that are actively being filtered
+   * (useful when technique tags are hidden in general - these should not be hidden though)
+   */
   activeTechniqueFilterSlugs: Set<string>
+  /** Callback when an author name is clicked for filtering */
   onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
+  /** Set of currently selected author slugs for highlighting */
   selectedAuthorSlugs: Set<string>
 }
 
@@ -80,12 +81,13 @@ const AuthorButton = React.memo(function AuthorButton({
  * - Filtering by tags and authors
  * - Sharing permalinks
  * - Viewing similar problems
+ * - Toggling likes
  *
  * @param props - The component props containing problem data and interaction handlers
  * @returns JSX element representing the problem card
  */
 export function ProblemCard({
-  problem,
+  problemSlug,
   ordinalNumber,
   areTechniquesGloballyVisible,
   onTagClick,
@@ -94,9 +96,21 @@ export function ProblemCard({
   onAuthorClick,
   selectedAuthorSlugs,
 }: ProblemCardProps) {
+  // Get the problem data from the global store
+  const problem = useProblem(problemSlug)
+
+  // Stores if the similar problems view is expanded
   const [expandedView, setExpandedView] = useState<SimilarProblemViewMode>(null)
+
+  // Stores if the techniques are locally visible (in this card
+  // (even when they are globally hidden, we can show them per card basis)
   const [areTechniquesLocallyVisible, setAreTechniquesLocallyVisible] = useState(false)
+
+  // Function for copying permalinks on problems
   const { copyPermalink } = useProblemPermalink()
+
+  // The hook to toggle likes
+  const toggleLike = useToggleProblemLike()
 
   /**
    * Toggles the expanded view for similar problems section.
@@ -111,8 +125,10 @@ export function ProblemCard({
    * Handles copying the permalink for the current problem to clipboard.
    */
   const handlePermalinkCopy = useCallback(() => {
-    copyPermalink(problem.slug)
-  }, [problem.slug, copyPermalink])
+    if (problem) {
+      copyPermalink(problem.slug)
+    }
+  }, [problem, copyPermalink])
 
   // Reset local reveal state when global techniques are hidden
   useEffect(() => {
@@ -123,23 +139,41 @@ export function ProblemCard({
 
   // Calculate technique tag visibility based on global settings and active filters
   const { hiddenTechniqueCount, hasVisibleTechniques } = useMemo(() => {
+    // We need to have a problem to return something meaningful
+    if (!problem) {
+      return {
+        hiddenTechniqueCount: 0,
+        hasVisibleTechniques: false,
+      }
+    }
+
+    // Get all technique tags
     const allTechniqueTags = problem.tags.filter((tag) => tag.tagType === 'Technique')
+
+    // Get technique tags that are part of an active filter
     const visibleDueToFilter = allTechniqueTags.filter((tag) =>
       activeTechniqueFilterSlugs.has(tag.slug)
     )
 
     // Technique tags are hidden if they're not part of an active filter
     const hiddenCount = allTechniqueTags.length - visibleDueToFilter.length
+
+    // Return the number of hidden technique tags and whether any are visible
     return {
       hiddenTechniqueCount: hiddenCount,
       hasVisibleTechniques: visibleDueToFilter.length > 0,
     }
-  }, [problem.tags, activeTechniqueFilterSlugs])
+  }, [problem, activeTechniqueFilterSlugs])
 
   // Determine if the "reveal techniques" chip should be shown
-  // Only show when techniques are globally hidden, locally not revealed, and there are hidden techniques
+  // Only show when techniques are globally hidden, locally revealed, and there are hidden techniques
   const showRevealChip =
     !areTechniquesGloballyVisible && !areTechniquesLocallyVisible && hiddenTechniqueCount > 0
+
+  // If problem hasn't loaded yet, nothing to render or do
+  if (!problem) {
+    return null
+  }
 
   return (
     <div
@@ -157,8 +191,26 @@ export function ProblemCard({
           {/* Problem identifier in uppercase for consistency */}
           <h2 className="text-base font-medium text-gray-100">{problem.slug.toUpperCase()}</h2>
         </div>
-        {/* Action buttons for solution link and permalink sharing */}
+        {/* Action buttons for solution link, permalink sharing, and likes */}
         <div className="flex items-center gap-2 flex-wrap justify-end">
+          {/* Like button */}
+          <button
+            onClick={() => toggleLike(problem.slug)}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm transition-all duration-200 rounded-md hover:bg-slate-700/50',
+              problem.liked
+                ? 'text-red-400 hover:text-red-500'
+                : 'text-gray-400 hover:text-gray-200'
+            )}
+            title={problem.liked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
+          >
+            <Heart
+              size={16}
+              className={cn('transition-all duration-200', problem.liked && 'fill-current')}
+            />
+            {/* Like count with optimistic update */}
+            <span className="font-medium tabular-nums">{problem.likeCount}</span>
+          </button>
           {/* External solution link if available */}
           {problem.solutionLink && (
             <a

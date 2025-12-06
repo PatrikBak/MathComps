@@ -8,4 +8,8 @@ export const ROUTES = {
   GUIDE: '/rozcestnik',
   HANDOUTS: '/materialy',
   PROBLEMS: '/ulohy',
+  LOGIN: '/prihlasit-sa',
+  PROFILE: '/profil',
+  SSO_CALLBACK: '/sso-callback',
+  PRIVACY: '/ochrana-sukromia',
 } as const

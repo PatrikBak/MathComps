@@ -88,6 +88,7 @@ describe('URL Parameter Validation', () => {
         ],
         authorLogic: 'or',
         contestSelection: [],
+        favoritesOnly: false,
       }
 
       const serialized = serializeFilters(originalFilters)
@@ -116,6 +117,7 @@ describe('URL Parameter Validation', () => {
         authors: [],
         authorLogic: 'or',
         contestSelection: [],
+        favoritesOnly: false,
       }
 
       const serialized = serializeFilters(emptyFilters)
@@ -147,6 +149,7 @@ describe('URL Parameter Validation', () => {
         authors: [{ slug: 'john-doe', displayName: 'John Doe' }],
         authorLogic: 'and', // Should be omitted in URL
         contestSelection: [],
+        favoritesOnly: false,
       }
 
       const serialized = serializeFilters(filtersWithSingleItems)

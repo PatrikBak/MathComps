@@ -79,4 +79,9 @@ public class Problem
     /// Similarity edges where this problem appears as the similar target.
     /// </summary>
     public ICollection<ProblemSimilarity> AppearsInProblems { get; } = [];
+
+    /// <summary>
+    /// Likes on this problem by users.
+    /// </summary>
+    public ICollection<ProblemLike> Likes { get; } = [];
 }

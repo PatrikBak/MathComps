@@ -5,28 +5,27 @@ import { MobileTableOfContents } from '../table-of-contents/MobileTableOfContent
 import type { TableOfContentsItem } from '../table-of-contents/table-of-contents-types'
 import { TableOfContents } from '../table-of-contents/TableOfContents'
 import Footer from './Footer'
-import Header from './Header'
+import ServerHeader from './ServerHeader'
 
 /**
- * Props for the Layout component.
+ * Props for the {@link Layout} component.
  */
 type LayoutProps = {
-  /** The content to be rendered within the layout */
-  children?: React.ReactNode
-  /** Optional CSS class for the root layout container */
+  /** The content rendered within the {@link Layout} shell */
+  children: React.ReactNode
+  /** Optional CSS class applied to the {@link Layout} root container */
   className?: string
-  /** Whether to display the footer at the bottom of the page */
+  /** Whether to display the {@link Footer} at the bottom of the page */
   displayFooter?: boolean
-  /** Table of contents items - when provided, renders a 2-column layout with desktop TOC sidebar and mobile TOC navigation */
+  /** Table of contents items for {@link TableOfContents} and {@link MobileTableOfContents} */
   tocItems?: TableOfContentsItem[]
-  /** Whether to vertically and horizontally center the content in the viewport (useful for full-screen pages like 404) */
+  /** Whether to center the content when no {@link TableOfContents} is provided */
   centerMidscreen?: boolean
 }
 
 /**
- * Root layout component that provides consistent page structure across the application.
- * Includes header, main content area, optional table of contents, and optional footer.
- * Supports two layout modes: standard content layout and centered full-screen layout.
+ * Root layout component that wires together {@link ServerHeader}, {@link AnchorScrollHandler},
+ * {@link TableOfContents}, and {@link Footer} to provide consistent page structure.
  */
 export default function Layout({
   children,
@@ -41,7 +40,7 @@ export default function Layout({
       <AnchorScrollHandler />
 
       {/* Sticky header */}
-      <Header />
+      <ServerHeader />
 
       {/* Body */}
       <main

@@ -1,6 +1,9 @@
+using Clerk.BackendAPI;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
 namespace MathComps.Infrastructure;
 
 /// <summary>
@@ -32,6 +35,11 @@ public static class DependencyInjectionHelpers
             .Validate(options => options.TimeoutSeconds > 0, $"{nameof(GeminiSettings.TimeoutSeconds)} must be > 0.")
             .ValidateDataAnnotations();
 
+        // Clerk settings
+        services.AddOptions<ClerkSettings>()
+            .BindConfiguration(ClerkSettings.SectionName)
+            .Validate(options => !string.IsNullOrWhiteSpace(options.WebhookSecret), $"{nameof(ClerkSettings.WebhookSecret)} is required.");
+
         // Gemini service with HttpClient
         services.AddHttpClient<IGeminiService, GeminiService>(client =>
         {
@@ -42,6 +50,23 @@ public static class DependencyInjectionHelpers
         // DB service
         services.AddScoped<IProblemFilterService, ProblemFilterService>();
         services.AddScoped<IProblemLookupService, ProblemLookupService>();
+        services.AddScoped<IUserManager, UserManager>();
+        services.AddScoped<IUserProblemService, UserProblemService>();
+        services.AddScoped<IClerkWebhookService, ClerkWebhook>();
+
+        // Clerk API Client
+        services.AddScoped(serviceProvider =>
+        {
+            // Parse out the secret key
+            var secretKey = serviceProvider.GetRequiredService<IOptions<ClerkSettings>>().Value.SecretKey;
+
+            // Make sure the key is fine
+            if (string.IsNullOrWhiteSpace(secretKey))
+                throw new InvalidOperationException("Clerk secret key is required.");
+
+            // Return the Clerk API client
+            return new ClerkBackendApi(bearerAuth: secretKey);
+        });
 
         // Return the services for chaining
         return services;

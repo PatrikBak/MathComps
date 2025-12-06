@@ -1,12 +1,15 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
 import { debounce, throttle } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { ROUTES } from '@/constants/routes'
+import { useProblemStore } from '@/stores/problem-store'
 
+import type { FilterType } from '../components/SearchFilters'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import {
@@ -15,7 +18,7 @@ import {
   isServerError,
   isValidationError,
 } from '../types/problem-errors'
-import type { SearchFiltersState } from '../types/problem-library-types'
+import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import {
   needsLabelResolution,
   resolveContestSelectionLabels,
@@ -24,8 +27,7 @@ import { countActiveFilters } from '../utils/filter-validation'
 import { isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { createDefaultFilters } from '../utils/url-initialization'
-import { hasProblemId } from '../utils/url-problem-resolver'
-import { getProblemsPageUrl } from '../utils/url-utils'
+import { getProblemsPageUrl, hasProblemId } from '../utils/url-utils'
 import {
   useInitialFilterData,
   useProblemSearchQuery,
@@ -83,12 +85,6 @@ type OrchestratorAction =
   | { type: 'SET_RESOLVED_SELECTIONS'; payload: SearchFiltersState['contestSelection'] }
   /** Enables the search query to run after initialization is complete. */
   | { type: 'ENABLE_SEARCH' }
-
-const initialState: OrchestratorState = {
-  filters: null,
-  initialFilters: null,
-  shouldSearch: false,
-}
 
 /**
  * The reducer function responsible for handling state transitions for the search UI.
@@ -149,36 +145,111 @@ function orchestratorReducer(
 }
 
 /**
+ * The return type of the `useProblemSearch` hook.
+ * Encapsulates the entire state and actions available for the problem search feature.
+ */
+type UseProblemSearchReturn = {
+  /**
+   * The current state of the problem search, including loading status, filters, and data.
+   */
+  state: {
+    /** Whether the initial data or search results are currently loading. */
+    isLoading: boolean
+    /** Whether a search is happening in the background (e.g., while typing or filtering). */
+    isSearchingInBackground: boolean
+    /** Whether more results are being loaded (infinite scroll). */
+    isLoadingMore: boolean
+    /** Whether a search is in progress but no data is available to show yet. */
+    isSearchingWithNoData: boolean
+    /** Whether the initial filter options and configuration have been loaded. */
+    hasInitialDataLoaded: boolean
+
+    /** The current active filters driving the UI. */
+    filters: SearchFiltersState | null
+    /** The initial filters set on page load (used for reset functionality). */
+    initialFilters: SearchFiltersState | null
+    /** The available options for filtering. */
+    filterOptions: FilterOptionsWithCounts | null
+    /** The base filter options loaded initially (without search adjustments). */
+    baseOptions: FilterOptionsWithCounts | null
+
+    /** The list of problem slugs currently displayed. */
+    problems: string[]
+    /** The total number of problems matching the current criteria. */
+    totalCount: number
+    /** Whether there are more pages of results available. */
+    hasMore: boolean
+    /** The current page number (always 1 in this infinite scroll implementation). */
+    currentPage: number
+
+    /** Error message if the search or initial load failed. */
+    error: string | null
+  }
+  /**
+   * Handler for updating the search filters.
+   *
+   * @param newFilters The new state of the filters.
+   * @param type Optional type of change ('discrete' or 'text') to optimize search timing.
+   */
+  handleFiltersChange: (newFilters: SearchFiltersState, type?: FilterType) => void
+  /**
+   * Handler to load more results (infinite scroll).
+   */
+  loadMore: () => void
+}
+
+/**
  * The primary hook for managing all problem search functionality.
  * Uses TanStack Query for data fetching, caching, and retries.
  * Maintains a reducer for immediate UI state updates.
  *
  * @returns An object containing the complete search state and handler functions.
  */
-export const useProblemSearch = () => {
-  // Step 1: Initialize UI state using our reducer
-  const [uiState, dispatch] = useReducer(orchestratorReducer, initialState)
+export const useProblemSearch = (): UseProblemSearchReturn => {
+  // Initialize UI state using our reducer
+  const [uiState, dispatch] = useReducer(orchestratorReducer, {
+    filters: null,
+    initialFilters: null,
+    shouldSearch: false,
+  })
 
   // Check if we're viewing a single problem by ID
   const router = useRouter()
   const searchParams = useSearchParams()
   const problemId = hasProblemId(searchParams) ? searchParams.get('id') : null
 
-  // Step 2: Fetch initial filter options
-  const initialDataQuery = useInitialFilterData()
+  // Get the current user
+  const { userId, isLoaded: isUserDataLoaded } = useAuth()
+
+  // Get the user ID which is either string or null...We will lose the
+  // information that the user is not loaded, but this will be re-used
+  // by passing whether a query is enabled or not...
+  const safeUserId = isUserDataLoaded ? (userId ?? null) : null
+
+  // Fetch initial filter options
+  // Only fetch when auth is loaded to ensure we have the correct user context (for likes)
+  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
+  const initialDataQuery = useInitialFilterData(safeUserId, isUserDataLoaded)
 
   // Track the query filters separately from UI filters
   // This prevents React Query from creating cache entries for every keystroke
   const [queryFilters, setQueryFilters] = useState<SearchFiltersState | null>(null)
 
-  // Step 3a: Fetch single problem if ID is in URL
-  const singleProblemQuery = useSingleProblem(problemId, !!problemId)
+  // Fetch single problem if ID is in URL
+  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
+  const singleProblemQuery = useSingleProblem(
+    problemId,
+    safeUserId,
+    !!problemId && isUserDataLoaded
+  )
 
-  // Step 3b: Search for problems based on current filters (disabled if viewing single problem)
+  // Search for problems based on current filters (disabled if viewing single problem)
   // Use queryFilters (not uiState.filters) to prevent React Query cache pollution from every keystroke
+  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
   const searchQuery = useProblemSearchQuery(
     queryFilters,
-    !problemId && uiState.shouldSearch && !initialDataQuery.isLoading
+    safeUserId,
+    !problemId && uiState.shouldSearch && !initialDataQuery.isLoading && isUserDataLoaded
   )
 
   // Store the filters in a ref for debounced/throttled functions
@@ -187,6 +258,12 @@ export const useProblemSearch = () => {
 
   // Track whether we've triggered the initial search
   const hasTriggeredInitialSearch = useRef(false)
+
+  // Sync filters to the global store so other components can access them
+  // Must be in useEffect to avoid setState during render
+  useEffect(() => {
+    useProblemStore.getState().setCurrentFilters(uiState.filters)
+  }, [uiState.filters])
 
   // Effect to initialize filters when initial data loads
   useEffect(() => {
@@ -400,14 +477,16 @@ export const useProblemSearch = () => {
     }
   }, [problemId, initialDataQuery.isSuccess, searchQuery.isRetrying])
 
-  // Step 4: Instantiate the URL synchronization hook
+  // Instantiate the URL synchronization hook
   useProblemUrlSync({
     filters: uiState.filters,
     baseOptions: initialDataQuery.data?.updatedOptions ?? null,
     handleFiltersChange,
+    isLoaded: isUserDataLoaded,
+    isSignedIn: !!userId,
   })
 
-  // Step 5: Get the final filter options.
+  // Get the final filter options.
   // Now a weird bunch of hacks come which should prevent random hard-to-trace race
   // conditions. One day I'd like to learn how a pretty code of this entire thing
   // would look like and work because this has turned into something real sus....
@@ -453,12 +532,15 @@ export const useProblemSearch = () => {
     : initialDataQuery.isLoading
   const hasInitialDataLoaded = initialDataQuery.isSuccess
 
+  // Get displayed problems from the global store
+  const displayedProblems = useProblemStore((state) => state.displayedProblems)
+
   // Determine problem data source (single problem vs search results)
-  const problems = singleProblemQuery.data
-    ? [singleProblemQuery.data.problem]
-    : searchQuery.problems
-  const totalCount = singleProblemQuery.data ? 1 : searchQuery.totalCount
-  const hasMore = singleProblemQuery.data ? false : searchQuery.hasMore
+  // Use displayedProblems from the global store instead of searchQuery.problems
+  // This enables optimistic updates (e.g. removing a problem from the list when unliking)
+  const problems = problemId ? [problemId] : displayedProblems
+  const totalCount = problemId ? 1 : searchQuery.totalCount
+  const hasMore = problemId ? false : searchQuery.hasMore
 
   // Always track if we're searching in the background (for subtle UI indicators like count spinner)
   // This is used to prevent loadMore/prefetch during searches and show spinner in count
@@ -468,38 +550,32 @@ export const useProblemSearch = () => {
   // This is only relevant for search queries, not single problem views
   const isSearchingWithNoData = !problemId && searchQuery.isSearchingWithNoData
 
-  // Combine state from multiple sources into a single API
-  const state = {
-    // Loading states
-    isLoading,
-    isSearchingInBackground,
-    isLoadingMore: !problemId && searchQuery.isLoadingMore,
-    isSearchingWithNoData,
-    hasInitialDataLoaded,
-
-    // Filter state
-    filters: uiState.filters,
-    initialFilters: uiState.initialFilters,
-    filterOptions,
-    baseOptions,
-
-    // Problem data
-    problems,
-    totalCount,
-    hasMore,
-    currentPage: 1,
-
-    // Error state - show error message while initial load is retrying
-    // With infinite retries, React Query never sets error, so we detect retrying via failureCount
-    error: initialDataQuery.isRetrying ? 'Nepodarilo sa pripojiť na server' : null,
-
-    // Compatibility fields
-    retryCount: 0,
-    isOfflineMode: false,
-  }
-
+  // Put together the final result
   return {
-    state,
+    state: {
+      // Loading states
+      isLoading,
+      isSearchingInBackground,
+      isLoadingMore: !problemId && searchQuery.isLoadingMore,
+      isSearchingWithNoData,
+      hasInitialDataLoaded,
+
+      // Filter state
+      filters: uiState.filters,
+      initialFilters: uiState.initialFilters,
+      filterOptions,
+      baseOptions,
+
+      // Problem data
+      problems,
+      totalCount,
+      hasMore,
+      currentPage: 1,
+
+      // Error state - show error message while initial load is retrying
+      // With infinite retries, React Query never sets error, so we detect retrying via failureCount
+      error: initialDataQuery.isRetrying ? 'Nepodarilo sa pripojiť na server' : null,
+    },
     handleFiltersChange,
     loadMore: searchQuery.loadMore,
   }

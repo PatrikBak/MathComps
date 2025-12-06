@@ -7,6 +7,8 @@ import type {
   HandoutEntry,
   HandoutSection,
 } from '@/components/features/handouts/types/handout-types'
+import { computeSectionMetadata } from '@/components/features/handouts/utils/handout-utils'
+import Layout from '@/components/layout/Layout'
 import { ROUTES } from '@/constants/routes'
 import handoutIndex from '@/content/handouts/handouts.json'
 import { generatePageMetadata } from '@/lib/metadata'
@@ -126,8 +128,27 @@ export default async function RenderPage({ params }: { params: Promise<{ slug: s
     // Ensure data exists (should always be true after loadDocumentBySlug)
     if (!entry.data) throw new Error('Invalid handout data')
 
-    // Render the handout detail component with the loaded document, images, and author information
-    return <HandoutDetail handout={handout} authors={entry.data.authors} />
+    // Compute section metadata once for both TOC and rendering
+    const sectionMetadata = computeSectionMetadata(handout.document)
+
+    // Extract TOC items (subset of metadata)
+    const tableOfContentsItems = sectionMetadata.map(({ id, label, title, level }) => ({
+      id,
+      label,
+      title,
+      level,
+    }))
+
+    // Render the handout detail component with already loaded document, images, and computed metadata
+    return (
+      <Layout tocItems={tableOfContentsItems}>
+        <HandoutDetail
+          handout={handout}
+          authors={entry.data.authors}
+          sectionMetadata={sectionMetadata}
+        />
+      </Layout>
+    )
   } catch {
     // If the handout doesn't exist or fails to load, show Next.js's 404 page
     notFound()

@@ -27,25 +27,34 @@ npm install
 
 ### 2. Environment Configuration (Optional)
 
-The application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form functionality.
+Most of the application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form or authentication functionality.
 
-**For contact form emails, create a `.env.local` file:**
+#### Authentication (Clerk)
+
+To enable user authentication, configure Clerk in your `.env.local` file. The necessary credentials can be found in the Clerk dashboard.
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+```
+
+**Development Mode:** Leave Clerk variables empty to disable authentication entirely. The app will work normally without login functionality.
+
+#### Contact Form Emails (Resend)
+
+**For contact form emails, configure in `.env.local`:**
 
 ```bash
 # Email Configuration (for contact form)
 # Get API key from https://resend.com/
 RESEND_API_KEY=your-resend-api-key-here
 
-# Email address where contact form submissions will be sent
-# Must be verified in your Resend account
+# Email address where contact form submissions will be sent / used in the privacy page.
+# For email-sending it must be configured and verified in the Resend account.
 CONTACT_EMAIL=contact@yourdomain.com
-
-# Email address to send from (just the email, no name)
-# Must be verified in your Resend account
-SENDER_EMAIL=noreply@yourdomain.com
 ```
 
-**Development Mode:** If you leave the email variables empty, the contact form will work in development mode without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
+**Development Mode:** Leave email variables empty for development - the contact form will work without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
 
 **Other available variables (have good defaults):**
 
@@ -128,6 +137,25 @@ The problem search feature is in [`src/components/features/problems/`](src/compo
 - Faceted search with tags and competitions
 - Virtual infinite scrolling
 - Similar problems integration
+
+### Webhooks
+
+**Purpose:** Handles `email.created` events to send custom-branded emails via Resend (replacing Clerk's default emails).
+**Events:** `email.created` (Signup, Password Reset)
+
+**Testing the webhook locally:**
+
+To test the webhook during development, you need to expose your local API to the internet so Clerk can send events to it:
+
+```bash
+# From the web directory
+cd web
+
+# Expose your local app (make sure it's running on port 3000)
+npx localtunnel --port 3000
+```
+
+This will give you a public URL (e.g., `https://random-name.loca.lt`) that you can use in the Clerk Dashboard webhook settings. Configure the webhook endpoint as `https://your-url.loca.lt/api/webhooks/clerk`.
 
 ### Handouts
 

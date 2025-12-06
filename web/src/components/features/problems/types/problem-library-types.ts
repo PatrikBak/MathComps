@@ -50,6 +50,7 @@ export type SearchFiltersState = {
   tagLogic: 'or' | 'and'
   authors: LabeledSlug[]
   authorLogic: 'or' | 'and'
+  favoritesOnly: boolean
 }
 
 /**

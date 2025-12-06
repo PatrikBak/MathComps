@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",
+    "@clerk/nextjs": "^6.35.2",
     "@floating-ui/react": "^0.27.15",
     "@headlessui/react": "^2.2.7",
     "@hookform/resolvers": "^5.2.2",
@@ -43,11 +44,14 @@
     "react-virtuoso": "^4.14.0",
     "resend": "^6.2.0",
     "sonner": "^2.0.7",
+    "svix": "^1.82.0",
     "tailwind-merge": "^3.3.1",
     "use-long-press": "^3.3.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@clerk/types": "^4.101.2",
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.33.0",
     "@tailwindcss/forms": "^0.5.10",

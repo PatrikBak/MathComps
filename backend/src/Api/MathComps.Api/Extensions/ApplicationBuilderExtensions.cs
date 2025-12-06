@@ -81,6 +81,10 @@ public static class ApplicationBuilderExtensions
         // Enable rate limiting middleware
         app.UseRateLimiter();
 
+        // Enable authentication and authorization
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         // Add request logging middleware for security monitoring
         app.Use(async (context, next) =>
         {

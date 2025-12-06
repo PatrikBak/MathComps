@@ -16,5 +16,5 @@ export function useScrollOffset(): number {
 
   // Desktop: larger header with more padding
   // Mobile: smaller header with less padding
-  return isDesktop ? 96 : 68
+  return isDesktop ? 96 : 76
 }

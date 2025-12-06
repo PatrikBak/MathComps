@@ -55,6 +55,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Texts (statements and solutions) for problems in various languages.</summary>
     public DbSet<ProblemText> ProblemTexts => Set<ProblemText>();
 
+    /// <summary>Users synced from Clerk.</summary>
+    public DbSet<User> Users => Set<User>();
+
+    /// <summary>Likes on problems by users.</summary>
+    public DbSet<ProblemLike> ProblemLikes => Set<ProblemLike>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -258,6 +264,11 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasForeignKey(i => i.ProblemId)
              .OnDelete(DeleteBehavior.Cascade);
 
+            e.HasMany(p => p.Likes)
+             .WithOne(l => l.Problem)
+             .HasForeignKey(l => l.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
             // Within the same round instance, problem numbers must be unique.
             e.HasIndex(p => new { p.RoundInstanceId, p.Number })
              .IsUnique()
@@ -451,6 +462,43 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemSimilarity
+
+        #region User
+
+        modelBuilder.Entity<User>(e =>
+        {
+            e.HasIndex(u => u.ExternalId).IsUnique().HasDatabaseName("ux_user_external_id");
+        });
+
+        #endregion User
+
+        #region ProblemLike
+
+        modelBuilder.Entity<ProblemLike>(e =>
+        {
+            // Composite primary key: a user can only like a problem once
+            e.HasKey(pl => new { pl.UserId, pl.ProblemId });
+
+            // Foreign key to User with cascade delete
+            e.HasOne(pl => pl.User)
+             .WithMany()
+             .HasForeignKey(pl => pl.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Foreign key to Problem with cascade delete
+            e.HasOne(pl => pl.Problem)
+             .WithMany(p => p.Likes)
+             .HasForeignKey(pl => pl.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Index on ProblemId for efficient lookup of all likes for a problem
+            e.HasIndex(pl => pl.ProblemId).HasDatabaseName("ix_problem_like_problem_id");
+
+            // Index on UserId for efficient lookup of all likes by a user
+            e.HasIndex(pl => pl.UserId).HasDatabaseName("ix_problem_like_user_id");
+        });
+
+        #endregion ProblemLike
     }
 
     #endregion OnModelCreating

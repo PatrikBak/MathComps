@@ -20,7 +20,7 @@ type AnimatedProblemCardProps = ProblemCardProps & {
 }
 
 export const AnimatedProblemCard = React.memo(function AnimatedProblemCard({
-  problem,
+  problemSlug,
   ordinalNumber,
   index,
   isNewBatch,
@@ -68,8 +68,8 @@ export const AnimatedProblemCard = React.memo(function AnimatedProblemCard({
    */
   useEffect(() => {
     if (!isNewBatch && !isInitialLoad && elementRef.current) {
-      const isDifferentProblem = problemSlugRef.current !== problem.slug
-      problemSlugRef.current = problem.slug
+      const isDifferentProblem = problemSlugRef.current !== problemSlug
+      problemSlugRef.current = problemSlug
 
       // Always show items to prevent empty space during fast scrolling
       setIsVisible(true)
@@ -115,7 +115,7 @@ export const AnimatedProblemCard = React.memo(function AnimatedProblemCard({
         setHasAnimated(true)
       }
     }
-  }, [problem.slug, isNewBatch, isInitialLoad, hasAnimated, index, scrollDirection, isInViewport])
+  }, [problemSlug, isNewBatch, isInitialLoad, hasAnimated, index, scrollDirection, isInViewport])
 
   return (
     <div
@@ -135,7 +135,7 @@ export const AnimatedProblemCard = React.memo(function AnimatedProblemCard({
     >
       <div>
         <ProblemCard
-          problem={problem}
+          problemSlug={problemSlug}
           ordinalNumber={ordinalNumber}
           areTechniquesGloballyVisible={areTechniquesGloballyVisible}
           onTagClick={onTagClick}

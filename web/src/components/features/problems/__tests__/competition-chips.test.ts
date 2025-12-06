@@ -115,6 +115,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -149,6 +150,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -175,6 +177,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -201,6 +204,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -234,6 +238,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -262,6 +267,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const step1Chips = generateCompetitionChips(
@@ -305,6 +311,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const step2Chips = generateCompetitionChips(
@@ -341,6 +348,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const step3Chips = generateCompetitionChips(
@@ -420,6 +428,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -463,6 +472,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -491,6 +501,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
@@ -535,6 +546,7 @@ describe('Competition Chips Logic', () => {
         tagLogic: 'and',
         authors: [],
         authorLogic: 'and',
+        favoritesOnly: false,
       }
 
       const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)

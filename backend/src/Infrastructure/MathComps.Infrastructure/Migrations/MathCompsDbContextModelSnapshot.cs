@@ -308,6 +308,32 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("problem_images", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemLike", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("UserId", "ProblemId")
+                        .HasName("pk_problem_likes");
+
+                    b.HasIndex("ProblemId")
+                        .HasDatabaseName("ix_problem_like_problem_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_problem_like_user_id");
+
+                    b.ToTable("problem_likes", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemSimilarity", b =>
                 {
                     b.Property<Guid>("SourceProblemId")
@@ -603,6 +629,51 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("tags", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_users");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_user_external_id");
+
+                    b.ToTable("users", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Category", null)
@@ -663,6 +734,27 @@ namespace MathComps.Infrastructure.Migrations
                         .HasConstraintName("fk_problem_images_problems_problem_id");
 
                     b.Navigation("Problem");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemLike", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
+                        .WithMany("Likes")
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_likes_problems_problem_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_likes_users_user_id");
+
+                    b.Navigation("Problem");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemSimilarity", b =>
@@ -814,6 +906,8 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("AppearsInProblems");
 
                     b.Navigation("Images");
+
+                    b.Navigation("Likes");
 
                     b.Navigation("ProblemAuthors");
 

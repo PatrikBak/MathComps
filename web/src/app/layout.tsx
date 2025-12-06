@@ -1,10 +1,12 @@
 import './globals.css'
 import 'katex/dist/katex.min.css'
 
+import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
 import KatexSetup from '@/components/math/KatexSetup'
+import { AuthStoreSync } from '@/components/shared/auth/AuthStoreSync'
 import ProgressBarProvider from '@/components/shared/providers/ProgressBarProvider'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { ToastProvider } from '@/components/shared/providers/ToastProvider'
@@ -33,15 +35,18 @@ export const viewport = {
   themeColor: '#0b0f1f',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children?: React.ReactNode }) {
   return (
     <html lang={SITE_LANGUAGE} suppressHydrationWarning>
       <body className={cn(inter.className, 'antialiased')}>
-        <QueryProvider>
-          <KatexSetup />
-          <ProgressBarProvider>{children}</ProgressBarProvider>
-        </QueryProvider>
-        <ToastProvider />
+        <ClerkProvider>
+          <QueryProvider>
+            <KatexSetup />
+            <ProgressBarProvider>{children}</ProgressBarProvider>
+          </QueryProvider>
+          <ToastProvider />
+          <AuthStoreSync />
+        </ClerkProvider>
       </body>
     </html>
   )

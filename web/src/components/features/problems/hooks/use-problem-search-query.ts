@@ -1,49 +1,161 @@
-'use client'
-
+import type { InfiniteData } from '@tanstack/react-query'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+
+import { useApi } from '@/hooks/useApi'
+import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { CACHE_TIMING } from '../constants/timing-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
-import type { Problem } from '../types/problem-api-types'
 import { isProblemNotFoundError } from '../types/problem-errors'
 import type {
   FilterOptionsWithCounts,
-  FilterResponse,
   SearchFiltersState,
+  SingleProblemResult,
 } from '../types/problem-library-types'
+
+/**
+ * The data shape returned by the infinite search query.
+ */
+type ProblemSearchInfiniteData = {
+  /** The problem data for the current page. */
+  problems: {
+    /** The list of problem slugs on this page. */
+    slugs: string[]
+    /** The current page number. */
+    page: number
+    /** The number of items per page. */
+    pageSize: number
+    /** The total number of problems matching the search criteria. */
+    totalCount: number
+    /** The total number of pages available. */
+    totalPages: number
+  }
+  /** The updated filter options based on the current search results. */
+  updatedOptions: FilterOptionsWithCounts | null
+}
+
+/**
+ * The return type of the `useInitialFilterData` hook.
+ */
+type UseInitialFilterDataReturn = {
+  /** The data returned by the query (initial filter options and first batch of problems). */
+  data: ProblemSearchInfiniteData | undefined
+  /** Whether the query is currently loading. */
+  isLoading: boolean
+  /** Whether the query was successful. */
+  isSuccess: boolean
+  /** Whether the query is currently retrying after a failure. */
+  isRetrying: boolean
+}
+
+/**
+ * The return type of the `useSingleProblem` hook.
+ */
+type UseSingleProblemReturn = {
+  /**
+   * The data returned by the query (filters and options),
+   * excluding the problem itself (to be accessed from the global store).
+   */
+  data: Omit<SingleProblemResult, 'problem'> | undefined
+  /** Whether the query is currently loading (initial fetch). */
+  isLoading: boolean
+  /** Whether the query is currently fetching (initial or background). */
+  isFetching: boolean
+  /** Whether the query encountered an error. */
+  isError: boolean
+  /** The error object if the query failed. */
+  error: Error | null
+  /** The number of consecutive failures. */
+  failureCount: number
+}
+
+/**
+ * The return type of the `useProblemSearchInfinite` hook.
+ */
+type UseProblemSearchInfiniteReturn = {
+  /** The infinite data structure containing pages of results. */
+  data: InfiniteData<ProblemSearchInfiniteData> | undefined
+  /** Whether the query is currently loading (initial fetch). */
+  isLoading: boolean
+  /** Whether the query is currently fetching (initial or background). */
+  isFetching: boolean
+  /** Whether the next page is currently being fetched. */
+  isFetchingNextPage: boolean
+  /** Whether there are more pages available to fetch. */
+  hasNextPage: boolean
+  /** The error object if the query failed. */
+  error: Error | null
+  /** The number of consecutive failures. */
+  failureCount: number
+  /** The timestamp of the last successful data update. */
+  dataUpdatedAt: number
+  /** Function to fetch the next page of results. */
+  fetchNextPage: () => void
+  /** Function to manually refetch the query. */
+  refetch: () => void
+}
 
 /**
  * Query key factory for problem search queries.
  * This ensures consistent cache keys across the application.
  */
-const problemQueryKeys = {
+export const problemQueryKeys = {
   // Base key for all problem-related queries
   all: ['problems'] as const,
 
-  // Key for initial filter data (all available options)
-  initialData: () => [...problemQueryKeys.all, 'initial'] as const,
+  // Key for favorite problems
+  favorites: ['problems', 'favorites'] as const,
 
-  // Key for problem search results with specific filters
-  search: (filters: SearchFiltersState | null) =>
-    [...problemQueryKeys.all, 'search', filters] as const,
+  // Key for initial filter data (all available options)
+  initialData: (userId: string | null) => [...problemQueryKeys.all, 'initial', userId] as const,
+
+  // Key for problem search results with specific filters + for the current user
+  // It also includes whether a filter filters only favorite problems
+  // This is technically not needed but it helps with cache invalidation of only favorite problem lists
+  search: (filters: SearchFiltersState | null, userId: string | null) =>
+    [
+      ...problemQueryKeys.all,
+      filters == null ? null : filters.favoritesOnly ? 'favorites' : 'all',
+      'search',
+      filters,
+      userId,
+    ] as const,
 
   // Key for a single problem by slug
-  single: (slug: string | null) => [...problemQueryKeys.all, 'single', slug] as const,
+  single: (problemSlug: string | null, userId: string | null) =>
+    [...problemQueryKeys.all, 'single', problemSlug, userId] as const,
 }
 
 /**
  * Hook to fetch initial filter data, i.e. filter options + the first batch of problems
  * Used during the initial page load to populate filter dropdowns.
+ *
+ * @param userId - The current user's ID (or null if anonymous)
+ * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing initial filter options
  */
-export function useInitialFilterData() {
+export function useInitialFilterData(
+  userId: string | null,
+  enabled: boolean
+): UseInitialFilterDataReturn {
+  // Get the API caller
+  const api = useApi({ requireAuth: false })
+
+  // Get the function to update problems in the global store
+  const upsertProblems = useProblemStore((state) => state.upsertProblems)
+
   // Construct the React Query
   const query = useQuery({
-    queryKey: problemQueryKeys.initialData(),
+    queryKey: problemQueryKeys.initialData(userId),
     queryFn: async () => {
+      // Guard against missing API caller (should be prevented by enabled flag)
+      if (api.state !== 'ready') throw new Error('API not ready')
+
       // Fetch the initial filter options from the server
-      const result = await getInitialFilterData()
+      const result = await getInitialFilterData(api.apiCall)
 
       // Throw typed error if the server request failed so React Query can retry
       if (!result.isSuccess) {
@@ -55,17 +167,33 @@ export function useInitialFilterData() {
         throw new Error('No filter options received from server')
       }
 
-      // Should be gud
-      return result.value
+      // Sync problems to global store
+      upsertProblems(result.value.problems.items)
+
+      // Destructure to separate 'items' from the rest of the data
+      const { items, ...problemMetadata } = result.value.problems
+
+      // Return structure with 'slugs' instead of 'items'
+      return {
+        ...result.value,
+        problems: {
+          ...problemMetadata,
+          slugs: items.map((problem) => problem.slug),
+        },
+      }
     },
     // Initial data rarely changes, so we can cache it aggressively
     staleTime: CACHE_TIMING.staleTime,
     gcTime: CACHE_TIMING.gcTime,
+    enabled: enabled && api.state === 'ready',
   })
 
+  // Return only the data we need
   return {
-    ...query,
-    // Expose retry state - failureCount > 0 means we're retrying after failure (show toast even between retries)
+    data: query.data,
+    isLoading: query.isLoading,
+    isSuccess: query.isSuccess,
+    // Expose retry state - failureCount > 0 means we're retrying after failure
     isRetrying: query.failureCount > 0,
   }
 }
@@ -74,30 +202,54 @@ export function useInitialFilterData() {
  * Hook to fetch a single problem by its slug.
  * Used when the URL contains an `id` parameter pointing to a specific problem.
  *
- * @param slug - The problem slug from the URL (null if not viewing a single problem)
+ * @param problemSlug - The problem slug from the URL (null if not viewing a single problem)
+ * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing the single problem data
  */
-export function useSingleProblem(slug: string | null, enabled = true) {
-  return useQuery({
-    queryKey: problemQueryKeys.single(slug),
+export function useSingleProblem(
+  problemSlug: string | null,
+  userId: string | null,
+  enabled: boolean
+): UseSingleProblemReturn {
+  // Get the API caller
+  const api = useApi({ requireAuth: false })
+
+  // Get the function to update a single problem in the global store
+  const upsertProblem = useProblemStore((state) => state.upsertProblem)
+
+  // Construct the React Query
+  const query = useQuery({
+    queryKey: problemQueryKeys.single(problemSlug, userId),
     queryFn: async () => {
       // Guard against missing slug (should be prevented by enabled flag, but provides safety)
-      if (!slug) {
+      if (!problemSlug) {
         throw new Error('Problem slug is required')
       }
 
+      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
+      if (api.state !== 'ready') throw new Error('API not ready')
+
       // Fetch the problem details from the server
-      const result = await getProblemBySlug(slug)
+      const result = await getProblemBySlug(api.apiCall, problemSlug)
 
       // Throw typed error if the server request failed so React Query can handle it
       if (!result.isSuccess) {
         throw result.error
       }
 
-      return result.value
+      // Sync to global store
+      upsertProblem(result.value.problem)
+
+      // Deconstruct the result to remove the problem
+      const { problem: _, ...rest } = result.value
+
+      // Return just the rest of the result (problem will be in the global store)
+      return rest
     },
     // Only run the query when enabled and we have a valid slug
-    enabled: enabled && slug !== null,
+    enabled: enabled && problemSlug !== null && api.state === 'ready',
     // Individual problems change rarely, so we can cache them
     staleTime: CACHE_TIMING.staleTime,
     // Use global retry defaults (infinite retries) EXCEPT for 404 errors (permanent failures)
@@ -110,83 +262,190 @@ export function useSingleProblem(slug: string | null, enabled = true) {
       return true
     },
   })
+
+  // Return just the data we need
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+    failureCount: query.failureCount,
+  }
 }
 
 /**
- * Hook to fetch and paginate problem search results using infinite scroll.
+ * Internal hook to fetch and paginate problem search results using infinite scroll.
  *
- * @param filters - The current filter state to search with
+ * @param filters - The current filter state to search with (null if not yet initialized)
+ * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing the search results
  */
-function useProblemSearchInfinite(filters: SearchFiltersState | null, enabled: boolean) {
-  return useInfiniteQuery({
-    queryKey: problemQueryKeys.search(filters),
+function useProblemSearchInfinite(
+  filters: SearchFiltersState | null,
+  userId: string | null,
+  enabled: boolean
+): UseProblemSearchInfiniteReturn {
+  // Get the API caller
+  const api = useApi({ requireAuth: false })
+
+  // Get the function to update problems in the global store
+  const upsertProblems = useProblemStore((state) => state.upsertProblems)
+
+  // Construct the React Query
+  const query = useInfiniteQuery({
+    queryKey: problemQueryKeys.search(filters, userId),
     queryFn: async ({ pageParam, signal }: { pageParam: number; signal: AbortSignal }) => {
       // Guard against missing filters (should be prevented by enabled flag, but provides safety)
       if (!filters) {
         throw new Error('Filters are required for search')
       }
 
+      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
+      if (api.state !== 'ready') throw new Error('API not ready')
+
       // Fetch the page of problems from the server with abort support for request cancellation
-      const result = await searchProblems(filters, DEFAULT_PAGE_SIZE, pageParam, signal)
+      const result = await searchProblems(
+        api.apiCall,
+        filters,
+        DEFAULT_PAGE_SIZE,
+        pageParam,
+        signal
+      )
 
       // Throw typed error if the server request failed so React Query can retry
       if (!result.isSuccess) {
         throw result.error
       }
 
-      return result.value
+      // Sync to global store
+      upsertProblems(result.value.problems.items)
+
+      // Separate the problems from the rest of the data so we can
+      // just return the slugs (problems have been added to the global store)
+      const { items: problems, ...rest } = result.value.problems
+
+      // On the result, replace the problems with slugs
+      return {
+        ...result.value,
+        problems: {
+          ...rest,
+          slugs: problems.map((problem) => problem.slug),
+        },
+      }
     },
     // Start with page 1 (server uses 1-based pagination)
     initialPageParam: 1,
 
     // Determine the next page number based on current data
-    getNextPageParam: (lastPage: FilterResponse) => {
+    getNextPageParam: (lastPage) => {
+      // Get the problem slugs from the last page
       const { page, totalPages } = lastPage.problems
+
       // Return next page number if more pages exist, otherwise undefined to stop pagination
       return page < totalPages ? page + 1 : undefined
     },
 
     // Only run if filters are provided and enabled
-    enabled: enabled && filters !== null,
+    enabled: enabled && filters !== null && api.state === 'ready',
 
     // Don't refetch on window focus for search results (user intent is to adjust filters, not auto-refresh)
     refetchOnWindowFocus: false,
   })
+
+  // Return just the data we need
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    error: query.error,
+    failureCount: query.failureCount,
+    dataUpdatedAt: query.dataUpdatedAt,
+    fetchNextPage: query.fetchNextPage,
+    refetch: query.refetch,
+  }
 }
 
 /**
- * Enhanced hook that wraps useProblemSearchInfinite with computed properties.
+ * The return type of the {@link useProblemSearchQuery} hook.
+ */
+type UseProblemSearchQueryReturn = {
+  /** The list of problem slugs to display. */
+  problems: string[]
+  /** The available filter options (counts adjusted based on search). */
+  filterOptions: FilterOptionsWithCounts | null
+  /** The total count of problems matching the search. */
+  totalCount: number
+  /** Whether there are more pages available to load. */
+  hasMore: boolean
+  /** Whether the initial search is loading. */
+  isLoading: boolean
+  /** Whether a search is currently in progress (excluding pagination). */
+  isSearching: boolean
+  /** Whether the next page is being loaded. */
+  isLoadingMore: boolean
+  /** Whether a search is in progress but no data is available to show yet. */
+  isSearchingWithNoData: boolean
+  /** The error message if the search failed. */
+  error: string | null
+  /** Whether the search is currently retrying after a failure. */
+  isRetrying: boolean
+  /** The timestamp of the last successful data update. */
+  dataUpdatedAt: number
+  /** Function to load the next page of results. */
+  loadMore: () => void
+  /** Function to manually refetch the search results. */
+  refetch: () => void
+}
+
+/**
+ * Enhanced hook that wraps {@link useProblemSearchInfinite} with computed properties.
  * Provides a simpler API for components with all the data they need.
  * Transforms the infinite query structure into flat arrays and clear loading states.
+ *
+ * @param filters - The current filter state to search with (null if not yet initialized)
+ * @param userId - The current user's ID (or null if anonymous)
+ * @param enabled - Whether the query should run
+ *
+ * @returns The query result containing the search results
  */
-export function useProblemSearchQuery(filters: SearchFiltersState | null, enabled: boolean) {
-  const infiniteQuery = useProblemSearchInfinite(filters, enabled)
+export function useProblemSearchQuery(
+  filters: SearchFiltersState | null,
+  userId: string | null,
+  enabled: boolean
+): UseProblemSearchQueryReturn {
+  // Construct the infinite query
+  const infiniteQuery = useProblemSearchInfinite(filters, userId, enabled)
+
+  // Get the function to update displayed problems
+  const setDisplayedProblems = useProblemStore((state) => state.setDisplayedProblems)
 
   // Store previous problems array for efficient comparison (order-dependent)
-  const previousProblemsRef = useRef<Problem[]>([])
+  const previousProblemsRef = useRef<string[]>([])
 
-  // Flatten all pages into a single array of problems for easy rendering
-  // Compare with previous problems to return same reference if contents and order are identical
-  // Keep previous problems visible while searching to prevent flicker
-  const problems = useMemo(() => {
+  // The problems to display
+  const finalProblems = useMemo(() => {
     // Flatten the results from all pages
-    const newProblems = infiniteQuery.data?.pages.flatMap((page) => page.problems.items) ?? []
+    const newProblems = infiniteQuery.data?.pages.flatMap((page) => page.problems.slugs) ?? []
 
     // Get the old currently visible problems
     const previousProblems = previousProblemsRef.current
 
     // If we're searching and have no new data yet, keep showing previous problems
-    // This prevents the empty state flicker when filters change
     if (infiniteQuery.isFetching) {
       return previousProblems
     }
 
-    // Compare lengths first
+    // Here we need to figure out if there was a change in the problems
+    // First compare lengths
     if (
       newProblems.length === previousProblems.length &&
       // Otherwise we need order-dependent comparison: check if all problems are equal in order and slug
-      newProblems.every((problem, index) => problem.slug === previousProblems[index]?.slug)
+      newProblems.every((slug, index) => slug === previousProblems[index])
     ) {
       // Same problems (same slugs, same order), return previous reference to prevent re-render
       return previousProblems
@@ -197,7 +456,12 @@ export function useProblemSearchQuery(filters: SearchFiltersState | null, enable
 
     // The new problems will be displayed
     return newProblems
-  }, [infiniteQuery.data, infiniteQuery.isFetching])
+  }, [infiniteQuery.data?.pages, infiniteQuery.isFetching])
+
+  // Sync problems to the global store
+  useEffect(() => {
+    setDisplayedProblems(finalProblems)
+  }, [finalProblems, setDisplayedProblems])
 
   // Get the most recent filter options (from the last page) to keep filter dropdowns in sync
   const filterOptions = useMemo(() => {
@@ -297,9 +561,10 @@ export function useProblemSearchQuery(filters: SearchFiltersState | null, enable
     return isSearching && !hasPreviousProblems
   }, [infiniteQuery.isFetching, infiniteQuery.isFetchingNextPage])
 
+  // Compose the final result object
   return {
     // Data
-    problems,
+    problems: finalProblems,
     filterOptions: effectiveFilterOptions,
     totalCount,
     hasMore,

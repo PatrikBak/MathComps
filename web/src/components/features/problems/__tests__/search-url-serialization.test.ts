@@ -25,6 +25,7 @@ describe('Search URL Serialization', () => {
         displayName: 'Matematická Olympiáda - A - Domáce kolo',
       },
     ],
+    favoritesOnly: true,
   }
 
   it('should correctly serialize a complex filter object', () => {
@@ -36,6 +37,7 @@ describe('Search URL Serialization', () => {
     expect(serialized).toContain('tags=combinatorics,geometry')
     expect(serialized).toContain('tagLogic=and')
     expect(serialized).toContain('competitions=csmo-a-i')
+    expect(serialized).toContain('favoritesOnly=true')
   })
 
   it('should correctly deserialize a complex filter object', () => {
@@ -58,6 +60,8 @@ describe('Search URL Serialization', () => {
         mockFilters.authors.map((a) => a.slug)
       )
       expect(deserialized.authorLogic).toBe(mockFilters.authorLogic)
+      expect(deserialized.authorLogic).toBe(mockFilters.authorLogic)
+      expect(deserialized.favoritesOnly).toBe(mockFilters.favoritesOnly)
       expect(deserialized.competitionSelectionParts).toEqual([['csmo', 'a', 'i']])
     }
   })
@@ -73,6 +77,7 @@ describe('Search URL Serialization', () => {
       authors: [],
       authorLogic: 'or',
       contestSelection: [],
+      favoritesOnly: false,
     }
     const serialized = serializeFilters(emptyFilters)
     const deserialized = deserializeFilters(serialized)
@@ -141,6 +146,7 @@ describe('Search URL Serialization', () => {
           displayName: 'ČSMO - A - Domáce kolo',
         },
       ],
+      favoritesOnly: false,
     }
     const serialized = serializeFilters(filters)
     expect(serialized).toBe('competitions=cpsj-i,csmo-a-i')

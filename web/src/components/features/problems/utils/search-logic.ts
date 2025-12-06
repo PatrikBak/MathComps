@@ -13,7 +13,8 @@ export function shouldTriggerSearch(searchFilters: SearchFiltersState): boolean 
       searchFilters.tags.length > 0 ||
       searchFilters.authors.length > 0 ||
       searchFilters.problemNumbers.length > 0 ||
-      (searchFilters.contestSelection && searchFilters.contestSelection.length > 0)
+      (searchFilters.contestSelection && searchFilters.contestSelection.length > 0) ||
+      searchFilters.favoritesOnly
     if (!hasOtherFilters) return false
   }
   return true
@@ -36,6 +37,7 @@ export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersSt
     prev.tagLogic === next.tagLogic &&
     prev.authors.length === next.authors.length &&
     prev.authorLogic === next.authorLogic &&
+    prev.favoritesOnly === next.favoritesOnly &&
     equalSelectionsArrays(prev.contestSelection, next.contestSelection)
   )
 }

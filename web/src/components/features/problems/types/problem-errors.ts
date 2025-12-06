@@ -14,7 +14,7 @@
  * This discriminated union allows TypeScript to narrow error types safely
  * and ensures all error cases are handled explicitly in error handling code.
  */
-export type ProblemError = ProblemNotFoundError | NetworkError | ServerError | ValidationError
+type ProblemError = ProblemNotFoundError | NetworkError | ServerError | ValidationError
 
 /**
  * Error thrown when a specific problem cannot be found by its slug.
@@ -55,8 +55,6 @@ type NetworkError = {
   type: 'NETWORK_ERROR'
   /** Human-readable error message describing what went wrong */
   message: string
-  /** HTTP status code if available (e.g., 400, 403, 408, 429, 503) */
-  status?: number
 }
 
 /**
@@ -74,8 +72,6 @@ type ServerError = {
   type: 'SERVER_ERROR'
   /** Human-readable error message (safe to log, not always safe to show user) */
   message: string
-  /** HTTP status code if available (e.g., 500, 502, 503, 504) */
-  status?: number
 }
 
 /**
@@ -163,3 +159,14 @@ export function isValidationError(error: unknown): error is ValidationError {
     error.type === 'VALIDATION_ERROR'
   )
 }
+
+/**
+ * Generic result type for service operations.
+ *
+ * This discriminated union pattern forces the consumer to handle both success and failure cases.
+ *
+ * @template TSuccess - The type of the value returned on success.
+ */
+export type ServiceResult<TSuccess> =
+  | { isSuccess: true; value: TSuccess }
+  | { isSuccess: false; error: ProblemError }

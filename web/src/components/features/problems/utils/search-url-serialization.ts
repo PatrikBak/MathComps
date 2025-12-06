@@ -14,6 +14,7 @@ const URL_PARAMS = {
   AUTHOR_LOGIC: 'authorLogic',
   COMPETITIONS: 'competitions',
   PROBLEM_ID: 'id',
+  FAVORITES_ONLY: 'favoritesOnly',
 } as const
 
 /**
@@ -107,6 +108,10 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
       params.push(`${URL_PARAMS.COMPETITIONS}=${selectionsValue}`)
     }
 
+    if (filters.favoritesOnly) {
+      params.push(`${URL_PARAMS.FAVORITES_ONLY}=true`)
+    }
+
     return params.join('&')
   } catch (error) {
     console.error('Failed to serialize filters:', error)
@@ -160,6 +165,7 @@ export const deserializeFilters = (queryString: string): UrlQueryState | null =>
       competitionSelectionParts: parseCompetitionSelectionParts(
         params.get(URL_PARAMS.COMPETITIONS)
       ),
+      favoritesOnly: params.get(URL_PARAMS.FAVORITES_ONLY) === 'true',
     }
   } catch (error) {
     console.error('Failed to deserialize filters:', error)

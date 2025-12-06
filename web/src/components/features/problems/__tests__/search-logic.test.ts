@@ -19,6 +19,7 @@ describe('Problem Search Logic', () => {
     authors: [],
     authorLogic: 'or',
     contestSelection: [],
+    favoritesOnly: false,
   }
 
   describe('shouldTriggerSearch - Complex Search Threshold Logic', () => {
@@ -51,6 +52,15 @@ describe('Problem Search Logic', () => {
         ],
       }
       expect(shouldTriggerSearch(complexFiltersWithShortText)).toBe(true)
+    })
+
+    it('should trigger search if favoritesOnly is active, even with short text', () => {
+      const favoritesWithShortText = {
+        ...mockInitialFilters,
+        searchText: 'x',
+        favoritesOnly: true,
+      }
+      expect(shouldTriggerSearch(favoritesWithShortText)).toBe(true)
     })
   })
 
@@ -94,6 +104,12 @@ describe('Problem Search Logic', () => {
         tags: [{ slug: 'algebra', displayName: 'Algebra' }],
       }
       expect(isTextOnlyChange(baseFilters, mixedChange)).toBe(false)
+    })
+
+    it('should detect favoritesOnly change as a discrete filter change', () => {
+      const baseFilters = { ...mockInitialFilters, searchText: 'existing search' }
+      const favoritesChange = { ...baseFilters, favoritesOnly: true }
+      expect(isTextOnlyChange(baseFilters, favoritesChange)).toBe(false)
     })
 
     it('should handle complex selections array comparison logic', () => {
