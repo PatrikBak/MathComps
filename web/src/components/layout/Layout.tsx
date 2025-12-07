@@ -21,6 +21,8 @@ type LayoutProps = {
   tocItems?: TableOfContentsItem[]
   /** Whether to center the content when no {@link TableOfContents} is provided */
   centerMidscreen?: boolean
+  /** Whether to use wider layout. This is automatically true if {@link tocItems} is provided */
+  wider?: boolean
 }
 
 /**
@@ -33,6 +35,7 @@ export default function Layout({
   tocItems,
   displayFooter = true,
   centerMidscreen = false,
+  wider = false,
 }: LayoutProps) {
   return (
     <div className={cn('min-h-screen flex flex-col', className)}>
@@ -51,7 +54,7 @@ export default function Layout({
             ? 'flex items-center justify-center'
             : 'px-4 sm:px-6 md:px-8 pb-6 sm:pb-10 md:pb-12 pt-4 sm:pt-6 md:pt-8 lg:pt-12',
           // Screen with toc should be wider
-          tocItems !== undefined ? 'max-w-[min(100%,80rem)]' : 'max-w-[min(100%,70rem)]'
+          wider || tocItems !== undefined ? 'max-w-[min(100%,80rem)]' : 'max-w-[min(100%,70rem)]'
         )}
       >
         {tocItems ? (

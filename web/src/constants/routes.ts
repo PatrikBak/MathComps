@@ -12,4 +12,5 @@ export const ROUTES = {
   PROFILE: '/profil',
   SSO_CALLBACK: '/sso-callback',
   PRIVACY: '/ochrana-sukromia',
+  NEWS: '/novinky',
 } as const
