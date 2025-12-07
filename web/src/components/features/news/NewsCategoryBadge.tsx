@@ -26,9 +26,8 @@ export function NewsCategoryBadge({ category }: NewsCategoryBadgeProps) {
 
   // Classes for the badge combining the defaults and category-specific classes
   const className = cn(
-    'px-2.5 py-1 text-xs font-medium rounded-md',
+    'px-2.5 py-1 text-xs font-medium rounded-md text-white',
     config.bgColor,
-    config.textColor,
     'hover:opacity-80 transition-opacity'
   )
 
