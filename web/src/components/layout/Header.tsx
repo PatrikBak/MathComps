@@ -47,6 +47,7 @@ export default function Header({ initialIsAuthenticated }: HeaderProps) {
               <NavLink href={ROUTES.PROBLEMS}>Úlohy</NavLink>
               <NavLink href={ROUTES.HANDOUTS}>Materiály</NavLink>
               <NavLink href={ROUTES.GUIDE}>Rozcestník</NavLink>
+              <NavLink href={ROUTES.NEWS}>Novinky</NavLink>
               <NavLink href={ROUTES.ABOUT}>O projekte</NavLink>
 
               {/* Auth Section */}

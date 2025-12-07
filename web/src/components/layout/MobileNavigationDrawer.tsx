@@ -102,6 +102,7 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
                   <MobileLink href={ROUTES.PROBLEMS}>Úlohy</MobileLink>
                   <MobileLink href={ROUTES.HANDOUTS}>Materiály</MobileLink>
                   <MobileLink href={ROUTES.GUIDE}>Rozcestník</MobileLink>
+                  <MobileLink href={ROUTES.NEWS}>Novinky</MobileLink>
                   <MobileLink href={ROUTES.ABOUT}>O projekte</MobileLink>
                 </nav>
 
