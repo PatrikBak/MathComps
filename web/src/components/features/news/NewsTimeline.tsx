@@ -168,9 +168,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
             <button
               onClick={clearFilter}
               className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md',
+                'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
                 CATEGORY_CONFIG[categoryFilter].bgColor,
-                CATEGORY_CONFIG[categoryFilter].textColor,
                 'hover:opacity-80 transition-opacity'
               )}
             >
@@ -227,9 +226,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                       <button
                         onClick={clearFilter}
                         className={cn(
-                          'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md',
+                          'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
                           CATEGORY_CONFIG[categoryFilter].bgColor,
-                          CATEGORY_CONFIG[categoryFilter].textColor,
                           'hover:opacity-80 transition-opacity'
                         )}
                       >

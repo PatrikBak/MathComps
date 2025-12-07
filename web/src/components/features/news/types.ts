@@ -5,7 +5,7 @@
 /**
  * Available news article categories
  */
-export type NewsCategory = 'archive' | 'handouts' | 'development'
+export type NewsCategory = 'archive' | 'handouts' | 'development' | 'misc'
 
 /**
  * A single news article
@@ -28,23 +28,21 @@ export type NewsArticle = {
 /**
  * Category display configuration
  */
-export const CATEGORY_CONFIG: Record<
-  NewsCategory,
-  { label: string; bgColor: string; textColor: string }
-> = {
+export const CATEGORY_CONFIG: Record<NewsCategory, { label: string; bgColor: string }> = {
   archive: {
     label: 'Archív',
     bgColor: 'bg-indigo-500/80',
-    textColor: 'text-white',
   },
   handouts: {
     label: 'Materiály',
     bgColor: 'bg-green-500/80',
-    textColor: 'text-white',
   },
   development: {
     label: 'Vývoj',
     bgColor: 'bg-slate-500/80',
-    textColor: 'text-white',
+  },
+  misc: {
+    label: 'Rôzne',
+    bgColor: 'bg-violet-500/80',
   },
 }
