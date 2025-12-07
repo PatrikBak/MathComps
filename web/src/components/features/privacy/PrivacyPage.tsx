@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-1">
             <li>
               <strong>Login:</strong> Email, meno, profilová fotka, prípadne prepojenie s
-              Google/Facebook, ak sa prihlásiš cez ne.
+              Google/Discord/GitHub, ak sa prihlásiš cez ne.
             </li>
             <li>
               <strong>Obsah:</strong> Všetok tvoj obsah, ktorý vkladáš na stránku.
