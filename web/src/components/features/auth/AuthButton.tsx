@@ -9,7 +9,7 @@ type AuthButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** The content of the button */
   children: ReactNode
   /** Visual variant of the button */
-  variant: 'social' | 'primary'
+  variant: 'social' | 'primary' | 'secondary'
 }
 
 /**
@@ -19,9 +19,11 @@ export default function AuthButton({ className, children, variant, ...props }: A
   // Each variant has a different border and background
   const variantStyles = {
     social:
-      'bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10 hover:border-white/20 hover:text-white hover:shadow-lg hover:shadow-black/20',
+      'bg-white/5 border border-slate-600/40 text-slate-200 hover:bg-white/10 hover:border-slate-500/60',
     primary:
-      'bg-linear-to-r from-indigo-500/30 to-indigo-600/30 border border-indigo-500/50 text-white hover:from-indigo-500/40 hover:to-indigo-600/40 hover:border-indigo-400/70 hover:shadow-lg hover:shadow-indigo-500/20',
+      'bg-indigo-400/40 border border-slate-600/40 text-white hover:bg-indigo-400/60 hover:border-slate-500/60 hover:shadow-lg',
+    secondary:
+      'bg-slate-800/40 border border-slate-600/40 text-slate-400 hover:bg-slate-800/60 hover:border-slate-500/60 hover:text-slate-300',
   }
 
   return (

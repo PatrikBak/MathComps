@@ -47,14 +47,7 @@ export default function AuthFormActions({
       )}
 
       {/* Submit Button */}
-      <AuthButton
-        type="submit"
-        disabled={loading}
-        className={cn(
-          'bg-gradient-to-r from-indigo-400/40 to-indigo-500/40 border border-indigo-400/50 text-white hover:from-indigo-400/60 hover:to-indigo-500/60 hover:border-indigo-400/70 hover:shadow-lg',
-          'mt-8'
-        )}
-      >
+      <AuthButton type="submit" disabled={loading} variant="primary" className="mt-8">
         {(() => {
           switch (screen) {
             case 'login-with-email':
@@ -84,10 +77,8 @@ export default function AuthFormActions({
           onBack()
         }}
         disabled={loading}
-        className={cn(
-          'bg-slate-800/40 border border-slate-600/40 text-slate-400 hover:bg-slate-800/60 hover:border-slate-500/60 hover:text-slate-300',
-          'mt-3'
-        )}
+        variant="secondary"
+        className="mt-3"
       >
         Späť
       </AuthButton>
