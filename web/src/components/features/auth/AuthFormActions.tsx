@@ -1,5 +1,3 @@
-import { cn } from '@/components/shared/utils/css-utils'
-
 import AuthButton from './AuthButton'
 import type { AuthScreen } from './AuthForm'
 

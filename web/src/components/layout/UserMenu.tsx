@@ -72,9 +72,8 @@ export default function UserMenu() {
           <UserAvatarImage
             imageUrl={user.imageUrl}
             altText={user.firstName || 'Používateľ'}
-            width={32}
-            height={32}
-            className="w-8 h-8"
+            size={40}
+            className="-my-2"
           />
           <ChevronDown
             className={cn(

@@ -25,12 +25,12 @@ type UserInfoHeaderProps = {
  */
 const sizeConfig = {
   sm: {
-    avatar: { width: 44, height: 44, className: 'w-11 h-11' },
+    avatarSize: 44,
     displayName: 'text-sm',
     handle: 'text-xs',
   },
   md: {
-    avatar: { width: 48, height: 48, className: 'w-12 h-12' },
+    avatarSize: 48,
     displayName: 'text-base',
     handle: 'text-sm',
   },
@@ -54,9 +54,8 @@ export const UserInfoHeader = ({
       <UserAvatarImage
         imageUrl={user.imageUrl}
         altText={user.firstName || 'Používateľ'}
-        width={config.avatar.width}
-        height={config.avatar.height}
-        className={cn(config.avatar.className, avatarClassName)}
+        size={config.avatarSize}
+        className={avatarClassName}
       />
       <div className="min-w-0">
         {user.firstName && (

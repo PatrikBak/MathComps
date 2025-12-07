@@ -159,8 +159,7 @@ export default function ProfilePageContent() {
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
                   altText={user.firstName || 'Používateľ'}
-                  width={128}
-                  height={128}
+                  size={128}
                   className="w-full h-full"
                 />
               </div>
