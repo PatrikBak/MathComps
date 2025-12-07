@@ -410,9 +410,9 @@ export default function AuthForm() {
   /**
    * Handles OAuth authentication for various providers.
    *
-   * @param strategy - The OAuth strategy to use (e.g., 'oauth_google', 'oauth_facebook')
+   * @param strategy - The OAuth strategy to use, as required by Clerk
    */
-  const handleOAuthLogin = async (strategy: 'oauth_google' | 'oauth_facebook') => {
+  const handleOAuthLogin = async (strategy: 'oauth_google' | 'oauth_discord' | 'oauth_github') => {
     // I suppose this should never happen
     if (!signIn) return
 
@@ -491,7 +491,8 @@ export default function AuthForm() {
         <AuthHubScreen
           onContinueWithEmail={() => switchScreen('enter-email')}
           onGoogleLogin={() => handleOAuthLogin('oauth_google')}
-          onFacebookLogin={() => handleOAuthLogin('oauth_facebook')}
+          onDiscordLogin={() => handleOAuthLogin('oauth_discord')}
+          onGithubLogin={() => handleOAuthLogin('oauth_github')}
           loading={loading}
         />
       )}

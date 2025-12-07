@@ -9,7 +9,7 @@ import { ROUTES } from '@/constants/routes'
 
 /**
  * SSO Callback page that handles OAuth redirects.
- * This page is shown after a user authenticates with an OAuth provider (Google, Facebook, etc.)
+ * This page is shown after a user authenticates with an OAuth provider (Google, etc.)
  * and is responsible for completing the authentication flow and redirecting the user.
  */
 export default function SSOCallbackPage() {
