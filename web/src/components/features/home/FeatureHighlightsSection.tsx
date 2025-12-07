@@ -18,7 +18,7 @@ export default function FeatureHighlights() {
       title: 'Archív',
       description: (
         <>
-          Databáza súťažných úloh s&nbsp;možnosťou vyhľadávať podľa kľúčových slov a ďalších
+          Databáza súťažných úloh s&nbsp;možnosťou vyhľadávania podľa kľúčových slov a ďalších
           kritérií.
         </>
       ),
@@ -28,14 +28,14 @@ export default function FeatureHighlights() {
       iconComponent: FileText,
       title: 'Materiály',
       description:
-        'Priebežne pripravované texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.',
+        'Priebežne dopĺňané študijné texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.',
       href: ROUTES.HANDOUTS,
     },
     {
       iconComponent: GitBranch,
       title: 'Rozcestník',
       description:
-        'Zoznam informácií o súťažiach a odkazy na rôzne užitočné veci zo sveta súťažnej matematiky.',
+        'Zoznam súťaží a seminárov spolu s odkazmi na rôzne nástroje užitočné pre žiakov aj učiteľov.',
       href: ROUTES.GUIDE,
     },
   ]
