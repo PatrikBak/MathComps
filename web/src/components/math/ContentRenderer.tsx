@@ -1,6 +1,5 @@
-import { ImageOff, Loader2 } from 'lucide-react'
-import Image from 'next/image'
-import React, { useState } from 'react'
+import { ImageOff } from 'lucide-react'
+import React from 'react'
 
 import type {
   ListStyleType,
@@ -10,6 +9,7 @@ import { getDocumentUrl, getProblemImageUrl } from '@/components/features/proble
 import FootnoteRef from '@/components/math/FootnoteRef'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'
 import { AppLink } from '@/components/shared/components/AppLink'
+import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { ProblemImage } from '../features/problems/types/problem-api-types'
@@ -23,12 +23,15 @@ type ContentRendererProps = {
   className?: string
 }
 
-function ImageWithPlaceholder({
+/**
+ * Renders an image for math content - handles both inline and block images.
+ * Uses ImageWithLoader for consistency, wrapped with appropriate styling.
+ */
+function ContentImage({
   src,
   alt,
   width,
   height,
-  className,
   isInline,
   scale,
 }: {
@@ -36,11 +39,10 @@ function ImageWithPlaceholder({
   alt: string
   width?: string
   height?: string
-  className: string
   isInline: boolean
   scale: number
 }) {
-  // Parse dimensions
+  // Parse dimensions from string values (e.g., "200px" -> 200)
   let { widthPx, heightPx } = parseDimensions(width, height)
 
   // Ensure parsing dimensions was successful
@@ -52,46 +54,11 @@ function ImageWithPlaceholder({
     heightPx = 200
   }
 
-  // Track image load state
-  const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>('loading')
-
-  // Handle successful image load - Next.js Image component uses onLoad
-  const handleLoad = () => {
-    setLoadState('loaded')
-  }
-
-  // Handle image load errors - show error icon instead of infinite spinner
-  const handleError = () => {
-    setLoadState('error')
-  }
-
-  // Spinner placeholder with exact image dimensions to prevent layout shift
-  const LoadingPlaceholder = () => (
-    <div
-      className="flex items-center justify-center absolute inset-0"
-      style={{
-        width: widthPx * scale,
-        height: heightPx * scale,
-      }}
-    >
-      <Loader2 className="text-gray-400 animate-spin" size={isInline ? 16 : 24} strokeWidth={2} />
-    </div>
-  )
-
-  // Error state with icon, no borders
-  const ErrorPlaceholder = () => (
-    <div
-      className="flex items-center justify-center absolute inset-0"
-      style={{
-        width: widthPx * scale,
-        height: heightPx * scale,
-      }}
-    >
-      <ImageOff className="text-gray-500" size={isInline ? 16 : 24} strokeWidth={1.5} />
-    </div>
-  )
+  // Spinner size based on inline context
+  const spinnerSize = isInline ? 16 : 24
 
   if (isInline) {
+    // Inline images need special styling to flow with text
     return (
       <span
         className="inline-flex items-center justify-center align-middle relative bg-white rounded p-1"
@@ -104,51 +71,33 @@ function ImageWithPlaceholder({
           height: heightPx * scale,
         }}
       >
-        {loadState === 'loading' && <LoadingPlaceholder />}
-        {loadState === 'error' && <ErrorPlaceholder />}
-        <Image
+        <ImageWithLoader
           src={src}
           alt={alt}
           width={widthPx}
           height={heightPx}
-          className={cn(className, loadState !== 'loaded' && 'opacity-0')}
-          style={{
-            verticalAlign: 'middle',
-            zoom: scale,
-            transition: 'opacity 0.2s ease-in-out',
-          }}
-          onLoad={handleLoad}
-          onError={handleError}
+          scale={scale}
+          spinnerSize={spinnerSize}
+          className="inline-block align-middle"
+          containerClassName="absolute inset-0"
         />
       </span>
     )
   }
 
+  // Block images are centered with white background
   return (
     <div className="my-4 flex justify-center">
-      <div
-        className="flex items-center justify-center relative bg-white rounded-lg p-1"
-        style={{
-          width: widthPx * scale,
-          height: heightPx * scale,
-        }}
-      >
-        {loadState === 'loading' && <LoadingPlaceholder />}
-        {loadState === 'error' && <ErrorPlaceholder />}
-        <Image
-          src={src}
-          alt={alt}
-          width={widthPx}
-          height={heightPx}
-          className={cn(className, loadState !== 'loaded' && 'opacity-0')}
-          style={{
-            zoom: scale,
-            transition: 'opacity 0.2s ease-in-out',
-          }}
-          onLoad={handleLoad}
-          onError={handleError}
-        />
-      </div>
+      <ImageWithLoader
+        src={src}
+        alt={alt}
+        width={widthPx}
+        height={heightPx}
+        scale={scale}
+        spinnerSize={spinnerSize}
+        className="block"
+        containerClassName="bg-white rounded-lg p-1"
+      />
     </div>
   )
 }
@@ -338,31 +287,17 @@ export function renderRawContentBlock(
         )
       }
 
-      if (isInline) {
-        return (
-          <ImageWithPlaceholder
-            src={imagePath}
-            alt=""
-            width={meta.width}
-            height={meta.height}
-            className="inline-block align-middle"
-            isInline={isInline}
-            scale={scale}
-          />
-        )
-      } else {
-        return (
-          <ImageWithPlaceholder
-            src={imagePath}
-            alt=""
-            width={meta.width}
-            height={meta.height}
-            className="block"
-            isInline={isInline}
-            scale={scale}
-          />
-        )
-      }
+      // Render the image using shared ContentImage component
+      return (
+        <ContentImage
+          src={imagePath}
+          alt=""
+          width={meta.width}
+          height={meta.height}
+          isInline={isInline}
+          scale={scale}
+        />
+      )
     }
     default:
       return null
