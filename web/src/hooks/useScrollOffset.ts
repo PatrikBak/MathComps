@@ -1,22 +1,33 @@
 'use client'
 
-import { useViewportSize } from '@mantine/hooks'
+import { useSyncExternalStore } from 'react'
 
 /**
  * Custom hook that returns the current scroll offset from CSS.
  * Reads the --scroll-offset CSS variable which is set responsively in globals.css.
  * Used for scroll-spy offset detection where JS needs to know the header height.
  */
-export function useScrollOffset(): number {
-  // Re-render when viewport changes (which may trigger CSS breakpoint changes)
-  useViewportSize()
+export function useScrollOffset() {
+  return useSyncExternalStore(
+    // Subscribe to resize events (when CSS variable might change)
+    (callback) => {
+      window.addEventListener('resize', callback)
+      return () => window.removeEventListener('resize', callback)
+    },
+    // The client-side function to get the scroll offset
+    () => {
+      // Get the value of the CSS variable
+      const cssValue = getComputedStyle(document.documentElement).getPropertyValue(
+        '--scroll-offset'
+      )
 
-  // Guard against SSR - getComputedStyle and document are browser-only APIs
-  if (typeof window === 'undefined') {
-    return 0
-  }
+      // Parse it
+      const parsedValue = parseInt(cssValue, 10)
 
-  // Read the current value from CSS (respects current breakpoint)
-  const cssValue = getComputedStyle(document.documentElement).getPropertyValue('--scroll-offset')
-  return parseInt(cssValue, 10)
+      // Return the parsed value or a safe default
+      return isNaN(parsedValue) ? 0 : parsedValue
+    },
+    // SSR fallback
+    () => 0
+  )
 }
