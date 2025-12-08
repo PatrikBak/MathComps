@@ -39,7 +39,7 @@ export function GuideSection({
   const sectionData = sectionNumberer.getSectionData(slug)
 
   return (
-    <AnimatedSection anchorId={slug}>
+    <AnimatedSection id={slug}>
       <section className="my-8 sm:my-16">
         <div className="max-w-7xl mx-auto px-0.5">
           <SectionHeader

@@ -1,5 +1,4 @@
 import { FileText, GitBranch, Search } from 'lucide-react'
-import React from 'react'
 
 import FloatingMath from '@/components/animations/FloatingMath'
 import ParticleSystem from '@/components/animations/ParticleSystem'
@@ -16,8 +15,12 @@ export default function HeroSection() {
     'gap-2 md:gap-3 w-full max-w-[240px] md:max-w-[300px] text-sm md:text-xl md:px-6 md:py-3'
   const iconClassName = 'w-4 h-4 md:w-5 md:h-5'
 
+  // The description used in the typing effect
+  const heroDescription =
+    'Prehľadný archív úloh, študijných materiálov a rozcestník užitočných zdrojov'
+
   return (
-    <AnimatedSection className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `} anchorId="hero-section">
+    <AnimatedSection className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `}>
       {/* Background Animations */}
       <ParticleSystem />
       <FloatingMath />
@@ -28,11 +31,12 @@ export default function HeroSection() {
           <GradientText>Moderný domov</GradientText> pre Matematickú{' '}
           <GradientText>olympiádu</GradientText>
         </h1>
-        <div className="mt-4 sm:mt-6 lg:mt-8 text-base sm:text-xl lg:text-2xl text-slate-400 max-w-2xl min-h-14 sm:min-h-16 lg:min-h-20 mx-auto leading-relaxed text-balance">
-          <TypingEffect
-            text="Prehľadný archív úloh, študijných materiálov a rozcestník užitočných zdrojov"
-            speed={25}
-          />
+        {/* Grid overlay trick: invisible text reserves height, typing effect renders on top */}
+        <div className="mt-4 sm:mt-6 lg:mt-8 text-base sm:text-xl lg:text-2xl text-slate-400 max-w-2xl mx-auto leading-relaxed text-balance hyphens-none grid [&>*]:col-start-1 [&>*]:row-start-1">
+          <span className="invisible" aria-hidden="true">
+            {heroDescription}
+          </span>
+          <TypingEffect text={heroDescription} speed={25} />
         </div>
 
         <div className="mt-6 sm:mt-10 lg:mt-12 flex flex-col lg:flex-row gap-6 justify-center items-center text-nowrap pb-2 lg:pb-0">

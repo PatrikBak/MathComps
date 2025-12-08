@@ -1,8 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-
-import { cn } from '@/components/shared/utils/css-utils'
+import { useEffect, useState } from 'react'
 
 interface TypingEffectProps {
   text: string
@@ -40,7 +38,7 @@ const TypingEffect = ({ text, speed = 25, delay = 300, className = '' }: TypingE
   }, [text])
 
   return (
-    <span className={cn('hyphens-none', className)}>
+    <span className={className}>
       {displayText}
       {!isComplete && <span className="animate-pulse">|</span>}
     </span>

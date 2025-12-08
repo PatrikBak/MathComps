@@ -1,10 +1,10 @@
 import ContactButton from '@/components/features/contact/ContactButton'
-import AnimatedSection from '@/components/shared/components/AnimatedSection'
+import Section from '@/components/shared/components/Section'
 import { cn } from '@/components/shared/utils/css-utils'
-import { HOME_ABOUT_STYLES } from '@/constants/common-section-styles'
 
 /**
- * A specific feature, either implemented or not
+ * A specific feature, either implemented or not.
+ * @Layout components
  */
 type FeatureItem = {
   /* The name/description of the feature */
@@ -14,7 +14,8 @@ type FeatureItem = {
 }
 
 /**
- * A category of features
+ * A category of features.
+ * @Layout components
  */
 type FeatureCategory = {
   /* The name of the category */
@@ -28,7 +29,7 @@ type FeatureCategory = {
 }
 
 /**
- * A badge representing a feature
+ * A badge representing a feature.
  */
 const FeatureBadge = ({ title, isImplemented }: FeatureItem) => (
   <span
@@ -45,9 +46,9 @@ const FeatureBadge = ({ title, isImplemented }: FeatureItem) => (
 )
 
 /**
- * A container with features of a single category
+ * A container with features of a single category.
  */
-const FeatureCategory = (category: FeatureCategory) => {
+const FeatureCategoryCard = (category: FeatureCategory) => {
   return (
     <div className="bg-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:bg-slate-900/40 transition-all duration-300">
       <div className="flex items-center gap-3 mb-4">
@@ -71,7 +72,7 @@ const FeatureCategory = (category: FeatureCategory) => {
 }
 
 /**
- * The entire section with all categories and their features
+ * Displays the roadmap/features section on the about page.
  */
 export const RoadmapSection = () => {
   const featureCategories: FeatureCategory[] = [
@@ -130,22 +131,24 @@ export const RoadmapSection = () => {
   ]
 
   return (
-    <AnimatedSection className={HOME_ABOUT_STYLES.sectionWrapper} anchorId="roadmap-section">
-      <div className={cn(HOME_ABOUT_STYLES.headerContainer, 'px-4')}>
-        <h2 className={HOME_ABOUT_STYLES.sectionTitle}>Funkcionality</h2>
-        <p className={cn(HOME_ABOUT_STYLES.sectionDescription, 'text-balance')}>
+    <Section
+      id="roadmap-section"
+      title="Funkcionality"
+      description={
+        <>
           Toto je len začiatok projektu a v pláne je veľa nových funkcií.{' '}
           <span className="block w-fit mx-auto mt-6 items-center px-2 py-0.5 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
             ✓ Zelené funkcie sú už dostupné!
           </span>
-        </p>
-      </div>
-
+        </>
+      }
+      descriptionClassName="text-balance"
+    >
       <div className="max-w-4xl mx-auto w-full px-4">
         <div className="space-y-6">
           {featureCategories.map((category) => (
             <div key={category.title}>
-              <FeatureCategory {...category} />
+              <FeatureCategoryCard {...category} />
             </div>
           ))}
         </div>
@@ -163,6 +166,6 @@ export const RoadmapSection = () => {
           </p>
         </div>
       </div>
-    </AnimatedSection>
+    </Section>
   )
 }

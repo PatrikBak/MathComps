@@ -1,37 +1,47 @@
 import type { ReactNode } from 'react'
 
-import AnimatedSection from '@/components/shared/components/AnimatedSection'
 import GlassCard from '@/components/shared/components/GlassCard'
-import { HOME_ABOUT_STYLES } from '@/constants/common-section-styles'
+import Section from '@/components/shared/components/Section'
 
-type AboutSectionProps = {
+/**
+ * Props for the {@link AboutPanelSection} component.
+ */
+type AboutPanelSectionProps = {
+  /* The ID of the section */
   id: string
+  /* The title of the section */
   title: string
+  /* The description of the section */
   description?: ReactNode
+  /* The children of the section */
   children?: ReactNode
 }
 
-export default function AboutPanelSection({ id, title, description, children }: AboutSectionProps) {
+/**
+ * A panel section used on the about page with a {@link GlassCard} wrapper.
+ */
+export default function AboutPanelSection({
+  id,
+  title,
+  description,
+  children,
+}: AboutPanelSectionProps) {
   return (
-    <AnimatedSection className={HOME_ABOUT_STYLES.sectionWrapper} anchorId={id}>
-      <section id={id}>
-        <div className={HOME_ABOUT_STYLES.containerStandard}>
-          <GlassCard
-            title={title}
-            titleElement="h3"
-            description={
-              description ?? (
-                <div className="text-slate-300 text-base sm:text-lg leading-relaxed space-y-5">
-                  {description}
-                </div>
-              )
-            }
-            align="left"
-          >
-            {children}
-          </GlassCard>
-        </div>
-      </section>
-    </AnimatedSection>
+    <Section id={id} containerWidth="standard">
+      <GlassCard
+        title={title}
+        titleElement="h3"
+        description={
+          description ?? (
+            <div className="text-slate-300 text-base sm:text-lg leading-relaxed space-y-5">
+              {description}
+            </div>
+          )
+        }
+        align="left"
+      >
+        {children}
+      </GlassCard>
+    </Section>
   )
 }

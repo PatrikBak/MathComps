@@ -1,13 +1,20 @@
 import Image from 'next/image'
-import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
-import { cn } from '@/components/shared/utils/css-utils'
 
+import { cn } from '../shared/utils/css-utils'
+
+/**
+ * Props for the {@link MathCompsLogo} component.
+ */
 type MathCompsLogoProps = {
+  /* Optional class name to apply to the logo. */
   className?: string
 }
 
+/**
+ * The best logo in the world? 🥺😇
+ */
 export default function MathCompsLogo({ className }: MathCompsLogoProps) {
   return (
     <AppLink
