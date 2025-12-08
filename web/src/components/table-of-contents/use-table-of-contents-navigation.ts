@@ -1,5 +1,5 @@
 import { useCustomScrollSpy } from '@/hooks/use-custom-scroll-spy'
-import { useScrollOffset } from '@/hooks/useScrollOffset'
+import { useScrollOffset } from '@/hooks/use-scroll-offset'
 
 import type { TableOfContentsItem } from './table-of-contents-types'
 

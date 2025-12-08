@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/useCurrentUrl'
+import { useCurrentUrl } from '@/hooks/use-current-url'
 
 import { cn } from '../shared/utils/css-utils'
 

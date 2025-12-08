@@ -19,7 +19,7 @@ import * as React from 'react'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
-import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
+import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 
 import { filterOptionsBySearch, getVisibleOptions } from './utils/facet-logic'
 

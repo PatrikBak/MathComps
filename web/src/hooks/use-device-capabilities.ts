@@ -12,20 +12,12 @@ import * as React from 'react'
  * - `isMac`: True if device is macOS
  * - `hasPointer`: True if device has pointer capability (mouse/trackpad)
  * - `isTouchOnly`: True if device is mobile OS without pointer capability
- *
- * @example
- * ```tsx
- * const { isMobileOS, isMac, hasPointer, isTouchOnly } = useDeviceCapabilities()
- *
- * if (isTouchOnly) {
- *   // Show touch-only UI
- * } else {
- *   // Show desktop UI
- * }
- * ```
  */
 export function useDeviceCapabilities() {
+  // Mantime's hook for OS detection
   const os = useOs()
+
+  // Device OS detection
   const isMobileOS = os === 'ios' || os === 'android'
   const isMac = os === 'macos'
 
@@ -34,10 +26,11 @@ export function useDeviceCapabilities() {
   const [hasPointer, setHasPointer] = React.useState(true)
 
   React.useEffect(() => {
-    // Check if device has pointer capability (not touch-only)
-    // This helps distinguish between tablets with keyboards vs touch-only devices
+    // Ensure client-side
     if (typeof window === 'undefined') return
 
+    // Check if device has pointer capability (not touch-only)
+    // This helps distinguish between tablets with keyboards vs touch-only devices
     const hasMouse = window.matchMedia('(hover: hover)').matches
 
     // Consider it a pointer/keyboard device if:
@@ -46,8 +39,10 @@ export function useDeviceCapabilities() {
     setHasPointer(!isMobileOS || hasMouse)
   }, [isMobileOS])
 
+  // Device is touch-only if it's a mobile OS without pointer capability
   const isTouchOnly = isMobileOS && !hasPointer
 
+  // Return device capabilities
   return {
     isMobileOS,
     isMac,

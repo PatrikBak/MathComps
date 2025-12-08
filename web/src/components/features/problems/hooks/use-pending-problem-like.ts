@@ -2,7 +2,7 @@ import { useLocalStorage } from '@mantine/hooks'
 import { useEffect } from 'react'
 
 import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { useApi } from '@/hooks/useApi'
+import { useApi } from '@/hooks/use-api'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { useToggleProblemLike } from './use-toggle-problem-like'

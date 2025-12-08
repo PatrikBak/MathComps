@@ -2,7 +2,7 @@ import type { InfiniteData } from '@tanstack/react-query'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useApi } from '@/hooks/useApi'
+import { useApi } from '@/hooks/use-api'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'

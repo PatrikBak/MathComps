@@ -11,7 +11,7 @@ import {
   TOC_LINK_INACTIVE_STYLES,
 } from './table-of-contents-styles'
 import type { TableOfContentsItem, TableOfContentsProps } from './table-of-contents-types'
-import { useTableOfContentsNavigation } from './useTableOfContentsNavigation'
+import { useTableOfContentsNavigation } from './use-table-of-contents-navigation'
 
 /**
  * Props for the TocLinks presentational component.

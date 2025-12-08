@@ -5,7 +5,7 @@ import type { ComponentType } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/useCurrentUrl'
+import { useCurrentUrl } from '@/hooks/use-current-url'
 
 import { AppLink } from '../shared/components/AppLink'
 

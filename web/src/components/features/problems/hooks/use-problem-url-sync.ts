@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/useCurrentUrl'
+import { useCurrentUrl } from '@/hooks/use-current-url'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'

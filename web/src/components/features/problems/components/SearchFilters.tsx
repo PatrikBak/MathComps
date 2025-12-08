@@ -5,8 +5,8 @@ import React, { useEffect, useRef } from 'react'
 import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
-import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 import {
   useSearchFiltersLogic,

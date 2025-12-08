@@ -1,4 +1,4 @@
-import type { ApiCaller } from '@/hooks/useApi'
+import type { ApiCaller } from '@/hooks/use-api'
 
 import type { FilterParameters } from '../types/problem-api-types'
 import type { ProblemNotFoundError, ServiceResult } from '../types/problem-errors'

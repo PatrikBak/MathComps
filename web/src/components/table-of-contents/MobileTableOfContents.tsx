@@ -12,7 +12,7 @@ import {
   TOC_LINK_INACTIVE_STYLES,
 } from './table-of-contents-styles'
 import type { TableOfContentsProps } from './table-of-contents-types'
-import { useTableOfContentsNavigation } from './useTableOfContentsNavigation'
+import { useTableOfContentsNavigation } from './use-table-of-contents-navigation'
 
 /**
  * Mobile table of contents that shows as a fixed bottom bar with collapsible menu.

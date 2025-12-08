@@ -3,7 +3,7 @@ import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/useCurrentUrl'
+import { useCurrentUrl } from '@/hooks/use-current-url'
 
 /**
  * Parameters for the options object passed to the show function

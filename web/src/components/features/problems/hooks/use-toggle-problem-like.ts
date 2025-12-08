@@ -4,8 +4,8 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
+import { useApi } from '@/hooks/use-api'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
-import { useApi } from '@/hooks/useApi'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { toggleProblemLike } from '../services/problem-service'
