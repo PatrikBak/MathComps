@@ -152,7 +152,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full max-w-full px-6">
       {/* Mobile Header - stacked layout */}
       <div className="md:hidden text-center flex flex-col gap-4">
         {/* Title with icon */}

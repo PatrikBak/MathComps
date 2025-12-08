@@ -19,7 +19,7 @@ export const metadata: Metadata = generatePageMetadata({
 
 export default function NovinkyPage() {
   return (
-    <Layout wider>
+    <Layout wider centerMidscreen>
       <NewsList articles={getAllNewsArticles()} />
     </Layout>
   )
