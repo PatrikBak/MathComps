@@ -1,7 +1,7 @@
 import { Github, Linkedin } from 'lucide-react'
-import Image from 'next/image'
 
 import { AppLink } from '@/components/shared/components/AppLink'
+import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 
 import AboutPanelSection from './layout/AboutPanelSection'
 
@@ -9,13 +9,13 @@ export const AuthorSection = () => {
   return (
     <AboutPanelSection id="aboutAuthor" title="O autorovi">
       <div className="flex flex-col sm:flex-row items-start gap-8">
-        <div className="flex-shrink-0 mx-auto sm:mx-0 w-32 h-32">
-          <Image
+        <div className="flex-shrink-0 mx-auto sm:mx-0">
+          <ImageWithLoader
             src="/foto.jpg"
             alt="Profilová fotka Patrika Baka"
             width={128}
             height={128}
-            className="w-32 h-32 object-cover rounded-full"
+            className="object-cover rounded-full"
             priority
           />
         </div>
