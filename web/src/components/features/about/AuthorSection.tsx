@@ -9,13 +9,13 @@ export const AuthorSection = () => {
   return (
     <AboutPanelSection id="aboutAuthor" title="O autorovi">
       <div className="flex flex-col sm:flex-row items-start gap-8">
-        <div className="flex-shrink-0 mx-auto sm:mx-0">
+        <div className="flex-shrink-0 mx-auto sm:mx-0 w-32 h-32">
           <Image
             src="/foto.jpg"
             alt="Profilová fotka Patrika Baka"
             width={128}
             height={128}
-            className="w-full h-full object-cover rounded-full"
+            className="w-32 h-32 object-cover rounded-full"
             priority
           />
         </div>
