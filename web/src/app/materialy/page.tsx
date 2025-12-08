@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
+import type { HandoutSection } from '@/components/features/handouts/handout-types'
 import { HandoutSectionList } from '@/components/features/handouts/HandoutSectionList'
 import { HandoutsHero } from '@/components/features/handouts/HandoutsHero'
-import type { HandoutSection } from '@/components/features/handouts/types/handout-types'
 import Layout from '@/components/layout/Layout'
 import { ROUTES } from '@/constants/routes'
 import handoutData from '@/content/handouts/handouts.json'

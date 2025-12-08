@@ -8,8 +8,8 @@ import type {
   HandoutData,
   HandoutImage,
   RawContentBlock,
-} from '@/components/features/handouts/types/handout-types'
-import type { SectionMetadata } from '@/components/features/handouts/utils/handout-utils'
+} from '@/components/features/handouts/handout-types'
+import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
 import {
   renderBlocks,
   renderInlineContent,

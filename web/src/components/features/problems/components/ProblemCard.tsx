@@ -2,7 +2,7 @@ import { ChevronDown, ExternalLink, Eye, EyeOff, Heart, Link, User } from 'lucid
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
+import type { RawContentBlock } from '@/components/features/handouts/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'

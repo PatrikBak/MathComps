@@ -2,7 +2,7 @@
 
 import { Link } from 'lucide-react'
 
-import type { RawContentBlock } from '@/components/features/handouts/types/handout-types'
+import type { RawContentBlock } from '@/components/features/handouts/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 

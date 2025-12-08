@@ -1,10 +1,7 @@
 import { ChevronRight, FileText, Lock, User } from 'lucide-react'
 import React from 'react'
 
-import type {
-  HandoutEntry,
-  HandoutSection,
-} from '@/components/features/handouts/types/handout-types'
+import type { HandoutEntry, HandoutSection } from '@/components/features/handouts/handout-types'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ROUTES } from '@/constants/routes'
 

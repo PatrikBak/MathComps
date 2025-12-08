@@ -1,10 +1,7 @@
 import { ImageOff } from 'lucide-react'
 import React from 'react'
 
-import type {
-  ListStyleType,
-  RawContentBlock,
-} from '@/components/features/handouts/types/handout-types'
+import type { ListStyleType, RawContentBlock } from '@/components/features/handouts/handout-types'
 import { getDocumentUrl, getProblemImageUrl } from '@/components/features/problems/utils/url-utils'
 import FootnoteRef from '@/components/math/FootnoteRef'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'

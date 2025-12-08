@@ -1,4 +1,4 @@
-import type { Document } from '@/components/features/handouts/types/handout-types'
+import type { Document } from '@/components/features/handouts/handout-types'
 import { SectionNumberingGenerator } from '@/components/shared/utils/section-numbering-utils'
 import { slugify } from '@/components/shared/utils/string-utils'
 

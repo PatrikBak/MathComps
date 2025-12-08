@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import type {
   HandoutData,
   HandoutEntry,
   HandoutSection,
-} from '@/components/features/handouts/types/handout-types'
-import { computeSectionMetadata } from '@/components/features/handouts/utils/handout-utils'
+} from '@/components/features/handouts/handout-types'
+import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
+import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import Layout from '@/components/layout/Layout'
 import { ROUTES } from '@/constants/routes'
 import handoutIndex from '@/content/handouts/handouts.json'
