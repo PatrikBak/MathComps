@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown, Menu } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -33,16 +33,14 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
   // Reference to the active item button for auto-scrolling when menu opens
   const activeItemReference = useRef<HTMLButtonElement>(null)
 
-  // Use shared navigation hook without hash change listener (mobile doesn't need it)
+  // Use shared navigation hook
   const { activeIndex, handleNavigationClick: baseNavigationClick } = useTableOfContentsNavigation({
     items,
-    enableHashChangeListener: false,
   })
 
   // Auto-scroll to active item when menu opens
   useEffect(() => {
     if (isOpen && activeItemReference.current) {
-      // Scroll the active item into view with smooth behavior and center alignment
       activeItemReference.current.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -50,17 +48,13 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
     }
   }, [isOpen])
 
-  // Early return if no items to avoid useScrollSpy with empty selector
-  if (!items || items.length === 0) {
-    return null
-  }
-
   /**
    * Wraps the base navigation click handler to also close the mobile menu.
    *
    * @param id - The section ID to navigate to
    */
   const handleNavigationClick = (id: string) => {
+    // Invoke base navigation click handler
     baseNavigationClick(id)
     // Close menu after successful navigation
     setIsOpen(false)
@@ -154,5 +148,3 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
     </>
   )
 }
-
-// #endregion

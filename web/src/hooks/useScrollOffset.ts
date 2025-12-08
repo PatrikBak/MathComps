@@ -1,20 +1,22 @@
 'use client'
 
-import { useMediaQuery } from '@mantine/hooks'
+import { useViewportSize } from '@mantine/hooks'
 
 /**
- * Custom hook that returns the appropriate scroll offset based on screen size.
- * Accounts for different header heights on mobile vs desktop.
- * Used for:
- * - Scroll offset when navigating to anchor links
- * - Scroll-spy offset for detecting active sections
- * - Any JavaScript logic that needs to account for the fixed header
+ * Custom hook that returns the current scroll offset from CSS.
+ * Reads the --scroll-offset CSS variable which is set responsively in globals.css.
+ * Used for scroll-spy offset detection where JS needs to know the header height.
  */
 export function useScrollOffset(): number {
-  // Use Tailwind's 'lg' breakpoint (1024px) to match header responsive behavior
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
+  // Re-render when viewport changes (which may trigger CSS breakpoint changes)
+  useViewportSize()
 
-  // Desktop: larger header with more padding
-  // Mobile: smaller header with less padding
-  return isDesktop ? 96 : 76
+  // Guard against SSR - getComputedStyle and document are browser-only APIs
+  if (typeof window === 'undefined') {
+    return 0
+  }
+
+  // Read the current value from CSS (respects current breakpoint)
+  const cssValue = getComputedStyle(document.documentElement).getPropertyValue('--scroll-offset')
+  return parseInt(cssValue, 10)
 }

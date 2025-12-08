@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -13,12 +13,10 @@ import {
 import type { TableOfContentsItem, TableOfContentsProps } from './table-of-contents-types'
 import { useTableOfContentsNavigation } from './useTableOfContentsNavigation'
 
-// #region Types
-
 /**
  * Props for the TocLinks presentational component.
  */
-interface TocLinksProps {
+type TocLinksProps = {
   /** Array of table of contents items to render */
   items: TableOfContentsItem[]
   /** Index of the currently active item (highlighted) */
@@ -29,18 +27,8 @@ interface TocLinksProps {
   registerLinkElementRef: (index: number) => (element: HTMLAnchorElement | null) => void
 }
 
-// #endregion
-
-// #region UI components
-
 /**
- * Presentational list of table-of-contents links.
- * Indentation scales with level: each level adds 1rem (16px) of left margin.
- *
- * @param items - Array of TOC items to render
- * @param activeIndex - Index of the currently active item for highlighting
- * @param onItemClick - Callback for handling link clicks
- * @returns Rendered list of navigation links
+ * List of  table-of-contents links.
  */
 function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: TocLinksProps) {
   return (
@@ -87,15 +75,11 @@ function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: T
  * - Deep-link support via URL hash
  * - Smooth scroll navigation with header offset
  * - Automatic highlighting of current section
- *
- * @param items - Array of navigation items to display
- * @returns Desktop TOC sidebar or null if no items
  */
 export function TableOfContents({ items }: TableOfContentsProps) {
-  // Use shared navigation hook with hash change listening enabled
+  // Use shared navigation hook
   const { activeIndex, handleNavigationClick } = useTableOfContentsNavigation({
     items,
-    enableHashChangeListener: true,
   })
 
   // Store references to the container and individual link elements so we can keep
@@ -104,35 +88,6 @@ export function TableOfContents({ items }: TableOfContentsProps) {
   const linkElementRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const registerLinkElementRef = (index: number) => (element: HTMLAnchorElement | null) => {
     linkElementRefs.current[index] = element
-  }
-
-  // When the active link changes due to scroll-spy, scroll it into view if needed.
-  // Special case: first item scrolls the entire container to top for a clean reset.
-  useEffect(() => {
-    if (activeIndex == null) return
-    const containerElement = containerRef.current
-    const activeElement = linkElementRefs.current[activeIndex]
-    if (!containerElement || !activeElement) return
-
-    // Scroll the container itself to the top for the first item
-    if (activeIndex === 0) {
-      containerElement.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      })
-    } else {
-      // For other items, use smart nearest positioning
-      activeElement.scrollIntoView({
-        block: 'nearest',
-        inline: 'nearest',
-        behavior: 'smooth',
-      })
-    }
-  }, [activeIndex])
-
-  // Early return if no items to avoid useScrollSpy with empty selector
-  if (!items || items.length === 0) {
-    return null
   }
 
   return (
@@ -162,5 +117,3 @@ export function TableOfContents({ items }: TableOfContentsProps) {
     </>
   )
 }
-
-// #endregion

@@ -1,4 +1,3 @@
-import { AnchorScrollHandler } from '@/components/shared/components/AnchorScrollHandlers'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { MobileTableOfContents } from '../table-of-contents/MobileTableOfContents'
@@ -39,9 +38,6 @@ export default function Layout({
 }: LayoutProps) {
   return (
     <div className={cn('min-h-screen flex flex-col', className)}>
-      {/* Makes sure footer links will properly scroll */}
-      <AnchorScrollHandler />
-
       {/* Sticky header */}
       <ServerHeader />
 
