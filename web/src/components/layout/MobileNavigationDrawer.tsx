@@ -89,11 +89,7 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
                 {isLoaded && user && (
                   <div className="mb-4 pb-4 border-b border-white/10 -mx-6 px-6">
                     <div className="py-3">
-                      <UserInfoHeader
-                        user={user}
-                        size="md"
-                        avatarClassName="border-2 border-violet-500/30"
-                      />
+                      <UserInfoHeader user={user} size="md" />
                     </div>
                   </div>
                 )}
