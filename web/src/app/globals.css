@@ -5,6 +5,35 @@
 :root {
   scroll-behavior: smooth;
   --problems-sidebar-width: 335px;
+
+  /* Scroll offset for anchor links - must match header height + breathing room */
+  --scroll-offset: 66px;
+}
+
+/* sm breakpoint */
+@media (min-width: 640px) {
+  :root {
+    --scroll-offset: 76px;
+  }
+}
+
+/* md breakpoint */
+@media (min-width: 768px) {
+  :root {
+    --scroll-offset: 84px;
+  }
+}
+
+/* lg breakpoint */
+@media (min-width: 1024px) {
+  :root {
+    --scroll-offset: 96px;
+  }
+}
+
+/* Apply scroll offset to all anchor targets */
+[id] {
+  scroll-margin-top: var(--scroll-offset);
 }
 
 @layer base {

@@ -25,7 +25,9 @@ type HeaderProps = {
 }
 
 /**
- * The main site header with logo + navigation + login button / user-data
+ * The main site sticky header with logo + navigation + login button / user-data
+ *
+ * @remarks **IMPORTANT**: If the header height changes, make sure to update --scroll-offset in globals.css for all breakpoints
  */
 export default function Header({ initialIsAuthenticated }: HeaderProps) {
   // Keep track of whether the mobile menu is open

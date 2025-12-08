@@ -1,20 +1,33 @@
 'use client'
 
-import { useMediaQuery } from '@mantine/hooks'
+import { useSyncExternalStore } from 'react'
 
 /**
- * Custom hook that returns the appropriate scroll offset based on screen size.
- * Accounts for different header heights on mobile vs desktop.
- * Used for:
- * - Scroll offset when navigating to anchor links
- * - Scroll-spy offset for detecting active sections
- * - Any JavaScript logic that needs to account for the fixed header
+ * Custom hook that returns the current scroll offset from CSS.
+ * Reads the --scroll-offset CSS variable which is set responsively in globals.css.
+ * Used for scroll-spy offset detection where JS needs to know the header height.
  */
-export function useScrollOffset(): number {
-  // Use Tailwind's 'lg' breakpoint (1024px) to match header responsive behavior
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
+export function useScrollOffset() {
+  return useSyncExternalStore(
+    // Subscribe to resize events (when CSS variable might change)
+    (callback) => {
+      window.addEventListener('resize', callback)
+      return () => window.removeEventListener('resize', callback)
+    },
+    // The client-side function to get the scroll offset
+    () => {
+      // Get the value of the CSS variable
+      const cssValue = getComputedStyle(document.documentElement).getPropertyValue(
+        '--scroll-offset'
+      )
 
-  // Desktop: larger header with more padding
-  // Mobile: smaller header with less padding
-  return isDesktop ? 96 : 76
+      // Parse it
+      const parsedValue = parseInt(cssValue, 10)
+
+      // Return the parsed value or a safe default
+      return isNaN(parsedValue) ? 0 : parsedValue
+    },
+    // SSR fallback
+    () => 0
+  )
 }
