@@ -58,7 +58,7 @@ export default function UserMenu() {
         disabled
         className="bg-white/5 border-white/10 cursor-progress select-none animate-pulse"
       >
-        <div className="w-8 h-8 rounded-full bg-white/20" />
+        <div className="w-7 h-7 rounded-full bg-white/20" />
         <div className="w-4 h-4 rounded-full bg-white/10" />
       </UserMenuTrigger>
     )

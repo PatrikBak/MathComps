@@ -1,9 +1,15 @@
 'use client'
 
 import React from 'react'
+import { createPortal } from 'react-dom'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
+/**
+ * The styles for the floating math animation. Not sure if it's
+ * the best approach to keep them here but I wanted to separate them
+ * from the globals.css file cause they're too big.
+ */
 const FloatingMathStyles = () => (
   <style jsx global>{`
     @keyframes containerPulse {
@@ -18,214 +24,208 @@ const FloatingMathStyles = () => (
 
     @keyframes floatPrimary {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.8);
-        opacity: 0; /* Start with 0 opacity instead of blur */
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.8);
+        opacity: 0;
       }
       5% {
-        transform: translateY(95vh) translateX(0px) rotate(10deg) scale(1);
-        opacity: 1; /* Fade in */
+        transform: translateY(90vh) translateX(0px) rotate(10deg) scale(1);
+        opacity: 1;
       }
       25% {
-        transform: translateY(75vh) translateX(20px) rotate(90deg) scale(1.1);
+        transform: translateY(70vh) translateX(20px) rotate(90deg) scale(1.1);
       }
       50% {
-        transform: translateY(50vh) translateX(-15px) rotate(180deg) scale(0.9);
+        transform: translateY(45vh) translateX(-15px) rotate(180deg) scale(0.9);
       }
       75% {
-        transform: translateY(25vh) translateX(25px) rotate(270deg) scale(1.05);
+        transform: translateY(20vh) translateX(25px) rotate(270deg) scale(1.05);
       }
       95% {
-        transform: translateY(5vh) translateX(-10px) rotate(350deg) scale(0.8);
-        opacity: 1; /* Stay visible until the end */
+        transform: translateY(0vh) translateX(-10px) rotate(350deg) scale(0.8);
+        opacity: 1;
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(360deg) scale(0.6);
-        opacity: 0; /* Fade out */
+        transform: translateY(-10vh) translateX(0px) rotate(360deg) scale(0.6);
+        opacity: 0;
       }
     }
 
     @keyframes floatSecondary {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.7);
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.7);
         opacity: 0;
       }
       8% {
-        transform: translateY(92vh) translateX(0px) rotate(-15deg) scale(1);
+        transform: translateY(88vh) translateX(0px) rotate(-15deg) scale(1);
         opacity: 1;
       }
       30% {
-        transform: translateY(70vh) translateX(-30px) rotate(-120deg) scale(1.2);
+        transform: translateY(65vh) translateX(-30px) rotate(-120deg) scale(1.2);
       }
       50% {
-        transform: translateY(50vh) translateX(20px) rotate(-180deg) scale(0.85);
+        transform: translateY(45vh) translateX(20px) rotate(-180deg) scale(0.85);
       }
       70% {
-        transform: translateY(30vh) translateX(-25px) rotate(-240deg) scale(1.1);
+        transform: translateY(25vh) translateX(-25px) rotate(-240deg) scale(1.1);
       }
       92% {
-        transform: translateY(8vh) translateX(15px) rotate(-345deg) scale(0.75);
+        transform: translateY(3vh) translateX(15px) rotate(-345deg) scale(0.75);
         opacity: 1;
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(-360deg) scale(0.5);
+        transform: translateY(-10vh) translateX(0px) rotate(-360deg) scale(0.5);
         opacity: 0;
       }
     }
 
     @keyframes floatTertiary {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.6);
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.6);
         opacity: 0;
       }
       6% {
-        transform: translateY(94vh) translateX(0px) rotate(20deg) scale(1);
+        transform: translateY(90vh) translateX(0px) rotate(20deg) scale(1);
         opacity: 1;
       }
       20% {
-        transform: translateY(80vh) translateX(15px) rotate(80deg) scale(1.3);
+        transform: translateY(75vh) translateX(15px) rotate(80deg) scale(1.3);
       }
       40% {
-        transform: translateY(60vh) translateX(-20px) rotate(160deg) scale(0.8);
+        transform: translateY(55vh) translateX(-20px) rotate(160deg) scale(0.8);
       }
       60% {
-        transform: translateY(40vh) translateX(25px) rotate(240deg) scale(1.15);
+        transform: translateY(35vh) translateX(25px) rotate(240deg) scale(1.15);
       }
       80% {
-        transform: translateY(20vh) translateX(-15px) rotate(320deg) scale(0.9);
+        transform: translateY(15vh) translateX(-15px) rotate(320deg) scale(0.9);
       }
       94% {
-        transform: translateY(6vh) translateX(10px) rotate(380deg) scale(0.65);
+        transform: translateY(1vh) translateX(10px) rotate(380deg) scale(0.65);
         opacity: 1;
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(400deg) scale(0.4);
+        transform: translateY(-10vh) translateX(0px) rotate(400deg) scale(0.4);
         opacity: 0;
       }
     }
 
     @keyframes floatQuaternary {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.5);
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.5);
         opacity: 0;
       }
       7% {
-        transform: translateY(93vh) translateX(0px) rotate(-25deg) scale(1);
+        transform: translateY(88vh) translateX(0px) rotate(-25deg) scale(1);
         opacity: 1;
       }
       35% {
-        transform: translateY(65vh) translateX(-35px) rotate(-140deg) scale(1.4);
+        transform: translateY(60vh) translateX(-35px) rotate(-140deg) scale(1.4);
       }
       50% {
-        transform: translateY(50vh) translateX(30px) rotate(-200deg) scale(0.7);
+        transform: translateY(45vh) translateX(30px) rotate(-200deg) scale(0.7);
       }
       65% {
-        transform: translateY(35vh) translateX(-20px) rotate(-260deg) scale(1.2);
+        transform: translateY(30vh) translateX(-20px) rotate(-260deg) scale(1.2);
       }
       93% {
-        transform: translateY(7vh) translateX(12px) rotate(-355deg) scale(0.6);
+        transform: translateY(2vh) translateX(12px) rotate(-355deg) scale(0.6);
         opacity: 1;
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(-380deg) scale(0.3);
+        transform: translateY(-10vh) translateX(0px) rotate(-380deg) scale(0.3);
         opacity: 0;
       }
     }
 
-    /*
-      OPTIMIZATION NOTE:
-      Removed 'text-shadow' from the keyframes. The shadow is now static and
-      defined in the '.highlight-number' and '.geometric' classes instead.
-      This prevents expensive repainting on every animation frame.
-    */
     @keyframes floatHighlight {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.8);
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.8);
         opacity: 0;
       }
       5% {
-        transform: translateY(95vh) translateX(0px) rotate(15deg) scale(1);
+        transform: translateY(90vh) translateX(0px) rotate(15deg) scale(1);
         opacity: 1;
       }
       25% {
-        transform: translateY(75vh) translateX(30px) rotate(105deg) scale(1.3);
+        transform: translateY(70vh) translateX(30px) rotate(105deg) scale(1.3);
       }
       50% {
-        transform: translateY(50vh) translateX(-20px) rotate(195deg) scale(0.9);
+        transform: translateY(45vh) translateX(-20px) rotate(195deg) scale(0.9);
       }
       75% {
-        transform: translateY(25vh) translateX(35px) rotate(285deg) scale(1.2);
+        transform: translateY(20vh) translateX(35px) rotate(285deg) scale(1.2);
       }
       95% {
-        transform: translateY(5vh) translateX(-15px) rotate(375deg) scale(0.8);
+        transform: translateY(0vh) translateX(-15px) rotate(375deg) scale(0.8);
         opacity: 1;
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(390deg) scale(0.6);
+        transform: translateY(-10vh) translateX(0px) rotate(390deg) scale(0.6);
         opacity: 0;
       }
     }
 
     @keyframes floatGeometric {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.7);
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.7);
         opacity: 0;
       }
       5% {
-        transform: translateY(95vh) translateX(0px) rotate(-20deg) scale(1);
+        transform: translateY(90vh) translateX(0px) rotate(-20deg) scale(1);
         opacity: 1;
       }
       20% {
-        transform: translateY(80vh) translateX(25px) rotate(-80deg) scale(1.4);
+        transform: translateY(75vh) translateX(25px) rotate(-80deg) scale(1.4);
       }
       40% {
-        transform: translateY(60vh) translateX(-30px) rotate(-160deg) scale(0.8);
+        transform: translateY(55vh) translateX(-30px) rotate(-160deg) scale(0.8);
       }
       60% {
-        transform: translateY(40vh) translateX(40px) rotate(-240deg) scale(1.3);
+        transform: translateY(35vh) translateX(40px) rotate(-240deg) scale(1.3);
       }
       80% {
-        transform: translateY(20vh) translateX(-25px) rotate(-320deg) scale(0.9);
+        transform: translateY(15vh) translateX(-25px) rotate(-320deg) scale(0.9);
       }
       95% {
-        transform: translateY(5vh) translateX(15px) rotate(-380deg) scale(0.7);
+        transform: translateY(0vh) translateX(15px) rotate(-380deg) scale(0.7);
         opacity: 1;
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(-400deg) scale(0.5);
+        transform: translateY(-10vh) translateX(0px) rotate(-400deg) scale(0.5);
         opacity: 0;
       }
     }
 
     @keyframes floatMagnetic {
       0% {
-        transform: translateY(90vh) translateX(0px) rotate(0deg) scale(0.8);
+        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.8);
         opacity: 0;
       }
       5% {
+        transform: translateY(90vh) translateX(0px) rotate(10deg) scale(1);
         opacity: 1;
-        transform: translateY(95vh) translateX(0px) rotate(10deg) scale(1);
       }
       25% {
-        transform: translateY(75vh) translateX(60px) rotate(90deg) scale(1.1);
+        transform: translateY(70vh) translateX(60px) rotate(90deg) scale(1.1);
       }
       35% {
-        transform: translateY(65vh) translateX(20px) rotate(130deg) scale(1.2);
+        transform: translateY(60vh) translateX(20px) rotate(130deg) scale(1.2);
       }
       50% {
-        transform: translateY(50vh) translateX(-40px) rotate(180deg) scale(0.9);
+        transform: translateY(45vh) translateX(-40px) rotate(180deg) scale(0.9);
       }
       65% {
-        transform: translateY(35vh) translateX(50px) rotate(230deg) scale(1.15);
+        transform: translateY(30vh) translateX(50px) rotate(230deg) scale(1.15);
       }
       75% {
-        transform: translateY(25vh) translateX(10px) rotate(270deg) scale(1.05);
+        transform: translateY(20vh) translateX(10px) rotate(270deg) scale(1.05);
       }
       95% {
+        transform: translateY(0vh) translateX(-10px) rotate(350deg) scale(0.8);
         opacity: 1;
-        transform: translateY(5vh) translateX(-10px) rotate(350deg) scale(0.8);
       }
       100% {
-        transform: translateY(-5vh) translateX(0px) rotate(360deg) scale(0.6);
+        transform: translateY(-10vh) translateX(0px) rotate(360deg) scale(0.6);
         opacity: 0;
       }
     }
@@ -335,18 +335,25 @@ const FloatingMathStyles = () => (
   `}</style>
 )
 
-interface FloatingMathSymbolDef {
+/**
+ * The data for a single symbol being animated
+ */
+type FloatingMathSymbolDef = {
+  /** The symbol to display */
   symbol: string
+  /** The layer of the symbol  */
   layer: 1 | 2 | 3 | 4
+  /** The left position of the symbol, as a CSS value */
   left: string
+  /** The animation delay of the symbol, as a CSS value */
   animationDelay?: string
+  /** Custom class to apply to the symbol */
   className?: string
 }
 
-interface FloatingMathProps {
-  className?: string
-}
-
+/**
+ * The symbols being animated
+ */
 const mathSymbols: FloatingMathSymbolDef[] = [
   { symbol: '∫', layer: 1, left: '8%', animationDelay: '0.05s' },
   {
@@ -426,6 +433,9 @@ const mathSymbols: FloatingMathSymbolDef[] = [
   },
 ]
 
+/**
+ * A single symbol in this floating math component
+ */
 const FloatingMathSymbol = ({
   symbol,
   layer,
@@ -433,13 +443,18 @@ const FloatingMathSymbol = ({
   className = '',
   index,
 }: FloatingMathSymbolDef & { index: number }) => {
-  const layerClass = `layer-${layer}`
-  const magneticClass = index % 3 === 0 ? 'magnetic' : ''
-  const combinedClassName = `floating-math ${layerClass} ${className} ${magneticClass}`.trim()
-
   return (
     <div
-      className={combinedClassName}
+      className={cn(
+        // The main class
+        `floating-math`,
+        // Layer-specific class
+        `layer-${layer}`,
+        // Add magnetic class every 3rd symbol
+        index % 3 === 0 ? 'magnetic' : '',
+        // Custom class
+        className
+      )}
       style={{
         left,
         // This needs to be here and not in the JSX styles so it's applied right when
@@ -454,11 +469,28 @@ const FloatingMathSymbol = ({
   )
 }
 
-export default function FloatingMath({ className }: FloatingMathProps) {
-  return (
+/**
+ * A fancy animation with symbols floating and flying and stuff.
+ */
+export default function FloatingMath() {
+  // We'll keep track to see if we've mounted (i.e. not in a server-side render)
+  const [mounted, setMounted] = React.useState(false)
+
+  // When this runs, the component has mounted
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Force the component to return null if we're in a server-side render
+  if (!mounted) return null
+
+  // Use the portal to avoid the math symbols affecting the layout of the page
+  // This fixed the problem with scrolling to a hash anchor - it would incorrectly
+  // calculate the scroll position of the anchor element (i.e. a section)
+  return createPortal(
     <>
       <FloatingMathStyles />
-      <div className={cn('floating-math-container', className)} aria-hidden="true">
+      <div className="floating-math-container" aria-hidden="true">
         {mathSymbols.map((symbolData, index) => (
           <FloatingMathSymbol
             key={`${symbolData.symbol}-${symbolData.layer}-${index}`}
@@ -467,6 +499,7 @@ export default function FloatingMath({ className }: FloatingMathProps) {
           />
         ))}
       </div>
-    </>
+    </>,
+    document.body
   )
 }

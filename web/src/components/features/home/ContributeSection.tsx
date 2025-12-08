@@ -2,10 +2,12 @@ import { Code, FileText, Globe, Shield } from 'lucide-react'
 
 import ContactButton from '@/components/features/contact/ContactButton'
 import Badge from '@/components/features/home/layout/Badge'
-import ThreeCardSection from '@/components/features/home/layout/ThreeCardSection'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { HOME_ABOUT_STYLES } from '@/constants/common-section-styles'
+import Section from '@/components/shared/components/Section'
 
+/**
+ * Displays the contribute/open-source section on the home page.
+ */
 export const ContributeSection = () => {
   const contributeCards = [
     {
@@ -56,22 +58,17 @@ export const ContributeSection = () => {
   ]
 
   return (
-    <ThreeCardSection
+    <Section
       id="contribute-section"
-      headerContent={
-        <>
-          <Badge
-            icon={<Shield size={14} className="sm:w-4 sm:h-4" />}
-            text="Otvorený projekt"
-            color="green"
-          />
-
-          <h2 className={HOME_ABOUT_STYLES.sectionTitle}>Prispejte svojím dielom</h2>
-          <p className={HOME_ABOUT_STYLES.sectionDescription}>
-            MathComps je otvorená platforma a každá pomoc je nesmierne cenná.
-          </p>
-        </>
+      badge={
+        <Badge
+          icon={<Shield size={14} className="sm:w-4 sm:h-4" />}
+          text="Otvorený projekt"
+          color="green"
+        />
       }
+      title="Prispejte svojím dielom"
+      description="MathComps je otvorená platforma a každá pomoc je nesmierne cenná."
       cards={contributeCards}
     />
   )

@@ -2,12 +2,21 @@ import React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
+/**
+ * The props for the {@link Badge} component.
+ */
 type BadgeProps = {
+  /* The icon to display in the badge. */
   icon: React.ReactNode
+  /* The text to display in the badge. */
   text: string
+  /* The color of the badge. */
   color: 'sky' | 'green' | 'amber'
 }
 
+/**
+ * A badge with an icon and text.
+ */
 export default function Badge({ icon, text, color }: BadgeProps) {
   const colorClasses = {
     sky: 'bg-sky-500/10 text-sky-300',

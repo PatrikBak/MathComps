@@ -1,11 +1,11 @@
 import Image from 'next/image'
-import React from 'react'
 
-import AnimatedSection from '@/components/shared/components/AnimatedSection'
 import GlassCard from '@/components/shared/components/GlassCard'
-import { cn } from '@/components/shared/utils/css-utils'
-import { HOME_ABOUT_STYLES } from '@/constants/common-section-styles'
+import Section from '@/components/shared/components/Section'
 
+/**
+ * Displays the technologies section on the about page.
+ */
 export default function TechnologiesSection() {
   const technologies = [
     {
@@ -37,16 +37,12 @@ export default function TechnologiesSection() {
   ]
 
   return (
-    <AnimatedSection
-      className={cn(HOME_ABOUT_STYLES.sectionWrapper, 'px-4')}
-      anchorId="technologies-section"
+    <Section
+      id="technologies-section"
+      className="px-4"
+      title="Technológie"
+      description="Prehľad kľúčových technológií, ktoré poháňajú MathComps."
     >
-      <div className={HOME_ABOUT_STYLES.headerContainer}>
-        <h2 className={HOME_ABOUT_STYLES.sectionTitle}>Technológie</h2>
-        <p className={HOME_ABOUT_STYLES.sectionDescription}>
-          Prehľad kľúčových technológií, ktoré poháňajú MathComps.
-        </p>
-      </div>
       <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
         {technologies.map((tech, index) => (
           <div key={index} className="w-full max-w-64 h-full">
@@ -62,6 +58,6 @@ export default function TechnologiesSection() {
           </div>
         ))}
       </div>
-    </AnimatedSection>
+    </Section>
   )
 }

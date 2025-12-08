@@ -1,10 +1,11 @@
 import { Brain, Sparkles, Trophy, Users } from 'lucide-react'
-import React from 'react'
 
 import Badge from '@/components/features/home/layout/Badge'
-import ThreeCardSection from '@/components/features/home/layout/ThreeCardSection'
-import { HOME_ABOUT_STYLES } from '@/constants/common-section-styles'
+import Section from '@/components/shared/components/Section'
 
+/**
+ * Displays the vision/future goals section on the home page.
+ */
 export default function VisionSection() {
   const visionItems = [
     {
@@ -27,21 +28,18 @@ export default function VisionSection() {
     },
   ]
 
-  const header = (
-    <>
-      <Badge
-        icon={<Sparkles size={14} className="sm:w-4 sm:h-4" />}
-        text="Kam smerujeme?"
-        color="sky"
-      />
-      <h2 className={HOME_ABOUT_STYLES.sectionTitle}>Vízia do budúcnosti</h2>
-      <p className={HOME_ABOUT_STYLES.sectionDescription}>
-        MathComps je na začiatku svojej cesty. V hlave je kopa nápadov, ako tento projekt vylepšiť,
-        aby priniesol čo najviac úžitku svetu matematických súťaží. Mimo zveľaďovania už
-        vytvoreného, ďalšie myšlienky sú:
-      </p>
-    </>
+  return (
+    <Section
+      badge={
+        <Badge
+          icon={<Sparkles size={14} className="sm:w-4 sm:h-4" />}
+          text="Kam smerujeme?"
+          color="sky"
+        />
+      }
+      title="Vízia do budúcnosti"
+      description="MathComps je na začiatku svojej cesty. V hlave je kopa nápadov, ako tento projekt vylepšiť, aby priniesol čo najviac úžitku svetu matematických súťaží. Mimo zveľaďovania už vytvoreného, ďalšie myšlienky sú:"
+      cards={visionItems}
+    />
   )
-
-  return <ThreeCardSection headerContent={header} cards={visionItems} />
 }

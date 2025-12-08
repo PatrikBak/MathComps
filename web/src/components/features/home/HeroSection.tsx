@@ -17,7 +17,7 @@ export default function HeroSection() {
   const iconClassName = 'w-4 h-4 md:w-5 md:h-5'
 
   return (
-    <AnimatedSection className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `} anchorId="hero-section">
+    <AnimatedSection className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `}>
       {/* Background Animations */}
       <ParticleSystem />
       <FloatingMath />

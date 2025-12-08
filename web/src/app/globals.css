@@ -31,11 +31,6 @@
   }
 }
 
-/* Apply scroll offset to all anchor targets */
-[id] {
-  scroll-margin-top: var(--scroll-offset);
-}
-
 @layer base {
   body {
     background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 50%);
@@ -53,6 +48,11 @@
       scrollbar-color: theme('colors.slate.600') transparent;
     }
   }
+}
+
+/* Apply scroll offset to all anchor targets */
+[id] {
+  scroll-margin-top: var(--scroll-offset);
 }
 
 @layer utilities {
