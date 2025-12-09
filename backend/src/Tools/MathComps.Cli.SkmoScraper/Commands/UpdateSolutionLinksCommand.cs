@@ -40,7 +40,7 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
         var jsonContent = await File.ReadAllTextAsync(settings.JsonFilePath);
 
         // Deserialize
-        var scrapedSolutions = JsonSerializer.Deserialize<List<ScrapedSolution>>(jsonContent);
+        var scrapedSolutions = jsonContent.FromJson<List<ScrapedSolution>>();
 
         // Ensure we have it
         if (scrapedSolutions == null || scrapedSolutions.Count == 0)
