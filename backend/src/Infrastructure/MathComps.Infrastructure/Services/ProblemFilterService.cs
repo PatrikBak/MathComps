@@ -629,8 +629,9 @@ public class ProblemFilterService(
 
                 // Handle rounds without categories (direct competition rounds)
                 var roundsWithoutCategory = competitionGroup
-                    // Only consider rounds without categories
-                    .Where(roundData => roundData.CategoryName == null)
+                    // Only consider rounds without categories, excluding default rounds
+                    // (Default rounds are implicit and should not appear as children in the tree)
+                    .Where(roundData => roundData.CategoryName == null && !roundData.IsDefault)
                     // Sort rounds by predefined sort order
                     .OrderBy(roundData => roundData.RoundSortOrder)
                     // Project to FacetOption
