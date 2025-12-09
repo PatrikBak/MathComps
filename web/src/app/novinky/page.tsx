@@ -2,6 +2,7 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import type { Metadata } from 'next'
 import path from 'path'
+import { Suspense } from 'react'
 
 import { NewsList } from '@/components/features/news/NewsList'
 import type { NewsArticle, NewsCategory } from '@/components/features/news/types'
@@ -20,7 +21,9 @@ export const metadata: Metadata = generatePageMetadata({
 export default function NovinkyPage() {
   return (
     <Layout wider centerMidscreen>
-      <NewsList articles={getAllNewsArticles()} />
+      <Suspense>
+        <NewsList articles={getAllNewsArticles()} />
+      </Suspense>
     </Layout>
   )
 }

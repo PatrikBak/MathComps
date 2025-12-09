@@ -5,7 +5,6 @@ import { Menu } from 'lucide-react'
 
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
 import UserMenu from '@/components/layout/UserMenu'
-import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/constants/routes'
 
@@ -13,23 +12,11 @@ import { cn } from '../shared/utils/css-utils'
 import { MobileNavigationDrawer } from './MobileNavigationDrawer'
 
 /**
- * Props for the {@link Header} component.
- */
-type HeaderProps = {
-  /**
-   * The starting authentication state of the user fetched from the server.
-   * If they are we can render the logged-in state right away without waiting
-   * for a client-side check of the user's data.
-   */
-  initialIsAuthenticated: boolean
-}
-
-/**
  * The main site sticky header with logo + navigation + login button / user-data
  *
  * @remarks **IMPORTANT**: If the header height changes, make sure to update --scroll-offset in globals.css for all breakpoints
  */
-export default function Header({ initialIsAuthenticated }: HeaderProps) {
+export default function Header() {
   // Keep track of whether the mobile menu is open
   const [isMobileNavigationOpen, toggleMobileNavigationOpen] = useToggle()
 
@@ -52,22 +39,8 @@ export default function Header({ initialIsAuthenticated }: HeaderProps) {
               <NavLink href={ROUTES.NEWS}>Novinky</NavLink>
               <NavLink href={ROUTES.ABOUT}>O projekte</NavLink>
 
-              {/* Auth Section */}
-              <div>
-                {/* Case where we are sure there will be a user  */}
-                {initialIsAuthenticated ? (
-                  <UserMenu />
-                ) : (
-                  <div className="pl-4">
-                    {/* Just a login button */}
-                    <LoginNavItem
-                      className="text-violet-300 hover:text-violet-200 
-                      transition-colors rounded-full outline outline-slate-700 outline-offset-8 
-                      hover:outline-white/50 focus-visible:outline-4  focus-visible:outline-indigo-500"
-                    />
-                  </div>
-                )}
-              </div>
+              {/* Auth - UserMenu handles all states (loading, logged out, logged in) */}
+              <UserMenu />
             </div>
 
             {/* Mobile Navigation Button */}

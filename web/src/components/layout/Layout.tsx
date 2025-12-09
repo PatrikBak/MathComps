@@ -4,7 +4,7 @@ import { MobileTableOfContents } from '../table-of-contents/MobileTableOfContent
 import type { TableOfContentsItem } from '../table-of-contents/table-of-contents-types'
 import { TableOfContents } from '../table-of-contents/TableOfContents'
 import Footer from './Footer'
-import ServerHeader from './ServerHeader'
+import Header from './Header'
 
 /**
  * Props for the {@link Layout} component.
@@ -25,8 +25,8 @@ type LayoutProps = {
 }
 
 /**
- * Root layout component that wires together {@link ServerHeader}, {@link AnchorScrollHandler},
- * {@link TableOfContents}, and {@link Footer} to provide consistent page structure.
+ * Root layout component that wires together {@link Header}, {@link TableOfContents},
+ * and {@link Footer} to provide consistent page structure.
  */
 export default function Layout({
   children,
@@ -39,7 +39,7 @@ export default function Layout({
   return (
     <div className={cn('min-h-screen flex flex-col', className)}>
       {/* Sticky header */}
-      <ServerHeader />
+      <Header />
 
       {/* Body */}
       <main
