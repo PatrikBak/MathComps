@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
+import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/constants/routes'
 
@@ -39,7 +40,7 @@ UserMenuTrigger.displayName = 'UserMenuTrigger'
 
 /**
  * User menu dropdown component for the header.
- * Shows user avatar, name, and provides logout functionality.
+ * Handles all auth states: loading, logged out (shows login), and logged in (shows dropdown).
  * Built with Radix UI Dropdown for better accessibility.
  */
 export default function UserMenu() {
@@ -49,8 +50,8 @@ export default function UserMenu() {
   // Disable profile menu item if already on profile page
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
 
-  // Render placeholder while the user data loads to prevent layout shifts
-  if (!isLoaded || !user) {
+  // Still loading auth state - show placeholder to prevent layout shifts
+  if (!isLoaded) {
     return (
       <UserMenuTrigger
         aria-label="Loading user menu"
@@ -61,6 +62,19 @@ export default function UserMenu() {
         <div className="w-7 h-7 rounded-full bg-white/20" />
         <div className="w-4 h-4 rounded-full bg-white/10" />
       </UserMenuTrigger>
+    )
+  }
+
+  // Auth loaded but no user - show login button
+  if (!user) {
+    return (
+      <div className="pl-4">
+        <LoginNavItem
+          className="text-violet-300 hover:text-violet-200 
+                    transition-colors rounded-full outline outline-slate-700 outline-offset-8 
+                    hover:outline-white/50 focus-visible:outline-4 focus-visible:outline-indigo-500"
+        />
+      </div>
     )
   }
 
