@@ -4,7 +4,6 @@ using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
-using System.Text.Json;
 
 namespace MathComps.Cli.SkmoScraper.Commands;
 
