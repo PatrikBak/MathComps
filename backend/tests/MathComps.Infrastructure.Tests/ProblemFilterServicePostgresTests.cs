@@ -878,37 +878,43 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticA.Id,
-            SeasonId = season2025.Id
+            SeasonId = season2025.Id,
+            Date = new DateOnly(2025, 9, 1)  // Estimated: September (home round)
         };
         var ri_2025_csmo_domestic_B = new RoundInstance
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticB.Id,
-            SeasonId = season2025.Id
+            SeasonId = season2025.Id,
+            Date = new DateOnly(2025, 9, 1)  // Estimated: September (home round)
         };
         var ri_2025_csmo_domestic_C = new RoundInstance
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticC.Id,
-            SeasonId = season2025.Id
+            SeasonId = season2025.Id,
+            Date = new DateOnly(2025, 9, 1)
         };
         var ri_2024_csmo_domestic_Z9 = new RoundInstance
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticZ9.Id,
-            SeasonId = season2024.Id
+            SeasonId = season2024.Id,
+            Date = new DateOnly(2024, 9, 1)
         };
         var ri_2024_csmo_regional_Z9 = new RoundInstance
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoRegionalZ9.Id,
-            SeasonId = season2024.Id
+            SeasonId = season2024.Id,
+            Date = new DateOnly(2025, 4, 1)
         };
         var ri_2025_imo = new RoundInstance
         {
             Id = Guid.NewGuid(),
             SeasonId = season2025.Id,
-            RoundId = roundImo.Id
+            RoundId = roundImo.Id,
+            Date = new DateOnly(2026, 7, 15)
         };
         context.RoundInstances.AddRange(ri_2025_csmo_domestic_A, ri_2025_csmo_domestic_B, ri_2025_csmo_domestic_C, ri_2024_csmo_domestic_Z9, ri_2024_csmo_regional_Z9, ri_2025_imo);
 

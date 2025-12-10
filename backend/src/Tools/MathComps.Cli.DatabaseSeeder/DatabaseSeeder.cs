@@ -769,16 +769,9 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
     {
         // There's so much fetching of all entities here but it don't matter because there's just so little data...
 
-        // To find new instances, we need existing ones... identified by (Round, Season).
+        // Fetch all existing round instances with their full data for updates
         var existingInstances = await dbContext.RoundInstances
-            // We only need what makes a round instance a round
-            .Select(instance => new
-            {
-                RoundId = instance.Round.Id,
-                SeasonId = instance.Season.Id,
-            })
-            // Should be all distinct
-            .ToHashSetAsync();
+            .ToDictionaryAsync(instance => (instance.RoundId, instance.SeasonId));
 
         // We'll need round ids to create instances, so fetch all rounds first.
         var roundKeyToId = await dbContext.Rounds.ToDictionaryAsync(
@@ -789,7 +782,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 CategorySlug = round.Category?.Slug ?? "",
                 RoundSlug = round.Slug
             },
-            // We need to use roiund ids
+            // We need to use round ids
             roundData => roundData.Id);
 
         // We'll need season ids to create instances, so fetch all seasons first.
@@ -797,39 +790,157 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             // The start year should be unique
             .ToDictionaryAsync(season => season.StartYear, season => season.Id);
 
-        // Create new round instances
-        var newInstances = instances
-            // Create the final entity for each new instance.
-            .Select(pair => new RoundInstance
+        // Track changes for logging
+        var insertedCount = 0;
+        var updatedCount = 0;
+
+        // Process each round instance
+        foreach (var pair in instances)
+        {
+            // These data should exist because we ensured comps, categories and rounds exist
+            var roundId = roundKeyToId[new
             {
-                // These data should exist because we ensured comps, categories and rounds exist
-                RoundId = roundKeyToId[new
+                CompetitionSlug = pair.Round.CompetitionId.ToSlug(),
+                CategorySlug = pair.Round.Category?.ToSlug() ?? "",
+                RoundSlug = pair.Round.Round?.RoundId.ToSlug() ?? "",
+            }];
+
+            // And we also ensured existing seasons
+            var seasonId = seasonStartYearToId[pair.StartYear];
+
+            // Estimate the date for chronological sorting
+            var estimatedDate = EstimateRoundInstanceDate(pair.Round, pair.StartYear);
+
+            // Check if round instance already exists
+            if (existingInstances.TryGetValue((roundId, seasonId), out var existingInstance))
+            {
+                // Any property change?
+                var hasChanges = existingInstance.Date != estimatedDate;
+
+                // Count it if so
+                updatedCount += hasChanges ? 1 : 0;
+
+                // Do the update of all properties, EF will figure out changes
+                existingInstance.Date = estimatedDate;
+            }
+            else
+            {
+                // Create new round instance
+                await dbContext.RoundInstances.AddAsync(new RoundInstance
                 {
-                    CompetitionSlug = pair.Round.CompetitionId.ToSlug(),
-                    CategorySlug = pair.Round.Category?.ToSlug() ?? "",
-                    RoundSlug = pair.Round.Round?.RoundId.ToSlug() ?? "",
-                }],
+                    RoundId = roundId,
+                    SeasonId = seasonId,
+                    Date = estimatedDate,
+                });
 
-                // And we also ensured existing seasons
-                SeasonId = seasonStartYearToId[pair.StartYear],
-            })
-            // Get rid of already created round instances
-            .Where(roundInstancee => !existingInstances.Contains(new
-            {
-                roundInstancee.RoundId,
-                roundInstancee.SeasonId,
-            }))
-            // In-memory evaluation
-            .ToList();
-
-        // Ensure the new instances are added
-        await dbContext.RoundInstances.AddRangeAsync(newInstances);
+                // Count it in
+                insertedCount++;
+            }
+        }
 
         // Log results summary
         AnsiConsole.MarkupLine(
             $"\n[cyan]Round instances:[/]\n" +
-            $"[green] - Inserted {newInstances.Count}[/]\n" +
-            $"[blue] - Unchanged {existingInstances.Count}[/]");
+            $"[green] - Inserted {insertedCount}[/]\n" +
+            $"[yellow] - Updated {updatedCount}[/]\n" +
+            $"[blue] - Unchanged {existingInstances.Count - updatedCount}[/]");
+    }
+
+    /// <summary>
+    /// Estimates an approximate date for a round instance based on competition structure.
+    /// Uses the season start year and typical month when the round occurs.
+    /// </summary>
+    /// <param name="roundData">The competition round data.</param>
+    /// <param name="seasonStartYear">The season start year (e.g., 2024 for 2024/2025 season).</param>
+    /// <returns>An estimated date for when the round instance typically occurs.</returns>
+    private static DateOnly EstimateRoundInstanceDate(CompetitionRoundData roundData, int seasonStartYear)
+    {
+        // Estimate month and day based on competition type and round
+        var (month, day) = roundData.CompetitionId switch
+        {
+            // CSMO rounds happen throughout the school year
+            "CSMO" => roundData.Round?.RoundId switch
+            {
+                // Home round: September (all categories)
+                "I" => (9, 1),
+
+                // School round
+                "S" => roundData.Category switch
+                {
+                    // December for A
+                    "A" => (12, 1),
+
+                    // January for B/C
+                    "B" or "C" => (1, 15),
+
+                    // Unhandled value
+                    _ => throw new NotImplementedException($"Unknown category for school round: {roundData.Category}")
+                },
+
+                // Round II: varies by category
+                "II" => roundData.Category switch
+                {
+                    // January for A category (county round)
+                    "A" => (1, 15),
+
+                    // Later in January for Z5, Z9 (district round)
+                    "Z5" or "Z9" => (1, 20),
+
+                    // April for B, C (county round), Z4 (school round), Z6, Z7, Z8 (district round)
+                    "B" or "C" or "Z4" or "Z6" or "Z7" or "Z8" => (4, 1),
+
+                    // Unhandled value
+                    _ => throw new NotImplementedException($"Unknown category for round II: {roundData.Category}")
+                },
+
+                // Round III: varies by category
+                "III" => roundData.Category switch
+                {
+                    // March for A (national round)
+                    "A" => (3, 15),
+
+                    // Later in March for Z9 (county round)
+                    "Z9" => (3, 20),
+
+                    // Unhandled value
+                    _ => throw new NotImplementedException($"Unknown category for round III: {roundData.Category}")
+                },
+
+                // Unhandled value
+                _ => throw new NotImplementedException($"Unknown CSMO round: {roundData.Round?.RoundId}")
+            },
+
+            // April for EGMO (European Girls' Mathematical Olympiad)
+            "EGMO" => (4, 10),
+
+            // Later in April for TST (Team Selection Test)
+            "TST" => (4, 15),
+
+            // Later in April for TSTC (Team Selection Test for CPSJ)
+            "TSTC" => (4, 20),
+
+            // May for CPSJ (Czech-Polish-Slovak Junior)
+            "CPSJ" => (5, 15),
+
+            // June for CAPS (Czech-Austrian-Polish-Slovak Match)
+            "CAPS" => (6, 15),
+
+            // July for IMO (International Mathematical Olympiad)
+            "IMO" => (7, 15),
+
+            // August for MEMO (Middle European Mathematical Olympiad)
+            "MEMO" => (8, 15),
+
+            // Unhandled cases
+            _ => throw new NotImplementedException($"Unknown competition: {roundData.CompetitionId}")
+        };
+
+        // Adjust year: events in September-December use seasonStartYear,
+        // events in January-August use seasonStartYear + 1
+        var year = month >= 9 ? seasonStartYear : seasonStartYear + 1;
+
+        // We've estimated everything
+        return new DateOnly(year, month, day);
     }
 
     #endregion

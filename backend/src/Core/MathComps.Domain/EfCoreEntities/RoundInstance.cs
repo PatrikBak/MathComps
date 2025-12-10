@@ -31,6 +31,12 @@ public class RoundInstance
     public Season Season { get; set; } = null!;
 
     /// <summary>
+    /// The date of this round instance. May be estimated if actual date is unknown.
+    /// Used for chronological sorting of problems.
+    /// </summary>
+    public required DateOnly Date { get; set; }
+
+    /// <summary>
     /// Problems that belong to this specific round instance.
     /// </summary>
     public ICollection<Problem> Problems { get; } = [];
