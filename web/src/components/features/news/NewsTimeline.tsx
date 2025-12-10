@@ -29,6 +29,44 @@ function parseCategory(value: string | null): NewsCategory | null {
 }
 
 /**
+ * The props for the {@link TimelineNavButton} component.
+ */
+type TimelineNavButtonProps = {
+  /** The direction of the button */
+  direction: 'left' | 'right'
+  /** The click handler */
+  onClick: () => void
+  /** Whether the button is visible */
+  visible: boolean
+}
+
+/**
+ * Navigation button for scrolling the timeline horizontally.
+ * Positioned on the timeline axis at the left or right edge.
+ */
+function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonProps) {
+  // The correct icon component
+  const Icon = direction === 'left' ? ChevronLeft : ChevronRight
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'absolute bottom-[45px] -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full',
+        'bg-slate-900 border-2 border-indigo-500/60 text-indigo-400',
+        'hover:bg-slate-700 hover:border-indigo-400 hover:text-indigo-300',
+        'transition-all duration-200',
+        direction === 'left' ? 'left-0' : 'right-0',
+        visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      )}
+      aria-label={direction === 'left' ? 'Novšie články' : 'Staršie články'}
+    >
+      <Icon size={18} strokeWidth={2.5} />
+    </button>
+  )
+}
+
+/**
  * A single item in the news timeline, pairing article data with its rendered card.
  */
 type NewsTimelineItem = {
@@ -192,25 +230,10 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
 
           {/* DESKTOP/TABLET: Horizontal timeline */}
           <div className="hidden md:block relative">
-            {/* Navigation row with title in center */}
-            <div className="flex items-center mb-12">
-              {/* Left: Novšie (Newer) - fixed width to balance layout */}
-              <button
-                onClick={() => scroll('left')}
-                disabled={!canScrollLeft}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 shrink-0',
-                  canScrollLeft
-                    ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 hover:text-indigo-200'
-                    : 'bg-slate-800/30 text-gray-600 cursor-not-allowed'
-                )}
-              >
-                <ChevronLeft size={20} />
-                <span>Novšie</span>
-              </button>
-
-              {/* Center: Title + optional filter - flex-1 prevents layout shift */}
-              <div className="flex-1 flex items-center justify-center gap-4">
+            {/* Header row with title in center */}
+            <div className="flex items-center justify-center mb-12">
+              {/* Center: Title + optional filter */}
+              <div className="flex items-center gap-4">
                 {/* Title with icon */}
                 <div className="flex items-center gap-3">
                   <Newspaper size={36} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
@@ -238,105 +261,121 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                   </>
                 )}
               </div>
-
-              {/* Right: Staršie (Older) */}
-              <button
-                onClick={() => scroll('right')}
-                disabled={!canScrollRight}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 shrink-0',
-                  canScrollRight
-                    ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 hover:text-indigo-200'
-                    : 'bg-slate-800/30 text-gray-600 cursor-not-allowed'
-                )}
-              >
-                <span>Staršie</span>
-                <ChevronRight size={20} />
-              </button>
             </div>
 
             {/* Scrollable container with cards AND timeline */}
-            <div
-              ref={scrollContainerRef}
-              onScroll={updateScrollButtons}
-              className="overflow-x-auto"
-              style={{
-                scrollBehavior: 'smooth',
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE/Edge
-              }}
-            >
-              {/* Hide scrollbar for Chrome/Safari */}
-              <style jsx>{`
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}</style>
+            <div className="relative">
+              {/* Navigation arrows on the timeline axis */}
+              <TimelineNavButton
+                direction="left"
+                onClick={() => scroll('left')}
+                visible={canScrollLeft}
+              />
+              <TimelineNavButton
+                direction="right"
+                onClick={() => scroll('right')}
+                visible={canScrollRight}
+              />
 
-              <div className="flex flex-col min-w-max">
-                {/* Cards row */}
-                <div className="flex gap-6">
-                  {filteredItems.map((item) => (
-                    <div
-                      key={item.article.id}
-                      className="w-[340px] lg:w-[388px] h-[200px] flex-shrink-0"
-                    >
-                      {item.card}
-                    </div>
-                  ))}
-                </div>
+              <div
+                ref={scrollContainerRef}
+                onScroll={updateScrollButtons}
+                className="overflow-x-auto"
+                style={{
+                  scrollBehavior: 'smooth',
+                  scrollbarWidth: 'none', // Firefox
+                  msOverflowStyle: 'none', // IE/Edge
+                }}
+              >
+                {/* Hide scrollbar for Chrome/Safari */}
+                <style jsx>{`
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
 
-                {/* Timeline row - scrolls together with cards */}
-                <div className="relative mt-6 pt-4">
-                  {/* Horizontal line spanning entire width */}
-                  <div className="absolute top-4 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-indigo-400/50 to-indigo-500/20" />
-
-                  {/* Date markers */}
+                <div className="flex flex-col min-w-max">
+                  {/* Cards row */}
                   <div className="flex gap-6">
-                    {filteredItems.map((item, index) => {
-                      // Parse the date info for the timeline
-                      const dateInfo = formatTimelineDate(item.article.date)
-
-                      // Check if this is the first item, it will be highlighted
-                      const isFirst = index === 0
-
+                    {filteredItems.map((item) => {
                       return (
                         <div
                           key={item.article.id}
-                          className="w-[340px] lg:w-[380px] flex-shrink-0 flex flex-col items-center"
+                          className="w-[340px] lg:w-[388px] h-[200px] flex-shrink-0 transition-all duration-300 hover:saturate-100"
                         >
-                          {/* Timeline dot */}
-                          <div
-                            className={cn(
-                              'w-4 h-4 rounded-full border-[3px] -mt-[6px] z-10',
-                              isFirst
-                                ? 'bg-indigo-400 border-indigo-200 shadow-lg shadow-indigo-500/60'
-                                : 'bg-slate-800 border-indigo-500/60'
-                            )}
-                          />
-
-                          {/* Date info */}
-                          <div className="mt-4 text-center">
-                            <div
-                              className={cn(
-                                'text-xl font-bold',
-                                isFirst ? 'text-indigo-300' : 'text-gray-400'
-                              )}
-                            >
-                              {dateInfo.day}. {dateInfo.month}
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">{dateInfo.year}</div>
-                          </div>
-
-                          {/* "Najnovšie" label for first item */}
-                          {isFirst && (
-                            <div className="mt-3 px-3 py-1 bg-indigo-500/20 rounded-full text-xs font-semibold text-indigo-300 uppercase tracking-wider border border-indigo-500/30">
-                              Najnovšie
-                            </div>
-                          )}
+                          {item.card}
                         </div>
                       )
                     })}
+                  </div>
+
+                  {/* Timeline row - scrolls together with cards */}
+                  <div className="relative mt-6 pt-4">
+                    {/* Horizontal line spanning entire width - fade towards older */}
+                    <div className="absolute top-4 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-400 via-indigo-500/30 to-gray-700/10" />
+
+                    {/* Date markers */}
+                    <div className="flex gap-6">
+                      {filteredItems.map((item, index) => {
+                        // Parse the date info for the timeline
+                        const dateInfo = formatTimelineDate(item.article.date)
+
+                        // Check if this is the first item, it will be highlighted
+                        const isFirst = index === 0
+
+                        return (
+                          <div
+                            key={item.article.id}
+                            className="w-[340px] lg:w-[380px] flex-shrink-0 flex flex-col items-center"
+                          >
+                            {/* Timeline dot with optional glow ring for newest */}
+                            <div className="relative -mt-[6px] z-10">
+                              {/* Animated glow ring for first/newest item */}
+                              {isFirst && (
+                                <div className="absolute inset-0 -m-2 rounded-full border-2 border-indigo-400/60 animate-pulse shadow-[0_0_12px_4px_rgba(129,140,248,0.4)]" />
+                              )}
+                              {/* Dot - oldest dots get progressively darker borders */}
+                              {(() => {
+                                // Calculate border color - fades from indigo to dark slate
+                                const borderOpacity = Math.max(20, 60 - index * 10)
+                                const borderColor = isFirst
+                                  ? // First item is styled with className, others with inline style
+                                    undefined
+                                  : `rgb(99 102 241 / ${borderOpacity}%)`
+
+                                return (
+                                  <div
+                                    className={cn(
+                                      'w-4 h-4 rounded-full border-[3px]',
+                                      isFirst
+                                        ? 'bg-indigo-400 border-indigo-200 shadow-lg shadow-indigo-500/60'
+                                        : 'bg-slate-900'
+                                    )}
+                                    style={isFirst ? undefined : { borderColor }}
+                                  />
+                                )
+                              })()}
+                            </div>
+
+                            {/* Date info - also fades with age */}
+                            <div
+                              className="mt-4 text-center transition-opacity"
+                              style={{ opacity: isFirst ? 1 : Math.max(0.5, 1 - index * 0.12) }}
+                            >
+                              <div
+                                className={cn(
+                                  'text-xl font-bold',
+                                  isFirst ? 'text-indigo-300' : 'text-gray-400'
+                                )}
+                              >
+                                {dateInfo.day}. {dateInfo.month}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">{dateInfo.year}</div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
