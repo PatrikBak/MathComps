@@ -28,6 +28,15 @@
           "authors": ["Patrik Bak"],
           "description": "Základné techniky riešenia súťažných nerovností. Pokrýva ekvivalentné úpravy, kladné štvorce, AG nerovnosť."
         }
+      },
+      {
+        "title": "Vtipná algebra",
+        "slug": "vtipna-algebra",
+        "data": {
+          "filename": "algebra-4-vtipna-algebra-sk.json",
+          "authors": ["Patrik Bak"],
+          "description": "Zbierka úloh, ktoré využívajú šikovné algebraické úpravy."
+        }
       }
     ]
   },
