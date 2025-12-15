@@ -770,65 +770,67 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Skúmaný výraz rozložte na súčin čo najviac zátvoriek."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Hľadaný rozklad je "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Aby sme vyšetrili deliteľnosť 30, tak stačí separátne vyšetriť deliteľnosť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "5",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúmaný výraz rozložte na súčin čo najviac zátvoriek."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hľadaný rozklad je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Aby sme vyšetrili deliteľnosť 30, tak stačí separátne vyšetriť deliteľnosť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "5",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -1116,56 +1118,58 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Rozklad "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^{37}+b^{37}",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " nám napovie oveľa jednoduchšiu deliteľnosť, ktorá stačí."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Keďže "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^{37}+b^{37}=(a+b)(\\cdots)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", tak stačí, aby "
-                    },
-                    {
-                      "type": "math",
-                      "text": "7 \\mid a+b",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Rozklad "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{37}+b^{37}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nám napovie oveľa jednoduchšiu deliteľnosť, ktorá stačí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Keďže "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{37}+b^{37}=(a+b)(\\cdots)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", tak stačí, aby "
+                      },
+                      {
+                        "type": "math",
+                        "text": "7 \\mid a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -1258,56 +1262,58 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Výraz "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n^6-1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " sa dá rozložiť na súčin veľa zátvoriek."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Jeden možný rozklad je "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Druhá zátvorka sa síce dá rozložiť, ale nie je vôbec evidentné ako. Lepší rozklad je "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Z\u00A0tohto rozkladáme ďalej. Následne už máme aspoň 4 činitele, čo znie podozrivo, ak má číslo byť súčinom troch prvočísel."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Výraz "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^6-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sa dá rozložiť na súčin veľa zátvoriek."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jeden možný rozklad je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Druhá zátvorka sa síce dá rozložiť, ale nie je vôbec evidentné ako. Lepší rozklad je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Z\u00A0tohto rozkladáme ďalej. Následne už máme aspoň 4 činitele, čo znie podozrivo, ak má číslo byť súčinom troch prvočísel."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -2095,80 +2101,82 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Výraz "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ab(a+b) + bc(b+c) + ca(c+a) + 3abc",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " sa nenápadne dá rozložiť na súčin."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Platí "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ab(a+b) + bc(b+c) + ca(c+a) + 3abc = (a+b+c)(ab+bc+ca)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Tým pádom sa naša deliteľnosť zjednoduší na"
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "math",
-                  "text": "a+b+c \\mid ab+bc+ca.",
-                  "isDisplay": true
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Výraz "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(a-b)^2 + (b-c)^2 + (c-a)^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " je rovný "
-                    },
-                    {
-                      "type": "math",
-                      "text": "2(a^2+b^2+c^2+ab+bc+ca)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", vidíme súvislosť."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Výraz "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab(a+b) + bc(b+c) + ca(c+a) + 3abc",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sa nenápadne dá rozložiť na súčin."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab(a+b) + bc(b+c) + ca(c+a) + 3abc = (a+b+c)(ab+bc+ca)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Tým pádom sa naša deliteľnosť zjednoduší na"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "a+b+c \\mid ab+bc+ca.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Výraz "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a-b)^2 + (b-c)^2 + (c-a)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je rovný "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2(a^2+b^2+c^2+ab+bc+ca)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", vidíme súvislosť."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -2638,44 +2646,46 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Skúmaný výraz sa dá na prekvapenie rozložiť. Doplnenie na štvorec je fajn technika. Len pozor, čo dopĺňame."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Kľúčové doplnenie je"
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "math",
-                  "text": "n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=(n^2+3)^2-9n^2.",
-                  "isDisplay": true
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Vidíme známy vzorec?"
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúmaný výraz sa dá na prekvapenie rozložiť. Doplnenie na štvorec je fajn technika. Len pozor, čo dopĺňame."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčové doplnenie je"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=(n^2+3)^2-9n^2.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Vidíme známy vzorec?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -2849,110 +2859,112 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Pre nepárne "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " máme vzorec. Uvedomme si, že nám dokonca stačí, aby "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " malo nepárneho deliteľa. Vďaka tomuto pozorovaniu je aj párny prípad zjednodušiteľný. Vieme vyriešiť prvý párny prípad "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n=4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "? Vie nám to pomôcť pri zvyšných?"
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Ak má "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " nepárneho deliteľa "
-                    },
-                    {
-                      "type": "math",
-                      "text": "k",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", pričom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n=mk",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", tak z\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^n+b^n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " vieme vybrať pred zátvorku "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^k+b^k",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Zostáva teda vyriešiť čísla, ktoré nemajú nepárneho deliteľa – čiže mocniny 2. Podľa zadania "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n>2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", takže najmenšia zaujímavá mocnina je 4, na takéto mocniny máme dopĺňanie na štvorec. Čo ale vyššie mocniny? Nuž, tie sú našťastie deliteľné\u00A04."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pre nepárne "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " máme vzorec. Uvedomme si, že nám dokonca stačí, aby "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " malo nepárneho deliteľa. Vďaka tomuto pozorovaniu je aj párny prípad zjednodušiteľný. Vieme vyriešiť prvý párny prípad "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "? Vie nám to pomôcť pri zvyšných?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ak má "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nepárneho deliteľa "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", pričom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=mk",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", tak z\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^n+b^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " vieme vybrať pred zátvorku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^k+b^k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Zostáva teda vyriešiť čísla, ktoré nemajú nepárneho deliteľa – čiže mocniny 2. Podľa zadania "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n>2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže najmenšia zaujímavá mocnina je 4, na takéto mocniny máme dopĺňanie na štvorec. Čo ale vyššie mocniny? Nuž, tie sú našťastie deliteľné\u00A04."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -3075,113 +3087,115 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Všimnime si, že sa nám vo výraze vyskytuje "
-                    },
-                    {
-                      "type": "math",
-                      "text": "2a^2b^2-a^4-b^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo je rovné "
-                    },
-                    {
-                      "type": "math",
-                      "text": "-(a^2-b^2)^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Kľúčový trik je spojiť to so zvyškom výrazu použitím "
-                    },
-                    {
-                      "type": "italic",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "ďalšieho"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " doplnenia na štvorec, pričom jeden z týchto "
-                    },
-                    {
-                      "type": "quote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "štvorcov"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " bude "
-                    },
-                    {
-                      "type": "math",
-                      "text": "-(a^2-b^2)^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Druhý hľadaný "
-                    },
-                    {
-                      "type": "quote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "štvorec"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " bude "
-                    },
-                    {
-                      "type": "math",
-                      "text": "-c^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", platí totiž: "
-                    },
-                    {
-                      "type": "math",
-                      "text": "-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". To vcelku dobre ladí so zvyškom výrazu."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Všimnime si, že sa nám vo výraze vyskytuje "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2a^2b^2-a^4-b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo je rovné "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-(a^2-b^2)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Kľúčový trik je spojiť to so zvyškom výrazu použitím "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "ďalšieho"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " doplnenia na štvorec, pričom jeden z týchto "
+                      },
+                      {
+                        "type": "quote",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "štvorcov"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " bude "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-(a^2-b^2)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Druhý hľadaný "
+                      },
+                      {
+                        "type": "quote",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "štvorec"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " bude "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-c^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", platí totiž: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To vcelku dobre ladí so zvyškom výrazu."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -3385,80 +3399,82 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Skúmaný výraz pripomína Sophie-Germain identitu. Skújte ju tam napasovať. Možno bude treba rozobrať nejaké prípady."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Aby sme vedeli použiť Sophie-Germain, potrebujeme, aby "
-                    },
-                    {
-                      "type": "math",
-                      "text": "4^n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " bolo v\u00A0tvare "
-                    },
-                    {
-                      "type": "math",
-                      "text": "4b^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". To určite je pre nepárne "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", lebo potom"
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "math",
-                  "text": "4^n = 4 \\cdot 4^{n-1} = 4 \\cdot 2^{2(n-1)} = 4 \\cdot \\left(2^{\\frac{n-1}{2}}\\right)^4.",
-                  "isDisplay": true
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Na druhej strane, prípad párneho "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " je zasa evidentne neprvočíselný."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúmaný výraz pripomína Sophie-Germain identitu. Skújte ju tam napasovať. Možno bude treba rozobrať nejaké prípady."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Aby sme vedeli použiť Sophie-Germain, potrebujeme, aby "
+                      },
+                      {
+                        "type": "math",
+                        "text": "4^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " bolo v\u00A0tvare "
+                      },
+                      {
+                        "type": "math",
+                        "text": "4b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To určite je pre nepárne "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", lebo potom"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "4^n = 4 \\cdot 4^{n-1} = 4 \\cdot 2^{2(n-1)} = 4 \\cdot \\left(2^{\\frac{n-1}{2}}\\right)^4.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Na druhej strane, prípad párneho "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je zasa evidentne neprvočíselný."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {

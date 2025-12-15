@@ -51,20 +51,18 @@ public record Exercise(
 
 /// <summary>
 /// Represents a problem block with extended metadata, including difficulty, hints, and a solution.
-/// Corresponds to the \Problem{difficulty}{title}{body}{hint1}{hint2}{solution} command.
+/// Corresponds to the \Problem{difficulty}{title}{body}{hint1}{hint2}...{hintn}{solution} command.
 /// </summary>
 /// <param name="Difficulty">A numerical value indicating the problem's difficulty.</param>
 /// <param name="Title">The optional title of the problem.</param>
 /// <param name="Body">The main content of the problem statement.</param>
-/// <param name="Hint1">The content for the first hint.</param>
-/// <param name="Hint2">The content for the second hint.</param>
+/// <param name="Hints">A list of hints, where each hint is a list of content blocks. Can be empty.</param>
 /// <param name="Solution">The content providing the solution to the problem.</param>
 public record Problem(
     int Difficulty,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
-    ImmutableList<RawContentBlock> Hint1,
-    ImmutableList<RawContentBlock> Hint2,
+    ImmutableList<ImmutableList<RawContentBlock>> Hints,
     ImmutableList<RawContentBlock> Solution
 ) : ContentBlock;
 

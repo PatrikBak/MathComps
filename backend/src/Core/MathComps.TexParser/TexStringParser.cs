@@ -24,7 +24,7 @@ namespace MathComps.TexParser;
 /// <item><c>\\Title{...}</c> and <c>\\Subtitle{...}</c> for the document's header.</item>
 /// <item><c>\\Theorem{title}{body}{proof}</c></item>
 /// <item><c>\\Exercise{title}{body}{solution}</c></item>
-/// <item><c>\\Problem{difficulty}{title}{body}{hint1}{hint2}{solution}</c></item>
+/// <item><c>\\Problem{difficulty}{title}{body}{hint1}...{hintn}{solution}</c> (0+ hints)</item>
 /// <item><c>\\Highlight{paragraph}</c> (a paragraph that should stand out)</item>
 /// <item><c>\\Example{title}{body}{solution}</c></item>
 /// <item><c>\\begitems ... \\enditems</c> for lists, with <c>\\i</c> for items. Optional style via <c>\\style code</c>.
@@ -272,28 +272,32 @@ public static class TexStringParser
     /// <returns>A tuple containing the parsed block and the index after the block.</returns>
     private static (ContentBlock block, int endIndex) ParseHighLevelCommandBlock(string sourceText, string commandName, int startIndex)
     {
-        // Determine the number of arguments required by this command.
-        var argumentCount = commandName switch
-        {
-            // Problems have 6 arguments.
-            "Problem" => 6,
+        // Calculate the starting position for parsing arguments (+1 for the backslash not in commandName).
+        var argumentsStartIndex = startIndex + commandName.Length + 1;
 
+        // Determine the number of arguments required by this command.
+        var (minimalArguments, maximalArguments) = commandName switch
+        {
             // Highlight has 1 argument (it's just a special paragraph)
-            "Highlight" => 1,
+            "Highlight" => (1, 1),
+
+            // Problem has variable arguments
+            "Problem" => (4, (int?)null),
 
             // All others have 3 arguments.
-            _ => 3,
+            _ => (3, 3),
         };
 
-        // Calculate the starting position for parsing arguments.
-        var argumentsStartIndex = startIndex + commandName.Length;
-
         // Parse the required number of braced arguments.
-        var (arguments, newIndex) = ParseBracedArguments(sourceText, argumentsStartIndex, argumentCount);
+        var (arguments, newIndex) = ParseBracedArguments(
+            sourceText,
+            argumentsStartIndex,
+            maximalArguments
+        );
 
-        // Check if the correct number of arguments were found and if not, throw an error
-        if (arguments.Count != argumentCount)
-            throw new TexParserException($"Expected {argumentCount} arguments for \\{commandName}, but found {arguments.Count} at: {sourceText.PreviewAt(argumentsStartIndex)}");
+        // Verify args
+        if (arguments.Count < minimalArguments || (maximalArguments is not null && arguments.Count > maximalArguments))
+            throw new TexParserException($"Invalid number of arguments for \\{commandName} at: {sourceText.PreviewAt(argumentsStartIndex)}");
 
         // Create the specific content block based on the command type.
         ContentBlock newBlock = commandName switch
@@ -314,9 +318,10 @@ public static class TexStringParser
                 Difficulty: int.Parse(arguments[0]),
                 Title: ParseAtMostSingleRawBlock(arguments[1]),
                 Body: [.. ParseRawContent(arguments[2])],
-                Hint1: [.. ParseRawContent(arguments[3])],
-                Hint2: [.. ParseRawContent(arguments[4])],
-                Solution: [.. ParseRawContent(arguments[5])]
+                // Hints are arguments 3 to n-2 (everything between Body and Solution)
+                Hints: [.. arguments[3..^1].Select(hint => (ImmutableList<RawContentBlock>)[.. ParseRawContent(hint)])],
+                // Solution is always the last argument
+                Solution: [.. ParseRawContent(arguments[^1])]
             ),
 
             "Example" => new Example(
@@ -853,37 +858,37 @@ public static class TexStringParser
                     // Flush any text that was being accumulated before this command
                     FlushAccumulatedText();
 
+                    // Move the cursor to after the command name
+                    var imageParseIndex = scanIndex;
+
                     // First we'll see if it's an inline image, indicated by a *
-                    var isInline = sourceText[scanIndex] == '*';
+                    var isInline = imageParseIndex < sourceText.Length && sourceText[imageParseIndex] == '*';
 
                     // If case of a presence of a *, we need to advance the index past it.
                     if (isInline)
-                        currentIndexRef++;
+                        imageParseIndex++;
 
-                    // Parse first argument (id)
-                    var (idContent, afterIdIndex) = GetBracedContent(sourceText, currentIndexRef);
+                    // Parse up to 2 arguments: id (required), scale (optional)
+                    var (imageArgs, afterImageIndex) = ParseBracedArguments(sourceText, imageParseIndex, maxArgumentCount: 2);
 
-                    // Advance the main cursor to just after the id argument.
-                    currentIndexRef = afterIdIndex;
+                    // We need at least the id
+                    if (imageArgs.Count < 1)
+                        throw new TexParserException($"Expected at least 1 argument for \\Image at: {sourceText.PreviewAt(currentIndexRef)}");
 
-                    // We need to parse the scale of the image, which is optional.
-                    decimal scale;
+                    // Advance the main cursor
+                    currentIndexRef = afterImageIndex;
 
-                    // Peek ahead: is the next non-whitespace char a '{'?
-                    var peek = currentIndexRef;
+                    // Extract id
+                    var idContent = imageArgs[0];
 
-                    // Skip whitespaces
-                    while (peek < sourceText.Length && char.IsWhiteSpace(sourceText[peek]))
-                        peek++;
+                    // Parse optional scale (default 1.0)
+                    var scale = 1.0m;
 
-                    // Check for the optional scale argument.
-                    if (peek < sourceText.Length && sourceText[peek] == '{')
+                    // The code should guarantee that we have at most 2 arguments
+                    if (imageArgs.Count > 1)
                     {
-                        // If it's there, get the scale content.
-                        var (scaleContent, afterScaleIndex) = GetBracedContent(sourceText, peek);
-
-                        // Advance the main cursor to just after the scale argument.
-                        currentIndexRef = afterScaleIndex;
+                        // Get the unparsed scale
+                        var scaleContent = imageArgs[1];
 
                         // PlainTex allows various formats...One thing that can be handled easily is when 
                         // the string starts with a decimal point (e.g. .5).
@@ -893,8 +898,6 @@ public static class TexStringParser
                         // Parse the scale
                         scale = decimal.Parse(scaleContent, CultureInfo.InvariantCulture);
                     }
-                    // If no scale argument is present, default to 1.0.
-                    else scale = 1.0m;
 
                     // We have all arguments, so we can emit an image
                     outputBlocks.Add(new Image(idContent, scale, isInline));
@@ -1096,13 +1099,17 @@ public static class TexStringParser
     }
 
     /// <summary>
-    /// Parses a specified number of consecutive braced arguments.
+    /// Parses up to a specified number of consecutive braced arguments.
+    /// If no <paramref name="maxArgumentCount"/> is provided, parses all available braced arguments.
     /// </summary>
     /// <param name="sourceText">The text to search within.</param>
     /// <param name="startIndex">The index to start searching from.</param>
-    /// <param name="argumentCount">The number of arguments to parse.</param>
+    /// <param name="maxArgumentCount">The maximum number of arguments to parse. Defaults to parse all.</param>
     /// <returns>A tuple with the list of argument strings and the new index.</returns>
-    private static (List<string> arguments, int endIndex) ParseBracedArguments(string sourceText, int startIndex, int argumentCount)
+    private static (List<string> arguments, int endIndex) ParseBracedArguments(
+        string sourceText,
+        int startIndex,
+        int? maxArgumentCount = null)
     {
         // Initialize a list to store the parsed argument strings.
         var arguments = new List<string>();
@@ -1110,12 +1117,10 @@ public static class TexStringParser
         // Set the initial cursor position.
         var currentIndex = startIndex;
 
-        // Loop for the required number of arguments.
-        for (var i = 0; i < argumentCount; i++)
+        // Loop until we've parsed the max number of arguments or run out of braces.
+        while (arguments.Count < (maxArgumentCount ?? int.MaxValue) &&
+               TryGetBracedContent(sourceText, currentIndex, out var content, out var endIndex))
         {
-            // Find and extract the content of the next braced group.
-            var (content, endIndex) = GetBracedContent(sourceText, currentIndex);
-
             // Add the extracted content to the list of arguments.
             arguments.Add(content);
 
@@ -1123,61 +1128,87 @@ public static class TexStringParser
             currentIndex = endIndex;
         }
 
-        // Validate that we have parsed the expected number of arguments.
-        if (arguments.Count != argumentCount)
-            throw new TexParserException($"Expected {argumentCount} arguments but found {arguments.Count} at: {sourceText.PreviewAt(startIndex)}");
-
         // Return the list of arguments and the final cursor position.
         return (arguments, currentIndex);
     }
 
     /// <summary>
-    /// Extracts the content of the first top-level braced group found after a start index.
+    /// Attempts to extract the content of the first top-level braced group found after a start index.
+    /// Returns false if no opening brace is found before the next high-level command or end of string.
     /// </summary>
     /// <param name="sourceText">The text to search within.</param>
     /// <param name="startIndex">The index to start searching from.</param>
-    /// <returns>A tuple containing the extracted content and the index after the closing brace.</returns>
-    private static (string content, int endIndex) GetBracedContent(string sourceText, int startIndex)
+    /// <param name="content">The extracted content if successful.</param>
+    /// <param name="endIndex">The index after the closing brace if successful.</param>
+    /// <returns>True if a braced group was found and extracted, false otherwise.</returns>
+    private static bool TryGetBracedContent(string sourceText, int startIndex, out string content, out int endIndex)
     {
-        // Initialize brace counter for handling nested braces.
-        var braceCount = 0;
+        // Start if with no content and current position
+        content = string.Empty;
+        endIndex = startIndex;
 
-        // The starting position of the content inside the braces.
-        var contentStartIndex = -1;
+        // Keep track where are are
+        var scanIndex = startIndex;
 
-        // Iterate through the string from the given start index.
-        for (var currentIndex = startIndex; currentIndex < sourceText.Length; currentIndex++)
+        // Scan forward to find an opening brace, but stop if we hit a backslash (next command)
+        while (scanIndex < sourceText.Length)
         {
-            // If an opening brace is found.
-            if (sourceText[currentIndex] == '{')
-            {
-                // If this is the first opening brace (top level), record the content start position.
-                if (braceCount == 0)
-                    contentStartIndex = currentIndex + 1;
+            // Get the current character
+            var currentChar = sourceText[scanIndex];
 
-                // Nesting one level up
-                braceCount++;
+            // If found a whitespace
+            if (char.IsWhiteSpace(currentChar))
+            {
+                // Skip it and continue scanning
+                scanIndex++;
+                continue;
             }
-            // If a closing brace is found.
-            else if (sourceText[currentIndex] == '}')
-            {
-                // Nesting one level down
-                braceCount--;
 
-                // If the brace counter is zero, we've found the matching closing brace.
-                if (braceCount == 0)
+            // If found an opening brace
+            if (currentChar == '{')
+            {
+                // Start tracking nested braces
+                var braceCount = 1;
+                var contentStartIndex = scanIndex + 1;
+
+                // Scan forward to find the closing brace
+                for (var i = contentStartIndex; i < sourceText.Length; i++)
                 {
-                    // Extract the content between the braces and trim whitespace.
-                    var content = sourceText[contentStartIndex..currentIndex].Trim();
+                    // Found another opening brace
+                    if (sourceText[i] == '{')
+                        braceCount++;
 
-                    // Return the content and the index immediately after the closing brace.
-                    return (content, currentIndex + 1);
+                    // Found a closing brace
+                    else if (sourceText[i] == '}')
+                    {
+                        // Close a nested brace
+                        braceCount--;
+
+                        // Found the closing brace of the top-level group
+                        if (braceCount == 0)
+                        {
+                            // Extract the content 
+                            content = sourceText[contentStartIndex..i].Trim();
+
+                            // Update the end index where we stopped
+                            endIndex = i + 1;
+
+                            // Return success
+                            return true;
+                        }
+                    }
                 }
+
+                // Unclosed brace - throw exception
+                throw new TexParserException($"Unclosed brace starting at: {sourceText.PreviewAt(scanIndex)}");
             }
+
+            // Any other character means no more braced arguments
+            return false;
         }
 
-        // Throw an exception if no matching closing brace was found.
-        throw new TexParserException($"Unclosed brace starting at: {sourceText.PreviewAt(0)}");
+        // Reached end of string without finding a brace
+        return false;
     }
 
     /// <summary>
@@ -1261,7 +1292,7 @@ public static class TexStringParser
                 break;
 
             case Problem problem:
-                collector.AddRange(GatherFromRaw([problem.Title, .. problem.Body, .. problem.Hint1, .. problem.Hint2, .. problem.Solution]));
+                collector.AddRange(GatherFromRaw([problem.Title, .. problem.Body, .. problem.Hints.SelectMany(h => h), .. problem.Solution]));
                 break;
 
             case Example example:

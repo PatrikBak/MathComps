@@ -4164,69 +4164,71 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Všimnite si, že druhá rovnica sa vlastne dá rozložiť na súčin. To pomôže pri zjednodušení prvej rovnice."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Druhá rovnica nám dáva "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(y-x)(y-2)=0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". To dáva dva prípady, "
-                    },
-                    {
-                      "type": "math",
-                      "text": "y=x",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "y=2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Dosadíme do prvej rovnice a\u00A0všimnime si, že vyzerá veľmi "
-                    },
-                    {
-                      "type": "italic",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "štvorcovito"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Všimnite si, že druhá rovnica sa vlastne dá rozložiť na súčin. To pomôže pri zjednodušení prvej rovnice."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Druhá rovnica nám dáva "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(y-x)(y-2)=0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To dáva dva prípady, "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y=x",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "y=2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Dosadíme do prvej rovnice a\u00A0všimnime si, že vyzerá veľmi "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "štvorcovito"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -4538,74 +4540,76 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Odčítame rovnice a\u00A0rozložíme na súčin."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Po odčítaní rovníc a\u00A0rozložení na súčin máme, že buď "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x=y",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " alebo "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2+xy+y^2-x-y+1=0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Druhá rovnica je neevidentná. Priamočiary spôsob jej riešenia je, že jednu premennú (napr. "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ") považujeme za neznámu a\u00A0druhú (napr. "
-                    },
-                    {
-                      "type": "math",
-                      "text": "y",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ") za parameter a\u00A0riešime kvadratickú rovnicu. Krajší spôsob je však nájsť rozklad na súčet štvorcov, k\u00A0čomu podobne ako pri analýze "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2+y^2+z^2-xy-yz-zx",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " potrebujeme najprv násobiť dvomi."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Odčítame rovnice a\u00A0rozložíme na súčin."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po odčítaní rovníc a\u00A0rozložení na súčin máme, že buď "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x=y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " alebo "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2+xy+y^2-x-y+1=0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Druhá rovnica je neevidentná. Priamočiary spôsob jej riešenia je, že jednu premennú (napr. "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ") považujeme za neznámu a\u00A0druhú (napr. "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ") za parameter a\u00A0riešime kvadratickú rovnicu. Krajší spôsob je však nájsť rozklad na súčet štvorcov, k\u00A0čomu podobne ako pri analýze "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2+y^2+z^2-xy-yz-zx",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " potrebujeme najprv násobiť dvomi."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -4946,56 +4950,58 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "S\u00A0absolútnymi hodnotami dobre funguje umocňovanie na druhú, vďaka tomu sa strácajú."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Po odstránení absolútnych hodnôt je možné napríklad každú dvojicu rovníc odčítať a\u00A0rozložiť na súčin (náš cieľ nie je nájsť všetky riešenia, ale len možné hodnoty súčtu "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x+y+z",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo nám pomôže v\u00A0diskusii). Ešte rýchlejšie riešenie je prekvapivo sčítať všetky rovnice. V\u00A0každom prípade nezabudnite overiť, že pre nájdených kandidátov pre "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x+y+z",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " naozaj existujú "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x,y,z",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", pre ktoré je súčet dosiahnuteľný."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "S\u00A0absolútnymi hodnotami dobre funguje umocňovanie na druhú, vďaka tomu sa strácajú."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po odstránení absolútnych hodnôt je možné napríklad každú dvojicu rovníc odčítať a\u00A0rozložiť na súčin (náš cieľ nie je nájsť všetky riešenia, ale len možné hodnoty súčtu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x+y+z",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo nám pomôže v\u00A0diskusii). Ešte rýchlejšie riešenie je prekvapivo sčítať všetky rovnice. V\u00A0každom prípade nezabudnite overiť, že pre nájdených kandidátov pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x+y+z",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " naozaj existujú "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x,y,z",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", pre ktoré je súčet dosiahnuteľný."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -5329,65 +5335,67 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Všimnite si, že po sčítaní všetkých rovníc máme na pravej strane "
-                    },
-                    {
-                      "type": "math",
-                      "text": "6x+9y+12z",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo je akosi podozrivo podobné pravej strane jednej z\u00A0našich rovníc."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Trikom je sčítať všetky rovnice a\u00A0odčítať dvojnásobok druhej rovnice, tým úplne vynulujeme pravú stranu a\u00A0na ľavej zostane "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2=z^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo vďaka kladnosti "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x,y,z",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " dáva "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x=z",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Všimnite si, že po sčítaní všetkých rovníc máme na pravej strane "
+                      },
+                      {
+                        "type": "math",
+                        "text": "6x+9y+12z",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo je akosi podozrivo podobné pravej strane jednej z\u00A0našich rovníc."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikom je sčítať všetky rovnice a\u00A0odčítať dvojnásobok druhej rovnice, tým úplne vynulujeme pravú stranu a\u00A0na ľavej zostane "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2=z^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo vďaka kladnosti "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x,y,z",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " dáva "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x=z",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -5613,101 +5621,103 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Sústava je cylická, stačí teda riešiť prípad keď "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a=\\max\\{a,b,c,d\\}",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Tým pádom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^3 \\ge b^3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " atď, máme viac možností, ako to využiť. Jedna z\u00A0nich nám dá ďalšiu nerovnosť medzi "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a,b,c,d",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Kľúčom je využiť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^3 \\ge c^3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", to nám dáva "
-                    },
-                    {
-                      "type": "math",
-                      "text": "c-b \\ge a-d",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo po úprave znamená "
-                    },
-                    {
-                      "type": "math",
-                      "text": "d-b \\ge a-c",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", takže nutne "
-                    },
-                    {
-                      "type": "math",
-                      "text": "d \\ge b",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Čo nám dáva "
-                    },
-                    {
-                      "type": "math",
-                      "text": "d^3 \\ge b^3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "?"
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Sústava je cylická, stačí teda riešiť prípad keď "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a=\\max\\{a,b,c,d\\}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Tým pádom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3 \\ge b^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " atď, máme viac možností, ako to využiť. Jedna z\u00A0nich nám dá ďalšiu nerovnosť medzi "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b,c,d",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom je využiť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3 \\ge c^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", to nám dáva "
+                      },
+                      {
+                        "type": "math",
+                        "text": "c-b \\ge a-d",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo po úprave znamená "
+                      },
+                      {
+                        "type": "math",
+                        "text": "d-b \\ge a-c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže nutne "
+                      },
+                      {
+                        "type": "math",
+                        "text": "d \\ge b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čo nám dáva "
+                      },
+                      {
+                        "type": "math",
+                        "text": "d^3 \\ge b^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -6046,141 +6056,143 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Prvým krokom je všimnúť si, že ľavá strana rovnice sa vlastne dá rozložiť na súčin výrazov podozrivo podobných tým v\u00A0druhej rovnici."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Platí "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^3+y^3+x^2y+y^2x=(x+y)(x^2+y^2)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Druhá rovnica je pritom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(x+y)+(x^2+y^2)=n+1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Čísla "
-                    },
-                    {
-                      "type": "math",
-                      "text": "A=x+y",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "B=x^2+y^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " teda spĺňajú "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB=n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "A+B=n+1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Ktoré to asi môžu byť? Formálne ich vieme odvodiť buď uvedomením si, že z\u00A0Vietových"
-                    },
-                    {
-                      "type": "footnote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Vietove vzťahy sú pomenované po francúzskom matematikovi Francoisovi Viete (1540–1603), ktorý je považovaný za jedného z\u00A0otcov modernej algebry vďaka svojmu systematickému používaniu písmen na reprezentáciu neznámych a\u00A0parametrov, čo umožnilo riešiť problémy všeobecnejšie."
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " vzťahov "
-                    },
-                    {
-                      "type": "math",
-                      "text": "A,B",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " musia byť korene kvadratickej rovnice "
-                    },
-                    {
-                      "type": "math",
-                      "text": "t^2-(n+1)t+n=0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a\u00A0tú vyriešiť; prípadne môžeme dosadiť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "B=n+1-A",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " do prvej rovnice, atď. V\u00A0každom prípade získame dve možnosti pre "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(A,B)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Jedna z\u00A0nich sa dá vylúčiť rýchlo (nezabúdajme, že "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " je štvorciferné číslo, teda je kladné)."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Prvým krokom je všimnúť si, že ľavá strana rovnice sa vlastne dá rozložiť na súčin výrazov podozrivo podobných tým v\u00A0druhej rovnici."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^3+y^3+x^2y+y^2x=(x+y)(x^2+y^2)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Druhá rovnica je pritom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(x+y)+(x^2+y^2)=n+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čísla "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A=x+y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "B=x^2+y^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " teda spĺňajú "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB=n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A+B=n+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Ktoré to asi môžu byť? Formálne ich vieme odvodiť buď uvedomením si, že z\u00A0Vietových"
+                      },
+                      {
+                        "type": "footnote",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Vietove vzťahy sú pomenované po francúzskom matematikovi Francoisovi Viete (1540–1603), ktorý je považovaný za jedného z\u00A0otcov modernej algebry vďaka svojmu systematickému používaniu písmen na reprezentáciu neznámych a\u00A0parametrov, čo umožnilo riešiť problémy všeobecnejšie."
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " vzťahov "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A,B",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " musia byť korene kvadratickej rovnice "
+                      },
+                      {
+                        "type": "math",
+                        "text": "t^2-(n+1)t+n=0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0tú vyriešiť; prípadne môžeme dosadiť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "B=n+1-A",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " do prvej rovnice, atď. V\u00A0každom prípade získame dve možnosti pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(A,B)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Jedna z\u00A0nich sa dá vylúčiť rýchlo (nezabúdajme, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je štvorciferné číslo, teda je kladné)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -6645,75 +6657,77 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Sčítanie a\u00A0odčítanie nevedie k\u00A0ničomu rozložiteľnému. Trikom v\u00A0tejto úlohe je použiť "
-                    },
-                    {
-                      "type": "italic",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "násobenie"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " rovníc. Keď napríklad vynásobíme rovnice ako sú, tak môžeme v\u00A0prípade "
-                    },
-                    {
-                      "type": "math",
-                      "text": "abc \\neq 0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " krátiť. To nám niečo dá, ale prezradím, že nič extra užitočné. Kľúčom je násobiť rovnice po menšej úprave každej z\u00A0nich."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Upravíme prvú rovnicu preusporiadaním členov:"
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "math",
-                  "text": "\\begin{align*}\na(b^2+c) &= c(c+ab), \\\\\nab^2 + ac &= c^2 + abc, \\\\\nab^2 - abc &= c^2 - ac, \\\\\nab(b-c) &= c(c-a).\n\\end{align*}",
-                  "isDisplay": true
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Teraz už vieme násobiť a\u00A0za predpokladu vzájomnej rôznosti "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a,b,c",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a\u00A0ich nenulovosti to dá užitočné veci. Nebude to koniec, ale budeme blízko."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Sčítanie a\u00A0odčítanie nevedie k\u00A0ničomu rozložiteľnému. Trikom v\u00A0tejto úlohe je použiť "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "násobenie"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " rovníc. Keď napríklad vynásobíme rovnice ako sú, tak môžeme v\u00A0prípade "
+                      },
+                      {
+                        "type": "math",
+                        "text": "abc \\neq 0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " krátiť. To nám niečo dá, ale prezradím, že nič extra užitočné. Kľúčom je násobiť rovnice po menšej úprave každej z\u00A0nich."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Upravíme prvú rovnicu preusporiadaním členov:"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "\\begin{align*}\na(b^2+c) &= c(c+ab), \\\\\nab^2 + ac &= c^2 + abc, \\\\\nab^2 - abc &= c^2 - ac, \\\\\nab(b-c) &= c(c-a).\n\\end{align*}",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Teraz už vieme násobiť a\u00A0za predpokladu vzájomnej rôznosti "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b,c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0ich nenulovosti to dá užitočné veci. Nebude to koniec, ale budeme blízko."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
