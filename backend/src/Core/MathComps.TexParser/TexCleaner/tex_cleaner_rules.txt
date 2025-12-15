@@ -107,14 +107,8 @@
 \\medskip(?![A-Za-z])
 \\bigskip(?![A-Za-z])
 
-\\sec Riešenia k cvičeniam(?![A-Za-z])
-\\sec Prvé návody k úlohám(?![A-Za-z])
-\\sec Druhé návody k úlohám(?![A-Za-z])
-\\sec Riešenia k úlohám(?![A-Za-z])
-
 \\DisplayExerciseSolutions(?![A-Za-z])
-\\DisplayFirstHints(?![A-Za-z])
-\\DisplaySecondHints(?![A-Za-z])
+\\DisplayHints(?![A-Za-z])
 \\DisplayProblemSolutions(?![A-Za-z])
 
 \\bye(?![A-Za-z])
