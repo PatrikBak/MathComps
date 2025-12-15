@@ -115,8 +115,7 @@ public static class TexImageProcessor
         {
             Title = ProcessOptionalRawBlock(problem.Title, config, ref imageCounter, discoveredImages),
             Body = ProcessRawBlocks(problem.Body, config, ref imageCounter, discoveredImages),
-            Hint1 = ProcessRawBlocks(problem.Hint1, config, ref imageCounter, discoveredImages),
-            Hint2 = ProcessRawBlocks(problem.Hint2, config, ref imageCounter, discoveredImages),
+            Hints = ProcessListOfLists(problem.Hints, config, ref imageCounter, discoveredImages),
             Solution = ProcessRawBlocks(problem.Solution, config, ref imageCounter, discoveredImages)
         },
         Example example => example with

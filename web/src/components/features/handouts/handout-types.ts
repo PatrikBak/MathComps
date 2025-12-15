@@ -74,8 +74,7 @@ type ProblemBlock = {
   difficulty: number
   title?: RawContentBlock | null
   body: RawContentBlock[]
-  hint1?: RawContentBlock[] | null
-  hint2?: RawContentBlock[] | null
+  hints: RawContentBlock[][]
   solution: RawContentBlock[]
 }
 

@@ -348,45 +348,26 @@ function renderDocumentSections(
                 >
                   <div>{renderBlocks(contentBlock.body, imagesById, imageType)}</div>
                   <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
-                    {contentBlock.hint1 && (
-                      <details className="group">
-                        <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden">
-                          <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
-                            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
-                              1
+                    {contentBlock.hints.length > 0 &&
+                      contentBlock.hints.map((hint, hintIndex) => (
+                        <details key={`hint-${hintIndex}`} className="group">
+                          <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden">
+                            <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
+                              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
+                                {hintIndex + 1}
+                              </span>
+                              Nápoveda
                             </span>
-                            Nápoveda
-                          </span>
-                          <ChevronRight
-                            size={16}
-                            className="opacity-70 transition-transform group-open:rotate-90"
-                          />
-                        </summary>
-                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.hint1, imagesById, imageType)}
-                        </div>
-                      </details>
-                    )}
-
-                    {contentBlock.hint2 && (
-                      <details className="group">
-                        <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden">
-                          <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
-                            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
-                              2
-                            </span>
-                            Nápoveda
-                          </span>
-                          <ChevronRight
-                            size={16}
-                            className="opacity-70 transition-transform group-open:rotate-90"
-                          />
-                        </summary>
-                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.hint2, imagesById, imageType)}
-                        </div>
-                      </details>
-                    )}
+                            <ChevronRight
+                              size={16}
+                              className="opacity-70 transition-transform group-open:rotate-90"
+                            />
+                          </summary>
+                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
+                            {renderBlocks(hint, imagesById, imageType)}
+                          </div>
+                        </details>
+                      ))}
 
                     {contentBlock.solution && (
                       <details className="group">

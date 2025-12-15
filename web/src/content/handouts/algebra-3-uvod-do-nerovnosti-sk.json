@@ -1402,65 +1402,67 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Má zmysel premiestniť všetko na jednu stranu a rozložiť na súčin."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Po úspešnom vykonaní rozkladu by nám malo stačiť dokázať "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(a-b)(a-b+1) \\ge 0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", teda "
-                    },
-                    {
-                      "type": "math",
-                      "text": "k(k+1) \\ge 0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Tu musíme využiť, že "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a,b",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " sú celé čísla, teda aj "
-                    },
-                    {
-                      "type": "math",
-                      "text": "k",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " je celé."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Má zmysel premiestniť všetko na jednu stranu a rozložiť na súčin."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po úspešnom vykonaní rozkladu by nám malo stačiť dokázať "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a-b)(a-b+1) \\ge 0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", teda "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k(k+1) \\ge 0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Tu musíme využiť, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sú celé čísla, teda aj "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je celé."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -2555,83 +2557,85 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Prvý krok je odomknúť podmienku "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^3+b=a+b^3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Presuňte všetko na ľavú stranu a\u00A0rozložte na súčin."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Z\u00A0podmienky vieme s\u00A0použitím vzorca "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^3-b^3=(a-b)(a^2+ab+b^2)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " odvodiť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(a-b)(a^2+ab+b^2-1)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", teda vďaka "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a \\neq b",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " máme "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^2+ab+b^2=1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Teraz skúste "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^2+b^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " doplniť na štvorec, ide to dokonca dvoma spôsobmi."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Prvý krok je odomknúť podmienku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3+b=a+b^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Presuňte všetko na ľavú stranu a\u00A0rozložte na súčin."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Z\u00A0podmienky vieme s\u00A0použitím vzorca "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3-b^3=(a-b)(a^2+ab+b^2)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " odvodiť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a-b)(a^2+ab+b^2-1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", teda vďaka "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\neq b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^2+ab+b^2=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Teraz skúste "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^2+b^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " doplniť na štvorec, ide to dokonca dvoma spôsobmi."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -4914,65 +4918,67 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Najprv analyzujte dokazovanú nerovnosť, nie je tam rozklad na súčin?"
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Dokazovaná nerovnosť je ekvivalentná s "
-                    },
-                    {
-                      "type": "math",
-                      "text": "c^2-ac+(ab-bc) \\leq 0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo sa dá upraviť na "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(c-a)(c-b) \\leq 0",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Stačí teda zdôvodniť, že "
-                    },
-                    {
-                      "type": "math",
-                      "text": "c",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " nie je najmenšie ani najväčšie číslo medzi "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a,b,c",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Skúste sporom a\u00A0rozoberte dva prípady."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Najprv analyzujte dokazovanú nerovnosť, nie je tam rozklad na súčin?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dokazovaná nerovnosť je ekvivalentná s "
+                      },
+                      {
+                        "type": "math",
+                        "text": "c^2-ac+(ab-bc) \\leq 0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo sa dá upraviť na "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(c-a)(c-b) \\leq 0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Stačí teda zdôvodniť, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nie je najmenšie ani najväčšie číslo medzi "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b,c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Skúste sporom a\u00A0rozoberte dva prípady."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -5286,65 +5292,67 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Zabudnite na dokazovanú nerovnosť – kľúčom je porozumieť, akým spôsobom veľkostné limity súvisia s\u00A0podmienkou."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Skúste aplikovať "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a>\\frac12",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "b>\\frac12",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " do podmienky, konkrétne odhadnite zdola výraz "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ab+bc+ca",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Čo nám výsledná nerovnosť hovorí o\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "c",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "?"
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zabudnite na dokazovanú nerovnosť – kľúčom je porozumieť, akým spôsobom veľkostné limity súvisia s\u00A0podmienkou."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúste aplikovať "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a>\\frac12",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b>\\frac12",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " do podmienky, konkrétne odhadnite zdola výraz "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab+bc+ca",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čo nám výsledná nerovnosť hovorí o\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -5822,74 +5830,76 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Jeden zo spôsobov, ako si úlohu spraviť krajšiu, je použiť substitúciu "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x=a^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "y=b^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Vďaka nej nemáme odmocniny. Naľavo potom máme "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^4+a^2b^2+b^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". S\u00A0týmto výrazom sa dá niečo zaujímavé urobiť."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Výraz "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^4+a^2b^2+b^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " sa dá rozložiť na súčin technikou dopĺňania na štvorec, doplňte na štvorec "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a^4+b^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Následne bude celá nerovnosť dávať zmysel."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jeden zo spôsobov, ako si úlohu spraviť krajšiu, je použiť substitúciu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x=a^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y=b^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Vďaka nej nemáme odmocniny. Naľavo potom máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^4+a^2b^2+b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". S\u00A0týmto výrazom sa dá niečo zaujímavé urobiť."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Výraz "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^4+a^2b^2+b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sa dá rozložiť na súčin technikou dopĺňania na štvorec, doplňte na štvorec "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^4+b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Následne bude celá nerovnosť dávať zmysel."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -6145,56 +6155,58 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Nerovnosť vyzerá ako AG nerovnosť – napravo máme dvojnásobok súčinu. Naľavo ale nemáme súčet, ale súčin. Roznásobme preto ľavú stranu: "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2y^2+x^2+y^2+1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Skúsme toto nejako šikovne prepísať."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Trikom je doplniť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2y^2+1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " na štvorec, čím vyrobiť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "xy-1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo je výraz z\u00A0pravej strany. Čo sa udeje so zvyškom ľavej strany?"
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Nerovnosť vyzerá ako AG nerovnosť – napravo máme dvojnásobok súčinu. Naľavo ale nemáme súčet, ale súčin. Roznásobme preto ľavú stranu: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2y^2+x^2+y^2+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Skúsme toto nejako šikovne prepísať."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikom je doplniť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2y^2+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na štvorec, čím vyrobiť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "xy-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo je výraz z\u00A0pravej strany. Čo sa udeje so zvyškom ľavej strany?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -6573,65 +6585,67 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Nerovnosť je podobná ako "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2+y^2+z^2 \\ge xy+yz+zx",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", a v\u00A0skutku podobný spôsob dôkazu funguje. Skúste vyrobiť čo najviac štvorcov."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Trikom je doplniť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a_1^2-a_1a_n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " na štvorec ako "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(a_1-a_n/2)^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a podobne zvyšné. Vznikne nám však veľký prebytok členov "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a_n^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Vyjadrite, koľko presne ich je. Nezabúdajme, že cieľom nie je nerovnosť dokázať, ale odhaliť, kedy platí."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Nerovnosť je podobná ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2+y^2+z^2 \\ge xy+yz+zx",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", a v\u00A0skutku podobný spôsob dôkazu funguje. Skúste vyrobiť čo najviac štvorcov."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikom je doplniť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a_1^2-a_1a_n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na štvorec ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a_1-a_n/2)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a podobne zvyšné. Vznikne nám však veľký prebytok členov "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a_n^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Vyjadrite, koľko presne ich je. Nezabúdajme, že cieľom nie je nerovnosť dokázať, ale odhaliť, kedy platí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -6892,101 +6906,103 @@
                   "highligted": false
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Výraz upravíme ako "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^4+y^4-xy(x+y)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Objavilo sa tu "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x+y",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", takže vieme použiť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x+y \\leq 1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Už postačí odhadnúť len zvyšok výrazu, čo chce ešte jeden krok."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Po použití "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x+y \\leq 1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " máme "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^4+y^4-xy(x+y) \\ge x^4+y^4-xy",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", takže odhadujeme "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^4+y^4-xy",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Nevieme odhadnúť "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^4+y^4",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " tak, aby sme vyrobili "
-                    },
-                    {
-                      "type": "math",
-                      "text": "xy",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " nejakým spôsobom?"
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Výraz upravíme ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^4+y^4-xy(x+y)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Objavilo sa tu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x+y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže vieme použiť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x+y \\leq 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Už postačí odhadnúť len zvyšok výrazu, čo chce ešte jeden krok."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po použití "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x+y \\leq 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^4+y^4-xy(x+y) \\ge x^4+y^4-xy",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže odhadujeme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^4+y^4-xy",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Nevieme odhadnúť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^4+y^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " tak, aby sme vyrobili "
+                      },
+                      {
+                        "type": "math",
+                        "text": "xy",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nejakým spôsobom?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
@@ -7193,101 +7209,103 @@
                   "isDisplay": true
                 }
               ],
-              "hint1": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Dokazovaná nerovnosť vyzerá ako "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AG",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " nerovnosť pre tri členy. My tam máme členy "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Čo nám zostane dokázať po aplikácii?"
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hint2": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Platí "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2+2 = x^2+1+1 \\ge 3 \\sqrt[ 3 ]{x^2}",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", takže stačí dokázať "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\sqrt[ 3 ]{x^2} \\ge xy",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", čo po umocnení na tretiu dáva "
-                    },
-                    {
-                      "type": "math",
-                      "text": "x^2 \\ge x^3y^3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", teda "
-                    },
-                    {
-                      "type": "math",
-                      "text": "1 \\ge xy^3",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Ešte sme nepoužili podmienku."
-                    }
-                  ],
-                  "highligted": false
-                }
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dokazovaná nerovnosť vyzerá ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AG",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nerovnosť pre tri členy. My tam máme členy "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čo nám zostane dokázať po aplikácii?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2+2 = x^2+1+1 \\ge 3 \\sqrt[ 3 ]{x^2}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže stačí dokázať "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sqrt[ 3 ]{x^2} \\ge xy",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", čo po umocnení na tretiu dáva "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x^2 \\ge x^3y^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", teda "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1 \\ge xy^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Ešte sme nepoužili podmienku."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
               ],
               "solution": [
                 {
