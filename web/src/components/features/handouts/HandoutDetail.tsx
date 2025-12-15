@@ -62,7 +62,7 @@ function renderTitle(
 
 function renderDifficultyStars(difficulty: number): React.ReactNode {
   if (difficulty === 0) return null
-  return <sup className="text-purple-400">*</sup>
+  return <sup className="text-purple-400">{'*'.repeat(difficulty)}</sup>
 }
 
 function renderDocumentSections(
