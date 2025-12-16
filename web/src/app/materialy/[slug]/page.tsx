@@ -93,9 +93,9 @@ export async function generateMetadata({
     // Find the entry that matches the slug and has a content file associated
     .find((data) => data.handout.slug === slug && data.handout.data?.filename)
 
-  // Throw if no matching entry exists
+  // Return 404 if no matching entry exists
   if (!handoutData || !handoutData.handout.data) {
-    throw new Error(`No handout found with slug: ${slug}`)
+    notFound()
   }
 
   return generatePageMetadata({
