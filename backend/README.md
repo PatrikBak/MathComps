@@ -134,6 +134,47 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 - **[Handouts Parser](src/Tools/MathComps.Cli.Handouts/README.md)** – Converts `.tex` handouts to `.json` for frontend
 
+## Deployment
+
+The backend supports separate **staging** and **production** environments using Docker Compose override files.
+
+### Quick Start
+
+```bash
+# Start production
+./deploy.sh prod up -d
+
+# Start staging
+./deploy.sh staging up -d
+
+# Stop staging (saves resources)
+./deploy.sh staging down
+
+# View logs
+./deploy.sh prod logs -f api
+```
+
+### Environment Setup
+
+1. Copy the base example file to `.env`:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` with your shared values
+
+3. Create environment-specific overrides:
+
+   ```bash
+   cp .env.prod.example .env.prod        # For production
+   cp .env.staging.example .env.staging  # For staging
+   ```
+
+4. Edit the override files with environment-specific values (`DOMAIN`)
+
+5. Create `appsettings.{Production|Staging}.json` with CORS origins (gitignored)
+
 ## Development
 
 ### Code Formatting

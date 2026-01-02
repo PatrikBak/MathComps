@@ -1,0 +1,25 @@
+name: mathcomps-prod
+
+# Production-specific overrides
+
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mathcomps-prod.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mathcomps-prod.entrypoints=websecure"
+      - "traefik.http.routers.mathcomps-prod.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mathcomps-prod.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik-public"
+
+volumes:
+  postgres_data_prod:
+    external: true

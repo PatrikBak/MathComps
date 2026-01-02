@@ -1,12 +1,26 @@
-# Load environment variables from .env.example and .env files
-# .env.example is loaded first, then .env (which overrides values from .env.example)
+# Load environment variables from .env files
+# Usage: . .\Import-Environment.ps1 -Environment <prod|staging>
+#
+# Loading order:
+#   1. .env.example (base defaults)
+#   2. .env.{environment}.example (env-specific defaults like ports)
+#   3. .env (user secrets)
+#   4. .env.{environment} (user env-specific overrides)
+
+param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [ValidateSet("prod", "staging")]
+    [string]$Environment
+)
 
 # Helper function to load environment variables from a file
 function Load-EnvFile {
     param(
+        # Path to the .env file to load
         [string]$FilePath
     )
     
+    # Check if the file exists
     if (Test-Path $FilePath) {
         # Read the .env file line by line
         Get-Content $FilePath | ForEach-Object {
@@ -19,23 +33,33 @@ function Load-EnvFile {
                 Set-Item -Path "env:$key" -Value $value
             }
         }
+        # Env loaded successfully
         return $true
     }
+
+    # Env file not found
     return $false
 }
 
 # Construct paths relative to the script directory
 $envExampleFile = Join-Path $PSScriptRoot ".env.example"
+$envEnvExampleFile = Join-Path $PSScriptRoot ".env.$Environment.example"
 $envFile = Join-Path $PSScriptRoot ".env"
+$envOverrideFile = Join-Path $PSScriptRoot ".env.$Environment"
 
-# Load .env.example first (if it exists)
-$exampleLoaded = Load-EnvFile -FilePath $envExampleFile
+# 1. Load .env.example (base defaults)
+Load-EnvFile -FilePath $envExampleFile | Out-Null
 
-# Load .env second (overrides values from .env.example)
+# 2. Load .env.{environment}.example (env-specific defaults)
+Load-EnvFile -FilePath $envEnvExampleFile | Out-Null
+
+# 3. Load .env (user secrets)
 $envLoaded = Load-EnvFile -FilePath $envFile
 
-# Warn if neither file exists
-if (-not $exampleLoaded -and -not $envLoaded) {
-    Write-Warning "Neither .env.example nor .env file found in $PSScriptRoot"
-}
+# 4. Load .env.{environment} (user env-specific overrides)
+Load-EnvFile -FilePath $envOverrideFile | Out-Null
 
+# Warn if .env file doesn't exist (user needs to create this)
+if (-not $envLoaded) {
+    Write-Warning ".env file not found. Copy .env.example to .env and configure your secrets."
+}
