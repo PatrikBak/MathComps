@@ -27,7 +27,7 @@ npm install
 
 ### 2. Environment Configuration (Optional)
 
-Most of the application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form or authentication functionality.
+Most of the application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form, authentication, or file upload functionality.
 
 #### Authentication (Clerk)
 
@@ -55,6 +55,23 @@ CONTACT_EMAIL=contact@yourdomain.com
 ```
 
 **Development Mode:** Leave email variables empty for development - the contact form will work without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
+
+#### File Storage (Cloudflare R2)
+
+For file upload functionality (e.g., image attachments), configure Cloudflare R2 storage:
+
+```bash
+# Cloudflare R2 Configuration
+R2_BUCKET_NAME=your-bucket-name
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_PUBLIC_URL=https://your-bucket.r2.dev
+```
+
+These credentials can be obtained from the [Cloudflare Dashboard](https://dash.cloudflare.com/) under R2 Object Storage.
+
+**Development Mode:** Leave R2 variables empty during development – file upload features will be disabled, but the rest of the application will work normally.
 
 **Other available variables (have good defaults):**
 

@@ -2,17 +2,18 @@
 
 import { SignOutButton, useUser } from '@clerk/nextjs'
 import { CalendarDays, LogOut, Mail, User } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { displayNameSchema } from '@/components/features/auth/authFormSchema'
+import { useInvalidateUserComments } from '@/components/features/comments/hooks/use-invalidate-user-comments'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/constants/routes'
+import { useLoginRedirect } from '@/hooks/use-login-redirect'
 
 /**
  * Props for the ProfileInfoField component
@@ -41,8 +42,8 @@ function ProfileInfoField({ icon: Icon, label }: ProfileInfoFieldProps) {
  * Displays user avatar, info, and sign-out button.
  */
 export default function ProfilePageContent() {
-  // Need a router for potential redirect to a login page
-  const router = useRouter()
+  // Get a function to redirect to the login page
+  const { redirectToLogin } = useLoginRedirect()
 
   // Load user data from Clerk
   const { user, isLoaded } = useUser()
@@ -50,12 +51,15 @@ export default function ProfilePageContent() {
   // Ref for the file input
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Hook for invalidating user comments
+  const { invalidateUserComments } = useInvalidateUserComments()
+
   // If no user is logged in, redirect to the login page
   useEffect(() => {
     if (isLoaded && !user) {
-      router.push(ROUTES.LOGIN)
+      redirectToLogin()
     }
-  }, [isLoaded, user, router])
+  }, [isLoaded, user, redirectToLogin])
 
   // A loading spinner while Clerk is loading user data
   if (!isLoaded) {
@@ -84,6 +88,9 @@ export default function ProfilePageContent() {
         firstName: newName,
         lastName: '',
       })
+
+      // Invalidate comments to refresh author name
+      await invalidateUserComments()
     } catch (error) {
       // Show errors in a toast
       toast.error(getClerkErrorMessage(error))
@@ -103,6 +110,9 @@ export default function ProfilePageContent() {
     try {
       // Use Clerk's API to update the user's profile image
       await user.setProfileImage({ file })
+
+      // Invalidate comments to refresh avatars
+      await invalidateUserComments()
 
       // This worked out fine
       toast.success('Profilová fotka nahraná, aktualizácia potrvá pár sekúnd')

@@ -66,9 +66,9 @@ public static class ServiceCollectionExtensions
                         // Check if the origin matches any of the regex patterns
                         .Any(pattern => Regex.IsMatch(origin, pattern, RegexOptions.IgnoreCase)))
                 // Allow common headers for browser requests
-                .WithHeaders("Content-Type", "X-Requested-With", "Authorization")
+                .WithHeaders("Content-Type", "X-Requested-With", "Authorization", "Accept")
                 // Only required HTTP methods
-                .WithMethods("GET", "POST", "OPTIONS")
+                .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             )
         );
 

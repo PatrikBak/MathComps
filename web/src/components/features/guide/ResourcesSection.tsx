@@ -1,9 +1,9 @@
 import { BookOpen, Link2, type LucideIcon, MessageSquare, Wrench, Youtube } from 'lucide-react'
 import React from 'react'
 
-import { getSiteUrl } from '@/components/features/problems/utils/url-utils'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
+import { getSiteUrl } from '@/components/shared/utils/url-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 import { ROUTES } from '@/constants/routes'
 

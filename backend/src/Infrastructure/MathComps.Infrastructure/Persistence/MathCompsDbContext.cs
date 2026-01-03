@@ -61,6 +61,27 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Likes on problems by users.</summary>
     public DbSet<ProblemLike> ProblemLikes => Set<ProblemLike>();
 
+    /// <summary>Comments on content.</summary>
+    public DbSet<Comment> Comments => Set<Comment>();
+
+    /// <summary>Likes on comments.</summary>
+    public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
+
+    /// <summary>Join table: comments on problems.</summary>
+    public DbSet<ProblemComment> ProblemComments => Set<ProblemComment>();
+
+    /// <summary>Join table: comments on handouts.</summary>
+    public DbSet<HandoutComment> HandoutComments => Set<HandoutComment>();
+
+    /// <summary>Join table: comments on news articles.</summary>
+    public DbSet<NewsArticleComment> NewsArticleComments => Set<NewsArticleComment>();
+
+    /// <summary>Anchor entity for file-based handouts.</summary>
+    public DbSet<Handout> Handouts => Set<Handout>();
+
+    /// <summary>Anchor entity for news articles.</summary>
+    public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -499,6 +520,137 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemLike
+
+        #region Comment
+
+        modelBuilder.Entity<Comment>(e =>
+        {
+            // Threading (self-reference)
+            e.HasOne(c => c.ParentComment)
+             .WithMany(c => c.Replies)
+             .HasForeignKey(c => c.ParentCommentId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Edit versioning (self-reference)
+            e.HasOne(c => c.PreviousVersion)
+             .WithMany()
+             .HasForeignKey(c => c.PreviousVersionId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Author
+            e.HasOne(c => c.Author)
+             .WithMany()
+             .HasForeignKey(c => c.AuthorId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(c => c.ParentCommentId).HasDatabaseName("ix_comment_parent_id");
+            e.HasIndex(c => c.AuthorId).HasDatabaseName("ix_comment_author_id");
+        });
+
+        #endregion Comment
+
+        #region CommentLike
+
+        modelBuilder.Entity<CommentLike>(e =>
+        {
+            e.HasKey(cl => new { cl.UserId, cl.CommentId });
+
+            e.HasOne(cl => cl.User)
+             .WithMany()
+             .HasForeignKey(cl => cl.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(cl => cl.Comment)
+             .WithMany(c => c.Likes)
+             .HasForeignKey(cl => cl.CommentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(cl => cl.CommentId).HasDatabaseName("ix_comment_like_comment_id");
+        });
+
+        #endregion CommentLike
+
+        #region ProblemComment
+
+        modelBuilder.Entity<ProblemComment>(e =>
+        {
+            e.HasKey(pc => new { pc.ProblemId, pc.CommentId });
+
+            e.HasOne(pc => pc.Problem)
+             .WithMany(p => p.ProblemComments)
+             .HasForeignKey(pc => pc.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(pc => pc.Comment)
+             .WithMany()
+             .HasForeignKey(pc => pc.CommentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Each comment belongs to at most one problem
+            e.HasIndex(pc => pc.CommentId).IsUnique().HasDatabaseName("ux_problem_comment_comment_id");
+        });
+
+        #endregion ProblemComment
+
+        #region HandoutComment
+
+        modelBuilder.Entity<HandoutComment>(e =>
+        {
+            e.HasKey(hc => new { hc.HandoutId, hc.CommentId });
+
+            e.HasOne(hc => hc.Handout)
+             .WithMany(h => h.Comments)
+             .HasForeignKey(hc => hc.HandoutId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(hc => hc.Comment)
+             .WithMany()
+             .HasForeignKey(hc => hc.CommentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(hc => hc.CommentId).IsUnique().HasDatabaseName("ux_handout_comment_comment_id");
+        });
+
+        #endregion HandoutComment
+
+        #region NewsArticleComment
+
+        modelBuilder.Entity<NewsArticleComment>(e =>
+        {
+            e.HasKey(nc => new { nc.NewsArticleId, nc.CommentId });
+
+            e.HasOne(nc => nc.NewsArticle)
+             .WithMany(n => n.Comments)
+             .HasForeignKey(nc => nc.NewsArticleId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(nc => nc.Comment)
+             .WithMany()
+             .HasForeignKey(nc => nc.CommentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(nc => nc.CommentId).IsUnique().HasDatabaseName("ux_news_article_comment_comment_id");
+        });
+
+        #endregion NewsArticleComment
+
+        #region Handout
+
+        modelBuilder.Entity<Handout>(e =>
+        {
+            e.HasIndex(h => h.ContentId).IsUnique().HasDatabaseName("ux_handout_content_id");
+        });
+
+        #endregion Handout
+
+        #region NewsArticle
+
+        modelBuilder.Entity<NewsArticle>(e =>
+        {
+            e.HasIndex(n => n.ContentId).IsUnique().HasDatabaseName("ux_news_article_content_id");
+        });
+
+        #endregion NewsArticle
     }
 
     #endregion OnModelCreating

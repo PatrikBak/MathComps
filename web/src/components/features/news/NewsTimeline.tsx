@@ -1,10 +1,17 @@
 'use client'
 
 import { useWindowEvent } from '@mantine/hooks'
-import { ChevronLeft, ChevronRight, Newspaper, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MessageSquare, Newspaper, X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import {
+  CommentCountProvider,
+  useCommentCount,
+} from '@/components/features/comments/components/CommentCountContext'
+import { CommentModal } from '@/components/features/comments/components/CommentModal'
+import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
+import { IconBadge } from '@/components/shared/components/IconBadge'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/constants/routes'
 
@@ -67,6 +74,38 @@ function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonPro
 }
 
 /**
+ * Props for the {@link NewsCommentButton} component.
+ */
+type NewsCommentButtonProps = {
+  /** The article slug to get the count for */
+  slug: string
+  /** The click handler to open comments modal */
+  openComments: () => void
+}
+
+/**
+ * Comment button specific to the news timeline.
+ */
+function NewsCommentButton({ slug, openComments }: NewsCommentButtonProps) {
+  // Get the count from the context
+  const { count, isLoading } = useCommentCount(slug)
+
+  return (
+    <button
+      onClick={openComments}
+      className="w-fit self-center flex items-center justify-center gap-4 py-2 px-4 text-gray-400 hover:bg-slate-800/50 rounded-lg transition-colors"
+    >
+      <div className="flex items-center gap-1.5">
+        <IconBadge count={count} color="indigo" isHighlighted={count > 0} isLoading={isLoading}>
+          <MessageSquare size={20} />
+        </IconBadge>
+      </div>
+      <span className="text-sm font-medium">Komentáre</span>
+    </button>
+  )
+}
+
+/**
  * A single item in the news timeline, pairing article data with its rendered card.
  */
 type NewsTimelineItem = {
@@ -103,6 +142,15 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
 
+  // Selected article for comments modal
+  const [commentsArticle, setCommentsArticle] = useState<NewsArticle | null>(null)
+
+  // Whether the comments modal is open
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false)
+
+  // Extract slugs for batch fetching
+  const articleSlugs = items.map((item) => item.article.id)
+
   // Ensure invalid categories are stripped out of the url
   useEffect(() => {
     if (categoryFilter === null) router.replace(ROUTES.NEWS)
@@ -116,6 +164,37 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
     // Otherwise filter by category
     return items.filter((item) => item.article.category === categoryFilter)
   }, [items, categoryFilter])
+
+  /**
+   * Function to open the comments modal for an article
+   *
+   * @param article The article to open the comments modal for
+   */
+  const openComments = useCallback((article: NewsArticle) => {
+    // Set the current article
+    setCommentsArticle(article)
+
+    // Open the modal
+    setIsCommentsOpen(true)
+  }, [])
+
+  // Hook for restoring comment modal state
+  const { pendingTarget, clearPendingTarget } = usePendingCommentTarget()
+
+  // Check for pending comment target on mount (after login redirect)
+  useEffect(() => {
+    // If there is a pending target and it is a news article
+    if (pendingTarget && pendingTarget.targetType === 'News') {
+      // Find the matching article
+      const match = items.find((item) => item.article.id === pendingTarget.targetId)
+
+      // If we found a match
+      if (match) {
+        // Open the comments modal
+        openComments(match.article)
+      }
+    }
+  }, [items, pendingTarget, openComments])
 
   // Check scroll position to update button states
   const updateScrollButtons = useCallback(() => {
@@ -220,11 +299,17 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
 
       {/* Timeline Section - Desktop/Tablet only */}
       {filteredItems.length > 0 && (
-        <>
+        <CommentCountProvider targetType="News" slugs={articleSlugs}>
           {/* MOBILE: Vertical stacked layout */}
           <div className="md:hidden flex flex-col gap-4">
             {filteredItems.map((item) => (
-              <div key={item.article.id}>{item.card}</div>
+              <div key={item.article.id} className="flex flex-col gap-2">
+                {item.card}
+                <NewsCommentButton
+                  slug={item.article.id}
+                  openComments={() => openComments(item.article)}
+                />
+              </div>
             ))}
           </div>
 
@@ -301,9 +386,15 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                       return (
                         <div
                           key={item.article.id}
-                          className="w-[340px] lg:w-[388px] h-[200px] flex-shrink-0 transition-all duration-300 hover:saturate-100"
+                          className="w-[340px] lg:w-[388px] flex-shrink-0 flex flex-col gap-2"
                         >
-                          {item.card}
+                          <div className="h-[200px] transition-all duration-300 hover:saturate-100">
+                            {item.card}
+                          </div>
+                          <NewsCommentButton
+                            slug={item.article.id}
+                            openComments={() => openComments(item.article)}
+                          />
                         </div>
                       )
                     })}
@@ -381,8 +472,25 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
               </div>
             </div>
           </div>
-        </>
+        </CommentCountProvider>
       )}
+
+      {/* Comments Modal */}
+      <CommentModal
+        isOpen={isCommentsOpen}
+        onClose={() => {
+          // Close the modal
+          setIsCommentsOpen(false)
+
+          // No more pending target in case we wanna log in from this comment section
+          clearPendingTarget()
+        }}
+        title={commentsArticle?.title ?? ''}
+        target={{
+          targetType: 'News',
+          targetId: commentsArticle?.id ?? '',
+        }}
+      />
     </div>
   )
 }

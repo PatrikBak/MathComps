@@ -1,8 +1,4 @@
 /**
- * String manipulation utilities for consistent text processing across the application.
- */
-
-/**
  * Soft hyphen character (Unicode U+00AD)
  * Equivalent to &shy; HTML entity. Use this to specify manual hyphenation points in text.
  *
@@ -16,6 +12,7 @@ const SHY = '\u00AD'
  * This allows you to write hyphenation hints in a TeX-like syntax.
  *
  * @param text - Text with TeX-style hyphenation marks (\-)
+ *
  * @returns Text with soft hyphen characters (U+00AD)
  *
  * @example
@@ -26,7 +23,9 @@ export const parseTexHyphens = (text: string): string => text.replace(/\\-/g, SH
 
 /**
  * Slugifies a string preserving only URL-safe characters
+ *
  * @param input - The string to convert to a URL-friendly slug
+ *
  * @returns A URL-safe slug with only lowercase letters, numbers, and hyphens
  */
 export const slugify = (input: string) =>
@@ -44,9 +43,10 @@ export const slugify = (input: string) =>
  * Converts to lowercase and removes all diacritical marks.
  *
  * @param text - The text to normalize
+ *
  * @returns Normalized text suitable for search comparisons
  *
- * @example
+ * @example7
  * normalizeForSearch('Čísla') // returns 'cisla'
  * normalizeForSearch('ŠTATISTIKA') // returns 'statistika'
  * normalizeForSearch('Trigonometria') // returns 'trigonometria'
@@ -59,8 +59,10 @@ export const normalizeForSearch = (text: string): string =>
 
 /**
  * Chooses the correct Slovak plural form based on a number
+ *
  * @param count - The number to determine plural form for
  * @param forms - Array of three forms: [one, few, many] (e.g., ["dostupný", "dostupné", "dostupných"])
+ *
  * @returns The appropriate plural form for the given count
  */
 export const slovakPlural = (count: number, [one, few, many]: [string, string, string]) =>
@@ -68,8 +70,10 @@ export const slovakPlural = (count: number, [one, few, many]: [string, string, s
 
 /**
  * Joins author names with a limit and "+X" remainder suffix
+ *
  * @param authors - Array of author names
  * @param limit - Maximum number of authors to show before adding "+X" suffix (default: 2)
+ *
  * @returns Formatted string of author names, e.g., "John Doe, Jane Smith +3"
  */
 export const joinAuthors = (authors: string[], limit = 2) =>
@@ -82,6 +86,7 @@ export const joinAuthors = (authors: string[], limit = 2) =>
  * Works with various YouTube URL formats including channels, videos, playlists, and custom URLs.
  *
  * @param text - The text that may contain YouTube URLs
+ *
  * @returns Shortened text with YouTube URLs reduced to their identifiers, or original text if no YouTube URLs found
  *
  * @example
@@ -101,4 +106,21 @@ export const shortenYouTubeUrls = (text: string): string => {
 
   // Return the first group or the original text if no match
   return youtubeMatch && youtubeMatch[1] ? youtubeMatch[1] : text
+}
+
+/**
+ * Checks if a string looks like a URL.
+ * Matches strings starting with http://, https://, or www.
+ *
+ * @param text - The text to check
+ * @returns True if the text appears to be a URL
+ *
+ * @example
+ * isUrl('https://example.com') // returns true
+ * isUrl('www.example.com') // returns true
+ * isUrl('just some text') // returns false
+ */
+export const isUrl = (text: string): boolean => {
+  const trimmed = text.trim()
+  return /^https?:\/\//.test(trimmed) || /^www\./.test(trimmed)
 }

@@ -12,10 +12,10 @@ import {
   useSearchFiltersLogic,
   type UseSearchFiltersLogicProps,
 } from '../hooks/use-search-filters-logic'
+import { getProblemsPageUrl } from '../services/problem-api-urls'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { createFilterUpdater } from '../utils/filter-update-utils'
 import { serializeFilters } from '../utils/search-url-serialization'
-import { getProblemsPageUrl } from '../utils/url-utils'
 import MultiSelectFacet from './facets/MultiSelectFacet'
 import TreeSelectFacet from './facets/TreeSelectFacet'
 

@@ -21,6 +21,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import * as React from 'react'
 import { useState } from 'react'
 
+/**
+ * Props for the {@link Tooltip} component.
+ */
 type TooltipProps = {
   /** The content to display inside the tooltip popover. */
   content: React.ReactNode
@@ -33,7 +36,7 @@ type TooltipProps = {
 }
 
 /**
- * A Tooltip which works on both desktop (on hover) and tablet (on click)
+ * A tooltip which works on both desktop (on hover) and tablet (on click)
  *
  * @param {TooltipProps} props - The props for the component.
  */

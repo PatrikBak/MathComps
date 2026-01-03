@@ -11,7 +11,7 @@ export type NewsCategory = 'archive' | 'handouts' | 'development' | 'misc'
  * A single news article
  */
 export type NewsArticle = {
-  /** Unique identifier (slug) */
+  /** Permanent unique identifier (nanoid from frontmatter) */
   id: string
   /** Article title */
   title: string

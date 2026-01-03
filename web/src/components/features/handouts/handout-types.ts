@@ -2,6 +2,8 @@
  * Typed representation of a single handout entry shown in the handouts list.
  */
 export type HandoutEntry = {
+  /** Permanent unique identifier (nanoid) - only present for available handouts */
+  id?: string
   /** Display title of the handout */
   title: string
   /** Precomputed URL-friendly slug */

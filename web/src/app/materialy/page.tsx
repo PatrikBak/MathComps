@@ -7,6 +7,7 @@ import Layout from '@/components/layout/Layout'
 import { ROUTES } from '@/constants/routes'
 import handoutData from '@/content/handouts/handouts.json'
 import { generatePageMetadata } from '@/lib/metadata'
+import { validateUniqueIds } from '@/lib/validation'
 
 export const metadata: Metadata = generatePageMetadata({
   title: 'Materiály',
@@ -18,7 +19,15 @@ export const metadata: Metadata = generatePageMetadata({
 })
 
 export default function HandoutsPage() {
+  // Load the handout data JSON
   const sections = handoutData as HandoutSection[]
+
+  // Check for duplicate ids
+  validateUniqueIds(
+    sections.flatMap((section) => section.handouts),
+    (handout) => handout.id,
+    'handout'
+  )
 
   return (
     <Layout>

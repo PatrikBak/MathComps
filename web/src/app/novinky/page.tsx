@@ -9,6 +9,7 @@ import type { NewsArticle, NewsCategory } from '@/components/features/news/types
 import Layout from '@/components/layout/Layout'
 import { ROUTES } from '@/constants/routes'
 import { generatePageMetadata } from '@/lib/metadata'
+import { validateUniqueIds } from '@/lib/validation'
 
 export const metadata: Metadata = generatePageMetadata({
   title: 'Novinky',
@@ -47,9 +48,6 @@ export function getAllNewsArticles(): NewsArticle[] {
     .readdirSync(CONTENT_DIR)
     .filter((file) => file.endsWith('.mdx'))
     .map((file) => {
-      // Parse filename to extract slug
-      const slug = file.replace(/\.mdx$/, '')
-
       // Get file content
       const filePath = path.join(CONTENT_DIR, file)
       const fileContent = fs.readFileSync(filePath, 'utf-8')
@@ -72,7 +70,7 @@ export function getAllNewsArticles(): NewsArticle[] {
 
       // Return article data
       return {
-        id: slug,
+        id: data.id,
         title: data.title,
         date: data.date,
         category: data.category as NewsCategory,
@@ -80,6 +78,9 @@ export function getAllNewsArticles(): NewsArticle[] {
         content: trimmedContent,
       } as NewsArticle
     })
+
+  // Check for duplicate IDs
+  validateUniqueIds(articles, (article) => article.id, 'news article')
 
   // Sort by date (newest first)
   return articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

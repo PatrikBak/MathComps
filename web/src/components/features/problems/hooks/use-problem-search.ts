@@ -8,16 +8,13 @@ import { toast } from 'sonner'
 
 import { ROUTES } from '@/constants/routes'
 import { useProblemStore } from '@/stores/problem-store'
+import { isNetworkError, isServerError, isValidationError } from '@/types/api'
 
 import type { FilterType } from '../components/SearchFilters'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
-import {
-  isNetworkError,
-  isProblemNotFoundError,
-  isServerError,
-  isValidationError,
-} from '../types/problem-errors'
+import { getProblemsPageUrl, hasProblemId } from '../services/problem-api-urls'
+import { isProblemNotFoundError } from '../types/problem-errors'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import {
   needsLabelResolution,
@@ -27,7 +24,6 @@ import { countActiveFilters } from '../utils/filter-validation'
 import { isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { createDefaultFilters } from '../utils/url-initialization'
-import { getProblemsPageUrl, hasProblemId } from '../utils/url-utils'
 import {
   useInitialFilterData,
   useProblemSearchQuery,

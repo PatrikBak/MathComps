@@ -53,6 +53,7 @@ public static class DependencyInjectionHelpers
         services.AddScoped<IUserManager, UserManager>();
         services.AddScoped<IUserProblemService, UserProblemService>();
         services.AddScoped<IClerkWebhookService, ClerkWebhook>();
+        services.AddScoped<ICommentService, CommentService>();
 
         // Clerk API Client
         services.AddScoped(serviceProvider =>

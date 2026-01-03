@@ -1,14 +1,13 @@
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/use-current-url'
+import { useLoginRedirect } from '@/hooks/use-login-redirect'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
+import { hasProblemId } from '../services/problem-api-urls'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { initializeFiltersFromUrl } from '../utils/url-initialization'
-import { hasProblemId } from '../utils/url-utils'
 
 /**
  * Parameters required for URL synchronization of problem search filters.
@@ -45,13 +44,8 @@ export const useProblemUrlSync = ({
   // Access URL search parameters to enable bookmarkable filter states
   const searchParams = useSearchParams()
 
-  // Access router to enable navigation to login page
-  // (when we try to get favorites and user is not signed in)
-  const router = useRouter()
-
-  // Get the current URL function to pass it to the login page triggered
-  // by the favorites button in case the user is not signed in
-  const currentUrl = useCurrentUrl()
+  // We will redirect to login if the user is not signed in and favorites are requested
+  const { redirectToLogin } = useLoginRedirect()
 
   // Prevent multiple URL syncs during component lifecycle - this is a one-time operation
   const isInitializedFromUrl = useRef(false)
@@ -85,7 +79,7 @@ export const useProblemUrlSync = ({
 
     // If favorites is requested and user is not signed in, redirect to login
     if (favoritesRequested && !isSignedIn) {
-      router.push(`${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(currentUrl())}`)
+      redirectToLogin()
       return
     }
 
@@ -120,7 +114,6 @@ export const useProblemUrlSync = ({
     handleFiltersChange,
     isLoaded,
     isSignedIn,
-    currentUrl,
-    router,
+    redirectToLogin,
   ])
 }

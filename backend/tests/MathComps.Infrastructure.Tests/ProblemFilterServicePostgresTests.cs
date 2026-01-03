@@ -1,161 +1,24 @@
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using MathComps.Domain.ApiDtos.Helpers;
 using MathComps.Domain.ApiDtos.ProblemQuery;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+
 
 namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
-/// Integration tests for the EF-backed <see cref="ProblemFilterService"/> using a disposable PostgreSQL container.
+/// Integration tests for the EF-backed <see cref="IProblemFilterService"/> using a disposable PostgreSQL container.
 /// </summary>
-public class ProblemFilterServicePostgresTests : IAsyncLifetime
+public class ProblemFilterServicePostgresTests : PostgresTestBase<IProblemFilterService>
 {
-    /// <summary>
-    /// The docker container 
-    /// </summary>
-    private readonly IContainer _postgresContainer;
-
-    /// <summary>
-    /// The connection string for the PostgreSQL container, initialized after the container starts.
-    /// </summary>
-    private readonly string _connectionString;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ProblemFilterServicePostgresTests"/> class.
-    /// Sets up the PostgreSQL container for testing.
-    /// </summary>
-    public ProblemFilterServicePostgresTests()
-    {
-        try
-        {
-            // The common property for the connection string
-            const string user = "postgres";
-            const string password = "postgres";
-            const string db = "mathcomps_service_test";
-            const int port = 5432;
-
-            // Create PostgreSQL container with pgvector extension for vector similarity operations.
-            _postgresContainer = new ContainerBuilder()
-                // Use pgvector image with PostgreSQL 16 for embedding similarity
-                .WithImage("pgvector/pgvector:pg16")
-                // The required envs
-                .WithEnvironment("POSTGRES_USER", user)
-                .WithEnvironment("POSTGRES_PASSWORD", password)
-                .WithEnvironment("POSTGRES_DB", db)
-                // Bind to random available port (0) to avoid conflicts with other services
-                .WithPortBinding(0, port)
-                // Wait for DB to be ready before proceeding
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
-                .Build();
-
-            // Initialize the connection string after the container is built
-            _connectionString = $"Host=localhost;Port={port};Database={db};Username={user};Password={password}";
-
-        }
-        catch (DockerUnavailableException)
-        {
-            // We need Docker!
-            throw new InvalidOperationException(
-                """
-                Docker Desktop is required to run Postgres integration tests
-                  - Install Docker Desktop (Windows/Mac) or Docker Engine (Linux)
-                  - Start Docker and ensure 'docker info' works
-                  - On Windows, enable WSL 2 backend in Docker Desktop settings
-                """
-            );
-        }
-    }
-
-    /// <summary>
-    /// Initializes the test environment by starting the PostgreSQL container and seeding test data.
-    /// This method is called before each test class execution to ensure a clean, isolated database state.
-    /// </summary>
-    /// <returns>A task representing the asynchronous initialization operation.</returns>
-    public async Task InitializeAsync()
-    {
-        // Make sure the container's on
-        await _postgresContainer.StartAsync();
-
-        // Create the DB context using the service provider
-        await using var serviceProvider = CreateServiceProvider();
-        await using var scope = serviceProvider.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
-
-        // Ensure we start with a completely clean database state for each test run
-        await context.Database.EnsureDeletedAsync();
-        await context.Database.MigrateAsync();
-
-        // Seed the database with test data
-        await SeedData(context);
-    }
-
-    /// <summary>
-    /// Cleans up the test environment by stopping and disposing of the PostgreSQL container.
-    /// This method is called after all tests in the class have completed to free up resources.
-    /// </summary>
-    /// <returns>A task representing the asynchronous cleanup operation.</returns>
-    public async Task DisposeAsync()
-    {
-        // Stop and dispose the container to free up resources
-        await (_postgresContainer?.StopAsync() ?? Task.CompletedTask);
-        await (_postgresContainer?.DisposeAsync() ?? ValueTask.CompletedTask);
-    }
-
-    /// <summary>
-    /// Creates a service provider configured with the test database connection string.
-    /// </summary>
-    /// <returns>A configured service provider ready for dependency injection.</returns>
-    private ServiceProvider CreateServiceProvider()
-    {
-        // Create in-memory configuration with the test database connection string
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = _connectionString
-            })
-            .Build();
-
-        // Register all necessary services for the ProblemFilterService to function
-        return new ServiceCollection()
-            .AddSingleton<IConfiguration>(configuration)
-            .AddMathCompsDbContext(configuration)
-            .AddInfrastructureServices()
-            .BuildServiceProvider();
-    }
-
-    /// <summary>
-    /// Executes filtering using the <see cref="IProblemFilterService"/>. This helper method
-    /// encapsulates the common pattern of creating a service scope, executing a filter query,
-    /// and ensuring proper disposal of resources.
-    /// </summary>
-    /// <param name="filterOptions">The filter options to execute.</param>
-    /// <returns>The filter result from the <see cref="IProblemFilterService"/>.</returns>
-    private async Task<FilterResult> ExecuteFiltering(ProblemFilterOptions filterOptions)
-    {
-        // Create a new service provider for each test to ensure proper isolation.
-        using var serviceProvider = CreateServiceProvider();
-        await using var scope = serviceProvider.CreateAsyncScope();
-
-        // Get the service
-        return await scope.ServiceProvider.GetRequiredService<IProblemFilterService>()
-            // Execute the filter query
-            .FilterAsync(filterOptions);
-    }
-
     /// <summary>
     /// Verifies that an initial load with no filters returns all problems and available filter options.
     /// This test ensures the service correctly handles the baseline case where no filtering is applied,
     /// returning the complete dataset along with all available filter options for the UI.
     /// </summary>
     [Fact]
-    public async Task FilterInitialLoadReturnsAllProblemsAndOptions()
+    public Task FilterInitialLoadReturnsAllProblemsAndOptions() => RunTestAsync(async service =>
     {
         // Arrange - create a query with no filters to test the baseline behavior
         var initialQuery = new ProblemFilterOptions(
@@ -179,7 +42,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the filter with no criteria
-        var initialResult = await ExecuteFiltering(initialQuery);
+        var initialResult = await service.FilterAsync(initialQuery);
 
         // Assert - verify we get all problems and all available filter options
         Assert.Equal(7, initialResult.Problems.TotalCount);
@@ -188,7 +51,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         Assert.Equal(2, initialResult.UpdatedOptions.Competitions.Count);
         Assert.Equal(3, initialResult.UpdatedOptions.Authors.Count);
         Assert.Equal(3, initialResult.UpdatedOptions.Tags.Count);
-    }
+    });
 
     /// <summary>
     /// Verifies that filtering by search text returns only problems containing the specified text.
@@ -196,7 +59,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// Slovak word that appears in one of our test problems.
     /// </summary>
     [Fact]
-    public async Task FilterBySearchTextReturnsMatchingProblems()
+    public Task FilterBySearchTextReturnsMatchingProblems() => RunTestAsync(async service =>
     {
         // Arrange - search for "štvorstena" (tetrahedron in Slovak) which appears in problem 75-b-i-1
         var textSearchQuery = new ProblemFilterOptions(
@@ -219,12 +82,12 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the text search
-        var textSearchResult = await ExecuteFiltering(textSearchQuery);
+        var textSearchResult = await service.FilterAsync(textSearchQuery);
 
         // Assert - verify we get exactly one matching problem
         Assert.Single(textSearchResult.Problems.Items);
         Assert.Equal("75-b-i-1", textSearchResult.Problems.Items[0].Slug);
-    }
+    });
 
     /// <summary>
     /// Verifies that search is both case-insensitive AND NFD-insensitive (diacritic-insensitive).
@@ -237,7 +100,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// For example: "stvorstena", "STVORSTENA", "Stvorstena" should all find "štvorstena".
     /// </summary>
     [Fact]
-    public async Task FilterBySearchTextIsCaseInsensitiveAndAccentInsensitive()
+    public Task FilterBySearchTextIsCaseInsensitiveAndAccentInsensitive() => RunTestAsync(async service =>
     {
         // Arrange - test various text normalization scenarios that users might encounter
         // Test 1: lowercase without accents should match "štvorstena" (with accents)
@@ -321,10 +184,10 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute all search variations
-        var lowercaseResult = await ExecuteFiltering(lowercaseQuery);
-        var uppercaseResult = await ExecuteFiltering(uppercaseQuery);
-        var mixedCaseResult = await ExecuteFiltering(mixedCaseQuery);
-        var lowerToTitleResult = await ExecuteFiltering(lowerToTitleQuery);
+        var lowercaseResult = await service.FilterAsync(lowercaseQuery);
+        var uppercaseResult = await service.FilterAsync(uppercaseQuery);
+        var mixedCaseResult = await service.FilterAsync(mixedCaseQuery);
+        var lowerToTitleResult = await service.FilterAsync(lowerToTitleQuery);
 
         // Assert - all variations should find their respective problems
         // Test 1: lowercase "stvorstena" → "štvorstena"
@@ -342,7 +205,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         // Test 4: lowercase "prirodzene" → "Prirodzené"
         Assert.Single(lowerToTitleResult.Problems.Items);
         Assert.Equal("75-c-i-1", lowerToTitleResult.Problems.Items[0].Slug);
-    }
+    });
 
     /// <summary>
     /// Verifies that filtering by a single author returns all problems authored by that person.
@@ -350,7 +213,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// expected number of problems for a specific author in our test dataset.
     /// </summary>
     [Fact]
-    public async Task FilterBySingleAuthorReturnsCorrectProblems()
+    public Task FilterBySingleAuthorReturnsCorrectProblems() => RunTestAsync(async service =>
     {
         // Arrange - filter by Patrik Bak, who authored 5 problems in our test data
         var authorQuery = new ProblemFilterOptions(
@@ -373,12 +236,12 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the author filter
-        var authorResult = await ExecuteFiltering(authorQuery);
+        var authorResult = await service.FilterAsync(authorQuery);
 
         // Assert - verify we get all 5 problems by Patrik Bak
         Assert.Equal(5, authorResult.Problems.TotalCount);
         Assert.All(authorResult.Problems.Items, problem => Assert.Contains(problem.Authors, author => author.DisplayName == "Patrik Bak"));
-    }
+    });
 
     /// <summary>
     /// Verifies that filtering by multiple tags with OR logic returns problems that have any of the selected tags.
@@ -386,7 +249,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// that match any of the selected tags, not necessarily all of them.
     /// </summary>
     [Fact]
-    public async Task FilterByMultipleTagsWithOrLogicReturnsCorrectProblems()
+    public Task FilterByMultipleTagsWithOrLogicReturnsCorrectProblems() => RunTestAsync(async service =>
     {
         // Arrange - filter by algebra OR number-theory tags (should return 2 problems)
         var tagsOrQuery = new ProblemFilterOptions(
@@ -409,11 +272,11 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the OR tag filter
-        var tagsOrResult = await ExecuteFiltering(tagsOrQuery);
+        var tagsOrResult = await service.FilterAsync(tagsOrQuery);
 
         // Assert - verify we get problems with either algebra OR number-theory tags
         Assert.Equal(2, tagsOrResult.Problems.TotalCount);
-    }
+    });
 
     /// <summary>
     /// Verifies that filtering by multiple tags with AND logic returns problems that have all of the selected tags.
@@ -421,7 +284,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// by returning no results when no problems have all the specified tags.
     /// </summary>
     [Fact]
-    public async Task FilterByMultipleTagsWithAndLogicReturnsNoProblemsWhenNoneMatchAll()
+    public Task FilterByMultipleTagsWithAndLogicReturnsNoProblemsWhenNoneMatchAll() => RunTestAsync(async service =>
     {
         // Arrange - filter by algebra AND number-theory tags (no problems have both in our test data)
         var tagsAndQuery = new ProblemFilterOptions(
@@ -444,11 +307,11 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the AND tag filter
-        var tagsAndResult = await ExecuteFiltering(tagsAndQuery);
+        var tagsAndResult = await service.FilterAsync(tagsAndQuery);
 
         // Assert - verify we get no results since no problems have both tags
         Assert.Empty(tagsAndResult.Problems.Items);
-    }
+    });
 
     /// <summary>
     /// Verifies that a complex filter with multiple criteria (Season, Category, and Tag) returns the correct subset of problems.
@@ -456,7 +319,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// correctly combines them using AND logic to return only problems that match all criteria.
     /// </summary>
     [Fact]
-    public async Task FilterWithComplexQueryReturnsCorrectProblems()
+    public Task FilterWithComplexQueryReturnsCorrectProblems() => RunTestAsync(async service =>
     {
         // Arrange - filter by season 75 AND geometry tag (should return 2 problems)
         var complexQuery = new ProblemFilterOptions(
@@ -479,7 +342,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the complex multi-criteria filter
-        var complexQueryResult = await ExecuteFiltering(complexQuery);
+        var complexQueryResult = await service.FilterAsync(complexQuery);
 
         // Assert - verify we get exactly 2 problems that match both season 75 and geometry tag
         Assert.Equal(2, complexQueryResult.Problems.Items.Count);
@@ -488,7 +351,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
             Assert.Equal("75", problem.Source.Season.Slug);
             Assert.Contains(problem.Tags, tag => tag.Slug == "geometry");
         }
-    }
+    });
 
     /// <summary>
     /// Verifies that pagination works correctly, returning the correct number of items for each page.
@@ -496,7 +359,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// the expected number of items and the total count remains consistent across pages.
     /// </summary>
     [Fact]
-    public async Task FilterWithPaginationReturnsCorrectPages()
+    public Task FilterWithPaginationReturnsCorrectPages() => RunTestAsync(async service =>
     {
         // Arrange - create queries for page 1 (4 items) and page 2 (remaining items)
         var page1Query = new ProblemFilterOptions(
@@ -537,15 +400,15 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute both page queries
-        var page1Result = await ExecuteFiltering(page1Query);
-        var page2Result = await ExecuteFiltering(page2Query);
+        var page1Result = await service.FilterAsync(page1Query);
+        var page2Result = await service.FilterAsync(page2Query);
 
         // Assert - verify pagination works correctly with 7 total problems
         Assert.Equal(4, page1Result.Problems.Items.Count);
         Assert.Equal(7, page1Result.Problems.TotalCount);
         Assert.Equal(3, page2Result.Problems.Items.Count);
         Assert.Equal(7, page2Result.Problems.TotalCount);
-    }
+    });
 
     /// <summary>
     /// Verifies that a query with criteria that should not match any problems returns an empty result set.
@@ -553,7 +416,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// when no problems match the specified criteria, rather than throwing exceptions.
     /// </summary>
     [Fact]
-    public async Task FilterWithNoMatchingCriteriaReturnsEmptyResult()
+    public Task FilterWithNoMatchingCriteriaReturnsEmptyResult() => RunTestAsync(async service =>
     {
         // Arrange - search for text that doesn't exist in any problem statement
         var noResultsQuery = new ProblemFilterOptions(
@@ -576,12 +439,12 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act - execute the query that should return no results
-        var noResultsResult = await ExecuteFiltering(noResultsQuery);
+        var noResultsResult = await service.FilterAsync(noResultsQuery);
 
         // Assert - verify we get an empty result set with zero total count
         Assert.Empty(noResultsResult.Problems.Items);
         Assert.Equal(0, noResultsResult.Problems.TotalCount);
-    }
+    });
     /// <summary>
     /// Verifies that filtering returns correct like information (Liked status and LikeCount).
     /// This test ensures that:
@@ -591,7 +454,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// 4. Liked is false when no user is provided (anonymous access).
     /// </summary>
     [Fact]
-    public async Task FilterReturnsCorrectLikeInformation()
+    public Task FilterReturnsCorrectLikeInformation() => RunTestAsync(async service =>
     {
         // Arrange - Use seeded users
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
@@ -616,13 +479,13 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
             ),
             UserId: null
         );
-        var resultUser1 = await ExecuteFiltering(baseQuery with { UserId = user1Id });
+        var resultUser1 = await service.FilterAsync(baseQuery with { UserId = user1Id });
 
         // Act 2: Query as User 2
-        var resultUser2 = await ExecuteFiltering(baseQuery with { UserId = user2Id });
+        var resultUser2 = await service.FilterAsync(baseQuery with { UserId = user2Id });
 
         // Act 3: Query as Anonymous
-        var resultAnon = await ExecuteFiltering(baseQuery);
+        var resultAnon = await service.FilterAsync(baseQuery);
 
         // Assert 1: User 1
         var p1User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
@@ -657,7 +520,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
 
         Assert.False(p2Anon.Liked);
         Assert.Equal(2, p2Anon.LikeCount);
-    }
+    });
 
     /// <summary>
     /// Verifies that filtering with FavoritesOnly returns only problems liked by the requesting user.
@@ -667,7 +530,7 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
     /// 3. When FavoritesOnly is true but no user is provided, no problems are returned (anonymous users have no favorites).
     /// </summary>
     [Fact]
-    public async Task FilterWithFavoritesOnlyReturnsOnlyLikedProblems()
+    public Task FilterWithFavoritesOnlyReturnsOnlyLikedProblems() => RunTestAsync(async service =>
     {
         // Arrange - Use seeded users
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
@@ -695,17 +558,17 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         );
 
         // Act 1: Query favorites for User 1 (liked 75-a-i-1 and 75-b-i-1)
-        var resultUser1Favorites = await ExecuteFiltering(favoritesQuery with { UserId = user1Id });
+        var resultUser1Favorites = await service.FilterAsync(favoritesQuery with { UserId = user1Id });
 
         // Act 2: Query favorites for User 2 (liked only 75-b-i-1)
-        var resultUser2Favorites = await ExecuteFiltering(favoritesQuery with { UserId = user2Id });
+        var resultUser2Favorites = await service.FilterAsync(favoritesQuery with { UserId = user2Id });
 
         // Act 3: Query favorites for Anonymous (should return nothing)
-        var resultAnonFavorites = await ExecuteFiltering(favoritesQuery);
+        var resultAnonFavorites = await service.FilterAsync(favoritesQuery);
 
         // Act 4: Query all problems for User 1 (FavoritesOnly = false)
         var allProblemsQuery = favoritesQuery with { Query = favoritesQuery.Query with { FavoritesOnly = false } };
-        var resultUser1All = await ExecuteFiltering(allProblemsQuery with { UserId = user1Id });
+        var resultUser1All = await service.FilterAsync(allProblemsQuery with { UserId = user1Id });
 
         // Assert 1: User 1 favorites - should get 2 problems (75-a-i-1 and 75-b-i-1)
         Assert.Equal(2, resultUser1Favorites.Problems.TotalCount);
@@ -724,15 +587,53 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
 
         // Assert 4: User 1 all problems - should get all 7 problems
         Assert.Equal(7, resultUser1All.Problems.TotalCount);
-    }
+    });
 
     /// <summary>
-    /// Seeds the test database with a comprehensive set of test data including seasons, 
-    /// competitions, categories, rounds, authors, tags, and problems. 
+    /// Verifies that filtering returns correct comment counts.
+    /// This test ensures that:
+    /// 1. CommentCount accurately reflects the total number of comments for a problem.
+    /// 2. Problems with no comments return 0.
     /// </summary>
-    /// <param name="context">The database context to seed with test data.</param>
-    /// <returns>A task representing the asynchronous seeding operation.</returns>
-    private static async Task SeedData(MathCompsDbContext context)
+    [Fact]
+    public Task FilterReturnsCorrectCommentCount() => RunTestAsync(async service =>
+    {
+        // Arrange
+        var baseQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null
+        );
+
+        // Act
+        var result = await service.FilterAsync(baseQuery);
+
+        // Assert
+        var p1 = result.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
+        var p2 = result.Problems.Items.First(problem => problem.Slug == "75-b-i-1");
+        var p3 = result.Problems.Items.First(problem => problem.Slug == "75-c-i-1");
+
+        // p1 has 1 active + 1 superseded => count should be 1
+        Assert.Equal(1, p1.CommentCount);
+        Assert.Equal(2, p2.CommentCount);
+        Assert.Equal(0, p3.CommentCount);
+    });
+
+    /// <inheritdoc />
+    protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
         // Seasons - Test data spans multiple years to test season filtering
         // We create two seasons to test filtering by different competition years
@@ -1178,6 +1079,47 @@ public class ProblemFilterServicePostgresTests : IAsyncLifetime
         context.ProblemLikes.Add(new ProblemLike { UserId = user1Id, ProblemId = p2.Id, CreatedAt = DateTimeOffset.UtcNow });
         context.ProblemLikes.Add(new ProblemLike { UserId = user2Id, ProblemId = p2.Id, CreatedAt = DateTimeOffset.UtcNow });
 
+        // Add comments for testing
+        // p1 (75-a-i-1): 1 active comment, 1 superseded comment
+        var comment1 = new Comment
+        {
+            Id = Guid.NewGuid(),
+            AuthorId = user1Id,
+            Content = "First comment",
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        var comment1Superseded = new Comment
+        {
+            Id = Guid.NewGuid(),
+            AuthorId = user1Id,
+            Content = "Old version",
+            Status = CommentStatus.Superseded,
+            CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-10)
+        };
+        context.Comments.AddRange(comment1, comment1Superseded);
+        context.ProblemComments.Add(new ProblemComment { ProblemId = p1.Id, CommentId = comment1.Id });
+        context.ProblemComments.Add(new ProblemComment { ProblemId = p1.Id, CommentId = comment1Superseded.Id });
+
+        // p2 (75-b-i-1): 2 comments
+        var comment2 = new Comment
+        {
+            Id = Guid.NewGuid(),
+            AuthorId = user1Id,
+            Content = "Second comment",
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        var comment3 = new Comment
+        {
+            Id = Guid.NewGuid(),
+            AuthorId = user2Id,
+            Content = "Third comment",
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        context.Comments.AddRange(comment2, comment3);
+        context.ProblemComments.Add(new ProblemComment { ProblemId = p2.Id, CommentId = comment2.Id });
+        context.ProblemComments.Add(new ProblemComment { ProblemId = p2.Id, CommentId = comment3.Id });
+
+        // Submit changes
         await context.SaveChangesAsync();
     }
 }

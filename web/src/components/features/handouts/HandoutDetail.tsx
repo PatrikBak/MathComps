@@ -1,8 +1,6 @@
-'use client'
+import { ChevronRight, MessageSquare, Users } from 'lucide-react'
 
-import { ChevronRight, Users } from 'lucide-react'
-import React from 'react'
-
+import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import type {
   Document,
   HandoutData,
@@ -18,6 +16,7 @@ import {
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { cn } from '@/components/shared/utils/css-utils'
+import { ANCHORS } from '@/constants/routes'
 
 import { CollapsibleCard } from './Cards'
 
@@ -29,6 +28,10 @@ type HandoutDetailProps = {
   handout: HandoutData
   /** The authors of the handout */
   authors: string[]
+  /** The slug for the handout */
+  slug: string
+  /** Permanent content ID (nanoid) */
+  contentId: string
   /** Metadata for each section in the handout */
   sectionMetadata: SectionMetadata[]
 }
@@ -155,12 +158,10 @@ function renderDocumentSections(
     return `${sectionSlug}-${typeSlug}-${environmentNumber}`
   }
   const renderedSections: React.ReactNode[] = []
-  const totalSections = documentContent.sections.length
 
   documentContent.sections.forEach((section, index) => {
     // Get pre-computed metadata for this section (guaranteed to exist at same index)
     const metadata = sectionMetadata[index]
-    const isLastSection = index === totalSections - 1
 
     renderedSections.push(
       <ArticleSection
@@ -169,7 +170,6 @@ function renderDocumentSections(
         number={metadata.label}
         title={section.title}
         titleContent={section.title}
-        isLastSection={isLastSection}
       >
         {section.text.content.map((contentBlock, contentBlockIndex) => {
           if (
@@ -420,21 +420,18 @@ function renderDocumentSections(
 }
 
 /**
- * Renders the detailed view of a handout, shifting expensive math rendering to the client.
- *
- * This component is designated as a Client Component ('use client') to delegate the
- * computationally intensive task of rendering TeX to the user's browser. This approach
- * ensures a fast initial page load from the server, with mathematical content being
- * rendered asynchronously on the client-side.
+ * Renders the detailed view of a handout.
  */
-export default function HandoutDetail({ handout, authors, sectionMetadata }: HandoutDetailProps) {
+export default function HandoutDetail({
+  handout,
+  authors,
+  sectionMetadata,
+  contentId,
+}: HandoutDetailProps) {
   const { document: documentContent, images } = handout
   // Create images lookup map
-  const imagesById = React.useMemo(() => {
-    const map: Record<string, HandoutImage> = {}
-    for (const image of images) map[image.contentId] = image
-    return map
-  }, [images])
+  const imagesById: Record<string, HandoutImage> = {}
+  for (const image of images) imagesById[image.contentId] = image
 
   return (
     <>
@@ -475,6 +472,16 @@ export default function HandoutDetail({ handout, authors, sectionMetadata }: Han
 
       {/* Math Sections */}
       {renderDocumentSections(documentContent, sectionMetadata, imagesById)}
+
+      {/* Comments Section */}
+      <ArticleSection
+        icon={<MessageSquare size={28} />}
+        title="Komentáre"
+        id={ANCHORS.COMMENTS}
+        className="mt-8 sm:mt-12 md:mt-16 min-h-[60vh]"
+      >
+        <CommentSection variant="inline" target={{ targetType: 'Handout', targetId: contentId }} />
+      </ArticleSection>
     </>
   )
 }

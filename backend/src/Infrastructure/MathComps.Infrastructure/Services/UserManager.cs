@@ -29,6 +29,7 @@ public class UserManager(
             ExternalId = userDto.ExternalId,
             DisplayName = userDto.DisplayName,
             Email = userDto.Email,
+            AvatarUrl = userDto.AvatarUrl,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -40,8 +41,11 @@ public class UserManager(
             .Exclude(user => new { user.CreatedAt, user.Id })
             .RunAsync(cancellationToken);
 
-        // Return the user ID (auto-generated client-side)
-        return user.Id;
+        // Return the user ID
+        return await dbContext.Users
+            .Where(user => user.ExternalId == userDto.ExternalId)
+            .Select(user => user.Id)
+            .FirstAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -83,7 +87,8 @@ public class UserManager(
         var userDto = new UserSyncDto(
             clerkUser.Id,
             clerkUser.EmailAddresses?.FirstOrDefault()?.EmailAddressValue ?? "",
-            displayName
+            displayName,
+            clerkUser.ImageUrl
         );
 
         // Sync user to DB
@@ -107,6 +112,7 @@ public class UserManager(
         // Anonymize personal information.
         user.DisplayName = "Deleted User";
         user.Email = null;
+        user.AvatarUrl = null;
 
         // Mark the user as soft-deleted
         user.IsDeleted = true;

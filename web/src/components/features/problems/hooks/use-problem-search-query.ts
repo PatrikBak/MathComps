@@ -158,24 +158,24 @@ export function useInitialFilterData(
       const result = await getInitialFilterData(api.apiCall)
 
       // Throw typed error if the server request failed so React Query can retry
-      if (!result.isSuccess) {
+      if (!result.success) {
         throw result.error
       }
 
       // Ensure we received valid filter options before proceeding
-      if (!result.value.updatedOptions) {
+      if (!result.data.updatedOptions) {
         throw new Error('No filter options received from server')
       }
 
       // Sync problems to global store
-      upsertProblems(result.value.problems.items)
+      upsertProblems(result.data.problems.items)
 
       // Destructure to separate 'items' from the rest of the data
-      const { items, ...problemMetadata } = result.value.problems
+      const { items, ...problemMetadata } = result.data.problems
 
       // Return structure with 'slugs' instead of 'items'
       return {
-        ...result.value,
+        ...result.data,
         problems: {
           ...problemMetadata,
           slugs: items.map((problem) => problem.slug),
@@ -235,15 +235,15 @@ export function useSingleProblem(
       const result = await getProblemBySlug(api.apiCall, problemSlug)
 
       // Throw typed error if the server request failed so React Query can handle it
-      if (!result.isSuccess) {
+      if (!result.success) {
         throw result.error
       }
 
       // Sync to global store
-      upsertProblem(result.value.problem)
+      upsertProblem(result.data.problem)
 
       // Deconstruct the result to remove the problem
-      const { problem: _, ...rest } = result.value
+      const { problem: _, ...rest } = result.data
 
       // Return just the rest of the result (problem will be in the global store)
       return rest
@@ -316,20 +316,20 @@ function useProblemSearchInfinite(
       )
 
       // Throw typed error if the server request failed so React Query can retry
-      if (!result.isSuccess) {
+      if (!result.success) {
         throw result.error
       }
 
       // Sync to global store
-      upsertProblems(result.value.problems.items)
+      upsertProblems(result.data.problems.items)
 
       // Separate the problems from the rest of the data so we can
       // just return the slugs (problems have been added to the global store)
-      const { items: problems, ...rest } = result.value.problems
+      const { items: problems, ...rest } = result.data.problems
 
       // On the result, replace the problems with slugs
       return {
-        ...result.value,
+        ...result.data,
         problems: {
           ...rest,
           slugs: problems.map((problem) => problem.slug),

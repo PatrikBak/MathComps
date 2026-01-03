@@ -47,7 +47,7 @@ export default function Layout({
           'mx-auto flex-1 w-full ',
           // Handle screen centering
           centerMidscreen && !tocItems
-            ? 'flex items-center justify-center'
+            ? 'flex items-center justify-center py-4 sm:py-6 md:py-8 lg:py-12'
             : 'px-4 sm:px-6 md:px-8 pb-6 sm:pb-10 md:pb-12 pt-4 sm:pt-6 md:pt-8 lg:pt-12',
           // Screen with toc should be wider
           wider || tocItems !== undefined ? 'max-w-[min(100%,80rem)]' : 'max-w-[min(100%,70rem)]'
