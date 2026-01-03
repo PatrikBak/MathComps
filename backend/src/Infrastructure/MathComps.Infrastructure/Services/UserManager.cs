@@ -37,7 +37,7 @@ public class UserManager(
         await dbContext.Users
             .Upsert(user)
             .On(user => user.ExternalId)
-            .Exclude(user => user.CreatedAt)
+            .Exclude(user => new { user.CreatedAt, user.Id })
             .RunAsync(cancellationToken);
 
         // Return the user ID (auto-generated client-side)
