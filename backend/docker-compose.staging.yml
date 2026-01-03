@@ -1,0 +1,26 @@
+name: mathcomps-staging
+
+# Staging-specific overrides
+
+services:
+  postgres:
+    ports:
+      # Use port 5433 to avoid conflict with prod (which uses 5432)
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mathcomps-staging.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mathcomps-staging.entrypoints=websecure"
+      - "traefik.http.routers.mathcomps-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mathcomps-staging.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik-public"
+
+volumes:
+  postgres_data_staging:
+    external: true
