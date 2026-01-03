@@ -21,19 +21,19 @@ import { UserMenuItem } from './UserMenuItem'
  */
 const UserMenuTrigger = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<'button'>>(
   ({ className, children, ...rest }, ref) => (
-    <button
-      ref={ref}
-      type="button"
-      className={cn(
-        'flex items-center gap-2 pl-4 pr-3 rounded-full min-w-[84px]',
-        'border border-transparent',
-        'hover:outline-1 outline-offset-6 transition-all duration-200 focus-visible:outline-1 focus-visible:outline-white/60',
-        className
-      )}
-      {...rest}
-    >
-      {children}
-    </button>
+    <div className="min-w-[84px]">
+      <button
+        ref={ref}
+        type="button"
+        className={cn(
+          'relative flex items-center gap-2 pl-4 pr-3 rounded-full min-w-[84px] border border-transparent transition-all duration-200 before:absolute before:inset-0 before:rounded-full before:ring-1 before:ring-transparent before:ring-offset-0 before:transition-all before:duration-200 before:pointer-events-none hover:before:ring-white/40 hover:before:-inset-x-1 hover:before:-inset-y-3 focus-visible:before:ring-white/60 focus-visible:before:-inset-x-1 focus-visible:before:-inset-y-3 focus-visible:outline-none',
+          className
+        )}
+        {...rest}
+      >
+        {children}
+      </button>
+    </div>
   )
 )
 UserMenuTrigger.displayName = 'UserMenuTrigger'
