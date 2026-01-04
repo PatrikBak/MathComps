@@ -61,6 +61,10 @@ try {
             Set-Location ../src/Infrastructure/MathComps.Infrastructure
             dotnet ef database update
         }
+        "sync-users" {
+            Set-Location ../src/Tools/MathComps.Cli.UserSync
+            dotnet run -c Release -- @remainingArgs
+        }
         
         default {
             Write-Host "Unknown command: $command"
@@ -75,6 +79,7 @@ try {
             Write-Host "  embeddings     - Generate embeddings"
             Write-Host "  translations   - Run translation assistant"
             Write-Host "  migrate        - Run database migrations"
+            Write-Host "  sync-users     - Sync all users from Clerk"
         }
     }
 }
