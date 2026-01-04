@@ -1,9 +1,7 @@
-import { useRouter } from 'next/navigation'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/use-current-url'
+import { useLoginRedirect } from '@/hooks/use-login-redirect'
 
 /**
  * Parameters for the options object passed to the show function
@@ -21,16 +19,13 @@ type UseLoginPromptToastParams = {
  * Shows a toast notification prompting the user to log in.
  */
 export function useLoginPromptToast() {
-  // Function to get the current URL, needed for the login prompt toast
-  const getCurrentUrl = useCurrentUrl()
+  // Use the login redirect hook
+  const { redirectToLogin } = useLoginRedirect()
 
   // Ref to track if the login link was clicked
   // We don't want to trigger the onDismiss callback
   // if the user is actually proceeding to login
   const isLoginClickedRef = useRef(false)
-
-  // Router to navigate to the login page
-  const router = useRouter()
 
   // Return the function to show the toast
   return useCallback(
@@ -46,11 +41,8 @@ export function useLoginPromptToast() {
             // Remember that the login link was clicked
             isLoginClickedRef.current = true
 
-            // Determine the return URL
-            const returnUrl = redirectUrl ?? getCurrentUrl()
-
             // Navigate to the login page
-            router.push(`${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(returnUrl)}`)
+            redirectToLogin(redirectUrl)
           },
         },
         // When the toast is dismissed...
@@ -63,6 +55,6 @@ export function useLoginPromptToast() {
         },
       })
     },
-    [getCurrentUrl, router]
+    [redirectToLogin]
   )
 }

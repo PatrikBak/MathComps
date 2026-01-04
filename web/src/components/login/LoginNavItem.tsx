@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/constants/routes'
-import { useCurrentUrl } from '@/hooks/use-current-url'
+import { useLoginRedirect } from '@/hooks/use-login-redirect'
 
 import { cn } from '../shared/utils/css-utils'
 
@@ -25,8 +25,8 @@ type LoginNavItemProps = {
  * Automatically captures the current page to redirect back after login.
  */
 export const LoginNavItem = ({ className, onClick }: LoginNavItemProps) => {
-  // Get the function which finds the current address bar url
-  const currentUrl = useCurrentUrl()
+  // Get the function which generates the login URL
+  const { getLoginUrl } = useLoginRedirect()
 
   // If already on login page
   const loginUrl =
@@ -34,7 +34,7 @@ export const LoginNavItem = ({ className, onClick }: LoginNavItemProps) => {
       ? // Do not add return URL
         ROUTES.LOGIN
       : // Otherwise add return URL determined at the time of navigation
-        `${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(currentUrl())}`
+        getLoginUrl()
 
   return (
     <NavLink href={loginUrl} className={cn(className, 'flex items-center gap-2')} onClick={onClick}>

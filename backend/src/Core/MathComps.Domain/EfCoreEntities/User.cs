@@ -31,6 +31,12 @@ public class User
     public required string DisplayName { get; set; }
 
     /// <summary>
+    /// URL to the user's avatar image (from Clerk).
+    /// </summary>
+    [MaxLength(500)]
+    public string? AvatarUrl { get; set; }
+
+    /// <summary>
     /// Whether the user has been soft deleted.
     /// </summary>
     public bool IsDeleted { get; set; }

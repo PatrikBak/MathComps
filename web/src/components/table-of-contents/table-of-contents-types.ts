@@ -1,3 +1,5 @@
+import type React from 'react'
+
 /**
  * Represents a single item in the table of contents.
  * Used by both desktop (TableOfContents) and mobile (MobileTableOfContents) components.
@@ -11,6 +13,8 @@ export type TableOfContentsItem = {
   title: string
   /** Heading level (1-6) used for visual indentation */
   level: number
+  /** Optional icon to render instead of the section number label */
+  icon?: React.ReactNode
 }
 
 /**

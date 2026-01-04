@@ -1,23 +1,32 @@
 import { useLocalStorage } from '@mantine/hooks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { useApi } from '@/hooks/use-api'
-import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
+import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { toggleProblemLike } from '../services/problem-service'
 import { problemQueryKeys } from './use-problem-search-query'
 
 /**
- * Result type for the toggle problem like mutation
+ * Parameters for the toggle problem like mutation
  */
-type ToggleProblemLikeResult =
-  | { type: 'success' }
-  | { type: 'authenticationLoading' }
-  | { type: 'unauthenticated' }
+type ToggleProblemLikeParams = {
+  /** The slug of the problem to like */
+  problemSlug: string
+  /** Whether the problem is liked or not */
+  isLiked: boolean
+}
+
+/**
+ * Context for the toggle problem like mutation - stores state for rollback
+ */
+type ToggleProblemLikeContext = {
+  /** The previous displayed problem slugs before optimistic update */
+  previousDisplayedProblems: string[]
+}
 
 /**
  * Hook to toggle likes on problems
@@ -33,9 +42,6 @@ export function useToggleProblemLike() {
   // Get current filters to check if we're viewing favorites only
   const currentFilters = useProblemStore((state) => state.currentFilters)
 
-  // API client for liking problems
-  const api = useApi()
-
   // Local storage for pending like slugs
   // (used to remember the like action for the case where a user previouly
   // not logged in liked the problem and then clicked on the login button in the toast,
@@ -45,66 +51,13 @@ export function useToggleProblemLike() {
     defaultValue: null,
   })
 
-  // Function to show login prompt toast
-  const showLoginPrompt = useLoginPromptToast()
-
-  /**
-   * Parameters for the toggle problem like mutation
-   */
-  type ToggleProblemLikeParams = {
-    /** The slug of the problem to like */
-    problemSlug: string
-    /** Whether the problem is liked or not */
-    isLiked: boolean
-  }
-
   // Prepare the mutation to toggle likes
-  const mutate = useMutation({
-    mutationFn: async ({
-      problemSlug,
-    }: ToggleProblemLikeParams): Promise<ToggleProblemLikeResult> => {
-      // Handle different authentication states
-      switch (api.state) {
-        // Still loading Clerk's data...have not seen this triggered yet mhm
-        case 'loading':
-          toast.loading('Overujem prihlásenie')
-          return { type: 'authenticationLoading' }
-
-        // User is not signed in
-        case 'unauthenticated':
-          // Ensure we remember they liked the problem so we can apply it after login
-          setPendingLikeSlug(problemSlug)
-
-          // Show a toast notification to prompt the user to log in
-          showLoginPrompt({
-            reason: 'lajkovanie úloh',
-            // Clear the pending like slug when the toast is dismissed
-            // (so that a user is not surprised to have liked a problem after a while)
-            onDismiss: () => {
-              setPendingLikeSlug(null)
-            },
-          })
-
-          // Return the reason for the unauthenticated state
-          return { type: 'unauthenticated' }
-
-        // User is signed in
-        case 'ready':
-          // Call the backend API to toggle the like
-          const result = await toggleProblemLike(api.apiCall, problemSlug)
-
-          // If the API call fails, throw an error so that onError can handle it
-          if (!result.isSuccess) {
-            throw result.error
-          }
-
-          // Otherwise the API call was successful
-          return { type: 'success' }
-      }
-    },
+  const mutation = useOptimisticMutation<void, ToggleProblemLikeParams, ToggleProblemLikeContext>({
+    // Call the backend API to toggle the like
+    apiFn: (apiCall, { problemSlug }) => toggleProblemLike(apiCall, problemSlug),
 
     // The function called before the server call happens
-    onMutate: async ({ problemSlug: updatedProblemSlug }) => {
+    onMutate: ({ problemSlug: updatedProblemSlug }) => {
       // Save the previous state for rollback
       const previousDisplayedProblems = useProblemStore.getState().displayedProblems
 
@@ -115,63 +68,63 @@ export function useToggleProblemLike() {
       return { previousDisplayedProblems }
     },
 
-    // The function called after a non-errorish server call
-    onSuccess: (result, { problemSlug, isLiked }, { previousDisplayedProblems }) => {
-      // Handle different authentication states
-      switch (result.type) {
-        // Unhappy paths
-        case 'authenticationLoading':
-        case 'unauthenticated':
-          // Rollback the like state in the store
-          toggleProblemLikeInStore(problemSlug)
+    // The function called after a successful server call
+    onSuccess: (_, { problemSlug, isLiked }) => {
+      // Invalidate the favorites query to refetch when filtering by liked problems
+      queryClient.invalidateQueries({
+        queryKey: problemQueryKeys.favorites,
+      })
 
-          // Restore the original displayed problems list
-          useProblemStore.getState().setDisplayedProblems(previousDisplayedProblems)
-          break
-
-        // Happy path
-        case 'success':
-          // Invalidate the favorites query to refetch when filtering by liked problems
-          queryClient.invalidateQueries({
-            queryKey: problemQueryKeys.favorites,
-          })
-
-          // Show undo toast only when:
-          // 1. We unliked a problem (isLiked was true before the toggle)
-          // 2. AND we're currently viewing favorites only
-          // This makes sense because the problem just disappeared from the view
-          // In other contexts, the problem stays visible so undo is less critical
-          if (isLiked && currentFilters?.favoritesOnly) {
-            toast.info('Úloha bola odstránená z obľúbených', {
-              action: {
-                label: 'Vrátiť',
-                onClick: () => {
-                  // Re-call the mutation to undo the unlike
-                  // isLiked: false because the problem is currently unliked (before this re-like toggle)
-                  // This reuses all the logic: optimistic updates, error handling, etc.
-                  mutate({ problemSlug, isLiked: false })
-                },
-              },
-            })
-          }
-          break
+      // Show undo toast only when:
+      // 1. We unliked a problem (isLiked was true before the toggle)
+      // 2. AND we're currently viewing favorites only
+      // This makes sense because the problem just disappeared from the view
+      // In other contexts, the problem stays visible so undo is less critical
+      if (isLiked && currentFilters?.favoritesOnly) {
+        toast.info('Úloha bola odstránená z obľúbených', {
+          action: {
+            label: 'Vrátiť',
+            onClick: () => {
+              // Re-call the mutation to undo the unlike
+              // isLiked: false because the problem is currently unliked (before this re-like toggle)
+              // This reuses all the logic: optimistic updates, error handling, etc.
+              mutation.mutate({ problemSlug, isLiked: false })
+            },
+          },
+        })
       }
     },
 
-    // The function called after the server throws an error
+    // The function called after the mutation fails (or auth fails)
     onError: (_, { problemSlug }, context) => {
-      // Rollback the like state in the store
-      toggleProblemLikeInStore(problemSlug)
+      // Rollback the like state in the store only if we optimistically updated it
+      if (context) {
+        toggleProblemLikeInStore(problemSlug)
+      }
 
       // Restore the original displayed problems list
       if (context?.previousDisplayedProblems) {
         useProblemStore.getState().setDisplayedProblems(context.previousDisplayedProblems)
       }
-
-      // Show error toast for actual API errors
-      toast.error('Nepodarilo sa zmeniť stav lajku')
     },
-  }).mutate
+
+    // Auth configuration
+    authReason: 'lajkovanie úloh',
+
+    // Ensure we remember they liked the problem so we can apply it after login
+    onBeforeLoginPrompt: ({ problemSlug }) => {
+      setPendingLikeSlug(problemSlug)
+    },
+
+    // Clear the pending like slug when the toast is dismissed
+    // (so that a user is not surprised to have liked a problem after a while)
+    onLoginPromptDismiss: () => {
+      setPendingLikeSlug(null)
+    },
+
+    // Error message for actual API errors
+    errorMessage: 'Nepodarilo sa zmeniť stav lajku',
+  })
 
   // Return a user-friendly function to toggle likes
   return useCallback(
@@ -182,9 +135,9 @@ export function useToggleProblemLike() {
       // If the problem is found, i.e. it is in the store, call the mutation
       // which will handle authentication checks and API calls
       if (problem) {
-        mutate({ problemSlug, isLiked: problem.liked })
+        mutation.mutate({ problemSlug, isLiked: problem.liked })
       }
     },
-    [mutate]
+    [mutation]
   )
 }

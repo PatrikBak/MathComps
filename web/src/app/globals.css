@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@plugin "@tailwindcss/forms";
 
 :root {
   scroll-behavior: smooth;
+
+  /* The fixed width of the problems sidebar */
   --problems-sidebar-width: 335px;
 
   /* Scroll offset for anchor links - must match header height + breathing room */
@@ -678,4 +679,26 @@ input[type='checkbox']:focus:not(:focus-visible) {
   animation: error-pulse 0.6s ease-out;
   outline: 1px solid transparent;
   outline-offset: 2px;
+}
+
+/* Emoji Picker Customization (emoji-picker-react) */
+.EmojiPickerReact.epr-dark-theme {
+  /* Main Background - Matches editor bg */
+  --epr-bg-color: #1e293b !important; /* slate-800 */
+
+  /* Category labels background (sticky headers) */
+  --epr-category-label-bg-color: #1e293b !important; /* slate-800 */
+
+  /* Text color */
+  --epr-text-color: #e2e8f0 !important; /* slate-200 */
+
+  /* Search input background */
+  --epr-search-input-bg-color: #0f172a !important; /* slate-900 */
+  --epr-search-input-text-color: #e2e8f0 !important; /* slate-200 */
+
+  /* Hover state for emojis */
+  --epr-hover-bg-color: #334155 !important; /* slate-700 */
+
+  /* Border color */
+  --epr-picker-border-color: #475569 !important; /* slate-600 */
 }

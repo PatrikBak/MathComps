@@ -1,9 +1,22 @@
-import { ChevronDown, ExternalLink, Eye, EyeOff, Heart, Link, User } from 'lucide-react'
+import {
+  ChevronDown,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Heart,
+  Link,
+  MessageSquare,
+  User,
+} from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { CommentModal } from '@/components/features/comments/components/CommentModal'
+import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
 import type { RawContentBlock } from '@/components/features/handouts/handout-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
+import { AppLink } from '@/components/shared/components/AppLink'
+import { IconBadge } from '@/components/shared/components/IconBadge'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 import { useProblem } from '@/stores/problem-store'
@@ -106,6 +119,9 @@ export function ProblemCard({
   // (even when they are globally hidden, we can show them per card basis)
   const [areTechniquesLocallyVisible, setAreTechniquesLocallyVisible] = useState(false)
 
+  // Whether the comments modal is open
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false)
+
   // Function for copying permalinks on problems
   const { copyPermalink } = useProblemPermalink()
 
@@ -136,6 +152,23 @@ export function ProblemCard({
       setAreTechniquesLocallyVisible(false)
     }
   }, [areTechniquesGloballyVisible])
+
+  // Hook for restoring comment modal state
+  const { pendingTarget, clearPendingTarget } = usePendingCommentTarget()
+
+  // Check for pending comment target on mount (after login redirect)
+  useEffect(() => {
+    // If this problem has a pending comment target
+    if (
+      problem &&
+      pendingTarget &&
+      pendingTarget.targetType === 'Problem' &&
+      pendingTarget.targetId === problem.slug
+    ) {
+      // Open the comments modal
+      setIsCommentsOpen(true)
+    }
+  }, [problem, pendingTarget])
 
   // Calculate technique tag visibility based on global settings and active filters
   const { hiddenTechniqueCount, hasVisibleTechniques } = useMemo(() => {
@@ -192,47 +225,63 @@ export function ProblemCard({
           <h2 className="text-base font-medium text-gray-100">{problem.slug.toUpperCase()}</h2>
         </div>
         {/* Action buttons for solution link, permalink sharing, and likes */}
-        <div className="flex items-center gap-2 flex-wrap justify-end">
-          {/* Like button */}
-          <button
-            onClick={() => toggleLike(problem.slug)}
-            className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm transition-all duration-200 rounded-md hover:bg-slate-700/50',
-              problem.liked
-                ? 'text-red-400 hover:text-red-500'
-                : 'text-gray-400 hover:text-gray-200'
-            )}
-            title={problem.liked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
-          >
-            <Heart
-              size={16}
-              className={cn('transition-all duration-200', problem.liked && 'fill-current')}
-            />
-            {/* Like count with optimistic update */}
-            <span className="font-medium tabular-nums">{problem.likeCount}</span>
-          </button>
-          {/* External solution link if available */}
-          {problem.solutionLink && (
-            <a
-              href={problem.solutionLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200 rounded-md hover:bg-slate-700/50"
-              title="Odkaz na riešenie (otvorí sa v novom okne)"
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+          {/* Likes and comments */}
+          <div className="flex items-center gap-1 sm:gap-1.5 mr-2 sm:mr-3">
+            {/* Like button */}
+            <button
+              onClick={() => toggleLike(problem.slug)}
+              className="p-2 transition-all duration-200 rounded-md hover:bg-slate-700/50 group"
+              title={problem.liked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
             >
-              <ExternalLink size={16} />
-              <span className="hidden sm:inline">Riešenie</span>
-            </a>
-          )}
-          {/* Permalink sharing button */}
-          <button
-            onClick={handlePermalinkCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200 rounded-md hover:bg-slate-700/50"
-            title="Zdieľať"
-          >
-            <Link size={16} />
-            <span className="hidden sm:inline">Zdieľať</span>
-          </button>
+              <IconBadge count={problem.likeCount} color="red" isHighlighted={problem.liked}>
+                <Heart
+                  size={18}
+                  className={cn('transition-all duration-200', problem.liked && 'fill-current')}
+                />
+              </IconBadge>
+            </button>
+
+            {/* Comments button */}
+            <button
+              onClick={() => setIsCommentsOpen(true)}
+              className="p-2 transition-all duration-200 rounded-md hover:bg-slate-700/50 group"
+              title="Komentáre"
+            >
+              <IconBadge
+                count={problem.commentCount}
+                color="indigo"
+                isHighlighted={problem.commentCount > 0}
+              >
+                <MessageSquare size={18} />
+              </IconBadge>
+            </button>
+          </div>
+
+          {/* Solution and share buttons */}
+          <div className="flex items-center gap-0.5 sm:gap-1">
+            {/* External solution link if available */}
+            {problem.solutionLink && (
+              <AppLink
+                href={problem.solutionLink}
+                newTab
+                className="flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200 rounded-md hover:bg-slate-700/50"
+                title="Odkaz na riešenie (otvorí sa v novom okne)"
+              >
+                <ExternalLink size={18} />
+                <span className="hidden sm:inline">Riešenie</span>
+              </AppLink>
+            )}
+            {/* Permalink sharing button */}
+            <button
+              onClick={handlePermalinkCopy}
+              className="flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200 rounded-md hover:bg-slate-700/50"
+              title="Zdieľať"
+            >
+              <Link size={18} />
+              <span className="hidden sm:inline">Zdieľať</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -376,6 +425,23 @@ export function ProblemCard({
 
       {/* Render expanded content when similar problems section is opened */}
       <SimilarProblemView view={expandedView} problem={problem} />
+
+      {/* Comments Modal */}
+      <CommentModal
+        isOpen={isCommentsOpen}
+        onClose={() => {
+          // Close the modal
+          setIsCommentsOpen(false)
+
+          // No more pending target in case we wanna log in from this comment section
+          clearPendingTarget()
+        }}
+        title={problem.slug.toUpperCase()}
+        target={{
+          targetType: 'Problem',
+          targetId: problem.slug,
+        }}
+      />
     </div>
   )
 }

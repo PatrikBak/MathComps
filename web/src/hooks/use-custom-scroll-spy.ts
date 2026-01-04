@@ -43,8 +43,8 @@ export function useCustomScrollSpy({
       // Guard against incorrect IDs
       if (!element) continue
 
-      // Check if the element is past the offset (+ 1px tolerance for sub-pixel rounding)
-      if (element.getBoundingClientRect().top <= offset + 1) {
+      // Check if the element is past the offset (+ 5px tolerance for sub-pixel rounding)
+      if (element.getBoundingClientRect().top <= offset + 5) {
         lastPassedIndex = itemIndex
       }
     }

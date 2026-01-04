@@ -1,3 +1,4 @@
+import { MessageSquare } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -9,7 +10,7 @@ import type {
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
 import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import Layout from '@/components/layout/Layout'
-import { ROUTES } from '@/constants/routes'
+import { ANCHORS, ROUTES } from '@/constants/routes'
 import handoutIndex from '@/content/handouts/handouts.json'
 import { generatePageMetadata } from '@/lib/metadata'
 
@@ -128,16 +129,29 @@ export default async function RenderPage({ params }: { params: Promise<{ slug: s
     // Ensure data exists (should always be true after loadDocumentBySlug)
     if (!entry.data) throw new Error('Invalid handout data')
 
+    // Ensure handout has a valid id
+    if (!entry.id) throw new Error('Handout has no id')
+
     // Compute section metadata once for both TOC and rendering
     const sectionMetadata = computeSectionMetadata(handout.document)
 
-    // Extract TOC items (subset of metadata)
-    const tableOfContentsItems = sectionMetadata.map(({ id, label, title, level }) => ({
-      id,
-      label,
-      title,
-      level,
-    }))
+    // Extract TOC items (subset of metadata) and add comments link
+    const tableOfContentsItems = [
+      ...sectionMetadata.map(({ id, label, title, level }) => ({
+        id,
+        label,
+        title,
+        level,
+      })),
+      // Add comments section link at the bottom
+      {
+        id: ANCHORS.COMMENTS,
+        label: '',
+        title: 'Komentáre',
+        level: 1,
+        icon: <MessageSquare size={12} />,
+      },
+    ]
 
     // Render the handout detail component with already loaded document, images, and computed metadata
     return (
@@ -146,6 +160,8 @@ export default async function RenderPage({ params }: { params: Promise<{ slug: s
           handout={handout}
           authors={entry.data.authors}
           sectionMetadata={sectionMetadata}
+          slug={slug}
+          contentId={entry.id}
         />
       </Layout>
     )

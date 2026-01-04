@@ -14,3 +14,10 @@ export const ROUTES = {
   PRIVACY: '/ochrana-sukromia',
   NEWS: '/novinky',
 } as const
+
+/**
+ * Common anchor fragments used for navigation within pages.
+ */
+export const ANCHORS = {
+  COMMENTS: 'komentare',
+} as const

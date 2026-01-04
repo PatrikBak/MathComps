@@ -54,8 +54,8 @@ function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: T
                 marginLeft: `${indentPx}px`,
               }}
             >
-              <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right">
-                {item.label}
+              <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right flex items-center justify-end">
+                {item.icon ?? item.label}
               </span>
               <span className="leading-snug">{item.title}</span>
             </a>

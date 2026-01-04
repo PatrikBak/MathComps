@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
                 options => options.MapEnum<TagType>("tag_type")
                                   .MapEnum<DocumentType>("document_type")
                                   .MapEnum<Language>("language")
+                                  .MapEnum<CommentStatus>("comment_status")
             )
         );
 

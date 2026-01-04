@@ -219,7 +219,10 @@ public class ProblemFilterService(
                 options.UserId != null && problem.Likes.Any(like => like.UserId == options.UserId),
 
                 // LikeCount
-                problem.Likes.Count
+                problem.Likes.Count,
+
+                // CommentCount
+                problem.ProblemComments.Count(problemComment => problemComment.Comment.Status == CommentStatus.Active)
             ));
 
         // Retrieve the current page of DTOs

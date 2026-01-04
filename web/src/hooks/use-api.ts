@@ -1,69 +1,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { useCallback } from 'react'
 
-/**
- * Represents a successful API call.
- *
- * @template T - The type of the data returned by the API.
- */
-type ApiSuccess<T> = {
-  /** Indicates the operation was successful */
-  success: true
-  /** The data returned by the API */
-  data: T
-}
-
-/**
- * Represents a failed API call.
- */
-type ApiFailure = {
-  /** Indicates the operation failed */
-  success: false
-  /** The error details */
-  error: ApiError
-}
-
-/**
- * Result type for API calls - discriminated union representing success or error states
- */
-type ApiResult<T> = ApiSuccess<T> | ApiFailure
-
-/**
- * Represents an error where the user is not authenticated or the token is invalid.
- */
-type UnauthenticatedError = {
-  /** Discriminator for unauthenticated errors */
-  type: 'unauthenticated'
-  /** Error message explaining why authentication failed */
-  message: string
-}
-
-/**
- * Represents a network or server error (non-2xx response).
- */
-type NetworkError = {
-  /** Discriminator for network errors */
-  type: 'network'
-  /** Error message describing the network issue */
-  message: string
-  /** The HTTP status code returned by the server, if available */
-  statusCode?: number
-}
-
-/**
- * Represents an unexpected error (e.g., parsing failed, network disconnected).
- */
-type UnknownError = {
-  /** Discriminator for unknown errors */
-  type: 'unknown'
-  /** Error message describing the unexpected error */
-  message: string
-}
-
-/**
- * Discriminated union of all possible API errors.
- */
-type ApiError = UnauthenticatedError | NetworkError | UnknownError
+import type { ApiResult } from '@/types/api'
 
 /**
  * Type definition for the apiCall function.
@@ -91,6 +29,9 @@ type ApiState =
       apiCall: ApiCaller
     }
 
+/**
+ * Configuration options for the API client.
+ */
 type ApiOptions = {
   /**
    * Whether to require authentication.

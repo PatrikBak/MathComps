@@ -84,4 +84,9 @@ public class Problem
     /// Likes on this problem by users.
     /// </summary>
     public ICollection<ProblemLike> Likes { get; } = [];
+
+    /// <summary>
+    /// Comments on this problem via the join entity.
+    /// </summary>
+    public ICollection<ProblemComment> ProblemComments { get; } = [];
 }

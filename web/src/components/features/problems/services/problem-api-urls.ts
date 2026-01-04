@@ -1,44 +1,10 @@
-import { getRequiredEnv } from '@/components/shared/utils/env-utils'
+import { buildApiUrl, getApiBaseUrl } from '@/components/shared/utils/url-utils'
 import { ROUTES } from '@/constants/routes'
 
 /**
  * The suffix for the URL endpoint for images for different types of content.
  */
 export type ImageType = 'problems' | 'handouts'
-
-/**
- * Retrieves the base API URL from environment variables.
- *
- * @returns The base API URL with no trailing slash
- */
-function getApiBaseUrl(): string {
-  return getRequiredEnv('NEXT_PUBLIC_API_URL')
-}
-
-/**
- * Retrieves the public site URL from environment variables.
- *
- * @returns The site URL with no trailing slash
- */
-export function getSiteUrl(): string {
-  return getRequiredEnv('NEXT_PUBLIC_SITE_URL')
-}
-
-/**
- * Builds API URL for the given endpoint path.
- *
- * Development: Uses /api prefix which Next.js strips via rewrites
- * Production: Uses direct backend URL without /api prefix
- *
- * @param path - The endpoint path
- * @returns The full API URL for the endpoint
- */
-function buildApiUrl(path: string): string {
-  const baseUrl = getApiBaseUrl()
-  // Production: use backend URL directly (no /api prefix on backend)
-  // Development: use /api prefix which Next.js rewrites to strip it
-  return baseUrl ? `${baseUrl}${path}` : `/api${path}`
-}
 
 /**
  * Builds a public URL to a problem image by its content id.
@@ -48,8 +14,7 @@ function buildApiUrl(path: string): string {
  * @returns The API URL path to the problem image
  */
 export function getProblemImageUrl(contentId: string, type: ImageType): string {
-  const baseUrl = getApiBaseUrl()
-  return `${baseUrl}/images/${type}/${contentId}`
+  return `${getApiBaseUrl()}/images/${type}/${contentId}`
 }
 
 /**
@@ -59,8 +24,7 @@ export function getProblemImageUrl(contentId: string, type: ImageType): string {
  * @returns The API URL path to the document asset
  */
 export function getDocumentUrl(documentId: string): string {
-  const baseUrl = getApiBaseUrl()
-  return `${baseUrl}/documents/${documentId}`
+  return `${getApiBaseUrl()}/documents/${documentId}`
 }
 
 /**

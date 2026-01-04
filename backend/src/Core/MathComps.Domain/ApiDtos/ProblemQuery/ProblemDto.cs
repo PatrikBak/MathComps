@@ -16,6 +16,7 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// <param name="SolutionLink">Optional external link identifier to the solution (short code/URL key).</param>
 /// <param name="Liked">Whether the current user has liked this problem.</param>
 /// <param name="LikeCount">Total number of likes for this problem.</param>
+/// <param name="CommentCount">Total number of comments for this problem.</param>
 public record ProblemDto(
     string Slug,
     string? StatementParsed,
@@ -26,5 +27,6 @@ public record ProblemDto(
     ImmutableList<ProblemImageDto> Images,
     string? SolutionLink,
     bool Liked,
-    int LikeCount
+    int LikeCount,
+    int CommentCount
 );

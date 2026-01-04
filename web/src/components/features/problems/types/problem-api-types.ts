@@ -59,6 +59,7 @@ export type Problem = {
   images: ProblemImage[]
   liked: boolean
   likeCount: number
+  commentCount: number
 }
 
 export type FilterParameters = {

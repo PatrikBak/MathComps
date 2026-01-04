@@ -1,5 +1,3 @@
-'use client'
-
 import { renderMathContentToHtml } from '@/components/math/utils/math-render'
 
 type MathRendererClientProps = {

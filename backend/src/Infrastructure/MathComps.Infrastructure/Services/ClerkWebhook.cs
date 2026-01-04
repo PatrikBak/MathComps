@@ -73,8 +73,13 @@ public class ClerkWebhook(
                         // And it should exist - either from social or email login
                         ?? throw new ArgumentException("A user without a first name should not exist.");
 
+                    // Extract avatar image URL
+                    var imageUrl = data.TryGetProperty("image_url", out var imageUrlProperty)
+                        ? imageUrlProperty.GetString()
+                        : null;
+
                     // Create DTO for synchronization.
-                    var userDto = new UserSyncDto(clerkId, email, displayName);
+                    var userDto = new UserSyncDto(clerkId, email, displayName, imageUrl);
 
                     // Delegate synchronization to the user manager.
                     await userManager.SyncUserAsync(userDto, cancellationToken);

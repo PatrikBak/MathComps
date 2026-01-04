@@ -7,11 +7,13 @@ import AnimatedSection from './AnimatedSection'
 import { CopyLinkButton } from './CopyLinkButton'
 
 /**
- * Props for the ArticleSection component.
+ * Props for the {@link ArticleSection} component.
  */
-interface ArticleSectionProps {
-  /** Section number (e.g., "1", "1.2", "2.3.1") */
-  number: string
+type ArticleSectionProps = {
+  /** Section number (e.g., "1", "1.2", "2.3.1") - omit if using icon */
+  number?: string
+  /** Optional icon to display instead of the section number */
+  icon?: React.ReactNode
   /** Section title - used to generate the slug/ID automatically */
   title: string
   /** Optional pre-computed ID for the section. If not provided, will be generated from title */
@@ -22,8 +24,6 @@ interface ArticleSectionProps {
   children: React.ReactNode
   /** Optional CSS class for the section container */
   className?: string
-  /** Whether this is the last section (adds min-height for TOC scrolling) */
-  isLastSection?: boolean
 }
 
 /**
@@ -32,31 +32,28 @@ interface ArticleSectionProps {
  */
 export function ArticleSection({
   number,
+  icon,
   title,
   id,
   titleContent,
   children,
   className,
-  isLastSection = false,
 }: ArticleSectionProps) {
   // Use provided ID or generate slug from title
   const slug = id || slugify(title)
 
   return (
     <AnimatedSection>
-      <section
-        className={cn(
-          'max-w-none',
-          // Add min-height to last section to ensure TOC links are clickable
-          isLastSection && 'lg:min-h-[55vh]',
-          className
-        )}
-      >
+      <section className={cn('max-w-none', className)}>
         <h2
           id={slug}
-          className="group text-3xl font-bold text-white mt-16 mb-6 border-b border-gray-700 pb-3 flex items-start gap-1"
+          className="group text-3xl font-bold text-white mt-16 mb-6 border-b border-gray-700 pb-3 flex items-center gap-2"
         >
-          <span className="mr-1 text-gray-300">{number}</span>
+          {icon ? (
+            <span className="text-gray-400">{icon}</span>
+          ) : number ? (
+            <span className="mr-1 text-gray-300">{number}</span>
+          ) : null}
           <span>{titleContent || title}</span>
           <CopyLinkButton sectionSlug={slug} iconSize={20} />
         </h2>

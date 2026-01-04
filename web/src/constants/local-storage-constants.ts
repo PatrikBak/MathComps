@@ -5,6 +5,12 @@
 export const PENDING_PROBLEM_LIKE_STORAGE_KEY = 'pending-problem-like'
 
 /**
+ * Key used to store the id of a comment that the user attempted to like while unauthenticated.
+ * Used to restore the action after login.
+ */
+export const PENDING_COMMENT_LIKE_STORAGE_KEY = 'pending-comment-like'
+
+/**
  * Key used to store the user's preference for showing technique tags in the problems library.
  * Currently uses localStorage, i.e. it is not user-specific for now.
  */
@@ -15,3 +21,9 @@ export const SHOW_TECHNIQUE_TAGS_STORAGE_KEY = 'showTechniqueTags'
  * Note: This is used with sessionStorage.
  */
 export const AUTH_RETURN_URL_STORAGE_KEY = 'auth_return_url'
+
+/**
+ * Key used to store the comment target (news/problem) that the user was viewing
+ * when they were prompted to log in. Used to re-open the comment modal.
+ */
+export const PENDING_COMMENT_TARGET_STORAGE_KEY = 'pending-comment-target'

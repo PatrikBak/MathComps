@@ -1,9 +1,9 @@
 'use client'
 
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react'
-import { X } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
+
+import { Modal } from '@/components/shared/components/Modal'
 
 import ContactForm from './ContactForm'
 import { type ContactFormData, type ReasonOption } from './contactFormSchema'
@@ -50,54 +50,12 @@ export default function ContactModal({ isOpen, onClose, defaultReason }: Contact
   }
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <TransitionChild
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-800/95 backdrop-blur-sm border border-slate-700/50 p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <DialogTitle as="h3" className="text-xl font-bold text-white">
-                    Napíšte nám
-                  </DialogTitle>
-                  <button
-                    onClick={onClose}
-                    className="text-slate-400 hover:text-white transition-colors duration-200"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <ContactForm
-                  defaultReason={defaultReason}
-                  onSubmit={handleFormSubmit}
-                  isSubmitting={isSubmitting}
-                />
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
+    <Modal isOpen={isOpen} onClose={onClose} title="Napíšte nám" showCloseButton>
+      <ContactForm
+        defaultReason={defaultReason}
+        onSubmit={handleFormSubmit}
+        isSubmitting={isSubmitting}
+      />
+    </Modal>
   )
 }

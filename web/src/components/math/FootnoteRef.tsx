@@ -1,15 +1,12 @@
 'use client'
 
-import React from 'react'
+import * as React from 'react'
 
 import { Tooltip } from '../shared/components/Tooltip'
 
 /**
-/**
  * Renders a footnote reference icon that displays footnote content in a floating popover
- * by reusing the generic Tooltip component.
- *
- * @param {React.ReactNode} props.children - The content to display inside the footnote popover.
+ * by reusing the generic {@link Tooltip} component.
  */
 export default function FootnoteRef({ children }: { children: React.ReactNode }) {
   return (

@@ -2,15 +2,18 @@ import { ImageOff } from 'lucide-react'
 import React from 'react'
 
 import type { ListStyleType, RawContentBlock } from '@/components/features/handouts/handout-types'
-import { getDocumentUrl, getProblemImageUrl } from '@/components/features/problems/utils/url-utils'
+import {
+  getDocumentUrl,
+  getProblemImageUrl,
+} from '@/components/features/problems/services/problem-api-urls'
 import FootnoteRef from '@/components/math/FootnoteRef'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { cn } from '@/components/shared/utils/css-utils'
 
+import type { ImageType } from '../features/problems/services/problem-api-urls'
 import type { ProblemImage } from '../features/problems/types/problem-api-types'
-import type { ImageType } from '../features/problems/utils/url-utils'
 import { MathRendererClient } from './MathRendererClient'
 
 type ContentRendererProps = {

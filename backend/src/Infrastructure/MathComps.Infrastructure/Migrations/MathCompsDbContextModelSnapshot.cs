@@ -22,6 +22,7 @@ namespace MathComps.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "comment_status", new[] { "active", "deleted", "superseded" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "document_type", new[] { "solution", "statement" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "language", new[] { "cz", "en", "sk" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "tag_type", new[] { "area", "goal", "technique", "type" });
@@ -97,6 +98,75 @@ namespace MathComps.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("ParentCommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_comment_id");
+
+                    b.Property<Guid?>("PreviousVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("previous_version_id");
+
+                    b.Property<CommentStatus>("Status")
+                        .HasColumnType("comment_status")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_comments");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_comment_author_id");
+
+                    b.HasIndex("ParentCommentId")
+                        .HasDatabaseName("ix_comment_parent_id");
+
+                    b.HasIndex("PreviousVersionId")
+                        .HasDatabaseName("ix_comments_previous_version_id");
+
+                    b.ToTable("comments", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CommentLike", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("UserId", "CommentId")
+                        .HasName("pk_comment_likes");
+
+                    b.HasIndex("CommentId")
+                        .HasDatabaseName("ix_comment_like_comment_id");
+
+                    b.ToTable("comment_likes", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Competition", b =>
                 {
                     b.Property<Guid>("Id")
@@ -140,6 +210,90 @@ namespace MathComps.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("ck_competition_sort_order_positive", "\"sort_order\" > 0");
                         });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Handout", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("content_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_handouts");
+
+                    b.HasIndex("ContentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_handout_content_id");
+
+                    b.ToTable("handouts", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutComment", b =>
+                {
+                    b.Property<Guid>("HandoutId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handout_id");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
+
+                    b.HasKey("HandoutId", "CommentId")
+                        .HasName("pk_handout_comments");
+
+                    b.HasIndex("CommentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_handout_comment_comment_id");
+
+                    b.ToTable("handout_comments", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("content_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_news_articles");
+
+                    b.HasIndex("ContentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_news_article_content_id");
+
+                    b.ToTable("news_articles", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticleComment", b =>
+                {
+                    b.Property<Guid>("NewsArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("news_article_id");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
+
+                    b.HasKey("NewsArticleId", "CommentId")
+                        .HasName("pk_news_article_comments");
+
+                    b.HasIndex("CommentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_news_article_comment_comment_id");
+
+                    b.ToTable("news_article_comments", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
@@ -215,6 +369,26 @@ namespace MathComps.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("ck_problem_author_order_positive", "\"ordinal\" > 0");
                         });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemComment", b =>
+                {
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
+
+                    b.HasKey("ProblemId", "CommentId")
+                        .HasName("pk_problem_comments");
+
+                    b.HasIndex("CommentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_problem_comment_comment_id");
+
+                    b.ToTable("problem_comments", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemEmbedding", b =>
@@ -639,6 +813,11 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("avatar_url");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -678,6 +857,97 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_users_author_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_comments_comments_parent_comment_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "PreviousVersion")
+                        .WithMany()
+                        .HasForeignKey("PreviousVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_comments_comments_previous_version_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("ParentComment");
+
+                    b.Navigation("PreviousVersion");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CommentLike", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
+                        .WithMany("Likes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_likes_comments_comment_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_likes_users_user_id");
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutComment", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_handout_comments_comments_comment_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Handout", "Handout")
+                        .WithMany("Comments")
+                        .HasForeignKey("HandoutId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_handout_comments_handouts_handout_id");
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Handout");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticleComment", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_news_article_comments_comments_comment_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.NewsArticle", "NewsArticle")
+                        .WithMany("Comments")
+                        .HasForeignKey("NewsArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_news_article_comments_news_articles_news_article_id");
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("NewsArticle");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Category", null)
@@ -712,6 +982,27 @@ namespace MathComps.Infrastructure.Migrations
                         .HasConstraintName("fk_problem_authors_problems_problem_id");
 
                     b.Navigation("Author");
+
+                    b.Navigation("Problem");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemComment", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_comments_comments_comment_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
+                        .WithMany("ProblemComments")
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_comments_problems_problem_id");
+
+                    b.Navigation("Comment");
 
                     b.Navigation("Problem");
                 });
@@ -900,9 +1191,26 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Rounds");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
+                {
+                    b.Navigation("Likes");
+
+                    b.Navigation("Replies");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Competition", b =>
                 {
                     b.Navigation("Rounds");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Handout", b =>
+                {
+                    b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
@@ -914,6 +1222,8 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Likes");
 
                     b.Navigation("ProblemAuthors");
+
+                    b.Navigation("ProblemComments");
 
                     b.Navigation("ProblemTagsAll");
 

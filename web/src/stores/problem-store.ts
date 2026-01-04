@@ -27,6 +27,9 @@ type ProblemState = {
   /* Toggle the like state of a problem in the store. */
   toggleProblemLike: (slug: string) => void
 
+  /* Update the comment count of a problem in the store. */
+  updateCommentCount: (slug: string, delta: number) => void
+
   /* Set the currently displayed problems (called when search results load). */
   setDisplayedProblems: (slugs: string[]) => void
 
@@ -102,6 +105,26 @@ export const useProblemStore = create<ProblemState>((set) => ({
       return {
         problems: updatedProblems,
         displayedProblems: updatedDisplayed,
+      }
+    }),
+
+  updateCommentCount: (problemSlug, delta) =>
+    set((state) => {
+      // Get the problem from the store
+      const problem = state.problems[problemSlug]
+
+      // Ensure the problem is there
+      if (!problem) return state
+
+      // Update the problem in the store
+      return {
+        problems: {
+          ...state.problems,
+          [problemSlug]: {
+            ...problem,
+            commentCount: Math.max(0, problem.commentCount + delta),
+          },
+        },
       }
     }),
 
