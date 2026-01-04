@@ -92,8 +92,8 @@ export default function ProfilePageContent() {
       // Invalidate comments to refresh author name
       await invalidateUserComments()
     } catch (error) {
-      // Show errors in a toast
-      toast.error(getClerkErrorMessage(error))
+      // Throw a new error with the friendly message so EditableTextField can display it
+      throw new Error(getClerkErrorMessage(error))
     }
   }
 
