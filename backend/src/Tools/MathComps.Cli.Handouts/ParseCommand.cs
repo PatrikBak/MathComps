@@ -186,19 +186,23 @@ public class ParseCommand : Command<ParseCommand.Settings>
         // Collect all discovered images from all sections
         var allDiscoveredImages = ImmutableList.CreateBuilder<ImageData>();
 
+        // Shared state across all sections for unique filenames and deduplication
+        var imageCounter = 1;
+        var processedImages = new Dictionary<string, string>();
+
         // Process each section's content because we need to
         // change image ids to svg ids + get images into wwwroot
         var processedSections = document.Sections.Select(section =>
         {
-            // Process the section's text
-            var result = TexImageProcessor.Process(section.Text, config)
+            // Process the section's text with shared counter and deduplication
+            var result = TexImageProcessor.Process(section.Text, config, ref imageCounter, processedImages)
                 // It should just work out
                 ?? throw new InvalidOperationException("Processing result is null");
 
             // Accumulate discovered images
             allDiscoveredImages.AddRange(result.DiscoveredImages);
 
-            // Return the section with processed text
+            // Return section with processed text
             return section with { Text = result.ProcessedText };
         });
 

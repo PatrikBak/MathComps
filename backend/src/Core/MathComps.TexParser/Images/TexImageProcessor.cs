@@ -25,14 +25,30 @@ public static class TexImageProcessor
     /// <returns>Processed text and an immutable list of discovered images.</returns>
     public static ImageProcessingResult Process(TexText text, ImageProcessingConfig config)
     {
-        // Initialize a deterministic suffix counter so generated file names are stable across runs.
+        // Prepare a count for image suffixes 
         var imageCounter = 1;
 
+        // Prepare a dictionary for deduplication.
+        var processedImages = new Dictionary<string, string>();
+
+        // Delegate to the more general method.
+        return Process(text, config, ref imageCounter, processedImages);
+    }
+
+    /// <inheritdoc cref="Process(TexText, ImageProcessingConfig)"/>
+    /// <param name="imageCounter">Shared counter for generating unique image suffixes.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
+    public static ImageProcessingResult Process(
+        TexText text,
+        ImageProcessingConfig config,
+        ref int imageCounter,
+        Dictionary<string, string> processedImages)
+    {
         // Prepare a collector for discovered image metadata.
         var discoveredImages = ImmutableList.CreateBuilder<ImageData>();
 
         // Walk and transform the content tree, rewriting images and collecting metadata as we go.
-        var updatedContent = ProcessBlocks(text.Content, config, ref imageCounter, discoveredImages);
+        var updatedContent = ProcessBlocks(text.Content, config, ref imageCounter, processedImages, discoveredImages);
 
         // Reconstruct the text with transformed blocks.
         var updatedText = text with { Content = updatedContent };
@@ -51,12 +67,14 @@ public static class TexImageProcessor
     /// <param name="blocks">Blocks to transform.</param>
     /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed immutable list of blocks.</returns>
     private static ImmutableList<ContentBlock> ProcessBlocks(
         ImmutableList<ContentBlock> blocks,
         ImageProcessingConfig config,
         ref int imageCounter,
+        Dictionary<string, string> processedImages,
         ImmutableList<ImageData>.Builder discoveredImages
     )
     {
@@ -65,7 +83,7 @@ public static class TexImageProcessor
 
         // Handle each block
         foreach (var block in blocks)
-            builder.Add(ProcessBlock(block, config, ref imageCounter, discoveredImages));
+            builder.Add(ProcessBlock(block, config, ref imageCounter, processedImages, discoveredImages));
 
         // Freeze results into an immutable list to match the domain model's preference for immutability.
         return builder.ToImmutable();
@@ -78,51 +96,53 @@ public static class TexImageProcessor
     /// <param name="block">Block to transform.</param>
     /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>The transformed block.</returns>
     private static ContentBlock ProcessBlock(
         ContentBlock block,
         ImageProcessingConfig config,
         ref int imageCounter,
+        Dictionary<string, string> processedImages,
         ImmutableList<ImageData>.Builder discoveredImages
     )
     => block switch
     {
         // The actual image
-        TexImage image => ProcessImage(image, config, ref imageCounter, discoveredImages),
+        TexImage image => ProcessImage(image, config, ref imageCounter, processedImages, discoveredImages),
 
         // Complex nested blocks
-        TexParagraph paragraph => paragraph with { Content = ProcessRawBlocks(paragraph.Content, config, ref imageCounter, discoveredImages) },
-        ItemList list => list with { Items = ProcessListOfLists(list.Items, config, ref imageCounter, discoveredImages) },
-        BoldText bold => bold with { Content = ProcessRawBlocks(bold.Content, config, ref imageCounter, discoveredImages) },
-        ItalicText italic => italic with { Content = ProcessRawBlocks(italic.Content, config, ref imageCounter, discoveredImages) },
-        QuoteText quote => quote with { Content = ProcessRawBlocks(quote.Content, config, ref imageCounter, discoveredImages) },
-        Footnote footnote => footnote with { Content = ProcessRawBlocks(footnote.Content, config, ref imageCounter, discoveredImages) },
-        Link link => link with { Content = ProcessRawBlocks(link.Content, config, ref imageCounter, discoveredImages) },
+        TexParagraph paragraph => paragraph with { Content = ProcessRawBlocks(paragraph.Content, config, ref imageCounter, processedImages, discoveredImages) },
+        ItemList list => list with { Items = ProcessListOfLists(list.Items, config, ref imageCounter, processedImages, discoveredImages) },
+        BoldText bold => bold with { Content = ProcessRawBlocks(bold.Content, config, ref imageCounter, processedImages, discoveredImages) },
+        ItalicText italic => italic with { Content = ProcessRawBlocks(italic.Content, config, ref imageCounter, processedImages, discoveredImages) },
+        QuoteText quote => quote with { Content = ProcessRawBlocks(quote.Content, config, ref imageCounter, processedImages, discoveredImages) },
+        Footnote footnote => footnote with { Content = ProcessRawBlocks(footnote.Content, config, ref imageCounter, processedImages, discoveredImages) },
+        Link link => link with { Content = ProcessRawBlocks(link.Content, config, ref imageCounter, processedImages, discoveredImages) },
         Theorem theorem => theorem with
         {
-            Title = ProcessOptionalRawBlock(theorem.Title, config, ref imageCounter, discoveredImages),
-            Body = ProcessRawBlocks(theorem.Body, config, ref imageCounter, discoveredImages),
-            Proof = ProcessRawBlocks(theorem.Proof, config, ref imageCounter, discoveredImages)
+            Title = ProcessOptionalRawBlock(theorem.Title, config, ref imageCounter, processedImages, discoveredImages),
+            Body = ProcessRawBlocks(theorem.Body, config, ref imageCounter, processedImages, discoveredImages),
+            Proof = ProcessRawBlocks(theorem.Proof, config, ref imageCounter, processedImages, discoveredImages)
         },
         Exercise exercise => exercise with
         {
-            Title = ProcessOptionalRawBlock(exercise.Title, config, ref imageCounter, discoveredImages),
-            Body = ProcessRawBlocks(exercise.Body, config, ref imageCounter, discoveredImages),
-            Solution = ProcessRawBlocks(exercise.Solution, config, ref imageCounter, discoveredImages)
+            Title = ProcessOptionalRawBlock(exercise.Title, config, ref imageCounter, processedImages, discoveredImages),
+            Body = ProcessRawBlocks(exercise.Body, config, ref imageCounter, processedImages, discoveredImages),
+            Solution = ProcessRawBlocks(exercise.Solution, config, ref imageCounter, processedImages, discoveredImages)
         },
         Problem problem => problem with
         {
-            Title = ProcessOptionalRawBlock(problem.Title, config, ref imageCounter, discoveredImages),
-            Body = ProcessRawBlocks(problem.Body, config, ref imageCounter, discoveredImages),
-            Hints = ProcessListOfLists(problem.Hints, config, ref imageCounter, discoveredImages),
-            Solution = ProcessRawBlocks(problem.Solution, config, ref imageCounter, discoveredImages)
+            Title = ProcessOptionalRawBlock(problem.Title, config, ref imageCounter, processedImages, discoveredImages),
+            Body = ProcessRawBlocks(problem.Body, config, ref imageCounter, processedImages, discoveredImages),
+            Hints = ProcessListOfLists(problem.Hints, config, ref imageCounter, processedImages, discoveredImages),
+            Solution = ProcessRawBlocks(problem.Solution, config, ref imageCounter, processedImages, discoveredImages)
         },
         Example example => example with
         {
-            Title = ProcessOptionalRawBlock(example.Title, config, ref imageCounter, discoveredImages),
-            Body = ProcessRawBlocks(example.Body, config, ref imageCounter, discoveredImages),
-            Solution = ProcessRawBlocks(example.Solution, config, ref imageCounter, discoveredImages)
+            Title = ProcessOptionalRawBlock(example.Title, config, ref imageCounter, processedImages, discoveredImages),
+            Body = ProcessRawBlocks(example.Body, config, ref imageCounter, processedImages, discoveredImages),
+            Solution = ProcessRawBlocks(example.Solution, config, ref imageCounter, processedImages, discoveredImages)
         },
 
         // Blocks without images
@@ -138,12 +158,14 @@ public static class TexImageProcessor
     /// <param name="listOfLists">List-items to transform.</param>
     /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed immutable list of list-items.</returns>
     private static ImmutableList<ImmutableList<RawContentBlock>> ProcessListOfLists(
         ImmutableList<ImmutableList<RawContentBlock>> listOfLists,
         ImageProcessingConfig config,
         ref int imageCounter,
+        Dictionary<string, string> processedImages,
         ImmutableList<ImageData>.Builder discoveredImages
     )
     {
@@ -152,7 +174,7 @@ public static class TexImageProcessor
 
         // Handle each list item
         foreach (var listItemBlocks in listOfLists)
-            outerBuilder.Add(ProcessRawBlocks(listItemBlocks, config, ref imageCounter, discoveredImages));
+            outerBuilder.Add(ProcessRawBlocks(listItemBlocks, config, ref imageCounter, processedImages, discoveredImages));
 
         // We're happy
         return outerBuilder.ToImmutable();
@@ -164,12 +186,14 @@ public static class TexImageProcessor
     /// <param name="blocks">Raw blocks to transform.</param>
     /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed immutable list of raw blocks.</returns>
     private static ImmutableList<RawContentBlock> ProcessRawBlocks(
         ImmutableList<RawContentBlock> blocks,
         ImageProcessingConfig config,
         ref int imageCounter,
+        Dictionary<string, string> processedImages,
         ImmutableList<ImageData>.Builder discoveredImages
     )
     {
@@ -178,7 +202,7 @@ public static class TexImageProcessor
 
         // Handle each block
         foreach (var block in blocks)
-            builder.Add((RawContentBlock)ProcessBlock(block, config, ref imageCounter, discoveredImages));
+            builder.Add((RawContentBlock)ProcessBlock(block, config, ref imageCounter, processedImages, discoveredImages));
 
         // We're happy
         return builder.ToImmutable();
@@ -190,17 +214,19 @@ public static class TexImageProcessor
     /// <param name="block">Optional raw block to transform.</param>
     /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Transformed optional raw block.</returns>
     private static RawContentBlock? ProcessOptionalRawBlock(
         RawContentBlock? block,
         ImageProcessingConfig config,
         ref int imageCounter,
+        Dictionary<string, string> processedImages,
         ImmutableList<ImageData>.Builder discoveredImages
     )
     => block is null
         ? null
-        : (RawContentBlock)ProcessBlock(block, config, ref imageCounter, discoveredImages);
+        : (RawContentBlock)ProcessBlock(block, config, ref imageCounter, processedImages, discoveredImages);
 
     /// <summary>
     /// Resolves, copies, and rewrites a single image node, recording discovered metadata for persistence.
@@ -208,12 +234,14 @@ public static class TexImageProcessor
     /// <param name="image">Image node to process.</param>
     /// <param name="config">Configuration for image processing.</param>
     /// <param name="imageCounter">Running counter used to suffix image files.</param>
+    /// <param name="processedImages">Dictionary mapping source image IDs to their output filenames for deduplication.</param>
     /// <param name="discoveredImages">Collector for discovered image metadata.</param>
     /// <returns>Updated image node with a stable content id.</returns>
     private static TexImage ProcessImage(
         TexImage image,
         ImageProcessingConfig config,
         ref int imageCounter,
+        Dictionary<string, string> processedImages,
         ImmutableList<ImageData>.Builder discoveredImages)
     {
         // Resolve the image source path using the provided resolver.
@@ -227,6 +255,13 @@ public static class TexImageProcessor
 
             // No image changes
             return image;
+        }
+
+        // Check if we've already processed this source image (deduplication)
+        if (processedImages.TryGetValue(image.Id, out var existingContentId))
+        {
+            // Reuse existing output file - no need to add metadata again
+            return image with { Id = existingContentId };
         }
 
         // Build a deterministic file name for stable URLs.
@@ -244,6 +279,9 @@ public static class TexImageProcessor
         // Use the new file name as the content id to link content JSON with metadata.
         var contentId = newFileName;
 
+        // Track this source image for deduplication
+        processedImages[image.Id] = contentId;
+
         // Read intrinsic dimensions from the SVG to support better layout in the UI.
         var (width, height) = GetSvgDimensions(sourcePath);
 
@@ -255,7 +293,7 @@ public static class TexImageProcessor
             image.Scale
         ));
 
-        //Advance the counter so subsequent images receive incremented suffixes.
+        // Advance the counter so subsequent images receive incremented suffixes.
         imageCounter++;
 
         // Update the image with the new id
