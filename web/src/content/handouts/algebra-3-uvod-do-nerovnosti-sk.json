@@ -3207,7 +3207,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a druhú premennú nahradíme tak, aby sa súčet zachoval. Týmto sme dosiahli, že sme zachovali súčet, zväčšili súčin, a tiež zmenšili počet premenných rôznych od "
+                      "text": " a druhú premennú nahradíme tak, aby sa súčet zachoval (viď obrázok). Týmto sme dosiahli, že sme zachovali súčet, zväčšili súčin, a tiež zmenšili počet premenných rôznych od "
                     },
                     {
                       "type": "math",
@@ -3235,6 +3235,18 @@
                     {
                       "type": "text",
                       "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "algebra-3-uvod-do-nerovnosti-sk-2.svg",
+                      "scale": 8,
+                      "isInline": false
                     }
                   ],
                   "highligted": false
@@ -7611,10 +7623,10 @@
       "scale": 0.4
     },
     {
-      "contentId": "algebra-3-uvod-do-nerovnosti-sk-1.svg",
-      "width": "406.33997pt",
-      "height": "289.726pt",
-      "scale": 0.4
+      "contentId": "algebra-3-uvod-do-nerovnosti-sk-2.svg",
+      "width": "8.2937202mm",
+      "height": "3.1749401mm",
+      "scale": 8
     }
   ]
 }

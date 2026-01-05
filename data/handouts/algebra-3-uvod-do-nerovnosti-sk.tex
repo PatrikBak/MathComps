@@ -371,7 +371,9 @@ Toto nám pomôže pri dôkaze všeobecnej AG nerovnosti:
 
     Predpokladajme najprv, že máme aspoň dve premenné, ktoré nie sú rovné priemeru~$p$. Ak by všetky premenné rôzne od $p$ boli menšie ako $p$, tak súčet všetkých premenných by bol zrejme menší ako $np$. Podobne nemôže platiť, že všetky premenné rôzne od $p$ sú väčšie ako $p$, vtedy by bol súčet priveľký. Nutne teda máme jednu premennú menšiu ako $p$ a druhú väčšiu ako $p$. 
 
-    Podľa tvrdenia z~predošlého cvičenia platí, že ak tieto dve premenné priblížime k~sebe a zachávame pritom ich súčet, tak zväčšíme ich súčin, takže zväčšíme aj súčin všetkých premenných. Toto zväčšenie spravíme tak, že premennú bližšiu k~$p$ nahradíme $p$ a druhú premennú nahradíme tak, aby sa súčet zachoval. Týmto sme dosiahli, že sme zachovali súčet, zväčšili súčin, a tiež zmenšili počet premenných rôznych od $p$. Konečným opakovaním tohto algoritmu dôjdeme do stavu, kedy máme aspoň $n-1$ premenných rovných $p$. 
+    Podľa tvrdenia z~predošlého cvičenia platí, že ak tieto dve premenné priblížime k~sebe a zachávame pritom ich súčet, tak zväčšíme ich súčin, takže zväčšíme aj súčin všetkých premenných. Toto zväčšenie spravíme tak, že premennú bližšiu k~$p$ nahradíme $p$ a druhú premennú nahradíme tak, aby sa súčet zachoval (viď obrázok). Týmto sme dosiahli, že sme zachovali súčet, zväčšili súčin, a tiež zmenšili počet premenných rôznych od $p$. Konečným opakovaním tohto algoritmu dôjdeme do stavu, kedy máme aspoň $n-1$ premenných rovných $p$. 
+
+    \Image{ag-proof.pdf}{8}
 
     Ak je práve $n-1$ z~nich rovných $p$, tak hodnotu poslednej získame, keď od súčtu všetkých premenných odpočítame súčet zvyšných. Súčet všetkých je $np$ (keďže $p$ je priemer a $n$ je ich počet), zatiaľ čo súčet zvyšných je $(n-1)p$ (keďže sú všetky rovné $p$). Vidíme, že aj posledná premenná musí byť rovná $p$, čo je spor.
 
