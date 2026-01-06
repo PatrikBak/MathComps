@@ -62,8 +62,11 @@ public abstract class PostgresTestBase<TService> : IAsyncLifetime where TService
                 .WithEnvironment("POSTGRES_DB", _dbName)
                 // Bind to random available port (0) to avoid conflicts with other services
                 .WithPortBinding(0, _dbPort)
-                // Wait for DB to be ready before proceeding
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(_dbPort))
+                // Wait for PostgreSQL to be fully ready (not just the port)
+                // pg_isready returns 0 when the server is accepting connections
+                .WithWaitStrategy(
+                    Wait.ForUnixContainer()
+                        .UntilCommandIsCompleted("pg_isready", "-U", _dbUser))
                 .Build();
         }
         catch (DockerUnavailableException)
