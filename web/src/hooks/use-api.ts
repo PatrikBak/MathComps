@@ -18,7 +18,7 @@ export type ApiCaller = <T>(endpoint: () => string, options?: RequestInit) => Pr
 /**
  * Represents the state of the API client.
  */
-type ApiState =
+export type ApiState =
   | { state: 'loading' }
   | { state: 'unauthenticated' }
   | {

@@ -30,10 +30,16 @@ public static class EndpointExtensions
             var options = new ProblemFilterOptions(query, userId);
 
             // Just call the service
-            var response = await problemService.FilterAsync(options);
+            return Results.Ok(await problemService.FilterAsync(options));
+        })
+        // Apply search-specific rate limiting
+        .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
 
-            // We're happy
-            return Results.Ok(response);
+        // The endpoint for the contest browser - returns competitions grouped by season
+        app.MapGet("/problems/contests-by-season", async (IProblemFilterService problemService) =>
+        {
+            // No params, just call the service
+            return Results.Ok(await problemService.GetContestsBySeasonAsync());
         })
         // Apply search-specific rate limiting
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);

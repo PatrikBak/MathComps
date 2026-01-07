@@ -1,9 +1,10 @@
 import type { SearchFiltersState, UrlQueryState } from '../types/problem-library-types'
 
 /**
- * URL parameter keys used for serialization
+ * URL parameter keys for search filter serialization.
+ * These parameters control the actual search query sent to the backend.
  */
-const URL_PARAMS = {
+const FILTER_PARAMS = {
   SEARCH_TEXT: 'q',
   SEARCH_IN_SOLUTION: 'searchInSolution',
   SEASONS: 'seasons',
@@ -15,6 +16,25 @@ const URL_PARAMS = {
   COMPETITIONS: 'competitions',
   PROBLEM_ID: 'id',
   FAVORITES_ONLY: 'favoritesOnly',
+} as const
+
+/**
+ * URL parameter keys for UI state.
+ * These parameters control UI elements (like modals) independent of search filters.
+ * Note: UI state is managed internally by components; these are only used for
+ * initial state from URL and validation.
+ */
+const UI_STATE_PARAMS = {
+  /** Whether the competition selector modal is open */
+  BROWSE_COMPETITIONS: 'browseCompetitions',
+} as const
+
+/**
+ * All URL parameter keys (filter + UI state) used for validation.
+ */
+export const URL_PARAMS = {
+  ...FILTER_PARAMS,
+  ...UI_STATE_PARAMS,
 } as const
 
 /**

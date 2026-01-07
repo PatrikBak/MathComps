@@ -59,6 +59,15 @@ export function getToggleProblemLikeApiUrl(slug: string): string {
 }
 
 /**
+ * Builds the API URL for fetching contests grouped by season.
+ *
+ * @returns The API URL path for the contests-by-season endpoint
+ */
+export function getContestsBySeasonApiUrl(): string {
+  return buildApiUrl('/problems/contests-by-season')
+}
+
+/**
  * Builds the frontend URL for the problems page with optional query parameters.
  * If queryString is empty, returns the base problems URL without a query string.
  *

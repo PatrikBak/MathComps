@@ -1,34 +1,32 @@
 import { useMediaQuery } from '@mantine/hooks'
-import { ChevronDown, ChevronUp, FilterX, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, FilterX, Grid3X3, Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { slovakPlural } from '../../../shared/utils/string-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
+import { usePrefetchContestBrowser } from '../hooks/use-contest-browser'
+import { useContestBrowserModal } from '../hooks/use-contest-browser-modal'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
+import { interpretSelectionParts } from '../utils/selection-interpreter'
 import { ActionsMenu } from './ActionsMenu'
 import type { ChipData } from './CollapsibleChipGroup'
 import { CollapsibleChipGroup } from './CollapsibleChipGroup'
+import { ContestBrowserModal, type ContestBrowserSelection } from './ContestBrowserModal'
 import { MobileFilterButton } from './MobileFilterDrawer'
 import { ShareButton } from './ShareButton'
 
 /**
- * Props for the ActiveFiltersBar component.
- * This component displays all currently active filters as removable chips,
- * shows the count of matching problems, and provides controls for resetting
- * filters and accessing additional actions.
+ * Props for the {@link ActiveFiltersBar} component.
  */
 type ActiveFiltersBarProps = {
   /** Current user selections across all filter dimensions. */
   filters: SearchFiltersState
   /** Available options with counts reflecting the current filtered result set. */
   filterOptions: FilterOptionsWithCounts
-  /**
-   * Snapshot of all available options at page load; ensures chips retain readable
-   * labels even when filtering narrows options to zero (avoiding empty-state flicker).
-   */
+  /** Snapshot of all available options at page load. */
   baseOptions: FilterOptionsWithCounts
   /** Default filter state used when user clicks Reset. */
   initialFilters: SearchFiltersState
@@ -39,13 +37,25 @@ type ActiveFiltersBarProps = {
   /** Whether technique tags (e.g., substitution, factoring) are currently visible on problem cards. */
   showTechniqueTags: boolean
   /** Toggles visibility of technique tags on problem cards. */
-  onShowTagsChange: (show: boolean) => void
+  onShowTechniqueTagsChange: (show: boolean) => void
   /** Opens the mobile filter drawer; only provided on narrow viewports. */
   onMobileFilterClick?: () => void
   /** Indicates that search results are currently being fetched; shows loading state for count. */
   isSearching: boolean
 }
 
+/**
+ * The component which displays:
+ * 1. A count of the number of problems matching the active filters
+ * 2. A list of active filters as removable chips
+ * 3. A "Clear All" button to reset all filters
+ * 4. A "Share" button to share the current filters
+ * 5. A "Technique Tags" toggle (inside a menu) to show/hide technique tags on problem cards
+ * 6. A "Contest Browser" button to open a modal for selecting competitions
+ * 7. A "Mobile Filter" button to open the mobile filter drawer on narrow viewports
+ * 8. A button to expand/collapse the filter sidebar. If there are too many filters,
+ *    the sidebar will always be collapsed automatically.
+ */
 export default function ActiveFiltersBar({
   filters,
   filterOptions,
@@ -54,14 +64,57 @@ export default function ActiveFiltersBar({
   onFiltersChange,
   problemCount,
   showTechniqueTags,
-  onShowTagsChange,
+  onShowTechniqueTagsChange,
   onMobileFilterClick,
   isSearching,
 }: ActiveFiltersBarProps) {
+  // Sidebar is visible on the desktop viewports
+  // Visibility is needed for instance to show the button to open the sidebar
   const isSidebarVisible = useMediaQuery('(min-width: 1024px)')
 
-  // Track manual user override; null means "auto mode" - follow filter count logic
+  // Contest browser modal state - synced with URL
+  const contestBrowser = useContestBrowserModal()
+
+  // The prefetcher for the contest browser modal, used in on hover to start before click
+  const prefetchContestBrowser = usePrefetchContestBrowser()
+
+  // This value is used to override the automatic expansion/collapse logic
+  // If it is set to true, the sidebar will always be expanded.
+  // If it is set to false, the sidebar will always be collapsed.
+  // If it is null, the sidebar will follow the automatic expansion/collapse logic.
   const [manualExpansionOverride, setManualExpansionOverride] = useState<boolean | null>(null)
+
+  // Handle contest selection from the browser modal
+  const handleContestSelect = (selection: ContestBrowserSelection) => {
+    // Close modal first (removes URL param)
+    contestBrowser.close()
+
+    // Look up season display name from the base option...The result
+    // should be there, unless the season slug is somehow invalid or
+    // the base options are stale?
+    const seasonDisplayName =
+      baseOptions.seasons.find((season) => season.slug === selection.seasonSlug)?.displayName ??
+      selection.seasonSlug
+
+    // Build selection parts for the function which will
+    // figure out the contest selection (based on the competition tree)
+    const parts: string[] = [selection.competitionSlug, selection.categorySlug, selection.roundSlug]
+      .filter((part) => part !== undefined)
+      .map((part) => part as string)
+
+    // Use existing utility to resolve display names from the competition tree
+    const contestSelections = interpretSelectionParts([parts], baseOptions.competitions)
+
+    // Update filters with the new selection
+    onFiltersChange(
+      {
+        ...initialFilters,
+        seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName }],
+        contestSelection: contestSelections ?? [],
+      },
+      'discrete'
+    )
+  }
 
   // Count total active filters across all dimensions
   const activeFilterCount =
@@ -328,21 +381,21 @@ export default function ActiveFiltersBar({
 
   return (
     <div className="rounded-xl border border-slate-600/60 bg-slate-800 p-3 lg:p-4">
-      {/* Custom breakpoint for Share button visibility + Mobile padding reduction */}
+      {/* Custom breakpoint for mobile layout adjustments at 500px */}
       <style>{`
         @media (min-width: 500px) {
           .share-custom-show { display: inline-flex !important; }
-          .separator-custom-show { display: block !important; }
-          .separator-custom-hide { display: none !important; }
+          .label-custom-show { display: inline !important; }
+          .gap-custom-expand { gap: 0.5rem !important; }
           /* Hide Share items in dropdown menu at larger screens */
           .share-custom-hide-content > :first-child,
           .share-custom-hide-content > :nth-child(2) { display: none !important; }
         }
       `}</style>
-      {/* Header Row - completely prevent wrapping */}
-      <div className="flex flex-nowrap items-center justify-between gap-x-2 min-w-0">
+      {/* Header Row */}
+      <div className="flex flex-nowrap items-center justify-between gap-x-1.5 gap-custom-expand min-w-0">
         {/* STATUS (Left Side) */}
-        <div className="flex items-center gap-2 text-sm flex-shrink min-w-0">
+        <div className="flex items-center gap-1.5 gap-custom-expand text-sm flex-shrink min-w-0">
           {isSidebarVisible ? (
             <div className="flex items-center gap-2 flex-shrink-0">
               <h2 className="font-semibold text-slate-200 whitespace-nowrap">Aktívne filtre</h2>
@@ -362,26 +415,23 @@ export default function ActiveFiltersBar({
           )}
 
           {/* Separator */}
-          <div className="h-6 w-px bg-slate-600/40 flex-shrink-0" />
+          <div className="hidden lg:block h-6 w-px bg-slate-600/40 flex-shrink-0" />
 
           {/* Compact count with spinner when searching */}
           {isSearching ? (
             <Loader2
-              className="h-3 w-3 animate-spin text-slate-400 flex-shrink-0"
+              className="ml-2 h-3 w-3 animate-spin text-slate-400 flex-shrink-0"
               aria-label="Vyhľadávam"
             />
           ) : (
-            <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="ml-2 flex items-center gap-1.5 flex-shrink-0">
               <div className="text-slate-400 flex-shrink-0 whitespace-nowrap text-xs">
                 {problemCount} {slovakPlural(problemCount, ['úloha', 'úlohy', 'úloh'])}
               </div>
             </div>
           )}
-        </div>
 
-        {/* ACTION (Right Side) */}
-        <div className="flex flex-nowrap items-center justify-end gap-x-1.5 sm:gap-x-2 flex-shrink-0">
-          {/* Toggle button to expand/collapse filter chips - only show when there are active filters */}
+          {/* Toggle button to expand/collapse filter chips */}
           {filterGroups.length > 0 && (
             <button
               onClick={() => setManualExpansionOverride(!areFiltersExpanded)}
@@ -398,7 +448,24 @@ export default function ActiveFiltersBar({
               )}
             </button>
           )}
-          {/* Share button - custom breakpoint at 700px */}
+        </div>
+
+        {/* ACTION (Right Side) */}
+        <div className="flex flex-nowrap items-center justify-end gap-x-1 sm:gap-x-2 flex-shrink-0">
+          {/* Contest browser button */}
+          <button
+            onClick={contestBrowser.open}
+            onMouseEnter={prefetchContestBrowser}
+            className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
+              hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+              whitespace-nowrap"
+            aria-label="Prehľad súťaží"
+            title="Prehľad súťaží"
+          >
+            <Grid3X3 className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="hidden label-custom-show">Súťaže</span>
+          </button>
+          {/* Share button */}
           <ShareButton
             filters={filters}
             className="hidden share-custom-show h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
@@ -406,7 +473,7 @@ export default function ActiveFiltersBar({
             disabled:opacity-30 disabled:pointer-events-none whitespace-nowrap"
           />
 
-          {/* Reset button - icon always visible, text hidden on small screens */}
+          {/* Reset button */}
           <button
             onClick={handleClearAll}
             disabled={!hasAnyActive}
@@ -420,10 +487,10 @@ export default function ActiveFiltersBar({
             <span className="hidden sm:inline">Resetovať</span>
           </button>
 
-          {/* Actions Menu - contains Share (mobile only) and Technique toggle (always) */}
+          {/* Actions Menu */}
           <ActionsMenu
             showTechniqueTags={showTechniqueTags}
-            onShowTagsChange={onShowTagsChange}
+            onShowTagsChange={onShowTechniqueTagsChange}
             filters={filters}
           />
         </div>
@@ -464,6 +531,13 @@ export default function ActiveFiltersBar({
           </div>
         </div>
       )}
+
+      {/* Contest Browser Modal */}
+      <ContestBrowserModal
+        isOpen={contestBrowser.isOpen}
+        onClose={contestBrowser.close}
+        onSelectContest={handleContestSelect}
+      />
     </div>
   )
 }
