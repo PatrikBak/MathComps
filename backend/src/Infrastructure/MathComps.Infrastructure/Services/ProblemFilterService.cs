@@ -734,4 +734,82 @@ public class ProblemFilterService(
         // Return distinct problem IDs to avoid duplicates
         return await textSearchQuery.Select(text => text.ProblemId).ToListAsync();
     }
+
+    /// <inheritdoc/>
+    public async Task<SeasonContestBrowserResult> GetContestsBySeasonAsync()
+    {
+        // Group all problems by their common contest data
+        // We will then take only these data + problem count to build the result 
+        var contestData = await dbContext.Problems
+            .GroupBy(problem => new
+            {
+                problem.RoundInstance.Season.EditionNumber,
+                problem.RoundInstance.Season.EditionLabel,
+                CompetitionSlug = problem.RoundInstance.Round.Competition.Slug,
+                CompetitionDisplayName = problem.RoundInstance.Round.Competition.DisplayName,
+                CompetitionFullName = problem.RoundInstance.Round.Competition.FullName,
+                CompetitionSortOrder = problem.RoundInstance.Round.Competition.SortOrder,
+                CategorySlug = problem.RoundInstance.Round.Category != null ? problem.RoundInstance.Round.Category.Slug : null,
+                CategoryName = problem.RoundInstance.Round.Category != null ? problem.RoundInstance.Round.Category.Name : null,
+                CategorySortOrder = problem.RoundInstance.Round.Category != null ? problem.RoundInstance.Round.Category.SortOrder : (int?)null,
+                RoundSlug = problem.RoundInstance.Round.Slug,
+                RoundDisplayName = problem.RoundInstance.Round.DisplayName,
+                RoundSortOrder = problem.RoundInstance.Round.SortOrder,
+                IsDefaultRound = problem.RoundInstance.Round.IsDefault,
+            })
+            .Select(group => new
+            {
+                group.Key.EditionNumber,
+                group.Key.EditionLabel,
+                group.Key.CompetitionSlug,
+                group.Key.CompetitionDisplayName,
+                group.Key.CompetitionFullName,
+                group.Key.CompetitionSortOrder,
+                group.Key.CategorySlug,
+                group.Key.CategoryName,
+                group.Key.CategorySortOrder,
+                group.Key.RoundSlug,
+                group.Key.RoundDisplayName,
+                group.Key.RoundSortOrder,
+                group.Key.IsDefaultRound,
+                ProblemCount = group.Count()
+            })
+            .ToListAsync();
+
+        // Build the hierarchical result in memory
+        var seasonGroups = contestData
+            // Group by season
+            .GroupBy(data => new { data.EditionNumber, data.EditionLabel })
+            // Order by newest first
+            .OrderByDescending(group => group.Key.EditionNumber)
+            // Create a season object for each group
+            .Select(seasonGroup =>
+            {
+                // Build flattened contest list for this season
+                var contests = seasonGroup
+                    // Order by competition, then category, then round
+                    .OrderBy(group => group.CompetitionSortOrder)
+                    .ThenBy(group => group.CategorySortOrder ?? 0)
+                    .ThenBy(group => group.RoundSortOrder)
+                    .Select(group => new ContestWithCount(
+                        group.CompetitionSlug,
+                        group.CategorySlug,
+                        group.RoundSlug,
+                        group.CompetitionDisplayName,
+                        group.CategoryName,
+                        !group.IsDefaultRound ? group.RoundDisplayName : null,
+                        group.ProblemCount
+                    ));
+
+                // Return season-specific data
+                return new SeasonContestsGroup(
+                    seasonGroup.Key.EditionNumber,
+                    seasonGroup.Key.EditionLabel,
+                    [.. contests]
+                );
+            });
+
+        // Build the result with all seasons
+        return new SeasonContestBrowserResult([.. seasonGroups]);
+    }
 }

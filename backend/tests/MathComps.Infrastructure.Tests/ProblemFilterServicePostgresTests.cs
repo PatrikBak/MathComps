@@ -4,7 +4,6 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
 
-
 namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
@@ -632,6 +631,139 @@ public class ProblemFilterServicePostgresTests : PostgresTestBase<IProblemFilter
         Assert.Equal(0, p3.CommentCount);
     });
 
+    #region GetContestsBySeasonAsync Tests
+
+    /// <summary>
+    /// Verifies that GetContestsBySeasonAsync returns all seasons with their contests.
+    /// This test ensures the contest browser can display all available seasons.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonReturnsAllSeasons() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync();
+
+        // Assert - we have 2 seasons in test data (75. ročník and 74. ročník)
+        Assert.Equal(2, result.Seasons.Count);
+    });
+
+    /// <summary>
+    /// Verifies that seasons are ordered by edition number descending (newest first).
+    /// This ensures the UI displays the most recent seasons at the top.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonReturnsSeasonsInDescendingOrder() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync();
+
+        // Assert - newest season (75) should come first
+        Assert.Equal(75, result.Seasons[0].EditionNumber);
+        Assert.Equal(74, result.Seasons[1].EditionNumber);
+        Assert.Equal("75. ročník", result.Seasons[0].EditionLabel);
+        Assert.Equal("74. ročník", result.Seasons[1].EditionLabel);
+    });
+
+    /// <summary>
+    /// Verifies that each season contains its associated contests with correct display names.
+    /// Tests that contests are properly flattened with full path names.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonReturnsContestsForEachSeason() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync();
+
+        // Assert - season 75 should have 4 contests (3 CSMO categories + 1 IMO)
+        var season75 = result.Seasons.First(season => season.EditionNumber == 75);
+        Assert.Equal(4, season75.Contests.Count);
+
+        // Verify CSMO contests have category in display name
+        Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "A");
+        Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "B");
+        Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "C");
+
+        // Verify IMO is included (no category, default round)
+        Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("IMO"));
+    });
+
+    /// <summary>
+    /// Verifies that problem counts are correct for each contest.
+    /// This ensures the UI can display accurate problem counts next to each contest.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonReturnsProblemCounts() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync();
+
+        // Assert - check specific contest counts
+        var season75 = result.Seasons.First(s => s.EditionNumber == 75);
+
+        // CSMO A in season 75 has 2 problems (p1, p4)
+        var csmoA = season75.Contests.First(contest => contest.CompetitionSlug == "csmo" && contest.CategorySlug == "a");
+        Assert.Equal(2, csmoA.ProblemCount);
+
+        // CSMO B in season 75 has 1 problem (p2)
+        var csmoB = season75.Contests.First(contest => contest.CompetitionSlug == "csmo" && contest.CategorySlug == "b");
+        Assert.Equal(1, csmoB.ProblemCount);
+
+        // CSMO C in season 75 has 1 problem (p3)
+        var csmoC = season75.Contests.First(c => c.CompetitionSlug == "csmo" && c.CategorySlug == "c");
+        Assert.Equal(1, csmoC.ProblemCount);
+
+        // IMO in season 75 has 1 problem (p7)
+        var imo = season75.Contests.First(c => c.CompetitionSlug == "imo");
+        Assert.Equal(1, imo.ProblemCount);
+    });
+
+    /// <summary>
+    /// Verifies that contest slugs are correctly populated for filter integration.
+    /// This ensures clicking a contest will correctly set the filter parameters.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonReturnsCorrectSlugs() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync();
+
+        // Assert
+        var season75 = result.Seasons.First(season => season.EditionNumber == 75);
+
+        // CSMO A should have competition and category slugs
+        var csmoA = season75.Contests.First(contest => contest.CompetitionSlug == "csmo" && contest.CategorySlug == "a");
+        Assert.Equal("csmo", csmoA.CompetitionSlug);
+        Assert.Equal("a", csmoA.CategorySlug);
+        Assert.NotNull(csmoA.RoundSlug);
+
+        // IMO should have competition slug but no category (direct round)
+        var imo = season75.Contests.First(c => c.CompetitionSlug == "imo");
+        Assert.Equal("imo", imo.CompetitionSlug);
+        Assert.Null(imo.CategorySlug);
+    });
+
+    /// <summary>
+    /// Verifies that season 74 contains its own distinct contests.
+    /// Tests data isolation between seasons.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonIsolatesContestsBySeason() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync();
+
+        // Assert - season 74 has different contests than season 75
+        var season74 = result.Seasons.First(season => season.EditionNumber == 74);
+
+        // Season 74 should have 2 contests (Z9 domestic and Z9 regional)
+        Assert.Equal(2, season74.Contests.Count);
+
+        // Both should be Z9 category
+        Assert.All(season74.Contests, contest => Assert.Equal("z9", contest.CategorySlug));
+    });
+
+    #endregion
+
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -1123,6 +1255,3 @@ public class ProblemFilterServicePostgresTests : PostgresTestBase<IProblemFilter
         await context.SaveChangesAsync();
     }
 }
-
-
-

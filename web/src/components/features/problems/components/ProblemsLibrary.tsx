@@ -353,7 +353,7 @@ export default function ProblemsLibrary() {
                     onFiltersChange={handleFiltersChange}
                     problemCount={displayCount}
                     showTechniqueTags={showTechniqueTags}
-                    onShowTagsChange={setShowTechniqueTags}
+                    onShowTechniqueTagsChange={setShowTechniqueTags}
                     onMobileFilterClick={() => setIsMobileFilterOpen(true)}
                     isSearching={isSearchingInBackgroundAndResultsCanChange}
                   />
