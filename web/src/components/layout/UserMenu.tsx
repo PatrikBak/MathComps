@@ -48,25 +48,22 @@ export default function UserMenu() {
   // Disable profile menu item if already on profile page
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
 
-  // Still loading auth state - show placeholder to prevent layout shifts
+  // The common padding for the login button in both the loading and loaded state
+  const loginButtonPadding = 'pl-4'
+
+  // Still loading auth state - use LoginNavItem skeleton which will handle loading animation
   if (!isLoaded) {
     return (
-      <UserMenuTrigger
-        aria-label="Loading user menu"
-        aria-busy="true"
-        disabled
-        className="bg-white/5 border-white/10 cursor-progress select-none animate-pulse"
-      >
-        <div className="w-7 h-7 rounded-full bg-white/20" />
-        <div className="w-4 h-4 rounded-full bg-white/10" />
-      </UserMenuTrigger>
+      <div className={loginButtonPadding}>
+        <LoginNavItem isLoading className="text-violet-300" />
+      </div>
     )
   }
 
   // Auth loaded but no user - show login button
   if (!user) {
     return (
-      <div className="pl-4">
+      <div className={loginButtonPadding}>
         <LoginNavItem
           className="text-violet-300 hover:text-violet-200 
                     transition-colors rounded-full outline outline-slate-700 outline-offset-8 
