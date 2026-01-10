@@ -26,7 +26,7 @@ export const commentCountQueryKeys = {
   /** Query key for a specific target type */
   forType: (targetType: CommentTargetType) => [...commentCountQueryKeys.all, targetType] as const,
 
-  /** Query key for a specific target type and slugs */
-  forSlugs: (targetType: CommentTargetType, slugs: string[]) =>
-    [...commentCountQueryKeys.forType(targetType), slugs.sort().join(',')] as const,
+  /** Query key for a specific target type and target IDs */
+  forTargetIds: (targetType: CommentTargetType, targetIds: string[]) =>
+    [...commentCountQueryKeys.forType(targetType), targetIds.sort().join(',')] as const,
 }

@@ -90,7 +90,7 @@ function HandoutCard({ handout }: HandoutCardProps) {
             )}
             aria-label="Komentáre k materiálu"
           >
-            <CommentCountPill slug={slug} />
+            <CommentCountPill targetId={handout.id!} />
           </AppLink>
 
           {/* Arrow icon - hidden on mobile and tablet to save space */}
@@ -166,14 +166,14 @@ type HandoutSectionListProps = {
  * for available and planned handouts.
  */
 export function HandoutSectionList({ sections }: HandoutSectionListProps) {
-  // Extract all handout slugs for comment counts that are fetched client-side in a batch
-  const handoutSlugs = sections.flatMap((section) =>
-    section.handouts.filter((handout) => handout.data?.filename).map((handout) => handout.slug)
+  // Extract all handout IDs for comment counts that are fetched client-side in a batch
+  const handoutIds = sections.flatMap((section) =>
+    section.handouts.filter((handout) => handout.id).map((handout) => handout.id!)
   )
 
   return (
     <div id="sections" className="space-y-6 sm:space-y-10 md:space-y-12">
-      <CommentCountProvider targetType="Handout" slugs={handoutSlugs}>
+      <CommentCountProvider targetType="Handout" targetIds={handoutIds}>
         {sections.map((section) => (
           <section key={section.category} id={slugify(section.category)}>
             <HandoutSectionHeader section={section} />

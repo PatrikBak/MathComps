@@ -10,41 +10,41 @@ import { commentCountQueryKeys } from './comment-query-keys'
  * Hook for bulk-fetching comment counts for multiple targets of the same type.
  *
  * @param targetType - The type of targets (Handout, Problem, or News)
- * @param slugs - Array of target slugs to get counts for
+ * @param targetIds - Array of permanent target IDs to get counts for
  *
- * @returns React Query result with a slug -> count mapping
+ * @returns React Query result with a targetId -> count mapping
  */
-export function useCommentCounts(targetType: CommentTargetType, slugs: string[]) {
+export function useCommentCounts(targetType: CommentTargetType, targetIds: string[]) {
   // The API client with no authentication (counts are general)
   const api = useApi({ requireAuth: false })
 
-  // Return React Query result with a slug -> count mapping
+  // Return React Query result with a targetId -> count mapping
   const query = useQuery({
-    queryKey: commentCountQueryKeys.forSlugs(targetType, slugs),
+    queryKey: commentCountQueryKeys.forTargetIds(targetType, targetIds),
     queryFn: async () => {
       // Ensure API is ready
       if (api.state !== 'ready') {
         throw new Error('API not ready')
       }
 
-      // Don't call API for empty slug arrays
-      if (slugs.length === 0) {
+      // Don't call API for empty targetId arrays
+      if (targetIds.length === 0) {
         return {} as Record<string, number>
       }
 
       // Fetch comment counts from API
-      const result = await getCommentCounts(api.apiCall, targetType, slugs)
+      const result = await getCommentCounts(api.apiCall, targetType, targetIds)
 
       // Ensure API call was successful
       if (!result.success) {
         throw new Error(result.error.message)
       }
 
-      // Return the slug -> count mapping
+      // Return the targetId -> count mapping
       return result.data
     },
-    // Only fetch if API is ready and there are slugs
-    enabled: api.state === 'ready' && slugs.length > 0,
+    // Only fetch if API is ready and there are targetIds
+    enabled: api.state === 'ready' && targetIds.length > 0,
     // Don't refetch too often, 1 minute as counts don't need to be super fresh
     staleTime: 60 * 1000,
   })

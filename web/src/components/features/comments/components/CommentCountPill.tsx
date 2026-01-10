@@ -11,17 +11,17 @@ import { useCommentCount } from './CommentCountContext'
  * Props for the {@link CommentCountPill} component.
  */
 type CommentCountPillProps = {
-  /** The slug of the handout to display the comment count for */
-  slug: string
+  /** The permanent target ID to display the comment count for */
+  targetId: string
 }
 
 /**
  * Displays a comment count pill with the icon.
  * Reads the count from the {@link CommentCountProvider} context.
  */
-export function CommentCountPill({ slug }: CommentCountPillProps) {
+export function CommentCountPill({ targetId }: CommentCountPillProps) {
   // Get the count from the context
-  const { count, isLoading } = useCommentCount(slug)
+  const { count, isLoading } = useCommentCount(targetId)
 
   // Determine if there are comments
   const hasComments = count > 0

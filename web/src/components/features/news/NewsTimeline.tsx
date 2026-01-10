@@ -77,8 +77,8 @@ function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonPro
  * Props for the {@link NewsCommentButton} component.
  */
 type NewsCommentButtonProps = {
-  /** The article slug to get the count for */
-  slug: string
+  /** The article ID to get the count for */
+  articleId: string
   /** The click handler to open comments modal */
   openComments: () => void
 }
@@ -86,9 +86,9 @@ type NewsCommentButtonProps = {
 /**
  * Comment button specific to the news timeline.
  */
-function NewsCommentButton({ slug, openComments }: NewsCommentButtonProps) {
+function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) {
   // Get the count from the context
-  const { count, isLoading } = useCommentCount(slug)
+  const { count, isLoading } = useCommentCount(articleId)
 
   return (
     <button
@@ -148,8 +148,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   // Whether the comments modal is open
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
 
-  // Extract slugs for batch fetching
-  const articleSlugs = items.map((item) => item.article.id)
+  // Extract article IDs for batch fetching comment counts
+  const articleIds = items.map((item) => item.article.id)
 
   // Ensure invalid categories are stripped out of the url
   useEffect(() => {
@@ -299,14 +299,14 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
 
       {/* Timeline Section - Desktop/Tablet only */}
       {filteredItems.length > 0 && (
-        <CommentCountProvider targetType="News" slugs={articleSlugs}>
+        <CommentCountProvider targetType="News" targetIds={articleIds}>
           {/* MOBILE: Vertical stacked layout */}
           <div className="md:hidden flex flex-col gap-4">
             {filteredItems.map((item) => (
               <div key={item.article.id} className="flex flex-col gap-2">
                 {item.card}
                 <NewsCommentButton
-                  slug={item.article.id}
+                  articleId={item.article.id}
                   openComments={() => openComments(item.article)}
                 />
               </div>
@@ -392,7 +392,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                             {item.card}
                           </div>
                           <NewsCommentButton
-                            slug={item.article.id}
+                            articleId={item.article.id}
                             openComments={() => openComments(item.article)}
                           />
                         </div>

@@ -9,7 +9,7 @@ import { useCommentCounts } from '../hooks/use-comment-counts'
  * The shape of the comment count context value.
  */
 type CommentCountContextValue = {
-  /** The fetched counts as a slug -> count mapping */
+  /** The fetched counts as a targetId -> count mapping */
   counts: Record<string, number>
   /** Whether the counts are currently loading */
   isLoading: boolean
@@ -21,8 +21,8 @@ type CommentCountContextValue = {
 type CommentCountProviderProps = {
   /** The type of targets (Handout, Problem, or News) */
   targetType: CommentTargetType
-  /** Array of target slugs to fetch counts for */
-  slugs: string[]
+  /** Array of permanent target IDs to fetch counts for */
+  targetIds: string[]
   /** Child components that will consume the counts */
   children: ReactNode
 }
@@ -46,9 +46,13 @@ const CommentCountContext = createContext<CommentCountContextValue | null>(null)
  * Provider that batch-fetches comment counts and distributes them via context.
  * Wrap sections of your UI that display multiple comment counts with this provider.
  */
-export function CommentCountProvider({ targetType, slugs, children }: CommentCountProviderProps) {
+export function CommentCountProvider({
+  targetType,
+  targetIds,
+  children,
+}: CommentCountProviderProps) {
   // Fetch all counts in a single batch request
-  const { data: counts, isLoading } = useCommentCounts(targetType, slugs)
+  const { data: counts, isLoading } = useCommentCounts(targetType, targetIds)
 
   // Provide the counts to children
   const value: CommentCountContextValue = {
@@ -61,14 +65,14 @@ export function CommentCountProvider({ targetType, slugs, children }: CommentCou
 }
 
 /**
- * Hook to get the comment count for a specific slug from the context.
+ * Hook to get the comment count for a specific target ID from the context.
  * Must be used within a {@link CommentCountProvider}.
  *
- * @param slug - The target slug to get the count for.
+ * @param targetId - The permanent target ID to get the count for.
  *
  * @returns The count (0 if not found) and loading state.
  */
-export function useCommentCount(slug: string): CommentCount {
+export function useCommentCount(targetId: string): CommentCount {
   // Get the context
   const context = useContext(CommentCountContext)
 
@@ -79,7 +83,7 @@ export function useCommentCount(slug: string): CommentCount {
 
   // Return the count and loading state
   return {
-    count: context.counts[slug] ?? 0,
+    count: context.counts[targetId] ?? 0,
     isLoading: context.isLoading,
   }
 }
