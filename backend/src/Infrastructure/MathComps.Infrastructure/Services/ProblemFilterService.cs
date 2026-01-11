@@ -794,7 +794,7 @@ public class ProblemFilterService(
                     .Select(group => new ContestWithCount(
                         group.CompetitionSlug,
                         group.CategorySlug,
-                        group.RoundSlug,
+                        !group.IsDefaultRound ? group.RoundSlug : null,
                         group.CompetitionDisplayName,
                         group.CategoryName,
                         !group.IsDefaultRound ? group.RoundDisplayName : null,

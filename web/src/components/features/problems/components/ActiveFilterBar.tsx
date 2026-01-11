@@ -98,9 +98,12 @@ export default function ActiveFiltersBar({
 
     // Build selection parts for the function which will
     // figure out the contest selection (based on the competition tree)
-    const parts: string[] = [selection.competitionSlug, selection.categorySlug, selection.roundSlug]
-      .filter((part) => part !== undefined)
-      .map((part) => part as string)
+    // Note: categorySlug and roundSlug can be null, so we filter them out
+    const parts: string[] = [
+      selection.competitionSlug,
+      selection.categorySlug,
+      selection.roundSlug,
+    ].filter((part): part is string => part != null)
 
     // Use existing utility to resolve display names from the competition tree
     const contestSelections = interpretSelectionParts([parts], baseOptions.competitions)
