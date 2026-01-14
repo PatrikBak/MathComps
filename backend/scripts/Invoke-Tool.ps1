@@ -35,7 +35,7 @@ try {
     switch ($command) {
         "seed" {
             Set-Location ../src/Tools/MathComps.Cli.DatabaseSeeder
-            dotnet run -c Release -- @remainingArgs
+            dotnet run -c Release -- $remainingArgs
         }
         "import-tags" {
             Set-Location ../src/Tools/MathComps.Cli.Tagging
@@ -43,7 +43,7 @@ try {
         }
         "tagging" {
             Set-Location ../src/Tools/MathComps.Cli.Tagging
-            dotnet run -c Release -- @remainingArgs
+            dotnet run -c Release -- $remainingArgs
         }
         "update-links" {
             Set-Location ../src/Tools/MathComps.Cli.SkmoScraper
@@ -51,11 +51,11 @@ try {
         }
         "embeddings" {
             Set-Location ../src/Tools/MathComps.Cli.Embeddings
-            dotnet run -c Release -- @remainingArgs
+            dotnet run -c Release -- $remainingArgs
         }
         "translations" {
             Set-Location ../src/Tools/MathComps.Cli.Translation
-            dotnet run -c Release -- @remainingArgs
+            dotnet run -c Release -- $remainingArgs
         }
         "migrate" {
             Set-Location ../src/Infrastructure/MathComps.Infrastructure
@@ -63,7 +63,7 @@ try {
         }
         "sync-users" {
             Set-Location ../src/Tools/MathComps.Cli.UserSync
-            dotnet run -c Release -- @remainingArgs
+            dotnet run -c Release -- $remainingArgs
         }
         
         default {
