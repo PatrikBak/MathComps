@@ -13,12 +13,37 @@ namespace MathComps.Cli.SkmoScraper.Services;
 public class SkmoDatabaseService(IDbContextFactory<MathCompsDbContext> contextFactory) : ISkmoDatabaseService
 {
     /// <inheritdoc/>
-    public async Task<UpdateResult> UpdateProblemsWithSolutionLinkAsync(
-        int seasonYear,
-        string competitionSlug,
-        string? categorySlug,
-        string? roundSlug,
-        string solutionLink)
+    public async Task<Dictionary<ProblemKey, string?>> GetExistingSolutionLinksAsync()
+    {
+        // Get DB access
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        // Fetch all problems with their hierarchy info, grouped by the key components
+        var existingLinks = await context.Problems
+            .Select(problem => new
+            {
+                SeasonYear = problem.RoundInstance.Season.EditionNumber,
+                CompetitionSlug = problem.RoundInstance.Round.Competition.Slug,
+                CategorySlug = problem.RoundInstance.Round.Category != null
+                    ? problem.RoundInstance.Round.Category.Slug
+                    : null,
+                RoundSlug = problem.RoundInstance.Round.Slug,
+                problem.SolutionLink
+            })
+            .Distinct()
+            .ToListAsync();
+
+        // Group by key and take the first solution link (they should all be the same for a given key)
+        return existingLinks
+            .GroupBy(link => new ProblemKey(link.SeasonYear, link.CompetitionSlug, link.CategorySlug, link.RoundSlug))
+            .ToDictionary(
+                group => group.Key,
+                group => group.First().SolutionLink
+            );
+    }
+
+    /// <inheritdoc/>
+    public async Task<UpdateResult> UpdateProblemsWithSolutionLinkAsync(ProblemKey key, string? solutionLink)
     {
         // Get DB access
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -26,15 +51,15 @@ public class SkmoDatabaseService(IDbContextFactory<MathCompsDbContext> contextFa
         // Build the base query...
         var query = context.Problems
             // The season must match
-            .Where(problem => problem.RoundInstance.Season.EditionNumber == seasonYear
+            .Where(problem => problem.RoundInstance.Season.EditionNumber == key.SeasonYear
                 // So does the component
-                && problem.RoundInstance.Round.Competition.Slug == competitionSlug);
+                && problem.RoundInstance.Round.Competition.Slug == key.CompetitionSlug);
 
         // If category is specified, filter by category slug
-        if (categorySlug is not null)
+        if (key.CategorySlug is not null)
         {
             // Include it in the filter
-            query = query.Where(problem => problem.RoundInstance.Round.Category!.Slug == categorySlug);
+            query = query.Where(problem => problem.RoundInstance.Round.Category!.Slug == key.CategorySlug);
         }
         // If no category is specified
         else
@@ -44,10 +69,10 @@ public class SkmoDatabaseService(IDbContextFactory<MathCompsDbContext> contextFa
         }
 
         // If round is specified, filter by round slug
-        if (roundSlug is not null)
+        if (key.RoundSlug is not null)
         {
             // Filter by it
-            query = query.Where(problem => problem.RoundInstance.Round.Slug == roundSlug);
+            query = query.Where(problem => problem.RoundInstance.Round.Slug == key.RoundSlug);
         }
 
         // First, count total problems that match the criteria

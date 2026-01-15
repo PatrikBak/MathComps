@@ -20,11 +20,11 @@ cd backend/src/Tools/MathComps.Cli.SkmoScraper
 
 ### **scrape**
 
-Scrapes the SKMO website for solution document links.
+Scrapes the SKMO website for solution document links. This is the default command.
 
 ```bash
 # Scrape all years starting from year 48 (default)
-dotnet run -- scrape
+dotnet run
 
 # Specify output file
 dotnet run -- scrape --output my-solutions.json
@@ -39,6 +39,8 @@ dotnet run -- scrape --start-year 60 --end-year 75
 - `--start-year` – First year (ročník) to scrape (default: 48)
 - `--end-year` – Last year to scrape (optional, scrapes until no new content if not specified)
 
+> **Note:** When `--end-year` is specified, new results are **merged** with existing data in the output file (new entries override duplicates). Without `--end-year`, the file is **overwritten**.
+
 ### **update-solution-links**
 
 Updates the database with solution links from a scraped JSON file.
@@ -51,6 +53,8 @@ dotnet run -- update-solution-links
 **Options:**
 
 - ` -i|--input` – Input JSON file path (default: `skmo-solution-links.json`)
+
+> **Note:** The scraper is authoritative. If a competition round exists on the website but has no solution link, the `scrape` command outputs an entry without a `SolutionLink` property (omitted from JSON). When `update-solution-links` runs, it will **remove** any existing solution link in the database for that problem.
 
 ## Setup
 

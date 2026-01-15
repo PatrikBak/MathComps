@@ -43,10 +43,13 @@ Once the tunnel is open, use `Invoke-Tool.ps1` to run CLI tools:
 # Seed the staging database
 .\Invoke-Tool.ps1 -Env staging seed
 
-# Other tools
+# Other tools (use default launch profile)
 .\Invoke-Tool.ps1 embeddings
 .\Invoke-Tool.ps1 tagging
 .\Invoke-Tool.ps1 translations
+
+# Use a specific launch profile
+.\Invoke-Tool.ps1 tagging -Profile "Veto Tags"
 ```
 
 ## Environment Loading Order

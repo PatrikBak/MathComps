@@ -1,14 +1,20 @@
 # CLI tool runner with environment support
 # Usage: .\Invoke-Tool.ps1 -Env <prod|staging> <command> [args]
+#        .\Invoke-Tool.ps1 <command> -Profile <ProfileName>
 # Examples:
-#   .\Invoke-Tool.ps1 -Env prod seed
+#   .\Invoke-Tool.ps1 seed
+#   .\Invoke-Tool.ps1 tagging -Profile "Veto Tags"
 #   .\Invoke-Tool.ps1 -Env staging migrate
 
 param(
     # Environment to use (prod or staging)
     [Parameter()]
     [ValidateSet("prod", "staging")]
-    [string]$Env = "prod",    
+    [string]$Env = "prod",
+
+    # Launch profile to use (from launchSettings.json)
+    [Parameter()]
+    [string]$Profile,
     
     # Command to run
     [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
@@ -30,20 +36,36 @@ $remainingArgs = if ($Arguments.Length -gt 1) { $Arguments[1..($Arguments.Length
 # Remember the current location
 Push-Location
 
+# Helper function to run dotnet with profile or args
+function Invoke-Dotnet {
+    # Use the specified launch profile
+    if ($Profile) {
+        dotnet run -c Release --launch-profile $Profile
+    }     
+    # No args: use default profile from launchSettings.json
+    elseif ($remainingArgs.Count -eq 0) {
+        dotnet run -c Release
+    } 
+    # Pass args to the application
+    else {
+        dotnet run -c Release -- $remainingArgs
+    }
+}
+
 try {
     # Execute the right command
     switch ($command) {
         "seed" {
             Set-Location ../src/Tools/MathComps.Cli.DatabaseSeeder
-            dotnet run -c Release -- @remainingArgs
+            Invoke-Dotnet
         }
         "import-tags" {
             Set-Location ../src/Tools/MathComps.Cli.Tagging
-            dotnet run -c Release -- import-tags ../../../../../Scripts/tags.csv
+            Invoke-Dotnet -- import-tags ../../../../../Scripts/tags.csv
         }
         "tagging" {
             Set-Location ../src/Tools/MathComps.Cli.Tagging
-            dotnet run -c Release -- @remainingArgs
+            Invoke-Dotnet
         }
         "update-links" {
             Set-Location ../src/Tools/MathComps.Cli.SkmoScraper
@@ -51,11 +73,11 @@ try {
         }
         "embeddings" {
             Set-Location ../src/Tools/MathComps.Cli.Embeddings
-            dotnet run -c Release -- @remainingArgs
+            Invoke-Dotnet
         }
         "translations" {
             Set-Location ../src/Tools/MathComps.Cli.Translation
-            dotnet run -c Release -- @remainingArgs
+            Invoke-Dotnet
         }
         "migrate" {
             Set-Location ../src/Infrastructure/MathComps.Infrastructure
@@ -63,13 +85,17 @@ try {
         }
         "sync-users" {
             Set-Location ../src/Tools/MathComps.Cli.UserSync
-            dotnet run -c Release -- @remainingArgs
+            Invoke-Dotnet
         }
         
         default {
             Write-Host "Unknown command: $command"
             Write-Host ""
-            Write-Host "Usage: .\Invoke-Tool.ps1 -Env <prod|staging> <command> [args]"
+            Write-Host "Usage: .\Invoke-Tool.ps1 [-Env <prod|staging>] <command> [-Profile <ProfileName>] [args]"
+            Write-Host ""
+            Write-Host "Options:"
+            Write-Host "  -Env        Environment (prod or staging, default: prod)"
+            Write-Host "  -Profile    Launch profile from launchSettings.json"
             Write-Host ""
             Write-Host "Commands:"
             Write-Host "  seed           - Seed the database"
@@ -87,4 +113,3 @@ finally {
     # Regardless of success, ensure we are in the same dir as we started
     Pop-Location
 }
-
