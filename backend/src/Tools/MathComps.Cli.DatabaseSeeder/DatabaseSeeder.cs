@@ -111,7 +111,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
         // Make aware of the update mode
         if (skipExistingProblems)
-            AnsiConsole.MarkupLine("[yellow]Existing problems will not be checked for updated[/]");
+            AnsiConsole.MarkupLine("[yellow]Existing problems will not be checked for updates[/]");
 
         #region Load problems
 

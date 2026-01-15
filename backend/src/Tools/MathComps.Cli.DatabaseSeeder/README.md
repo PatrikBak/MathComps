@@ -21,20 +21,15 @@ All commands must be run from the tool's directory as it uses relative paths.
 # Navigate to the tool's directory
 cd backend/src/Tools/MathComps.Cli.DatabaseSeeder
 
-# Full sync - insert new problems and update existing ones (default)
+# Full sync: insert new and update existing (default)
 dotnet run
 
-# Skip existing - only insert new problems, skip updates (much faster)
+# Skip existing: only insert new problems (faster for adding new years)
 dotnet run -- --skip-existing
 
-# Process only problems from specific year(s)
+# Process only specific year(s)
 dotnet run -- 75
-
-# Process problems from multiple years (space-separated)
 dotnet run -- 72 59 41
-
-# Combine options: skip existing and process specific years
-dotnet run -- --skip-existing 74 75
 ```
 
 **Options:**

@@ -1,17 +1,12 @@
 {
   "profiles": {
-    "Seed": {
-      "commandName": "Project",
-      "workingDirectory": "."
-    },
-    "Seed And Skip Existing": {
+    "Seed (Skip Existing)": {
       "commandName": "Project",
       "commandLineArgs": "--skip-existing",
       "workingDirectory": "."
     },
-    "Seed Year": {
+    "Seed (Full Upsert)": {
       "commandName": "Project",
-      "commandLineArgs": "74 75",
       "workingDirectory": "."
     }
   }
