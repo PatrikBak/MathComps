@@ -134,6 +134,79 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 - **[Handouts Parser](src/Tools/MathComps.Cli.Handouts/README.md)** – Converts `.tex` handouts to `.json` for frontend
 
+## Adding New Problems
+
+Step-by-step workflow for adding new SKMO problems. All `Invoke-Tool` commands assume you're in `backend/scripts/` with the DB tunnel open.
+
+### 1. Add to Archive
+
+Edit the correct `.tex` file in `data/skmo/Archive/<year>/`:
+
+- `zadania.tex` for problem statements
+- `riesenia.tex` for solutions
+
+### 2. Parse the Archive
+
+```powershell
+# From backend/src/Tools/MathComps.Cli.SkmoParser
+dotnet run -c Release
+```
+
+### 3. Seed the Database
+
+```powershell
+.\Invoke-Tool.ps1 seed
+```
+
+### 4. Generate Translations
+
+```powershell
+.\Invoke-Tool.ps1 translations
+```
+
+Translates to all languages (EN, CZ) by default.
+
+### 5. Generate Embeddings
+
+```powershell
+.\Invoke-Tool.ps1 embeddings
+```
+
+### 6. Generate Tags
+
+```powershell
+.\Invoke-Tool.ps1 tagging
+```
+
+### 7. Veto Tags (Optional)
+
+```powershell
+.\Invoke-Tool.ps1 tagging -Profile "Veto Tags"
+```
+
+Useful when tagging many problems, as manual adjustments can be tedious.
+
+### 8. Manual Tag Adjustment
+
+```powershell
+.\Invoke-Tool.ps1 tagging interactive
+```
+
+### 9. Scrape SKMO Links (If Needed)
+
+If new solution PDFs are available on the SKMO website (using the correct):
+
+```powershell
+# From backend/src/Tools/MathComps.Cli.SkmoScraper
+dotnet run -c Release -- scrape --start-year 75 --end-year 75
+```
+
+### 10. Update Solution Links
+
+```powershell
+.\Invoke-Tool.ps1 update-links
+```
+
 ## Deployment
 
 The backend supports separate **staging** and **production** environments using Docker Compose override files.
