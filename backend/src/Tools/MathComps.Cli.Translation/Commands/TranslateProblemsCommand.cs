@@ -4,6 +4,7 @@ using MathComps.Cli.Translation.Services;
 using MathComps.Cli.Translation.Settings;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
+using MathComps.Shared;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
@@ -39,11 +40,11 @@ public class TranslateProblemsCommand(
         public required int Count { get; set; }
 
         /// <summary>
-        /// Target language for translation (e.g., "en", "cz", "sk").
+        /// Target language for translation (e.g., "en", "cz", "sk"). If omitted, translates to all languages.
         /// </summary>
-        [CommandOption("-l|--language", isRequired: true)]
-        [Description("Target language for translation (e.g., 'en', 'cz', 'sk').")]
-        public required string Language { get; set; }
+        [CommandOption("-l|--language")]
+        [Description("Target language for translation (e.g., 'en', 'cz'). If omitted, translates to all languages.")]
+        public string? Language { get; set; }
 
         /// <summary>
         /// Force retranslation even if translations already exist.
@@ -72,89 +73,108 @@ public class TranslateProblemsCommand(
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        #region Parse and validate input
+        // A helper function to get lange string
+        static string FormatLanguages(IEnumerable<Language> languages) =>
+            // Format as "CZ, EN, ..."
+            languages.Select(language => language.ToString().ToUpper()).ToJoinedString(", ");
 
-        // Parse the target language
-        if (!Enum.TryParse<Language>(settings.Language.ToUpper(), out var targetLanguage))
+        // Determine which languages to translate
+        List<Language> targetLanguages;
+
+        // This is a non-translatable language
+        const Language originalLanguage = Language.SK;
+
+        // If no languages specified...
+        if (string.IsNullOrEmpty(settings.Language))
         {
-            // Make aware of a bad one
-            AnsiConsole.MarkupLine($"[red]Invalid language code '{settings.Language}'. Use language codes like 'en', 'cz', 'sk'.[/]");
+            // Translate to all languages...
+            targetLanguages = [.. Enum.GetValues<Language>()
+                // ...except SK (original language)
+                .Where(language => language != originalLanguage)];
+        }
+        // If unable to parse the specified language...
+        else if (!Enum.TryParse<Language>(settings.Language.ToUpper(), out var targetLanguage))
+        {
+            // ...log error and exit
+            AnsiConsole.MarkupLine(
+                $"[red]Invalid language code '{settings.Language}'. " +
+                $"Available languages: {FormatLanguages(Enum.GetValues<Language>().Except([originalLanguage]))}[/]");
+
             return 1;
         }
+        // If the specified language is valid and Slovak
+        else if (targetLanguage == originalLanguage)
+        {
+            // ...log error and exit
+            AnsiConsole.MarkupLine($"[red]Cannot translate to {originalLanguage} (original language). [/]");
 
-        // Display the target language
-        AnsiConsole.MarkupLine($"[cyan]Target language:[/] {targetLanguage.ToString().ToUpper()}");
+            return 1;
+        }
+        // Otherwise, add the target language
+        else targetLanguages = [targetLanguage];
+
+        // Log target languages
+        AnsiConsole.MarkupLine($"[cyan]Target languages:[/] {FormatLanguages(targetLanguages)}");
 
         // Display what we're translating
-        var translationScope = settings.Scope switch
+        AnsiConsole.MarkupLine($"[cyan]Translation scope:[/] {settings.Scope switch
         {
             TranslationScope.StatementsOnly => "statements only",
             TranslationScope.SolutionsOnly => "solutions only",
             TranslationScope.Both => "statements and solutions",
             _ => throw new ArgumentException($"Unsupported translation scope: {settings.Scope}")
-        };
-        AnsiConsole.MarkupLine($"[cyan]Translation scope:[/] {translationScope}");
+        }}");
 
-        #endregion
-
-        #region Retrieve problems needing translation
-
-        // Retrieve the problems that need translation based on user settings
-        var problemsToTranslate = await databaseService.GetProblemsNeedingTranslationAsync(
-            targetLanguage,
-            settings.Count,
-            settings.Force,
-            settings.Scope
-        );
-
-        // If no problems found to process
-        if (problemsToTranslate.Count == 0)
+        // Process each target language
+        foreach (var targetLanguage in targetLanguages)
         {
-            // Make aware
-            AnsiConsole.MarkupLine("[yellow]No problems found to translate with the specified criteria.[/]");
+            // Log target language
+            AnsiConsole.MarkupLine($"\n[bold blue]Translating to {targetLanguage}...[/]");
 
-            // Exit successfully
-            return 0;
-        }
+            // Retrieve the problems that need translation for this language
+            var problemsToTranslate = await databaseService.GetProblemsNeedingTranslationAsync(
+                targetLanguage,
+                settings.Count,
+                settings.Force,
+                settings.Scope
+            );
 
-        // Log count
-        AnsiConsole.MarkupLine($"[green]Found {problemsToTranslate.Count} problem(s) to translate.[/]");
-
-        #endregion
-
-        #region Process problems with AI translation
-
-        // Use the progress helper to process problems with AI translation in parallel
-        await ProgressHelper.ExecuteWithProgressInParallelAsync(
-            problemsToTranslate,
-            "Translating problems...",
-            getItemDescription: problem => problem.Slug.ToUpperInvariant(),
-            processItem: async (problem, index, cancellationToken) =>
+            // If no problems found to process
+            if (problemsToTranslate.Count == 0)
             {
-                // Translate the problem in parallel
-                return await TranslateProblem(
-                    problem,
-                    targetLanguage,
-                    settings.Scope,
-                    cancellationToken
-                );
-            },
-            numThreads: settings.NumThreads,
-            handleResult: async (translationResult, problem, index, cancellationToken) =>
-            {
-                // If translation succeeded, save to database
-                await databaseService.UpsertTranslationAsync(translationResult);
+                AnsiConsole.MarkupLine($"[yellow]No problems found to translate to {targetLanguage}.[/]");
+                continue;
             }
-        );
 
-        #endregion
+            // Log count
+            AnsiConsole.MarkupLine($"[green]Found {problemsToTranslate.Count} problem(s) to translate to {targetLanguage}.[/]");
 
-        #region Report completion
+            // Use the progress helper to process problems with AI translation in parallel
+            await ProgressHelper.ExecuteWithProgressInParallelAsync(
+                problemsToTranslate,
+                $"Translating to {targetLanguage}...",
+                getItemDescription: problem => problem.Slug.ToUpperInvariant(),
+                processItem: async (problem, index, cancellationToken) =>
+                {
+                    // Translate the problem in parallel
+                    return await TranslateProblem(
+                        problem,
+                        targetLanguage,
+                        settings.Scope,
+                        cancellationToken
+                    );
+                },
+                numThreads: settings.NumThreads,
+                handleResult: async (translationResult, problem, index, cancellationToken) =>
+                {
+                    // If translation succeeded, save to database
+                    await databaseService.UpsertTranslationAsync(translationResult);
+                }
+            );
+        }
 
         // Confirm successful completion
         AnsiConsole.MarkupLine($"[bold green]Translation complete.[/]");
-
-        #endregion
 
         return 0;
     }
