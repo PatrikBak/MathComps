@@ -1,14 +1,14 @@
 {
   "profiles": {
-    "GenerateNew": {
+    "Generate": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "--count 10"
+      "commandLineArgs": "--count 100"
     },
     "Regenerate": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "--force --count 10"
+      "commandLineArgs": "--force --count 100"
     }
   }
 }
