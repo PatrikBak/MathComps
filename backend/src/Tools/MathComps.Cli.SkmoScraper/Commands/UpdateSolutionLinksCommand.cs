@@ -1,3 +1,4 @@
+using MathComps.Cli.SkmoScraper.Dtos;
 using MathComps.Cli.SkmoScraper.Services;
 using MathComps.Shared;
 using MathComps.Shared.Cli;
@@ -52,62 +53,81 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
         }
 
         // We have it!
-        AnsiConsole.MarkupLine($"[green]Found {scrapedSolutions.Count} solution entries to process.[/]");
+        AnsiConsole.MarkupLine($"[green]Found {scrapedSolutions.Count} solution entries in file.[/]");
+
+        // Fetch existing solution links from DB (single query)
+        AnsiConsole.MarkupLine("[dim]Fetching existing solution links from database...[/]");
+        var existingLinks = await databaseService.GetExistingSolutionLinksAsync();
+        AnsiConsole.MarkupLine($"[dim]Found {existingLinks.Count} existing link groups in database.[/]");
+
+        // Convert scraped solutions to (ProblemKey, SolutionLink) and filter out unchanged
+        var solutionsToProcess = scrapedSolutions
+            .Select(solution =>
+            {
+                // Determine the competition and round slugs based on the mapping algorithm
+                var key = !string.IsNullOrEmpty(solution.Category)
+                    // Existing category, always Czech-Slovak Math Olympiad
+                    ? new ProblemKey(
+                        solution.Year,
+                        "csmo",
+                        solution.Category.ToSlug(),
+                        solution.CompetitionId.ToSlug()
+                    )
+                    // If category null, we don't have subrounds
+                    : new ProblemKey(
+                        solution.Year,
+                        solution.CompetitionId.ToSlug(),
+                        null,
+                        null
+                    );
+
+                // Return the key identifying the problem, the solution link, and the problem slug for logging
+                return (Key: key, solution.SolutionLink, solution.Slug);
+            })
+            // Filter out entries that already have the correct solution link
+            .Where(item => !existingLinks.TryGetValue(item.Key, out var existingLink) || existingLink != item.SolutionLink)
+            .ToList();
+
+        // Log how many we're skipping
+        var skipped = scrapedSolutions.Count - solutionsToProcess.Count;
+        if (skipped > 0)
+            AnsiConsole.MarkupLine($"[dim]Skipping {skipped} entries that already have correct links.[/]");
+
+        // If nothing to update, quit early
+        if (solutionsToProcess.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[green]All solution links are already up to date![/]");
+            return 0;
+        }
+
+        // Log how many we're updating
+        AnsiConsole.MarkupLine($"[yellow]Processing {solutionsToProcess.Count} entries that need updates...[/]");
 
         // We'll count how much we've updated
         var totalUpdatedProblems = 0;
 
         // Use the progress helper to process solution links sequentially
         await ProgressHelper.ExecuteWithProgressAsync(
-            scrapedSolutions,
+            solutionsToProcess,
             "Updating solution links...",
-            getItemDescription: solution => solution.Slug,
-            processItem: async (solution, index, cancellationToken) =>
+            getItemDescription: item => item.Slug,
+            processItem: async (item, index, cancellationToken) =>
             {
-                // Determine the competition and round slugs based on the mapping algorithm
-                string competitionSlug;
-                string? categorySlug;
-                string? roundSlug;
-
-                // If category is not null, the competition slug is basically 'csmo' because I decided so randomly
-                if (!string.IsNullOrEmpty(solution.Category))
-                {
-                    competitionSlug = "csmo";
-                    categorySlug = solution.Category.ToSlug();
-                    roundSlug = solution.CompetitionId.ToSlug();
-                }
-                // If category null, we don't have subrounds
-                else
-                {
-                    competitionSlug = solution.CompetitionId.ToSlug();
-                    categorySlug = null;
-                    roundSlug = null;
-                }
-
                 // Update problems in the database with the solution link
-                var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(
-                    solution.Year,
-                    competitionSlug,
-                    categorySlug,
-                    roundSlug,
-                    solution.SolutionLink);
+                var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(item.Key, item.SolutionLink);
 
-                // If no problems to update
+                // If no problems to update, make aware, this could be sus
                 if (result.TotalProblemsFound == 0)
-                {
-                    // This is good to know
-                    AnsiConsole.MarkupLine($"[red]Found no problems for [yellow]{solution.Slug}[/][/]");
-                }
+                    AnsiConsole.MarkupLine($"[red]Found no problems for [yellow]{item.Slug}[/][/]");
 
                 // We'll report the total updated problems
                 totalUpdatedProblems += result.ProblemsUpdated;
             }
         );
 
-        // Say we're happy
+        // Report success
         AnsiConsole.MarkupLine($"[green]Successfully updated {totalUpdatedProblems} problems with solution links.[/]");
-
-        // And be happy
         return 0;
     }
 }
+

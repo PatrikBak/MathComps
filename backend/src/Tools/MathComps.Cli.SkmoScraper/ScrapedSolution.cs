@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 namespace MathComps.Cli.SkmoScraper;
 
 /// <summary>
-/// Represents a single scraped solution link from the SKMO website.
+/// Represents a single scraped solution link from the SKMO website. Can also
+/// represent a missing solution (so we know it is not there even when the comp is)
 /// </summary>
 /// <param name="Year">The competition year, referred to as 'Ročník' on the website.</param>
 /// <param name="CompetitionId">An identifier for the competition, such as 'Krajské kolo' or 'IMO'.</param>
@@ -13,7 +14,7 @@ public record ScrapedSolution(
     int Year,
     string CompetitionId,
     string? Category,
-    string SolutionLink
+    string? SolutionLink
 )
 {
     /// <summary>

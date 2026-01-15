@@ -229,17 +229,22 @@ public class SkmoScraperService(HttpClient httpClient) : ISkmoScraperService
                 // Get the solution node
                 var linkNode = cell.SelectSingleNode(".//a");
 
-                // Some solution cells are just empty
-                if (linkNode is null)
-                    continue;
+                // We'll try to parse the solution
+                string? solutionLink = null;
 
-                // Get the href
-                var href = linkNode.GetAttributeValue<string?>("href", def: null)
-                    // It must be there
-                    ?? throw new Exception($"Expected a link in the solution cell for year {year}");
+                // If we have a link node, parse it
+                if (linkNode is not null)
+                {
+                    // Get the href
+                    var href = linkNode.GetAttributeValue<string?>("href", def: null);
 
-                // Create absolute URL from relative href
-                var solutionLink = new Uri(new Uri(BaseUrl), href).ToString();
+                    // If href exists
+                    if (href is not null)
+                    {
+                        // Create absolute URL from relative href
+                        solutionLink = new Uri(new Uri(BaseUrl), href).ToString();
+                    }
+                }
 
                 // Create absolute URLs from relative hrefs and store the solution data.
                 yield return new ScrapedSolution(
@@ -285,20 +290,24 @@ public class SkmoScraperService(HttpClient httpClient) : ISkmoScraperService
             // We should have a link
             var linkNode = solutionCell.SelectSingleNode(".//a");
 
-            // Some solution cells are just empty
-            if (linkNode is null)
-                continue;
+            string? solutionLink = null;
 
-            // Get the link value
-            var href = linkNode.GetAttributeValue<string?>("href", def: null)
-                // It must be there
-                ?? throw new Exception($"Expected a link in the solution cell for year {year} in the additional documents table.");
+            // If we have a link node, parse it
+            if (linkNode is not null)
+            {
+                // Get the link value
+                var href = linkNode.GetAttributeValue<string?>("href", def: null);
+
+                // If href exists
+                if (href is not null)
+                {
+                    // Get the absolute URL from the relative href
+                    solutionLink = new Uri(new Uri(BaseUrl), href).ToString();
+                }
+            }
 
             // Extract the event name from the first column (IMO, MEMO, EGMO, etc.).
             var competitionName = cells[0].InnerText.Trim();
-
-            // Get the absolute URL from the relative href
-            var solutionLink = new Uri(new Uri(BaseUrl), href).ToString();
 
             // Create the solution record with null category since this table doesn't use categories.
             yield return new ScrapedSolution(

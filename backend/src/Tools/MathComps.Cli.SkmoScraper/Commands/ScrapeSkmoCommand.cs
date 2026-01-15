@@ -66,6 +66,9 @@ public class ScrapeSkmoCommand(ISkmoScraperService scraperService)
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        // Determine if we're in "partial scrape" mode (specific year range specified)
+        var isPartialScrape = settings.EndYear.HasValue;
+
         // Log start
         AnsiConsole.MarkupLine($"[yellow]Starting SKMO website scrape. Output will be saved to '{settings.OutputPath}'[/]");
 
@@ -84,6 +87,37 @@ public class ScrapeSkmoCommand(ISkmoScraperService scraperService)
 
         // Log end
         AnsiConsole.MarkupLine($"[green]Scraping complete. Found {scrapedSolutions.Count} solution documents.[/]");
+
+        // If partial scrape and output file exists, merge with existing data
+        if (isPartialScrape && File.Exists(settings.OutputPath))
+        {
+            // Read existing content
+            var existingJson = await File.ReadAllTextAsync(settings.OutputPath);
+            var existingSolutions = existingJson.FromJson<List<ScrapedSolution>>() ?? [];
+
+            // Log merge
+            AnsiConsole.MarkupLine($"[dim]Merging with {existingSolutions.Count} existing solution(s)...[/]");
+
+            // Create a dictionary keyed by unique identifier (Year, Category, CompetitionId)
+            // New solutions will override existing ones with the same key
+            var mergedSolutions = existingSolutions.ToDictionary(
+                solution => (solution.Year, solution.Category, solution.CompetitionId),
+                solution => solution
+            );
+
+            // Add/override with new solutions
+            foreach (var solution in scrapedSolutions)
+                mergedSolutions[(solution.Year, solution.Category, solution.CompetitionId)] = solution;
+
+            // Convert back to list, sorted by year for consistency
+            scrapedSolutions = [.. mergedSolutions.Values
+                .OrderBy(solution => solution.Year)
+                .ThenBy(solution => solution.Category)
+                .ThenBy(solution => solution.CompetitionId)];
+
+            // Log merged count
+            AnsiConsole.MarkupLine($"[dim]Merged result contains {scrapedSolutions.Count} solution(s).[/]");
+        }
 
         // Serialize the data to a JSON string.
         var jsonContent = scrapedSolutions.ToJson();

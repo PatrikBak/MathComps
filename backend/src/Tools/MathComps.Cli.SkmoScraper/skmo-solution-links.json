@@ -1,5 +1,374 @@
 [
   {
+    "year": 48,
+    "competitionId": "I",
+    "category": "A"
+  },
+  {
+    "year": 48,
+    "competitionId": "S",
+    "category": "A"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "A"
+  },
+  {
+    "year": 48,
+    "competitionId": "III",
+    "category": "A"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "B"
+  },
+  {
+    "year": 48,
+    "competitionId": "S",
+    "category": "B"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "B"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "C"
+  },
+  {
+    "year": 48,
+    "competitionId": "S",
+    "category": "C"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "C"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 48,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 48,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 48,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "A"
+  },
+  {
+    "year": 49,
+    "competitionId": "S",
+    "category": "A"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "A"
+  },
+  {
+    "year": 49,
+    "competitionId": "III",
+    "category": "A"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "B"
+  },
+  {
+    "year": 49,
+    "competitionId": "S",
+    "category": "B"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "B"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "C"
+  },
+  {
+    "year": 49,
+    "competitionId": "S",
+    "category": "C"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "C"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 49,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 49,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 49,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 49,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 49,
+    "competitionId": "CAPS"
+  },
+  {
+    "year": 49,
+    "competitionId": "IMO"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "A"
+  },
+  {
+    "year": 50,
+    "competitionId": "S",
+    "category": "A"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "A"
+  },
+  {
+    "year": 50,
+    "competitionId": "III",
+    "category": "A"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "B"
+  },
+  {
+    "year": 50,
+    "competitionId": "S",
+    "category": "B"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "B"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "C"
+  },
+  {
+    "year": 50,
+    "competitionId": "S",
+    "category": "C"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "C"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 50,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 50,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 50,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 50,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 50,
+    "competitionId": "CAPS"
+  },
+  {
+    "year": 50,
+    "competitionId": "IMO"
+  },
+  {
     "year": 51,
     "competitionId": "I",
     "category": "A",
@@ -58,6 +427,75 @@
     "competitionId": "II",
     "category": "C",
     "solutionLink": "https://skmo.sk/dokument.php?id=281"
+  },
+  {
+    "year": 51,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 51,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 51,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 51,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 51,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 51,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 51,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 51,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 51,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 51,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 51,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 51,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 51,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 51,
+    "competitionId": "výberové sústredenie"
   },
   {
     "year": 51,
@@ -131,6 +569,75 @@
   },
   {
     "year": 52,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 52,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 52,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 52,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 52,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 52,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 52,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 52,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 52,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 52,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 52,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 52,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 52,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 52,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 52,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=84"
   },
@@ -198,6 +705,75 @@
     "competitionId": "II",
     "category": "C",
     "solutionLink": "https://skmo.sk/dokument.php?id=261"
+  },
+  {
+    "year": 53,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 53,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 53,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 53,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 53,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 53,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 53,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 53,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 53,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 53,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 53,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 53,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 53,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 53,
+    "competitionId": "výberové sústredenie"
   },
   {
     "year": 53,
@@ -271,6 +847,75 @@
   },
   {
     "year": 54,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 54,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 54,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 54,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 54,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 54,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 54,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 54,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 54,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 54,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 54,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 54,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 54,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 54,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 54,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=82"
   },
@@ -341,6 +986,75 @@
   },
   {
     "year": 55,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 55,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 55,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 55,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 55,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 55,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 55,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 55,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 55,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 55,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 55,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 55,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 55,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 55,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 55,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=81"
   },
@@ -408,6 +1122,75 @@
     "competitionId": "II",
     "category": "C",
     "solutionLink": "https://skmo.sk/dokument.php?id=231"
+  },
+  {
+    "year": 56,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 56,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 56,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 56,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 56,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 56,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 56,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 56,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 56,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 56,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 56,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 56,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 56,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 56,
+    "competitionId": "výberové sústredenie"
   },
   {
     "year": 56,
@@ -483,6 +1266,75 @@
     "competitionId": "II",
     "category": "C",
     "solutionLink": "https://skmo.sk/dokument.php?id=221"
+  },
+  {
+    "year": 57,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 57,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 57,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 57,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 57,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 57,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 57,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 57,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 57,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 57,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 57,
+    "competitionId": "II",
+    "category": "Z5"
+  },
+  {
+    "year": 57,
+    "competitionId": "I",
+    "category": "Z4"
+  },
+  {
+    "year": 57,
+    "competitionId": "II",
+    "category": "Z4"
+  },
+  {
+    "year": 57,
+    "competitionId": "výberové sústredenie"
   },
   {
     "year": 57,
@@ -562,6 +1414,51 @@
   {
     "year": 58,
     "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 58,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 58,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 58,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 58,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 58,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 58,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 58,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 58,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 58,
+    "competitionId": "I",
     "category": "Z5",
     "solutionLink": "https://skmo.sk/dokument.php?id=437"
   },
@@ -582,6 +1479,10 @@
     "competitionId": "II",
     "category": "Z4",
     "solutionLink": "https://skmo.sk/dokument.php?id=435"
+  },
+  {
+    "year": 58,
+    "competitionId": "výberové sústredenie"
   },
   {
     "year": 58,
@@ -738,6 +1639,10 @@
   },
   {
     "year": 59,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 59,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=358"
   },
@@ -891,6 +1796,10 @@
   },
   {
     "year": 60,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 60,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=672"
   },
@@ -1029,6 +1938,14 @@
     "competitionId": "II",
     "category": "Z5",
     "solutionLink": "https://skmo.sk/dokument.php?id=442"
+  },
+  {
+    "year": 61,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 61,
+    "competitionId": "CPSJ"
   },
   {
     "year": 61,
@@ -1173,6 +2090,14 @@
   },
   {
     "year": 62,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 62,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 62,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=1802"
   },
@@ -1311,6 +2236,14 @@
     "competitionId": "II",
     "category": "Z5",
     "solutionLink": "https://skmo.sk/dokument.php?id=1001"
+  },
+  {
+    "year": 63,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 63,
+    "competitionId": "CPSJ"
   },
   {
     "year": 63,
@@ -1455,6 +2388,14 @@
   },
   {
     "year": 64,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 64,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 64,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=3019"
   },
@@ -1596,6 +2537,18 @@
   },
   {
     "year": 65,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 65,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 65,
+    "competitionId": "CAPS"
+  },
+  {
+    "year": 65,
     "competitionId": "IMO",
     "solutionLink": "https://skmo.sk/dokument.php?id=3876"
   },
@@ -1732,6 +2685,18 @@
   },
   {
     "year": 66,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 66,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 66,
+    "competitionId": "CAPS"
+  },
+  {
+    "year": 66,
     "competitionId": "IMO",
     "solutionLink": "https://skmo.sk/dokument.php?id=3877"
   },
@@ -1865,6 +2830,14 @@
     "competitionId": "II",
     "category": "Z5",
     "solutionLink": "https://skmo.sk/dokument.php?id=2542"
+  },
+  {
+    "year": 67,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 67,
+    "competitionId": "CPSJ"
   },
   {
     "year": 67,
@@ -2009,6 +2982,22 @@
   },
   {
     "year": 68,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 68,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 68,
+    "competitionId": "CAPS"
+  },
+  {
+    "year": 68,
+    "competitionId": "IMO"
+  },
+  {
+    "year": 68,
     "competitionId": "MEMO",
     "solutionLink": "https://skmo.sk/dokument.php?id=3909"
   },
@@ -2055,6 +3044,11 @@
   },
   {
     "year": 69,
+    "competitionId": "II",
+    "category": "B"
+  },
+  {
+    "year": 69,
     "competitionId": "I",
     "category": "C",
     "solutionLink": "https://skmo.sk/dokument.php?id=3388"
@@ -2064,6 +3058,11 @@
     "competitionId": "S",
     "category": "C",
     "solutionLink": "https://skmo.sk/dokument.php?id=3392"
+  },
+  {
+    "year": 69,
+    "competitionId": "II",
+    "category": "C"
   },
   {
     "year": 69,
@@ -2079,9 +3078,19 @@
   },
   {
     "year": 69,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 69,
     "competitionId": "I",
     "category": "Z8",
     "solutionLink": "https://skmo.sk/dokument.php?id=3888"
+  },
+  {
+    "year": 69,
+    "competitionId": "II",
+    "category": "Z8"
   },
   {
     "year": 69,
@@ -2091,9 +3100,19 @@
   },
   {
     "year": 69,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 69,
     "competitionId": "I",
     "category": "Z6",
     "solutionLink": "https://skmo.sk/dokument.php?id=3890"
+  },
+  {
+    "year": 69,
+    "competitionId": "II",
+    "category": "Z6"
   },
   {
     "year": 69,
@@ -2106,6 +3125,18 @@
     "competitionId": "II",
     "category": "Z5",
     "solutionLink": "https://skmo.sk/dokument.php?id=3394"
+  },
+  {
+    "year": 69,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 69,
+    "competitionId": "CAPS"
+  },
+  {
+    "year": 69,
+    "competitionId": "IMO"
   },
   {
     "year": 69,
@@ -2245,6 +3276,14 @@
   },
   {
     "year": 70,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 70,
+    "competitionId": "výb. sústr. pre CPSJ"
+  },
+  {
+    "year": 70,
     "competitionId": "CPSJ",
     "solutionLink": "https://skmo.sk/dokument.php?id=3874"
   },
@@ -2252,6 +3291,10 @@
     "year": 70,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=3881"
+  },
+  {
+    "year": 70,
+    "competitionId": "IMO"
   },
   {
     "year": 70,
@@ -2391,6 +3434,18 @@
   },
   {
     "year": 71,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 71,
+    "competitionId": "výb. sústr. pre CPSJ"
+  },
+  {
+    "year": 71,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 71,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=4162"
   },
@@ -2527,8 +3582,24 @@
   },
   {
     "year": 72,
+    "competitionId": "výberové sústredenie"
+  },
+  {
+    "year": 72,
+    "competitionId": "výb. sústr. pre CPSJ"
+  },
+  {
+    "year": 72,
+    "competitionId": "CPSJ"
+  },
+  {
+    "year": 72,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=4616"
+  },
+  {
+    "year": 72,
+    "competitionId": "IMO"
   },
   {
     "year": 72,
@@ -2663,6 +3734,10 @@
   },
   {
     "year": 73,
+    "competitionId": "výb. sústr. pre CPSJ"
+  },
+  {
+    "year": 73,
     "competitionId": "CPSJ",
     "solutionLink": "https://skmo.sk/dokument.php?id=4968"
   },
@@ -2670,6 +3745,10 @@
     "year": 73,
     "competitionId": "CAPS",
     "solutionLink": "https://skmo.sk/dokument.php?id=5328"
+  },
+  {
+    "year": 73,
+    "competitionId": "IMO"
   },
   {
     "year": 73,
@@ -2803,9 +3882,123 @@
     "solutionLink": "https://skmo.sk/dokument.php?id=5382"
   },
   {
+    "year": 74,
+    "competitionId": "IMO"
+  },
+  {
+    "year": 74,
+    "competitionId": "MEMO"
+  },
+  {
+    "year": 74,
+    "competitionId": "kvalifikácia"
+  },
+  {
     "year": 75,
     "competitionId": "I",
     "category": "A",
     "solutionLink": "https://skmo.sk/dokument.php?id=5825"
+  },
+  {
+    "year": 75,
+    "competitionId": "S",
+    "category": "A",
+    "solutionLink": "https://skmo.sk/dokument.php?id=5828"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "A",
+    "solutionLink": "https://skmo.sk/dokument.php?id=5837"
+  },
+  {
+    "year": 75,
+    "competitionId": "III",
+    "category": "A"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "B"
+  },
+  {
+    "year": 75,
+    "competitionId": "S",
+    "category": "B"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "B"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "C"
+  },
+  {
+    "year": 75,
+    "competitionId": "S",
+    "category": "C"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "C"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "Z9"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "Z9"
+  },
+  {
+    "year": 75,
+    "competitionId": "III",
+    "category": "Z9"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "Z8"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "Z8"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "Z7"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "Z7"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "Z6"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "Z6"
+  },
+  {
+    "year": 75,
+    "competitionId": "I",
+    "category": "Z5"
+  },
+  {
+    "year": 75,
+    "competitionId": "II",
+    "category": "Z5"
   }
 ]
