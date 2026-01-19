@@ -7,9 +7,11 @@ using MathComps.Infrastructure.Services;
 namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
-/// Integration tests for the EF-backed <see cref="IProblemFilterService"/> using a disposable PostgreSQL container.
+/// Integration tests for the EF-backed <see cref="IProblemFilterService"/> using a shared PostgreSQL container.
 /// </summary>
-public class ProblemFilterServicePostgresTests : PostgresTestBase<IProblemFilterService>
+/// <param name="fixture">The shared PostgreSQL container fixture.</param>
+public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
+    : PostgresTestBase<IProblemFilterService>(fixture)
 {
     /// <summary>
     /// Verifies that an initial load with no filters returns all problems and available filter options.
