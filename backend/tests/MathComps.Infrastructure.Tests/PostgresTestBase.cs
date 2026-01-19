@@ -1,5 +1,3 @@
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -9,124 +7,45 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
-/// Base class for integration tests using a disposable PostgreSQL container.
-/// Provides shared infrastructure for database setup, migration, and cleanup.
+/// Base class for integration tests using a shared PostgreSQL container.
+/// Each test class gets its own isolated database within the shared container,
+/// ensuring test isolation while avoiding the overhead of container startup per test.
 /// </summary>
-public abstract class PostgresTestBase<TService> : IAsyncLifetime where TService : class
+/// <typeparam name="TService">The service type to resolve for test execution.</typeparam>
+/// <param name="fixture">The shared PostgreSQL container fixture.</param>
+[Collection(PostgresTestCollection.Name)]
+public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixture) : IAsyncLifetime where TService : class
 {
     /// <summary>
-    /// The Docker container running PostgreSQL for testing.
-    /// </summary>
-    private readonly IContainer _postgresContainer;
-
-    /// <summary>
-    /// The connection string for the PostgreSQL container.
-    /// </summary>
-    private string? _connectionString;
-
-    /// <summary>
-    /// The name of the database for testing, unique for each test class.
+    /// Unique database name for this test class to ensure isolation.
     /// </summary>
     private readonly string _dbName = $"mathcomps_test_{Guid.NewGuid():N}";
 
     /// <summary>
-    /// The username for the database.
+    /// The connection string for this test class's database.
     /// </summary>
-    private readonly string _dbUser = "postgres";
+    private string? _connectionString;
 
-    /// <summary>
-    /// The password for the database.
-    /// </summary>
-    private readonly string _dbPassword = "postgres";
-
-    /// <summary>
-    /// The port for the database.
-    /// </summary>
-    private readonly int _dbPort = 5432;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PostgresTestBase{TService}"/> class.
-    /// Sets up the PostgreSQL container for testing.
-    /// </summary>
-    protected PostgresTestBase()
-    {
-        try
-        {
-            // Create PostgreSQL container with pgvector extension for vector similarity operations.
-            _postgresContainer = new ContainerBuilder()
-                // Use pgvector image with PostgreSQL 16 for embedding similarity
-                .WithImage("pgvector/pgvector:pg16")
-                // The required envs
-                .WithEnvironment("POSTGRES_USER", _dbUser)
-                .WithEnvironment("POSTGRES_PASSWORD", _dbPassword)
-                .WithEnvironment("POSTGRES_DB", _dbName)
-                // Bind to random available port (0) to avoid conflicts with other services
-                .WithPortBinding(0, _dbPort)
-                // Wait for PostgreSQL to be fully ready (not just the port)
-                // pg_isready returns 0 when the server is accepting connections
-                .WithWaitStrategy(
-                    Wait.ForUnixContainer()
-                        .UntilCommandIsCompleted("pg_isready", "-U", _dbUser))
-                .Build();
-        }
-        catch (DockerUnavailableException)
-        {
-            // We need Docker!
-            throw new InvalidOperationException(
-                """
-                Docker Desktop is required to run Postgres integration tests
-                  - Install Docker Desktop (Windows/Mac) or Docker Engine (Linux)
-                  - Start Docker and ensure 'docker info' works
-                  - On Windows, enable WSL 2 backend in Docker Desktop settings
-                """
-            );
-        }
-    }
-
-    /// <summary>
-    /// Initializes the test environment by starting the PostgreSQL container and seeding test data.
-    /// This method is called before each test class execution to ensure a clean, isolated database state.
-    /// </summary>
-    /// <returns>A task representing the asynchronous initialization operation.</returns>
+    /// <inheritdoc/>
     public virtual async Task InitializeAsync()
     {
-        // Start the container
-        await _postgresContainer.StartAsync();
-
-        // Ask Docker which random port it picked
-        var mappedPort = _postgresContainer.GetMappedPublicPort(_dbPort);
-
-        // Build connection string with the RANDOM port
-        _connectionString = $"Host=localhost;" +
-                            $"Port={mappedPort};" +
-                            $"Database={_dbName};" +
-                            $"Username={_dbUser};" +
-                            $"Password={_dbPassword};";
+        // Get connection string for our unique database
+        _connectionString = fixture.GetConnectionString(_dbName);
 
         // Create the DB context using the service provider
         await using var serviceProvider = CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
 
-        // Ensure we start with a completely clean database state for each test run
-        await context.Database.EnsureDeletedAsync();
+        // Ensure we start with a fully migrated database
         await context.Database.MigrateAsync();
 
         // Seed the database with test data
         await SeedDataAsync(context);
     }
 
-    /// <summary>
-    /// Cleans up the test environment by stopping and disposing of the PostgreSQL container.
-    /// This method is called after all tests in the class have completed to free up resources.
-    /// </summary>
-    /// <returns>A task representing the asynchronous cleanup operation.</returns>
-    public virtual async Task DisposeAsync()
-    {
-        // Stop and dispose the container to free up resources
-        await (_postgresContainer?.StopAsync() ?? Task.CompletedTask);
-        await (_postgresContainer?.DisposeAsync() ?? ValueTask.CompletedTask);
-    }
+    /// <inheritdoc/>
+    public virtual Task DisposeAsync() => Task.CompletedTask;
 
     /// <summary>
     /// Creates a service provider configured with the test database connection string.

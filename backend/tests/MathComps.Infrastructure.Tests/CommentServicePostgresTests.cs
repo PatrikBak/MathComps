@@ -9,9 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
-/// Integration tests for the EF-backed <see cref="ICommentService"/> using a disposable PostgreSQL container.
+/// Integration tests for the EF-backed <see cref="ICommentService"/> using a shared PostgreSQL container.
 /// </summary>
-public class CommentServicePostgresTests : PostgresTestBase<ICommentService>
+/// <param name="fixture">The shared PostgreSQL container fixture.</param>
+public class CommentServicePostgresTests(PostgresContainerFixture fixture)
+    : PostgresTestBase<ICommentService>(fixture)
 {
     /// <summary>
     /// Test user ID 1.
