@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl'
+
 import AuthButton from './AuthButton'
 import type { AuthScreen } from './AuthForm'
 
@@ -25,6 +27,9 @@ export default function AuthFormActions({
   onScreenSwitch,
   onBack,
 }: AuthFormActionsProps) {
+  // Get the translation
+  const t = useTranslations('auth')
+
   return (
     <>
       {/* Forgot Password Link */}
@@ -39,7 +44,7 @@ export default function AuthFormActions({
             }}
             className="text-indigo-400 font-medium hover:text-indigo-300 hover:underline transition-colors cursor-pointer text-sm"
           >
-            Zabudli ste heslo?
+            {t('forgotPassword')}
           </button>
         </div>
       )}
@@ -49,19 +54,19 @@ export default function AuthFormActions({
         {(() => {
           switch (screen) {
             case 'login-with-email':
-              return 'Prihlásiť sa'
+              return t('login')
             case 'signup-with-email':
-              return 'Registrovať sa'
+              return t('register')
             case 'forgotten-password':
-              return 'Odoslať kód'
+              return t('sendCode')
             case 'password-reset-code':
-              return 'Overiť kód'
+              return t('verifyCode')
             case 'enter-new-password':
-              return 'Obnoviť heslo'
+              return t('resetPassword')
             case 'email-verification':
-              return 'Overiť email'
+              return t('verifyEmail')
             case 'enter-email':
-              return 'Pokračovať'
+              return t('continue')
           }
         })()}
       </AuthButton>
@@ -78,7 +83,7 @@ export default function AuthFormActions({
         variant="secondary"
         className="mt-3"
       >
-        Späť
+        {t('back')}
       </AuthButton>
     </>
   )

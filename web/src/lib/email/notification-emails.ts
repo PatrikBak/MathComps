@@ -1,6 +1,5 @@
 /**
  * Notification email templates for user communications
- * Uses base template system for consistent branding
  */
 
 import { generateBaseEmail } from './base-template'
@@ -20,23 +19,29 @@ type ContactEmailProps = {
 }
 
 /**
- * Generates HTML for contact form notification email
+ * Generates HTML for contact form notification email (admin notification).
+ * Uses English for international admin team.
  */
-export function generateContactEmail({ name, email, reason, message }: ContactEmailProps): string {
+export async function generateContactEmail({
+  name,
+  email,
+  reason,
+  message,
+}: ContactEmailProps): Promise<string> {
   const content = `
     <h2 style="margin: 0 0 16px; color: #1d1d1f; font-size: 24px; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 12px;">
-      Nová správa z kontaktného formulára
+      New Contact Form Message
     </h2>
     
     <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
       <h3 style="color: #334155; margin: 0 0 16px; font-size: 16px; font-weight: 600;">
-        Kontaktné údaje
+        Contact Details
       </h3>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
         <tr>
           <td style="padding: 4px 0;">
             <span style="color: #64748b; font-size: 14px;">
-              <strong>Meno:</strong>
+              <strong>Name:</strong>
             </span>
           </td>
           <td style="padding: 4px 0;">
@@ -60,7 +65,7 @@ export function generateContactEmail({ name, email, reason, message }: ContactEm
         <tr>
           <td style="padding: 4px 0;">
             <span style="color: #64748b; font-size: 14px;">
-              <strong>Dôvod:</strong>
+              <strong>Reason:</strong>
             </span>
           </td>
           <td style="padding: 4px 0;">
@@ -77,9 +82,6 @@ export function generateContactEmail({ name, email, reason, message }: ContactEm
     </div>
   `
 
-  // Reuse the base email template
-  return generateBaseEmail({
-    content,
-    previewText: `Nová správa od ${name}: ${reason}`,
-  })
+  // Reuse the base email template with English locale for admin
+  return await generateBaseEmail(content, `New message from ${name}: ${reason}`, 'en')
 }

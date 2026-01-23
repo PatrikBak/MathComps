@@ -99,7 +99,6 @@ type UseProblemSearchInfiniteReturn = {
 
 /**
  * Query key factory for problem search queries.
- * This ensures consistent cache keys across the application.
  */
 export const problemQueryKeys = {
   // Base key for all problem-related queries
@@ -109,35 +108,37 @@ export const problemQueryKeys = {
   favorites: ['problems', 'favorites'] as const,
 
   // Key for initial filter data (all available options)
-  initialData: (userId: string | null) => [...problemQueryKeys.all, 'initial', userId] as const,
+  initialData: (locale: string, userId: string | null) =>
+    [...problemQueryKeys.all, 'initial', locale, userId] as const,
 
   // Key for problem search results with specific filters + for the current user
-  // It also includes whether a filter filters only favorite problems
-  // This is technically not needed but it helps with cache invalidation of only favorite problem lists
-  search: (filters: SearchFiltersState | null, userId: string | null) =>
+  search: (locale: string, filters: SearchFiltersState | null, userId: string | null) =>
     [
       ...problemQueryKeys.all,
       filters == null ? null : filters.favoritesOnly ? 'favorites' : 'all',
       'search',
+      locale,
       filters,
       userId,
     ] as const,
 
   // Key for a single problem by slug
-  single: (problemSlug: string | null, userId: string | null) =>
-    [...problemQueryKeys.all, 'single', problemSlug, userId] as const,
+  single: (locale: string, problemSlug: string | null, userId: string | null) =>
+    [...problemQueryKeys.all, 'single', locale, problemSlug, userId] as const,
 }
 
 /**
  * Hook to fetch initial filter data, i.e. filter options + the first batch of problems
  * Used during the initial page load to populate filter dropdowns.
  *
+ * @param locale - The current locale for localized metadata
  * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
  *
  * @returns The query result containing initial filter options
  */
 export function useInitialFilterData(
+  locale: string,
   userId: string | null,
   enabled: boolean
 ): UseInitialFilterDataReturn {
@@ -149,7 +150,7 @@ export function useInitialFilterData(
 
   // Construct the React Query
   const query = useQuery({
-    queryKey: problemQueryKeys.initialData(userId),
+    queryKey: problemQueryKeys.initialData(locale, userId),
     queryFn: async () => {
       // Guard against missing API caller (should be prevented by enabled flag)
       if (api.state !== 'ready') throw new Error('API not ready')
@@ -202,6 +203,7 @@ export function useInitialFilterData(
  * Hook to fetch a single problem by its slug.
  * Used when the URL contains an `id` parameter pointing to a specific problem.
  *
+ * @param locale - The current locale for localized metadata
  * @param problemSlug - The problem slug from the URL (null if not viewing a single problem)
  * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
@@ -209,6 +211,7 @@ export function useInitialFilterData(
  * @returns The query result containing the single problem data
  */
 export function useSingleProblem(
+  locale: string,
   problemSlug: string | null,
   userId: string | null,
   enabled: boolean
@@ -221,7 +224,7 @@ export function useSingleProblem(
 
   // Construct the React Query
   const query = useQuery({
-    queryKey: problemQueryKeys.single(problemSlug, userId),
+    queryKey: problemQueryKeys.single(locale, problemSlug, userId),
     queryFn: async () => {
       // Guard against missing slug (should be prevented by enabled flag, but provides safety)
       if (!problemSlug) {
@@ -277,6 +280,7 @@ export function useSingleProblem(
 /**
  * Internal hook to fetch and paginate problem search results using infinite scroll.
  *
+ * @param locale - The current locale for localized metadata
  * @param filters - The current filter state to search with (null if not yet initialized)
  * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
@@ -284,6 +288,7 @@ export function useSingleProblem(
  * @returns The query result containing the search results
  */
 function useProblemSearchInfinite(
+  locale: string,
   filters: SearchFiltersState | null,
   userId: string | null,
   enabled: boolean
@@ -296,7 +301,7 @@ function useProblemSearchInfinite(
 
   // Construct the React Query
   const query = useInfiniteQuery({
-    queryKey: problemQueryKeys.search(filters, userId),
+    queryKey: problemQueryKeys.search(locale, filters, userId),
     queryFn: async ({ pageParam, signal }: { pageParam: number; signal: AbortSignal }) => {
       // Guard against missing filters (should be prevented by enabled flag, but provides safety)
       if (!filters) {
@@ -407,6 +412,7 @@ type UseProblemSearchQueryReturn = {
  * Provides a simpler API for components with all the data they need.
  * Transforms the infinite query structure into flat arrays and clear loading states.
  *
+ * @param locale - The current locale for localized metadata
  * @param filters - The current filter state to search with (null if not yet initialized)
  * @param userId - The current user's ID (or null if anonymous)
  * @param enabled - Whether the query should run
@@ -414,12 +420,13 @@ type UseProblemSearchQueryReturn = {
  * @returns The query result containing the search results
  */
 export function useProblemSearchQuery(
+  locale: string,
   filters: SearchFiltersState | null,
   userId: string | null,
   enabled: boolean
 ): UseProblemSearchQueryReturn {
   // Construct the infinite query
-  const infiniteQuery = useProblemSearchInfinite(filters, userId, enabled)
+  const infiniteQuery = useProblemSearchInfinite(locale, filters, userId, enabled)
 
   // Get the function to update displayed problems
   const setDisplayedProblems = useProblemStore((state) => state.setDisplayedProblems)

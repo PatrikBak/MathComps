@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl'
+
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
 
 import type { AuthScreen } from './AuthForm'
@@ -14,6 +16,9 @@ type AuthFormHeaderProps = {
  * Header component for the authentication form.
  */
 export default function AuthFormHeader({ screen }: AuthFormHeaderProps) {
+  // Get the translation
+  const t = useTranslations('auth.headers')
+
   return (
     <div className="text-center mb-8">
       <div className="flex justify-center mb-5">
@@ -24,19 +29,19 @@ export default function AuthFormHeader({ screen }: AuthFormHeaderProps) {
           switch (screen) {
             case 'hub':
             case 'enter-email':
-              return 'PRIHLÁSENIE / REGISTRÁCIA'
+              return t('loginOrRegister')
             case 'login-with-email':
-              return 'PRIHLÁSTE SA'
+              return t('login')
             case 'signup-with-email':
-              return 'VYTVORTE SI ÚČET'
+              return t('createAccount')
             case 'forgotten-password':
-              return 'OBNOVENIE HESLA'
+              return t('passwordReset')
             case 'password-reset-code':
-              return 'ZADANIE KÓDU'
+              return t('enterCode')
             case 'enter-new-password':
-              return 'NOVÉ HESLO'
+              return t('newPassword')
             case 'email-verification':
-              return 'OVERENIE EMAILU'
+              return t('verifyEmail')
           }
         })()}
       </h5>

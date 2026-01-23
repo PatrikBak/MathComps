@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -15,6 +16,8 @@ interface ContactModalProps {
 }
 
 export default function ContactModal({ isOpen, onClose, defaultReason }: ContactModalProps) {
+  const tContact = useTranslations('contact')
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleFormSubmit = async (data: ContactFormData) => {
@@ -32,25 +35,21 @@ export default function ContactModal({ isOpen, onClose, defaultReason }: Contact
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Správu sa nepodarilo odoslať')
+        throw new Error(result.error || tContact('sendFailed'))
       }
 
-      toast.success('Správa úspešne poslaná! Čoskoro sa vám ozveme.')
+      toast.success(tContact('successMessage'))
       onClose()
     } catch (error) {
       console.error('Contact form error:', error)
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Správu sa nepodarilo odoslať. Skúste znova neskôr.'
-      )
+      toast.error(error instanceof Error ? error.message : tContact('sendFailedRetry'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Napíšte nám" showCloseButton>
+    <Modal isOpen={isOpen} onClose={onClose} title={tContact('title')} showCloseButton>
       <ContactForm
         defaultReason={defaultReason}
         onSubmit={handleFormSubmit}

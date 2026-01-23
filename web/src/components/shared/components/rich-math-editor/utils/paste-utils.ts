@@ -5,7 +5,7 @@ import { createMarkdownLink, type EditContext, type EditResult } from './transfo
 
 /** Action to replace content with an image upload */
 type PasteImageAction = {
-  /** Discriminator for image paste action */
+  /** Discriminator */
   type: 'image'
   /** The result of the file upload initiation */
   result: FileValid
@@ -13,7 +13,7 @@ type PasteImageAction = {
 
 /** Action to replace selection with a markdown link */
 type PasteLinkAction = {
-  /** Discriminator for link paste action */
+  /** Discriminator */
   type: 'link'
   /** The result of the text edit operation creating the link */
   result: EditResult
@@ -21,7 +21,7 @@ type PasteLinkAction = {
 
 /** Default action - let the browser handle the paste natively */
 type PasteDefaultAction = {
-  /** Discriminator for default paste action */
+  /** Discriminator */
   type: 'default'
 }
 
@@ -46,6 +46,10 @@ type PasteHandlerParams = {
   pushState: FileUploadParams['pushState']
   /** Callback to get fresh textarea state during async ops */
   getTextareaState: FileUploadParams['getTextareaState']
+  /** Translation function for UI strings */
+  tEditor: FileUploadParams['tEditor']
+  /** Translation function for API errors */
+  tApiErrors: FileUploadParams['tApiErrors']
 }
 
 /**
@@ -68,6 +72,8 @@ export function processPaste({
   onChange,
   pushState,
   getTextareaState,
+  tEditor,
+  tApiErrors,
 }: PasteHandlerParams): PasteAction {
   // Get text area context data
   const { start, selectedText } = context
@@ -83,16 +89,18 @@ export function processPaste({
 
     // If file is extracted...
     if (blob) {
-      // Upload
+      // Upload with translated filename
       const url = handleFileUpload({
         file: blob,
-        filename: 'Prilepený obrázok',
+        filename: tEditor('pastedImage'),
         currentText: context.fullText,
         selectionStart: start,
         scrollTop,
         onChange,
         pushState,
         getTextareaState,
+        tEditor,
+        tApiErrors,
       })
 
       // Return the new state

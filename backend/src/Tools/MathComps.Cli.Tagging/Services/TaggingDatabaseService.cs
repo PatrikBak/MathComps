@@ -49,14 +49,14 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             var targetCountWithoutSolution = categoriesCounts.Where(pair => pair.Key != TagType.Technique).Sum(pair => pair.Value);
 
             // Flatten the tag selection
-            var selectedTags = tagSelection.Data.Values.Flatten().ToList();
+            var selectedTagSlugs = tagSelection.Data.Values.Flatten().ToList();
 
             // Filter problems that haven't been fully processed for the selected tags
             query = query.Where(problem =>
                 // Compute how many of the selected tags are already associated with the problem
                 (from problemTag in problem.ProblemTagsAll
-                 join tagName in selectedTags on problemTag.Tag.Name equals tagName
-                 select tagName).Count()
+                 join slug in selectedTagSlugs on problemTag.Tag.Slug equals slug
+                 select slug).Count()
                  // Compare against the expected counts based on whether the problem has a solution
                  != (problem.Texts.Any(text => text.DocumentType == DocumentType.Solution) ? targetCountWithSolution : targetCountWithoutSolution));
         }
@@ -89,7 +89,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             // Here we only consider problems that have at least one of the selected tags and match the criteria
             ? query.Where(problem =>
                 (from problemTag in problem.ProblemTagsAll.AsQueryable().Where(applyCriteria)
-                 join tagName in tagSelection on problemTag.Tag.Name equals tagName
+                 join slug in tagSelection on problemTag.Tag.Slug equals slug
                  select problemTag).Any())
             // Here we consider all problems that have any tags matching the criteria
             : query.Where(problem =>
@@ -125,14 +125,14 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
 
         // Remove existing problem tags that are being updated
         foreach (var existingProblemTag in problemToUpdate.ProblemTagsAll.ToList())
-            if (tags.ContainsKey(existingProblemTag.Tag.Name))
+            if (tags.ContainsKey(existingProblemTag.Tag.Slug))
                 problemToUpdate.ProblemTagsAll.Remove(existingProblemTag);
 
         // Add new problem tags with proper data mapping
         foreach (var pair in tags)
         {
             // Get the tracked Tag entity
-            var tag = tagSlugToTagEntity[pair.Key.ToSlug()];
+            var tag = tagSlugToTagEntity[pair.Key];
 
             // Create and add the ProblemTag association
             problemToUpdate.ProblemTagsAll.Add(new ProblemTag
@@ -185,9 +185,9 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             // If the problem doesn't exist, throw an exception
             ?? throw new Exception($"Trying to update tags of non-existing problem: {problemId}");
 
-        // Join problem tags with approval decisions and apply veto logic
+        // Join problem tags with approval decisions
         var problemTags = from problemTag in problemToUpdate.ProblemTagsAll
-                          join pair in tagsApprovals on problemTag.Tag.Name equals pair.Key
+                          join pair in tagsApprovals on problemTag.Tag.Slug equals pair.Key
                           select (problemTag, pair.Value);
 
         // Apply the approval or veto logic
@@ -219,11 +219,9 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
         // Create a new database context for this operation to ensure proper disposal and isolation
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Summarize usage per tag to guide pruning choices
-
         // First, get all tags with their basic info including TagType
         var tags = await dbContext.Tags
-            .Select(tag => new { tag.Id, tag.Name, tag.Slug, tag.TagType })
+            .Select(tag => new { tag.Id, tag.Slug, tag.TagType })
             .ToListAsync();
 
         // Then, get the problem counts for each tag using a separate query
@@ -233,22 +231,20 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             .Select(group => new { TagId = group.Key, Count = group.Count() })
             .ToDictionaryAsync(group => group.TagId, group => group.Count);
 
-        // Combine the data into the final DTOs including TagType
+        // Combine the data into the final DTOs
         return [.. tags
             .Select(tag => new TagUsageDto(
-                tag.Name,
                 tag.Slug,
                 tag.TagType,
                 problemCounts.GetValueOrDefault(tag.Id, 0)
             ))
-            // Nicely ordered by TagType first, then usage, then name
             .OrderBy(pair => pair.TagType)
             .ThenBy(pair => pair.ProblemCount)
-            .ThenBy(pair => pair.Name)];
+            .ThenBy(pair => pair.Slug)];
     }
 
     /// <inheritdoc />
-    public async Task RemoveProblemTagsAsync(string[] tags, bool onlyAssigned)
+    public async Task RemoveProblemTagsAsync(string[] tagSlugs, bool onlyAssigned)
     {
         // Get DB access
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -258,7 +254,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
         {
             // Just delete the tags and count on the cascade delete
             await dbContext.Tags
-                .Where(tag => tags.Contains(tag.Name))
+                .Where(tag => tagSlugs.Contains(tag.Slug))
                 .ExecuteDeleteAsync();
         }
         // If deleting just good tags..
@@ -266,14 +262,14 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
         {
             // Just delete good tag associations
             await dbContext.ProblemTags
-                .Where(problemTag => tags.Contains(problemTag.Tag.Name))
+                .Where(problemTag => tagSlugs.Contains(problemTag.Tag.Slug))
                 .Where(ProblemTag.IsGoodEnoughTag)
                 .ExecuteDeleteAsync();
         }
     }
 
     /// <inheritdoc />
-    public async Task RemoveSpecificTagFromProblemAsync(Guid problemId, string tagName)
+    public async Task RemoveSpecificTagFromProblemAsync(Guid problemId, string tagSlug)
     {
         // Get DB access
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -286,11 +282,11 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             // Make sure the problem exists
             ?? throw new ArgumentException($"Problem with ID {problemId} not found");
 
-        // Find the specific tag to remove by name
+        // Find the specific tag to remove by slug
         var problemTagToRemove = problem
             .ProblemTagsAll.AsQueryable()
             .Where(ProblemTag.IsGoodEnoughTag)
-            .FirstOrDefault(problemTag => problemTag.Tag.Name == tagName);
+            .FirstOrDefault(problemTag => problemTag.Tag.Slug == tagSlug);
 
         // Only proceed if the tag is actually associated with this problem
         if (problemTagToRemove != null)
@@ -319,7 +315,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             from problemTag in problem.ProblemTagsAll.AsQueryable().Where(ProblemTag.IsGoodEnoughTag)
             where problem.Id == problemId
             select KeyValuePair.Create(
-                problemTag.Tag.Name,
+                problemTag.Tag.Slug,
                 new ProblemTagData(
                     problemTag.Tag.TagType,
                     problemTag.GoodnessOfFit,
@@ -334,21 +330,26 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
     }
 
     /// <inheritdoc />
-    public async Task<int> MergeTagsAsync(string tagToDelete, string tagToReplace)
+    public async Task<int> MergeTagsAsync(string tagToDeleteSlug, string tagToReplaceSlug)
     {
         // Get DB access
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         // Find the tag to delete
         var tagToDeleteEntity = await dbContext.Tags
-            .FirstOrDefaultAsync(tag => tag.Name == tagToDelete);
+            .FirstOrDefaultAsync(tag => tag.Slug == tagToDeleteSlug);
 
         // If tag doesn't exist, nothing to merge
         if (tagToDeleteEntity == null)
             return 0;
 
         // Get or create the tag to replace
-        var tagToReplaceEntity = (await GetOrCreateTagEntitiesAsync(dbContext, [(tagToReplace, tagToDeleteEntity.TagType)])).Values.Single();
+        var tagToReplaceEntity = (await GetOrCreateTagEntitiesAsync(
+                dbContext,
+                [(tagToReplaceSlug, tagToDeleteEntity.TagType)]
+            ))
+            .Values
+            .Single();
 
         // Load all ProblemTag entries that have tagToDelete, including their tag navigation
         var problemTagsToMerge = await dbContext.ProblemTags
@@ -414,14 +415,14 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
     /// Retrieves a dictionary of Tag entities for the given slugs, creating any that do not exist.
     /// </summary>
     /// <param name="dbContext">The database context to use for this operation.</param>
-    /// <param name="tags">A list of tuples, where each contains the Name and TagType of a tag to find or create.</param>
+    /// <param name="tags">A list of tuples, where each contains the Slug and TagType of a tag to find or create.</param>
     /// <returns>A dictionary mapping tag slugs to their tracked EF Core Tag entities.</returns>
     private static async Task<Dictionary<string, Tag>> GetOrCreateTagEntitiesAsync(
         MathCompsDbContext dbContext,
-        IEnumerable<(string Name, TagType Type)> tags)
+        IEnumerable<(string Slug, TagType Type)> tags)
     {
-        //  Extract just the slugs from the input to query the database
-        var tagSlugs = tags.Select(pair => pair.Name.ToSlug()).ToList();
+        // Extract just the slugs from the input to query the database
+        var tagSlugs = tags.Select(pair => pair.Slug).ToList();
 
         // Query the database to find all tags that already exist with the given slugs
         var tagSlugToTagEntity = await dbContext.Tags
@@ -429,7 +430,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             .ToDictionaryAsync(tag => tag.Slug, tag => tag);
 
         // Identify which of the requested tags do not already exist in the database
-        var newTagsData = tags.Where(pair => !tagSlugToTagEntity.ContainsKey(pair.Name.ToSlug())).ToList();
+        var newTagsData = tags.Where(pair => !tagSlugToTagEntity.ContainsKey(pair.Slug)).ToList();
 
         // Create new Tag entities in memory for the ones that were not found
         foreach (var pair in newTagsData)
@@ -437,8 +438,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             // A new Tag entity is instantiated with all the required data provided by the caller
             var newTag = new Tag
             {
-                Name = pair.Name,
-                Slug = pair.Name.ToSlug(),
+                Slug = pair.Slug,
                 TagType = pair.Type,
             };
 
@@ -446,7 +446,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
             dbContext.Tags.Add(newTag);
 
             // Remember the entity so we can reference it in problems
-            tagSlugToTagEntity[pair.Name.ToSlug()] = newTag;
+            tagSlugToTagEntity[pair.Slug] = newTag;
         }
 
         // Return the dictionary containing both the pre-existing and the newly created tags
@@ -480,7 +480,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                  // Collect tag data
                  TagsData = problem.ProblemTagsAll.Select(problemTag => new
                  {
-                     problemTag.Tag.Name,
+                     problemTag.Tag.Slug,
                      problemTag.Tag.TagType,
                      problemTag.Justification,
                      problemTag.GoodnessOfFit,
@@ -497,7 +497,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                 problem.Statement,
                 problem.Solution,
                 problem.TagsData.ToImmutableDictionary(
-                    tagData => tagData.Name,
+                    tagData => tagData.Slug,
                     tagData => new ProblemTagData(
                         tagData.TagType,
                         tagData.GoodnessOfFit,
@@ -539,7 +539,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
         // Ensure all required Tag entities exist in the database
         var tagSlugToTagEntity = await GetOrCreateTagEntitiesAsync(
             dbContext,
-            tagImports.Select(tag => (tag.TagName, tag.TagType)).Distinct()
+            tagImports.Select(tag => (tag.TagSlug, tag.TagType)).Distinct()
         );
 
         // Track successful imports
@@ -561,7 +561,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                 .Select(tag => new ProblemTag
                 {
                     // Look up already existing tag id
-                    TagId = tagSlugToTagEntity[tag.TagName.ToSlug()].Id,
+                    TagId = tagSlugToTagEntity[tag.TagSlug].Id,
 
                     // We're in a loop for one problem
                     ProblemId = problemId,

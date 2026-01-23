@@ -1,4 +1,4 @@
-using MathComps.Domain.EfCoreEntities;
+using MathComps.Shared;
 
 namespace MathComps.Cli.Translation.Dtos;
 

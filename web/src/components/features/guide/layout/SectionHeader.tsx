@@ -61,7 +61,7 @@ export function SectionHeader({
         )}
         <span className="mr-1">{number}</span>
         <span>{title}</span>
-        <CopyLinkButton sectionSlug={sectionSlug} iconSize={18} />
+        <CopyLinkButton slug={sectionSlug} iconSize={18} />
       </h3>
       {description && (
         <div className="text-base sm:text-lg text-slate-400 max-w-4xl leading-relaxed">

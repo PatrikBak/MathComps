@@ -1,10 +1,11 @@
+import { useTranslations } from 'next-intl'
+
 import ContactButton from '@/components/features/contact/ContactButton'
 import Section from '@/components/shared/components/Section'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
  * A specific feature, either implemented or not.
- * @Layout components
  */
 type FeatureItem = {
   /* The name/description of the feature */
@@ -14,8 +15,7 @@ type FeatureItem = {
 }
 
 /**
- * A category of features.
- * @Layout components
+ * Categories list of {@link FeatureItem}s.
  */
 type FeatureCategory = {
   /* The name of the category */
@@ -29,7 +29,7 @@ type FeatureCategory = {
 }
 
 /**
- * A badge representing a feature.
+ * A badge representing a {@link FeatureItem}.
  */
 const FeatureBadge = ({ title, isImplemented }: FeatureItem) => (
   <span
@@ -46,7 +46,7 @@ const FeatureBadge = ({ title, isImplemented }: FeatureItem) => (
 )
 
 /**
- * A container with features of a single category.
+ * A container with features of a single {@link FeatureCategory}.
  */
 const FeatureCategoryCard = (category: FeatureCategory) => {
   return (
@@ -75,57 +75,60 @@ const FeatureCategoryCard = (category: FeatureCategory) => {
  * Displays the roadmap/features section on the about page.
  */
 export const RoadmapSection = () => {
+  // Translations for section
+  const t = useTranslations('about.roadmap')
+
+  // Categorized features
   const featureCategories: FeatureCategory[] = [
     {
-      title: 'Obsah',
+      title: t('categories.content'),
       icon: '📚',
       color: 'bg-blue-500/20 text-blue-400',
       features: [
-        { title: 'Archív SK/CZ úloh', isImplemented: true },
-        { title: 'Úvodné študijné texty', isImplemented: true },
-        { title: 'Úlohy zo zahraničných súťaží' },
-        { title: 'Doplnenie študijných textov' },
-        { title: 'Preklady úloh (CZ/EN)' },
-        { title: 'Plná lokalizácia (CZ/EN)' },
+        { title: t('features.archiveSKCZ'), isImplemented: true },
+        { title: t('features.introTexts'), isImplemented: true },
+        { title: t('features.fullLocalization'), isImplemented: true },
+        { title: t('features.foreignTasks') },
+        { title: t('features.moreTexts') },
       ],
     },
     {
-      title: 'Komunita',
+      title: t('categories.community'),
       icon: '👥',
       color: 'bg-green-500/20 text-green-400',
       features: [
-        { title: 'Sekcia s novinkami', isImplemented: true },
-        { title: 'Používateľské profily', isImplemented: true },
-        { title: 'Lajkovanie úloh', isImplemented: true },
-        { title: 'Diskusie k obsahu' },
-        { title: 'Možnosť reportovať chyby' },
-        { title: 'Vlastné zoznamy úloh' },
-        { title: 'Platforma pre prispievateľov' },
+        { title: t('features.newsSection'), isImplemented: true },
+        { title: t('features.userProfiles'), isImplemented: true },
+        { title: t('features.likeTasks'), isImplemented: true },
+        { title: t('features.discussions'), isImplemented: true },
+        { title: t('features.reportBugs') },
+        { title: t('features.customLists') },
+        { title: t('features.contributorPlatform') },
       ],
     },
     {
-      title: 'Nástroje',
+      title: t('categories.tools'),
       icon: '🛠️',
       color: 'bg-purple-500/20 text-purple-400',
       features: [
-        { title: 'Filtrovanie obľúbených úloh', isImplemented: true },
-        { title: 'Export do PDF a TeX' },
-        { title: 'Odporúčania podobných úloh' },
-        { title: 'AI hinty k úlohám' },
-        { title: 'Sledovanie progresu v riešení' },
-        { title: 'Personalizované odporúčania úloh' },
+        { title: t('features.filterFavorites'), isImplemented: true },
+        { title: t('features.exportPdfTex') },
+        { title: t('features.recommendSimilar') },
+        { title: t('features.aiHints') },
+        { title: t('features.trackProgress') },
+        { title: t('features.personalizedRecs') },
       ],
     },
     {
-      title: 'Súťaže',
+      title: t('categories.competitions'),
       icon: '🏆',
       color: 'bg-yellow-500/20 text-yellow-400',
       features: [
-        { title: 'Platforma na tréningové súťaže' },
-        { title: 'Možnosť súkromných súťaží' },
-        { title: 'Oficiálne tréningové súťaže' },
-        { title: 'Rebríčky a medaily' },
-        { title: 'AI predhodnotenie' },
+        { title: t('features.trainingPlatform') },
+        { title: t('features.privateComps') },
+        { title: t('features.officialTraining') },
+        { title: t('features.leaderboards') },
+        { title: t('features.aiPregrading') },
       ],
     },
   ]
@@ -133,12 +136,12 @@ export const RoadmapSection = () => {
   return (
     <Section
       id="roadmap-section"
-      title="Funkcionality"
+      title={t('title')}
       description={
         <>
-          Toto je len začiatok projektu a v pláne je veľa nových funkcií.{' '}
+          {t('description')}{' '}
           <span className="block w-fit mx-auto mt-6 items-center px-2 py-0.5 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            ✓ Zelené funkcie sú už dostupné!
+            ✓ {t('implementedLabel')}
           </span>
         </>
       }
@@ -155,14 +158,16 @@ export const RoadmapSection = () => {
 
         <div className="mt-8 text-center">
           <p className="text-slate-400 text-sm">
-            Tento zoznam sa bude v čase meniť, pokojte{' '}
-            <ContactButton
-              reason="feature-ideas"
-              className="text-indigo-400 hover:text-indigo-300 underline"
-            >
-              prispejte svojimi nápadmi
-            </ContactButton>
-            .
+            {t.rich('footer', {
+              link: (chunks) => (
+                <ContactButton
+                  reason="featureIdeas"
+                  className="text-indigo-400 hover:text-indigo-300 underline"
+                >
+                  {chunks}
+                </ContactButton>
+              ),
+            })}
           </p>
         </div>
       </div>

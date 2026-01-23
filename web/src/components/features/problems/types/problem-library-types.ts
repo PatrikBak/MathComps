@@ -8,8 +8,6 @@ import type {
   Problem,
 } from './problem-api-types'
 
-// #region UI Filter Types
-
 /**
  * The possible options to filter from in the problem library
  */
@@ -55,29 +53,17 @@ export type SearchFiltersState = {
 
 /**
  * Represents the state of filters as parsed directly from the URL.
- * This is a discriminated union that handles two distinct URL patterns:
- *
- * 1. **Filter-based URLs** (e.g., `?competitions=csmo-a&seasons=2025`):
- *    Contains filter parameters parsed before context-aware interpretation.
- *    The `competitionSelectionParts` field exists to distinguish between
- *    ambiguous formats like competition-category vs competition-round, since we can't know
- *    whether the second part is a category or a round without context.
- *    This enables concise slugs like `csmo-a` or `cpsj-i`.
- *
- * 2. **Problem ID URLs** (e.g., `?id=75-a-i-1`):
- *    Contains only a problem identifier that requires backend lookup
- *    to determine the appropriate filters.
  */
-export type UrlQueryState =
-  | (Omit<SearchFiltersState, 'contestSelection'> & {
-      competitionSelectionParts: string[][]
-    })
-  | {
-      problemId: string
-    }
-// #endregion
-
-// #region UI Response Types
+export type UrlQueryState = Omit<SearchFiltersState, 'contestSelection'> & {
+  /**
+   * Contains filter parameters parsed before context-aware interpretation.
+   * The `competitionSelectionParts` field exists to distinguish between
+   * ambiguous formats like competition-category vs competition-round, since we can't know
+   * whether the second part is a category or a round without context.
+   * This enables concise slugs like `csmo-a` or `cpsj-i`.
+   */
+  competitionSelectionParts: string[][]
+}
 
 /**
  * Response type for filter operations.
@@ -103,5 +89,3 @@ export type SingleProblemResult = {
   filters: SearchFiltersState
   options: FilterOptionsWithCounts
 }
-
-// #endregion

@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import {
@@ -36,7 +37,7 @@ export default function SimpleSelect({
   options,
   value,
   onChange,
-  placeholder = 'Select an option',
+  placeholder,
   className,
 }: SimpleSelectProps) {
   // Convert options to FacetOption format
@@ -48,6 +49,12 @@ export default function SimpleSelect({
       })),
     [options]
   )
+
+  // Get translations for aria-labels
+  const t = useTranslations('ui.filters')
+
+  // Use provided placeholder or default translated one
+  const effectivePlaceholder = placeholder ?? t('selectPlaceholder')
 
   // Convert single value to array format expected by facet
   const selectedValues = React.useMemo(() => (value ? [value] : []), [value])
@@ -71,7 +78,7 @@ export default function SimpleSelect({
   })
 
   const selectedOption = options.find((option) => option.value === value)
-  const displayText = selectedOption ? selectedOption.label : placeholder
+  const displayText = selectedOption ? selectedOption.label : effectivePlaceholder
 
   const handleOptionChange = React.useCallback(
     (optionValue: string) => {
@@ -90,7 +97,7 @@ export default function SimpleSelect({
         className={cn(facetUI.trigger, className)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={open ? 'Zavrieť výber' : 'Otvoriť výber'}
+        aria-label={open ? t('closePopover') : t('openPopover', { name: '' })}
       >
         {/* Left: label */}
         <span className="min-w-0 flex items-center gap-2 truncate">

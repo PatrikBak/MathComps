@@ -1,4 +1,5 @@
 import { Expand, Eye, Image, Paperclip, Send, Shrink, Type, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -127,6 +128,9 @@ export function RichMathEditorFooter({
   isValid,
   isLoading = false,
 }: RichMathEditorFooterProps) {
+  // Get translations
+  const tEditor = useTranslations('ui.editor')
+
   // Use existing device capabilities hook for OS detection
   const { isMobileOS, isMac } = useDeviceCapabilities()
 
@@ -162,10 +166,10 @@ export function RichMathEditorFooter({
             type="button"
             onClick={modeConfig.onExpand}
             className="flex items-center gap-1.5 pl-0.5 pr-2 sm:px-2 py-1 rounded text-xs transition-colors text-gray-400 hover:text-gray-200 hover:bg-slate-600/50 whitespace-nowrap"
-            title="Rozšíriť editor s náhľadom"
+            title={tEditor('expandEditor')}
           >
             <Expand size={12} />
-            <span>Rozšíriť + Náhľad</span>
+            <span>{tEditor('expandWithPreview')}</span>
             <Eye size={12} />
           </button>
         )}
@@ -176,10 +180,10 @@ export function RichMathEditorFooter({
             type="button"
             onClick={modeConfig.onShrink}
             className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors text-gray-400 hover:text-gray-200 hover:bg-slate-600/50 whitespace-nowrap"
-            title="Zmenšiť editor"
+            title={tEditor('shrinkEditor')}
           >
             <Shrink size={12} />
-            <span className="hidden md:inline">Zmenšiť</span>
+            <span className="hidden md:inline">{tEditor('shrink')}</span>
           </button>
         )}
 
@@ -196,7 +200,7 @@ export function RichMathEditorFooter({
                   max={MAX_IMAGES_PER_COMMENT}
                   isOver={isOverImageLimit}
                   isNear={isNearImageLimit}
-                  title={`Maximálny počet obrázkov: ${MAX_IMAGES_PER_COMMENT}`}
+                  title={tEditor('maxImages', { max: MAX_IMAGES_PER_COMMENT })}
                 />
               )}
               {attachmentCount > 0 && (
@@ -206,7 +210,7 @@ export function RichMathEditorFooter({
                   max={MAX_ATTACHMENTS_PER_COMMENT}
                   isOver={isOverAttachmentLimit}
                   isNear={isNearAttachmentLimit}
-                  title={`Maximálny počet príloh: ${MAX_ATTACHMENTS_PER_COMMENT}`}
+                  title={tEditor('maxAttachments', { max: MAX_ATTACHMENTS_PER_COMMENT })}
                 />
               )}
               {charCount > 0 && (
@@ -216,7 +220,7 @@ export function RichMathEditorFooter({
                   max={MAX_CHARACTERS_PER_COMMENT}
                   isOver={isOverCharLimit}
                   isNear={isNearCharLimit}
-                  title={`Maximálny počet znakov: ${MAX_CHARACTERS_PER_COMMENT}`}
+                  title={tEditor('maxCharacters', { max: MAX_CHARACTERS_PER_COMMENT })}
                   tabular
                 />
               )}
@@ -237,7 +241,7 @@ export function RichMathEditorFooter({
                 'w-8 h-8 sm:w-10 sm:h-10',
                 'bg-slate-700/30 text-gray-400 hover:bg-slate-600/50 hover:text-gray-200'
               )}
-              title="Zrušiť (Esc)"
+              title={tEditor('cancelEsc')}
             >
               <X size={16} className="sm:hidden" />
               <X size={18} className="hidden sm:block" />
@@ -255,7 +259,11 @@ export function RichMathEditorFooter({
                 : 'bg-slate-700/20 text-gray-500 cursor-not-allowed',
               isLoading && 'cursor-wait opacity-90'
             )}
-            title={isMobileOS ? 'Odoslať' : `Odoslať (${isMac ? '⌘' : 'Ctrl'} + Enter)`}
+            title={
+              isMobileOS
+                ? tEditor('submit')
+                : tEditor('submitShortcut', { modifier: isMac ? '⌘' : 'Ctrl' })
+            }
           >
             {isLoading ? (
               <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 border-white/20 border-t-white" />

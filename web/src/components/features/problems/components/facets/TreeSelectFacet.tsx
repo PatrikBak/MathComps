@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -76,7 +77,7 @@ export default function TreeSelectFacet({
   options,
   selected,
   onChange,
-  searchPlaceholder = 'Hľadať…',
+  searchPlaceholder,
   className,
   defaultExpandedIds = [],
   showSearch = true,
@@ -86,6 +87,7 @@ export default function TreeSelectFacet({
   showCounts = true,
   titleTooltip,
 }: TreeSelectFacetProps) {
+  const tFilters = useTranslations('ui.filters')
   const facet = useFacetBase<TreeSelectFacetOption>({ options, inputKind: 'checkbox', selected })
   const isDirty = selected.length > 0
 
@@ -407,7 +409,7 @@ export default function TreeSelectFacet({
             setQuery={facet.setQuery}
             searchRef={facet.searchRef}
             title={title}
-            placeholder={searchPlaceholder}
+            placeholder={searchPlaceholder ?? tFilters('searchPlaceholder')}
             onArrowDownToList={facet.focusFirstItem}
           />
         )}
@@ -418,7 +420,7 @@ export default function TreeSelectFacet({
           onKeyDown={facet.onListKeyDown}
         >
           {filteredTree.length === 0 && facet.query && (
-            <div className="px-3 py-3 text-sm text-slate-400">Žiadne výsledky</div>
+            <div className="px-3 py-3 text-sm text-slate-400">{tFilters('noResults')}</div>
           )}
           {filteredTree.map((option) => renderNode(option, 0))}
         </FacetListContainer>

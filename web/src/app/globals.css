@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'flag-icons/css/flag-icons.min.css';
+@import 'katex/dist/katex.min.css';
 
 :root {
   scroll-behavior: smooth;

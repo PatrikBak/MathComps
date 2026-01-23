@@ -2,7 +2,7 @@
   "profiles": {
     "ParseHandouts": {
       "commandName": "Project",
-      "commandLineArgs": "*-sk.tex",
+      "commandLineArgs": "*.sk.tex *.en.tex *.cs.tex",
       "workingDirectory": "."
     }
   }

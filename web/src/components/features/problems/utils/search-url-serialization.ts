@@ -14,7 +14,6 @@ const FILTER_PARAMS = {
   AUTHORS: 'authors',
   AUTHOR_LOGIC: 'authorLogic',
   COMPETITIONS: 'competitions',
-  PROBLEM_ID: 'id',
   FAVORITES_ONLY: 'favoritesOnly',
 } as const
 
@@ -50,26 +49,33 @@ const SEPARATORS = {
  * Uses dashes to separate hierarchy levels and commas to separate multiple selections.
  *
  * @param selections - Array of filter selections to serialize
+ *
  * @returns Serialized string representation
  */
 const serializeSelections = (selections: SearchFiltersState['contestSelection']): string => {
-  const serializedSelections = selections.map((selection) => {
-    switch (selection.type) {
-      case 'competition':
-        return selection.competitionSlug
-      case 'category':
-        return `${selection.competitionSlug}${SEPARATORS.HIERARCHY}${selection.categorySlug}`
-      case 'round':
-        // Smart serialization: only include category if it exists
-        if (selection.categorySlug) {
-          return `${selection.competitionSlug}${SEPARATORS.HIERARCHY}${selection.categorySlug}${SEPARATORS.HIERARCHY}${selection.roundSlug}`
-        } else {
-          return `${selection.competitionSlug}${SEPARATORS.HIERARCHY}${selection.roundSlug}`
-        }
-    }
-  })
+  return selections
+    .map((selection) => {
+      switch (selection.type) {
+        // A whole competition
+        case 'competition':
+          return selection.competitionSlug
 
-  return serializedSelections.join(SEPARATORS.LIST)
+        // A category within a competition
+        case 'category':
+          return `${selection.competitionSlug}${SEPARATORS.HIERARCHY}${selection.categorySlug}`
+
+        // A round within a competition
+        case 'round':
+          // A round within a category
+          if (selection.categorySlug) {
+            return `${selection.competitionSlug}${SEPARATORS.HIERARCHY}${selection.categorySlug}${SEPARATORS.HIERARCHY}${selection.roundSlug}`
+          } else {
+            // A round within a competition
+            return `${selection.competitionSlug}${SEPARATORS.HIERARCHY}${selection.roundSlug}`
+          }
+      }
+    })
+    .join(SEPARATORS.LIST)
 }
 
 /**
@@ -77,6 +83,7 @@ const serializeSelections = (selections: SearchFiltersState['contestSelection'])
  * Only includes non-default values to maintain clean, shareable URLs.
  *
  * @param filters - The search filters state to serialize
+ *
  * @returns URL query string, or empty string if all filters are default
  */
 export const serializeFilters = (filters: SearchFiltersState): string => {
@@ -147,49 +154,26 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
  * @returns Parsed URL query state with raw selection parts, or null if parsing fails or has invalid params
  */
 export const deserializeFilters = (queryString: string): UrlQueryState | null => {
-  try {
-    const params = new URLSearchParams(queryString)
+  const params = new URLSearchParams(queryString)
 
-    // Validate all parameters are recognized
-    const validKeys = Object.values(URL_PARAMS) as string[]
-    const hasInvalidParams = Array.from(params.keys()).some((key) => !validKeys.includes(key))
-
-    // Check if this is a problem ID URL
-    const problemId = params.get(URL_PARAMS.PROBLEM_ID)
-    if (problemId) {
-      if (hasInvalidParams) {
-        console.warn('Invalid URL parameters detected with problem ID:', queryString)
-        return null
-      }
-
-      return {
-        problemId,
-      }
-    }
-
-    if (hasInvalidParams) {
-      console.warn('Invalid URL parameters detected:', queryString)
-      return null
-    }
-
-    // Otherwise, it's a filter-based URL
-    return {
-      searchText: params.get(URL_PARAMS.SEARCH_TEXT) || '',
-      searchInSolution: params.get(URL_PARAMS.SEARCH_IN_SOLUTION) === 'true',
-      seasons: parseSlugArray(params.get(URL_PARAMS.SEASONS)),
-      problemNumbers: parseNumberArray(params.get(URL_PARAMS.PROBLEM_NUMBERS)),
-      tags: parseSlugArray(params.get(URL_PARAMS.TAGS)),
-      tagLogic: (params.get(URL_PARAMS.TAG_LOGIC)?.toLowerCase() as 'or' | 'and') || 'or',
-      authors: parseSlugArray(params.get(URL_PARAMS.AUTHORS)),
-      authorLogic: (params.get(URL_PARAMS.AUTHOR_LOGIC)?.toLowerCase() as 'or' | 'and') || 'or',
-      competitionSelectionParts: parseCompetitionSelectionParts(
-        params.get(URL_PARAMS.COMPETITIONS)
-      ),
-      favoritesOnly: params.get(URL_PARAMS.FAVORITES_ONLY) === 'true',
-    }
-  } catch (error) {
-    console.error('Failed to deserialize filters:', error)
+  // Validate all parameters are recognized
+  const validKeys = Object.values(URL_PARAMS) as string[]
+  const hasInvalidParams = Array.from(params.keys()).some((key) => !validKeys.includes(key))
+  if (hasInvalidParams) {
     return null
+  }
+
+  return {
+    searchText: params.get(URL_PARAMS.SEARCH_TEXT) || '',
+    searchInSolution: params.get(URL_PARAMS.SEARCH_IN_SOLUTION) === 'true',
+    seasons: parseSlugArray(params.get(URL_PARAMS.SEASONS)),
+    problemNumbers: parseNumberArray(params.get(URL_PARAMS.PROBLEM_NUMBERS)),
+    tags: parseSlugArray(params.get(URL_PARAMS.TAGS)),
+    tagLogic: (params.get(URL_PARAMS.TAG_LOGIC)?.toLowerCase() as 'or' | 'and') || 'or',
+    authors: parseSlugArray(params.get(URL_PARAMS.AUTHORS)),
+    authorLogic: (params.get(URL_PARAMS.AUTHOR_LOGIC)?.toLowerCase() as 'or' | 'and') || 'or',
+    competitionSelectionParts: parseCompetitionSelectionParts(params.get(URL_PARAMS.COMPETITIONS)),
+    favoritesOnly: params.get(URL_PARAMS.FAVORITES_ONLY) === 'true',
   }
 }
 
@@ -249,7 +233,6 @@ const parseSelectionParts = (selectionString: string): string[] | null => {
   const parts = selectionString.split(SEPARATORS.HIERARCHY).filter(Boolean)
 
   if (parts.length === 0) {
-    console.warn(`Empty selection format: ${selectionString}`)
     return null
   }
 

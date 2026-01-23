@@ -1,4 +1,5 @@
 import { AtSign, KeyRound, Lock, LockKeyhole, Mail, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useFormContext } from 'react-hook-form'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -27,6 +28,9 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
     formState: { errors },
   } = useFormContext<AuthFormValues>()
 
+  // Get translations for auth UI
+  const tAuth = useTranslations('auth')
+
   return (
     <div className="space-y-4">
       {/* Email Field  */}
@@ -36,9 +40,9 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
         screen === 'enter-email') && (
         <InputField
           id="email"
-          label="Email"
+          label={tAuth('emailLabel')}
           icon={AtSign}
-          placeholder="Zadajte email"
+          placeholder={tAuth('enterEmail')}
           type="email"
           error={'email' in errors ? errors.email : undefined}
           registration={register('email')}
@@ -49,9 +53,9 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
       {screen === 'signup-with-email' && (
         <InputField
           id="firstName"
-          label="Meno alebo prezývka"
+          label={tAuth('nameOrNickname')}
           icon={User}
-          placeholder="Zadajte meno alebo prezývku"
+          placeholder={tAuth('enterName')}
           error={'firstName' in errors ? errors.firstName : undefined}
           registration={register('firstName')}
         />
@@ -70,16 +74,16 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
               )}
             >
               <Mail className="mt-0.5 size-4 shrink-0 text-blue-400" />
-              <p className="text-xs leading-relaxed text-slate-300">Overovací kód bol odoslaný</p>
+              <p className="text-xs leading-relaxed text-slate-300">{tAuth('verificationSent')}</p>
             </div>
           )}
 
           {/* Code input */}
           <InputField
             id="code"
-            label="Kód z emailu"
+            label={tAuth('codeFromEmail')}
             icon={KeyRound}
-            placeholder="Zadajte 6-miestny kód"
+            placeholder={tAuth('enterCode')}
             maxLength={6}
             error={'code' in errors ? errors.code : undefined}
             registration={register('code')}
@@ -93,9 +97,11 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
         screen === 'enter-new-password') && (
         <InputField
           id="password"
-          label={screen === 'enter-new-password' ? 'Nové heslo' : 'Heslo'}
+          label={screen === 'enter-new-password' ? tAuth('newPassword') : tAuth('password')}
           icon={Lock}
-          placeholder={screen === 'enter-new-password' ? 'Zadajte nové heslo' : 'Zadajte heslo'}
+          placeholder={
+            screen === 'enter-new-password' ? tAuth('enterNewPassword') : tAuth('enterPassword')
+          }
           type="password"
           error={'password' in errors ? errors.password : undefined}
           registration={register('password')}
@@ -106,9 +112,9 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
       {(screen === 'signup-with-email' || screen === 'enter-new-password') && (
         <InputField
           id="confirmPassword"
-          label="Potvrdiť heslo"
+          label={tAuth('confirmPassword')}
           icon={LockKeyhole}
-          placeholder="Zadajte heslo znova"
+          placeholder={tAuth('enterPasswordAgain')}
           type="password"
           error={'confirmPassword' in errors ? errors.confirmPassword : undefined}
           registration={register('confirmPassword')}

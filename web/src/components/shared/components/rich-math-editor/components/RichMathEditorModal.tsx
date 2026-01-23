@@ -1,4 +1,5 @@
 import { useMediaQuery } from '@mantine/hooks'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -44,6 +45,9 @@ export function RichMathEditorExpandedModal({
   onCancel,
   isLoading = false,
 }: RichMathEditorExpandedModalProps) {
+  // Get translations
+  const tEditor = useTranslations('ui.editor')
+
   // Check if we're on mobile where we have editor and preview as tabs
   const isMobile = useMediaQuery('(max-width: 767px)')
 
@@ -66,7 +70,7 @@ export function RichMathEditorExpandedModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Rozšírený editor"
+      title={tEditor('expandedEditor')}
       showCloseButton
       className="flex flex-col max-h-[95vh] md:max-h-[90vh] md:max-w-6xl"
     >
@@ -83,7 +87,7 @@ export function RichMathEditorExpandedModal({
                 : 'text-gray-400 hover:text-gray-200'
             )}
           >
-            Editor
+            {tEditor('expandedEditor')}
           </button>
           <button
             type="button"
@@ -95,7 +99,7 @@ export function RichMathEditorExpandedModal({
                 : 'text-gray-400 hover:text-gray-200'
             )}
           >
-            Náhľad
+            {tEditor('preview')}
           </button>
         </div>
 
@@ -149,7 +153,7 @@ export function RichMathEditorExpandedModal({
               <div className="h-full flex flex-col overflow-y-auto">
                 {/* Header - desktop only */}
                 <div className="hidden md:block sticky top-0 z-10 px-4 pt-3 pb-2 bg-slate-800/50 text-xs text-gray-500 uppercase tracking-wide font-medium">
-                  Náhľad
+                  {tEditor('preview')}
                 </div>
                 {/* Content */}
                 <div className="flex-1 px-4 py-3 text-sm text-gray-300 leading-relaxed min-h-[200px] bg-slate-700/50">

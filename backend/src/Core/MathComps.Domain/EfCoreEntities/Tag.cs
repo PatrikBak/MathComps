@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MathComps.Shared;
 
 namespace MathComps.Domain.EfCoreEntities;
 
@@ -13,11 +14,7 @@ public class Tag
     /// </summary>
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
-    /// <summary>
-    /// Human-readable tag name.
-    /// </summary>
-    [MaxLength(100)]
-    public required string Name { get; set; }
+
 
     /// <summary>
     /// URL-safe unique slug (lowercase, hyphenated).

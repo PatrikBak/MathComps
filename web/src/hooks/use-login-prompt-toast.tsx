@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
@@ -7,7 +8,7 @@ import { useLoginRedirect } from '@/hooks/use-login-redirect'
  * Parameters for the options object passed to the show function
  */
 type UseLoginPromptToastParams = {
-  /* Message to display in the toast, in the format "Pre [reason] sa musíte prihlásiť" */
+  /* Message to display in the toast, the reason why login is required */
   reason: string
   /* Optional callback to be called when the toast is dismissed */
   onDismiss?: () => void
@@ -22,6 +23,9 @@ export function useLoginPromptToast() {
   // Use the login redirect hook
   const { redirectToLogin } = useLoginRedirect()
 
+  // Translations for UI strings
+  const t = useTranslations('auth')
+
   // Ref to track if the login link was clicked
   // We don't want to trigger the onDismiss callback
   // if the user is actually proceeding to login
@@ -34,9 +38,9 @@ export function useLoginPromptToast() {
       isLoginClickedRef.current = false
 
       // Show the toast
-      toast.warning(`Pre ${reason} sa musíte prihlásiť`, {
+      toast.warning(t('loginRequired', { reason }), {
         action: {
-          label: 'Prihlásiť sa',
+          label: t('login'),
           onClick: () => {
             // Remember that the login link was clicked
             isLoginClickedRef.current = true
@@ -55,6 +59,6 @@ export function useLoginPromptToast() {
         },
       })
     },
-    [redirectToLogin]
+    [redirectToLogin, t]
   )
 }

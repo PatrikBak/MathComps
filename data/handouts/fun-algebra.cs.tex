@@ -1,0 +1,489 @@
+\input _template
+
+\Title{Algebra}
+
+\Subtitle{Vtipná algebra}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+V této sbírce úloh najdete mé nejoblíbenější úlohy, které mají krátká zajímavá, častokrát triková řešení využívající různé algebraické triky.
+
+\sec Úlohy
+
+Bez dalšího otálení pojďme na úlohy. Klíčem je najít vtipnou úpravu. Je těžké dát obecný návod -- koneckonců, nadstandardní úlohy jsou přece jen dost o kreativitě.
+
+\Problem{0}{}{
+    Označme
+    $$
+    m \circ n = \frac{mn+4}{m+n}.
+    $$
+    Určete
+    $$
+    (\dots((42 \circ 41) \circ 40) \circ \dots \circ 1) \circ 0.
+    $$
+}{
+    V~úloze jsou zdánlivě náhodné konstanty, například~$42$ vypadá, že by mohla být uměle nastavená. Kdybychom měli ručně vyhodnocovat takto velká čísla, zblázníme se. Zkuste si úlohu pro menší konstanty.
+}{
+    Platí
+    \begitems
+    \i $1 \circ 0 = 4$
+    \i $(2 \circ 1) \circ 0 = 2$
+    \i $((3 \circ 2) \circ 1) \circ 0 = 2$
+    \i $(((4 \circ 3) \circ 2) \circ 1) \circ 0 = 2$
+    \enditems
+    Není podezřelé, že to po čase vychází stále 2?
+}{
+    Všimněme si speciální vlastnosti čísla $2$ vzhledem k operaci $\circ$. Pro libovolné $m \ne -2$ platí
+    $$
+    m \circ 2 = \frac{2m+4}{m+2} = \frac{2(m+2)}{m+2} = 2.
+    $$
+    Výraz ze zadání vyhodnocujeme postupně zleva, přičemž čísla vstupují do operace v~pořadí $42, 41, \dots, 2, 1, 0$. V~momentě, kdy budeme mezivýsledek skládat s~číslem $2$, se hodnota celého výrazu změní na $2$. Všechny následující operace budou mít tvar $2 \circ k$, což je opět $2$. Výsledek je proto $2$.
+}
+
+\Problem{0}{}{
+    Čísla $a,b,c$ jsou nenulová reálná čísla se součtem $0$. Dokažte, že
+    $$
+    \frac{1}{a+b}+\frac{1}{b+c}+\frac{1}{c+a}=\frac{a^2+b^2+c^2}{2abc}.
+    $$
+}{
+    Podmínku $a+b+c=0$ chceme šikovně využít, abychom se zbavili komplikovaných zlomků nalevo.
+}{
+    Klíčem je uvědomit si, že $a+b=-c$, tedy první zlomek je vlastně roven $-\frac 1c$, podobně zbylé.
+}{
+    Po úpravě stačí ukázat
+    $$
+    -\left(\frac 1a + \frac 1b + \frac 1c\right) = \frac{a^2+b^2+c^2}{2abc},
+    $$
+    po roznásobení
+    $$
+    2ab+2bc+2ca=a^2+b^2+c^2.
+    $$
+    Teď potřebujeme znovu použít podmínku $a+b+c=0$. Co takového bychom s~ní mohli udělat, abychom dostali výrazy, o~kterých máme něco dokázat?
+}{
+    Z~podmínky $a+b+c=0$ vyplývá $a+b=-c$, $b+c=-a$ a~$c+a=-b$. Levou stranu dokazované rovnosti proto upravíme na
+    $$
+    -\frac{1}{c} - \frac{1}{a} - \frac{1}{b} = -\frac{ab+bc+ca}{abc}.
+    $$
+    Zároveň umocněním rovnosti $a+b+c=0$ na druhou dostaneme
+    $$
+    0 = (a+b+c)^2 = a^2+b^2+c^2 + 2(ab+bc+ca),
+    $$
+    z~čehož vyjádříme $ab+bc+ca = -\frac{1}{2}(a^2+b^2+c^2)$. Dosazením tohoto výrazu do upravené levé strany ihned získáme
+    $$
+    -\frac{-\frac{1}{2}(a^2+b^2+c^2)}{abc} = \frac{a^2+b^2+c^2}{2abc},
+    $$
+    což jsme chtěli dokázat.
+}
+
+\Problem{0}{}{
+    Čísla $a,b,c$ jsou kladná reálná taková, že $ab+bc+ca=1$. Určete všechny možné hodnoty výrazu
+    $$
+    \frac{a(b^2+1)}{a+b}+
+    \frac{b(c^2+1)}{b+c}+
+    \frac{c(a^2+1)}{c+a}.
+    $$
+}{
+    Trikem je zjednodušit každý zlomek individuálně použitím podmínky $ab+bc+ca=1$.
+}{
+    Náš zkoumaný výraz je plný písmen a~je tam jedno číslo, $1$. Co takhle se ho zbavit?
+}{
+    Upravme první zlomek dosazením $1 = ab+bc+ca$ do čitatele:
+    $$
+    \gather
+    \frac{a(b^2+ab+bc+ca)}{a+b} = \frac{a(b(a+b)+c(a+b))}{a+b} =\\= \frac{a(a+b)(b+c)}{a+b} = ab+ac.
+    \endgather
+    $$
+    Cyklicky pro druhý a~třetí zlomek dostaneme $bc+ab$ a~$ca+bc$. Sečtením všech tří upravených výrazů získáme
+    $$
+    (ab+ac) + (bc+ab) + (ca+bc) = 2(ab+bc+ca).
+    $$
+    Jelikož $ab+bc+ca=1$, hodnota výrazu je $2$.
+
+    Ještě potřebujeme dokázat, že tato hodnota je dosažitelná -- zřejmě však existují kladná čísla $a,b,c$, pro která $ab+bc+ca=1$, například $a=b=c=\sqrt{3}/3$.
+}
+
+\Problem{0}{}{
+    Čísla $a,b,c$ jsou kladná reálná se součinem 1. Určete všechny možné hodnoty výrazu
+    $$
+    \frac{1}{1+a+ab}+
+    \frac{1}{1+b+bc}+
+    \frac{1}{1+c+ca}.
+    $$
+}{
+    Klíčem je provést nějakou šikovnou úpravu některých zlomků, která umožní použít podmínku $abc=1$. Co je taková běžná věc, kterou umíme dělat se zlomky?
+}{
+    Jednoduchý způsob, jak využít $abc=1$ např. v~prvním zlomku, je rozšířit ho~$c$, potom máme
+    $$
+    \frac{1}{c+ac+abc}=\frac{1}{c+ac+1}.
+    $$
+    Tento zlomek má čistou náhodou stejný jmenovatel jako poslední zlomek.
+}{
+    První zlomek rozšíříme číslem $c$ a~druhý výrazem $ac$. S~využitím $abc=1$ tak upravíme jejich jmenovatele na tvar shodný se třetím zlomkem:
+    $$
+    \align
+    \frac{1}{1+a+ab} &= \frac{c}{c+ac+abc} = \frac{c}{c+ac+1}, \\
+    \frac{1}{1+b+bc} &= \frac{ac}{ac+abc+ab c^2} = \frac{ac}{ac+1+c}.
+    \endalign
+    $$
+    Sečtením všech tří zlomků dostaneme
+    $$
+    \frac{c}{1+c+ac} + \frac{ac}{1+c+ac} + \frac{1}{1+c+ac} = \frac{c+ac+1}{1+c+ac} = 1.
+    $$
+    Jediná možná hodnota výrazu je $1$. Příklad $a=b=c=1$ přitom dokazuje, že tato hodnota je dosažitelná.
+}
+
+\Problem{0}{}{
+    Reálná čísla $a, b, c$ mají součet 1. Dokažte, že číslo
+    $$
+    (a + bc)(b + ca)(c + ab)
+    $$
+    je nezáporné.
+}{
+    Trikem je upravit každou závorku individuálně použitím podmínky $a+b+c=1$.
+}{
+    Dobrým indikátorem, jak upravit každou závorku, je fakt, že v~jednotlivých závorkách máme $a+bc$, kde je první člen stupně~1 a~druhý stupně~2 -- co takhle je nějak oba udělat stupně~2?
+}{
+    Využijeme podmínku $a+b+c=1$ na úpravu výrazů v~závorce. Pro první závorku platí:
+    $$
+    \gather
+    a + bc = a(a+b+c) + bc = a^2+ab+ac+bc =\\= a(a+b)+c(a+b) = (a+c)(a+b).
+    \endgather
+    $$
+    Analogicky odvodíme $b+ca = (a+b)(b+c)$ a~$c+ab = (a+c)(b+c)$. Vynásobením všech tří výrazů dostaneme
+    $$
+    (a+bc)(b+ca)(c+ab) = (a+b)^2(b+c)^2(c+a)^2.
+    $$
+    Výsledek je součinem druhých mocnin reálných čísel, a~proto je nezáporný.
+}
+
+\Problem{0}{}{
+    Pro nenulová reálná čísla $a,b,c$ platí
+    $$
+    \frac1a + \frac1b + \frac1c = \frac1{a+b+c}.
+    $$
+    Dokažte, že pro každé liché přirozené číslo $n$ platí
+    $$
+    \frac1{a^n} + \frac1{b^n} + \frac1{c^n} = \frac1{a^n+b^n+c^n}.
+    $$
+}{
+    Zapomeňte na to, co dokazujeme. Kdy vůbec může platit předpoklad? Zkuste najít všechny trojice $a,b,c$, které tuto rovnost splňují.
+}{
+    Klíčem je uvědomit si, že po roznásobení podmínky dostaneme
+    $$
+    (a+b+c)(ab+bc+ca)-abc=0.
+    $$
+    Tento výraz se překvapivě dá rozložit na součin. Odtud to už bude přímočaré.
+}{
+    Upravme podmínku ze zadání vynásobením jmenovateli:
+    $$
+    \gather
+    \frac{ab+bc+ca}{abc} = \frac{1}{a+b+c},\\
+    (a+b+c)(ab+bc+ca) - abc = 0.
+    \endgather
+    $$
+    Výraz na levé straně upravíme postupným vytýkáním na součin:
+    $$
+    \align
+    (a+b+c)(ab+bc+ca) - abc &= \\ =
+    (a+b+c)(ab + c(a+b)) - abc &= \\ =
+    (a+b)ab + abc + (a+b)^2c + (a+b)c^2 - abc &= \\ =
+    (a+b)(ab + ac + bc + c^2) &= \\ =
+    (a+b)(a(b+c) + c(b+c))  &= \\ =
+    (a+b)(b+c)(c+a).&
+    \endalign
+    $$
+    Rovnost tedy platí právě tehdy, když jsou alespoň dvě z~čísel opačná. Bez újmy na obecnosti nechť $b=-a$.
+    Potom pro každé liché přirozené číslo $n$ platí $b^n = (-a)^n = -a^n$.
+    Levá strana dokazované rovnosti je
+    $$
+    \frac{1}{a^n} + \frac{1}{-a^n} + \frac{1}{c^n} = \frac{1}{c^n}.
+    $$
+    Pravá strana je
+    $$
+    \frac{1}{a^n - a^n + c^n} = \frac{1}{c^n}.
+    $$
+    Levá strana se rovná pravé, čímž je důkaz hotov.
+}
+
+\Problem{0}{}{
+    Navzájem různá reálná čísla $a,b,c$ splňují
+    $$
+    a + \frac1b = b + \frac1c = c + \frac1a.
+    $$
+    Dokažte, že $|abc|=1$.
+}{
+    Zadání nám říká, že platí
+    $$
+    \align 
+    a + \frac 1b &= b + \frac 1c, \\
+    b + \frac 1c &= c + \frac 1a, \\
+    c + \frac 1a &= a + \frac 1b. \\
+    \endalign
+    $$
+    Uvědomění si, že jde o~soustavu tří rovnic, je dobrý krok k~tomu, aby bylo přirozené zkoušet různě kombinovat rovnice, jak je běžné při práci se soustavami.
+}{
+    Po chvíli snadno zjistíme, že sčítání a~odčítání rovnic k~ničemu nevede. Klíčem je tyto rovnice násobit. K~tomu však potřebujeme každou rovnici trochu upravit, aby se nám při násobení něco vykrátilo.
+}{
+    Z~rovnosti $a + \frac{1}{b} = b + \frac{1}{c}$ vyjádříme rozdíl $a-b$:
+    $$
+    a - b = \frac{1}{c} - \frac{1}{b} = \frac{b-c}{bc}.
+    $$
+    Cyklicky pro další dvojice získáme
+    $$
+    b - c = \frac{c-a}{ca} \quad\text{a}\quad c - a = \frac{a-b}{ab}.
+    $$
+    Jelikož jsou čísla $a,b,c$ navzájem různá, rozdíly $a-b$, $b-c$ a~$c-a$ jsou nenulové. Vynásobením těchto tří rovností dostaneme
+    $$
+    (a-b)(b-c)(c-a) = \frac{(b-c)(c-a)(a-b)}{(abc)^2}.
+    $$
+    Vydělením nenulovým výrazem $(a-b)(b-c)(c-a)$ získáme $1 = \frac{1}{(abc)^2}$, tedy $(abc)^2 = 1$, z~čehož vyplývá $|abc|=1$.
+}
+
+\Problem{0}{}{
+    Pro nenulová reálná čísla $a,b,c$ platí
+    $$
+    a^2-b^2 = bc \hbox{\quad a \quad} b^2-c^2 = ca.
+    $$
+    Dokažte, že $a^2 - c^2 = ab$.
+}{
+    Sečtením rovnic dostaneme přesně levou stranu dokazované rovnosti. Stačí tedy dokázat něco, co vypadá zdánlivě jednodušeji.
+}{
+    Podle prvního návodu jsme už zjistili, že součet rovnic z~podmínky má smysl. To ještě není všechno, potřebujeme něco dalšího. Jiné než sčítání rovnic je například násobení. Předtím je ale často musíme upravit -- ideálně tak, aby se po násobení něco vykrátilo.
+}{
+    Sečtením zadaných rovnic dostaneme
+    $$
+    a^2-c^2 = bc+ca.
+    $$
+    K důkazu tvrzení tedy stačí ukázat, že $ab = bc+ca$.
+    První rovnici ze zadání upravíme na $a^2 = b(b+c)$ a~druhou na $(b-c)(b+c)=ca$. Vynásobením těchto rovností máme
+    $$
+    a^2(b-c)(b+c) = abc(b+c).
+    $$
+    Kdyby $b+c=0$, tak z~první upravené rovnice $a^2=0$, tedy $a=0$, což odporuje zadání. Proto můžeme rovnici vydělit nenulovým výrazem $a(b+c)$, čímž dostaneme
+    $$
+    a(b-c) = bc,
+    $$
+    což je zřejmě ekvivalentní dokazovanému vztahu $ab=bc+ca$. Tím je důkaz hotov.
+}
+
+\Problem{1}{}{
+    Jen s~použitím pera a~papíru (a mozku) najděte dvě čtyřmístná čísla, jejichž součin je roven $4^8 + 6^8 + 9^8$.
+}{
+    Úloha nám naznačuje, že máme hledat rozklad na součin. Náš výraz je ale velmi nepřehledný, zaveďme nejprve vhodnou substituci čísel za písmenka, abychom ho zpřehlednili.
+}{
+    Vyjádření $4=2^2$, $9=3^2$ a $6=2 \cdot 3$ naznačují, že klíčová substituce je $a=2$, $b=3$, výraz je potom roven
+    $$
+    a^{16}+(ab)^8+b^{16}.
+    $$
+    Dokážeme toto rozložit na součin?
+}{
+    Trikem k~rozkladu $a^{16}+(ab)^8+b^{16}$ je \textit{doplnění na čtverec}, zkuste doplnit $a^{16}+b^{16}$ na čtverec.
+}{
+    Nechť $a=2$, $b=3$. Výraz ze zadání je potom roven
+    $$
+    a^{16} + a^8 b^8 + b^{16}.
+    $$
+    Tento výraz upravíme doplněním na čtverec a~následným použitím vzorce pro rozdíl čtverců:
+    $$
+    \align
+    a^{16}+a^8b^8+b^{16} &= (a^{16} + 2a^8b^8 + b^{16}) - a^8b^8 \\
+    &= (a^8+b^8)^2 - (a^4b^4)^2 \\
+    &= (a^8+b^8-a^4b^4)(a^8+b^8+a^4b^4).
+    \endalign
+    $$
+    Dosadíme $a=2$ a~$b=3$. Potom $a^4=16$, $b^4=81$, $a^4b^4 = 1296$.
+    Dále $a^8=256$ a~$b^8=6561$, a $a^8+b^8 = 256+6561 = 6817$.
+    Jednotlivé závorky jsou tedy rovny:
+    $$
+    \align
+    6817 - 1296 &= 5521, \\
+    6817 + 1296 &= 8113.
+    \endalign
+    $$
+    Obě nalezená čísla jsou čtyřmístná.
+}
+
+
+\Problem{1}{}{
+    V~oboru reálných čísel řešte rovnici
+    $$
+    x^4+4x^3+6x^2+4x=6.
+    $$
+}{
+    Konstanty na levé straně nejsou náhodné a~měly by něco připomínat.
+}{
+    To něco, co by tyto konstanty měly připomínat, se dokonce učí ve škole a má jméno.
+}{
+    Levá strana rovnice připomíná binomickou větu pro 4~členy. Vskutku,
+    $$
+    (x+1)^4 = x^4+4x^3+6x^2+4x+1.
+    $$
+    To je skoro levá strana rovnice, potřebujeme ještě přičíst~1. Rovnice je tedy ekvivalentní s~rovnicí.
+    $$
+    (x+1)^4 = 7.
+    $$
+    V~oboru reálných čísel má rovnice dvě řešení $x=-1\pm \root 4 \of 7$.
+}
+
+\Problem{2}{}{
+    V~oboru reálných čísel řešte rovnici
+    $$
+    (x^2 + 3x + 2)(x^2 - 2x - 1)(x^2 - 7x + 12) + 24 = 0.
+    $$
+}{
+    Kvadratické členy nejsou náhodné. Co takhle se podívat na každý zvlášť, nedá se přetransformovat?
+}{
+    Prvním krokem úlohy je uvědomit si, že dva ze tří našich kvadratických členů se dají rozložit na součin -- kupodivu to vychází i pěkně, je to náhoda?
+}{
+    Co se čtyřmi lineárními členy a~jedním kvadratickým? Trikem je z~nich znovu vytvořit tři kvadratické členy.
+}{
+    Aplikováním rad z~předešlých návodů bychom měli dojít k~rovnici
+    $$
+    (x^2 - 2x - 8)(x^2 - 2x - 3)(x^2 - 2x - 1) + 24=0.
+    $$
+    Její stupeň umíme zjednodušit vhodnou substitucí. Měla by zůstat rovnice s~celočíselnými kořeny, kterou už vyřešíme středoškolskými postupy.
+}{
+    Rozložíme první a~třetí závorku na součin lineárních činitelů:
+    $$
+    (x+1)(x+2)(x^2-2x-1)(x-3)(x-4) + 24 = 0.
+    $$
+    Vhodným přeskupením členů máme:
+    $$
+    \align
+    (x+1)(x-3) &= x^2-2x-3 \\
+    (x+2)(x-4) &= x^2-2x-8
+    \endalign
+    $$
+    Dosazením do původní rovnice máme
+    $$
+    (x^2-2x-3)(x^2-2x-8)(x^2-2x-1) + 24 = 0.
+    $$
+    Zavedeme substituci $y = x^2-2x$. Rovnice přejde do tvaru
+    $$
+    (y-3)(y-8)(y-1) + 24 = 0.
+    $$
+    Po roznásobení a~úpravě získáme
+    $$
+    \align
+    y^3 - 12y^2 + 35y &= 0 \\
+    y(y^2-12y+35) &= 0 \\
+    y(y-5)(y-7) &= 0.
+    \endalign
+    $$
+    Pro $y \in \{0, 5, 7\}$ dořešíme kvadratické rovnice pro $x$:
+    \begitems
+    \i $x^2-2x = 0$ má kořeny $0, 2$.
+    \i $x^2-2x-5 = 0$ má kořeny $1 \pm \sqrt{6}$.
+    \i $x^2-2x-7 = 0$ má kořeny $1 \pm 2\sqrt{2}$.
+    \enditems
+    Množina řešení je $\{0, 2, 1 \pm \sqrt{6}, 1 \pm 2\sqrt{2}\}$.
+}
+
+
+\Problem{2}{}{
+    Celá čísla $a,b,c$ splňují
+    $$
+    (a-b)^2 + (b-c)^2 + (c-a)^2 = abc.
+    $$
+    Dokažte, že $a+b+c+6 \mid a^3+b^3+c^3$.
+}{
+    Klíčem je vzpomenout si na algebraickou identitu, která jaksi spojuje některé z~výrazů, o~kterých je tato úloha.
+}{
+    Klíčová identita je rozklad výrazu $a^3+b^3+c^3-3abc$ na součin. Pokud to neznáte, zkuste si tento rozklad odvodit. V~dalším návodu prozradíme možné triky, jak na něj přijít.
+}{
+    K~objevení $a^3+b^3+c^3-3abc$ můžeme použít tyto možné postupy:
+    \begitems \style a
+    \i Doplníme $a^3+b^3$ na třetí mocninu, tedy vyjádříme z~rozkladu $(a+b)^3$.
+    \i Doplníme $a^3+b^3+c^3$ na třetí mocninu, tedy vyjádříme z~rozkladu $(a+b+c)^3=...$. Z~toho extrahujeme $a^3+b^3+c^3=...$. Zůstanou nám pouze smíšené členy jako $a^2b$, $ab^2$ a $abc$. Ty je potřeba vhodně uspořádat, abychom vytkli něco před závorku.
+    \enditems 
+}{
+    Prozradíme klíčovou identitu
+    $$
+    a^3+b^3+c^3-3abc = (a+b+c)(a^2+b^2+c^2-ab-bc-ca).
+    $$
+    (V~předešlém návodu naznačené odvození najdete v~řešení.)
+}{
+    Jak využít klíčovou identitu? Potřebujeme ještě jeden trik: uvědomění si, jak druhá závorka rozkladu souvisí s~podmínkou ze zadání.
+}{
+    Podmínku ze zadání můžeme po roznásobení napsat jako
+    $$
+    2(a^2+b^2+c^2-ab-bc-ca)=abc.
+    $$
+    Shodou okolností se nám tu objevila druhá závorka našeho rozkladu. Teď už stačí dát všechno opatrně dohromady.
+}{
+    Nejprve odvodíme identitu pro rozklad výrazu $a^3+b^3+c^3-3abc$. Součet prvních dvou třetích mocnin doplníme na třetí mocninu součtu podle vztahu
+    $$
+    a^3+b^3 = (a+b)^3 - 3ab(a+b).
+    $$
+    Následně použijeme vzorec pro součet třetích mocnin
+    $$
+    x^3+y^3=(x+y)(x^2-xy+y^2)
+    $$
+    na členy $(a+b)^3$ a~$c^3$:
+    $$
+    \align
+    a^3+b^3+c^3-3abc &=\\ 
+    (a+b)^3 + c^3 - 3ab(a+b) - 3abc &=\\
+    (a+b+c)((a+b)^2 - (a+b)c + c^2) - 3ab(a+b+c) &=\\
+    (a+b+c)(a^2+2ab+b^2 - ac - bc + c^2 - 3ab) &= \\
+    (a+b+c)(a^2+b^2+c^2-ab-bc-ca)&. 
+    \endalign
+    $$
+    Druhou závorku označme $K = a^2+b^2+c^2-ab-bc-ca$. Jelikož $a,b,c$ jsou celá čísla, i $K$ je celé číslo.
+    Podmínku ze zadání roznásobíme a~upravíme do tvaru
+    $$
+    (a^2-2ab+b^2) + (b^2-2bc+c^2) + (c^2-2ca+a^2) = abc,
+    $$
+    takže $2K=abc$. Tento vztah dosadíme do odvozené identity:
+    $$
+    a^3+b^3+c^3 - 3(2K) = (a+b+c)K.
+    $$
+    Osamostatněním součtu třetích mocnin dostaneme
+    $$
+    a^3+b^3+c^3 = 6K + (a+b+c)K = K(a+b+c+6).
+    $$
+    Výraz $a+b+c+6$ tedy dělí $a^3+b^3+c^3$.
+
+    \textit{Poznámka.} Ukážeme ještě alternativní způsob doplnění na třetí mocninu pomocí rozkladu ${(a+b+c)^3}$. Po roznásobení platí:
+    $$
+    \gather
+    (a+b+c)^3 = a^3+b^3+c^3+ \\
+    {}+ 3(a^2b+ab^2+b^2c+bc^2+c^2a+ca^2) + 6abc
+    \endgather
+    $$
+    takže
+    $$
+    \gather
+    a^3+b^3+c^3 - 3abc = (a+b+c)^3 \\
+    {}- 3(a^2b+ab^2+b^2c+bc^2+c^2a+ca^2)- 9abc,
+    \endgather
+    $$
+    Z~posledního řádku lze vytknout~$-3$ před závorku, soustřeďme se pouze na vnitřek této závorky:
+    $$
+    \align
+    (a^2b+ab^2+b^2c+bc^2+c^2a+ac^2) + 3abc &= \\
+    a^2b+ab^2+b^2c+c^2b+c^2a+a^2c+3abc &= \\
+    [a^2b+ab^2+abc]+[b^2c+c^2b+abc]+[c^2a+a^2c+abc] &=\\
+    ab(a+b+c) + bc(b+c+a) + ca(c+a+b) &= \\
+    (a+b+c)(ab+bc+ca).
+    \endalign
+    $$
+    Teď to už jen dát dohromady:
+    $$
+    \gather
+    a^3+b^3+c^3 - 3abc = (a+b+c)^3 \\
+    {}- 3(a^2b+ab^2+b^2c+bc^2+c^2a+ca^2)- 9abc = \\
+    (a+b+c)^3 - 3(a+b+c)(ab+bc+ca) \\ 
+    (a+b+c)((a+b+c)^2-3(ab+bc+ca)),
+    \endgather
+    $$
+    což je alternativní zápis naší dokazované identity.
+}
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

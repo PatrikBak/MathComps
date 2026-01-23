@@ -168,7 +168,7 @@ public class TagProblemsCommand(
                     datetimeString,
                     "statement",
                     tagProblemsOptions.Value.TagProblemStatement,
-                    tagData => tagData.TagType != TagType.Technique && tagNameFilter(tagData.TagName),
+                    tagData => tagData.Type != TagType.Technique && tagNameFilter(tagData.Name),
                     problem);
 
                 // Initialize technique tags as empty (will be populated if solution exists)
@@ -182,7 +182,7 @@ public class TagProblemsCommand(
                         datetimeString,
                         "solution",
                         tagProblemsOptions.Value.TagProblemSolution,
-                        tagData => tagData.TagType == TagType.Technique && tagNameFilter(tagData.TagName),
+                        tagData => tagData.Type == TagType.Technique && tagNameFilter(tagData.Name),
                         problem
                     );
                 }
@@ -234,36 +234,40 @@ public class TagProblemsCommand(
     }
 
     /// <summary>
-    /// Uses AI to analyze a problem and suggest appropriate tags based on the problem statement or solution.
+    /// Uses AI to analyze a problem and suggest appropriate tags based on the problem statement or solution. 
+    /// Tags are sent to the AI in the <see cref="TagFilesHelper.AiLanguage"/> language, then mapped back to 
+    /// slugs for database storage.
     /// </summary>
     /// <param name="folder">Directory name for organizing log files by analysis type (e.g., "statement", "solution").</param>
     /// <param name="suffix">File suffix for log files to distinguish between different analysis types.</param>
     /// <param name="geminiSettings">Configuration for the Gemini AI model including prompts and parameters.</param>
-    /// <param name="tagSelector">Function to filter which tags are eligible for suggestion based on their name and type.</param>
+    /// <param name="tagSelector">Function to filter which tags are eligible for suggestion based on name and type.</param>
     /// <param name="problem">The problem details including statement, solution, and existing tags.</param>
-    /// <returns>Dictionary of suggested tags with their confidence scores and justifications.</returns>
+    /// <returns>Dictionary mapping slugs to <see cref="ProblemTagData"/> objects for database storage.</returns>
     private async Task<ImmutableDictionary<string, ProblemTagData>> TagProblem(
         string folder,
         string suffix,
         AiModelConfig geminiSettings,
-        Func<(string TagName, TagType TagType), bool> tagSelector,
+        Func<(string Name, TagType Type), bool> tagSelector,
         ProblemDetailsDto problem)
     {
         // Load the system prompt template for AI interaction
         var systemPromptTemplate = await File.ReadAllTextAsync(geminiSettings.SystemPromptPath);
 
-        // Get all approved tags for validation and filtering
-        var allApprovedTags = TagFilesHelper.GetCategorizedApprovedTags().MapTagsToTheirData();
+        // Get all tags for LLM
+        var allTagsByName = TagFilesHelper.GetTagsForAi();
 
-        // Identify tags that are forbidden (already assigned or not in selection)
-        var tagsNotToBeUsed = allApprovedTags
-            .Where(pair => problem.TagsData.ContainsKey(pair.Key) || !tagSelector((pair.Key, pair.Value.Type)))
+        // Get slugs of already-assigned tags for exclusion
+        var assignedSlugs = problem.TagsData.Keys.ToImmutableHashSet();
+
+        // Identify tags that should NOT be used (already assigned or filtered out)
+        var tagsNotToBeUsed = allTagsByName
+            .Where(pair => assignedSlugs.Contains(pair.Value.Slug) || !tagSelector((pair.Key, pair.Value.Type)))
             .Select(pair => pair.Key)
             .ToImmutableHashSet();
 
-        // Build the list of tags that can be processed (not forbidden)
-        var tagsToProcess = TagFilesHelper.GetCategorizedApprovedTags()
-            .MapTagsToTheirData()
+        // Build the list of candidate tags to send to LLM, mapping names to data for LLM
+        var tagsToProcess = allTagsByName
             .Where(pair => !tagsNotToBeUsed.Contains(pair.Key))
             .ToImmutableDictionary(
                 pair => pair.Key,
@@ -273,22 +277,15 @@ public class TagProblemsCommand(
                     pair.Value.Description
                 });
 
-        // Get already assigned tags with their metadata for context
-        var alreadyAssignedTags =
-            (from problemTagPair in problem.ApprovedTags()
-             join approvedTagPair in allApprovedTags on problemTagPair.Key equals approvedTagPair.Key
-             select new
-             {
-                 Tag = problemTagPair.Key,
-                 problemTagPair.Value.TagType,
-                 approvedTagPair.Value.Description
-             })
+        // Build already assigned tags for context, mapping names to data for LLM
+        var alreadyAssignedTags = allTagsByName
+            .Where(pair => assignedSlugs.Contains(pair.Value.Slug))
             .ToImmutableDictionary(
-                data => data.Tag,
-                data => new
+                pair => pair.Key,
+                pair => new
                 {
-                    Category = data.TagType.ToString(),
-                    data.Description
+                    Category = pair.Value.Type.ToString(),
+                    pair.Value.Description
                 });
 
         // If no tags can be processed, return empty result
@@ -318,16 +315,14 @@ public class TagProblemsCommand(
         var userPromptPath = $"{logDirectory}/{problem.Slug}.{suffix}.prompt.txt";
         File.WriteAllText(userPromptPath, userPrompt);
 
-        // In a try-catch
+        // Call the Gemini service to get tag suggestions
         var aiResponseRaw = await GeneralUtilities.TryExecuteAsync(() =>
-            // Call the Gemini service to get tag suggestions
             geminiService.GenerateContentAsync(
                 geminiSettings.Model,
                 systemPromptTemplate,
                 userPrompt,
                 geminiSettings.ThinkingBudget
             ),
-            // Provide an exception with more context
             exception => throw new InvalidOperationException("Gemini error", exception));
 
         // If AI service failed, return empty result
@@ -338,28 +333,35 @@ public class TagProblemsCommand(
         var aiResponsePath = $"{logDirectory}/{problem.Slug}.{suffix}.json";
         File.WriteAllText(aiResponsePath, aiResponseRaw);
 
-        // Parse the AI response to extract tag suggestions with fitness scores
+        // Parse the AI response and map localized names back to slugs
         var suggestedTags = GeneralUtilities.TryExecute(() => (
             from suggestedTagPair in TaggingHelpers.ParseTagFitnesses(aiResponseRaw)
-            join approvedTagPair in allApprovedTags on suggestedTagPair.Key equals approvedTagPair.Key
+            where allTagsByName.TryGetValue(suggestedTagPair.Key, out _)
+            let tagData = allTagsByName[suggestedTagPair.Key]
             select KeyValuePair.Create(
-                suggestedTagPair.Key,
+                tagData.Slug,
                 new ProblemTagData(
-                    approvedTagPair.Value.Type,
+                    tagData.Type,
                     suggestedTagPair.Value.GoodnessOfFit,
                     suggestedTagPair.Value.Justification,
                     Confidence: 0)
                 )
             )
             .ToImmutableDictionary(),
-            // Provide an exception with more context
             exception => throw new InvalidOperationException("Parsing AI response failed", exception));
 
         // If parsing failed, return empty result
         if (suggestedTags is null)
             return ImmutableDictionary<string, ProblemTagData>.Empty;
 
-        // Filter suggestions to only include tags that were actually candidates
-        return suggestedTags.Where(pair => tagsToProcess.ContainsKey(pair.Key)).ToImmutableDictionary();
+        // Get the set of potential tags to consider
+        var candidateSlugSet = tagsToProcess.Keys
+            .Select(name => allTagsByName[name].Slug)
+            .ToImmutableHashSet();
+
+        // Filter suggested tags to only include those that are in the candidate set
+        return suggestedTags
+            .Where(pair => candidateSlugSet.Contains(pair.Key))
+            .ToImmutableDictionary();
     }
 }

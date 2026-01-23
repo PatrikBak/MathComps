@@ -35,3 +35,32 @@ export function buildApiUrl(path: string): string {
   // Development: use /api prefix which Next.js rewrites to strip it
   return baseUrl ? `${baseUrl}${path}` : `/api${path}`
 }
+
+/**
+ * Generates a canonical URL for a given path.
+ *
+ * Canonical URLs tell search engines which URL is the authoritative "master"
+ * version of a page. This prevents duplicate content issues when the same
+ * content is accessible via multiple URLs (e.g., with/without trailing slash,
+ * with query params, or via different domains).
+ *
+ * @param path - The URL path (should include locale prefix if applicable)
+ *
+ * @returns The full canonical URL (e.g., 'https://example.com/sk/about')
+ */
+export function getCanonicalUrl(path: string = ''): string {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  return `${getSiteUrl()}${cleanPath}`
+}
+
+/**
+ * Checks if the given URL is an external link (i.e. a link to a different domain)
+ *
+ * @param href - The URL to check
+ *
+ * @returns True if the URL is external, false otherwise
+ */
+export const isExternalHref = (href: string) => {
+  // scheme:// or //host, or common non-http schemes
+  return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^(mailto|tel|sms|geo):/i.test(href)
+}

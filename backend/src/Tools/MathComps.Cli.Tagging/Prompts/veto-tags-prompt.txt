@@ -1,4 +1,4 @@
-I will give you a list candidate tags (in Slovak) describing math problems. I will also give you
+I will give you a list candidate tags (in English) describing math problems. I will also give you
 a list of known tags (that have already been approved). For each of the candidate tags,
 you should verify whether it satisfies the tag rules listed below and whether it is new
 (i.e. not among the list of known tags). Approve new tags that satisfy the rules, and reject

@@ -2,14 +2,17 @@
 
 import { useClipboard } from '@mantine/hooks'
 import { Link } from 'lucide-react'
-import React from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
-interface CopyLinkButtonProps {
+/**
+ * Props for the {@link CopyLinkButton} component.
+ */
+type CopyLinkButtonProps = {
   /** Section slug/ID for the anchor link (already slugified) */
-  sectionSlug: string
+  slug: string
   /** Icon size in pixels */
   iconSize?: number
   /** Additional CSS classes */
@@ -19,19 +22,23 @@ interface CopyLinkButtonProps {
 /**
  * Reusable button component that copies a section anchor link to clipboard.
  */
-export function CopyLinkButton({ sectionSlug, iconSize = 20, className }: CopyLinkButtonProps) {
-  const clipboard = useClipboard({ timeout: 2000 })
+export function CopyLinkButton({ slug, iconSize = 20, className }: CopyLinkButtonProps) {
+  // Get translations
+  const tActions = useTranslations('ui.actions')
+  const tEditor = useTranslations('ui.editor')
 
-  const handleCopyLink = () => {
-    // Create URL with the section slug
-    const url = `${window.location.origin}${window.location.pathname}#${sectionSlug}`
-    clipboard.copy(url)
-    toast.success('Odkaz na sekciu bol skopírovaný do schránky')
-  }
+  // Get clipboard handler
+  const clipboard = useClipboard({ timeout: 2000 })
 
   return (
     <button
-      onClick={handleCopyLink}
+      onClick={() => {
+        // Copy the URL to clipboard
+        clipboard.copy(`${window.location.origin}${window.location.pathname}#${slug}`)
+
+        // Inform the user
+        toast.success(tEditor('sectionLinkCopied'))
+      }}
       className={cn(
         'transition-all duration-200',
         'p-1.5 ml-2 rounded-lg',
@@ -40,8 +47,8 @@ export function CopyLinkButton({ sectionSlug, iconSize = 20, className }: CopyLi
         'outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50',
         className
       )}
-      aria-label="Kopírovať odkaz na sekciu"
-      title="Kopírovať odkaz na sekciu"
+      aria-label={tActions('copyLink')}
+      title={tActions('copyLink')}
     >
       <Link size={iconSize} />
     </button>

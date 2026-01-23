@@ -55,7 +55,7 @@ export function ArticleSection({
             <span className="mr-1 text-gray-300">{number}</span>
           ) : null}
           <span>{titleContent || title}</span>
-          <CopyLinkButton sectionSlug={slug} iconSize={20} />
+          <CopyLinkButton slug={slug} iconSize={20} />
         </h2>
         {children}
       </section>

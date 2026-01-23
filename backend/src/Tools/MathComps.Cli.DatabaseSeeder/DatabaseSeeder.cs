@@ -66,14 +66,10 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
     /// it is for one day of a multi-day competition, or a team round vs. individual round.
     /// </summary>
     /// <param name="RoundId">The id of the round.</param>
-    /// <param name="DisplayName"><inheritdoc cref="Round.DisplayName" path="/summary"/></param>
-    /// <param name="FullName"><inheritdoc cref="Round.FullName" path="/summary"/></param>
     /// <param name="RoundOrder"><inheritdoc cref="Round.SortOrder" path="/summary"/></param>
     private record RoundData(
         string RoundId,
-        int RoundOrder,
-        string DisplayName,
-        string? FullName = null
+        int RoundOrder
     );
 
     /// <summary>
@@ -495,24 +491,16 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             // The slugs are extracted from SKMO ids
             var competitionSlug = competitionId.ToSlug();
 
-            // Find the nice names for the UI
-            var (displayName, fullName) = GetCompetitionNames(competitionSlug);
-
             // Check if competition already exists
             if (existingCompetitions.TryGetValue(competitionSlug, out var existingCompetition))
             {
                 // Any property change?
-                var hasChanges =
-                    existingCompetition.DisplayName != displayName ||
-                    existingCompetition.FullName != fullName ||
-                    existingCompetition.SortOrder != competitionOrder;
+                var hasChanges = existingCompetition.SortOrder != competitionOrder;
 
                 // Count it if so
                 updatedCount += hasChanges ? 1 : 0;
 
-                // Update all properties, ef will manage
-                existingCompetition.DisplayName = displayName;
-                existingCompetition.FullName = fullName ?? displayName;
+                // Update properties
                 existingCompetition.SortOrder = competitionOrder;
             }
             else
@@ -520,8 +508,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 // Create new competition
                 await dbContext.Competitions.AddAsync(new Competition
                 {
-                    DisplayName = displayName,
-                    FullName = fullName ?? displayName,
                     Slug = competitionSlug,
                     SortOrder = competitionOrder,
                 });
@@ -564,18 +550,16 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             var categorySortOrder = GetCategorySortOrder(categoryName);
 
             // Check if category already exists
+            // Check if category already exists
             if (existingCategories.TryGetValue(categorySlug, out var existingCategory))
             {
                 // Any property change?
-                var hasChanges =
-                    existingCategory.Name != categoryName ||
-                    existingCategory.SortOrder != categorySortOrder;
+                var hasChanges = existingCategory.SortOrder != categorySortOrder;
 
                 // Count it if so
                 updatedCount += hasChanges ? 1 : 0;
 
-                // Do the update of all properties, EF will figure out changes
-                existingCategory.Name = categoryName;
+                // Update properties
                 existingCategory.SortOrder = categorySortOrder;
             }
             else
@@ -583,7 +567,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 // Create new category
                 await dbContext.Categories.AddAsync(new Category
                 {
-                    Name = categoryName,
                     Slug = categorySlug,
                     SortOrder = categorySortOrder,
                 });
@@ -640,10 +623,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             // This slug combines competition, category and round into a single unique round-slug
             var compositeSlug = $"{data.CompetitionId}{(data.Category != null ? $"-{data.Category}" : "")}{(data.Round != null ? $"-{data.Round.RoundId}" : "")}".ToSlug();
 
-            // Rounds have names unless they're 'default'
-            var displayName = data.Round?.DisplayName ?? "";
-            var fullName = data.Round?.FullName ?? data.Round?.DisplayName ?? "";
-
             // The round order is provided, unless we have a default round where it don't matter conceptually
             var sortOrder = data.Round?.RoundOrder ?? 1;
 
@@ -656,18 +635,14 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 // Any property change?
                 var hasChanges =
                     existingRound.CompositeSlug != compositeSlug ||
-                    existingRound.DisplayName != displayName ||
-                    existingRound.FullName != fullName ||
                     existingRound.SortOrder != sortOrder ||
                     existingRound.IsDefault != isDefault;
 
                 // Count it if so
                 updatedCount += hasChanges ? 1 : 0;
 
-                // Do the update of all properties, EF will figure out changes
+                // Update properties
                 existingRound.CompositeSlug = compositeSlug;
-                existingRound.DisplayName = displayName;
-                existingRound.FullName = fullName;
                 existingRound.SortOrder = sortOrder;
                 existingRound.IsDefault = isDefault;
             }
@@ -680,8 +655,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                     CategoryId = categoryId,
                     Slug = roundSlug,
                     CompositeSlug = compositeSlug,
-                    DisplayName = displayName,
-                    FullName = fullName,
                     SortOrder = sortOrder,
                     IsDefault = isDefault,
                 });
@@ -720,23 +693,17 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             // Slovak numbering ftw
             var editionNumber = startYear - OlympiadBaseYear;
 
-            // Slovak names ftw
-            var editionLabel = $"{editionNumber}. ročník ({startYear}/{startYear + 1})";
-
             // Check if season already exists
             if (existingSeasons.TryGetValue(startYear, out var existingSeason))
             {
                 // Any property change?
-                var hasChanges =
-                    existingSeason.EditionNumber != editionNumber ||
-                    existingSeason.EditionLabel != editionLabel;
+                var hasChanges = existingSeason.EditionNumber != editionNumber;
 
                 // Count it if so
                 updatedCount += hasChanges ? 1 : 0;
 
-                // Do the update of all properties, EF will figure out changes
+                // Update properties
                 existingSeason.EditionNumber = editionNumber;
-                existingSeason.EditionLabel = editionLabel;
             }
             else
             {
@@ -745,7 +712,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 {
                     StartYear = startYear,
                     EditionNumber = editionNumber,
-                    EditionLabel = editionLabel,
                 });
 
                 // Count it in
@@ -1085,6 +1051,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             await dbContext.ProblemImages.AddRangeAsync(images.Select(image => new ProblemImage
             {
                 ContentId = image.ContentId,
+                OriginalId = image.OriginalId,
                 Width = image.Width,
                 Height = image.Height,
                 Scale = image.Scale,
@@ -1237,14 +1204,29 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
             #region Handle Images
 
-            // Get the data of the images
+            // Get the data of the images that we want to have there
             var desiredImages = images
-                .Select(image => new { image.ContentId, image.Width, image.Height, image.Scale })
+                .Select(image => new
+                {
+                    image.ContentId,
+                    image.OriginalId,
+                    image.Width,
+                    image.Height,
+                    image.Scale
+                })
                 .ToHashSet();
 
+            // Get the data of the images that are already there
             var existingImages = await dbContext.ProblemImages
                 .Where(image => image.ProblemId == existingProblem.Id)
-                .Select(image => new { image.ContentId, image.Width, image.Height, image.Scale })
+                .Select(image => new
+                {
+                    image.ContentId,
+                    image.OriginalId,
+                    image.Width,
+                    image.Height,
+                    image.Scale
+                })
                 .ToHashSetAsync();
 
             // Any changes?
@@ -1264,6 +1246,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                     {
                         ProblemId = existingProblem.Id,
                         ContentId = image.ContentId,
+                        OriginalId = image.OriginalId,
                         Width = image.Width,
                         Height = image.Height,
                         Scale = image.Scale,
@@ -1323,38 +1306,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             _ => throw new NotImplementedException($"Unknown competition slug '{competitionSlug}'"),
         };
 
-        // Different rounds have different names based on the category.
-        static string GetRoundName(string? categoryName, string competitionName) => categoryName switch
-        {
-            // Null should not happen with valid dataset.
-            null => throw new NotImplementedException($"Cannot determine round name (krajské/okresné/celštátne...) when provided null category"),
 
-            // Second and third rounds for high school categories (A, B, C).
-            "A" or "B" or "C" => competitionName switch
-            {
-                "II" => "Krajské kolo",
-                "III" => "Celoštátne kolo",
-
-                // This should never happen with valid dataset.
-                _ => throw new NotImplementedException($"Unknown competition '{competitionName}' for category '{categoryName}'"),
-            },
-
-            // Special case, Z4 usd to have a school round but in the data it is as II
-            "Z4" when competitionName == "II" => "Školské kolo",
-
-            // Second and third rounds for elementary school categories (Z5-Z9).
-            _ when categoryName.StartsWith('Z') => competitionName switch
-            {
-                "II" => "Okresné kolo",
-                "III" => "Krajské kolo",
-
-                // This should never happen with valid dataset.
-                _ => throw new NotImplementedException($"Unknown competition '{competitionName}' for category '{categoryName}'"),
-            },
-
-            // This should never happen with valid dataset.
-            _ => throw new NotImplementedException($"Unknown category '{categoryName}'"),
-        };
 
         // Parse the round data from the TST subcompetition identifier.
         // TST (Team Selection Test) competitions are held over multiple days (D1, D2, etc.).
@@ -1368,7 +1320,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 throw new InvalidCastException($"Unknown TST subcompetition '{subcompetitionIdentifier}'");
 
             // The day number is used for both the display name and the sort order to ensure uniqueness.
-            return new RoundData(subcompetitionIdentifier, dayNumber, $"{dayNumber}. deň");
+            return new RoundData(subcompetitionIdentifier, dayNumber);
         }
 
         // Parse the round information based on the competition type and structure.
@@ -1378,15 +1330,15 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             "CSMO" => competitionName switch
             {
                 // Home round (available for all categories)
-                "I" => new RoundData(competitionName, 1, "Domáce kolo"),
+                "I" => new RoundData(competitionName, 1),
 
                 // School round (only for high school categories)
-                "S" => new RoundData(competitionName, 2, "Školské kolo"),
+                "S" => new RoundData(competitionName, 2),
 
                 // The name of the 2nd/3rd round depend on the category,
                 // e.g. II for A/B/C is "Krajské kolo", for Z5-Z9 is "Okresné kolo".
-                "II" => new RoundData(competitionName, 3, GetRoundName(categoryName, competitionName)),
-                "III" => new RoundData(competitionName, 4, GetRoundName(categoryName, competitionName)),
+                "II" => new RoundData(competitionName, 3),
+                "III" => new RoundData(competitionName, 4),
 
                 // This should never happen with valid dataset.
                 _ => throw new NotImplementedException($"Unknown CSMO competition '{competitionId.Competition}'"),
@@ -1396,10 +1348,10 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             "CPSJ" or "MEMO" => subcompetitionName switch
             {
                 // Individual competition has no subcompetition identifier.
-                null => new RoundData("I", 1, "Individual", "Individuálna časť"),
+                null => new RoundData("I", 1),
 
                 // Team competition is marked with "T" subcompetition.
-                "T" => new RoundData("T", 2, "Team", "Tímová časť"),
+                "T" => new RoundData("T", 2),
 
                 // This should never happen with valid dataset.
                 _ => throw new NotImplementedException($"Unknown {competitionSlug} subcompetition '{subcompetitionName}'"),
@@ -1416,29 +1368,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         return new CompetitionRoundData(competitionSlug, competitionDisplayOrder, roundData, categoryName);
     }
 
-    /// <summary>
-    /// Gets both the short and full human-readable competition names from the competition slug.
-    /// Maps internal competition slugs to their short names suitabl for displaying and full names
-    /// suitable for tooltips.
-    /// </summary>
-    /// <param name="competitionSlug">The competition slug already used the DB (e.g., "CSMO", "IMO").</param>
-    /// <returns>
-    /// A tuple containing:
-    ///   - The short competition name (e.g., "IMO")
-    ///   - The full competition name in the original language (e.g. "International Mathematical Olympiad")
-    /// </returns>
-    private static (string DisplayName, string FullName) GetCompetitionNames(string competitionSlug) => competitionSlug switch
-    {
-        "csmo" => ("CSMO", "Česko-slovenská Matematická olympiáda"),
-        "tst" => ("Výberko IMO/MEMO", "Výberové sústredenie pred IMO a MEMO"),
-        "memo" => ("MEMO", "Middle European Mathematical Olympiad"),
-        "imo" => ("IMO", "International Mathematical Olympiad"),
-        "caps" => ("CAPS", "Czech-Austrian-Polish-Slovak Match"),
-        "egmo" => ("EGMO", "European Girl's Mathematical Olympiad"),
-        "tstc" => ("Výberko CPSJ", "Výberové sústredenie pred CPSJ"),
-        "cpsj" => ("CPSJ", "Czech-Polish-Slovak Junior Match"),
-        _ => throw new NotImplementedException($"Unknown competition slug '{competitionSlug}'"),
-    };
+
 
     /// <summary>
     /// Determines the sort order for a category based on its name.

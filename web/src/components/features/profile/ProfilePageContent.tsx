@@ -2,18 +2,19 @@
 
 import { SignOutButton, useUser } from '@clerk/nextjs'
 import { CalendarDays, LogOut, Mail, User } from 'lucide-react'
+import { useFormatter, useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { displayNameSchema } from '@/components/features/auth/authFormSchema'
+import { createDisplayNameSchema } from '@/components/features/auth/authFormSchema'
 import { useInvalidateUserComments } from '@/components/features/comments/hooks/use-invalidate-user-comments'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { cn } from '@/components/shared/utils/css-utils'
-import { ROUTES } from '@/constants/routes'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
+import { ROUTES } from '@/i18n/i18n'
 
 /**
  * Props for the ProfileInfoField component
@@ -42,6 +43,18 @@ function ProfileInfoField({ icon: Icon, label }: ProfileInfoFieldProps) {
  * Displays user avatar, info, and sign-out button.
  */
 export default function ProfilePageContent() {
+  // Translations for profile page
+  const tProfile = useTranslations('profile')
+  // Translations for auth-related strings
+  const tAuth = useTranslations('auth')
+  // Translations for validation errors
+  const tValidation = useTranslations('validation')
+  // Translations for Clerk auth errors
+  const tClerkErrors = useTranslations('clerkErrors')
+
+  // Date formatter (uses current locale automatically)
+  const format = useFormatter()
+
   // Get a function to redirect to the login page
   const { redirectToLogin } = useLoginRedirect()
 
@@ -93,7 +106,7 @@ export default function ProfilePageContent() {
       await invalidateUserComments()
     } catch (error) {
       // Throw a new error with the friendly message so EditableTextField can display it
-      throw new Error(getClerkErrorMessage(error))
+      throw new Error(getClerkErrorMessage(error, tClerkErrors))
     }
   }
 
@@ -115,9 +128,9 @@ export default function ProfilePageContent() {
       await invalidateUserComments()
 
       // This worked out fine
-      toast.success('Profilová fotka nahraná, aktualizácia potrvá pár sekúnd')
+      toast.success(tProfile('avatarUpdated'))
     } catch (error) {
-      toast.error(getClerkErrorMessage(error))
+      toast.error(getClerkErrorMessage(error, tClerkErrors))
     }
   }
 
@@ -168,7 +181,7 @@ export default function ProfilePageContent() {
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-slate-900 overflow-hidden bg-slate-800">
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
-                  altText={user.firstName || 'Používateľ'}
+                  altText={user.firstName || tProfile('defaultUser')}
                   size={128}
                   className="w-full h-full"
                 />
@@ -181,21 +194,21 @@ export default function ProfilePageContent() {
         <div className="px-4 sm:px-6 md:px-12 pb-8 sm:pb-10 md:pb-12 pt-16 sm:pt-20 md:pt-30">
           <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(250px,1fr)] justify-items-start items-center gap-x-8 gap-y-4 md:gap-y-9 [&>div:nth-child(2n)]:w-full">
             {/* Row 1, Col 1 - Display name label */}
-            <ProfileInfoField icon={User} label="Meno / Prezývka" />
+            <ProfileInfoField icon={User} label={tProfile('displayName')} />
 
             {/* Row 1, Col 2 - Display name input */}
             <EditableTextField
               value={user.firstName || ''}
               onSave={onUpdateDisplayName}
-              schema={displayNameSchema}
-              label="Zadajte vaše meno"
+              schema={createDisplayNameSchema(tValidation)}
+              label={tProfile('displayNamePlaceholder')}
               textClassName={cn(commonFontStyle, 'text-slate-200')}
               innerContainerClassName={containerClassName}
               iconClassName="w-3.5 h-3.5"
             />
 
             {/* Row 2, Col 1 - Email label */}
-            <ProfileInfoField icon={Mail} label="Email" />
+            <ProfileInfoField icon={Mail} label={tProfile('email')} />
 
             {/* Row 2, Col 2 - Email read-only */}
             <div className={readOnlyContainerClassName}>
@@ -203,14 +216,13 @@ export default function ProfilePageContent() {
             </div>
 
             {/* Row 3, Col 1 - Member since label */}
-            <ProfileInfoField icon={CalendarDays} label="Členom od" />
+            <ProfileInfoField icon={CalendarDays} label={tProfile('memberSince')} />
 
             {/* Row 3, Col 2 - Member since read-only */}
             <div className={readOnlyContainerClassName}>
               <span className={commonFontStyle}>
-                {user &&
-                  user.createdAt &&
-                  new Date(user.createdAt).toLocaleDateString('sk-SK', {
+                {user?.createdAt &&
+                  format.dateTime(new Date(user.createdAt), {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric',
@@ -235,7 +247,7 @@ export default function ProfilePageContent() {
               )}
             >
               <LogOut className="w-4 h-4" />
-              <span>Odhlásiť sa</span>
+              <span>{tAuth('signOut')}</span>
             </button>
           </SignOutButton>
         </div>

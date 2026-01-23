@@ -1,8 +1,10 @@
 using MathComps.Domain.ApiDtos.Helpers;
 using MathComps.Domain.ApiDtos.ProblemQuery;
+using MathComps.Domain.ApiDtos.SearchBar;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
+using MathComps.Shared;
 
 namespace MathComps.Infrastructure.Tests;
 
@@ -39,7 +41,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the filter with no criteria
@@ -79,7 +82,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the text search
@@ -121,7 +125,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Test 2: UPPERCASE without accents should match "štvorstena" (lowercase with accents)
@@ -141,7 +146,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Test 3: UPPERCASE without accents should match "Prirodzené" (different case with accents)
@@ -161,7 +167,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Test 4: lowercase without accents should match "Prirodzené" (different case with accents)
@@ -181,7 +188,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute all search variations
@@ -233,7 +241,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the author filter
@@ -269,7 +278,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the OR tag filter
@@ -304,7 +314,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the AND tag filter
@@ -339,7 +350,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the complex multi-criteria filter
@@ -379,7 +391,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
         var page2Query = new ProblemFilterOptions(
             new FilterQuery(
@@ -397,7 +410,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 2,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute both page queries
@@ -436,7 +450,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act - execute the query that should return no results
@@ -478,7 +493,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
         var resultUser1 = await service.FilterAsync(baseQuery with { UserId = user1Id });
 
@@ -555,7 +571,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: true
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act 1: Query favorites for User 1 (liked 75-a-i-1 and 75-b-i-1)
@@ -616,7 +633,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageNumber: 1,
                 FavoritesOnly: false
             ),
-            UserId: null
+            UserId: null,
+            Language: Language.SK
         );
 
         // Act
@@ -643,7 +661,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetContestsBySeasonReturnsAllSeasons() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync();
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
 
         // Assert - we have 2 seasons in test data (75. ročník and 74. ročník)
         Assert.Equal(2, result.Seasons.Count);
@@ -657,13 +675,13 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetContestsBySeasonReturnsSeasonsInDescendingOrder() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync();
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
 
         // Assert - newest season (75) should come first
         Assert.Equal(75, result.Seasons[0].EditionNumber);
         Assert.Equal(74, result.Seasons[1].EditionNumber);
-        Assert.Equal("75. ročník", result.Seasons[0].EditionLabel);
-        Assert.Equal("74. ročník", result.Seasons[1].EditionLabel);
+        Assert.Equal("75. ročník (2025/2026)", result.Seasons[0].EditionLabel);
+        Assert.Equal("74. ročník (2024/2025)", result.Seasons[1].EditionLabel);
     });
 
     /// <summary>
@@ -674,7 +692,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetContestsBySeasonReturnsContestsForEachSeason() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync();
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
 
         // Assert - season 75 should have 4 contests (3 CSMO categories + 1 IMO)
         var season75 = result.Seasons.First(season => season.EditionNumber == 75);
@@ -697,7 +715,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetContestsBySeasonReturnsProblemCounts() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync();
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
 
         // Assert - check specific contest counts
         var season75 = result.Seasons.First(s => s.EditionNumber == 75);
@@ -727,7 +745,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetContestsBySeasonReturnsCorrectSlugs() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync();
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
 
         // Assert
         var season75 = result.Seasons.First(season => season.EditionNumber == 75);
@@ -752,7 +770,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetContestsBySeasonIsolatesContestsBySeason() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync();
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
 
         // Assert - season 74 has different contests than season 75
         var season74 = result.Seasons.First(season => season.EditionNumber == 74);
@@ -766,6 +784,127 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     #endregion
 
+    #region Language-Aware Statement Selection Tests
+
+    /// <summary>
+    /// Verifies that requesting the original language returns the original statement.
+    /// Problem 75-a-i-1 has Slovak as original, requesting Slovak should return Slovak.
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsOriginalStatementWhenRequestingOriginalLanguage() => RunTestAsync(async service =>
+    {
+        // Arrange - query for Slovak (original language for most CSMO problems)
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "Ostrov",  // Unique text in 75-a-i-1
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - should return Slovak statement
+        Assert.Single(result.Problems.Items);
+        var problem = result.Problems.Items[0];
+        Assert.Equal("75-a-i-1", problem.Slug);
+        Assert.Equal(Language.SK, problem.StatementLanguage);
+    });
+
+    /// <summary>
+    /// Verifies that requesting a non-original language returns the translation when it exists.
+    /// Problem 75-a-i-1 has both Slovak (original) and English translation, requesting English should return English.
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsTranslatedStatementWhenTranslationExists() => RunTestAsync(async service =>
+    {
+        // Arrange - query for English (translation exists for 75-a-i-1)
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [75],
+                    Contests: [new ContestSelection("csmo", "a", "i")],
+                    ProblemNumbers: [1],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.EN
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - should return English translation
+        Assert.Single(result.Problems.Items);
+        var problem = result.Problems.Items[0];
+        Assert.Equal("75-a-i-1", problem.Slug);
+        Assert.Equal(Language.EN, problem.StatementLanguage);
+        // Verify we got the English content (parsed as JSON, just check it's there)
+        Assert.NotNull(problem.StatementParsed);
+    });
+
+    /// <summary>
+    /// Verifies that requesting a non-original language falls back to original when translation doesn't exist.
+    /// Problem 75-b-i-1 has only Slovak (original), requesting English should fall back to Slovak.
+    /// </summary>
+    [Fact]
+    public Task FilterFallsBackToOriginalWhenTranslationDoesNotExist() => RunTestAsync(async service =>
+    {
+        // Arrange - query for English (no translation exists for 75-b-i-1)
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [75],
+                    Contests: [new ContestSelection("csmo", "b", "i")],
+                    ProblemNumbers: [1],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.EN
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - should fall back to Slovak (original) since no English translation exists
+        Assert.Single(result.Problems.Items);
+        var problem = result.Problems.Items[0];
+        Assert.Equal("75-b-i-1", problem.Slug);
+        Assert.Equal(Language.SK, problem.StatementLanguage);  // Fallback to original
+    });
+
+    #endregion
+
+
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -775,14 +914,12 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             StartYear = 2025,
-            EditionLabel = "75. ročník",
             EditionNumber = 75
         };
         var season2024 = new Season
         {
             Id = Guid.NewGuid(),
             StartYear = 2024,
-            EditionLabel = "74. ročník",
             EditionNumber = 74
         };
         context.Seasons.AddRange(season2025, season2024);
@@ -792,16 +929,12 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var csmo = new Competition
         {
             Id = Guid.NewGuid(),
-            DisplayName = "CSMO",
-            FullName = "Matematická Olympiáda",
             Slug = "csmo",
             SortOrder = 100
         };
         var imo = new Competition
         {
             Id = Guid.NewGuid(),
-            DisplayName = "IMO",
-            FullName = "International Mathematical Olympiad",
             Slug = "imo",
             SortOrder = 200
         };
@@ -812,28 +945,24 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var catA = new Category
         {
             Id = Guid.NewGuid(),
-            Name = "A",
             Slug = "a",
             SortOrder = 100
         };
         var catB = new Category
         {
             Id = Guid.NewGuid(),
-            Name = "B",
             Slug = "b",
             SortOrder = 200
         };
         var catC = new Category
         {
             Id = Guid.NewGuid(),
-            Name = "C",
             Slug = "c",
             SortOrder = 300
         };
         var catZ9 = new Category
         {
             Id = Guid.NewGuid(),
-            Name = "Z9",
             Slug = "z9",
             SortOrder = 400
         };
@@ -845,9 +974,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Id = Guid.NewGuid(),
             CompetitionId = csmo.Id,
             CategoryId = catA.Id,
-            DisplayName = "Domáce",
-            FullName = "Domáce kolo",
-            Slug = "i-a",
+            Slug = "i",
             CompositeSlug = "csmo-a-i",
             SortOrder = 100
         };
@@ -856,9 +983,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Id = Guid.NewGuid(),
             CompetitionId = csmo.Id,
             CategoryId = catB.Id,
-            DisplayName = "Domáce",
-            FullName = "Domáce kolo",
-            Slug = "i-b",
+            Slug = "i",
             CompositeSlug = "csmo-b-i",
             SortOrder = 100
         };
@@ -867,9 +992,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Id = Guid.NewGuid(),
             CompetitionId = csmo.Id,
             CategoryId = catC.Id,
-            DisplayName = "Domáce",
-            FullName = "Domáce kolo",
-            Slug = "i-c",
+            Slug = "i",
             CompositeSlug = "csmo-c-i",
             SortOrder = 100
         };
@@ -878,9 +1001,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Id = Guid.NewGuid(),
             CompetitionId = csmo.Id,
             CategoryId = catZ9.Id,
-            DisplayName = "Domáce",
-            FullName = "Domáce kolo",
-            Slug = "i-z9",
+            Slug = "i",
             CompositeSlug = "csmo-z9-i",
             SortOrder = 100
         };
@@ -889,9 +1010,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Id = Guid.NewGuid(),
             CompetitionId = csmo.Id,
             CategoryId = catZ9.Id,
-            DisplayName = "Krajské",
-            FullName = "Krajské kolo",
-            Slug = "iii-z9",
+            Slug = "iii",
             CompositeSlug = "csmo-z9-iii",
             SortOrder = 200
         };
@@ -899,8 +1018,6 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             CompetitionId = imo.Id,
-            DisplayName = "",
-            FullName = "",
             Slug = "",
             CompositeSlug = "imo",
             SortOrder = 1,
@@ -980,21 +1097,18 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var tagAlgebra = new Tag
         {
             Id = Guid.NewGuid(),
-            Name = "Algebra",
             Slug = "algebra",
             TagType = TagType.Area
         };
         var tagGeometry = new Tag
         {
             Id = Guid.NewGuid(),
-            Name = "Geometry",
             Slug = "geometry",
             TagType = TagType.Area
         };
         var tagNumberTheory = new Tag
         {
             Id = Guid.NewGuid(),
-            Name = "Number Theory",
             Slug = "number-theory",
             TagType = TagType.Area
         };
@@ -1021,6 +1135,18 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
+        });
+        // English translation for p1 - enables testing language-aware statement selection
+        p1.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p1.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "The island is divided into several kingdoms.",
+            ParsedText = /*lang=json,strict*/ """{"en": true}""",
+            Language = Language.EN,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = false
         });
         p1.ProblemAuthors.Add(new ProblemAuthor
         {

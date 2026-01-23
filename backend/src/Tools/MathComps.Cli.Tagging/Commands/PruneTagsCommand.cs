@@ -1,6 +1,7 @@
 using MathComps.Cli.Tagging.Services;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Collections.Immutable;
 using System.ComponentModel;
 
 namespace MathComps.Cli.Tagging.Commands;
@@ -52,6 +53,12 @@ public class PruneTagsCommand(ITaggingDatabaseService databaseService) : AsyncCo
 
         #region Table
 
+        // Build slug → English name lookup for display
+        var slugToName = TagFilesHelper.GetTagsForAi()
+            .ToImmutableDictionary(
+                pair => pair.Value.Slug,
+                pair => pair.Key);
+
         // Show a compact summary before any changes including tag categorization.
         var table = new Table()
             .AddColumn("Tag")
@@ -62,7 +69,7 @@ public class PruneTagsCommand(ITaggingDatabaseService databaseService) : AsyncCo
         // Include all candidates with their tag types for better context
         foreach (var usage in candidates)
             table.AddRow(
-                usage.Name,
+                slugToName[usage.Slug],
                 usage.TagType.ToString(),
                 usage.Slug,
                 usage.ProblemCount.ToString()
@@ -87,7 +94,7 @@ public class PruneTagsCommand(ITaggingDatabaseService databaseService) : AsyncCo
 
         // Handle each usage (completely remove tags from database)
         foreach (var usage in candidates)
-            await databaseService.RemoveProblemTagsAsync([usage.Name], onlyAssigned: false);
+            await databaseService.RemoveProblemTagsAsync([usage.Slug], onlyAssigned: false);
 
         // Log success
         AnsiConsole.MarkupLine($"[green]Deleted {candidates.Count} tags.[/]");

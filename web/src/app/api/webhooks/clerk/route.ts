@@ -1,9 +1,11 @@
 import { headers } from 'next/headers'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { Webhook } from 'svix'
 
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/i18n'
 import { sendEmail } from '@/lib/email/email-sender'
 import {
   generatePasswordResetEmail,
@@ -64,6 +66,12 @@ export async function POST(request: NextRequest) {
   // Get the recipient email address
   const recipientEmail = event.data.to_email_address
 
+  // Default locale for emails (one day will be extended to detect user's preferred locale)
+  const locale: Locale = DEFAULT_LOCALE
+
+  // Get translations for email subjects
+  const tEmail = await getTranslations({ locale, namespace: 'email' })
+
   // We'll generate the appropriate email template
   let emailHtml: string
   let subject: string
@@ -71,12 +79,12 @@ export async function POST(request: NextRequest) {
   // This is what distinguishes the email type
   switch (event.data.slug) {
     case 'verification_code':
-      emailHtml = generateSignupVerificationEmail({ code, email: recipientEmail })
-      subject = 'Vitajte v MathComps - Overovací kód'
+      emailHtml = await generateSignupVerificationEmail({ code, email: recipientEmail, locale })
+      subject = tEmail('signup.subject')
       break
     case 'reset_password_code':
-      emailHtml = generatePasswordResetEmail({ code, email: recipientEmail })
-      subject = 'Obnovenie hesla - MathComps'
+      emailHtml = await generatePasswordResetEmail({ code, email: recipientEmail, locale })
+      subject = tEmail('passwordReset.subject')
       break
 
     // Should not happen with the right configuration 🙃

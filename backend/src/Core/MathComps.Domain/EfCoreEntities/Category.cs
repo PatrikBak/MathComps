@@ -13,11 +13,7 @@ public class Category
     /// </summary>
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
-    /// <summary>
-    /// Display name (e.g., "A").
-    /// </summary>
-    [MaxLength(100)]
-    public required string Name { get; set; }
+
 
     /// <summary>
     /// URL-safe unique slug (lowercase, hyphenated).

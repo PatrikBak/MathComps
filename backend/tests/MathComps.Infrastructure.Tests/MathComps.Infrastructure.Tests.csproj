@@ -28,6 +28,14 @@
         <ProjectReference Include="..\..\src\Core\MathComps.Domain\MathComps.Domain.csproj" />
     </ItemGroup>
 
+    <!-- Link Resources from Infrastructure so tests can access metadata files -->
+    <ItemGroup>
+        <Content Include="..\..\src\Infrastructure\MathComps.Infrastructure\Resources\**\*">
+            <Link>Resources\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
     <ItemGroup>
         <Using Include="Xunit" />
     </ItemGroup>

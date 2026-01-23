@@ -1,0 +1,4184 @@
+{
+  "document": {
+    "title": "Algebra",
+    "subtitle": "Factorization",
+    "sections": [
+      {
+        "title": "Introduction",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why is it good to know how to factor complex expressions? Imagine you have to prove that the number "
+                },
+                {
+                  "type": "math",
+                  "text": "n^3-n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " is divisible by six for every integer "
+                },
+                {
+                  "type": "math",
+                  "text": "n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Without modification, it is unclear. However, it is enough to factor the expression:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "math",
+              "text": "n^3-n = n(n^2-1) = (n-1)n(n+1).",
+              "isDisplay": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Suddenly we see a product of three consecutive numbers, of which at least one is always even and exactly one is divisible by three. Divisibility by six is thus obvious."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The ability to transform a confusing sum into a clear product is one of the key techniques in solving tricky mathematical problems"
+                },
+                {
+                  "type": "footnote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This idea of factoring expressions is thousands of years old – ancient Babylonians and Greeks solved problems, which we record today as quadratic equations, using geometric methods that were essentially a visual factorization."
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". In this lesson, we will systematically derive known factorizations, explain the tricks and intuition behind them, and practice everything on examples."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Theory",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In this section, we will gradually introduce four key factorization techniques. We will start from basic formulas, move to the general method of grouping, and finally explain completing the square. As a curiosity, we will also show that one can complete not only to a square but also to a cube, and surprisingly it can be useful."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Difference and sum of powers formulas",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Verify by expanding that the following holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^2-b^2=(a-b)(a+b)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3-b^3=(a-b)(a^2+ab+b^2)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^4-b^4=(a-b)(a^3+a^2b+ab^2+b^3)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What will the general formula for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^n-b^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " look like for a natural number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The answer to the question is Proposition 1."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Verify by expanding that the following holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3+b^3=(a+b)(a^2-ab+b^2)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^5+b^5=(a+b)(a^4-a^3b+a^2b^2-ab^3+b^4)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What will the general formula for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^n+b^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " look like for an odd natural number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The answer to the question is Proposition 2."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "After a while of investigation, we will surely come up with general formulas:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For all real numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and natural "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", it holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^n - b^n = (a-b)(a^{n-1}+a^{n-2}b+\\cdots+ab^{n-2}+b^{n-1})",
+                  "isDisplay": true
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We subtract the expressions:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\na(a^{n-1}+a^{n-2}b+\\cdots+ab^{n-2}+b^{n-1}) &= a^n  + a^{n-1}b + \\cdots + ab^{n-1}  \\\\\nb(a^{n-1}+a^{n-2}b+\\cdots+ab^{n-2}+b^{n-1}) &=  a^{n-1}b + \\cdots + ab^{n-1} + b^n\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On the left, we can factor out the large parenthesis and get exactly the right side of the proven formula. On the right, all terms cancel out. The proposition is proved."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The situation with "
+                },
+                {
+                  "type": "math",
+                  "text": "a^n+b^n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " is more curious in that such a factorization works only for odd\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". From the proof, it is visible why:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For all real numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and odd natural "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", it holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^n + b^n = (a+b)(a^{n-1}-a^{n-2}b+\\cdots-ab^{n-2}+b^{n-1})",
+                  "isDisplay": true
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The proposition can be proved similarly to the previous one – by observing which terms cancel out when expanding the right side. However, a trickier proof is worth mentioning, in which we substitute the value "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " instead of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " into the formula for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^n-b^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Thanks to the oddness of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^n-(-b)^n=a^n+b^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Every second term of the parenthesis "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^{n-1}+a^{n-2}b+\\cdots+ab^{n-2}+b^{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " changes sign when replacing "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "How is it for even "
+                },
+                {
+                  "type": "math",
+                  "text": "n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "? For the expression "
+                },
+                {
+                  "type": "math",
+                  "text": "a^2+b^2",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", it can be proven that it really cannot be factored (in the domain of real numbers). However, all other "
+                },
+                {
+                  "type": "math",
+                  "text": "a^n+b^n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " can be factored, which we will gradually work towards."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor into a product of two expressions without roots ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "n,k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are natural numbers)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3-27",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3+8b^3",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^4-4^n",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^6+b^6",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^{4k+2}+b^{4k+2}",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The individual factorizations are"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3-27 = a^3 - 3^3 = (a-3)(a^2+3a+9)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3+8b^3 = a^3 + (2b)^3 = (a+2b)(a^2-2ab+4b^2)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^4-4^n = (a^2)^2 - (2^n)^2 = (a^2-2^n)(a^2+2^n)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^6+b^6 = (a^2)^3 + (b^2)^3 = (a^2+b^2)(a^4 - a^2b^2 + b^4)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^{4k+2}+b^{4k+2}=(a^{2})^{2k+1}+(b^{2})^{2k+1}=(a^{2}+b^{2})(a^{4k}-a^{4k-2}b^{2}+\\cdots-a^{2}b^{4k-2}+b^{4k})",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In more complex problems, factorization is typically just one of several steps. We can try:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that for every natural number\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^5-n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by 30."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Factor the investigated expression into as many parentheses as possible."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The sought factorization is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To investigate divisibility by 30, it is enough to investigate divisibility by "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "5",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " separately."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It holds that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". It suffices to prove that this expression is divisible by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "divisibility by "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " follows from the fact that of consecutive numbers "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", at least one is even;"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "similarly, divisibility by "
+                          },
+                          {
+                            "type": "math",
+                            "text": "3",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " follows from numbers "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ";"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "divisibility by "
+                          },
+                          {
+                            "type": "math",
+                            "text": "5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is more complex. Certainly, when "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " gives a remainder of 0, 1, or 4 when divided by 5, we are done, due to factors "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Then if "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n=5k+2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " or "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n=5k+3",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", then "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n^2+1 = 25k^2+20k+5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " or "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n^2+1=25k^2+30k+10",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", so again we have a number divisible by 5."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Find three distinct pairs of natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a,b)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^{37} + b^{37}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "0<a<b<7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The factorization of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{37}+b^{37}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " suggests a much simpler divisibility, which is sufficient."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Since "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{37}+b^{37}=(a+b)(\\cdots)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", it is enough that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "7 \\mid a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It holds that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^{37}+b^{37}=(a+b)(a^{36}+\\cdots+b^{36})",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b \\mid a^{37}+b^{37}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", thus it suffices that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "7 \\mid a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We can easily achieve this with pairs "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a,b)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " equal to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1,6), (2,5), (3,4)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Find all natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " greater than 1 such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^6-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a product of three not necessarily distinct primes."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The expression "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^6-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " can be factored into a product of many parentheses."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "One possible factorization is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The second parenthesis can indeed be factored, but it is not evident at all how. A better factorization is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". From this we factor further. Subsequently, we have at least 4 factors, which sounds suspicious if the number is to be a product of three primes."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We have the factorization"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)=(n-1)(n^2+n+1)(n+1)(n^2-n+1).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For this to be a product of three primes, one parenthesis must be equal to 1. For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n>1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", this is only possible for the first one, where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". In that case, we indeed have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^6-1=63=3\\cdot3\\cdot7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Grouping",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The common school procedure of successive factorization works even in harder problems. The idea is: notice that something can be factored out; factor it out; and see what happens next. For this procedure, there exists a very important trick usable even in harder problems: "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "watch when the expression is zero"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor the expression "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^4-a-b^4+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Without seeing the resulting factorization, we can say that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " will be in it, because the investigated expression is equal to 0 for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Thanks to this, we purposefully rearrange the terms as "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a^4-b^4)+(a-b)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Now we can factor out "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " from both expressions and we have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a-b)(a^3+a^2b+ab^2+b^3)-(a-b)=(a-b)(a^3+a^2b+ab^2+b^3-1).",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "This view explains why in the formulas "
+                },
+                {
+                  "type": "math",
+                  "text": "a^n-b^n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " and "
+                },
+                {
+                  "type": "math",
+                  "text": "a^n+b^n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " from the previous section we have "
+                },
+                {
+                  "type": "math",
+                  "text": "a-b",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " and "
+                },
+                {
+                  "type": "math",
+                  "text": "a+b",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "; and also why the second one requires odd "
+                },
+                {
+                  "type": "math",
+                  "text": "n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " – for "
+                },
+                {
+                  "type": "math",
+                  "text": "a=b",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " or "
+                },
+                {
+                  "type": "math",
+                  "text": "a=-b",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "a^n-b^n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " or "
+                },
+                {
+                  "type": "math",
+                  "text": "a^n + b^n",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " are zero."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "[2 factors] "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2ab+a+2b+1",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "[3 factors] "
+                          },
+                          {
+                            "type": "math",
+                            "text": "abc+ab+bc+ca+a+b+c+1",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "[3 factors] "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a^2(b-c) + b^2(c-a) + c^2(a-b)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "[4 factors] (harder"
+                          },
+                          {
+                            "type": "footnote",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Coming up with this factorization was the first step to solving problem 3 of IMO 2006"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "text",
+                            "text": ") "
+                          },
+                          {
+                            "type": "math",
+                            "text": "ab(a^{2}-b^{2})+bc(b^{2}-c^{2})+ca(c^{2}-a^{2})",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The individual factorizations are:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "An obvious zero point is "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", in the result we expect "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". We easily find "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2ab+a+2b+1=(a+1)(2b+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Here again it holds that whenever any of the numbers "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a,b,c",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is equal to "
+                          },
+                          {
+                            "type": "math",
+                            "text": "-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", the expression will be zero. Thus we expect "
+                          },
+                          {
+                            "type": "math",
+                            "text": "(a+1)(b+1)(c+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " in the result. Actually, that is all: "
+                          },
+                          {
+                            "type": "math",
+                            "text": "abc+ab+bc+ca+a+b+c+1=(a+1)(b+1)(c+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". We can arrive at this gradually like this:"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\nabc+ab+bc+ca+a+b+c+1=\n(abc+ab)+(bc+b)+(ac+a)+(c+1) = \\\\ =\nab(c+1)+b(c+1)+a(c+1)+(c+1)=\n(c+1)(ab+b+a+1)=  \\\\ =\n(c+1)(b(a+1)+(a+1))=\n(c+1)(b+1)(a+1).\n\\end{gather*}",
+                        "isDisplay": true
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "When two numbers are equal, e.g., "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=b",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", the expression is zero. We manipulate the expression to have a parenthesis "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a-b",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " in the result. We expect that "
+                          },
+                          {
+                            "type": "math",
+                            "text": "b-c",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "c-a",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " (or the opposite) will also appear there."
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\na^{2}(b-c)+b^{2}(c-a)+c^{2}(a-b) = (a^2b - ab^2) - c(a^2-b^2) + c^2(a-b) = \\\\ =\nab(a-b) - c(a-b)(a+b) - c^2(a-b) = (a-b)(ab-c(a+b)-c^2) = \\\\ = (a-b)(a(b-c)-c(b-c)) = (a-b)(b-c)(a-c).\n\\end{gather*}",
+                        "isDisplay": true
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "We proceed similarly to the previous exercise, since again we have equality for "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=b",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". The modifications are more complex here:"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\nab(a^{2}-b^{2})+bc(b^{2}-c^{2})+ca(c^{2}-a^{2})=\nab(a^2-b^2) + b^3c - bc^3 + ac^3 - a^3c = \\\\ =\nab(a^2-b^2) - c(a^3-b^3) + c^3(a-b) =\n(a-b)(ab(a+b) - c(a^2+ab+b^2) + c^3).\n\\end{gather*}",
+                        "isDisplay": true
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Now let's focus on the parenthesis:"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\nab(a+b) - c(a^2+ab+b^2) + c^3 =\na^2b + ab^2 - ca^2 - abc - cb^2 + c^3 = \\\\ =\nab(a-c) + b^2(a-c) - c(a^2-c^2) =\n(a-c)(ab+b^2-c(a+c)).\n\\end{gather*}",
+                        "isDisplay": true
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Finally, the last parenthesis:"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\nab+b^2-c(a+c)=(ab-ac)+(b^2-c^2)=\\\\=a(b-c) + (b-c)(b+c)=  (b-c)(a+b+c).\n\\end{gather*}",
+                        "isDisplay": true
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Together we have"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{2}(b-c)+b^{2}(c-a)+c^{2}(a-b) = (a-b)(b-c)(a-c)(a+b+c).",
+                        "isDisplay": true
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "This view is not universal, because the factored factors do not have to be linear at all or can be more complex and it is harder to see the root. Then we have no choice but to play with rearranging terms and successive factoring."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor into a product of two expressions:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3b + a^2 + ab^3 + b^2",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3b + a^2 + ab^3 + ab + b^2 + 1",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3+b^3+c^3+ab(a+b)+bc(b+c)+ca(c+a)",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The individual factorizations are:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "a^3b + a^2 + ab^3 + b^2 = a^2(ab+1) + b^2(ab+1)=(a^2+b^2)(ab+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\na^3b + a^2 + ab^3 + ab + b^2 + 1 = (a^3b+a^2) + (ab^3+b^2) + (ab+1) =\\\\\n= a^2 (ab+1) + b^2 (ab+1) + (ab+1) = (a^2+b^2+1)(ab+1).\n\\end{gather*}",
+                        "isDisplay": true
+                      }
+                    ],
+                    [
+                      {
+                        "type": "math",
+                        "text": "\\begin{gather*}\na^3+b^3+c^3+ab(a+b)+bc(b+c)+ca(c+a)= \\\\=\n(a^3+ab^2+ac^2) + (b^3+bc^2+ba^2) + (c^3+ca^2+cb^2) = \\\\ =\na(a^2+b^2+c^2) + b(a^2+b^2+c^2) + c(a^2+b^2+c^2) = \\\\ =\n(a+b+c)(a^2+b^2+c^2).\n\\end{gather*}",
+                        "isDisplay": true
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Hidden factorization and other algebraic modifications can be successfully used in this example:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "CPSJ"
+                  },
+                  {
+                    "type": "footnote",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Czech-Polish-Slovak Junior Match"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": " 2018"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " it holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a + b + c)^2 \\mid ab(a + b) + bc(b + c) + ca(c + a) + 3abc.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a + b + c) \\mid (a - b)^2 + (b - c)^2 + (c - a)^2.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The expression "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab(a+b) + bc(b+c) + ca(c+a) + 3abc",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " can be subtly factored."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "It holds that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab(a+b) + bc(b+c) + ca(c+a) + 3abc = (a+b+c)(ab+bc+ca)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Thus our divisibility simplifies to"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "a+b+c \\mid ab+bc+ca.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The expression "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a-b)^2 + (b-c)^2 + (c-a)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is equal to "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2(a^2+b^2+c^2+ab+bc+ca)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we see a connection."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We factor the right side of the first divisibility:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\nab(a + b) + bc(b + c) + ca(c + a) + 3abc &= \\\\\n(ab(a + b)+abc) + (bc(b + c)+abc) + (ca(c + a)+abc) &= \\\\\nab(a+b+c) + bc(a+b+c) + ca(a+b+c) &= \\\\\n(a+b+c)(ab+bc+ca).\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The assumed divisibility translates to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\mid ab+bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". It holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a-b)^2 + (b-c)^2 + (c-a)^2 = 2(a^2+b^2+c^2+ab+bc+ca).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The divisibility "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\mid ab+bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " simplifies the situation to the fact that it suffices to prove "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\mid 2(a^2+b^2+c^2)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We prove this by using"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a+b+c \\mid (a+b+c)^2 = a^2+b^2+c^2 + 2(ab+bc+ca).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Together with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\mid ab+bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we then have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\mid a^2+b^2+c^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so altogether we are done."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Completing the square",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Completing the square is one of the oldest and most elegant techniques in algebra"
+                },
+                {
+                  "type": "footnote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It was made famous by the Persian mathematician of the 9th century, Muhammad ibn Musa al-Khwarizmi (the word 'algorithm' comes from his name). He did not solve equations with our symbols, but geometrically – literally drawing squares and rectangles and trying to 'complete' a larger square from them."
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". It allows us to "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "factor"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " a quadratic polynomial into a product of simpler linear ones, e.g."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "math",
+              "text": "x^2+2x-3=(x+1)^2-4=(x+1-2)(x+1+2)=(x-1)(x+3).",
+              "isDisplay": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In general for real numbers "
+                },
+                {
+                  "type": "math",
+                  "text": "a\\neq 0",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "b",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "c",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " we have"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "math",
+              "text": "\\begin{gather*}\nax^2+bx+c\n=a\\left(x^2+\\frac ba x + \\frac ca\\right)\n=a\\left(\\left(x + \\frac{b}{2a}\\right)^2 + \\frac ca - \\frac{b^2}{4a^2}\\right) =\\\\\n=a\\left(\\left(x + \\frac{b}{2a}\\right)^2 - \\frac{b^2 - 4ac}{4a^2}\\right).\n\\end{gather*}",
+              "isDisplay": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "From this, we can easily derive the formula for the solutions of a quadratic equation."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In general, we actually used "
+                },
+                {
+                  "type": "math",
+                  "text": "a^2+2ab = (a+b)^2 - b^2",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". However, we can also complete to a square by 'manufacturing' the middle coefficient, i.e., using the formula "
+                },
+                {
+                  "type": "math",
+                  "text": "a^2+b^2=(a+b)^2-2ab",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". We will demonstrate this on the following example:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^4+m^2n^2+n^4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first thing that might occur to us is to complete "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^4+m^2n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to a square. By doing so we get"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "m^4+m^2n^2+n^4= \\left(m^2 +\\frac{n^2}2\\right)^2 + \\frac{3n^4}4.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This did not help us much. Let's try something else, let's complete "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^4+n^4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to a square. Then we have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\nm^4+m^2n^2+n^4 = (m^4+n^4)+m^2n^2 = (m^2+n^2)^2 - 2m^2n^2 + m^2n^2 = \\\\ = (m^2+n^2)^2 - m^2n^2 = (m^2+n^2-mn)(m^2+n^2+mn).\n\\end{gather*}",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Practice this by deriving a known identity:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Sophie-Germain identity"
+                  },
+                  {
+                    "type": "footnote",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Named after Sophie Germain, one of the most significant female mathematicians at the turn of the 18th and 19th centuries. At a time when women did not have access to universities, she studied mathematics herself and corresponded with the greatest mathematicians of her time, like Gauss, initially under a male pseudonym."
+                      }
+                    ]
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^4+4b^4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By completing to a square we have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^4+4b^4 = (a^2)^2 + (2b^2)^2 = (a^2+2b^2)^2 - (2ab)^2 = (a^2+2b^2-2ab)(a^2+2b^2+2ab).",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Try an example from the national round of MO:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "CKMO 2012"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Determine all natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^4 - 3n^2 + 9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a prime number."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The investigated expression can surprisingly be factored. Completing the square is a fine technique. Just be careful what we are completing."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key completion is"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=(n^2+3)^2-9n^2.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Do we see a known formula?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\nn^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=\\\\=(n^2+3)^2-9n^2 = (n^2+3-3n)(n^2+3+3n).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Clearly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2+3+3n > n^2+3-3n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The second number is positive for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n>0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", because"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n^2-3n+3=\\left(n-\\frac32\\right)^2 + \\frac 34.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For the product to be a prime number, since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n^2+3-3n)(n^2+3+3n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2+3-3n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By solving the quadratic equation we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Learned techniques can be nicely put together in this observation:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Justify that the expression "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^n+b^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " can be factored into a product of non-constant expressions with real coefficients for every "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n>2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "(Let us note that it can be proven that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2+b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "cannot"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " be factored into a product of two non-constant parentheses with real coefficients.)"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For odd "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " we have a formula. Let's realize that it is even enough for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to have an odd divisor. Thanks to this observation, the even case is also simplifying. Can we solve the first even case "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "? Does it help with the rest?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "If "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " has an odd divisor "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", where "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=mk",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", then we can factor out "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^k+b^k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " from "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^n+b^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". It remains to solve numbers that do not have an odd divisor – that is, powers of 2. According to the problem statement "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n>2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so the smallest interesting power is 4, for such powers we have completing the square. But what about higher powers? Well, those are fortunately divisible by\u00A04."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has an odd divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=mk",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\na^n+b^n\n= a^{mk}+b^{mk}\n= (a^m)^k+(b^m)^k =\\\\\n= (a^m+b^m)\\left(a^{m(k-1)}-a^{m(k-2)}b^{m}+a^{m(k-3)}b^{2m}-\\cdots\n- a^{m}b^{m(k-2)}+b^{m(k-1)}\\right).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Otherwise, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a power of\u00A02 and thanks to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n>2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " it is divisible by 4, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=4t",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\na^{4t}+b^{4t}\n=(a^{2t})^{2}+(b^{2t})^{2}\n=(a^{2t}+b^{2t})^{2}-2a^{2t}b^{2t}=\\\\\n=\\left(a^{2t}+b^{2t}-\\sqrt2\\,a^{t}b^{t}\\right)\\left(a^{2t}+b^{2t}+\\sqrt2\\,a^{t}b^{t}\\right)=\\\\\n=\\left(a^{2t}-\\sqrt2\\,a^{t}b^{t}+b^{2t}\\right)\\left(a^{2t}+\\sqrt2\\,a^{t}b^{t}+b^{2t}\\right).\n\\end{gather*}",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "A few more harder problems for practice:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " into a product of four non-constant parentheses."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Notice that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2a^2b^2-a^4-b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " appears in the expression, which is equal to "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-(a^2-b^2)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The key trick is to combine it with the rest of the expression using *another* completion to a square, where one of these 'squares' will be "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-(a^2-b^2)^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The second sought 'square' will be "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-c^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", as it holds: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". That fits quite well with the rest of the expression."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "First we notice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a^2b^2-a^4-b^4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in the expression and create a square:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4 = -(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Now we apply completing the square to the first two terms, specifically we complete "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-(x^2+y^2)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=a^2-b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y=c^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n-(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2= \\\\\n= -((a^2-b^2)+c^2)^2 + 2(a^2-b^2)c^2 + 2b^2c^2 + 2c^2a^2= \\\\\n= -(a^2-b^2+c^2)^2 + (2a^2c^2 - 2b^2c^2) + 2b^2c^2 + 2c^2a^2= \\\\\n= -(a^2-b^2+c^2)^2 + 4a^2c^2= \\\\\n= (2ac)^2 - (a^2-b^2+c^2)^2.\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We can easily factor this expression by repeatedly finding squares and using the formula for the difference of squares:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n(2ac - (a^2-b^2+c^2))(2ac + (a^2-b^2+c^2)) = \\\\\n= (b^2 - (a^2-2ac+c^2))((a^2+2ac+c^2)-b^2)= \\\\\n= (b^2 - (a-c)^2)((a+c)^2 - b^2)= \\\\\n= (b-(a-c))(b+(a-c)) \\cdot ((a+c)-b)((a+c)+b)= \\\\\n= (a+b+c)(a+b-c)(a-b+c)(-a+b+c).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let us note that we actually practically reconstructed Heron's"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Heron of Alexandria was an ancient Greek mathematician and engineer who lived in the 1st century AD. His formula for the area of a triangle appears in his work "
+                        },
+                        {
+                          "type": "italic",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Metrica"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " formula. For the area\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of a triangle with sides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", it holds"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "16S^2 = 2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This formula is usually presented in a computationally more acceptable\u00A0form"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "S = \\sqrt{s(s-a)(s-b)(s-c)}, \\qquad\\text{where}\\qquad s=\\frac{a+b+c}{2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Verify yourselves that this form is equivalent to our proven identity"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "16S^2=2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4=(a+b+c)(a+b-c)(a-b+c)(-a+b+c).",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For which natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^4 + 4^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a prime number?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The investigated expression resembles the Sophie-Germain identity. Try to fit it in there. Maybe it will be necessary to analyze some cases."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "To be able to use Sophie-Germain, we need "
+                      },
+                      {
+                        "type": "math",
+                        "text": "4^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to be in the form "
+                      },
+                      {
+                        "type": "math",
+                        "text": "4b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". This is certainly true for odd "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", because then"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "4^n = 4 \\cdot 4^{n-1} = 4 \\cdot 2^{2(n-1)} = 4 \\cdot \\left(2^{\\frac{n-1}{2}}\\right)^4.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "On the other hand, the case of even "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is again evidently non-prime."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We will analyze two cases according to the parity of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is even, then the number "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n^4+4^n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is clearly divisible by 4, so it is not a prime number."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is odd, then notice that:"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "4^n = 4 \\cdot 4^{n-1} = 4 \\cdot 2^{2(n-1)} = 4 \\cdot \\left(2^{(n-1)/2}\\right)^4.",
+                        "isDisplay": true
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Our expression thus has the form "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a^4+4b^4",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " for "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "b=2^{\\frac{n-1}2}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Thus we can use the Sophie-Germain identity"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^4+4b^4=(a^2+2b^2-2ab)(a^2+2b^2+2ab).",
+                        "isDisplay": true
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "For this product to be a prime number, one of the factors must be equal to 1. The second factor is clearly greater than 1 for every "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a,b \\ge 1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Let's analyze the first factor, which after completing to a square is equal to:"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^2+2b^2-2ab=(a-b)^2+b^2.",
+                        "isDisplay": true
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "For this to be equal to 1, we must have "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=b=1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", so "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n=1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Then indeed "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n^4+4^n=5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is a prime number."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The only solution is therefore "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Completing the cube",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Finally, we will show a non-traditional technique: besides completing to a square, one can perform "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "completing to a cube"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". This means that if we have "
+                },
+                {
+                  "type": "math",
+                  "text": "a^3+b^3",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", instead of directly applying the factorization formula, we can use"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "math",
+              "text": "a^3 + b^3 = (a+b)^3 - 3ab(a+b).",
+              "isDisplay": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "We will demonstrate this on an example:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Factor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^3+b^3+c^3-3abc",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Using completing to a cube we have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\na^3 + b^3 + c^3 - 3abc &= \\\\\n(a+b)^3 - 3ab(a+b) + c^3 - 3abc &= \\\\\n(a+b)^3 + c^3 - 3ab(a+b+c) &= \\\\\n(a+b+c)((a+b)^2 - (a+b)c + c^2) - 3ab(a+b+c) &= \\\\\n(a+b+c)((a+b)^2 - (a+b)c + c^2 - 3ab) &= \\\\\n(a+b+c)(a^2 + 2ab + b^2 - ac - bc + c^2 - 3ab) &= \\\\\n(a+b+c)(a^2 + b^2 + c^2 - ab - bc - ca).\n\\end{align*}",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "This factorization is very interesting in itself, as it allows us to easily prove an inequality:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be real numbers for which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\ge 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^3+b^3+c^3 \\ge 3abc,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "where equality occurs if and only if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We will use our already known factorization"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^3+b^3+c^3 - 3abc = (a+b+c)(a^2+b^2+c^2-ab-bc-ca).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c \\ge 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", it suffices to prove "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2+b^2+c^2 \\ge ab+bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This looks tempting from the perspective of completing to a square, for example, we can try to complete "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2-ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to a square. However, I will reveal that this will not lead to the goal. The trick to proving this inequality is to multiply it by two and prove the equivalent inequality"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "2a^2+2b^2+2c^2 \\ge 2ab+2bc+2ca.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It seems we haven't helped ourselves. However, another trick is to split "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " as "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2+a^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". After suitable rearranging of terms we then have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\na^2+a^2+b^2+b^2+c^2+c^2-2ab-2bc-2ca &= \\\\\n(a^2-2ab+b^2)+(b^2-2bc+c^2)+(c^2-2ac+a^2) &=\\\\\n(a-b)^2 + (b-c)^2 + (c-a)^2.\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since this last expression is certainly non-negative, the proof of the inequality is finished. Equality occurs if and only if the first parenthesis "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is zero or the second parenthesis "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2+b^2+c^2-ab-bc-ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is zero. From the proof of its non-negativity, we see that it is exactly when "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a-b=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b-c=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c-a=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e., when "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We are done."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "What to remember",
+        "level": 1,
+        "text": {
+          "content": []
+        }
+      },
+      {
+        "title": "Techniques",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We look for differences/sums of powers so we can use "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^n+b^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^n-b^n",
+                        "isDisplay": false
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We check when the expression is zero, which helps us factor correctly"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We complete to a square/cube. We try multiple possibilities of how to do it"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Useful formulas",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Factorization of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^n-b^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^n+b^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " (for odd "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ")"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Expressions of the form "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^4+4b^4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " can often be factored, even if it is not evident"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Non-evident factorization of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3+b^3+c^3-3abc",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and its consequences (Proposition 3)"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Inequality "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^2+b^2+c^2 \\ge ab+bc+ca",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and its proof"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Other useful factorizations like"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "math",
+                              "text": "a^2+2ab+b^2=(a+b)^2",
+                              "isDisplay": false
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ],
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "math",
+                              "text": "a^2+b^2+c^2+2ab+2bc+2ca=(a+b+c)^2",
+                              "isDisplay": false
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ],
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "etc, there are no limits to the imagination of problem authors..."
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ]
+                    ],
+                    "styleType": "LowerRomanParens"
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

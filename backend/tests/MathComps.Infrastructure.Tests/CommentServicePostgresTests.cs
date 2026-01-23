@@ -611,8 +611,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         var competition = new Competition
         {
             Id = Guid.NewGuid(),
-            DisplayName = "Test Comp",
-            FullName = "Test Competition",
             Slug = "test-comp",
             SortOrder = 1
         };
@@ -623,7 +621,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             StartYear = 2024,
-            EditionLabel = "1st",
             EditionNumber = 1
         };
         context.Seasons.Add(season);
@@ -633,8 +630,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             CompetitionId = competition.Id,
-            DisplayName = "Test Round",
-            FullName = "Test Round Full",
             Slug = "test-round",
             CompositeSlug = "test-comp-test-round",
             SortOrder = 1,

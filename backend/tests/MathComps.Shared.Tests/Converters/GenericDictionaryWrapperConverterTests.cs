@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MathComps.Shared.Converters;
-using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Shared.Tests.Converters;
 

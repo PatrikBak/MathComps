@@ -36,6 +36,27 @@ public static class ProblemRenderer
     #region Public API
 
     /// <summary>
+    /// Parses raw TeX text with standard preprocessing (itemize/enumerate conversion to OpMac style).
+    /// Use this method when parsing translated or external TeX content that may contain \item commands.
+    /// </summary>
+    /// <param name="rawText">The raw TeX text to parse.</param>
+    /// <param name="rules">The cleaner rules for normalizing TeX input.</param>
+    /// <param name="problemId">The problem ID used for logging warnings during preprocessing.</param>
+    /// <returns>A parse result containing the parsed Text and any unknown commands found.</returns>
+    public static TexParserResult<TexText> ParseWithPreprocessing(
+        string rawText,
+        TeXCleanerRules rules,
+        string problemId)
+    {
+        // This just needs a simple delegation with itemize conversion (which is private here)
+        return TexStringParser.ParseText(
+            rawText,
+            rules,
+            currentText => ConvertPotentialItemizeIntoOpmacStyle(problemId, currentText)
+        );
+    }
+
+    /// <summary>
     /// Asynchronously parses and renders a list of raw TeX problems into HTML files according to the specified configuration.
     /// </summary>
     /// <param name="cleanerRules">The set of rules for cleaning the raw TeX input.</param>
@@ -139,7 +160,7 @@ public static class ProblemRenderer
     #region Preprocessing
 
     /// <summary>
-    /// This method will handle LaTeX itemize/enumerate environments + 'implicit' \item
+    /// This method will handle TeX itemize/enumerate environments + 'implicit' \item
     /// itemizes and convert them into OpMac-style \begitems ... \enditems environments.
     /// <para>For the sake of humanity, it would not be good if anyone else truly ever
     /// needed to understand this code. The SKMO archive files are just a lot of random

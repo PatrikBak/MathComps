@@ -1,8 +1,9 @@
 'use client'
 
 import { Link } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
-import type { RawContentBlock } from '@/components/features/handouts/handout-types'
+import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -11,12 +12,13 @@ import type { Problem, SimilarProblem } from '../types/problem-api-types'
 import { IconButton } from './IconButton'
 
 const SimilarityScoreIndicator = ({ score }: { score: number }) => {
+  const tProblems = useTranslations('problems')
   const percentage = (score * 100).toFixed(0)
   const hue = score * 120 // 0 = red, 1 = green
   const color = `hsl(${hue}, 60%, 50%)`
 
   return (
-    <div className="flex items-center gap-2" title={`Relevancia: ${percentage}%`}>
+    <div className="flex items-center gap-2" title={tProblems('relevance', { percentage })}>
       <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full"
@@ -45,7 +47,9 @@ const SimilarProblemCard = ({
   problem: SimilarProblem
   ordinalNumber: number
 }) => {
-  const { copyPermalink } = useProblemPermalink()
+  const copyPermalink = useProblemPermalink()
+  const tActions = useTranslations('ui.actions')
+  const tProblems = useTranslations('problems')
 
   const handlePermalinkCopy = () => {
     copyPermalink(problem.slug)
@@ -67,7 +71,7 @@ const SimilarProblemCard = ({
               <SimilarityScoreIndicator score={problem.similarityScore} />
             </div>
           </div>
-          <IconButton Icon={Link} title="Získať permalink" onClick={handlePermalinkCopy} />
+          <IconButton Icon={Link} title={tActions('getPermalink')} onClick={handlePermalinkCopy} />
         </div>
         {/* Spacer to create empty space for the absolutely positioned element */}
         <div className="h-6" />
@@ -88,11 +92,11 @@ const SimilarProblemCard = ({
               )
             } catch (error) {
               console.warn('Failed to parse statement content:', error)
-              return <span>Error loading problem statement</span>
+              return <span>{tProblems('errorLoadingStatement')}</span>
             }
           })()
         ) : (
-          <span>No problem statement available</span>
+          <span>{tProblems('noStatementAvailable')}</span>
         )}
       </div>
     </div>
@@ -100,6 +104,7 @@ const SimilarProblemCard = ({
 }
 
 export const SimilarProblemView = ({ view, problem }: SimilarProblemViewProps) => {
+  const tProblems = useTranslations('problems')
   if (!view) return null
 
   const renderContent = () => {
@@ -108,14 +113,14 @@ export const SimilarProblemView = ({ view, problem }: SimilarProblemViewProps) =
         if (!problem.similarProblems || problem.similarProblems.length === 0) {
           return (
             <div className="text-center text-gray-400">
-              <p>Nenašli sa žiadne podobné úlohy s dostatočnou relevanciou.</p>
+              <p>{tProblems('noSimilarProblems')}</p>
             </div>
           )
         }
         return (
           <div className="space-y-4">
             <div className="flex justify-end mb-4">
-              <p className="text-xs text-gray-500 italic">Relevancia je orientačná</p>
+              <p className="text-xs text-gray-500 italic">{tProblems('relevanceNote')}</p>
             </div>
             {problem.similarProblems.map((similarProblem, index) => (
               <SimilarProblemCard

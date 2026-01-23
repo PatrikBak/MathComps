@@ -10,4 +10,8 @@
     <PackageReference Include="Pgvector" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\MathComps.Shared\MathComps.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

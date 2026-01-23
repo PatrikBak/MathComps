@@ -1,0 +1,222 @@
+[
+  {
+    "category": {
+      "sk": "Algebra",
+      "cs": "Algebra",
+      "en": "Algebra"
+    },
+    "handouts": [
+      {
+        "status": "ready",
+        "id": "RFj3E98fbinTsPJNbfBMm",
+        "slug": {
+          "sk": "rozklady-na-sucin",
+          "cs": "rozklady-na-soucin",
+          "en": "factorization"
+        },
+        "title": {
+          "sk": "Rozklady na súčin",
+          "cs": "Rozklady na součin",
+          "en": "Factorization"
+        },
+        "description": {
+          "sk": "Systematický úvod do rozkladania algebraických výrazov na súčin. Pokrýva základné vzorce, postupné vynímanie a dopĺňanie na štvorec s praktickými aplikáciami.",
+          "cs": "Systematický úvod do rozkládání algebraických výrazů na součin. Pokrývá základní vzorce, postupné vytýkání a doplňování na čtverec s praktickými aplikacemi.",
+          "en": "A systematic introduction to factoring algebraic expressions. Covers basic formulas, step-by-step extraction, and completing the square with practical applications."
+        },
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "status": "ready",
+        "id": "_bNdll2TEiNb6fuho76K3",
+        "slug": {
+          "sk": "sustavy-rovnic",
+          "cs": "soustavy-rovnic",
+          "en": "systems-of-equations"
+        },
+        "title": {
+          "sk": "Sústavy rovníc",
+          "cs": "Soustavy rovnic",
+          "en": "Systems of Equations"
+        },
+        "description": {
+          "sk": "Základné techniky riešenia súťažných sústav rovníc. Pokrýva odčítanie, sčítanie a usporiadanie premenných.",
+          "cs": "Základní techniky řešení soutěžních soustav rovnic. Pokrývá odčítání, sčítání a uspořádání proměnných.",
+          "en": "Basic techniques for solving competition-level systems of equations. Covers subtraction, addition, and variable ordering."
+        },
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "status": "ready",
+        "id": "u15f7GlQS2wKSsuIKCz0c",
+        "slug": {
+          "sk": "uvod-do-nerovnosti",
+          "cs": "uvod-do-nerovnosti",
+          "en": "introduction-to-inequalities"
+        },
+        "title": {
+          "sk": "Úvod do nerovností",
+          "cs": "Úvod do nerovností",
+          "en": "Introduction to Inequalities"
+        },
+        "description": {
+          "sk": "Základné techniky riešenia súťažných nerovností. Pokrýva ekvivalentné úpravy, kladné štvorce, AG nerovnosť.",
+          "cs": "Základní techniky řešení soutěžních nerovností. Pokrývá ekvivalentní úpravy, kladné čtverce, AM-GM nerovnost.",
+          "en": "Basic techniques for solving competition-level inequalities. Covers equivalent transformations, positive squares, AM-GM inequality."
+        },
+        "authors": ["Patrik Bak"]
+      },
+      {
+        "status": "ready",
+        "id": "dafdGYRouX2XuyrXK-5Xf",
+        "slug": {
+          "sk": "vtipna-algebra",
+          "cs": "vtipna-algebra",
+          "en": "fun-algebra"
+        },
+        "title": {
+          "sk": "Vtipná algebra",
+          "cs": "Vtipná algebra",
+          "en": "Fun Algebra"
+        },
+        "description": {
+          "sk": "Zbierka úloh, ktoré využívajú šikovné algebraické úpravy.",
+          "cs": "Sbírka úloh, které využívají šikovné algebraické úpravy.",
+          "en": "A collection of problems that use clever algebraic manipulations."
+        },
+        "authors": ["Patrik Bak"]
+      }
+    ]
+  },
+  {
+    "category": {
+      "sk": "Teória čísel",
+      "cs": "Teorie čísel",
+      "en": "Number Theory"
+    },
+    "handouts": [
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "delitelnost",
+          "cs": "delitelnost",
+          "en": "divisibility"
+        },
+        "title": {
+          "sk": "Deliteľnosť",
+          "cs": "Dělitelnost",
+          "en": "Divisibility"
+        }
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "diofanticke-rovnice",
+          "cs": "diofanticke-rovnice",
+          "en": "diophantine-equations"
+        },
+        "title": {
+          "sk": "Diofantické rovnice",
+          "cs": "Diofantické rovnice",
+          "en": "Diophantine Equations"
+        }
+      }
+    ]
+  },
+  {
+    "category": {
+      "sk": "Geometria",
+      "cs": "Geometrie",
+      "en": "Geometry"
+    },
+    "handouts": [
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "podobnosti-a-zhodnosti",
+          "cs": "podobnosti-a-shodnosti",
+          "en": "similarity-and-congruence"
+        },
+        "title": {
+          "sk": "Podobnosti a zhodnosti",
+          "cs": "Podobnosti a shodnosti",
+          "en": "Similarity and Congruence"
+        }
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "uhly",
+          "cs": "uhly",
+          "en": "angles"
+        },
+        "title": {
+          "sk": "Uhly",
+          "cs": "Úhly",
+          "en": "Angles"
+        }
+      }
+    ]
+  },
+  {
+    "category": {
+      "sk": "Kombinatorika",
+      "cs": "Kombinatorika",
+      "en": "Combinatorics"
+    },
+    "handouts": [
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "ofarbovanie",
+          "cs": "barveni",
+          "en": "coloring"
+        },
+        "title": {
+          "sk": "Ofarbovanie",
+          "cs": "Barvení",
+          "en": "Coloring"
+        }
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "dirichletov-princip",
+          "cs": "dirichletuv-princip",
+          "en": "pigeonhole-principle"
+        },
+        "title": {
+          "sk": "Dirichletov princíp",
+          "cs": "Dirichletův princip",
+          "en": "Pigeonhole Principle"
+        }
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "extremalny-princip",
+          "cs": "extremalni-princip",
+          "en": "extremal-principle"
+        },
+        "title": {
+          "sk": "Extremálny princíp",
+          "cs": "Extremální princip",
+          "en": "Extremal Principle"
+        }
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "grafove-ulohy",
+          "cs": "grafove-ulohy",
+          "en": "graph-problems"
+        },
+        "title": {
+          "sk": "Grafové úlohy",
+          "cs": "Grafové úlohy",
+          "en": "Graph Problems"
+        }
+      }
+    ]
+  }
+]

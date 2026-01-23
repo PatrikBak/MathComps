@@ -1,5 +1,5 @@
 import { Dumbbell, Play, Target } from 'lucide-react'
-import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
@@ -15,40 +15,30 @@ export default function BeginnerGuideSection({
 }: {
   sectionNumberer: SectionNumberer
 }) {
+  const t = useTranslations('guide')
+
+  const beginningsPoints = t.raw('sections.howToStart.steps.beginnings.points') as string[]
+  const trainingPoints = t.raw('sections.howToStart.steps.training.points') as string[]
+
   const steps = [
     {
       icon: Play,
-      title: 'Začiatky sú skvelé, lebo človek sa rýchlo zlepšuje',
-      points: [
-        'Vyskúšaj korešpondenčné semináre. Majú úlohy vhodné pre začiatočníkov a poskytujú spätnú väzbu. Zúčastni sa ich sústredení, kde sa naučíš, spoznáš a zabavíš.',
-        'Hľadaj matematické krúžky na škole alebo v okolí. Spýtaj sa svojho učiteľa matematiky, či o niečom nevie.',
-        'Skús riešenie úloh s niekým ďalším, môžete sa motivovať a baviť navzájom.',
-        'Nájdi si tiež študijné materiály na systematické štúdium, odporúčania nájdeš o kúsok vyššie.',
-      ],
+      title: t('sections.howToStart.steps.beginnings.title'),
+      points: beginningsPoints,
       bulletStyle: 'checkbox',
     },
     {
       icon: Dumbbell,
-      title: 'Princípy dobrého tréningu',
-      points: [
-        'Matematiku je treba aktívne trénovať, ani svaly sa nezískajú pozeraním na videá o cvičení. Vždy je lepšie najprv skúsiť úlohu riešiť samostatne. Proces premýšľania, skúšania a aj zlyhávania pomáha mysli učiť sa.',
-        'Až po troche snahy je treba pozrieť vzorové riešenie úloh, ktoré si nevyriešil. Mozog sa z nich viac naučí, keď sa predtým trápil.',
-        'Určite ale pozri aj vzorové riešenia úloh, ktoré si vyriešil, častokrát sa naučíš iné postupy, možno aj efektívnejšie.',
-        'Niekomu viac vyhovujú systematické materiály a knihy, niekomu riešenie náhodných úloh. Ideálne je veci kombinovať, experimentovať, a nájsť to, čo ťa baví najviac.',
-      ],
+      title: t('sections.howToStart.steps.training.title'),
+      points: trainingPoints,
       bulletStyle: 'circle',
     },
   ]
 
-  const finalNote = {
-    title: 'Na záver',
-    text: 'Základom je baviť sa procesom. Svet súťaží a seminárov priťahuje veľa ľudí a všetci nemôžu byť najlepší, čo ale vôbec neznamená, že to všetkým nemôže zmeniť život k lepšiemu 😊',
-  }
-
   return (
     <GuideSection
-      title={GUIDE_TITLES.HOW_TO_START}
-      description="Na začiatku je vždy veľa možností, ako začať. Potom je veľa možností, ako napredovať. Nasledovné rady majú za cieľ týmto procesom pomôcť."
+      title={t(`titles.${GUIDE_TITLES.HOW_TO_START}`)}
+      description={t('sections.howToStart.description')}
       icon={{ type: 'lucide', icon: Target }}
       iconColor="text-violet-400"
       iconBackground="bg-violet-500/10"
@@ -92,9 +82,11 @@ export default function BeginnerGuideSection({
       <div className="mt-6 sm:mt-8">
         <div className={GUIDE_STYLES.noteBox}>
           <h4 className="text-lg sm:text-xl font-semibold text-emerald-300 mb-2 sm:mb-3">
-            {finalNote.title}
+            {t('sections.howToStart.finalNote.title')}
           </h4>
-          <p className={cn(GUIDE_STYLES.textNormal, 'leading-relaxed')}>{finalNote.text}</p>
+          <p className={cn(GUIDE_STYLES.textNormal, 'leading-relaxed')}>
+            {t('sections.howToStart.finalNote.text')}
+          </p>
         </div>
       </div>
     </GuideSection>

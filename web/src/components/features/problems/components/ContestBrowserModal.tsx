@@ -1,12 +1,12 @@
 'use client'
 
 import { Loader2, Search } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 import { GroupedVirtuoso } from 'react-virtuoso'
 
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
-import { slovakPlural } from '@/components/shared/utils/string-utils'
 
 import { useContestBrowser } from '../hooks/use-contest-browser'
 import type { ContestWithCount, SeasonContestsGroup } from '../types/contest-browser-types'
@@ -97,6 +97,12 @@ export function ContestBrowserModal({
   // The state for the current search query
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Translations for plurals
+  const tPlurals = useTranslations('plurals')
+
+  // Translations for the problems page
+  const tProblems = useTranslations('problems')
+
   // The function to filter the seasons based on the search query
   const filteredSeasons = useMemo(() => {
     // Handle no data
@@ -158,7 +164,7 @@ export function ContestBrowserModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Prehľad súťaží"
+      title={tProblems('contestsOverview')}
       showCloseButton
       className="max-w-xl max-h-[90vh] flex flex-col"
     >
@@ -169,7 +175,7 @@ export function ContestBrowserModal({
           type="text"
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Hľadať súťaže..."
+          placeholder={tProblems('searchContests')}
           className="form-input !pl-9 w-full text-sm"
           autoFocus
         />
@@ -183,11 +189,11 @@ export function ContestBrowserModal({
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-400">
-            <p>Nepodarilo sa načítať súťaže</p>
+            <p>{tProblems('loadContestsFailed')}</p>
           </div>
         ) : filteredSeasons.length === 0 ? (
           <div className="text-center py-12 text-slate-400">
-            <p>Žiadne súťaže</p>
+            <p>{tProblems('noContests')}</p>
           </div>
         ) : (
           <GroupedVirtuoso
@@ -204,7 +210,7 @@ export function ContestBrowserModal({
                 <div className="text-sm font-semibold text-slate-200 bg-slate-700 py-2 px-2 flex items-center justify-between">
                   <span>{season.editionLabel}</span>
                   <span className="text-xs font-normal text-slate-400">
-                    {problemCount} {slovakPlural(problemCount, ['úloha', 'úlohy', 'úloh'])}
+                    {tPlurals('problems', { count: problemCount })}
                   </span>
                 </div>
               )

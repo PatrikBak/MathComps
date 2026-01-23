@@ -1,8 +1,8 @@
-import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
 
 import { CATEGORY_CONFIG, type NewsCategory } from './types'
 
@@ -18,6 +18,9 @@ type NewsCategoryBadgeProps = {
  * Colored badge for news article category.
  */
 export function NewsCategoryBadge({ category }: NewsCategoryBadgeProps) {
+  // Translations for category labels
+  const t = useTranslations('news.categories')
+
   // Get the config of the pre-defined category
   const config = CATEGORY_CONFIG[category]
 
@@ -33,7 +36,7 @@ export function NewsCategoryBadge({ category }: NewsCategoryBadgeProps) {
 
   return (
     <AppLink href={href} className={className}>
-      {config.label}
+      {t(category)}
     </AppLink>
   )
 }

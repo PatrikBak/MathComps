@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MathComps.Domain.EfCoreEntities;
@@ -26,12 +25,7 @@ public class Season
     [NotMapped]
     public int EndYear => StartYear + 1;
 
-    /// <summary>
-    /// Season-wide label used for CZ/SK "ročník" grouping across competitions
-    /// (e.g., "75. ročník").
-    /// </summary>
-    [MaxLength(100)]
-    public required string EditionLabel { get; set; }
+
 
     /// <summary>
     /// Numeric edition for easier numeric filtering (e.g., 75).

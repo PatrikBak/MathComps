@@ -1,7 +1,7 @@
-Given a list of math problems, suggest tags that would be useful for describing these problems,
-in general (you are not suggesting tags for the individual problems, only tags that would be
-generally useful for describing math problems). I will give you some example tags below, but
-you should exclude those from your output (those are already known, and are of no interest).
+Given a list of math problems (in Slovak), suggest tags (in English) that would be useful for
+describing these problems, in general (you are not suggesting tags for the individual problems,
+only tags that would be generally useful for describing math problems). I will give you some
+example tags below, but you should exclude those from your output (those are already known).
 
 {tag_rules}
 
@@ -18,27 +18,27 @@ I.e. the JSON lists for each category the tags of that category.
 For example, this would be a valid output:
 {
   "area": [
-    "Logická úloha",
-    "Kombinatorická geometria",
-    "Kombinatorika",
-    "Komplexné čísla"
+    "Logic Puzzle",
+    "Combinatorial Geometry",
+    "Combinatorics",
+    "Complex Numbers"
   ],
-  "logic": [
-    "Konštrukčná úloha",
-    "Dôkaz ekvivalencie",
-    "Optimalizačná úloha"
+  "goal": [
+    "Construction Problem",
+    "Proof of Equivalence",
+    "Optimization Problem"
   ],
-  "term": [
-    "Dotyčnicový štvoruholník",
-    "Faktoriál",
-    "Fibonacciho postupnosť",
-    "Geometrická postupnosť",
-    "Sústava rovníc"
+  "type": [
+    "Tangential Quadrilateral",
+    "Factorial",
+    "Fibonacci Sequence",
+    "Geometric Sequence",
+    "System of Equations"
   ],
   "technique": [
-    "Cauchyho nerovnosť",
-    "Čínska zvyšková veta"
-    "Dirichletov princíp",
-    "Sínusová veta",
+    "Cauchy's Inequality",
+    "Chinese Remainder Theorem",
+    "Pigeonhole Principle",
+    "Law of Sines"
   ]
 }

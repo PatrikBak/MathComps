@@ -2,7 +2,6 @@ using MathComps.Cli.Translation.Dtos;
 using MathComps.Cli.Translation.Enums;
 using MathComps.Cli.Translation.Services;
 using MathComps.Cli.Translation.Settings;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared;
 using MathComps.Shared.Cli;
@@ -202,7 +201,7 @@ public class TranslateProblemsCommand(
         var targetLanguageName = targetLanguage switch
         {
             Language.EN => "English",
-            Language.CZ => "Czech",
+            Language.CS => "Czech",
             Language.SK => "Slovak",
             _ => throw new ArgumentException($"Unsupported language: {targetLanguage}")
         };
@@ -305,7 +304,7 @@ public class TranslateProblemsCommand(
         if (translationMatch.Success)
             return translationMatch.Groups[1].Value.Trim();
 
-        // Strategy 3: Use the entire response if it looks like LaTeX
+        // Strategy 3: Use the entire response if it looks like TeX
         if (translationResponse.Contains('\\') || translationResponse.Contains('{') || translationResponse.Contains('}'))
             return translationResponse.Trim();
 

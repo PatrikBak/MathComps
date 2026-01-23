@@ -1,11 +1,12 @@
 import { BookOpen, Link2, type LucideIcon, MessageSquare, Wrench, Youtube } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
 import { getSiteUrl } from '@/components/shared/utils/url-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
 
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import { GUIDE_TITLES } from './layout/guide-structure'
@@ -24,6 +25,8 @@ type Resource = {
 type ResourceCategoryType = {
   title: string
   icon: LucideIcon
+  iconColor: string
+  iconBg: string
   description?: string | React.ReactNode
   resources: Resource[]
   renderFooter?: () => React.ReactNode
@@ -59,39 +62,27 @@ function renderResourceCard(resource: Resource, resourceIndex: number) {
 
 function ResourceCategory({
   category,
-  categoryIndex,
   sectionNumberer,
 }: {
   category: ResourceCategoryType
-  categoryIndex: number
   sectionNumberer: SectionNumberer
 }) {
-  const CategoryIcon = category.icon
-  const iconColors = [
-    { color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-    { color: 'text-violet-400', bg: 'bg-violet-500/10' },
-    { color: 'text-pink-400', bg: 'bg-pink-500/10' },
-    { color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  ]
-  const iconScheme = iconColors[categoryIndex % iconColors.length]
+  // Get translations
+  const t = useTranslations('guide')
 
   return (
     <GuideSection
       title={category.title}
       description={category.description}
-      icon={{ type: 'lucide', icon: CategoryIcon }}
-      iconColor={iconScheme.color}
-      iconBackground={iconScheme.bg}
+      icon={{ type: 'lucide', icon: category.icon }}
+      iconColor={category.iconColor}
+      iconBackground={category.iconBg}
       sectionNumberer={sectionNumberer}
     >
       <div className="space-y-3 sm:space-y-4">
         {category.resources.map(renderResourceCard)}
-        {category.title === GUIDE_TITLES.PROGRAMS && (
-          <TipBox>
-            Všetci vidíme, že AI sa v matike zlepšuje. Vie to byť rýchla pomôcka pri učení sa nových
-            vecí. Len je treba mať sa na pozore, keďže ono to nemá vždy pravdu a vie si to
-            povymýšľať kde-čo 🙃
-          </TipBox>
+        {category.title === t(`titles.${GUIDE_TITLES.PROGRAMS}`) && (
+          <TipBox>{t('sections.resources.tips.ai')}</TipBox>
         )}
         {category.renderFooter && category.renderFooter()}
       </div>
@@ -104,161 +95,143 @@ export default function ResourcesSection({
 }: {
   sectionNumberer: SectionNumberer
 }) {
+  // Common guide translations
+  const tGuide = useTranslations('guide')
+
+  // Scoped translators for each resource category
+  const tWebsites = useTranslations('guide.sections.resources.websites')
+  const tPrograms = useTranslations('guide.sections.resources.programs')
+  const tYoutube = useTranslations('guide.sections.resources.youtube')
+  const tStudyTexts = useTranslations('guide.sections.resources.studyTexts')
+  const tTips = useTranslations('guide.sections.resources.tips')
+
   const resourceCategories: ResourceCategoryType[] = [
     {
-      title: GUIDE_TITLES.WEBSITES,
+      title: tGuide(`titles.${GUIDE_TITLES.WEBSITES}`),
       icon: MessageSquare,
+      iconColor: 'text-indigo-400',
+      iconBg: 'bg-indigo-500/10',
       resources: [
         {
           title: 'AoPS',
           fullName: 'Art of Problem Solving',
-          description:
-            'Asi najväčšia a najdôležitejšia stránka o olympiádnej matematike na svete. Fóra, obrovské zbierky úloh, články, všetko na jednom mieste. Nutnosť poznať.',
+          description: tWebsites('aops'),
           link: 'https://artofproblemsolving.com/',
         },
         {
           title: 'MODS',
           fullName: 'Math Olympiad Discord Server',
-          description:
-            'Veľký medzinárodný Discord server, kde možno diskutovať s ľuďmi z celého sveta. Už viac ako 2000 dní pripravuje rubriku úloha dňa, pričom je možné pristúpiť k starším úlohám podľa oblastí a hodnotení obtiažnosti.',
+          description: tWebsites('mods'),
           link: 'https://discord.gg/mods',
         },
         {
-          title: 'Evan Chen stránka',
-          description:
-            'Osobná stránka svetoznámeho olympiádneho experta. Cez jeho stránku sa možno preklikať na veľa nielen jeho materiálov alebo ďalších zdrojov a informácií.',
+          title: 'Evan Chen',
+          description: tWebsites('evanchen'),
           link: 'https://web.evanchen.cc/',
         },
       ],
     },
     {
-      title: GUIDE_TITLES.PROGRAMS,
+      title: tGuide(`titles.${GUIDE_TITLES.PROGRAMS}`),
       icon: Wrench,
+      iconColor: 'text-violet-400',
+      iconBg: 'bg-violet-500/10',
       resources: [
         {
           title: 'GeoGebra',
-          description: (
-            <>
-              Fantastická pomôcka pri učení sa geometrie, prípadne nástroj na kreslenie grafov.
-              Dobre narysovoaný obrázok môže robiť rozdiel v tom, či riešenie vidíme alebo nie, no a{' '}
-              <span className="text-no-break">GeoGebra</span> ich vie rysovať presne 📐.
-            </>
-          ),
+          description: tGuide.rich('sections.resources.programs.geogebra', {
+            app: (chunks) => <span className="text-no-break">{chunks}</span>,
+          }),
           link: 'https://www.geogebra.org/',
         },
         {
           title: 'WolframAlpha',
-          description:
-            'Rýchly a spoľahlivý nástroj na riešenie rovníc, rozkladanie čísel na súčin, počítanie súm, alebo aj derivovanie, integerovanie atď.',
+          description: tPrograms('wolframalpha'),
           link: 'https://www.wolframalpha.com/',
         },
         {
           title: 'Overleaf',
-          description:
-            'Online prostriedie na písanie v LaTeX-u, čo je štandard pre matematiku. Obsahuje návody pre začiatočníkov na LaTeX samotný.',
+          description: tPrograms('overleaf'),
           link: 'https://www.overleaf.com/',
         },
       ],
     },
     {
-      title: GUIDE_TITLES.YOUTUBE,
+      title: tGuide(`titles.${GUIDE_TITLES.YOUTUBE}`),
       icon: Youtube,
+      iconColor: 'text-pink-400',
+      iconBg: 'bg-pink-500/10',
       resources: [
         {
           title: 'MindYourDecisions',
-          description:
-            'Videá s riešením úloh všetkých obtiažností, od priam popularizačných až po zaujímavé olympiádne.',
+          description: tYoutube('mindyourdecisions'),
           link: 'https://www.youtube.com/@MindYourDecisions',
         },
         {
           title: 'Michael Penn',
-          description: 'Vysvetlenia riešení súťažných úloh zo súťaží z celého sveta pred tabuľou.',
+          description: tYoutube('michaelpenn'),
           link: 'https://www.youtube.com/c/MichaelPennMath',
         },
         {
           title: '3Blue1Brown',
-          description: 'Unikátne vizuálne spracovanie všemožných tém z matematiky.',
+          description: tYoutube('3blue1brown'),
           link: 'https://www.youtube.com/c/3blue1brown',
         },
       ],
     },
     {
-      title: GUIDE_TITLES.STUDY_TEXTS,
+      title: tGuide(`titles.${GUIDE_TITLES.STUDY_TEXTS}`),
       icon: BookOpen,
-      description: (
-        <>
-          V tejto sekcii si zhrnieme niektoré študijné materiály. Priorita je poskytnúť
-          začiatočníkom prehľad, kam sa môžu obrátiť.
-        </>
-      ),
+      iconColor: 'text-emerald-400',
+      iconBg: 'bg-emerald-500/10',
+      description: tStudyTexts('intro'),
       resources: [
         {
-          title: 'Naše materiály',
-          description:
-            'Verejne dostupných materiálov pre začiatočníkov s dobrými vysvetleniami myšlienok nie je veľa. Naše materiály na tejto stránke majú ambíciu túto medzeru zaplniť. Priebežne sa ich zbierka bude rozrastať.',
+          title: tStudyTexts('titles.ourMaterials'),
+          description: tStudyTexts('ourMaterials'),
           link: `${getSiteUrl()}${ROUTES.HANDOUTS}`,
         },
         {
-          title: 'KMS zbierka',
-          description:
-            'Starší, ale nadčasový materiál. Príjemné zdôvodnenia a krátke úvody do všetkých tém s veľa príkladmi zo seminára KMS.',
+          title: tStudyTexts('titles.kmsCollection'),
+          description: tStudyTexts('kmsCollection'),
           link: 'https://kms.sk/zbierka/',
         },
         {
-          title: 'Vzorové riešenia',
-          description: (
-            <>
-              Najľahšie úlohy{' '}
+          title: tStudyTexts('titles.sampleSolutions'),
+          description: tGuide.rich('sections.resources.studyTexts.sampleSolutions', {
+            link: (chunks) => (
               <AppLink href="#seminars" className={GUIDE_STYLES.link}>
-                seminárov
+                {chunks}
               </AppLink>
-              , prípadne nižších kategórii MO, sú dobrým zdrojom. V seminároch sú riešenia písané
-              viac v štýle, ako na úlohy prísť, zatiaľ čo v olympiáde viac v štýle, ako ich napísať,
-              keď už na to niekto prišiel.
-            </>
-          ),
+            ),
+          }),
         },
         {
-          title: 'Návodné úlohy k domácim kolám MO',
-          description:
-            'Oplatí sa riešiť si aj staršie domáceho kolá MO, lebo v rámci nich sa vydávajú návodné a doplňujúce úlohy (aj s riešenia/odkazmi na ne), čo je dobrý spôsob ako nasať nejakú tému.',
+          title: tStudyTexts('titles.guidedProblems'),
+          description: tStudyTexts('guidedProblems'),
         },
         {
-          title: 'PraSe knižnica',
-          description:
-            'Veľká zbierka materiálov zo seminára PraSe. Na samostatné štúdium sú veľmi zaujímavé takzvané seriály, čo sú tematické texty. ',
+          title: tStudyTexts('titles.praseLibrary'),
+          description: tStudyTexts('praseLibrary'),
           link: 'https://prase.cz/knihovna/',
         },
       ],
-      renderFooter: () => (
-        <TipBox variant="info">
-          Je možné, že sa pýtate, prečo tu nie je to a to. Je to najmä preto, že tento rozcestník je
-          písaný najmä pre začiatočníkov, a zahltenie množstvom materiálov hneď v úvode nemusí byť
-          produktívne. Priebežne budú pribúdať odkazy na ďalšie štúdium dovnútra materiálov na
-          stránke, prípadne neskôr môže vzkninúť stránka s návodom pre pokročilých, kde bude väčšia
-          databáza. Ono aj tak, v PraSe knižnici je toho fakt veľa 😜.
-        </TipBox>
-      ),
+      renderFooter: () => <TipBox variant="info">{tTips('footer')}</TipBox>,
     },
   ]
 
   return (
     <GuideSection
-      title={GUIDE_TITLES.RESOURCES}
-      description="Stručný zoznam tých najdôležitejších študijných/komunitných zdrojov zo sveta súťažnej matematiky, ktoré sa určite oplatí poznať."
+      title={tGuide(`titles.${GUIDE_TITLES.RESOURCES}`)}
+      description={tGuide('sections.resources.description')}
       icon={{ type: 'lucide', icon: Link2 }}
       iconColor="text-blue-400"
       iconBackground="bg-blue-500/10"
       sectionNumberer={sectionNumberer}
     >
       <div className={GUIDE_STYLES.sectionSpacing}>
-        {resourceCategories.map((category, categoryIndex) => (
-          <ResourceCategory
-            key={categoryIndex}
-            category={category}
-            categoryIndex={categoryIndex}
-            sectionNumberer={sectionNumberer}
-          />
+        {resourceCategories.map((category, index) => (
+          <ResourceCategory key={index} category={category} sectionNumberer={sectionNumberer} />
         ))}
       </div>
     </GuideSection>

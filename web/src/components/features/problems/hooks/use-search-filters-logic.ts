@@ -70,10 +70,17 @@ function buildFacetOptions(
   )
 }
 
+/**
+ * Props for the {@link useSearchFiltersLogic} hook.
+ */
 export type UseSearchFiltersLogicProps = {
+  /** The current filters */
   filters: SearchFiltersState
+  /** Handler for when filters change */
   onFiltersChange: (newFilters: SearchFiltersState, filterType: FilterType) => void
+  /** The currrent filter options (potentially after some filtering) */
   filterOptions: FilterOptionsWithCounts
+  /** The base filter options (before any filtering, loaded at startup) */
   baseOptions: FilterOptionsWithCounts
 }
 

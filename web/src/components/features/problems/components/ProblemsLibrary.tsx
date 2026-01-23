@@ -3,6 +3,7 @@
 import { useLocalStorage } from '@mantine/hooks'
 import { isEqual } from 'lodash'
 import { Loader2, WifiOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React, { useEffect, useMemo, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { Virtuoso } from 'react-virtuoso'
@@ -32,6 +33,9 @@ const ActiveFiltersBarSkeleton = () => (
 )
 
 export default function ProblemsLibrary() {
+  // Translations for section
+  const t = useTranslations('problems')
+
   // The hook to handle all difficult logic of problem search
   const {
     state: {
@@ -40,7 +44,6 @@ export default function ProblemsLibrary() {
       isLoadingMore,
       isSearchingWithNoData,
       filters,
-      initialFilters,
       filterOptions,
       baseOptions,
       problems,
@@ -66,8 +69,7 @@ export default function ProblemsLibrary() {
   usePendingProblemLike()
 
   // We'll track whether we have the needed data. Before that, we show skeletons
-  const isPageReady =
-    !isLoading && filters && filterOptions && initialFilters && hasInitialDataLoaded
+  const isPageReady = !isLoading && filters && filterOptions && hasInitialDataLoaded
 
   // Create a set of selected tag slugs for efficient lookup
   const selectedTagSlugs = useMemo(
@@ -271,10 +273,10 @@ export default function ProblemsLibrary() {
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
                 <WifiOff className="mx-auto mb-4 h-16 w-16 text-red-400/60" />
-                <h2 className="mb-2 text-2xl font-bold text-white">Pripojenie zlyhalo</h2>
+                <h2 className="mb-2 text-2xl font-bold text-white">{t('connectionFailed')}</h2>
                 <div className="flex items-center justify-center gap-3 text-gray-400">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm">Pokúšam sa pripojiť...</span>
+                  <span className="text-sm">{t('tryingToConnect')}</span>
                 </div>
               </div>
             </div>
@@ -349,7 +351,6 @@ export default function ProblemsLibrary() {
                     filters={filters}
                     filterOptions={filterOptions}
                     baseOptions={baseOptions ?? filterOptions}
-                    initialFilters={initialFilters}
                     onFiltersChange={handleFiltersChange}
                     problemCount={displayCount}
                     showTechniqueTags={showTechniqueTags}
@@ -430,7 +431,7 @@ export default function ProblemsLibrary() {
                             <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
                               <div className="flex items-center gap-3 text-gray-400">
                                 <Loader2 className="h-5 w-5 animate-spin" />
-                                <span className="text-sm">Načítavam ďalšie úlohy...</span>
+                                <span className="text-sm">{t('loadingMore')}</span>
                               </div>
                             </div>
                           ) : null,

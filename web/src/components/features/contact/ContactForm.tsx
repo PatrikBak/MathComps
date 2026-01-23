@@ -2,12 +2,15 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AtSign, BookMarked, Loader2, MessageSquare, Send, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import SimpleSelect from '../../shared/SimpleSelect'
 import {
   type ContactFormData,
-  contactFormSchema,
+  createContactFormSchema,
+  getTranslatedReasonOptions,
   REASON_OPTIONS,
   type ReasonOption,
 } from './contactFormSchema'
@@ -35,6 +38,16 @@ export default function ContactForm({
   onSubmit,
   isSubmitting = false,
 }: ContactFormProps) {
+  // Get translations for contact form
+  const tContact = useTranslations('contact')
+  const tValidation = useTranslations('validation')
+
+  // Create the schema with translated validation messages
+  const contactFormSchema = useMemo(() => createContactFormSchema(tValidation), [tValidation])
+
+  // Get translated reason options for the select
+  const translatedReasonOptions = useMemo(() => getTranslatedReasonOptions(tContact), [tContact])
+
   const {
     register,
     handleSubmit,
@@ -59,7 +72,7 @@ export default function ContactForm({
       {/* Name Field */}
       <div>
         <label htmlFor="name" className={formClasses.label}>
-          Meno *
+          {tContact('name')} *
         </label>
         <div className="relative">
           <span className={formClasses.iconSpan}>
@@ -70,7 +83,7 @@ export default function ContactForm({
             type="text"
             id="name"
             className={`${formClasses.baseInput} ${formClasses.inputWithIcon}`}
-            placeholder="Ján Novák"
+            placeholder={tContact('namePlaceholder')}
           />
         </div>
         {errors.name && <p className={formClasses.error}>{errors.name.message}</p>}
@@ -79,7 +92,7 @@ export default function ContactForm({
       {/* Email Field */}
       <div>
         <label htmlFor="email" className={formClasses.label}>
-          Email *
+          {tContact('email')} *
         </label>
         <div className="relative">
           <span className={formClasses.iconSpan}>
@@ -90,7 +103,7 @@ export default function ContactForm({
             type="email"
             id="email"
             className={`${formClasses.baseInput} ${formClasses.inputWithIcon}`}
-            placeholder="vas@email.sk"
+            placeholder={tContact('emailPlaceholder')}
           />
         </div>
         {errors.email && <p className={formClasses.error}>{errors.email.message}</p>}
@@ -99,24 +112,22 @@ export default function ContactForm({
       {/* Reason Field */}
       <div>
         <label htmlFor="reason" className={formClasses.label}>
-          Predmet *
+          {tContact('subject')} *
         </label>
         <div className="relative">
           <span className={`${formClasses.iconSpan} z-10`}>
             {(() => {
-              const selectedOption = REASON_OPTIONS.find(
-                (option) => option.value === selectedReason
-              )
+              const selectedOption = REASON_OPTIONS[selectedReason]
               const IconComponent = selectedOption?.icon || BookMarked
               return <IconComponent className={formClasses.icon} />
             })()}
           </span>
           <SimpleSelect
             id="reason"
-            options={REASON_OPTIONS}
+            options={translatedReasonOptions}
             value={selectedReason || ''}
             onChange={(value) => setValue('reason', value as ReasonOption)}
-            placeholder="Vybrať..."
+            placeholder={tContact('selectPlaceholder')}
             className={formClasses.inputWithIcon}
           />
         </div>
@@ -127,7 +138,7 @@ export default function ContactForm({
       {/* Message Field */}
       <div>
         <label htmlFor="message" className={formClasses.label}>
-          Správa *
+          {tContact('message')} *
         </label>
         <div className="relative">
           <span className={`${formClasses.iconSpan} items-start pt-2.5 sm:pt-3`}>
@@ -138,7 +149,7 @@ export default function ContactForm({
             id="message"
             rows={3}
             className={`${formClasses.baseInput} resize-vertical sm:rows-4 ${formClasses.inputWithIcon}`}
-            placeholder="Sem napíšte text vašej správy..."
+            placeholder={tContact('messagePlaceholder')}
           />
         </div>
         {errors.message && <p className={formClasses.error}>{errors.message.message}</p>}
@@ -146,7 +157,7 @@ export default function ContactForm({
 
       {/* Honeypot field */}
       <div style={{ display: 'none' }}>
-        <label htmlFor="website">Webová stránka</label>
+        <label htmlFor="website">{tContact('websiteLabel')}</label>
         <input {...register('website')} type="text" id="website" tabIndex={-1} autoComplete="off" />
       </div>
 
@@ -155,11 +166,11 @@ export default function ContactForm({
         {isSubmitting ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />
-            Odosielam...
+            {tContact('sending')}
           </>
         ) : (
           <>
-            Odoslať správu
+            {tContact('sendMessage')}
             <Send className="h-4 w-4 sm:h-5 sm:w-5" />
           </>
         )}

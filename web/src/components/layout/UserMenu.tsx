@@ -3,13 +3,14 @@
 import { useUser } from '@clerk/nextjs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import type { ComponentPropsWithoutRef } from 'react'
-import { forwardRef } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { cn } from '@/components/shared/utils/css-utils'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
+import { usePathname } from '@/i18n/navigation'
 
 import { UserAvatarImage } from './UserAvatarImage'
 import { UserInfoHeader } from './UserInfoHeader'
@@ -37,39 +38,61 @@ const UserMenuTrigger = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<'
 UserMenuTrigger.displayName = 'UserMenuTrigger'
 
 /**
+ * Props for the {@link UserMenu} component.
+ */
+type UserMenuProps = {
+  /**
+   * The authentication state of the user coming from the server. If we know this
+   * state is true, we will show the user menu skeleton to prevent layout shift.
+   */
+  isAuthenticated: boolean
+}
+
+/**
  * User menu dropdown component for the header.
  * Handles all auth states: loading, logged out (shows login), and logged in (shows dropdown).
  * Built with Radix UI Dropdown for better accessibility.
  */
-export default function UserMenu() {
+export default function UserMenu({ isAuthenticated }: UserMenuProps) {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
+
+  // Keep track of whether the component has mounted yet
+  const [mounted, setMounted] = useState(false)
+
+  // Setup that the component has mounted after the first render
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Disable profile menu item if already on profile page
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
 
-  // The common padding for the login button in both the loading and loaded state
-  const loginButtonPadding = 'pl-4'
+  // Get translations
+  const tUserMenu = useTranslations('ui.userMenu')
+  const tProfile = useTranslations('profile')
 
-  // Still loading auth state - use LoginNavItem skeleton which will handle loading animation
-  if (!isLoaded) {
+  // If the server is saying we're authenticated but the user is not loaded yet,
+  // we will show the skeleton of the user menu to prevent layout shift.
+  // We also check for !mounted to match the server's output during hydration.
+  if (isAuthenticated && (!isLoaded || !mounted)) {
     return (
-      <div className={loginButtonPadding}>
-        <LoginNavItem isLoading className="text-violet-300" />
-      </div>
+      <UserMenuTrigger aria-label={tUserMenu('loading')}>
+        <div className="w-10 h-10 rounded-full bg-slate-700/50 animate-pulse -my-2" />
+        <ChevronDown className="w-4 h-4 text-white/30" aria-hidden="true" />
+      </UserMenuTrigger>
     )
   }
 
-  // Auth loaded but no user - show login button
-  if (!user) {
+  // Still loading auth state - use LoginNavItem skeleton which will handle loading animation
+  // We also check !mounted to ensure hydration consistency: SSR always has isLoaded=false,
+  // so the client must show the same skeleton until mounted.
+  if (!isLoaded || !user) {
     return (
-      <div className={loginButtonPadding}>
-        <LoginNavItem
-          className="text-violet-300 hover:text-violet-200 
-                    transition-colors rounded-full outline outline-slate-700 outline-offset-8 
-                    hover:outline-white/50 focus-visible:outline-4 focus-visible:outline-indigo-500"
-        />
-      </div>
+      <LoginNavItem
+        isLoading={!isLoaded || !mounted}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-200 hover:text-white hover:bg-indigo-500/10 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      />
     )
   }
 
@@ -77,10 +100,10 @@ export default function UserMenu() {
     <DropdownMenu.Root modal={false}>
       {/* Trigger Button */}
       <DropdownMenu.Trigger asChild>
-        <UserMenuTrigger aria-label="Používateľské menu">
+        <UserMenuTrigger id="user-menu-trigger" aria-label={tUserMenu('label')}>
           <UserAvatarImage
             imageUrl={user.imageUrl}
-            altText={user.firstName || 'Používateľ'}
+            altText={user.firstName || tProfile('defaultUser')}
             size={40}
             className="-my-2"
           />
@@ -97,6 +120,7 @@ export default function UserMenu() {
       {/* Dropdown Content */}
       <DropdownMenu.Portal>
         <DropdownMenu.Content
+          id="user-menu-content"
           className={cn(
             'w-full rounded-lg',
             'bg-slate-900/95 backdrop-blur-sm border border-white/10',
@@ -120,7 +144,7 @@ export default function UserMenu() {
           {/* Menu Items */}
           <div className="py-1.5">
             <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />
-            <UserMenuItem type="sign-out" variant="dropdown" />
+            <UserMenuItem type="signOut" variant="dropdown" />
           </div>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

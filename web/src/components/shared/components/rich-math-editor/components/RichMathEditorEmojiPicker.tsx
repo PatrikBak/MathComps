@@ -2,6 +2,7 @@
 
 import EmojiPicker, { Categories, Theme } from 'emoji-picker-react'
 import { Smile } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { RichMathEditorPicker } from './RichMathEditorPicker'
 
@@ -14,11 +15,15 @@ type RichMathEditorEmojiPickerProps = {
 }
 
 /**
- * A Slovak-localized emoji picker with Discord/Slack-style dark theme.
+ * A localized emoji picker with Discord/Slack-style dark theme.
  */
 export function RichMathEditorEmojiPicker({ onEmojiClick }: RichMathEditorEmojiPickerProps) {
+  // Get translations
+  const tEmojiPicker = useTranslations('ui.editor.emojiPicker')
+  const tCategories = useTranslations('ui.editor.emojiPicker.categories')
+
   return (
-    <RichMathEditorPicker triggerContent={<Smile size={14} />} triggerTitle="Emoji">
+    <RichMathEditorPicker triggerContent={<Smile size={14} />} triggerTitle={tEmojiPicker('title')}>
       {({ close }) => (
         <EmojiPicker
           theme={Theme.DARK}
@@ -32,17 +37,17 @@ export function RichMathEditorEmojiPicker({ onEmojiClick }: RichMathEditorEmojiP
           width={320}
           height={400}
           previewConfig={{ showPreview: false }}
-          searchPlaceHolder="Hľadať emoji..."
+          searchPlaceHolder={tEmojiPicker('searchPlaceholder')}
           categories={[
-            { category: Categories.SUGGESTED, name: 'Často používané' },
-            { category: Categories.SMILEYS_PEOPLE, name: 'Smajlíky a ľudia' },
-            { category: Categories.ANIMALS_NATURE, name: 'Zvieratá a príroda' },
-            { category: Categories.FOOD_DRINK, name: 'Jedlo a nápoje' },
-            { category: Categories.TRAVEL_PLACES, name: 'Cestovanie a miesta' },
-            { category: Categories.ACTIVITIES, name: 'Aktivity' },
-            { category: Categories.OBJECTS, name: 'Predmety' },
-            { category: Categories.SYMBOLS, name: 'Symboly' },
-            { category: Categories.FLAGS, name: 'Vlajky' },
+            { category: Categories.SUGGESTED, name: tCategories('suggested') },
+            { category: Categories.SMILEYS_PEOPLE, name: tCategories('smileys') },
+            { category: Categories.ANIMALS_NATURE, name: tCategories('animals') },
+            { category: Categories.FOOD_DRINK, name: tCategories('food') },
+            { category: Categories.TRAVEL_PLACES, name: tCategories('travel') },
+            { category: Categories.ACTIVITIES, name: tCategories('activities') },
+            { category: Categories.OBJECTS, name: tCategories('objects') },
+            { category: Categories.SYMBOLS, name: tCategories('symbols') },
+            { category: Categories.FLAGS, name: tCategories('flags') },
           ]}
         />
       )}

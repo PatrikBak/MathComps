@@ -1,4 +1,5 @@
 import { useLocalStorage } from '@mantine/hooks'
+import { useTranslations } from 'next-intl'
 
 import { PENDING_COMMENT_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
 
@@ -25,6 +26,9 @@ type ToggleLikeParams = {
  * @returns A React Query mutation object.
  */
 export function useToggleCommentLike() {
+  // Get the translations
+  const t = useTranslations('comments')
+
   // Local storage for pending comment like ID
   const [_, setPendingLikeId] = useLocalStorage<string | null>({
     key: PENDING_COMMENT_LIKE_STORAGE_KEY,
@@ -43,10 +47,10 @@ export function useToggleCommentLike() {
       }),
 
     // The reason shown in the auth prompt
-    authReason: 'lajkovanie komentárov',
+    authReason: t('authReasons.likeComment'),
 
     // The error message shown when the server craps out
-    errorMessage: 'Nepodarilo sa zmeniť stav lajku',
+    errorMessage: t('errors.likeFailed'),
 
     // Ensure we remember they liked the comment so we can apply it after login
     onBeforeLoginPrompt: ({ commentId }) => {

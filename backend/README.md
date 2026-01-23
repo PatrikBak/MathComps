@@ -8,8 +8,41 @@ The .NET backend for the MathComps application. Includes a Web API and CLI tools
   - See the [API README](src/Api/MathComps.Api/README.md) for setup and running instructions
 - **`src/Core/`** – Domain models and parsing logic
 - **`src/Infrastructure/`** – Database, EF Core, and data access
+  - **`Resources/`** – Shared metadata files (e.g., `approved-tags.json`, `metadata.*.json`)
 - **`src/Shared/`** – Shared utilities and common code
+  - **`ResourcePaths.cs`** – Centralized paths to shared resources
 - **`src/Tools/`** – CLI tools for data processing (see below)
+
+### Shared Resources
+
+Metadata files in `src/Infrastructure/MathComps.Infrastructure/Resources/` are embedded and copied to output directories, making them available to both the API and CLI tools at runtime via `ResourcePaths` constants.
+
+### Localization
+
+The API supports multiple languages via the `Accept-Language` HTTP header. The frontend sends this header with each request, and the backend uses it to return localized content.
+
+**How it works:**
+
+- **Request Localization Middleware** (`Program.cs`) – Parses `Accept-Language` header and sets `CurrentCulture`
+- **Endpoint Extensions** – Helper methods extract the detected language for service calls
+
+**Key localization files in `Resources/`:**
+
+| File                     | Purpose                                         |
+| ------------------------ | ----------------------------------------------- |
+| `metadata.{locale}.json` | Localized competition names, round labels, etc. |
+| `approved-tags.json`     | Tag vocabulary with English slugs (canonical)   |
+
+**Problem translations:**
+
+Problem statements and solutions are stored in the `problem_texts` table with per-language entries. The original language is marked, and AI-generated translations are created using the [Translation Assistant CLI](src/Tools/MathComps.Cli.Translation/README.md). The API returns problem text in the requested language, falling back to the original if unavailable.
+
+**Adding a new language:**
+
+1. Create `metadata.{locale}.json` with translated competition/round names
+2. Update `SupportedLanguages` in the codebase
+3. Run the Translation Assistant to generate problem translations
+4. The API will automatically serve content based on `Accept-Language`
 
 ## Getting Started
 
@@ -155,30 +188,38 @@ dotnet run -c Release
 ### 3. Seed the Database
 
 ```powershell
-.\Invoke-Tool.ps1 seed
+.\Invoke-Tool.ps1 seed --skip-existing
 ```
 
 ### 4. Generate Translations
 
 ```powershell
-.\Invoke-Tool.ps1 translations
+.\Invoke-Tool.ps1 translations translate
 ```
 
 Translates to all languages (EN, CZ) by default.
 
-### 5. Generate Embeddings
+### 5. Parse Translations
+
+```powershell
+.\Invoke-Tool.ps1 translations parse
+```
+
+Parses the raw TeX in translations to generate structured content. If any translations fail to parse, they are written to `Output/parse-issues.yaml`. To fix: edit the file and rerun.
+
+### 6. Generate Embeddings
 
 ```powershell
 .\Invoke-Tool.ps1 embeddings
 ```
 
-### 6. Generate Tags
+### 7. Generate Tags
 
 ```powershell
 .\Invoke-Tool.ps1 tagging
 ```
 
-### 7. Veto Tags (Optional)
+### 8. Veto Tags (Optional)
 
 ```powershell
 .\Invoke-Tool.ps1 tagging -Profile "Veto Tags"
@@ -186,13 +227,13 @@ Translates to all languages (EN, CZ) by default.
 
 Useful when tagging many problems, as manual adjustments can be tedious.
 
-### 8. Manual Tag Adjustment
+### 9. Manual Tag Adjustment
 
 ```powershell
 .\Invoke-Tool.ps1 tagging interactive
 ```
 
-### 9. Scrape SKMO Links (If Needed)
+### 10. Scrape SKMO Links (If Needed)
 
 If new solution PDFs are available on the SKMO website (using the correct):
 
@@ -201,7 +242,7 @@ If new solution PDFs are available on the SKMO website (using the correct):
 dotnet run -c Release -- scrape --start-year 75 --end-year 75
 ```
 
-### 10. Update Solution Links
+### 11. Update Solution Links
 
 ```powershell
 .\Invoke-Tool.ps1 update-links

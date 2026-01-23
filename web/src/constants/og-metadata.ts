@@ -1,39 +1,27 @@
 /**
- * Open Graph metadata constants
- * Based on the project's focus on mathematical competitions, learning materials, and community
+ * Open Graph metadata constants.
+ *
+ * This file contains only static, non-locale-specific constants.
+ * For locale-aware metadata (description, keywords), use the
+ * `getSiteMetadata(locale)` function from `@/lib/metadata`.
  */
-
-// Site information
-export const SITE_NAME = 'MathComps'
-export const SITE_TITLE = 'MathComps'
-
-// Main descriptions - keeping the authentic tone from the codebase
-export const SITE_DESCRIPTION =
-  'Platforma pre matematické súťaže s archívom úloh, učebnými materiálmi a rozcestníkom užitočných zdrojov.'
-
-// Keywords based on the site content
-export const SITE_KEYWORDS = [
-  'matematika',
-  'matematické súťaže',
-  'matematická olympiáda',
-  'matematické úlohy',
-  'matematické materiály',
-  'matematický archív',
-]
-
-// Twitter/X
-export const TWITTER_CARD_TYPE = 'summary_large_image'
-
-// Language
-export const SITE_LANGUAGE = 'sk'
 
 /**
- * Default metadata template for pages without specific content
+ * The name of the site (brand, not localized).
  */
-export const DEFAULT_OG_METADATA = {
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
-  siteName: SITE_NAME,
-  locale: 'sk_SK',
-  type: 'website' as const,
-}
+export const SITE_NAME = 'MathComps'
+
+/**
+ * The title of the site (brand, not localized).
+ */
+export const SITE_TITLE = 'MathComps'
+
+/**
+ * The type of Twitter/X card to use.
+ */
+export const TWITTER_CARD_TYPE = 'summary_large_image'
+
+/**
+ * The theme color of the site.
+ */
+export const SITE_THEME_COLOR = '#0b0f1f'

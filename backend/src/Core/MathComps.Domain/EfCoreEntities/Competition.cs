@@ -12,17 +12,7 @@ public class Competition
     /// </summary>
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
-    /// <summary>
-    /// Display name (e.g., "IMO", "CSMO").
-    /// </summary>
-    [MaxLength(50)]
-    public required string DisplayName { get; set; }
 
-    /// <summary>
-    /// Full display name (e.g., "International Mathematical Olympiad").
-    /// </summary>
-    [MaxLength(200)]
-    public required string FullName { get; set; }
 
     /// <summary>
     /// URL-safe unique slug (lowercase, hyphenated).

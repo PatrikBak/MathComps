@@ -20,7 +20,9 @@ public interface IProblemFilterService
     /// <summary>
     /// Gets all contests grouped by season with problem counts for the contest browser.
     /// </summary>
+    /// <param name="language">The language for localized display names.</param>
     /// <returns>Seasons with their available contests and problem counts.</returns>
-    Task<SeasonContestBrowserResult> GetContestsBySeasonAsync();
+    Task<SeasonContestBrowserResult> GetContestsBySeasonAsync(Language language);
 }
+
 

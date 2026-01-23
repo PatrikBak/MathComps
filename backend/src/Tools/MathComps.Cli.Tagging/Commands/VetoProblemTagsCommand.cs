@@ -3,7 +3,6 @@ using MathComps.Cli.Tagging.Constants;
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared;
@@ -156,7 +155,7 @@ public class VetoProblemTagsCommand(
                     "statement",
                     vetoProblemTagsOptions.Value.VetoProblemStatementTags,
                     settings,
-                    tagInfo => tagInfo.TagType != TagType.Technique && tagNameFilter(tagInfo.TagName),
+                    tagInfo => tagInfo.Type != TagType.Technique && tagNameFilter(tagInfo.Name),
                     problem);
 
                 // Process solution tags (Technique) for veto decisions
@@ -165,7 +164,7 @@ public class VetoProblemTagsCommand(
                     "solution",
                     vetoProblemTagsOptions.Value.VetoProblemSolutionTags,
                     settings,
-                    tagInfo => tagInfo.TagType == TagType.Technique && tagNameFilter(tagInfo.TagName),
+                    tagInfo => tagInfo.Type == TagType.Technique && tagNameFilter(tagInfo.Name),
                     problem);
 
                 // Combine statement and solution tag approvals into single result
@@ -210,60 +209,75 @@ public class VetoProblemTagsCommand(
 
     /// <summary>
     /// Filters problem tags using AI analysis to determine which tags should be approved or vetoed.
-    /// Processes candidate tags based on confidence and goodness of fit thresholds, then uses
-    /// the Gemini AI service to make approval decisions for each tag.
+    /// Tags are sent to LLM in the <see cref="TagFilesHelper.AiLanguage"/> language, then results
+    /// are mapped back to slugs.
     /// </summary>
     /// <param name="folder">The folder name for organizing log files (e.g., "statement" or "solution").</param>
     /// <param name="suffix">The suffix for log file naming to distinguish between different tag types.</param>
-    /// <param name="geminiSettings">Configuration settings for the Gemini AI model including model name and prompt paths.</param>
-    /// <param name="settings">Command settings containing filtering criteria like max confidence and goodness of fit.</param>
-    /// <param name="tagSelector">Function to filter which tags are eligible for vetoing based on their name and type.</param>
-    /// <param name="problem">The problem details containing statement, solution, and current approved tags to analyze.</param>
-    /// <returns>An immutable dictionary mapping tag names to their approval status (true for approved, false for vetoed).</returns>
+    /// <param name="geminiSettings">Configuration settings for the Gemini AI model.</param>
+    /// <param name="settings">Command settings containing filtering criteria.</param>
+    /// <param name="tagSelector">Function to filter which tags are eligible for vetoing.</param>
+    /// <param name="problem">The problem details containing tags to analyze.</param>
+    /// <returns>Dictionary mapping slugs to approval status (true for approved, false for vetoed).</returns>
     private async Task<ImmutableDictionary<string, bool>> FilterTags(
         string folder,
         string suffix,
         AiModelConfig geminiSettings,
         Settings settings,
-        Func<(string TagName, TagType TagType), bool> tagSelector,
+        Func<(string Name, TagType Type), bool> tagSelector,
         ProblemDetailsDto problem)
     {
         // Load the system prompt template for AI interaction
         var systemPrompt = await File.ReadAllTextAsync(geminiSettings.SystemPromptPath);
 
-        // Get all valid approved tags for validation
-        var validTags = TagFilesHelper.GetCategorizedApprovedTags().MapTagsToTheirData();
+        // Get all tags with names for LLM
+        var allTagsByName = TagFilesHelper.GetTagsForAi();
 
-        // Filter candidate tags based on user criteria and build structured data for AI
+        // Create reverse lookup: slug → name
+        var slugToName = allTagsByName.ToImmutableDictionary(
+            pair => pair.Value.Slug,
+            pair => pair.Key);
+
+        // Filter candidate tags based on user criteria
+        // problem.ApprovedTags() returns slugs as keys
         var candidateTags = (from pair in problem.ApprovedTags()
+                             let slug = pair.Key
                              where pair.Value.GoodnessOfFit <= settings.MaxGoodnessOfFit &&
                                    pair.Value.Confidence != null &&
-                                   pair.Value.Confidence <= settings.MaxConfidence
-                             join validTagPair in validTags on pair.Key equals validTagPair.Key
-                             where tagSelector((pair.Key, validTagPair.Value.Type))
+                                   pair.Value.Confidence <= settings.MaxConfidence &&
+                                   slugToName.ContainsKey(slug)
+                             let name = slugToName[slug]
+                             let tagData = allTagsByName[name]
+                             where tagSelector((name, tagData.Type))
                              select new
                              {
-                                 TagName = pair.Key,
+                                 Slug = slug,
+                                 Name = name,
                                  ProblemTag = pair.Value,
-                                 TagType = validTagPair.Value.Type,
-                                 TagDescription = validTagPair.Value.Description
+                                 tagData.Type,
+                                 tagData.Description
                              })
-                            .ToImmutableDictionary(entry => entry.TagName, entry => new
-                            {
-                                tagCategory = entry.TagType,
-                                tagDescription = entry.TagDescription,
-                                justification = entry.ProblemTag.Justification
-                            });
+                            .ToImmutableList();
 
         // If no candidate tags meet the criteria, return empty result
         if (candidateTags.Count == 0)
             return ImmutableDictionary<string, bool>.Empty;
 
+        // Build structured data for AI with names as keys
+        var candidateTagsForAi = candidateTags.ToImmutableDictionary(
+            entry => entry.Name,
+            entry => new
+            {
+                tagCategory = entry.Type,
+                tagDescription = entry.Description,
+                justification = entry.ProblemTag.Justification
+            });
+
         // Build the user prompt by replacing placeholders with actual problem data
         var userPrompt = systemPrompt
             .Replace("{problem_statement}", problem.Statement)
             .Replace("{problem_solution}", problem.Solution ?? string.Empty)
-            .Replace("{candidate_tags}", candidateTags.ToJson());
+            .Replace("{candidate_tags}", candidateTagsForAi.ToJson());
 
         // Prepare the log directory
         var logDirectory = $"{LoggingConstants.LogsDirectory}/{folder}";
@@ -273,16 +287,14 @@ public class VetoProblemTagsCommand(
         var userPromptPath = $"{logDirectory}/{problem.Slug}.{suffix}.veto.prompt.txt";
         File.WriteAllText(userPromptPath, userPrompt);
 
-        // In a try-catch
+        // Call the AI service to get tag approval decisions
         var aiResponseRaw = await GeneralUtilities.TryExecuteAsync(
-            // Call the AI service to get tag approval decisions with error handling
             () => geminiService.GenerateContentAsync(
                 geminiSettings.Model,
                 systemPrompt,
                 userPrompt,
                 geminiSettings.ThinkingBudget
             ),
-            // Provide an exception with more context
             exception => throw new InvalidOperationException("Gemini error", exception));
 
         // If AI service failed, return empty result
@@ -293,18 +305,21 @@ public class VetoProblemTagsCommand(
         var aiResponsePath = $"{LoggingConstants.LogsDirectory}/{folder}/{problem.Slug}.{suffix}.veto.json";
         File.WriteAllText(aiResponsePath, aiResponseRaw);
 
-        // In a try-catch
-        var approvals = GeneralUtilities.TryExecute(() =>
-            // Parse the AI response to extract tag approval decisions
-            TaggingHelpers.ParseTagApprovals(aiResponseRaw).ToImmutableDictionary(pair => pair.Key, pair => pair.Value.Approved),
-            // Provide an exception with more context
+        // Parse the AI response (which uses names)
+        var approvalsByName = GeneralUtilities.TryExecute(() =>
+            TaggingHelpers.ParseTagApprovals(aiResponseRaw)
+                .ToImmutableDictionary(pair => pair.Key, pair => pair.Value.Approved),
             exception => throw new InvalidOperationException("Parsing AI response failed", exception));
 
         // If parsing failed, return empty result
-        if (approvals is null)
+        if (approvalsByName is null)
             return ImmutableDictionary<string, bool>.Empty;
 
-        // Filter approvals to only include tags that were actually candidates
-        return approvals.Where(pair => candidateTags.ContainsKey(pair.Key)).ToImmutableDictionary();
+        // Map names back to slugs for database
+        return candidateTags
+            .Where(tag => approvalsByName.ContainsKey(tag.Name))
+            .ToImmutableDictionary(
+                tag => tag.Slug,
+                tag => approvalsByName[tag.Name]);
     }
 }

@@ -3,42 +3,47 @@ import { slugify } from '@/components/shared/utils/string-utils'
 import type { TableOfContentsItem } from '@/components/table-of-contents/table-of-contents-types'
 
 /**
- * Centralized titles for guide sections.
+ * Centralized translation keys for guide sections.
  */
 export const GUIDE_TITLES = {
   // Main sections
-  WHY_COMPETITIONS: 'Prečo matematické súťaže?',
-  COMPETITIONS: 'Zoznam súťaží',
-  RESOURCES: 'Ďalšie odkazy',
-  HOW_TO_START: 'Ako začať aj pokračovať',
+  WHY_COMPETITIONS: 'whyCompetitions',
+  COMPETITIONS: 'competitions',
+  RESOURCES: 'resources',
+  HOW_TO_START: 'howToStart',
 
   // Competition subsections
-  MATH_OLYMPIAD: 'Matematická olympiáda',
-  SEMINARS: 'Korešpondenčné semináre',
-  OTHER_COMPETITIONS: 'Ďalšie súťaže',
+  MATH_OLYMPIAD: 'mathOlympiad',
+  SEMINARS: 'seminars',
+  OTHER_COMPETITIONS: 'otherCompetitions',
 
   // Seminar subsections
-  SEMINARS_ELEMENTARY: 'ZŠ semináre',
-  SEMINARS_HIGH_SCHOOL: 'SŠ semináre',
+  SEMINARS_ELEMENTARY: 'seminarsElementary',
+  SEMINARS_HIGH_SCHOOL: 'seminarsHighSchool',
 
   // Other competitions subsections
-  OTHER_COMPETITIONS_TEAM: 'Tímové súťaže',
-  OTHER_COMPETITIONS_INDIVIDUAL: 'Individuálne súťaže',
+  OTHER_COMPETITIONS_TEAM: 'otherCompetitionsTeam',
+  OTHER_COMPETITIONS_INDIVIDUAL: 'otherCompetitionsIndividual',
 
   // Resource subsections
-  WEBSITES: 'Webstránky a komunity',
-  PROGRAMS: 'Programy a nástroje',
-  YOUTUBE: 'YouTube kanály',
-  STUDY_TEXTS: 'Študijné texty',
+  WEBSITES: 'websites',
+  PROGRAMS: 'programs',
+  YOUTUBE: 'youtube',
+  STUDY_TEXTS: 'studyTexts',
 } as const
+
+/**
+ * Union type of all guide title translation keys
+ */
+type GuideTitleKey = (typeof GUIDE_TITLES)[keyof typeof GUIDE_TITLES]
 
 /**
  * Type definition for a guide section with optional nested children.
  * Used to define the hierarchical structure of the guide navigation.
  */
 type GuideSection = {
-  /** Display title of the section */
-  title: string
+  /** Translation key for the section title */
+  titleKey: GuideTitleKey
   /** Optional nested child sections */
   children?: GuideSection[]
 }
@@ -46,68 +51,72 @@ type GuideSection = {
 /**
  * Static definition of the guide's section hierarchy.
  * This structure mirrors the component tree and is used to generate
- * the table of contents navigation items in a SSR-compatible way.
+ * the table of contents navigation items.
  */
 const GUIDE_STRUCTURE: GuideSection[] = [
   {
-    title: GUIDE_TITLES.WHY_COMPETITIONS,
+    titleKey: GUIDE_TITLES.WHY_COMPETITIONS,
   },
   {
-    title: GUIDE_TITLES.COMPETITIONS,
+    titleKey: GUIDE_TITLES.COMPETITIONS,
     children: [
       {
-        title: GUIDE_TITLES.MATH_OLYMPIAD,
+        titleKey: GUIDE_TITLES.MATH_OLYMPIAD,
       },
       {
-        title: GUIDE_TITLES.SEMINARS,
+        titleKey: GUIDE_TITLES.SEMINARS,
         children: [
           {
-            title: GUIDE_TITLES.SEMINARS_ELEMENTARY,
+            titleKey: GUIDE_TITLES.SEMINARS_ELEMENTARY,
           },
           {
-            title: GUIDE_TITLES.SEMINARS_HIGH_SCHOOL,
+            titleKey: GUIDE_TITLES.SEMINARS_HIGH_SCHOOL,
           },
         ],
       },
       {
-        title: GUIDE_TITLES.OTHER_COMPETITIONS,
+        titleKey: GUIDE_TITLES.OTHER_COMPETITIONS,
         children: [
           {
-            title: GUIDE_TITLES.OTHER_COMPETITIONS_TEAM,
+            titleKey: GUIDE_TITLES.OTHER_COMPETITIONS_TEAM,
           },
           {
-            title: GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL,
+            titleKey: GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL,
           },
         ],
       },
     ],
   },
   {
-    title: GUIDE_TITLES.RESOURCES,
+    titleKey: GUIDE_TITLES.RESOURCES,
     children: [
       {
-        title: GUIDE_TITLES.WEBSITES,
+        titleKey: GUIDE_TITLES.WEBSITES,
       },
       {
-        title: GUIDE_TITLES.PROGRAMS,
+        titleKey: GUIDE_TITLES.PROGRAMS,
       },
       {
-        title: GUIDE_TITLES.YOUTUBE,
+        titleKey: GUIDE_TITLES.YOUTUBE,
       },
       {
-        title: GUIDE_TITLES.STUDY_TEXTS,
+        titleKey: GUIDE_TITLES.STUDY_TEXTS,
       },
     ],
   },
   {
-    title: GUIDE_TITLES.HOW_TO_START,
+    titleKey: GUIDE_TITLES.HOW_TO_START,
   },
 ]
 
 /**
- * The pre-calculcate TOC for the guide component
+ * Generates the TOC for the guide component using the provided translation function.
+ *
+ * @param t Translation function scoped to 'guide.titles' namespace
+ *
+ * @returns Array of {@link TableOfContentsItem} objects representing the guide's table of contents
  */
-export const guideTableOfContents = (() => {
+export function getGuideTableOfContents(t: (key: GuideTitleKey) => string) {
   // We'll agreggate the result here
   const navigationItems: TableOfContentsItem[] = []
 
@@ -122,12 +131,15 @@ export const guideTableOfContents = (() => {
     // Generate section number using the shared utility
     const sectionNumber = numbering.getNextNumber(level)
 
+    // Resolve localized title (t is already scoped to 'guide.titles')
+    const title = t(section.titleKey)
+
     // Create TOC item with separate number and title fields
     // ID is auto-generated by slugifying the title
     navigationItems.push({
-      id: slugify(section.title),
+      id: slugify(title),
       label: sectionNumber,
-      title: section.title,
+      title: title,
       level: level + 1,
     })
 
@@ -142,4 +154,4 @@ export const guideTableOfContents = (() => {
 
   // The recursive call should have filled this up
   return navigationItems
-})()
+}

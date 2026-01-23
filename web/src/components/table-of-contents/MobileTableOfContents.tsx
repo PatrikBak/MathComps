@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown, Menu } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -27,6 +28,9 @@ import { useTableOfContentsNavigation } from './use-table-of-contents-navigation
  * - Scrollable dropdown when content exceeds viewport height
  */
 export function MobileTableOfContents({ items }: TableOfContentsProps) {
+  // Translations for UI labels
+  const t = useTranslations('navigation')
+
   // Track if the navigation is open
   const [isOpen, setIsOpen] = useState(false)
 
@@ -87,7 +91,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
                 <div className="flex items-center gap-2.5">
                   <Menu className="h-4 w-4 text-gray-400 shrink-0" />
                   <span className="text-sm font-medium text-white">
-                    {isOpen ? 'Zavrieť' : 'Navigácia'}
+                    {isOpen ? t('menuClose') : t('menuOpen')}
                   </span>
                 </div>
               ) : (

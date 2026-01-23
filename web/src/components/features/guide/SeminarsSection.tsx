@@ -1,28 +1,30 @@
 import { Mail } from 'lucide-react'
-import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
+import type messages from '../../../../messages/sk.json'
 import { BulletList } from './layout/BulletList'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import { FlagIcon } from './layout/FlagIcon'
 import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
-import { SchoolLevelBadge } from './layout/SchoolLevelBadge'
+import { type SchoolLevel, SchoolLevelBadge } from './layout/SchoolLevelBadge'
 import TipBox from './layout/TipBox'
 
-type Level = 'ZŠ' | 'SŠ'
-
 type Country = 'SK' | 'CZ' | 'INTERNATIONAL'
+
+type SeminarDescriptionKey = keyof (typeof messages)['guide']['sections']['seminars']['items']
 
 type Seminar = {
   title: string
   link: string
-  description?: string
+  /** Translation key for description in sections.seminars.items */
+  descriptionKey?: SeminarDescriptionKey
   details?: string[]
-  level: Level
+  level: SchoolLevel
   country: Country
 }
 
@@ -31,104 +33,108 @@ type Seminar = {
  * Uses a clean, list-based layout emphasizing key information over visual effects.
  */
 export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: SectionNumberer }) {
+  // Common guide translations
+  const tGuide = useTranslations('guide')
+
+  // Scoped translator for seminar common content
+  const tSeminars = useTranslations('guide.sections.seminars')
+
   const seminars: Seminar[] = [
     {
       title: 'KMS',
       link: 'https://kms.sk/',
-      level: 'SŠ',
+      level: 'highSchool',
       country: 'SK',
     },
     {
       title: 'Strom',
       link: 'https://strom.sk/strom',
-      level: 'SŠ',
+      level: 'highSchool',
       country: 'SK',
     },
     {
       title: 'PraSe',
       link: 'https://prase.cz/',
-      level: 'SŠ',
+      level: 'highSchool',
       country: 'CZ',
     },
     {
       title: 'BRKOS',
       link: 'https://brkos.math.muni.cz/',
-      level: 'SŠ',
+      level: 'highSchool',
       country: 'CZ',
     },
     {
       title: 'iKS',
       link: 'https://iksko.org/',
-      description:
-        'Česko-slovenský seminár pre riešiteľov s ambíciou uspieť na medzinárodných kolách',
-      level: 'SŠ',
+      descriptionKey: 'iks',
+      level: 'highSchool',
       country: 'INTERNATIONAL',
     },
     {
       title: 'MBL',
       link: 'https://mathsbeyondlimits.eu/',
-      description:
-        'Pôvodne poľský, teraz už medzinárodný seminár s jedným kolom a jedným dlhým sústredením',
-      level: 'SŠ',
+      descriptionKey: 'mbl',
+      level: 'highSchool',
       country: 'INTERNATIONAL',
     },
     {
       title: 'Riešky',
       link: 'https://riesky.sk/',
-      level: 'ZŠ',
+      level: 'elementary',
       country: 'SK',
     },
     {
       title: 'Pikomat',
       link: 'https://pikomat.sk/',
-      level: 'ZŠ',
+      level: 'elementary',
       country: 'SK',
     },
     {
       title: 'Sezam',
       link: 'https://www.sezam.sk/',
-      level: 'ZŠ',
-      description: 'Pre 7.-9. ročník ZŠ',
+      level: 'elementary',
+      descriptionKey: 'sezam',
       country: 'SK',
     },
     {
       title: 'Sezamko',
       link: 'https://www.sezam.sk/sezamko/',
-      level: 'ZŠ',
-      description: 'Pre 4.-6. ročník ZŠ',
+      level: 'elementary',
+      descriptionKey: 'sezamko',
       country: 'SK',
     },
     {
       title: 'Matik',
       link: 'https://strom.sk/matik',
-      level: 'ZŠ',
-      description: 'Pre 7.-9. ročník ZŠ',
+      level: 'elementary',
+      descriptionKey: 'matik',
       country: 'SK',
     },
     {
       title: 'Malynár',
       link: 'https://strom.sk/malynar',
-      level: 'ZŠ',
-      description: 'Pre 4.-6. ročník ZŠ',
+      level: 'elementary',
+      descriptionKey: 'malynar',
       country: 'SK',
     },
     {
       title: 'Pikomat',
       link: 'https://pikomat.mff.cuni.cz/',
-      level: 'ZŠ',
+      level: 'elementary',
       country: 'CZ',
     },
     {
       title: 'Komár',
       link: 'https://komar.math.muni.cz/',
-      level: 'ZŠ',
+      level: 'elementary',
       country: 'CZ',
     },
     {
       title: 'KoKoS',
       link: 'http://kokos.gmk.cz/',
-      description: 'Pre 6.-9. ročník ZŠ',
-      level: 'ZŠ',
+      descriptionKey: 'kokos',
+      level: 'elementary',
       country: 'CZ',
     },
   ]
@@ -152,9 +158,9 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
           <ExternalLinkButton href={seminar.link} />
         </div>
 
-        {seminar.description && (
+        {seminar.descriptionKey && (
           <p className={cn(GUIDE_STYLES.textSmall, 'leading-relaxed mt-1.5')}>
-            {seminar.description}
+            {tGuide(`sections.seminars.items.${seminar.descriptionKey}`)}
           </p>
         )}
 
@@ -167,7 +173,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     </div>
   )
 
-  const renderCountryGroup = (country: Country, level: Level) => {
+  const renderCountryGroup = (country: Country, level: SchoolLevel) => {
     const rightSeminars = seminars
       .filter((seminar) => seminar.country == country && seminar.level == level)
       .map(renderSeminarRow)
@@ -175,20 +181,14 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     return rightSeminars.length == 0 ? null : (
       <div className="mb-10 last:mb-0">
         <div className="flex items-center gap-2.5 mb-4">
-          <FlagIcon countries={[country]} className="h-5 w-7" />
+          <FlagIcon country={country} className="h-5 w-7" />
           <h4
             className={cn(
               GUIDE_STYLES.textSmall,
               'font-semibold uppercase tracking-wide text-white/70'
             )}
           >
-            {
-              {
-                SK: 'Slovenské',
-                CZ: 'České',
-                INTERNATIONAL: 'Medzinárodné',
-              }[country]
-            }
+            {tGuide(`sections.seminars.countries.${country}`)}
           </h4>
         </div>
         <div className="space-y-2.5">{rightSeminars}</div>
@@ -196,19 +196,17 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     )
   }
 
-  function renderLevelGroup(level: Level) {
+  function renderLevelGroup(level: SchoolLevel) {
     const levelConfig = {
-      ZŠ: {
-        title: GUIDE_TITLES.SEMINARS_ELEMENTARY,
-        description:
-          'ZŠ seminárov je naozaj dosť. Väčšina z nich je pre všeobecne druhý stupeň ZŠ, pričom ale majú škálované príklady pre všetkých.',
+      elementary: {
+        title: tGuide(`titles.${GUIDE_TITLES.SEMINARS_ELEMENTARY}`),
+        description: tGuide('sections.seminars.levels.elementary.description'),
         iconColor: 'text-purple-400',
         iconBackground: 'bg-purple-500/10',
       },
-      SŠ: {
-        title: GUIDE_TITLES.SEMINARS_HIGH_SCHOOL,
-        description:
-          'Dva slovenské, dva české a jeden česko-slovenský. Okrem toho veľa česko-slovenských študentov sa zúčastňuje aj MBL. O zábavu naozaj nie je núdza.',
+      highSchool: {
+        title: tGuide(`titles.${GUIDE_TITLES.SEMINARS_HIGH_SCHOOL}`),
+        description: tGuide('sections.seminars.levels.highSchool.description'),
         iconColor: 'text-orange-400',
         iconBackground: 'bg-orange-500/10',
       },
@@ -232,23 +230,15 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     )
   }
 
+  const features = tSeminars.raw('features') as string[]
+
   return (
     <GuideSection
-      title={GUIDE_TITLES.SEMINARS}
+      title={tGuide(`titles.${GUIDE_TITLES.SEMINARS}`)}
       description={
         <>
-          <p>
-            Korešpondenčné semináre sú neoddeliteľnou súčasťou česko-slovenskej matematickej
-            kultúry, čomu zodpovedá aj ich počet. Typické vlastnosti:
-          </p>
-          <BulletList
-            className="mt-4"
-            items={[
-              'Riešenie úloh doma a zasielanie riešení poštou (odtiaľ názov), aj keď teraz už skôr online',
-              'Niekoľko sérií úloh počas roka',
-              'Sústredenia nabité zábavou a matikou ako neodmysliteľná súčasť seminárov',
-            ]}
-          />
+          <p>{tGuide('sections.seminars.description')}</p>
+          <BulletList className="mt-4" items={features} />
         </>
       }
       icon={{ type: 'lucide', icon: Mail }}
@@ -256,14 +246,10 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
       iconBackground="bg-blue-500/10"
       sectionNumberer={sectionNumberer}
     >
-      {renderLevelGroup('ZŠ')}
-      {renderLevelGroup('SŠ')}
+      {renderLevelGroup('elementary')}
+      {renderLevelGroup('highSchool')}
 
-      <TipBox>
-        Veľa ľudí rieši súčasne viac seminárov, a to aj na ZŠ aj na SŠ. Je tiež bežné pre Slovákov
-        riešiť české semináre a naopak. Nie je náhoda, že medzi najlepšími riešiteľmi MO a seminárov
-        je veľký prekryv 😉
-      </TipBox>
+      <TipBox>{tGuide('sections.seminars.tip')}</TipBox>
     </GuideSection>
   )
 }

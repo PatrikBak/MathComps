@@ -374,6 +374,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasFilter("is_original = true")
              .HasDatabaseName("ux_problem_text_one_original_per_problem_document");
 
+            // Partial covering index for optimized statement lookup by language preference.
+            e.HasIndex(pt => new { pt.ProblemId, pt.Language, pt.IsOriginal })
+             .HasDatabaseName("ix_problem_text_statement_lookup")
+             .HasFilter("document_type = 'statement' AND parsed_text IS NOT NULL")
+             .IncludeProperties(pt => pt.ParsedText!);
+
             // Embeddings relationship
             e.HasMany(pt => pt.Embeddings)
              .WithOne(pe => pe.ProblemText)

@@ -1,4 +1,5 @@
 import { Github, Linkedin } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
@@ -6,13 +7,16 @@ import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import AboutPanelSection from './layout/AboutPanelSection'
 
 export const AuthorSection = () => {
+  // Translations for section
+  const t = useTranslations('about.author')
+
   return (
-    <AboutPanelSection id="aboutAuthor" title="O autorovi">
+    <AboutPanelSection id="aboutAuthor" title={t('title')}>
       <div className="flex flex-col sm:flex-row items-start gap-8">
         <div className="flex-shrink-0 mx-auto sm:mx-0">
           <ImageWithLoader
             src="/foto.jpg"
-            alt="Profilová fotka Patrika Baka"
+            alt={t('alt')}
             width={128}
             height={128}
             className="object-cover rounded-full"
@@ -21,17 +25,12 @@ export const AuthorSection = () => {
         </div>
 
         <div className="text-slate-400 text-sm sm:text-base lg:text-lg leading-relaxed space-y-4 sm:pr-2">
-          <p>
-            Volám sa <strong>Patrik Bak</strong>. Ako bývalý trojnásobný účastník a dvojnásobný
-            medailista na Medzinárodných matematických olympiádach (IMO), ale aj autor množstva
-            súťažných úloh (vrátane dvoch pre IMO), mám k olympiádnej matematike hlboký vzťah. Už
-            dlhšie ma baví spájať matematiku s programovaním. Tento záujem v minulosti viedol k
-            projektu <strong>GeoGen</strong>, nástroju na automatické generovanie geometrických
-            úloh. <strong>MathComps</strong> je ďalším logickým krokom na tejto ceste – snahou
-            vytvoriť komplexnú a modernú platformu pre komunitu matematickej olympiády. Pri jej
-            budovaní sa opieram nielen o vlastné poznatky a skúsenosti, ale vďaka porozumeniu a
-            podpore viacerých skvelých ľudí z komunity MO aj o ich pripomienky a nápady.
-          </p>
+          <div>
+            {t.rich('description', {
+              p: (chunks) => <p>{chunks}</p>,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
+          </div>
 
           <div className="flex items-center gap-4 sm:gap-6 pt-2">
             <AppLink

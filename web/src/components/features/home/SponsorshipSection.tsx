@@ -1,4 +1,5 @@
 import { Heart, Star } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import ContactButton from '@/components/features/contact/ContactButton'
 import Badge from '@/components/features/home/layout/Badge'
@@ -16,6 +17,9 @@ const WINCENT_LOGO_URL =
  * Displays the sponsorship section on the home page.
  */
 export default function SponsorshipSection() {
+  // Translations for section
+  const t = useTranslations('home.sponsorship')
+
   return (
     <Section
       id="sponsorship-section"
@@ -23,16 +27,16 @@ export default function SponsorshipSection() {
       badge={
         <Badge
           icon={<Star size={14} className="sm:w-4 sm:h-4" />}
-          text="Neziskový projekt"
+          text={t('badge')}
           color="amber"
         />
       }
-      title="Podporte rozvoj platformy"
-      description="MathComps je nezávislý neziskový projekt s cieľom zostať navždy úplne bezplatný pre všetkých. Každý príspevok pomôže naplniť cieľ venovať sa projektu naplno. Veľká vďaka patrí podpore, ktorá sa projektu dostala od nášho hlavného sponzora."
+      title={t('title')}
+      description={t('description')}
       descriptionClassName="mb-6 sm:mb-10 lg:mb-12"
     >
       <div className="max-w-xs sm:max-w-md md:max-w-lg mx-auto text-center">
-        <GlassCard title="Hlavný sponzor projektu" titleElement="h3">
+        <GlassCard title={t('mainSponsor')} titleElement="h3">
           <div className="mt-4 sm:mt-6 mb-4 sm:mb-6">
             <AppLink
               href="https://www.wincent.com/"
@@ -60,7 +64,7 @@ export default function SponsorshipSection() {
             className="inline-flex items-center gap-2 sm:gap-2 lg:gap-3 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 rounded-lg lg:rounded-xl text-violet-300 font-semibold lg:font-bold text-sm sm:text-base lg:text-lg border-2 border-violet-500/40 hover:bg-violet-500/10 hover:border-violet-500/70 transition-all duration-300 shadow-lg shadow-violet-500/10"
           >
             <Heart size={16} className="sm:w-[18px] sm:h-[18px] lg:w-6 lg:h-6" />
-            <span>Staňte sa sponzorom</span>
+            <span>{t('becomeSponsor')}</span>
           </ContactButton>
         </GlassCard>
       </div>

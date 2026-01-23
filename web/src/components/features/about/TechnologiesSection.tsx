@@ -1,4 +1,7 @@
+'use client'
+
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 import GlassCard from '@/components/shared/components/GlassCard'
 import Section from '@/components/shared/components/Section'
@@ -7,6 +10,10 @@ import Section from '@/components/shared/components/Section'
  * Displays the technologies section on the about page.
  */
 export default function TechnologiesSection() {
+  // Translations for section
+  const t = useTranslations('about.technologies')
+
+  // The array of used technologies with their data
   const technologies = [
     {
       name: 'Next.js',
@@ -40,8 +47,8 @@ export default function TechnologiesSection() {
     <Section
       id="technologies-section"
       className="px-4"
-      title="Technológie"
-      description="Prehľad kľúčových technológií, ktoré poháňajú MathComps."
+      title={t('title')}
+      description={t('description')}
     >
       <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
         {technologies.map((tech, index) => (

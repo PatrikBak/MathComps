@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Fragment } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -36,6 +37,9 @@ export function Modal({
   className,
   align = 'center',
 }: ModalProps) {
+  // Get translations for modal
+  const tModal = useTranslations('ui.modal')
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -90,7 +94,7 @@ export function Modal({
                       <button
                         onClick={onClose}
                         className="text-slate-400 hover:text-white transition-colors duration-200 ml-auto flex-shrink-0"
-                        aria-label="Zavrieť"
+                        aria-label={tModal('close')}
                       >
                         <X size={24} />
                       </button>

@@ -1,123 +1,185 @@
+import { type useTranslations } from 'next-intl'
 import { z, type ZodRawShape } from 'zod'
 
 import type { AuthScreenWithValidation } from './AuthForm'
 
 /**
- * Base schema for email validation used across all auth screens.
+ * Type for the validation translation function.
  */
-const emailSchema = z.email('Zadajte platný email')
+type ValidationTranslator = ReturnType<typeof useTranslations<'validation'>>
 
 /**
- * Base schema for password validation.
+ * Creates base schemas for email validation.
  */
-const passwordSchema = z.string().min(1, 'Heslo je povinné').min(8, 'Heslo musí mať aspoň 8 znakov')
+const createEmailSchema = (t: ValidationTranslator) => z.email(t('invalidEmail'))
 
 /**
- * Base schema for password confirmation.
+ * Creates base schema for password validation.
+ *
+ * @param t - The translation function from useTranslations('validation')
+ *
+ * @returns The schema for the password
  */
-const confirmPasswordSchema = z.string().min(1, 'Potvrdenie hesla je povinné')
+const createPasswordSchema = (t: ValidationTranslator) =>
+  z
+    .string()
+    .min(1, t('passwordRequired'))
+    .min(8, t('passwordMinLength', { count: 8 }))
 
 /**
- * Schema for display name validation.
+ * Creates base schema for password confirmation.
+ *
+ * @param t - The translation function from useTranslations('validation')
+ *
+ * @returns The schema for the password confirmation
  */
-export const displayNameSchema = z
-  .string()
-  .min(1, 'Meno je povinné')
-  .min(3, 'Meno musí mať aspoň 3 znaky')
-  .max(20, 'Meno môže mať maximálne 20 znakov')
+const createConfirmPasswordSchema = (t: ValidationTranslator) =>
+  z.string().min(1, t('confirmPasswordRequired'))
 
 /**
- * Base schema for verification code validation.
+ * Creates schema for display name validation.
+ *
+ * @param t - The translation function from useTranslations('validation')
+ *
+ * @returns The schema for the display name
  */
-const codeSchema = z.string().min(1, 'Kód je povinný').length(6, 'Kód musí mať 6 znakov')
+export const createDisplayNameSchema = (t: ValidationTranslator) =>
+  z
+    .string()
+    .min(1, t('nameRequired'))
+    .min(3, t('nameMinLength', { count: 3 }))
+    .max(20, t('nameMaxLength', { count: 20 }))
 
 /**
- * Schema for login form (requires email and password).
+ * Creates base schema for verification code validation.
+ *
+ * @param t - The translation function from useTranslations('validation')
+ *
+ * @returns The schema for the verification code
  */
-const loginSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-})
-
-/**
- * Schema for password reset form (only requires email).
- */
-const checkEmailSchema = z.object({
-  email: emailSchema,
-})
-
-/**
- * Schema for code verification (requires code).
- */
-const codeVerificationSchema = z.object({
-  code: codeSchema,
-})
+const createCodeSchema = (t: ValidationTranslator) =>
+  z
+    .string()
+    .min(1, t('codeRequired'))
+    .length(6, t('codeLength', { count: 6 }))
 
 /**
  * Helper to add password matching refinement to a schema.
+ *
+ * @param schema - The schema to add the refinement to
+ * @param t - The translation function from useTranslations('validation')
+ *
+ * @returns The schema with the refinement added
  */
-const addPasswordMatchRefinement = <T extends z.ZodObject<ZodRawShape>>(schema: T) =>
+const addPasswordMatchRefinement = <T extends z.ZodObject<ZodRawShape>>(
+  schema: T,
+  t: ValidationTranslator
+) =>
   schema.refine((data) => data.password === data.confirmPassword, {
-    message: 'Heslá sa nezhodujú',
+    message: t('passwordsDoNotMatch'),
     path: ['confirmPassword'],
   })
 
 /**
- * Schema for signup form (requires name, email, password, and confirmPassword).
+ * Creates all auth-related schemas with translated validation messages.
+ *
+ * @param t - The translation function from useTranslations('validation')
+ *
+ * @returns Object containing all auth schemas
  */
-const signupSchema = addPasswordMatchRefinement(
-  z.object({
-    firstName: displayNameSchema,
+export function createAuthSchemas(t: ValidationTranslator) {
+  // Create schemas requiring translation
+  const emailSchema = createEmailSchema(t)
+  const passwordSchema = createPasswordSchema(t)
+  const confirmPasswordSchema = createConfirmPasswordSchema(t)
+  const displayNameSchema = createDisplayNameSchema(t)
+  const codeSchema = createCodeSchema(t)
+
+  // Schema for login form
+  const loginSchema = z.object({
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: confirmPasswordSchema,
   })
-)
+
+  // Schema for password reset form (only requires email)
+  const checkEmailSchema = z.object({
+    email: emailSchema,
+  })
+
+  // Schema for code verification
+  const codeVerificationSchema = z.object({
+    code: codeSchema,
+  })
+
+  // Schema for signup form
+  const signupSchema = addPasswordMatchRefinement(
+    z.object({
+      firstName: displayNameSchema,
+      email: emailSchema,
+      password: passwordSchema,
+      confirmPassword: confirmPasswordSchema,
+    }),
+    t
+  )
+
+  // Schema for new password entry
+  const newPasswordSchema = addPasswordMatchRefinement(
+    z.object({
+      password: passwordSchema,
+      confirmPassword: confirmPasswordSchema,
+    }),
+    t
+  )
+
+  // Return all schemas
+  return {
+    loginSchema,
+    checkEmailSchema,
+    codeVerificationSchema,
+    signupSchema,
+    newPasswordSchema,
+  }
+}
 
 /**
- * Schema for new password entry (requires password and confirmPassword).
+ * Type for the schemas returned by createAuthSchemas.
  */
-const newPasswordSchema = addPasswordMatchRefinement(
-  z.object({
-    password: passwordSchema,
-    confirmPassword: confirmPasswordSchema,
-  })
-)
+type AuthSchemas = ReturnType<typeof createAuthSchemas>
 
 /**
  * Type inference for email entry form data.
  */
-export type EnterEmailFormData = z.infer<typeof checkEmailSchema>
+export type EnterEmailFormData = z.infer<AuthSchemas['checkEmailSchema']>
 
 /**
  * Type inference for login form data.
  */
-export type LoginFormData = z.infer<typeof loginSchema>
+export type LoginFormData = z.infer<AuthSchemas['loginSchema']>
 
 /**
  * Type inference for signup form data.
  */
-export type SignupFormData = z.infer<typeof signupSchema>
+export type SignupFormData = z.infer<AuthSchemas['signupSchema']>
 
 /**
  * Type inference for password reset form data.
  */
-export type ResetPasswordFormData = z.infer<typeof checkEmailSchema>
+export type ResetPasswordFormData = z.infer<AuthSchemas['checkEmailSchema']>
 
 /**
  * Type inference for reset code form data.
  */
-export type ResetCodeFormData = z.infer<typeof codeVerificationSchema>
+export type ResetCodeFormData = z.infer<AuthSchemas['codeVerificationSchema']>
 
 /**
  * Type inference for email verification form data.
  */
-export type EmailVerificationFormData = z.infer<typeof codeVerificationSchema>
+export type EmailVerificationFormData = z.infer<AuthSchemas['codeVerificationSchema']>
 
 /**
  * Type inference for new password form data.
  */
-export type NewPasswordFormData = z.infer<typeof newPasswordSchema>
+export type NewPasswordFormData = z.infer<AuthSchemas['newPasswordSchema']>
 
 /**
  * Union type for all form data types.
@@ -134,23 +196,24 @@ export type AuthFormValues =
 /**
  * Get the appropriate schema based on the authentication screen.
  *
+ * @param schemas - The auth schemas created with createAuthSchemas
  * @param screen - The current authentication screen
  *
  * @returns The Zod schema for the given screen
  */
-export function getAuthSchema(screen: AuthScreenWithValidation) {
+export function getAuthSchema(schemas: AuthSchemas, screen: AuthScreenWithValidation) {
   switch (screen) {
     case 'forgotten-password':
     case 'enter-email':
-      return checkEmailSchema
+      return schemas.checkEmailSchema
     case 'password-reset-code':
     case 'email-verification':
-      return codeVerificationSchema
+      return schemas.codeVerificationSchema
     case 'enter-new-password':
-      return newPasswordSchema
+      return schemas.newPasswordSchema
     case 'signup-with-email':
-      return signupSchema
+      return schemas.signupSchema
     case 'login-with-email':
-      return loginSchema
+      return schemas.loginSchema
   }
 }

@@ -5,16 +5,24 @@ A Next.js application for browsing and searching mathematical competition proble
 ## Structure
 
 - **`src/app/`** – Next.js App Router pages
-  - `problems/` – Problem search and filtering
-  - `handouts/` – Educational handouts viewer
-  - `about/` – Project information
-  - `guide/` – Orientation for exploring math contests
+  - `[locale]/` – Localized routes (English canonical: `problems`, `handouts`, `news`, etc.)
+  - `api/` – API routes (contact form, webhooks)
 - **`src/components/`** – React components organized by purpose
-  - `features/` – Page-specific feature components
+  - `features/` – Page-specific feature components (problems, handouts, contact, etc.)
   - `shared/` – Reusable components and utilities
   - `layout/` – Header, footer, navigation
   - `math/` – KaTeX rendering and math utilities
-- **`src/content/`** – Static content (handouts JSON)
+  - `login/` – Authentication UI components
+  - `animations/` – Animation components
+  - `table-of-contents/` – ToC components for handouts
+- **`src/constants/`** – Application constants (OG metadata, etc.)
+- **`src/content/`** – Static content (handouts, news)
+- **`src/i18n/`** – Internationalization config and routing
+- **`src/hooks/`** – Custom React hooks
+- **`src/lib/`** – Shared utilities (email, metadata, etc.)
+- **`src/stores/`** – Zustand state stores
+- **`src/types/`** – TypeScript type definitions
+- **`messages/`** – Locale JSON files (en.json, sk.json)
 
 ## Getting Started
 
@@ -51,7 +59,7 @@ RESEND_API_KEY=your-resend-api-key-here
 
 # Email address where contact form submissions will be sent / used in the privacy page.
 # For email-sending it must be configured and verified in the Resend account.
-CONTACT_EMAIL=contact@yourdomain.com
+NEXT_PUBLIC_CONTACT_EMAIL=contact@yourdomain.com
 ```
 
 **Development Mode:** Leave email variables empty for development - the contact form will work without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.

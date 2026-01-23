@@ -75,10 +75,10 @@ public class SuggestTagsCommand(
 
         // Remove any suggestions that it should have not made but AI is shit so...
         suggestedTags = suggestedTags.FilterOut(
-            // Remove forbidden + 
-            TagFilesHelper.GetForbiddenTags().GetAllTagNames()
-                // Approved tags
-                .Concat(TagFilesHelper.GetCategorizedApprovedTags().MapTagsToTheirData().Keys
+            // Remove forbidden tags
+            TagFilesHelper.GetForbiddenTags().GetAllTags()
+                // Also remove already approved tags
+                .Concat(TagFilesHelper.GetTagsForAi().Keys
             ));
 
         // Find the counts, just for logging

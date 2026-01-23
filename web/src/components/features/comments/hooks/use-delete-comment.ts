@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl'
+
 import { useProblemStore } from '@/stores/problem-store'
 
 import type { CommentTarget } from '../api/comment-api-types'
@@ -22,6 +24,9 @@ type DeleteCommentParams = {
  * @returns A React Query mutation object.
  */
 export function useDeleteComment() {
+  // Get the translations
+  const t = useTranslations('comments')
+
   // We will need to update the number of comments in the problem store
   // if the comment is deleted from a problem
   const updateProblemCommentCount = useProblemStore((state) => state.updateCommentCount)
@@ -49,9 +54,9 @@ export function useDeleteComment() {
     },
 
     // The reason shown in the auth prompt
-    authReason: 'odstraňovanie komentárov',
+    authReason: t('authReasons.deleteComment'),
 
     // The error message shown when the server craps out
-    errorMessage: 'Nepodarilo sa odstrániť komentár',
+    errorMessage: t('errors.deleteFailed'),
   })
 }

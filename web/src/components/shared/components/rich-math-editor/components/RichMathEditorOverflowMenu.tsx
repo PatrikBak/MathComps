@@ -1,5 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -15,8 +16,6 @@ type RichMathEditorOverflowMenuItem = {
   text?: string
   /** Label to display in the menu. */
   label: string
-  /** Tooltip for the menu item. */
-  title: string
   /** Callback when the menu item is clicked. */
   onClick: () => void
 }
@@ -33,12 +32,15 @@ type RichMathEditorOverflowMenuProps = {
  * Overflow menu for mobile toolbar. Uses Headless UI Menu.
  */
 export function RichMathEditorOverflowMenu({ items }: RichMathEditorOverflowMenuProps) {
+  // Get translations
+  const tEditor = useTranslations('ui.editor')
+
   return (
     <Menu>
       {({ open }) => (
         <>
           <MenuButton
-            title="Ďalšie možnosti"
+            title={tEditor('moreOptions')}
             onMouseDown={preventFocusLoss}
             className={cn(
               'flex items-center justify-center gap-1.5 px-2 py-1 rounded transition-colors text-xs min-w-[28px]',
@@ -62,7 +64,6 @@ export function RichMathEditorOverflowMenu({ items }: RichMathEditorOverflowMenu
                     type="button"
                     onMouseDown={preventFocusLoss}
                     onClick={item.onClick}
-                    title={item.title}
                     className={cn(
                       'w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 rounded transition-colors',
                       focus && 'bg-slate-700/60'

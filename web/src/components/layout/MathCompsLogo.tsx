@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 
@@ -16,11 +17,14 @@ type MathCompsLogoProps = {
  * The best logo in the world? 🥺😇
  */
 export default function MathCompsLogo({ className }: MathCompsLogoProps) {
+  // Get translations
+  const t = useTranslations('navigation')
+
   return (
     <AppLink
       href="/"
       className={cn('font-bold text-2xl text-white flex items-center gap-2 sm:gap-3', className)}
-      aria-label="MathComps - domov"
+      aria-label={`MathComps - ${t('home')}`}
     >
       <span className="inline-flex items-center gap-2 sm:gap-3">
         <Image

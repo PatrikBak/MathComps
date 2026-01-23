@@ -32,17 +32,7 @@ public class Round
     /// </summary>
     public Category? Category { get; set; }
 
-    /// <summary>
-    /// Display name (e.g., "Krajské"). Empty if <see cref="IsDefault"/> is true.
-    /// </summary>
-    [MaxLength(50)]
-    public required string DisplayName { get; set; }
 
-    /// <summary>
-    /// Full display name (e.g., "Krajské kolo"). Empty if <see cref="IsDefault"/> is true.
-    /// </summary>
-    [MaxLength(200)]
-    public required string FullName { get; set; }
 
     /// <summary>
     /// URL-safe slug unique within the round (lowercase, hyphenated). Empty if <see cref="IsDefault"/> is true.

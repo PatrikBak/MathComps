@@ -93,7 +93,7 @@ export default function GlassCard({
 
   // Common card styles used for both clickable and non-clickable cards
   const cardClassName = cn(
-    'relative overflow-hidden bg-slate-800/40 backdrop-blur-md border border-violet-500/20 p-2 sm:p-4 lg:p-6 rounded-2xl group hover:scale-105 transition-all duration-500',
+    'relative overflow-hidden bg-slate-800/40 backdrop-blur-md border border-violet-500/20 hover:border-violet-400/50 p-2 sm:p-4 lg:p-6 rounded-2xl transition-colors duration-300',
     align === 'center' && 'text-center'
   )
 

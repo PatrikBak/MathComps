@@ -1,4 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Shared;
 
 namespace MathComps.Cli.Tagging.Dtos;
 
