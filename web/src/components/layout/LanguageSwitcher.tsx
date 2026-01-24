@@ -2,8 +2,8 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 import { FlagIcon } from '@/components/features/guide/layout/FlagIcon'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -38,11 +38,11 @@ export function LanguageSwitcher() {
       <DropdownMenu.Trigger
         id="language-switcher-trigger"
         className={cn(
-          'flex items-center gap-1.5 px-2 py-1.5 rounded-lg',
+          'flex items-center gap-1.5 px-2 py-1.5 rounded-lg outline-none',
           'text-sm font-medium text-slate-200',
           'transition-all duration-300',
           'hover:bg-indigo-500/10 hover:text-white hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
+          'focus-visible:ring-2 focus-visible:ring-indigo-500'
         )}
         aria-label={t('change')}
       >
