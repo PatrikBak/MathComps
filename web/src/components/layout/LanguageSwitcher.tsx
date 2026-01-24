@@ -2,9 +2,11 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { FlagIcon } from '@/components/features/guide/layout/FlagIcon'
+import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher'
 import { LOCALE_NAMES, LOCALE_TO_COUNTRY, SUPPORTED_LOCALES } from '@/i18n/i18n'
@@ -16,8 +18,16 @@ export function LanguageSwitcher() {
   // Get translations
   const t = useTranslations('common.language')
 
+  // Track loading state while language is changing
+  const [isChanging, setIsChanging] = useState(false)
+
   // Get the current locale and the function to change it
   const { currentLocale, changeLocale } = useLanguageSwitcher()
+
+  // Reset loading state when locale changes (and this component re-renders)
+  useEffect(() => {
+    setIsChanging(false)
+  }, [currentLocale])
 
   // Get the country flag data for the current locale
   const currentCountry = LOCALE_TO_COUNTRY[currentLocale]
@@ -36,7 +46,11 @@ export function LanguageSwitcher() {
         )}
         aria-label={t('change')}
       >
-        <FlagIcon country={currentCountry} flagHeight={16} flagWidth={22} />
+        {isChanging ? (
+          <LoadingSpinner className="w-4 h-4 border" />
+        ) : (
+          <FlagIcon country={currentCountry} flagHeight={16} flagWidth={22} />
+        )}
         <span className="uppercase text-xs tracking-wide">{currentLocale}</span>
         <ChevronDown
           className={cn(
@@ -81,7 +95,12 @@ export function LanguageSwitcher() {
                     ? 'bg-indigo-500/20 text-white'
                     : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                 )}
-                onSelect={() => changeLocale(locale)}
+                onSelect={() => {
+                  if (locale !== currentLocale) {
+                    setIsChanging(true)
+                    changeLocale(locale)
+                  }
+                }}
               >
                 <FlagIcon country={country} flagHeight={14} flagWidth={20} />
                 <span>{LOCALE_NAMES[locale]}</span>
