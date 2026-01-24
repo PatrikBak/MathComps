@@ -116,8 +116,8 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
                 // Update problems in the database with the solution link
                 var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(item.Key, item.SolutionLink);
 
-                // If no problems to update, make aware, this could be sus
-                if (result.TotalProblemsFound == 0)
+                // If no problems to update, yet there is a solution link, make aware, this could be sus
+                if (item.SolutionLink != null && result.TotalProblemsFound == 0)
                     AnsiConsole.MarkupLine($"[red]Found no problems for [yellow]{item.Slug}[/][/]");
 
                 // We'll report the total updated problems
