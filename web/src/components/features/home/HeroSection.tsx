@@ -53,7 +53,7 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="px-4 max-w-4xl mx-auto relative z-10">
-        <h1 className="text-white font-black tracking-tight text-balance leading-[1] mb-4 sm:mb-6 lg:mb-8 text-[clamp(2rem,8vw,5.5rem)]">
+        <h1 className="text-white font-black tracking-tight text-balance leading-[1] mb-4 sm:mb-6 lg:mb-8 text-[clamp(2rem,8vw,5.5rem)] hyphens-none">
           <GradientText>{t('title.modernHome')}</GradientText> {t('title.forMath')}{' '}
           <GradientText>{t('title.olympiad')}</GradientText>
         </h1>
