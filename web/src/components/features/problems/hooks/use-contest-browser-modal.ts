@@ -11,8 +11,10 @@ type UseContestBrowserModalReturn = {
   isOpen: boolean
   /** Opens the contest browser modal and updates the URL */
   open: () => void
-  /** Closes the contest browser modal and updates the URL */
-  close: () => void
+  /** Closes the contest browser modal and removes the url param indicating the modal is open */
+  closeWithUrlUpdate: () => void
+  /** Closes the modal UI state without updating the URL (useful when something else will update the URL) */
+  closeWithoutUrlUpdate: () => void
 }
 
 /**
@@ -61,14 +63,14 @@ export function useContestBrowserModal(): UseContestBrowserModalReturn {
     // Update internal state first (immediate UI response)
     setIsOpen(true)
 
-    // Then update URL for shareability/history
+    // Then update URL for shareability
     const params = new URLSearchParams(searchParams.toString())
     params.set(URL_PARAMS.BROWSE_COMPETITIONS, 'true')
     router.push(`?${params.toString()}`, { scroll: false })
   }, [router, searchParams])
 
-  /** Closes the contest browser modal and updates the URL */
-  const close = useCallback(() => {
+  /** Closes the contest browser modal and removes the browse competitions param from URL */
+  const closeWithUrlUpdate = useCallback(() => {
     // Update internal state first (immediate UI response)
     setIsOpen(false)
 
@@ -78,6 +80,14 @@ export function useContestBrowserModal(): UseContestBrowserModalReturn {
     router.push(`?${params.toString()}`, { scroll: false })
   }, [router, searchParams])
 
+  /**
+   * Closes the modal UI state only, without updating the URL.
+   * Used when the caller will update the URL themselves
+   */
+  const closeWithoutUrlUpdate = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
   // Return the state and actions for the parent component to use
-  return { isOpen, open, close }
+  return { isOpen, open, closeWithUrlUpdate, closeWithoutUrlUpdate }
 }

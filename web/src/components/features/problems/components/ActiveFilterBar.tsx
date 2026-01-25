@@ -93,9 +93,6 @@ export default function ActiveFiltersBar({
 
   // Handle contest selection from the browser modal
   const handleContestSelect = (selection: ContestBrowserSelection) => {
-    // Close modal first (removes URL param)
-    contestBrowser.close()
-
     // Look up season display name from the base option...The result
     // should be there, unless the season slug is somehow invalid or
     // the base options are stale?
@@ -124,6 +121,9 @@ export default function ActiveFiltersBar({
       },
       'discrete'
     )
+
+    // Close modal UI state without a second URL update (filters already handled it)
+    contestBrowser.closeWithoutUrlUpdate()
   }
 
   // Count total active filters across all dimensions
@@ -555,7 +555,7 @@ export default function ActiveFiltersBar({
       {/* Contest Browser Modal */}
       <ContestBrowserModal
         isOpen={contestBrowser.isOpen}
-        onClose={contestBrowser.close}
+        onClose={contestBrowser.closeWithUrlUpdate}
         onSelectContest={handleContestSelect}
       />
     </div>

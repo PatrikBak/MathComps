@@ -142,7 +142,7 @@ export function ContestBrowserModal({
   }, [filteredSeasons])
 
   /**
-   * Handles a contest click, setting the filters and closing the modal.
+   * Handles a contest click, setting the filters.
    *
    * @param season The season of the contest.
    * @param contest The contest to select.
@@ -155,9 +155,6 @@ export function ContestBrowserModal({
       categorySlug: contest.categorySlug,
       roundSlug: contest.roundSlug,
     })
-
-    // Close modal
-    onClose()
   }
 
   return (
