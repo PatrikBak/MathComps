@@ -1,4 +1,5 @@
 import { Code, FileText, Globe, Shield } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import ContactButton from '@/components/features/contact/ContactButton'
 import Badge from '@/components/features/home/layout/Badge'
@@ -9,51 +10,49 @@ import Section from '@/components/shared/components/Section'
  * Displays the contribute/open-source section on the home page.
  */
 export const ContributeSection = () => {
+  // Translations for section
+  const t = useTranslations('home.contribute')
+
+  // The cards to display in the section
   const contributeCards = [
     {
       iconComponent: Globe,
-      title: 'Spätná väzba',
-      description: (
-        <>
-          Našli ste chybu, máte nápad na funkciu alebo akýkoľvek iný postreh?{' '}
+      title: t('feedback.title'),
+      description: t.rich('feedback.text', {
+        link: (chunks) => (
           <ContactButton reason="feedback" className="text-indigo-400 font-medium hover:underline">
-            Napíšte
+            {chunks}
           </ContactButton>
-          .
-        </>
-      ),
+        ),
+      }),
     },
     {
       iconComponent: Code,
-      title: 'Vývoj a kód',
-      description: (
-        <>
-          Ste programátor? Pozrite na{' '}
+      title: t('development.title'),
+      description: t.rich('development.text', {
+        link: (chunks) => (
           <AppLink
             href="https://github.com/PatrikBak/MathComps"
             className="text-indigo-400 font-medium hover:underline"
           >
-            zdrojový kód na GitHube
-          </AppLink>{' '}
-          a&nbsp;pokojne prispejte.
-        </>
-      ),
+            {chunks}
+          </AppLink>
+        ),
+      }),
     },
     {
       iconComponent: FileText,
-      title: 'Tvorba obsahu',
-      description: (
-        <>
-          Ak máte záujem prispievať materiálmi alebo inými užitočnými článkami, určite{' '}
+      title: t('content.title'),
+      description: t.rich('content.text', {
+        link: (chunks) => (
           <ContactButton
-            reason="content-contribution"
+            reason="contentContribution"
             className="text-indigo-400 font-medium hover:underline"
           >
-            sa ozvite
+            {chunks}
           </ContactButton>
-          .
-        </>
-      ),
+        ),
+      }),
     },
   ]
 
@@ -63,12 +62,12 @@ export const ContributeSection = () => {
       badge={
         <Badge
           icon={<Shield size={14} className="sm:w-4 sm:h-4" />}
-          text="Otvorený projekt"
+          text={t('badge')}
           color="green"
         />
       }
-      title="Prispejte svojím dielom"
-      description="MathComps je otvorená platforma a každá pomoc je nesmierne cenná."
+      title={t('title')}
+      description={t('description')}
       cards={contributeCards}
     />
   )

@@ -80,7 +80,7 @@ type ContestSelection = {
   roundSlug?: string
 }
 
-export type CategoryFilterOption = {
+type CategoryFilterOption = {
   categoryData: FacetOption
   roundData: FacetOption[]
 }

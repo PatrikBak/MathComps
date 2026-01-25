@@ -1,7 +1,11 @@
 import { ImageOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import type { ListStyleType, RawContentBlock } from '@/components/features/handouts/handout-types'
+import type {
+  ListStyleType,
+  RawContentBlock,
+} from '@/components/features/handouts/handout-content-types'
 import {
   getDocumentUrl,
   getProblemImageUrl,
@@ -128,12 +132,15 @@ function getOrderedListStyleClass({ style }: { style?: ListStyleType | null }) {
  * @param block - The raw content block to render
  * @param imagesById - Optional mapping of image IDs to ProblemImage objects
  * @param imageType - Optional type of the image (problems or handouts)
+ * @param imageMissingText - Text to display when an image is missing
+ *
  * @returns The rendered content block
  */
 export function renderRawContentBlock(
   block: RawContentBlock,
   imagesById: Record<string, ProblemImage>,
-  imageType: ImageType
+  imageType: ImageType,
+  imageMissingText: string
 ): React.ReactNode {
   switch (block.type) {
     case 'text':
@@ -145,7 +152,9 @@ export function renderRawContentBlock(
       return (
         <strong>
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
+            <span key={index}>
+              {renderRawContentBlock(child, imagesById, imageType, imageMissingText)}
+            </span>
           ))}
         </strong>
       )
@@ -153,7 +162,9 @@ export function renderRawContentBlock(
       return (
         <em>
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
+            <span key={index}>
+              {renderRawContentBlock(child, imagesById, imageType, imageMissingText)}
+            </span>
           ))}
         </em>
       )
@@ -161,7 +172,9 @@ export function renderRawContentBlock(
       return (
         <q className="italic">
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
+            <span key={index}>
+              {renderRawContentBlock(child, imagesById, imageType, imageMissingText)}
+            </span>
           ))}
         </q>
       )
@@ -178,7 +191,9 @@ export function renderRawContentBlock(
           newTab
         >
           {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageType)}</span>
+            <span key={index}>
+              {renderRawContentBlock(child, imagesById, imageType, imageMissingText)}
+            </span>
           ))}
         </AppLink>
       )
@@ -189,7 +204,8 @@ export function renderRawContentBlock(
           {renderRawContentBlock(
             { type: 'paragraph', content: block.content } as RawContentBlock,
             imagesById,
-            imageType
+            imageType,
+            imageMissingText
           )}
         </FootnoteRef>
       )
@@ -214,7 +230,7 @@ export function renderRawContentBlock(
     case 'list': {
       const listStyle = getOrderedListStyleClass({ style: block.styleType })
       const renderListItem = (listItem: RawContentBlock[]) => {
-        return renderInlineContent(listItem, imagesById, imageType)
+        return renderInlineContent(listItem, imagesById, imageType, imageMissingText)
       }
       return (
         <ul className={cn('mb-4 pl-6 space-y-1 text-gray-300', listStyle.className)}>
@@ -248,13 +264,13 @@ export function renderRawContentBlock(
           flushInlineRun()
           paragraphParts.push(
             <div key={`b-${paragraphParts.length}`}>
-              {renderRawContentBlock(childBlock, imagesById, imageType)}
+              {renderRawContentBlock(childBlock, imagesById, imageType, imageMissingText)}
             </div>
           )
         } else {
           inlineRun.push(
             <React.Fragment key={childIndex}>
-              {renderRawContentBlock(childBlock, imagesById, imageType)}
+              {renderRawContentBlock(childBlock, imagesById, imageType, imageMissingText)}
             </React.Fragment>
           )
         }
@@ -282,7 +298,7 @@ export function renderRawContentBlock(
         return (
           <span className="inline-flex items-center gap-1 text-gray-500 text-sm">
             <ImageOff size={16} strokeWidth={1.5} />
-            <span className="italic">Obrázok sa stratil</span>
+            <span className="italic">{imageMissingText}</span>
           </span>
         )
       }
@@ -312,7 +328,8 @@ export function renderRawContentBlock(
 export function renderInlineContent(
   content: RawContentBlock[],
   imagesById: Record<string, ProblemImage>,
-  imageType: ImageType
+  imageType: ImageType,
+  imageMissingText: string
 ): React.ReactNode {
   const inlineNodes: React.ReactNode[] = []
 
@@ -324,14 +341,14 @@ export function renderInlineContent(
         const child = block.content[j]
         inlineNodes.push(
           <React.Fragment key={`p-${i}-${j}`}>
-            {renderRawContentBlock(child, imagesById, imageType)}
+            {renderRawContentBlock(child, imagesById, imageType, imageMissingText)}
           </React.Fragment>
         )
       }
     } else {
       inlineNodes.push(
         <React.Fragment key={i}>
-          {renderRawContentBlock(block, imagesById, imageType)}
+          {renderRawContentBlock(block, imagesById, imageType, imageMissingText)}
         </React.Fragment>
       )
     }
@@ -347,7 +364,8 @@ export function renderInlineContent(
 export function renderBlocks(
   blocks: RawContentBlock[] | null | undefined,
   imagesById: Record<string, ProblemImage>,
-  imageType: ImageType
+  imageType: ImageType,
+  imageMissingText: string
 ): React.ReactNode {
   if (!blocks) {
     return null
@@ -356,7 +374,7 @@ export function renderBlocks(
     <>
       {blocks.map((block, index) => (
         <React.Fragment key={index}>
-          {renderRawContentBlock(block, imagesById, imageType)}
+          {renderRawContentBlock(block, imagesById, imageType, imageMissingText)}
         </React.Fragment>
       ))}
     </>
@@ -369,9 +387,11 @@ export function ContentRenderer({
   imagesById,
   imageType,
 }: ContentRendererProps) {
+  const t = useTranslations('ui.content')
+
   return (
     <div className={cn('content-renderer', className)}>
-      {renderBlocks(content, imagesById, imageType)}
+      {renderBlocks(content, imagesById, imageType, t('imageMissing'))}
     </div>
   )
 }

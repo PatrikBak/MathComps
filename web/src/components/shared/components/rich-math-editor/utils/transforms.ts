@@ -31,6 +31,19 @@ export type EditResult = {
 }
 
 /**
+ * Labels required for localized text transforms.
+ * These strings are inserted directly into the editor content and should be translated.
+ */
+export type TransformLabels = {
+  /** Label shown in spoiler block header, e.g., "Hidden text" */
+  spoilerLabel: string
+  /** Placeholder text inside spoiler when nothing is selected, e.g., "hidden content" */
+  spoilerPlaceholder: string
+  /** Placeholder text for empty heading, e.g., "Heading" */
+  headingPlaceholder: string
+}
+
+/**
  * Wraps selected text (or cursor position) with before/after markers.
  * If nothing is selected and a placeholder is provided, inserts the placeholder
  * and returns selection bounds so it can be highlighted for immediate replacement.
@@ -364,14 +377,15 @@ export function insertBlockCode(context: EditContext): EditResult {
 
 /**
  * Inserts an H3 heading at the current line.
- * If the line is empty, inserts '### Nadpis' with 'Nadpis' selected.
+ * If the line is empty, inserts '### [placeholder]' with the placeholder selected.
  * If the line has content (or multiple lines selected), prefixes each line with '### '.
  *
  * @param context - The current editor context.
+ * @param labels - The localized labels for inserted text.
  *
  * @returns The new text and cursor position.
  */
-export function insertHeading(context: EditContext): EditResult {
+export function insertHeading(context: EditContext, labels: TransformLabels): EditResult {
   // Get context data
   const { start, end, fullText } = context
 
@@ -393,7 +407,7 @@ export function insertHeading(context: EditContext): EditResult {
   if (!content.includes('\n') && content.trim().length === 0) {
     // Determine prefix and placeholder
     const prefix = '### '
-    const placeholder = 'Nadpis'
+    const placeholder = labels.headingPlaceholder
 
     // Replace the empty line with prefix + placeholder
     const newText =
@@ -481,23 +495,24 @@ export function handleListContinuation(context: EditContext): EditResult | null 
  * If no text is selected, inserts a placeholder that can be immediately replaced.
  *
  * @param context - The current editor context.
+ * @param labels - The localized labels for inserted text.
  *
  * @returns The new text and cursor position.
  */
-export function insertSpoiler(context: EditContext): EditResult {
+export function insertSpoiler(context: EditContext, labels: TransformLabels): EditResult {
   // Get context data
   const { start, end, selectedText, fullText } = context
 
   // Build the content
-  const content = selectedText || 'skrytý obsah'
+  const content = selectedText || labels.spoilerPlaceholder
 
   // Build the new text using directive syntax
-  const spoilerBlock = `:::spoiler[Skrytý text]\n${content}\n:::`
+  const spoilerBlock = `:::spoiler[${labels.spoilerLabel}]\n${content}\n:::`
   const newText = fullText.substring(0, start) + spoilerBlock + fullText.substring(end)
 
   // Position cursor at start of content, with selection to end of content
-  // ":::spoiler[Skrytý text]\n" = 24 characters
-  const contentStart = start + 24
+  // Length includes: ":::spoiler[" (11) + label + "]\n" (2)
+  const contentStart = start + 11 + labels.spoilerLabel.length + 2
 
   // Return the new text and cursor position, with content selected only if selected originally
   return {

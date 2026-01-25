@@ -1,4 +1,5 @@
 import { useAuth } from '@clerk/nextjs'
+import { useLocale } from 'next-intl'
 import { useCallback } from 'react'
 
 import type { ApiResult } from '@/types/api'
@@ -53,6 +54,9 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
   // Use Clerk hooks to get authentication state
   const { getToken, isLoaded, isSignedIn } = useAuth()
 
+  // Get current locale for Accept-Language header
+  const locale = useLocale()
+
   // Memoize the API call function
   const apiCall = useCallback(
     /**
@@ -94,6 +98,7 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
         // Prepare headers
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
+          'Accept-Language': locale,
           ...options.headers,
         }
 
@@ -144,7 +149,7 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
         }
       }
     },
-    [getToken, isSignedIn, requireAuth]
+    [getToken, isSignedIn, requireAuth, locale]
   )
 
   // Still loading Clerk's data

@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, Pencil, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -101,6 +102,8 @@ export function EditableTextField({
   const inputRef = useRef<HTMLInputElement>(null)
   // Ref to track the value when editing starts so we can cancel and go back
   const startValueRef = useRef(value)
+  // Get translations
+  const tActions = useTranslations('ui.actions')
 
   // Sync inputValue with external value changes
   useEffect(() => {
@@ -166,10 +169,10 @@ export function EditableTextField({
       setInputValue(trimmedValue)
 
       // Display a toast with a success message
-      toast.success('Úspešne uložené')
+      toast.success(tActions('savedSuccessfully'))
     } catch (error) {
       // Display a toast with an error message
-      toast.error(error instanceof Error ? error.message : 'Nepodarilo sa uložiť')
+      toast.error(error instanceof Error ? error.message : tActions('saveFailed'))
     } finally {
       // Saving done in any case
       setIsSaving(false)
@@ -247,7 +250,7 @@ export function EditableTextField({
       }}
       role="button"
       tabIndex={isEditing ? -1 : 0}
-      aria-label={`Upraviť ${label || 'text'}`}
+      aria-label={tActions('editField', { field: label || 'text' })}
     >
       {/* Inner container for the text inputs and action buttons */}
       <div className={cn('relative flex gap-3', innerContainerClassName)}>
@@ -331,7 +334,7 @@ export function EditableTextField({
                 textClassName,
                 !inputValue && placeholderClassName
               )}
-              aria-label={label || 'Upraviť text'}
+              aria-label={label || tActions('edit')}
             />
           )}
         </div>
@@ -346,7 +349,7 @@ export function EditableTextField({
                 <IconButton
                   onClick={handleSave}
                   className="hover:bg-green-500/20 text-green-400"
-                  label="Uložiť"
+                  label={tActions('save')}
                 >
                   <Check className={iconClassName} />
                 </IconButton>
@@ -355,7 +358,7 @@ export function EditableTextField({
                 <IconButton
                   onClick={handleCancel}
                   className="hover:bg-red-500/20 text-red-400"
-                  label="Zrušiť"
+                  label={tActions('cancel')}
                 >
                   <X className={iconClassName} />
                 </IconButton>
@@ -367,7 +370,7 @@ export function EditableTextField({
               <IconButton
                 onClick={startEditing}
                 className="text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-slate-500/20"
-                label="Upraviť"
+                label={tActions('edit')}
               >
                 <Pencil className={iconClassName} />
               </IconButton>

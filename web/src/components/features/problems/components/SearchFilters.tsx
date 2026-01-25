@@ -1,5 +1,6 @@
 import { useAuth } from '@clerk/nextjs'
 import { Heart, Layers, Lightbulb, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React, { useEffect, useRef } from 'react'
 
 import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
@@ -13,16 +14,10 @@ import {
   type UseSearchFiltersLogicProps,
 } from '../hooks/use-search-filters-logic'
 import { getProblemsPageUrl } from '../services/problem-api-urls'
-import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { createFilterUpdater } from '../utils/filter-update-utils'
 import { serializeFilters } from '../utils/search-url-serialization'
 import MultiSelectFacet from './facets/MultiSelectFacet'
 import TreeSelectFacet from './facets/TreeSelectFacet'
-
-/**
- * Defines the type of filter change to distinguish between immediate and debounced search
- */
-export type FilterType = 'text' | 'discrete'
 
 /**
  * Props for {@link ModeToggleButton}
@@ -75,60 +70,70 @@ const ModeToggleButton = ({ isActive, onClick, label, icon, isLoading }: ModeTog
  * about search functionality and selection shortcuts.
  */
 function TipsAndTricks() {
+  // The translations
+  const t = useTranslations('problems.filters.tips')
+
+  // Get the intro text
+  const introText = t('intro')
+
+  // Figure out the device for proper key display
   const { isMac, isTouchOnly } = useDeviceCapabilities()
 
+  // Get the modifier key and name
   const modifierKey = isMac ? '⌘' : 'Ctrl'
   const modifierName = isMac ? 'Cmd' : 'Ctrl'
 
-  const explanationText =
-    'v strome súťaží alebo ďalších filtrov vyberie len túto možnosť (bežné kliknutie položku pridáva/odoberá). Funguje tiež na kľúčové slová v kartičke s úlohami, meno autora a v paneli s aktívnymi filtrami.'
-
+  // The JSX displayed in the tooltip
   const tooltipContent = (
     <div className="space-y-3 max-w-xs text-xs sm:text-sm">
       {/* Search languages */}
       <div>
-        <div className="font-medium text-slate-200 mb-1.5">Vyhľadávanie</div>
-        <p className="text-slate-300/90">
-          Vyhľadávanie funguje v slovenčine, češtine a angličtine. Prednastavene sa hľadá v texte
-          úlohy, môžete však zapnúť hľadanie aj v riešení.
-        </p>
+        <div className="font-medium text-slate-200 mb-1.5">{t('search.title')}</div>
+        <p className="text-slate-300/90">{t('search.text')}</p>
       </div>
 
       {/* Exclusive selection */}
       <div>
-        <div className="font-medium text-slate-200 mb-1.5">Výlučný výber</div>
+        <div className="font-medium text-slate-200 mb-1.5">{t('exclusive.title')}</div>
         {isTouchOnly ? (
-          <p className="text-slate-300/90">Dlhé podržanie na položke {explanationText}</p>
+          <p className="text-slate-300/90">{t('exclusive.touch', { intro: introText })}</p>
         ) : (
           <p className="text-slate-300/90">
-            Dlhé podržanie na položke alebo stlačenie{' '}
-            <kbd className="px-1 py-0.5 rounded bg-slate-600/50 text-xs font-mono">
-              {modifierKey}
-            </kbd>{' '}
-            ({modifierName}) + kliknutie na položku {explanationText}
+            {t.rich('exclusive.desktop', {
+              modifierKey,
+              modifierName,
+              intro: introText,
+              kbd: (chunks: React.ReactNode) => (
+                <kbd className="px-1 py-0.5 rounded bg-slate-600/50 text-xs font-mono">
+                  {chunks}
+                </kbd>
+              ),
+            })}
           </p>
         )}
       </div>
 
       {/* Logic toggle */}
       <div>
-        <div className="font-medium text-slate-200 mb-1.5">Prepínanie logiky filtrov</div>
+        <div className="font-medium text-slate-200 mb-1.5">{t('logic.title')}</div>
         <p className="text-slate-300/90">
-          V paneli s aktívnymi filtrami môžete kliknutím na symbol{' '}
-          <span className="font-mono text-indigo-200">∧</span> (AND) alebo{' '}
-          <span className="font-mono text-indigo-200">∨</span> (OR) medzi filtrami{' '}
-          <ManualHyphens text="kľú\-čo\-vých" /> slov alebo autorov prepnúť logiku. AND znamená, že
-          musia platiť všetky vybrané filtre, OR znamená, že stačí aspoň jeden.
+          {t.rich('logic.text', {
+            mono: (chunks: React.ReactNode) => (
+              <span className="font-mono text-indigo-200">{chunks}</span>
+            ),
+            hyphens: (chunks: React.ReactNode) => <ManualHyphens text={String(chunks)} />,
+          })}
         </p>
       </div>
     </div>
   )
 
+  // Render the tooltip
   return (
     <Tooltip content={tooltipContent} placement="left">
       <span
         className="p-1 rounded text-slate-400 hover:text-amber-400/80 hover:bg-slate-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-help"
-        aria-label="Tipy a triky"
+        aria-label={t('title')}
       >
         <Lightbulb className="h-4 w-4" />
       </span>
@@ -136,17 +141,13 @@ function TipsAndTricks() {
   )
 }
 
-type SearchFiltersProps = {
-  filters: SearchFiltersState
-  onFiltersChange: (newFilters: SearchFiltersState, filterType: FilterType) => void
-  filterOptions: FilterOptionsWithCounts
-  baseOptions: FilterOptionsWithCounts
-}
+/**
+ * Props for the {@link SearchFilters} component
+ */
+type SearchFiltersProps = UseSearchFiltersLogicProps
 
 /**
  * Sidebar filter UI for the problems library.
- * This component is now a thin wrapper around the `useSearchFiltersLogic` hook,
- * responsible for rendering the UI based on the logic provided by the hook.
  */
 export const SearchFilters = ({
   filters,
@@ -154,12 +155,16 @@ export const SearchFilters = ({
   filterOptions,
   baseOptions,
 }: SearchFiltersProps) => {
+  // Translations
+  const t = useTranslations('problems.filters')
+
   // Ref for the search input
   const searchTextRef = useRef<HTMLInputElement | null>(null)
 
   // Auth state
   const { isLoaded, isSignedIn } = useAuth()
 
+  // Use a helper hook which provided the data needed to render the filters
   const {
     competitionTreeOpts,
     defaultExpandedIds,
@@ -174,7 +179,7 @@ export const SearchFilters = ({
     onFiltersChange,
     filterOptions,
     baseOptions,
-  } as UseSearchFiltersLogicProps)
+  })
 
   // A helper function to update filters
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
@@ -197,7 +202,7 @@ export const SearchFilters = ({
       const redirectUrl = getProblemsPageUrl(queryString)
 
       // Show login prompt with a redirect URL to the filter with favorite problems
-      showLoginPrompt({ reason: 'zobrazenie obľúbených úloh', redirectUrl })
+      showLoginPrompt({ reason: t('myFavorites'), redirectUrl })
       return
     }
 
@@ -224,19 +229,19 @@ export const SearchFilters = ({
                 isActive={!filters.favoritesOnly}
                 onClick={() => updateFilter('favoritesOnly', false, 'discrete')}
                 icon={<Layers />}
-                label="Všetky úlohy"
+                label={t('allProblems')}
               />
               <ModeToggleButton
                 isActive={filters.favoritesOnly}
                 onClick={handleFavoritesClick}
                 isLoading={!isLoaded}
                 icon={<Heart />}
-                label="Moje obľúbené"
+                label={t('myFavorites')}
               />
             </div>
             {isLoaded && !isSignedIn && filters.favoritesOnly && (
               <p className="mt-2 text-xs text-slate-500 text-center px-2">
-                Pre zobrazenie obľúbených úloh sa musíte prihlásiť.
+                {t('favoritesLoginRequired')}
               </p>
             )}
           </div>
@@ -245,7 +250,7 @@ export const SearchFilters = ({
           <div>
             <div className="mb-2 sm:mb-3 flex items-center justify-between gap-2">
               <label htmlFor="search" className="text-xs sm:text-sm font-semibold text-slate-200">
-                Vyhľadávanie
+                {t('search.label')}
               </label>
               <TipsAndTricks />
             </div>
@@ -257,7 +262,7 @@ export const SearchFilters = ({
                 value={filters.searchText}
                 onChange={(e) => updateFilter('searchText', e.target.value, 'text')}
                 className={cn('form-input', filters.searchText && 'pr-9')}
-                placeholder="napr. tabuľka"
+                placeholder={t('search.placeholder')}
               />
               {filters.searchText && (
                 <button
@@ -267,8 +272,8 @@ export const SearchFilters = ({
                     searchTextRef.current?.focus()
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-slate-400 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                  aria-label="Vymazať text vyhľadávania"
-                  title="Vymazať"
+                  aria-label={t('search.clear')}
+                  title={t('search.clear')}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -279,7 +284,9 @@ export const SearchFilters = ({
                 id="search-solution"
                 type="checkbox"
                 checked={filters.searchInSolution}
-                onChange={(e) => updateFilter('searchInSolution', e.target.checked, 'discrete')}
+                onChange={(event) =>
+                  updateFilter('searchInSolution', event.target.checked, 'discrete')
+                }
                 className="form-checkbox"
                 disabled={!filters.searchText}
               />
@@ -290,7 +297,7 @@ export const SearchFilters = ({
                   !filters.searchText && 'text-slate-500'
                 )}
               >
-                Hľadať aj v riešení
+                {t('search.searchInSolution')}
               </label>
             </div>
           </div>
@@ -298,17 +305,17 @@ export const SearchFilters = ({
           {/* Section 2: Contextual Filters */}
           <div className="space-y-3 sm:space-y-4 border-t border-slate-500/70 pt-3 sm:pt-4 py-2">
             <TreeSelectFacet
-              title="Súťaž"
+              title={t('facets.competition')}
               options={competitionTreeOpts}
               selected={selectedTreeIds}
               onChange={handleCompetitionTreeChange}
-              searchPlaceholder="Hľadať súťaže"
-              closedLabel={'Všetky súťaže'}
+              searchPlaceholder={t('facets.searchCompetitions')}
+              closedLabel={t('facets.allCompetitions')}
               defaultExpandedIds={defaultExpandedIds}
             />
 
             <MultiSelectFacet
-              title="Ročník"
+              title={t('facets.season')}
               options={seasonOpts}
               selected={filters.seasons.map((item) => item.slug)}
               onChange={(next) => {
@@ -318,13 +325,13 @@ export const SearchFilters = ({
                   'discrete'
                 )
               }}
-              searchPlaceholder="Hľadať ročníky…"
-              closedLabel={'Všetky ročníky'}
+              searchPlaceholder={t('facets.searchSeasons')}
+              closedLabel={t('facets.allSeasons')}
             />
 
             {/* Problem Numbers as a multi-select facet */}
             <MultiSelectFacet
-              title="Poradie úlohy"
+              title={t('facets.problemNumber')}
               options={numberOpts}
               selected={filters.problemNumbers.map(String)}
               onChange={(next) => {
@@ -337,16 +344,16 @@ export const SearchFilters = ({
                 )
               }}
               showSearch={false}
-              closedLabel={'Ľubovoľné poradie'}
+              closedLabel={t('facets.anyOrder')}
             />
           </div>
 
           {/* Section 3: Attribute Filters (Multi-select) */}
           <div className="space-y-3 sm:space-y-4 border-t border-slate-500/70 pt-3 sm:pt-4">
             <MultiSelectFacet
-              title="Kľúčové slová"
-              titleTooltip="Kľúčové slová sú prideľované čiastočne na základe heuristík a umelej inteligencie, a preto môžu obsahovať nepresnosti."
-              closedLabel={'Vyberte kľúčové slová'}
+              title={t('facets.tags')}
+              titleTooltip={t('facets.tagsTooltip')}
+              closedLabel={t('facets.selectTags')}
               options={tagOpts}
               selected={filters.tags.map((item) => item.slug)}
               onChange={(next) => {
@@ -356,26 +363,29 @@ export const SearchFilters = ({
                   'discrete'
                 )
               }}
-              searchPlaceholder="Hľadať kľúčové slová"
+              searchPlaceholder={t('facets.searchTags')}
               logic={{
                 mode: filters.tagLogic,
                 onChange: (mode) => updateFilter('tagLogic', mode, 'discrete'),
-                labels: { or: 'Aspoň jedno', and: 'Všetky' },
+                labels: {
+                  or: t('facets.logic.or'),
+                  and: t('facets.logic.and'),
+                },
               }}
               grouping={{
                 keys: ['Area', 'Type', 'Goal', 'Technique'],
                 labels: {
-                  Area: 'Oblasť',
-                  Type: 'Výskyt',
-                  Goal: 'Cieľ',
-                  Technique: 'Technika',
+                  Area: t('facets.grouping.Area'),
+                  Type: t('facets.grouping.Type'),
+                  Goal: t('facets.grouping.Goal'),
+                  Technique: t('facets.grouping.Technique'),
                 },
               }}
             />
 
             <MultiSelectFacet
-              title="Autori"
-              closedLabel={'Vyberte autorov'}
+              title={t('facets.authors')}
+              closedLabel={t('facets.selectAuthors')}
               options={authorOpts}
               selected={filters.authors.map((item) => item.slug)}
               onChange={(next) => {
@@ -385,7 +395,7 @@ export const SearchFilters = ({
                   'discrete'
                 )
               }}
-              searchPlaceholder="Hľadať autorov…"
+              searchPlaceholder={t('facets.searchAuthors')}
               logic={{
                 mode: filters.authorLogic,
                 onChange: (mode) => updateFilter('authorLogic', mode, 'discrete'),

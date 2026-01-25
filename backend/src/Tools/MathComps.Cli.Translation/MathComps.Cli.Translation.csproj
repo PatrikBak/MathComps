@@ -22,10 +22,13 @@
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MathComps.Cli.SkmoParser\MathComps.Cli.SkmoParser.csproj" />
     <ProjectReference Include="..\..\Core\MathComps.Domain\MathComps.Domain.csproj" />
+    <ProjectReference Include="..\..\Core\MathComps.TexParser\MathComps.TexParser.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Shared\MathComps.Shared\MathComps.Shared.csproj" />
     <ProjectReference Include="..\..\Shared\MathComps.Shared.Cli\MathComps.Shared.Cli.csproj" />

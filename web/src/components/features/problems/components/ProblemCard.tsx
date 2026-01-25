@@ -8,12 +8,13 @@ import {
   MessageSquare,
   User,
 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
-import type { RawContentBlock } from '@/components/features/handouts/handout-types'
+import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { IconBadge } from '@/components/shared/components/IconBadge'
@@ -65,6 +66,7 @@ const AuthorButton = React.memo(function AuthorButton({
   isSelected: boolean
   onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
 }) {
+  const tProblems = useTranslations('problems')
   return (
     <button
       onClick={(event) => onAuthorClick(author, event)}
@@ -79,7 +81,7 @@ const AuthorButton = React.memo(function AuthorButton({
         'text-sm transition-colors duration-200 hover:underline select-none',
         isSelected ? 'text-slate-200 font-medium' : 'text-gray-400 hover:text-gray-200'
       )}
-      title={`Filtrovať podľa autora: ${author.displayName}`}
+      title={tProblems('filterByAuthor', { name: author.displayName })}
     >
       {author.displayName}
     </button>
@@ -123,10 +125,16 @@ export function ProblemCard({
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
 
   // Function for copying permalinks on problems
-  const { copyPermalink } = useProblemPermalink()
+  const copyPermalink = useProblemPermalink()
 
   // The hook to toggle likes
   const toggleLike = useToggleProblemLike()
+
+  // Get translations for the component
+  const tProblems = useTranslations('problems')
+
+  // Get the current locale (for sorting)
+  const locale = useLocale()
 
   /**
    * Toggles the expanded view for similar problems section.
@@ -232,7 +240,7 @@ export function ProblemCard({
             <button
               onClick={() => toggleLike(problem.slug)}
               className="p-2 transition-all duration-200 rounded-md hover:bg-slate-700/50 group"
-              title={problem.liked ? 'Zrušiť lajk' : 'Lajknúť úlohu'}
+              title={problem.liked ? tProblems('unlike') : tProblems('like')}
             >
               <IconBadge count={problem.likeCount} color="red" isHighlighted={problem.liked}>
                 <Heart
@@ -246,7 +254,7 @@ export function ProblemCard({
             <button
               onClick={() => setIsCommentsOpen(true)}
               className="p-2 transition-all duration-200 rounded-md hover:bg-slate-700/50 group"
-              title="Komentáre"
+              title={tProblems('commentsButton')}
             >
               <IconBadge
                 count={problem.commentCount}
@@ -266,20 +274,20 @@ export function ProblemCard({
                 href={problem.solutionLink}
                 newTab
                 className="flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200 rounded-md hover:bg-slate-700/50"
-                title="Odkaz na riešenie (otvorí sa v novom okne)"
+                title={tProblems('solutionLink')}
               >
                 <ExternalLink size={18} />
-                <span className="hidden sm:inline">Riešenie</span>
+                <span className="hidden sm:inline">{tProblems('solution')}</span>
               </AppLink>
             )}
             {/* Permalink sharing button */}
             <button
               onClick={handlePermalinkCopy}
               className="flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200 rounded-md hover:bg-slate-700/50"
-              title="Zdieľať"
+              title={tProblems('share')}
             >
               <Link size={18} />
-              <span className="hidden sm:inline">Zdieľať</span>
+              <span className="hidden sm:inline">{tProblems('share')}</span>
             </button>
           </div>
         </div>
@@ -303,11 +311,11 @@ export function ProblemCard({
               )
             } catch (parsingError) {
               console.warn('Failed to parse statement content:', parsingError)
-              return <span>Error loading problem statement</span>
+              return <span>{tProblems('errorLoadingStatement')}</span>
             }
           })()
         ) : (
-          <span>No problem statement available</span>
+          <span>{tProblems('noStatementAvailable')}</span>
         )}
         {/* Author attribution with optional filtering */}
         {problem.authors.length > 0 && (
@@ -340,7 +348,7 @@ export function ProblemCard({
           <div className="px-3 py-2 sm:px-4 sm:py-3 lg:px-6 lg:py-4">
             <div className="flex flex-wrap items-center gap-2">
               {/* Render tags sorted by category with technique visibility logic */}
-              {sortTagsByCategory(problem.tags)
+              {sortTagsByCategory(problem.tags, locale)
                 .filter((tag) => {
                   if (tag.tagType !== 'Technique') {
                     return true // Always show non-technique tags
@@ -370,12 +378,14 @@ export function ProblemCard({
                   onClick={() => setAreTechniquesLocallyVisible(true)}
                   clickable={true}
                   className="!bg-purple-600/30 !text-purple-200 hover:!bg-purple-600/50"
-                  title="Zobraziť skryté techniky riešenia pre túto úlohu"
+                  title={tProblems('showHiddenTechniques')}
                 >
                   <div className="flex items-center gap-1.5">
                     <Eye className="h-3.5 w-3.5" />
                     <span>
-                      {hasVisibleTechniques ? 'Zobraziť ďalšie techniky' : 'Zobraziť techniky'}
+                      {hasVisibleTechniques
+                        ? tProblems('showMoreTechniques')
+                        : tProblems('showTechniques')}
                     </span>
                     {/* Badge showing count of hidden techniques */}
                     <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-medium text-purple-200 bg-purple-600/50 rounded-full">
@@ -396,7 +406,7 @@ export function ProblemCard({
                   ? 'bg-indigo-500/10 hover:bg-indigo-500/15'
                   : 'hover:bg-slate-700/30'
               }`}
-              title="Zobraziť/skryť podobné úlohy"
+              title={tProblems('toggleSimilar')}
             >
               <div className="flex items-center gap-2.5">
                 {/* Toggle between eye and eye-off icons based on expansion state */}
@@ -405,7 +415,9 @@ export function ProblemCard({
                 ) : (
                   <Eye size={18} className="text-gray-400" />
                 )}
-                <span className="text-sm font-medium text-gray-200">Podobné úlohy</span>
+                <span className="text-sm font-medium text-gray-200">
+                  {tProblems('similarProblems')}
+                </span>
                 {/* Badge showing count of similar problems */}
                 <span className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-xs font-semibold text-indigo-200 bg-indigo-500/30 rounded-full border border-indigo-400/30">
                   {problem.similarProblems.length}

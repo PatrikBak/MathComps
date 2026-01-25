@@ -2,15 +2,38 @@
 
 This CLI tool uses an LLM to help categorize math problems with a structured set of tags. It's a human-in-the-loop system designed to build and apply a high-quality, curated tag vocabulary.
 
+## Architecture
+
+### Tag Storage
+
+- **Slugs only in database**: The `Tag` entity stores only `Slug` (e.g., `mathematical-induction`), not localized names.
+- **Localized names in JSON**: `approved-tags.json` defines tags with slugs and localized names (SK, EN, CS).
+- **Commands translate**: CLI commands resolve user input (name in any language or slug) → slug for database operations.
+
+### LLM Interaction
+
+- **English-only**: LLMs receive and output **English tag names** (`TagFilesHelper.AiLanguage = Language.EN`).
+- **Name↔Slug mapping**: Commands use `TagFilesHelper.GetTagsForAi()` to get `EnglishName → TagData(Slug)` mapping.
+- **Workflow**: English names → LLM → English names → map to slugs → database.
+
+### Tag Categories
+
+Tags are organized into four categories:
+
+- **Area** – Mathematical domain (e.g., Algebra, Geometry)
+- **Goal** – Problem objective (e.g., Geometric construction, Proof)
+- **Type** – Problem structure (e.g., Inequality, System of equations)
+- **Technique** – Solution method (e.g., Mathematical Induction) – only for problems with solutions
+
 ## How It Works
 
 The tagging process is a workflow that combines AI suggestions with human oversight.
 
 ### 1. Define the Official Vocabulary
 
-- All approved tags are stored in `Data/approved-tags.json`.
+- All approved tags are stored in `approved-tags.json` (in Infrastructure resources).
+- Tags have a slug (e.g., `mathematical-induction`) and localized names.
 - This file is the single source of truth, managed by a human, and is version-controlled.
-- Tags are organized into four categories: **Area** (e.g., Algebra), **Goal** (e.g. Geometric construction), **Type** (e.g., Inequality), and **Technique** (e.g., Mathematical Induction).
 
 ### 2. Brainstorming New Tags with AI
 
@@ -164,13 +187,13 @@ dotnet run -- import-tags Data/import-example.csv --batch-size 50
 - `<file-path>`: Path to the CSV file containing tag data
 - `--batch-size`: Number of rows to process in each batch (default: 1000)
 
-**CSV Format**: The CSV must have columns: `ProblemSlug`, `TagName`, `TagType`, `Confidence`, `GoodnessOfFit`, `Justification`. TagType values should be: `Area`, `Type`, `Technique`, or `Goal`.
+**CSV Format**: The CSV must have columns: `ProblemSlug`, `TagSlug`, `TagType`, `Confidence`, `GoodnessOfFit`, `Justification`. TagType values should be: `Area`, `Type`, `Technique`, or `Goal`.
 
 **Exporting from Database**: To create the CSV file from an existing database, use this SQL query:
 
 ```sql
 SELECT p.slug AS "ProblemSlug",
-       name AS "TagName",
+       t.slug AS "TagSlug",
        -- This converts PG snake_case onto C# PascalCase
        replace(initcap(replace(tag_type::text, '_', ' ')), ' ', '') AS "TagType",
        goodness_of_fit AS "GoodnessOfFit",
@@ -190,16 +213,17 @@ Starts an interactive session to manually manage tags.
 dotnet run -- interactive
 ```
 
+**Tag input**: All commands accept tag names in **any language** (SK, EN, CS) or slugs. The tool resolves them to the correct slug automatically.
+
 - **Commands**:
 
-  - `add "<tag-name>" <problem-slug1> [<problem-slug2> ...]` - Add a tag to one or more problems (tag type is automatically derived from approved tags)
-  - `remove "<tag-name>" <problem-slug1> [<problem-slug2> ...]` - Remove a specific tag from one or more problems (soft removal: sets goodness-of-fit to 0)
-  - `clearTag "<tag-name>"` - Remove the tag from all problems and delete the tag entity completely from the database
+  - `add "<tag>" <problem-slug1> [<problem-slug2> ...]` - Add a tag to one or more problems
+  - `remove "<tag>" <problem-slug1> [<problem-slug2> ...]` - Soft-remove a tag from problems (sets goodness-of-fit to 0)
+  - `clearTag "<tag>"` - Delete the tag completely from the database
   - `clear <problem-slug>` - Remove all tags from a problem
-  - `merge "<tagToDelete>" "<tagToReplace>"` - Merge two tags by replacing all occurrences of tagToDelete with tagToReplace, then removes tagToDelete
+  - `merge "<tagToDelete>" "<tagToReplace>"` - Merge two tags
   - `list <problem-slug>` - Show all tags assigned to a problem
-  - `help` - Show help information
-  - `exit` - Exit the interactive session
+  - `help` / `exit`
 
 - Note that `clearTag` completely removes the tag from the database (deletes both ProblemTag associations and the Tag entity itself); it _does not_ merely set the goodness-of-fit to 0. This is different from `remove`, which only soft-removes a tag from a single problem.
 

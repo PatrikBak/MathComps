@@ -1,16 +1,14 @@
 'use client'
 
 import { LogIn } from 'lucide-react'
-import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 import { NavLink } from '@/components/shared/components/NavLink'
-import { ROUTES } from '@/constants/routes'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
+import { ROUTES } from '@/i18n/i18n'
+import { usePathname } from '@/i18n/navigation'
 
 import { cn } from '../shared/utils/css-utils'
-
-/** Label text for the login button - single source of truth for layout consistency. */
-const LOGIN_LABEL = 'Prihlásiť sa'
 
 /**
  * Props for the {@link LoginNavItem} component.
@@ -30,6 +28,9 @@ type LoginNavItemProps = {
  * Automatically captures the current page to redirect back after login.
  */
 export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProps) => {
+  // Translations for section
+  const t = useTranslations('auth')
+
   // Get the function which generates the login URL
   const { getLoginUrl } = useLoginRedirect()
 
@@ -49,23 +50,24 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
           className,
           'flex items-center gap-2 animate-pulse cursor-progress select-none'
         )}
-        aria-label="Loading login button"
+        aria-label={t('loadingButton')}
         aria-busy="true"
       >
         <div className="w-5 h-5 rounded bg-current opacity-20" />
         {/* Visible skeleton bar overlaid on invisible text (for exact width) */}
         <span className="relative">
-          <span className="invisible">{LOGIN_LABEL}</span>
+          <span className="invisible">{t('signIn')}</span>
           <span className="absolute inset-0 rounded bg-current opacity-20" />
         </span>
       </div>
     )
   }
 
+  // Happy path - render the real button
   return (
     <NavLink href={loginUrl} className={cn(className, 'flex items-center gap-2')} onClick={onClick}>
       <LogIn className="w-5 h-5" />
-      <span>{LOGIN_LABEL}</span>
+      <span>{t('signIn')}</span>
     </NavLink>
   )
 }

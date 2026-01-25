@@ -58,17 +58,6 @@ export const normalizeForSearch = (text: string): string =>
     .replace(/[\u0300-\u036f]/g, '')
 
 /**
- * Chooses the correct Slovak plural form based on a number
- *
- * @param count - The number to determine plural form for
- * @param forms - Array of three forms: [one, few, many] (e.g., ["dostupný", "dostupné", "dostupných"])
- *
- * @returns The appropriate plural form for the given count
- */
-export const slovakPlural = (count: number, [one, few, many]: [string, string, string]) =>
-  count === 1 ? one : count >= 2 && count <= 4 ? few : many
-
-/**
  * Joins author names with a limit and "+X" remainder suffix
  *
  * @param authors - Array of author names

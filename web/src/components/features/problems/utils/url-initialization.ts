@@ -1,5 +1,3 @@
-import { isEqual } from 'lodash'
-
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from './filter-validation'
@@ -23,97 +21,104 @@ export const createDefaultFilters = (): SearchFiltersState => ({
 })
 
 /**
- * Configuration for URL-based filter initialization.
+ * Result of URL-first filter initialization.
  */
-interface UrlInitConfig {
-  searchParams: URLSearchParams
-  currentFilters: SearchFiltersState | null
-  competitionsTree: FilterOptionsWithCounts['competitions']
-  onFiltersChange: (filters: SearchFiltersState) => void
-}
-
-/**
- * Result of the URL filter initialization.
- */
-interface UrlInitResult {
+type UrlInitializationResult = {
+  /** The parsed filters (from URL or defaults) */
+  filters: SearchFiltersState
+  /** Whether the URL contained invalid parameters that were ignored */
   hasInvalidParams: boolean
-  hasTooManyFilters?: boolean
+  /** Whether the URL contained too many filters */
+  hasTooManyFilters: boolean
+  /** Whether favorites mode was requested */
+  favoritesRequested: boolean
 }
 
 /**
- * Parses, interprets, and applies search filters from the URL.
- * This is the main entry point for URL handling.
+ * Parses filters from URL. Falls back to defaults if URL is empty or invalid.
  *
- * @param config - The configuration object.
- * @returns An object indicating whether there were invalid parameters.
+ * @param searchParams - The URL search parameters
+ * @param competitionsTree - The competition tree for resolving contest selections
+ *
+ * @returns Parsed filters and validation flags
  */
-export function initializeFiltersFromUrl(config: UrlInitConfig): UrlInitResult {
-  const { searchParams, currentFilters, competitionsTree, onFiltersChange } = config
-
-  // Parse URL query string and interpret slugs against competition tree.
-  // Returns null if URL contains invalid parameters or unrecognized competition slugs.
-  const filtersFromUrl = parseAndInterpretFilters(searchParams, competitionsTree)
-
-  // Signal validation failure so caller can show user feedback (toast).
-  if (filtersFromUrl === null) {
-    return { hasInvalidParams: true }
+export function initializeFiltersFromUrlOrDefaults(
+  searchParams: URLSearchParams,
+  competitionsTree: FilterOptionsWithCounts['competitions']
+): UrlInitializationResult {
+  // No URL params = default filters
+  if (searchParams.toString().length === 0) {
+    return {
+      filters: createDefaultFilters(),
+      hasInvalidParams: false,
+      hasTooManyFilters: false,
+      favoritesRequested: false,
+    }
   }
 
-  // Validate that URL doesn't contain excessive filters (prevents URL crafting abuse)
-  if (countActiveFilters(filtersFromUrl) > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
-    // Reject URLs with too many filters - don't apply any filters in this case
-    return { hasInvalidParams: false, hasTooManyFilters: true }
+  // Check if favorites was requested (needed for auth checks)
+  const favoritesRequested = searchParams.get('favoritesOnly') === 'true'
+
+  // Parse and validate URL parameters
+  const parsed = parseAndInterpretFilters(searchParams, competitionsTree)
+
+  // Invalid URL = default filters
+  if (parsed === null) {
+    return {
+      filters: createDefaultFilters(),
+      hasInvalidParams: true,
+      hasTooManyFilters: false,
+      favoritesRequested,
+    }
   }
 
-  // Avoid unnecessary state updates if parsed filters match current state.
-  if (!currentFilters || !isEqual(filtersFromUrl, currentFilters)) {
-    onFiltersChange(filtersFromUrl)
+  // Check filter count limit
+  if (countActiveFilters(parsed) > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
+    return {
+      filters: createDefaultFilters(),
+      hasInvalidParams: false,
+      hasTooManyFilters: true,
+      favoritesRequested,
+    }
   }
 
-  // Good parameters by default
-  return { hasInvalidParams: false }
+  // Happy path - valid URL with valid filters
+  return {
+    filters: parsed,
+    hasInvalidParams: false,
+    hasTooManyFilters: false,
+    favoritesRequested,
+  }
 }
 
 /**
- * Orchestrates the two-stage parsing and interpretation of the URL query.
+ * Pure function to parse URL params into filters or null if parsing fails.
  *
  * @param searchParams - The URL search parameters.
- * @param competitionsTree - The competition tree for context.
- * @returns A fully formed SearchFiltersState, or null if parsing/interpretation fails.
+ * @param competitionsTree - The competition tree to resolve labels from slugs.
+ *
+ * @returns Parsed {@link SearchFiltersState}, or null if parsing/interpretation fails.
  */
 function parseAndInterpretFilters(
   searchParams: URLSearchParams,
   competitionsTree: FilterOptionsWithCounts['competitions']
 ): SearchFiltersState | null {
-  // 1. Pure parsing from URL string to raw parts
+  // Pure parsing from URL string to raw parts
   const rawUrlState = deserializeFilters(searchParams.toString())
 
   // If parsing fails (due to invalid URL format), return null
-  if (rawUrlState === null) {
-    return null
-  }
+  if (rawUrlState === null) return null
 
-  // At this point, caller guarantees we have filter parameters (not problemId)
-  // because use-problem-url-sync checks hasProblemId() and returns early
-  if ('problemId' in rawUrlState) {
-    throw new Error(
-      'Unexpected problemId in filter initialization - caller should check hasProblemId first'
-    )
-  }
-
-  // 2. Context-aware interpretation of raw parts
+  // Context-aware interpretation of raw parts
   const selections = interpretSelectionParts(
     rawUrlState.competitionSelectionParts,
     competitionsTree
   )
 
-  // If interpretation fails (due to invalid slugs), return null
-  if (selections === null) {
-    return null
-  }
+  // If interpretation fails, return null
+  if (selections === null) return null
 
-  // 3. Assemble the final, validated state, omitting the temporary parsing parts
-  // At this point we know rawUrlState is the filter-based type, not problemId type
+  // Assemble the final, validated state, omitting the temporary parsing parts
   const { competitionSelectionParts: _, ...finalState } = rawUrlState
   return {
     ...finalState,

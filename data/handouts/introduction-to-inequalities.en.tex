@@ -1,0 +1,844 @@
+\input _template
+
+\Title{Algebra}
+
+\Subtitle{Introduction to Inequalities}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+Inequalities are one of the fundamental topics not only in algebra but in mathematics as a whole, with many practical applications. Let's take, for example, the following question:
+
+\Highlight{
+    We have a square piece of paper with a side length of 12 cm. We want to create an open box by cutting identical squares from each of the four corners and folding up the sides. What is the largest possible volume of the box?
+
+    \Image{box.pdf}{0.4}
+}
+
+This problem is not very simple, but we will learn its most elegant solution. We will continuously build upon generally useful techniques from previous posts, such as factorization, completing the square, ordering, etc.
+
+\sec Theory
+
+In this post, we will focus on the most basic methods. The absolute foundation of practically all algebra is the manipulation of expressions, so we will start there. Then we will look at inequalities that utilize the positivity of squares. Subsequently, we will introduce the famous AM-GM inequality, even with a proof. Finally, as an interesting point, we will show several more non-traditional but still simple problems where interesting conditions from the problem statement are cleverly used.
+
+\secc Basic Manipulations
+
+Many examples can be solved simply by using common manipulations such as expanding, factorizing, and the like. We will start with such problems and add more methods in the following sections.
+
+\Example{}{
+    Given real numbers $a$, $b$, $c$, $d$ satisfying $a<b<c<d$. Order the numbers
+    $$
+    \align
+    x &=(a+b)(c+d), \\
+    y &= (a+c)(b+d), \\
+    z &= (a+d)(b+c)
+    \endalign
+    $$
+    by size.
+}{
+    Let's try to calculate $x-y$. We have
+    $$
+    \gather
+    x-y = (a+b)(c+d) - (a+c)(b+d) =\\= (ac+ad+bc+bd)-(ab+ad+bc+cd) =\\=  ac+bd-ab-cd = (a-d)(c-b)
+    \endgather
+    $$
+    Since $a<d$ and $b<c$, then $x<y$. Similarly, let's calculate
+    $$
+    \gather
+    y-z = (a+c)(b+d) - (a+d)(b+c) =\\= (ab+ad+bc+cd) - (ab+ac+bd+cd) =\\= ad+bc-ac-bd = (a-b)(d-c)
+    \endgather
+    $$
+    Since $a<b$ and $c<d$, then $y<z$. We don't even need to calculate the difference $x-z$, and we already have $x<y<z$.
+}
+
+Try it out on a problem from the school round A:
+
+\Exercise{69-CSMO-A-S-1}{
+    Suppose that distinct real numbers $a$, $b$, $c$, $d$ satisfy the inequalities
+    $$
+    ab+cd > bc+ad > ac+bd.
+    $$
+    If $a$ is the largest of these four numbers, which of them is the smallest?
+}{
+    Let's rearrange the given inequalities. The first inequality $ab+cd > bc+ad$ is equivalent to
+    $$
+    \align
+    ab+cd - bc - ad &> 0 \\
+    a(b-d) - c(b-d) &> 0 \\
+    (a-c)(b-d) &> 0.
+    \endalign
+    $$
+    The second inequality $bc+ad > ac+bd$ is equivalent to
+    $$
+    \align
+    bc+ad - ac - bd &> 0 \\
+    b(c-d) - a(c-d) &> 0 \\
+    (b-a)(c-d) &> 0.
+    \endalign
+    $$
+    We know that $a$ is the largest number, so $a>b$, $a>c$, and $a>d$.
+    \begitems 
+    \i From $a>b$, it follows that $b-a < 0$. For $(b-a)(c-d) > 0$ to hold, it must be that $c-d < 0$, so $c < d$.
+    \i From $a>c$, it follows that $a-c > 0$. For $(a-c)(b-d) > 0$ to hold, it must be that $b-d > 0$, so $b > d$.
+    \enditems
+    We thus obtained the relationships $c < d$ and $d < b$. Since we know that $b < a$, we have the ordering $a > b > d > c$.
+    Therefore, the smallest of these four numbers is $c$.
+}
+
+The next example shows that it pays to know the formulas we presented in the first part.
+
+\Example{}{
+    Prove that for real numbers $a,b$ with a non-negative sum, the following holds:
+    $$
+    a^3 + b^3 \ge a^2b + ab^2.
+    $$
+    Also determine when equality occurs.
+}{
+    Notice that the left side can be factorized using a known formula as $(a+b)(a^2-ab+b^2)$. The right side can be factorized as $ab(a+b)$. It therefore makes sense to move everything to the left side and factorize. We get:
+    $$
+    \align
+    a^3 + b^3 &\ge a^2b + ab^2 \\
+    a^3 + b^3 - a^2b - ab^2 &\ge 0 \\
+    (a+b)(a^2-ab+b^2) - ab(a+b) &\ge 0 \\
+    (a+b)(a^2-ab+b^2 - ab) &\ge 0 \\
+    (a+b)(a^2-2ab+b^2) &\ge 0 \\
+    (a+b)(a-b)^2 &\ge 0
+    \endalign
+    $$
+    We see that the left side is the product of two non-negative numbers $a+b$ (assumption) and $(a-b)^2$ (square), so their product is also non-negative. Equality occurs precisely when $a+b=0$ or $a=b$.
+
+    It is important to mention that the manipulations were equivalent and we can reverse the procedure -- in mathematics, we always start from valid assumptions and use them to prove new things. Alternatively, we can write the proof in reverse, starting with $(a+b)(a-b)^2 \ge 0$ and arriving at $a^3+b^3 \ge a^2b+ab^2$ through manipulations. However, this often looks less natural than proceeding from the inequality to be proved towards a valid statement with a note about the equivalence of the steps.
+}
+
+Try these exercises to practice basic factorizations. Notice that the following exercise is a generalization of the previous example. Repeating the procedure from it will not be possible, but it is not difficult to come up with something else :)
+
+\Exercise{}{
+    Given positive real numbers $a$, $b$ and natural numbers $m$, $n$. Prove that the inequality holds
+    $$
+    a^{m+n} + b^{m+n} \ge a^mb^n + a^nb^m.
+    $$
+    and find all cases of equality.
+}{
+    We move all terms to one side and try to factorize:
+    $$
+    \align
+    a^{m+n} + b^{m+n} - a^mb^n - a^nb^m &\ge 0 \\
+    a^m a^n + b^m b^n - a^m b^n - a^n b^m &\ge 0 \\
+    a^m(a^n - b^n) - b^m(a^n - b^n) &\ge 0 \\
+    (a^m - b^m)(a^n - b^n) &\ge 0
+    \endalign
+    $$
+    This inequality holds for all positive $a, b$ and natural $m, n$.
+    \begitems \style i
+    \i If $a \ge b > 0$, then $a^m \ge b^m$ and $a^n \ge b^n$, so we have the product of two non-negative numbers.
+    \i If $b \ge a > 0$, then $a^m \le b^m$ and $a^n \le b^n$, so we have the product of two non-positive numbers.
+    \enditems
+    Equality occurs precisely when $a^m - b^m = 0$ or $a^n - b^n = 0$, which for positive $a, b$ and natural $m, n$ means $a=b$. Since the manipulations were equivalent, we are done.
+}
+
+\Exercise{61-CSMO-II-2}{
+    For all real numbers $x$, $y$, $z$ such that $x<y<z$, prove the inequality
+    $$
+    x^2-y^2+z^2>(x-y+z)^2.
+    $$
+}{
+    We prove the equivalent inequality $x^2-y^2+z^2 - (x-y+z)^2 > 0$.
+    Let's rearrange the terms on the left side so that we can use the difference of squares formula $A^2-B^2=(A-B)(A+B)$ twice:
+    $$
+    (x^2-y^2) + (z^2 - (x-y+z)^2) > 0.
+    $$
+    We factorize the first bracket as $(x-y)(x+y)$.
+    We factorize the second bracket as:
+    $$
+    \gather
+    (z - (x-y+z)) (z + (x-y+z)) = (z-x+y-z)(z+x-y+z) =\\=  (y-x)(x-y+2z).
+    \endgather
+    $$
+    Substituting back into the inequality, we have:
+    $$
+    (x-y)(x+y) + (y-x)(x-y+2z) > 0.
+    $$
+    Since $(y-x) = -(x-y)$, we can factor out $(x-y)$ in front of the bracket:
+    $$
+    \align
+    (x-y)(x+y) - (x-y)(x-y+2z) &> 0 \\
+    (x-y) \big( (x+y) - (x-y+2z) \big) &> 0 \\
+    (x-y) (x+y-x+y-2z) &> 0 \\
+    (x-y) (2y-2z) &> 0 \\
+    2(x-y)(y-z) &> 0.
+    \endalign
+    $$
+    This last inequality holds because from the assumption $x<y<z$, it follows that $x-y < 0$ and $y-z < 0$. The product of two negative numbers is positive.
+    Since all manipulations were equivalent, the original inequality is proven.
+
+    \textit{Note.} The problem can also be solved by expanding the expression $(x-y+z)^2$ and subsequently rearranging to $(y-z)(x-y)$. However, the method using the double difference of squares is more elegant because it avoids directly expanding three terms.
+}
+
+A slightly harder but still manageable example is this one. Note that we have \textit{integers} here:
+
+\Problem{0}{71-CSMO-C-II-1}{
+    Prove that for any integers $a$, $b$, the inequality holds
+    $$
+    a(a+1)+b(b-1) \ge 2ab.
+    $$
+    Also determine when equality occurs.
+}{
+    It makes sense to move everything to one side and factorize.
+}{
+    After successfully performing the factorization, it should suffice to prove $(a-b)(a-b+1) \ge 0$, i.e., $k(k+1) \ge 0$. Here we must use the fact that $a,b$ are integers, so $k$ is also an integer.
+}{
+    We expand the expressions on the left side, move the term $2ab$ from the right side to the left, and factorize:
+    $$
+    \align
+    a^2+a+b^2-b - 2ab &\ge 0 \\
+    (a^2 - 2ab + b^2) + (a - b) &\ge 0 \\
+    (a-b)^2 + (a-b) &\ge 0 \\
+    (a-b)(a-b+1) &\ge 0.
+    \endalign
+    $$
+    Let $k = a-b$. Since $a$ and $b$ are integers, $k$ is also an integer. We want to prove $k(k+1) \ge 0$.
+    The expression $k(k+1)$ is the product of two consecutive integers.
+    \begitems \style i
+    \i If $k \ge 0$, then $k+1 \ge 1$, and therefore $k(k+1) \ge 0$.
+    \i If $k = -1$, then $k(k+1) = 0$.
+    \i If $k \le -2$, then both $k$ and $k+1$ are negative, so their product $k(k+1)$ is positive.
+    \enditems
+    In all cases, $k(k+1) \ge 0$, so the inequality holds for all integers $a, b$.
+
+    Equality occurs precisely when $k(k+1) = 0$, which is satisfied for $k=0$ or $k=-1$.
+    Substituting $k=a-b$, we get that equality holds precisely when $a-b=0$ (i.e., $a=b$) or $a-b=-1$ (i.e., $b=a+1$).
+}
+
+\secc Positive Squares
+
+Another very common group of problems are those that use the obvious fact that for every real number $x$, $x^2 \ge 0$ holds, with equality occurring only for $x=0$. By substituting $x=a-b$, we can derive the inequality $(a-b)^2\ge 0$ from this, which can be equivalently rewritten as $a^2+b^2 \ge 2ab$. This may not be immediately obvious at first glance. We can derive more and more inequalities with similar games. Let's first review this very famous example:
+
+\Example{}{
+    Prove that for all real numbers $a$, $b$, $c$, the following holds
+    $$
+    a^2 + b^2 + c^2 \ge ab + bc + ca.
+    $$
+}{
+    The inequality looks suspiciously similar to the inequality from the introduction: $a^2 + b^2 \ge 2ab$. Indeed, when we write this inequality for the pairs of variables $(b,c)$ as well and add them up, we have
+    $$
+    (a^2+b^2) + (b^2+c^2) + (c^2+a^2) \ge (2ab) + (2bc) + (2ca),
+    $$
+    which is actually
+    $$
+    2a^2+2b^2+2c^2 \ge 2ab+2bc+2ca,
+    $$
+    i.e., our inequality to be proved multiplied by two. Equality occurs precisely when equality occurs in our partial inequalities, i.e., when $a=b$, $b=c$, $c=a$, in short $a=b=c$.
+
+    This procedure is very famous and common. It is often presented by multiplying the original inequality by two and rearranging it to
+    $$
+    (a-b)^2+(b-c)^2+(c-a)^2 \ge 0,
+    $$
+    which is an equivalent inequality. The trick with multiplying by two (or even something else) is generally useful.
+    
+    However, we will show another less common but straightforward solution.
+
+    \textit{Alternative solution.} The plan is to move everything to one side and look at the inequality as a quadratic inequality in the variable~$a$. Then we can complete the square:
+    $$
+    \align
+    (a^2 + b^2 + c^2) - (ab + bc + ca) &\ge 0 \\
+    a^2 - (b+c)a + (b^2 + c^2 - bc) &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 - \left( \frac{b+c}{2} \right)^2 + (b^2 + c^2 - bc) &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 - \frac{b^2 + 2bc + c^2}{4} + \frac{4(b^2 + c^2 - bc)}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{-b^2 - 2bc - c^2 + 4b^2 + 4c^2 - 4bc}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{3b^2 - 6bc + 3c^2}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{3(b^2 - 2bc + c^2)}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{3}{4}(b-c)^2 &\ge 0
+    \endalign
+    $$
+    We obtained the sum of a square and a positive multiple of a square, so the inequality is proven. Since the manipulations were equivalent, we can reverse the procedure, and thus the original inequality is proven.
+
+    From this form, it is not entirely immediately obvious that equality occurs for $a=b=c$. To find this, we must solve the system
+    $$
+    \align
+    \left(a - \frac{b+c}{2}\right)^2 &= 0, \\
+    \frac{3}{4}(b-c)^2 &= 0.
+    \endalign
+    $$
+    But this is easy; the second equation gives us $b=c$, and the first then gives $a=b$, so indeed $a=b=c$ is the only case of equality.
+}
+
+Now it's your turn:
+
+\Exercise{}{
+    For real numbers $x$, $y$, prove the inequality
+    $$
+    x^2 + y^2 + 2 \ge 2x + 2y
+    $$
+    and find all cases of equality.
+}{
+    The inequality is equivalent to the inequality where we move all terms to the left side:
+    $$
+    x^2 - 2x + y^2 - 2y + 2 \ge 0.
+    $$
+    We can modify the expression on the left side by completing the square. We split $2$ into $1+1$:
+    $$
+    (x^2 - 2x + 1) + (y^2 - 2y + 1) \ge 0.
+    $$
+    This is equivalent to
+    $$
+    (x-1)^2 + (y-1)^2 \ge 0.
+    $$
+    We thus have a sum of squares, which are non-negative. Equality occurs precisely for $x=y=1$.
+}
+
+\Exercise{}{
+    For real numbers $a$, $b$, prove the inequality
+    $$
+    a^2(a^2+1) + b^2(b^2+1) \ge 2ab(a+b).
+    $$
+    and find all cases of equality.
+}{
+    We multiply out both sides of the inequality, move all terms to the left side, rearrange the terms, and find squares:
+    $$
+    \align
+    a^4 + a^2 + b^4 + b^2 &\ge 2a^2b + 2ab^2 \\
+    a^4 - 2a^2b + b^4 - 2ab^2 + a^2 + b^2 &\ge 0 \\
+    (a^4 - 2a^2b + b^2) + (b^4 - 2ab^2 + a^2) &\ge 0 \\
+    (a^2 - b)^2 + (b^2 - a)^2 &\ge 0 
+    \endalign
+    $$
+    We thus have a sum of squares, which are non-negative. All manipulations were equivalent, so the proof is complete.
+
+    Equality occurs precisely when $a^2=b$ and $b^2=a$. Substituting $b=a^2$ into the second equality, we have $a^4=a$, i.e., $a(a^3-1)=0$. Thus, either $a=0$, which gives $b=0$, or $a^3=1$, i.e., $a=1$, which gives $b=1$. The only two possible cases of equality are $(a,b)=(0,0)$ or $(1,1)$.
+}
+
+Such basic things are sufficient to solve a problem from the regional round of category~A:
+
+\Problem{1}{74-CSMO-A-II-1}{
+    Given two distinct real numbers $a$, $b$ such that the expressions $a^3 + b$ and $a + b^3$ have the same value. Prove that for their product, $-1\le ab<\frac13$ holds.
+}{
+    The first step is to unlock the condition $a^3+b=a+b^3$. Move everything to the left side and factorize.
+}{
+    From the condition, using the formula $a^3-b^3=(a-b)(a^2+ab+b^2)$, we can derive $(a-b)(a^2+ab+b^2-1)$, so thanks to $a \neq b$, we have $a^2+ab+b^2=1$. Now try to complete $a^2+b^2$ to a square; this can actually be done in two ways.
+}{
+    From the problem statement, we have $a^3 + b = a + b^3$. Moving terms to one side and factorizing gives
+    $$
+    \align
+    a^3 - b^3 - a + b &= 0 \\
+    (a-b)(a^2+ab+b^2) - (a-b) &= 0 \\
+    (a-b)(a^2+ab+b^2-1) &= 0.
+    \endalign
+    $$
+    Since $a \neq b$, it must hold that $a-b \neq 0$, and thus
+    $$
+    a^2+ab+b^2=1.
+    $$
+    We complete $a^2+b^2$ to a square as $(a+b)^2-2ab$ and $(a-b)^2+2ab$. These expressions give us:
+    $$
+    (a+b)^2-ab = 1 \quad\text{and}\quad (a-b)^2 + 3ab = 1.
+    $$
+    \begitems \style a
+    \i Since $(a+b)^2 \ge 0$, we have $ab=(a+b)^2-1 \ge -1$.
+    \i Since $a\neq 0$, then $(a-b)^2 > 0$, so $3ab=1-(a-b)^2 < 1$, thus $ab<1/3$.
+    \enditems
+}
+
+\secc AM-GM Inequality
+
+In this section, we will look at the most famous named inequality, namely the inequality between the arithmetic and geometric mean, abbreviated as the \textit{AM-GM inequality}. We have already encountered it in the form
+$$
+a^2+b^2 \ge 2ab,
+$$
+which is a consequence of $(a-b)^2 \ge 0$. We will show that this simple inequality can be generalized into something non-trivial.
+
+The arithmetic mean concerns the sum, the geometric mean the product. Before we reveal the exact statement of AM-GM and its proof, the preparation is the following example:
+
+\Example{}{
+    Think through and formally prove that if we have two positive numbers whose sum is given, then the closer these numbers are to each other, the larger their product is.
+}{
+    Let $s$ be the mean of our numbers and $\delta$ their distance from the mean. Then our numbers are equal to $s-\delta$ and $s+\delta$. Their product is equal to $(s-\delta)(s+\delta)=s^2-\delta^2$. 
+    
+    Since the sum of the numbers is fixed, their mean is also fixed. The distance between our numbers is obviously $2 \delta$. The smaller the distance, the smaller $\delta$, and thus also $\delta^2$, so the larger their product $s^2-\delta^2$ is, which was to be proved.
+}
+
+This will help us in the proof of the general AM-GM inequality:
+
+\Theorem{AM-GM Inequality}{
+    Given an integer $n \ge 2$. Prove that for any non-negative real numbers $a_1,a_2,\ldots,a_n$, the following holds
+    $$
+    \frac{a_1+\cdots+a_n}{n} \ge \root n \of {a_1\cdots a_n}.
+    $$
+}{
+    The inequality is obvious if any of the numbers is zero. Let's assume they are all non-zero.
+
+    Our tactic will be as follows: we fix the sum of the variables and thus also their arithmetic mean~$p$, and we prove that they have the largest product precisely when they are all equal to~$p$. We will carry out the proof by contradiction.
+
+    Suppose first that we have at least two variables that are not equal to the mean~$p$. If all variables different from $p$ were smaller than $p$, then the sum of all variables would obviously be smaller than $np$. Similarly, it cannot hold that all variables different from $p$ are larger than $p$, in which case the sum would be too large. Necessarily, we have one variable smaller than $p$ and another larger than $p$.
+
+    According to the claim from the previous exercise, if we bring these two variables closer to each other while preserving their sum, we increase their product, and thus increase the product of all variables. We do this increase by replacing the variable closer to $p$ with $p$ and replacing the other variable so that the sum is preserved (see figure). By this, we have achieved that we preserved the sum, increased the product, and also decreased the number of variables different from $p$. By finite repetition of this algorithm, we reach a state where we have at least $n-1$ variables equal to $p$.
+
+    \Image{ag-proof.pdf}{8}
+
+    If exactly $n-1$ of them are equal to $p$, then we obtain the value of the last one by subtracting the sum of the others from the sum of all variables. The sum of all is $np$ (since $p$ is the mean and $n$ is their count), while the sum of the others is $(n-1)p$ (since they are all equal to $p$). We see that the last variable must also be equal to $p$, which is a contradiction.
+
+    \textit{Note.} There are very many different proofs of this famous inequality with varying levels of technicality. However, we believe that this one is the most intuitive in the sense that it best explains what is actually happening.
+}
+
+Good perspectives on how to look at the AM-GM inequality:
+\begitems \style i
+\i We estimate the sum from below by the product:
+$$
+a_1+\cdots+a_n \ge n \root n \of {a_1\cdots a_n}
+$$
+\i We estimate the product from above by the sum:
+$$
+a_1 \cdots a_n \leq \left(\frac{a_1+\cdots+a_n}{n}\right)^n
+$$
+\enditems
+These perspectives help us not to worry about averages -- we don't need an explicitly written average of $a$ and $b$ to use the AM-GM inequality on $a$ and $b$.
+
+\Example{}{
+    Prove that for positive real numbers $a$, $b$, $c$, the inequality holds
+    $$
+    (a+b)(b+c)(c+a) \geq 8abc
+    $$
+}{
+    We use AM-GM on the pairs $(a,b)$, $(b,c)$, $(c,a)$, getting
+    $$
+    \align
+    a+b &\ge 2 \sqrt{ab}, \\
+    b+c &\ge 2 \sqrt{bc}, \\
+    c+a &\ge 2 \sqrt{ca}.
+    \endalign
+    $$
+    Multiplying these inequalities, we have the required inequality.
+}
+
+Finally, it is time to reveal the solution to the motivational problem from the introduction:
+
+\Example{The Box Problem}{
+    We have a square piece of paper with a side length of 12 cm. We want to create an open box by cutting identical squares from each of the four corners and folding up the sides. What is the largest possible volume of the box?
+
+    \Image{box.pdf}{0.4}
+}{
+    Let $x$ denote the side of the square we cut from the corner. Then our box has a base in the shape of a square with side $12-2x$ and height $x$. Its volume is therefore $(12-2x)^2x$, and our goal is to maximize this expression. We have the product of three things: $12-2x$, $12-2x$, $x$. If we estimated them directly, the sum of these things would be in the estimate -- that won't help us much, and in fact, we won't solve the problem with it (equality won't occur in the correct case). However, if we used AM-GM on $12-2x$, $12-2x$, $4x$, then the $x$'s cancel out. We can artificially create this~4:
+    $$
+    \gather
+    (12-2x)(12-2x) x = 
+    (12-2x)(12-2x) 4x \cdot \frac14 \leq \\ \leq
+    \left(\frac{(12-2x)+(12-2x)+4x}3\right)^3 \cdot \frac 14 =
+    128.
+    \endgather
+    $$
+    Equality occurs precisely when all estimated terms are equal, i.e., when $12-2x=12-2x=4x$, which gives $x=2$. We therefore need to cut a square with side $x=2$, and in the end, we get a box with dimensions $8 \times 8 \times 2$.
+
+    \textit{Note.} Generally for a square with side $a$, we have $\displaystyle x=\frac a6$.
+}
+
+Several problems for practice:
+
+\Exercise{}{
+    Prove that for a positive real number $a$ and a natural number $n$, the following holds
+    $$
+    a^n+n \ge na + 1.
+    $$
+}{
+    We use the AM-GM inequality on $n$ positive numbers: $a^n$ and $n-1$ numbers equal to~$1$.
+    From the AM-GM inequality, it holds:
+    $$
+    a^n + n - 1 \ge na,
+    $$
+    which is an inequality equivalent to ours. Equality occurs precisely when $a^n = 1$, which for positive $a$ means $a=1$.
+}
+
+\Exercise{}{
+    Prove that for positive real numbers $a_1,\dots,a_n$ with a product of~1, the following holds
+    $$
+    (a_1+1)(a_2+1)\cdots(a_n+1) \ge 2^n.
+    $$
+}{
+    For each $i \in \{1, \ldots, n\}$, we can use the AM-GM inequality on the pair of positive numbers $a_i$ and $1$:
+    $$
+    a_i+1 \ge 2\sqrt{a_i \cdot 1} = 2\sqrt{a_i}.
+    $$
+    We multiply these inequalities together and get
+    $$
+    (a_1+1)(a_2+1)\cdots(a_n+1) \ge
+    (2\sqrt{a_1})(2\sqrt{a_2})\cdots(2\sqrt{a_n}) =
+    2^n \sqrt{a_1 a_2 \cdots a_n} = 2^n,
+    $$
+    which was to be proved. Equality occurs when $a_i = 1$ for all $i$.
+}
+
+A memorable consequence of the AM-GM inequality is the inequality
+$$
+\frac ab + \frac ba \ge 2
+$$
+valid for positive $a,b$. It often appears for $b=1$ as well, when it means
+$$
+a+\frac 1a \ge 2,
+$$
+i.e., the sum of a positive number and its reciprocal is at least 2.
+
+\Exercise{}{
+    Prove that for positive real numbers $a$, $b$, $c$, the inequality holds
+    $$
+    \frac{a+b}{c} + \frac{b+c}{a}  + \frac{c+a}{b} \ge 6
+    $$
+}{
+    We split the fractions on the left side and suitably rearrange the terms:
+    $$
+    \gather
+    \frac{a+b}{c} + \frac{b+c}{a} + \frac{c+a}{b} = \frac{a}{c} + \frac{b}{c} + \frac{b}{a} + \frac{c}{a} + \frac{c}{b} + \frac{a}{b} =\\=
+    \left(\frac{a}{c} + \frac{c}{a}\right) + \left(\frac{b}{c} + \frac{c}{b}\right) + \left(\frac{a}{b} + \frac{b}{a}\right).
+    \endgather
+    $$
+    Using the inequality $\frac xy + \frac yx \ge 2$ for each bracket, we then have
+    $$
+    \left(\frac{a}{c} + \frac{c}{a}\right) + \left(\frac{b}{c} + \frac{c}{b}\right) + \left(\frac{a}{b} + \frac{b}{a}\right) \ge 2 + 2 + 2 = 6.
+    $$
+    Thus the inequality is proven. Equality occurs precisely when $a=c$, $b=c$ and $a=b$, i.e., $a=b=c$.
+}
+
+\Exercise{65-CSMO-A-S-2}{
+    Positive real numbers $a$, $b$, $c$, $d$ satisfy the equalities
+    $$
+    a=c+\frac1d \qquad\text{and}\qquad b=d+\frac1c.
+    $$
+    Prove the inequality $ab\ge4$ and find the smallest possible value of the expression $ab + cd$.
+}{
+    Multiplying the given equalities, we have:
+    $$
+    \gather
+    ab = \left(c+\frac1d\right)\left(d+\frac1c\right) = cd + \frac cc + \frac dd + \frac{1}{cd} = \\ = cd + 1 + 1 + \frac{1}{cd} = cd + \frac{1}{cd} + 2.
+    \endgather
+    $$
+    For a positive number $x=cd$, the known inequality $x + \frac 1x \ge 2$ holds. Substituting, we get
+    $$
+    ab = \left(cd + \frac{1}{cd}\right) + 2 \ge 2 + 2 = 4.
+    $$
+    Thus the first part is proven. Equality $ab=4$ occurs precisely when $cd=1$.
+
+    Now we seek the smallest possible value of the expression $ab + cd$. We use the already derived relationship for $ab$:
+    $$
+    ab + cd = \left(cd + \frac{1}{cd} + 2\right) + cd = 2cd + \frac{1}{cd} + 2.
+    $$
+    We use the AM-GM inequality on the positive numbers $2cd$ and $\frac 1{cd}$:
+    $$
+    2cd + \frac 1{cd} \ge 2\sqrt{2cd \cdot \frac 1{cd}} = 2\sqrt{2},
+    $$
+    so together we have
+    $$
+    ab + cd = \left(2cd + \frac{1}{cd}\right) + 2 \ge 2\sqrt{2} + 2.
+    $$
+    The smallest possible value is $2 + 2\sqrt{2}$. This value is achieved when equality occurs in the used AM-GM inequality, i.e., when $2cd = \frac 1{cd}$, or $2(cd)^2 = 1$, $cd = 1/\sqrt{2}$. It suffices to choose, for example, $c=1$ and $d=1/\sqrt{2}$ (both are positive real numbers) for this value to be reached.
+}
+
+\secc Combining Conditions and Estimates
+
+Finally, let's discuss a very general concept: Inequalities are often difficult because solving them requires combining many different conditions and estimates. These estimates can be quite simple, but seeing them is challenging -- such problems are very popular precisely because, instead of knowledge of difficult inequalities, they test algebraic imagination. A good way to train is to see and try as much as possible. In this section, we will have a small demonstration of problems with non-traditional conditions.
+
+\Example{}{
+    Positive real numbers $x$ and $y$ satisfy $x^2>x+y$. Prove that $x^3>x^2+y$ also holds.
+}{
+    Let's multiply the condition from the problem statement by positive $x$, we have $x^3 > x^2 + xy$. Now it suffices to prove that $x^2 + xy > x^2 + y$, i.e., $xy > y$. For this, it would suffice to prove that $x>1$. But we can quickly see this from the condition: $x^2>x+y$ gives us $x^2>x$ due to the positivity of $y$, which after dividing by positive $x$ gives $x>1$, which we wanted to prove.
+
+    \textit{Note.} The solution written this way shows the thought process leading to the solution. In a competition, we could write the solution like this:
+
+    Since $y>0$, then $x^2>x+y>x$, which thanks to $x>0$ gives $x>1$. Then $x^2>x+y$ after multiplying by positive $x$ gives $x^3>x^2+xy$, which thanks to $x>1$ gives $xy>y$, so altogether $x^3>x^2+xy>x^2+y$, so we are done.
+}
+
+We see that we actually used only very clear considerations and combined them in various ways with the condition from the problem statement. Similar fun can be performed in these problems as well; you can try.
+
+\Problem{0}{63-CSMO-C-II-3}{
+    For positive real numbers $a$, $b$, $c$, $c^2 + ab = a^2 + b^2$ holds.
+    Prove that then $c^2 + ab \le ac + bc$ also holds.
+}{
+    First analyze the inequality to be proved; isn't there a factorization?
+}{
+    The inequality to be proved is equivalent to $c^2-ac+(ab-bc) \leq 0$, which can be rearranged to $(c-a)(c-b) \leq 0$. It therefore suffices to justify that $c$ is neither the smallest nor the largest number among $a,b,c$. Try by contradiction and analyze two cases.
+}{
+    The inequality to be proved $c^2 + ab \le ac + bc$ is equivalent to the inequality
+    $$
+    c^2 - ac - bc + ab \le 0,
+    $$
+    which we can modify by factorization:
+    $$
+    c(c-a) - b(c-a) \le 0,
+    $$
+    $$
+    (c-a)(c-b) \le 0.
+    $$
+    This inequality holds precisely when $c$ lies between $a$ and $b$, i.e., when it is not the largest among $a,b,c$. Let's try to prove by contradiction that this is not the case, for which we finally use the condition, which we write as $c^2=a^2+b^2-ab$
+       
+    \begitems \style i
+    \i If $c$ is the largest among $a,b,c$, then thanks to the positivity of $a,b,c$, $c^2 > a^2$ also holds, so $c^2 + ab > a^2 + ab$, so $a^2+b^2 > a^2+ab$, so $b^2 > ab$, which gives $b > a$. Analogously, however, we derive $a>b$, which is a contradiction.    
+    \i The case where $c$ is the smallest among $a,b,c$ is analogous, only all signs in the previous case are reversed.
+    \enditems
+    
+    Since both possibilities lead to a contradiction, the original assumption is incorrect, and the proof is complete.
+}
+
+\Problem{0}{68-CSMO-C-II-4}{
+    Real numbers $a$, $b$, $c$, all greater than $\frac12$, satisfy the condition $ab+bc+ca=\frac54$.
+Prove that the following holds
+    $$
+    a+b+c>a^2+b^2+c^2.
+$$
+}{
+    Forget about the inequality to be proved -- the key is to understand how the size limits relate to the condition.
+}{
+    Try applying $a>\frac12$, $b>\frac12$ to the condition, specifically estimate the expression $ab+bc+ca$ from below. What does the resulting inequality tell us about $c$? 
+}{
+    From the problem statement, we know that $a > \frac12$ and $b > \frac12$. Using these estimates in the condition, we get:
+    $$
+    \frac54 = ab+bc+ca = ab + c(a+b) > \frac12 \cdot \frac12 + c\left(\frac12 + \frac12\right) = \frac14 + c.
+    $$
+    From the inequality $\frac54 > \frac14 + c$, it immediately follows that $\frac44 > c$, i.e., $c < 1$. Since $c$ is positive, it thus also holds that $c>c^2$. By symmetry, we also have $a>a^2$ and $b>b^2$. Adding these inequalities, we have $a+b+c > a^2+b^2+c^2$.
+}
+
+\sec What to Remember
+
+\secc Useful Inequalities
+
+It is good to remember these inequalities even in your sleep.
+
+\begitems \style N
+
+\i [Sum of squares is at least the sum of mixed terms] For real $a,b,c$: 
+$$
+a^2+b^2+c^2 \ge ab+bc+ca
+$$
+\i [Sum of two reciprocals is at least $2$] For positive $a,b$
+$$
+\frac ab + \frac ba \ge 2  \quad\text{or}\quad a + \frac 1a \ge 2
+$$
+\i [Different forms of AM-GM for two terms] For positive $a,b$
+$$
+ab \leq \left(\frac{a+b}{2}\right)^2 \quad\text{or}\quad
+a+b \ge 2\sqrt{ab} \quad\text{or}\quad
+a^2+b^2 \ge 2ab
+$$
+\i [Different forms of general AM-GM] For positive $a_1,a_2,\cdots,a_n$:
+$$
+a_1+\cdots+a_n \ge n \root n \of {a_1\cdots a_n}  \quad\text{or}\quad
+a_1 \cdots a_n \leq \left(\frac{a_1+\cdots+a_n}{n}\right)^n
+$$
+\enditems 
+
+\secc Proving Techniques
+
+It's about playing.
+
+\begitems \style N
+
+\i Factorization is very powerful.
+\i We complete squares because they are positive.
+\i A sum can be estimated from below with AM-GM; one can play with the addends in various ways.
+\i A product can be estimated from above with AM-GM; one can play with the factors in various ways.
+\i We play with conditions; often a lot of interesting things can be extracted from them.
+
+\enditems 
+
+\sec What Next
+
+Inequalities can be studied for a very long time. There are many other methods and known inequalities. However, we have already built a series of techniques and procedures that can be used for practically all problems in the Czech-Slovak Olympiad (including those in the national round). Sometimes in the next part, we will cover even more :)
+
+For those interested in further study, I recommend the \Link[https://prase.cz/]{PraSe} series \Link[zdolavani-nerovnosti.pdf]{Conquering Inequalities}. The first chapter is certainly accessible to everyone. The second is a bit harder (approximately national round level), as is the introduction to the third. From the section \uv{SOS form}, however, methods begin that are very interesting but nowadays not so applicable in competitions (where the effort is to give problems that cannot be \uv{killed} by knowledge but are rather about creativity). However, it definitely doesn't hurt to know about them.
+
+\sec Problems
+
+Diverse problems where the covered concepts are sufficient for all of them, although as is usual with inequalities, the solution can be arbitrarily hard to see. Good luck :)
+
+\Problem{0}{}{
+    Given non-negative real numbers $x$ and $y$.
+Prove the inequality
+    $$
+    x^2+xy+y^2 \leq 3(x-\sqrt{xy}+y)^2.
+$$
+}{
+    One way to make the problem nicer is to use the substitution $x=a^2$, $y=b^2$. Thanks to it, we don't have square roots. On the left, we then have $a^4+a^2b^2+b^4$. Something interesting can be done with this expression.
+}{
+    The expression $a^4+a^2b^2+b^4$ can be factorized using the technique of completing the square; complete $a^4+b^4$ to a square. Subsequently, the entire inequality will make sense.
+}{
+    We use the substitution $x=a^2$ and $y=b^2$ for non-negative $a,b$, where at least one is positive. The inequality rewrites to
+    $$
+    a^4 + a^2b^2 + b^4 \le 3(a^2 - ab + b^2)^2.
+    $$
+    We factorize the left side by completing the square and subsequently using the difference of squares formula:
+    $$
+    \gather
+    a^4 + a^2b^2 + b^4 = (a^4 + 2a^2b^2 + b^4) - a^2b^2 = \\ = (a^2+b^2)^2 - (ab)^2 = (a^2+b^2 - ab)(a^2+b^2 + ab).
+    \endgather
+    $$
+    Substituting into the inequality, we get
+    $$
+    (a^2 - ab + b^2)(a^2 + ab + b^2) \le 3(a^2 - ab + b^2)^2,
+    $$
+    The expression $K = a^2 - ab + b^2 = (a - b/2)^2 + \frac{3}{4}b^2$ is non-negative. In the case where it is zero (i.e., when $a=b=0$), the inequality holds.
+    
+    Let it be non-zero then; we can divide the inequality by it. Subsequently, we finish the inequality with equivalent manipulations:
+    $$
+    \align
+    a^2 + ab + b^2 &\le 3(a^2 - ab + b^2) \\
+    0 &\le (3a^2 - 3ab + 3b^2) - (a^2 + ab + b^2) \\
+    0 &\le 2a^2 - 4ab + 2b^2 \\
+    0 &\le 2(a^2 - 2ab + b^2) \\
+    0 &\le 2(a-b)^2.
+    \endalign
+    $$
+    The last inequality is obviously true. Since the manipulations were equivalent, the original inequality is proven.
+
+    \textit{Note.} The substitution $x=a^2$, $y=b^2$ was not necessary, but it makes the solution more \uv{discoverable}, since powers are nicer than roots.
+}
+
+\Problem{0}{66-CPSJ-I-3}{
+    Prove that for all real numbers $x$, $y$, the following holds
+    $$
+    (x^2+1)(y^2+1) \ge 2(xy-1)(x+y).
+    $$
+    For which integers $x$, $y$ does equality occur?
+}{
+    The inequality looks like the AM-GM inequality -- on the right, we have twice the product. But on the left, we don't have a sum, but a product. Let's expand the left side: $x^2y^2+x^2+y^2+1$. Let's try to rewrite this cleverly.
+}{
+    The trick is to complete $x^2y^2+1$ to a square, thereby creating $xy-1$, which is the expression from the right side. What happens to the rest of the left side?
+}{
+    After expanding the left side and completing $x^2+y^2+1$ and $x^2+y^2$ to a square, we get:
+    $$
+    \gather
+    (x^2+1)(y^2+1) = 
+    x^2y^2+x^2+y^2+1 = 
+    (x^2y^2+1) + (x^2+y^2) = \\ =
+    [(xy-1)^2 - 2xy] + [(x+y)^2 + 2xy] =
+    (xy-1)^2 + (x+y)^2.
+    \endgather
+    $$
+    The inequality to be proved is thus equivalent to
+    $$
+    (xy-1)^2 + (x+y)^2 \ge 2(xy-1)(x+y),
+    $$
+    which, after moving everything to the left side, is obviously a square
+    $$
+    \big( (xy-1) - (x+y) \big)^2 \ge 0.
+    $$
+    This inequality obviously holds. Equality occurs precisely when $(xy-1) - (x+y) = 0$, i.e., $xy - x - y = 1$. This is a bit of number theory. An elegant solution consists of adding~1 to both sides and factorizing, whereby we get:
+    $$
+    \align 
+    xy - x - y + 1 &= 1 \\
+    (x-1)(y-1) &= 2.
+    \endalign
+    $$
+    The product of integers $x-1$ and $y-1$ is $2$ in four cases:
+
+    \begitems
+    \i $x-1 = 1$ and $y-1 = 2$, which gives $(x,y)=(2,3)$.
+    \i $x-1 = 2$ and $y-1 = 1$, which gives $(x,y)=(3,2)$.
+    \i $x-1 = -1$ and $y-1 = -2$, which gives $(x,y)=(0,-1)$.
+    \i $x-1 = -2$ and $y-1 = -1$, which gives $(x,y)=(-1,0)$.
+    \enditems
+    
+    \textit{Note.} The trick on the left side is actually a special case of the identity
+    $$
+    (a^2+b^2)(c^2+d^2) = (ac+bd)^2 - (ac-bd)^2,
+    $$
+    which is in turn a special case of the \uv{Lagrange identity}.
+}
+
+\Problem{0}{}{
+    Find all integers $n \ge 2$ for which the inequality
+    $$
+    a_1^2 + a_2^2 + \cdots + a_n^2 \ge (a_1+\ldots+a_{n-1})a_n
+    $$
+    holds for all real numbers $a_1,\ldots,a_n$.
+}{
+    The inequality is similar to $x^2+y^2+z^2 \ge xy+yz+zx$, and indeed a similar method of proof works. Try to produce as many squares as possible.
+}{
+    The trick is to complete $a_1^2-a_1a_n$ to a square as $(a_1-a_n/2)^2$ and similarly the others. However, we will create a large surplus of $a_n^2$ terms. Express exactly how many there are. Let's not forget that the goal is not to prove the inequality, but to reveal when it holds.
+}{
+    We move all terms to the left side and modify them by completing the square for $i=1, \ldots, n-1$:
+    $$
+    \align
+    0 &\le (a_1^2 - a_1a_n) + (a_2^2 - a_2a_n) + \cdots + (a_{n-1}^2 - a_{n-1}a_n) + a_n^2 \\
+    0 &\le \sum_{i=1}^{n-1} \left( a_i^2 - a_ia_n \right) + a_n^2 \\
+    0 &\le \sum_{i=1}^{n-1} \left[ \left(a_i - \frac{a_n}{2}\right)^2 - \frac{a_n^2}{4}     \right] + a_n^2 \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) - (n-1)\frac  {a_n^2}{4} + a_n^2 \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) + a_n^2 \left(1   - \frac{n-1}{4}\right) \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) + a_n^2 \left (\frac{4 - (n-1)}{4}\right) \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) + a_n^2 \left (\frac{5-n}{4}\right).
+    \endalign
+    $$
+    The first term $\sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2$ is a sum of squares, so it is always non-negative.
+    
+    For the inequality to hold for all $a_1, \ldots, a_n$, the coefficient $\frac{5-n}{4}$ at $a_n^2$ must also be non-negative -- for if it were negative, we could choose $a_i = a_n/2$ for $i=1, \ldots, n-1$ and $a_n \ne 0$. This would make the first sum equal to 0, but the second term $a_n^2 \left(\frac{5-n}{4}\right)$ would be negative, leading to a contradiction. It must therefore hold that $\frac{5-n}{4} \ge 0$, from which $5-n \ge 0$, and thus $n \le 5$.
+    
+    Since we know from the problem statement that $n \ge 2$, all integers $n \in \{2, 3, 4, 5\}$ satisfy the condition. For these values of $n$, the coefficient $\frac{5-n}{4}$ is non-negative, and therefore the entire right side is a sum of non-negative expressions, so the inequality holds.
+}
+
+\Problem{0}{70-CPSJ-I-4}{
+    Find the smallest possible value that the expression
+    $$
+    x^4+y^4-x^2y-xy^2,
+    $$
+    can take, where $x$ and $y$ are positive real numbers satisfying $x+y \le 1$.
+}{
+    We modify the expression as $x^4+y^4-xy(x+y)$. $x+y$ appeared here, so we can use $x+y \leq 1$. It is sufficient to estimate only the rest of the expression, which needs one more step.
+}{
+    After using $x+y \leq 1$, we have $x^4+y^4-xy(x+y) \ge x^4+y^4-xy$, so we are estimating $x^4+y^4-xy$. Can't we estimate $x^4+y^4$ in such a way that we produce $xy$ in some way?
+}{
+    Let $V$ denote the examined expression. We modify it and use the condition $x+y \le 1$:
+    $$
+    V = x^4+y^4-xy(x+y) \ge x^4+y^4-xy(1) = x^4+y^4-xy
+    $$
+    Using the AM-GM inequality $x^4+y^4 \ge 2\sqrt{x^4y^4} = 2x^2y^2$, we get
+    $$
+    V \ge 2x^2y^2 - xy.
+    $$
+    The substitution $t = xy$ leads to the quadratic expression $2t^2 - t$. We search for its minimum by completing the square:
+    $$
+    2t^2 - t = 2\left(t^2 - \frac{1}{2}t\right) = 2\left(\left(t - \frac{1}{4}\right)^2 - \frac{1}{16}\right) = 2\left(t - \frac{1}{4}\right)^2 - \frac{1}{8}.
+    $$
+    The minimum is $-1/8$ and is achieved for $t = xy = 1/4$.
+    We must verify if this value $xy=1/4$ is attainable under the condition $x+y \le 1$. But for this, it suffices to set $x=y=1/2$.
+}
+
+\Problem{0}{57-CSMO-A-II-4}{
+    Prove that for non-negative real numbers $x$, $y$ satisfying the relationship $x^2+y^6=2$, the following holds
+    $$
+    x^2+2\ge 3xy.
+$$
+}{
+    The inequality to be proved looks like the $AM-GM$ inequality for three terms. We have terms $x^2$, $1$, $1$ there. What remains for us to prove after the application?
+}{
+    It holds that $x^2+2 = x^2+1+1 \ge 3 \root 3 \of{x^2}$, so it suffices to prove $\root 3 \of{x^2} \ge xy$, which after cubing gives $x^2 \ge x^3y^3$, i.e., $1 \ge xy^3$. We haven't used the condition yet.
+}{
+    For $x=0$, the inequality obviously holds. Let $x \neq 0$. We use the AM-GM inequality for the numbers $x^2$, $1$ and $1$:
+    $$
+    x^2+2 = x^2+1+1 \ge 3 \root 3 \of{x^2 \cdot 1 \cdot 1} = 3\root 3 \of{x^2}.
+    $$
+    To prove the original inequality $x^2+2 \ge 3xy$, it thus suffices to prove
+    $$
+    3\root 3 \of{x^2} \ge 3xy \quad \text{precisely when}\quad \root 3 \of{x^2} \ge xy.
+    $$
+    Since both sides of the inequality $\root 3 \of{x^2} \ge xy$ are non-negative, we can cube them:
+    $$
+    x^2 \ge (xy)^3 = x^3y^3.
+    $$
+    Since $x^2 > 0$, we can divide the inequality by it and get the equivalent inequality
+    $$
+    1 \ge xy^3.
+    $$
+    We prove this inequality using the condition $x^2+y^6=2$ and the AM-GM inequality:
+    $$
+    2 = x^2+y^6 \ge 2xy^3 \quad \text{precisely when} \quad 1 \ge xy^3,
+    $$
+    so we are done. Equality occurs when equality occurs in both used AM-GM inequalities:
+    \begitems \style i
+    \i $x^2 = 1 = 1$ (from the first AM-GM), which for $x> 0$ gives $x=1$.
+    \i $x^2 = y^6$ (from the second AM-GM), which after substituting $x=1$ gives $1 = y^6$, and thus $y=1$ (since $y \ge 0$).
+    \enditems
+    Equality occurs precisely when $x=1$ and $y=1$.
+}
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

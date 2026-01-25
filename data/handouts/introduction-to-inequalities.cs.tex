@@ -1,0 +1,844 @@
+\input _template
+
+\Title{Algebra}
+
+\Subtitle{Úvod do nerovností}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Nerovnosti jsou jedním ze základních témat nejen v~algebře, ale v~matematice jako takové s~mnoho praktickými aplikacemi. Vezměme si například takovouto otázku: 
+
+\Highlight{
+    Máme čtvercový kus papíru s délkou strany 12 cm. Chceme vytvořit otevřenou krabici tak, že z každého ze čtyř rohů vystřihneme identické čtverce a boky zahneme nahoru. Jaký je největší možný objem krabice?
+
+    \Image{box.pdf}{0.4}
+}
+
+Tato úloha není příliš jednoduchá, ale my se naučíme její nejelegantnější řešení. Průběžně budeme stavět na obecně užitečných technikách z~minulých příspěvků jako rozklad na součin, doplňování na čtverec, uspořádání atd.
+
+\sec Teorie 
+
+V~příspěvku se zaměříme na nejzákladnější postupy. Úplným základem prakticky všech algeber jsou úpravy výrazů, těmi začneme. Poté se podíváme na nerovnosti, které využívají kladnost čtverců. Následně si představíme známou AG nerovnost dokonce i s~důkazem. Na závěr si jako zajímavost ukážeme několik netradičnějších, ale stále jednoduchých úloh, kde se šikovně používají zajímavé podmínky ze zadání.
+
+\secc Základní úpravy
+
+Mnoho příkladů lze vyřešit pouze tím, že používáme běžné úpravy jako roznásobování, rozkládání na součin a podobně. Takovými úlohami začneme a~v~dalších sekcích přidáme další postupy.
+
+\Example{}{
+    Jsou dána reálná čísla $a$, $b$, $c$, $d$ splňující $a<b<c<d$. Uspořádejte čísla 
+    $$
+    \align
+    x &=(a+b)(c+d), \\
+    y &= (a+c)(b+d), \\
+    z &= (a+d)(b+c)
+    \endalign
+    $$
+    podle velikosti.
+}{
+    Zkusme spočítat $x-y$. Platí 
+    $$
+    \gather
+    x-y = (a+b)(c+d) - (a+c)(b+d) =\\= (ac+ad+bc+bd)-(ab+ad+bc+cd) =\\=  ac+bd-ab-cd = (a-d)(c-b)
+    \endgather
+    $$
+    Jelikož $a<d$ a $b<c$, tak $x<y$. Podobně spočítejme 
+    $$
+    \gather
+    y-z = (a+c)(b+d) - (a+d)(b+c) =\\= (ab+ad+bc+cd) - (ab+ac+bd+cd) =\\= ad+bc-ac-bd = (a-b)(d-c)
+    \endgather
+    $$
+    Jelikož $a<b$ a $c<d$, tak $y<z$. Rozdíl $x-z$ ani počítat nemusíme a už máme $x<y<z$.
+}
+
+Vyzkoušejte si to na úloze ze školního kola A:
+
+\Exercise{69-CSMO-A-S-1}{
+    Předpokládejme, že navzájem různá reálná čísla $a$, $b$, $c$, $d$ splňují nerovnosti
+    $$
+    ab+cd > bc+ad > ac+bd.
+    $$
+    Pokud je $a$ z těchto čtyř čísel největší, které z nich je nejmenší?
+}{
+    Upravme si zadané nerovnosti. První nerovnost $ab+cd > bc+ad$ je ekvivalentní s
+    $$
+    \align
+    ab+cd - bc - ad &> 0 \\
+    a(b-d) - c(b-d) &> 0 \\
+    (a-c)(b-d) &> 0.
+    \endalign
+    $$
+    Druhá nerovnost $bc+ad > ac+bd$ je ekvivalentní s
+    $$
+    \align
+    bc+ad - ac - bd &> 0 \\
+    b(c-d) - a(c-d) &> 0 \\
+    (b-a)(c-d) &> 0.
+    \endalign
+    $$
+    Víme, že $a$ je největší číslo, tedy $a>b$, $a>c$ i $a>d$.
+    \begitems 
+    \i Z $a>b$ vyplývá $b-a < 0$. Aby platilo $(b-a)(c-d) > 0$, musí být i $c-d < 0$, tedy $c < d$.
+    \i Z $a>c$ vyplývá $a-c > 0$. Aby platilo $(a-c)(b-d) > 0$, musí být i $b-d > 0$, tedy $b > d$.
+    \enditems
+    Dostali jsme tak vztahy $c < d$ a $d < b$. Jelikož víme, že $b < a$, máme uspořádání $a > b > d > c$.
+    Nejmenší z těchto čtyř čísel je tedy $c$.
+}
+
+Další příklad ukazuje, že se vyplatí znát vzorce, které jsme prezentovali v~prvním díle.
+
+\Example{}{
+    Dokažte, že pro reálná čísla $a,b$ s~nezáporným součtem platí
+    $$
+    a^3 + b^3 \ge a^2b + ab^2.
+    $$
+    Zjistěte také, kdy nastává rovnost. 
+}{
+    Všimněme si, že levá strana se dá pomocí známého vzorce rozložit na součin jako $(a+b)(a^2-ab+b^2)$. Pravá strana se dá rozložit jako $ab(a+b)$. Má tedy smysl vše přenést na levou stranu a rozkládat na součin. Dostaneme:
+    $$
+    \align
+    a^3 + b^3 &\ge a^2b + ab^2 \\
+    a^3 + b^3 - a^2b - ab^2 &\ge 0 \\
+    (a+b)(a^2-ab+b^2) - ab(a+b) &\ge 0 \\
+    (a+b)(a^2-ab+b^2 - ab) &\ge 0 \\
+    (a+b)(a^2-2ab+b^2) &\ge 0 \\
+    (a+b)(a-b)^2 &\ge 0
+    \endalign
+    $$
+    Vidíme, že levá strana je součinem dvou nezáporných čísel $a+b$ (předpoklad) a $(a-b)^2$ (čtverec), takže i jejich součin je nezáporný. Rovnost nastává právě když $a+b=0$ nebo $a=b$.
+
+    Je důležité zmínit, že úpravy byly ekvivalentní a~postup umíme obrátit -- v~matematice vždy vycházíme z~platných předpokladů a pomocí nich dokazujeme nové věci. Alternativně můžeme důkaz zapsat my obráceně, začít $(a+b)(a-b)^2 \ge 0$ a~úpravami dojít k~$a^3+b^3 \ge a^2b+ab^2$. To ale často vypadá méně přirozeně než postup od dokazované nerovnosti k~platnému tvrzení s~dodatkem o~ekvivalentnosti úprav.
+}
+
+Zkuste si úlohy na procvičení základních rozkladů. Všimněme si, že následující cvičení je zobecněním předešlého příkladu. Zopakovat postup z~něj však nebude možné, není však těžké vymyslet něco jiného :)
+
+\Exercise{}{
+    Jsou dána kladná reálná čísla $a$, $b$ a přirozená čísla $m$, $n$. Dokažte, že platí nerovnost
+    $$
+    a^{m+n} + b^{m+n} \ge a^mb^n + a^nb^m.
+    $$
+    a~najděte všechny případy rovnosti.
+}{
+    Převedeme všechny členy na jednu stranu a~snažíme se rozložit na součin:
+    $$
+    \align
+    a^{m+n} + b^{m+n} - a^mb^n - a^nb^m &\ge 0 \\
+    a^m a^n + b^m b^n - a^m b^n - a^n b^m &\ge 0 \\
+    a^m(a^n - b^n) - b^m(a^n - b^n) &\ge 0 \\
+    (a^m - b^m)(a^n - b^n) &\ge 0
+    \endalign
+    $$
+    Tato nerovnost platí pro všechna kladná $a, b$ a přirozená $m, n$.
+    \begitems \style i
+    \i Pokud $a \ge b > 0$, tak $a^m \ge b^m$ a $a^n \ge b^n$, tedy máme součin dvou nezáporných čísel.
+    \i Pokud $b \ge a > 0$, tak $a^m \le b^m$ a $a^n \le b^n$, takže máme součin dvou nekladných čísel.
+    \enditems
+    Rovnost nastává právě tehdy, když $a^m - b^m = 0$ nebo $a^n - b^n = 0$, což pro kladná $a, b$ a přirozená $m, n$ znamená $a=b$. Jelikož úpravy byly ekvivalentní, jsme hotovi.
+}
+
+\Exercise{61-CSMO-II-2}{
+    Pro všechna reálná čísla $x$, $y$, $z$ taková, že $x<y<z$, dokažte nerovnost
+    $$
+    x^2-y^2+z^2>(x-y+z)^2.
+    $$
+}{
+    Dokazujeme ekvivalentní nerovnost $x^2-y^2+z^2 - (x-y+z)^2 > 0$.
+    Přeuspořádáme si členy na levé straně tak, abychom mohli dvakrát použít vzorec pro rozdíl čtverců $A^2-B^2=(A-B)(A+B)$:
+    $$
+    (x^2-y^2) + (z^2 - (x-y+z)^2) > 0.
+    $$
+    První závorku rozložíme jako $(x-y)(x+y)$.
+    Druhou závorku rozložíme jako:
+    $$
+    \gather
+    (z - (x-y+z)) (z + (x-y+z)) = (z-x+y-z)(z+x-y+z) =\\=  (y-x)(x-y+2z).
+    \endgather
+    $$
+    Po dosazení zpět do nerovnosti máme:
+    $$
+    (x-y)(x+y) + (y-x)(x-y+2z) > 0.
+    $$
+    Jelikož $(y-x) = -(x-y)$, můžeme vytknout $(x-y)$ před závorku:
+    $$
+    \align
+    (x-y)(x+y) - (x-y)(x-y+2z) &> 0 \\
+    (x-y) \big( (x+y) - (x-y+2z) \big) &> 0 \\
+    (x-y) (x+y-x+y-2z) &> 0 \\
+    (x-y) (2y-2z) &> 0 \\
+    2(x-y)(y-z) &> 0.
+    \endalign
+    $$
+    Tato poslední nerovnost platí, protože ze zadání $x<y<z$ vyplývá, že $x-y < 0$ a $y-z < 0$. Součin dvou záporných čísel je kladný.
+    Jelikož všechny úpravy byly ekvivalentní, původní nerovnost je dokázána.
+
+    \textit{Poznámka.} Úlohu je možné vyřešit i roznásobením výrazu $(x-y+z)^2$ a následnou úpravou na $(y-z)(x-y)$. Postup s~dvojitým využitím rozdílu čtverců je však elegantnější, neboť se vyhne přímému roznásobení tří členů.
+}
+
+Maličko těžší, ale stále zvládnutelný příklad je tento. Všimněte si, že zde máme \textit{celá} čísla:
+
+\Problem{0}{71-CSMO-C-II-1}{
+    Dokažte, že pro libovolná celá čísla $a$, $b$ platí nerovnost
+    $$
+    a(a+1)+b(b-1) \ge 2ab.
+    $$
+    Zjistěte také, kdy nastává rovnost. 
+}{
+    Má smysl přemístit vše na jednu stranu a rozložit na součin.
+}{
+    Po úspěšném provedení rozkladu by nám mělo stačit dokázat $(a-b)(a-b+1) \ge 0$, tedy $k(k+1) \ge 0$. Zde musíme využít, že $a,b$ jsou celá čísla, tedy i $k$ je celé.
+}{
+    Roznásobíme výrazy na levé straně, přesuneme člen $2ab$ z pravé strany na levou a~rozložíme na součin:
+    $$
+    \align
+    a^2+a+b^2-b - 2ab &\ge 0 \\
+    (a^2 - 2ab + b^2) + (a - b) &\ge 0 \\
+    (a-b)^2 + (a-b) &\ge 0 \\
+    (a-b)(a-b+1) &\ge 0.
+    \endalign
+    $$
+    Nechť $k = a-b$. Jelikož $a$ a $b$ jsou celá čísla, i $k$ je celé číslo. Chceme dokázat $k(k+1) \ge 0$.
+    Výraz $k(k+1)$ je součin dvou po sobě jdoucích celých čísel.
+    \begitems \style i
+    \i Pokud $k \ge 0$, tak $k+1 \ge 1$, a proto $k(k+1) \ge 0$.
+    \i Pokud $k = -1$, tak $k(k+1) = 0$.
+    \i Pokud $k \le -2$, tak $k$ i $k+1$ jsou záporná, takže jejich součin $k(k+1)$ je kladný.
+    \enditems
+    Ve všech případech je $k(k+1) \ge 0$, takže nerovnost platí pro všechna celá čísla $a, b$.
+
+    Rovnost nastává právě tehdy, když $k(k+1) = 0$, což je splněno pro $k=0$ nebo $k=-1$.
+    Dosazením $k=a-b$ dostáváme, že rovnost platí právě tehdy, když $a-b=0$ (tedy $a=b$) nebo $a-b=-1$ (tedy $b=a+1$).
+}
+
+\secc Kladné čtverce
+
+Další velmi běžnou skupinou úloh jsou ty, které používají zřejmý fakt, že pro každé reálné číslo $x$ platí $x^2 \ge 0$, přičemž rovnost nastává jen pro $x=0$. Dosazením $x=a-b$ můžeme z~toho odvodit nerovnost $(a-b)^2\ge 0$, která se dá ekvivalentně přepsat jako $a^2+b^2 \ge 2ab$. Ta nám na první pohled nemusí být hned zřejmá. Podobnými hrátkami můžeme odvozovat více a~více nerovností. Zopakujme si nejprve tento velmi známý příklad:
+
+\Example{}{
+    Dokažte, že pro všechna reálná čísla $a$, $b$, $c$ platí 
+    $$
+    a^2 + b^2 + c^2 \ge ab + bc + ca.
+    $$ 
+}{
+    Nerovnost vypadá podezřele podobně jako nerovnost z~úvodu: $a^2 + b^2 \ge 2ab$. Vskutku, když si tuto nerovnost napíšeme i pro dvojice proměnných $(b,c)$ a sečteme je, tak máme 
+    $$
+    (a^2+b^2) + (b^2+c^2) + (c^2+a^2) \ge (2ab) + (2bc) + (2ca),
+    $$
+    což je vlastně 
+    $$
+    2a^2+2b^2+2c^2 \ge 2ab+2bc+2ca,
+    $$
+    tedy naše dokazovaná nerovnost vynásobená dvěma. Rovnost nastává právě když v~našich dílčích nerovnostech nastává rovnost, tedy když $a=b$, $b=c$, $c=a$, zkráceně $a=b=c$.
+
+    Tento postup je velmi známý a běžný. Častokrát je prezentován tak, že původní nerovnost vynásobíme dvěma a upravíme na 
+    $$
+    (a-b)^2+(b-c)^2+(c-a)^2 \ge 0,
+    $$
+    což je ekvivalentní nerovnost. Trik s~násobením dvěma (nebo i něčím jiným) je obecně užitečný.
+    
+    Ukážeme si však ještě jiné méně běžné, ale přímočaré řešení. 
+
+    \textit{Alternativní řešení.} Plán je přenést si všechno na jednu stranu a podívat se na nerovnost jako na kvadratickou nerovnici v~proměnné~$a$. Potom můžeme doplňovat na čtverec:
+    $$
+    \align
+    (a^2 + b^2 + c^2) - (ab + bc + ca) &\ge 0 \\
+    a^2 - (b+c)a + (b^2 + c^2 - bc) &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 - \left( \frac{b+c}{2} \right)^2 + (b^2 + c^2 - bc) &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 - \frac{b^2 + 2bc + c^2}{4} + \frac{4(b^2 + c^2 - bc)}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{-b^2 - 2bc - c^2 + 4b^2 + 4c^2 - 4bc}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{3b^2 - 6bc + 3c^2}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{3(b^2 - 2bc + c^2)}{4} &\ge 0 \\
+    \left( a - \frac{b+c}{2} \right)^2 + \frac{3}{4}(b-c)^2 &\ge 0
+    \endalign
+    $$
+    Dostali jsme součet čtverce a~kladného násobku čtverce, takže nerovnost je dokázána. Jelikož úpravy byly ekvivalentní, umíme postup obrátit, a~tedy původní nerovnost je dokázána.
+
+    Z~tohoto tvaru přitom není úplně hned zřejmé, že rovnost nastává pro $a=b=c$. K~tomuto zjištění musíme vyřešit soustavu 
+    $$
+    \align
+    \left(a - \frac{b+c}{2}\right)^2 &= 0, \\
+    \frac{3}{4}(b-c)^2 &= 0.
+    \endalign
+    $$
+    To je však lehké, druhá rovnice nám dává $b=c$ a~první potom $a=b$, takže opravdu $a=b=c$ je jediný případ rovnosti.
+}
+
+Teď jste na řadě vy:
+
+\Exercise{}{
+    Pro reálná čísla $x$, $y$ dokažte nerovnost
+    $$
+    x^2 + y^2 + 2 \ge 2x + 2y
+    $$
+    a~najděte všechny případy rovnosti.
+}{
+    Nerovnost je ekvivalentní s nerovností, kde všechny členy přesuneme na levou stranu:
+    $$
+    x^2 - 2x + y^2 - 2y + 2 \ge 0.
+    $$
+    Výraz na levé straně můžeme upravit doplněním na čtverec. Rozdělíme $2$ na $1+1$:
+    $$
+    (x^2 - 2x + 1) + (y^2 - 2y + 1) \ge 0.
+    $$
+    To je ekvivalentní s
+    $$
+    (x-1)^2 + (y-1)^2 \ge 0.
+    $$
+    Máme tedy součet čtverců, které jsou nezáporné. Rovnost nastává právě pro $x=y=1$.
+}
+
+\Exercise{}{
+    Pro reálná čísla $a$, $b$ dokažte nerovnost
+    $$
+    a^2(a^2+1) + b^2(b^2+1) \ge 2ab(a+b).
+    $$
+    a~najděte všechny případy rovnosti.
+}{
+    Roznásobíme obě strany nerovnosti, přesuneme všechny členy na levou stranu, přeulspořádáme členy a~najdeme čtverce:
+    $$
+    \align
+    a^4 + a^2 + b^4 + b^2 &\ge 2a^2b + 2ab^2 \\
+    a^4 - 2a^2b + b^4 - 2ab^2 + a^2 + b^2 &\ge 0 \\
+    (a^4 - 2a^2b + b^2) + (b^4 - 2ab^2 + a^2) &\ge 0 \\
+    (a^2 - b)^2 + (b^2 - a)^2 &\ge 0 
+    \endalign
+    $$
+    Máme tedy součet čtverců, které jsou nezáporné. Všechny úpravy byly ekvivalentní, takže důkaz je hotov. 
+
+    Rovnost nastává právě když $a^2=b$ a $b^2=a$. Dosazením $b=a^2$ do druhé rovnosti máme $a^4=a$, tedy $a(a^3-1)=0$. Platí tedy buď $a=0$, což dává $b=0$, nebo $a^3=1$, tedy $a=1$, což dává $b=1$. Jediné dva možné případy rovnosti jsou $(a,b)=(0,0)$ nebo $(1,1)$.
+}
+
+Takto základní věci postačují k vyřešení úlohy z~krajského kola kategorie~A:
+
+\Problem{1}{74-CSMO-A-II-1}{
+    Dána jsou dvě navzájem různá reálná čísla $a$, $b$ taková, že výrazy $a^3 + b$ a $a + b^3$ mají stejnou hodnotu. Dokažte, že pro jejich součin platí $-1\le ab<\frac13$.
+}{
+    Prvním krokem je odemknout podmínku $a^3+b=a+b^3$. Přesuňte vše na levou stranu a~rozložte na součin.
+}{
+    Z~podmínky víme s~použitím vzorce $a^3-b^3=(a-b)(a^2+ab+b^2)$ odvodit $(a-b)(a^2+ab+b^2-1)$, tedy díky $a \neq b$ máme $a^2+ab+b^2=1$. Teď zkuste $a^2+b^2$ doplnit na čtverec, jde to dokonce dvěma způsoby.
+}{
+    Ze zadání máme $a^3 + b = a + b^3$. Přesunutím členů na jednu stranu a rozkladem na součin dostaneme
+    $$
+    \align
+    a^3 - b^3 - a + b &= 0 \\
+    (a-b)(a^2+ab+b^2) - (a-b) &= 0 \\
+    (a-b)(a^2+ab+b^2-1) &= 0.
+    \endalign
+    $$
+    Jelikož $a \neq b$, musí platit $a-b \neq 0$, a tedy
+    $$
+    a^2+ab+b^2=1.
+    $$
+    Doplníme $a^2+b^2$ na čtverec jako $(a+b)^2-2ab$ a $(a-b)^2+2ab$. Tato vyjádření nám dají:
+    $$
+    (a+b)^2-ab = 1 \quad\text{a}\quad (a-b)^2 + 3ab = 1.
+    $$
+    \begitems \style a
+    \i Jelikož $(a+b)^2 \ge 0$, tak máme $ab=(a+b)^2-1 \ge -1$.
+    \i Jelikož $a\neq 0$, tak $(a-b)^2 > 0$, takže $3ab=1-(a-b)^2 < 1$, tedy $ab<1/3$.
+    \enditems
+}
+
+\secc AG nerovnost
+
+V této části se podíváme na nejznámější pojmenovanou nerovnost, a sice nerovnost mezi aritmetickým a geometrickým průměrem, zkráceně \textit{AG nerovnost}. Už jsme se s ní setkali ve formě
+$$
+a^2+b^2 \ge 2ab,
+$$
+což je důsledkem $(a-b)^2 \ge 0$. Ukážeme, že tato jednoduchá nerovnost se dá zobecnit na něco netriviálního.
+
+Aritmetický průměr se týká součtu, geometrický součinu. Než prozradíme přesné znění AG a její důkaz, předpřípravou je následující příklad:
+
+\Example{}{
+    Rozmyslete si a formálně dokažte, že pokud máme dvě kladná čísla, jejichž součet je dán, tak čím blíže jsou tato čísla u sebe, tím větší součin mají.
+}{
+    Nechť $s$ je průměr našich čísel a~$\delta$ jejich vzdálenost od průměru. Potom jsou naše čísla rovna $s-\delta$ a $s+\delta$. Jejich součin je roven $(s-\delta)(s+\delta)=s^2-\delta^2$. 
+    
+    Jelikož součet čísel je fixní, je fixní i jejich průměr. Vzdálenost našich čísel je zřejmě $2 \delta$. Čím menší vzdálenost, tím menší $\delta$, ~a tedy i $\delta^2$, takže tím větší je jejich součin $s^2-\delta^2$, což bylo třeba dokázat. 
+}
+
+Toto nám pomůže při důkazu obecné AG nerovnosti:
+
+\Theorem{AG nerovnost}{
+    Je dáno celé číslo $n \ge 2$. Dokažte, že pro libovolná nezáporná reálná čísla $a_1,a_2,\ldots,a_n$ platí 
+    $$
+    \frac{a_1+\cdots+a_n}{n} \ge \root n \of {a_1\cdots a_n}.
+    $$
+}{
+    Nerovnost je zřejmá, když je nějaké z~čísel nulové. Předpokládejme, že jsou všechna nenulová. 
+
+    Naše taktika bude následující: zafixujeme součet proměnných a tedy i jejich aritmetický průměr~$p$ a dokážeme, že největší součin mají právě tehdy, když jsou všechna rovna~$p$. Důkaz provedeme sporem.
+
+    Předpokládejme nejprve, že máme alespoň dvě proměnné, které nejsou rovny průměru~$p$. Pokud by všechny proměnné různé od $p$ byly menší než $p$, tak součet všech proměnných by byl zřejmě menší než $np$. Podobně nemůže platit, že všechny proměnné různé od $p$ jsou větší než $p$, tehdy by byl součet příliš velký. Nutně tedy máme jednu proměnnou menší než $p$ a druhou větší než $p$. 
+
+    Podle tvrzení z~předešlého cvičení platí, že pokud tyto dvě proměnné přiblížíme k~sobě a zachováváme přitom jejich součet, tak zvětšíme jejich součin, takže zvětšíme i součin všech proměnných. Toto zvětšení provedeme tak, že proměnnou bližší k~$p$ nahradíme $p$ a druhou proměnnou nahradíme tak, aby se součet zachoval (viz obrázek). Tímto jsme dosáhli, že jsme zachovali součet, zvětšili součin a také zmenšili počet proměnných různých od $p$. Konečným opakováním tohoto algoritmu dojdeme do stavu, kdy máme alespoň $n-1$ proměnných rovných $p$. 
+
+    \Image{ag-proof.pdf}{8}
+
+    Pokud je právě $n-1$ z~nich rovných $p$, tak hodnotu poslední získáme, když od součtu všech proměnných odečteme součet zbývajících. Součet všech je $np$ (jelikož $p$ je průměr a $n$ je jejich počet), zatímco součet zbývajících je $(n-1)p$ (jelikož jsou všechna rovna $p$). Vidíme, že i poslední proměnná musí být rovna $p$, což je spor.
+
+    \textit{Poznámka.} Existuje velmi mnoho různých důkazů této známé nerovnosti s různou úrovní techničnosti. Věříme však, že tento je nejintuitivnější z~hlediska, že nejlépe vysvětluje, co se to vlastně děje.
+}
+
+Dobré pohledy, jak nahlížet na AG nerovnost:
+\begitems \style i
+\i Součet odhadujeme zdola součinem:
+$$
+a_1+\cdots+a_n \ge n \root n \of {a_1\cdots a_n}
+$$
+\i Součin odhadujeme shora součtem: 
+$$
+a_1 \cdots a_n \leq \left(\frac{a_1+\cdots+a_n}{n}\right)^n
+$$
+\enditems
+Tyto pohledy nám pomáhají nedělat si starosti s~průměry -- nepotřebujeme explicitně napsaný průměr $a$ a $b$, abychom na $a$ a $b$ použili AG nerovnost.
+
+\Example{}{
+    Dokažte, že pro kladná reálná čísla $a$, $b$, $c$ platí nerovnost
+    $$
+    (a+b)(b+c)(c+a) \geq 8abc
+    $$
+}{
+    Použijeme AG na dvojice $(a,b)$, $(b,c)$, $(c,a)$, čímž dostaneme
+    $$
+    \align
+    a+b &\ge 2 \sqrt{ab}, \\
+    b+c &\ge 2 \sqrt{bc}, \\
+    c+a &\ge 2 \sqrt{ca}.
+    \endalign
+    $$
+    Vynásobením těchto nerovností máme požadovanou nerovnost. 
+}
+
+Konečně je čas prozradit řešení motivační úlohy z~úvodu:
+
+\Example{Problém krabice}{
+    Máme čtvercový kus papíru s délkou strany 12 cm. Chceme vytvořit otevřenou krabici tak, že z každého ze čtyř rohů vystřihneme identické čtverce a boky zahneme nahoru. Jaký je největší možný objem krabice?
+
+    \Image{box.pdf}{0.4}
+}{
+    Nechť $x$ označuje stranu čtverce, který vystřihujeme z~rohu. Potom naše krabice má podstavu ve tvaru čtverce se stranou $12-2x$ a výšku $x$. Její objem je tedy $(12-2x)^2x$ a náš cíl je tento výraz maximalizovat. Máme součin tří věcí: $12-2x$, $12-2x$, $x$. Pokud bychom je odhadli přímo, tak v~odhadu bude součet těchto věcí -- tím si moc nepomůžeme a ve skutečnosti tím úlohu nedořešíme (rovnost nebude nastávat ve správném případě). Kdybychom však použili AG na $12-2x$, $12-2x$, $4x$, tak se $x$ odečtou. Tuto~4 si však umíme uměle vyrobit:
+    $$
+    \gather
+    (12-2x)(12-2x) x = 
+    (12-2x)(12-2x) 4x \cdot \frac14 \leq \\ \leq
+    \left(\frac{(12-2x)+(12-2x)+4x}3\right)^3 \cdot \frac 14 =
+    128.
+    \endgather
+    $$
+    Rovnost nastává právě když všechny odhadované členy jsou stejné, tedy když $12-2x=12-2x=4x$, což dává $x=2$. Potřebujeme tedy vystřihnout čtverec se stranou $x=2$ a ve výsledku dostaneme krabici s~rozměry $8 \times 8 \times 2$.
+
+    \textit{Poznámka.} Obecně pro čtverec se stranou $a$ máme $\displaystyle x=\frac a6$.
+}
+
+Několik úloh na procvičení:
+
+\Exercise{}{
+    Dokažte, že pro kladné reálné číslo $a$ a přirozené číslo $n$ platí
+    $$
+    a^n+n \ge na + 1.
+    $$
+}{
+    Použijeme AG nerovnost na $n$ kladných čísel: $a^n$ a $n-1$ čísel rovných~$1$. 
+    Z AG nerovnosti platí:
+    $$
+    a^n + n - 1 \ge na,
+    $$
+    což je nerovnost ekvivalentní s~naší. Rovnost nastává právě tehdy, když $a^n = 1$, což pro kladné $a$ znamená $a=1$.
+}
+
+\Exercise{}{
+    Dokažte, že pro kladná reálná čísla $a_1,\dots,a_n$ se součinem~1 platí 
+    $$
+    (a_1+1)(a_2+1)\cdots(a_n+1) \ge 2^n.
+    $$
+}{
+    Pro každé $i \in \{1, \ldots, n\}$ můžeme použít AG nerovnost na dvojici kladných čísel $a_i$ a $1$:
+    $$
+    a_i+1 \ge 2\sqrt{a_i \cdot 1} = 2\sqrt{a_i}.
+    $$
+    Tyto nerovnosti mezi sebou vynásobíme a~dostaneme
+    $$
+    (a_1+1)(a_2+1)\cdots(a_n+1) \ge
+    (2\sqrt{a_1})(2\sqrt{a_2})\cdots(2\sqrt{a_n}) =
+    2^n \sqrt{a_1 a_2 \cdots a_n} = 2^n,
+    $$
+    což bylo třeba dokázat. Rovnost nastává, když $a_i = 1$ pro všechna $i$.
+}
+
+Zapamatováníhodný důsledek AG nerovnosti je nerovnost
+$$
+\frac ab + \frac ba \ge 2
+$$
+platná pro kladná $a,b$. Častokrát se objeví i pro $b=1$, kdy znamená 
+$$
+a+\frac 1a \ge 2,
+$$
+tedy součet kladného čísla a jeho převrácené hodnoty je alespoň 2. 
+
+\Exercise{}{
+    Dokažte, že pro kladná reálná čísla $a$, $b$, $c$ platí nerovnost 
+    $$
+    \frac{a+b}{c} + \frac{b+c}{a}  + \frac{c+a}{b} \ge 6
+    $$
+}{
+    Rozdělíme zlomky na levé straně a vhodně přeulspořádáme členy:
+    $$
+    \gather
+    \frac{a+b}{c} + \frac{b+c}{a} + \frac{c+a}{b} = \frac{a}{c} + \frac{b}{c} + \frac{b}{a} + \frac{c}{a} + \frac{c}{b} + \frac{a}{b} =\\=
+    \left(\frac{a}{c} + \frac{c}{a}\right) + \left(\frac{b}{c} + \frac{c}{b}\right) + \left(\frac{a}{b} + \frac{b}{a}\right).
+    \endgather
+    $$
+    Použitím nerovnosti $\frac xy + \frac yx \ge 2$ na každou závorku potom máme
+    $$
+    \left(\frac{a}{c} + \frac{c}{a}\right) + \left(\frac{b}{c} + \frac{c}{b}\right) + \left(\frac{a}{b} + \frac{b}{a}\right) \ge 2 + 2 + 2 = 6.
+    $$
+    Tím je nerovnost dokázána. Rovnost nastává, právě když $a=c$, $b=c$ a $a=b$, tedy $a=b=c$.
+}
+
+\Exercise{65-CSMO-A-S-2}{
+    Kladná reálná čísla $a$, $b$, $c$, $d$ splňují rovnosti
+    $$
+    a=c+\frac1d \qquad\text a\qquad b=d+\frac1c.
+    $$
+    Dokažte nerovnost $ab\ge4$ a najděte nejmenší možnou hodnotu výrazu $ab + cd$.
+}{
+    Vynásobením zadaných rovností máme:
+    $$
+    \gather
+    ab = \left(c+\frac1d\right)\left(d+\frac1c\right) = cd + \frac cc + \frac dd + \frac{1}{cd} = \\ = cd + 1 + 1 + \frac{1}{cd} = cd + \frac{1}{cd} + 2.
+    \endgather
+    $$
+    Pro kladné číslo $x=cd$ platí známá nerovnost $x + \frac 1x \ge 2$. Dosazením dostáváme
+    $$
+    ab = \left(cd + \frac{1}{cd}\right) + 2 \ge 2 + 2 = 4.
+    $$
+    Tím je první část dokázána. Rovnost $ab=4$ nastává právě tehdy, když $cd=1$.
+
+    Teď hledáme nejmenší možnou hodnotu výrazu $ab + cd$. Použijeme již odvozený vztah pro $ab$:
+    $$
+    ab + cd = \left(cd + \frac{1}{cd} + 2\right) + cd = 2cd + \frac{1}{cd} + 2.
+    $$
+    Použijeme AG nerovnost na kladná čísla $2cd$ a $\frac 1{cd}$:
+    $$
+    2cd + \frac 1{cd} \ge 2\sqrt{2cd \cdot \frac 1{cd}} = 2\sqrt{2},
+    $$
+    takže dohromady máme
+    $$
+    ab + cd = \left(2cd + \frac{1}{cd}\right) + 2 \ge 2\sqrt{2} + 2.
+    $$
+    Nejmenší možná hodnota je $2 + 2\sqrt{2}$. Této hodnoty se dosáhne, když v použité AG nerovnosti nastane rovnost, tedy když $2cd = \frac 1{cd}$, čili $2(cd)^2 = 1$, $cd = 1/\sqrt{2}$. Stačí zvolit například $c=1$ a $d=1/\sqrt{2}$ (obě jsou kladná reálná čísla), aby bylo této hodnoty dosaženo.
+}
+
+\secc Kombinování podmínek a odhadů
+
+Na závěr se pobavme o velmi obecném konceptu: Nerovnosti jsou častokrát těžké tím, že k jejich vyřešení je třeba zkombinovat mnoho různých podmínek a~odhadů. Tyto odhady mohou být úplně jednoduché, ale vidět je je náročné -- takové úlohy jsou právě velmi populární, neboť místo znalostí těžkých nerovností testují algebraickou fantazii. Dobrý způsob tréninku je vidět a zkusit toho co nejvíce. V~této sekci si dáme menší ukázku úloh s~netradičními podmínkami. 
+
+\Example{}{
+    Kladná reálná čísla $x$ a $y$ splňují $x^2>x+y$. Dokažte, že i $x^3>x^2+y$.
+}{
+    Podmínku ze zadání vynásobme kladným $x$, máme $x^3 > x^2 + xy$. Nyní stačí dokázat, že $x^2 + xy > x^2 + y$, tedy $xy > y$. K~tomu by nám stačilo dokázat, že $x>1$. To ale rychle nahlédneme z~podmínky: $x^2>x+y$ nám z~kladnosti $y$ dává $x^2>x$, což po vydělení kladným $x$ dává $x>1$, což jsme chtěli dokázat.
+
+    \textit{Poznámka.} Takto zapsané řešení ukazuje myšlenkový postup vedoucí k~řešení. Na soutěži bychom řešení mohli zapsat takto:
+
+    Jelikož $y>0$, tak $x^2>x+y>x$, což díky $x>0$ dává $x>1$. Potom $x^2>x+y$ po vynásobení kladným $x$ dává $x^3>x^2+xy$, což díky $x>1$ dává $xy>y$, takže dohromady $x^3>x^2+xy>x^2+y$, takže jsme hotovi.
+}
+
+Vidíme, že jsme vlastně používali jen velmi jasné úvahy a různě je kombinovali s~podmínkou ze zadání. Podobné hrátky je možné provést i v~těchto úlohách, můžete vyzkoušet.
+
+\Problem{0}{63-CSMO-C-II-3}{
+    Pro kladná reálná čísla $a$, $b$, $c$ platí $c^2 + ab = a^2 + b^2$.
+    Dokažte, že potom platí i $c^2 + ab \le ac + bc$.
+}{
+    Nejprve analyzujte dokazovanou nerovnost, není tam rozklad na součin?
+}{
+    Dokazovaná nerovnost je ekvivalentní s $c^2-ac+(ab-bc) \leq 0$, což se dá upravit na $(c-a)(c-b) \leq 0$. Stačí tedy zdůvodnit, že $c$ není nejmenší ani největší číslo mezi $a,b,c$. Zkuste sporem a~rozebere dva případy.
+}{
+    Dokazovaná nerovnost $c^2 + ab \le ac + bc$ je ekvivalentní s nerovností
+    $$
+    c^2 - ac - bc + ab \le 0,
+    $$
+    což můžeme upravit rozkladem na součin:
+    $$
+    c(c-a) - b(c-a) \le 0,
+    $$
+    $$
+    (c-a)(c-b) \le 0.
+    $$
+    Tato nerovnost platí právě tehdy, když $c$ leží mezi $a$ a $b$, tedy když není největší mezi $a,b,c$. Zkusme sporem dokázat, že tomu tak není, k~čemuž konečně využijeme podmínku, kterou napíšeme jako $c^2=a^2+b^2-ab$
+       
+    \begitems \style i
+    \i Pokud je $c$ největší mezi $a,b,c$, tak díky kladnosti $a,b,c$ platí i $c^2 > a^2$, takže $c^2 + ab > a^2 + ab$, takže $a^2+b^2 > a^2+ab$, takže $b^2 > ab$, což dává $b > a$. Analogicky ale odvodíme $a>b$, což je spor.    
+    \i Případ, kdy je $c$ nejmenší mezi $a,b,c$ je analogický, jen se všechna znaménka v~předešlém případě obrátí.
+    \enditems
+    
+    Jelikož obě možnosti vedou ke sporu, původní předpoklad je nesprávný, důkaz je hotov.
+}
+
+\Problem{0}{68-CSMO-C-II-4}{
+    Reálná čísla $a$, $b$, $c$, všechna větší než $\frac12$, splňují podmínku $ab+bc+ca=\frac54$.
+Dokažte, že platí
+    $$
+    a+b+c>a^2+b^2+c^2.
+$$
+}{
+    Zapomeňte na dokazovanou nerovnost -- klíčem je porozumět, jakým způsobem velikostní limity souvisí s~podmínkou.
+}{
+    Zkuste aplikovat $a>\frac12$, $b>\frac12$ do podmínky, konkrétně odhadněte zdola výraz $ab+bc+ca$. Co nám výsledná nerovnost říká o~$c$? 
+}{
+    Ze zadání víme, že $a > \frac12$ a $b > \frac12$. Použitím těchto odhadů v~podmínce dostaneme:
+    $$
+    \frac54 = ab+bc+ca = ab + c(a+b) > \frac12 \cdot \frac12 + c\left(\frac12 + \frac12\right) = \frac14 + c.
+    $$
+    Z~nerovnosti $\frac54 > \frac14 + c$ ihned vyplývá $\frac44 > c$, tedy $c < 1$. Jelikož je $c$ kladné, tím pádem i $c>c^2$. Ze symetrie máme i $a>a^2$ a $b>b^2$. Sečtením těchto nerovností máme $a+b+c > a^2+b^2+c^2$.
+}
+
+\sec Co si zapamatovat
+
+\secc Užitečné nerovnosti
+
+Tyto nerovnosti je dobré pamatovat si i ve~spánku.
+
+\begitems \style N
+
+\i [Součet čtverců alespoň součet smíšených členů] Pro reálná $a,b,c$: 
+$$
+a^2+b^2+c^2 \ge ab+bc+ca
+$$
+\i [Součet dvou převrácených hodnot je alespoň $2$] Pro kladná $a,b$
+$$
+\frac ab + \frac ba \ge 2  \quad\text{resp.}\quad a + \frac 1a \ge 2
+$$
+\i [Různé formy AG pro dva členy] Pro kladná $a,b$
+$$
+ab \leq \left(\frac{a+b}{2}\right)^2 \quad\text{resp.}\quad
+a+b \ge 2\sqrt{ab} \quad\text{resp.}\quad
+a^2+b^2 \ge 2ab
+$$
+\i [Různé formy obecné AG] Pro kladná $a_1,a_2,\cdots,a_n$:
+$$
+a_1+\cdots+a_n \ge n \root n \of {a_1\cdots a_n}  \quad\text{resp.}\quad
+a_1 \cdots a_n \leq \left(\frac{a_1+\cdots+a_n}{n}\right)^n
+$$
+\enditems 
+
+\secc Techniky dokazování
+
+Je to o hraní si.
+
+\begitems \style N
+
+\i Rozkládání na součin je velmi silné.
+\i Doplňujeme na čtverce, neboť ty jsou kladné.
+\i Součet se dá odhadnout zdola s~AG, se sčítanci se dá různě hrát.
+\i Součin se dá odhadnout shora s~AG, s~činiteli se dá různě hrát.
+\i Hrajeme si s~podmínkami, často se z~nich dá vytěžit mnoho zajímavého.
+
+\enditems 
+
+\sec Co dále
+
+Nerovnosti se dají studovat ještě velmi dlouho. Existuje mnoho dalších metod, známých nerovností. Už teď jsme ale vybudovali sérii technik a postupů, které se dají použít na prakticky všechny úlohy v česko-slovenské olympiádě (včetně těch v~celostátním kole). Někdy v~dalším díle pokryjeme ještě více :)
+
+Zájemcům o~další studium doporučuji \Link[https://prase.cz/]{PraSe} seriál \Link[zdolavani-nerovnosti.pdf]{Zdolávání nerovností}. První kapitola je určitě přístupná každému. Druhá je už trochu těžší (úroveň přibližně celostátního kola), stejně tak i úvod třetí. Od sekce \uv{Tvar SOS} však začínají sice velmi zajímavé, ale v~dnešní době ne až tak použitelné metody na soutěžích (kde je snaha dávat úlohy, které se nedají \uv{zabít} znalostmi, ale jsou spíše o kreativitě). Rozhodně však není na škodu o nich vědět.
+
+\sec Úlohy
+
+Různorodé úlohy, kde na všechny z~nich stačí probrané koncepty, i když jak to už u nerovností bývá, řešení bývá libovolně těžko viditelné. Hodně štěstí~:)
+
+\Problem{0}{}{
+    Jsou dána nezáporná reálná čísla $x$ a $y$.
+Dokažte nerovnost 
+    $$
+    x^2+xy+y^2 \leq 3(x-\sqrt{xy}+y)^2.
+$$
+}{
+    Jeden ze způsobů, jak si úlohu udělat hezčí, je použít substituci $x=a^2$, $y=b^2$. Díky ní nemáme odmocniny. Nalevo potom máme $a^4+a^2b^2+b^4$. S~tímto výrazem se dá něco zajímavého udělat.
+}{
+    Výraz $a^4+a^2b^2+b^4$ se dá rozložit na součin technikou doplňování na čtverec, doplňte na čtverec $a^4+b^4$. Následně bude celá nerovnost dávat smysl.
+}{
+    Použijeme substituci $x=a^2$ a $y=b^2$ pro nezáporná $a,b$, kde alespoň jedno je kladné. Nerovnost se přepíše na
+    $$
+    a^4 + a^2b^2 + b^4 \le 3(a^2 - ab + b^2)^2.
+    $$
+    Levou stranu rozložíme doplněním na čtverec a~následným použitím vzorce pro rozdíl čtverců:
+    $$
+    \gather
+    a^4 + a^2b^2 + b^4 = (a^4 + 2a^2b^2 + b^4) - a^2b^2 = \\ = (a^2+b^2)^2 - (ab)^2 = (a^2+b^2 - ab)(a^2+b^2 + ab).
+    \endgather
+    $$
+    Dosazením do nerovnosti dostaneme
+    $$
+    (a^2 - ab + b^2)(a^2 + ab + b^2) \le 3(a^2 - ab + b^2)^2,
+    $$
+    Výraz $K = a^2 - ab + b^2 = (a - b/2)^2 + \frac{3}{4}b^2$ je nezáporný. V~případě, kdy je nulový (tedy když $a=b=0$), tak nerovnost platí. 
+    
+    Nechť je tedy nenulový, potom jím můžeme nerovnost vydělit. Následně nerovnost dokončíme ekvivalentními úpravami:
+    $$
+    \align
+    a^2 + ab + b^2 &\le 3(a^2 - ab + b^2) \\
+    0 &\le (3a^2 - 3ab + 3b^2) - (a^2 + ab + b^2) \\
+    0 &\le 2a^2 - 4ab + 2b^2 \\
+    0 &\le 2(a^2 - 2ab + b^2) \\
+    0 &\le 2(a-b)^2.
+    \endalign
+    $$
+    Poslední nerovnost je zjevně pravdivá. Jelikož úpravy byly ekvivalentní, původní nerovnost je dokázána.
+
+    \textit{Poznámka.} Substituce $x=a^2$, $y=b^2$ nebyla nutná, dělá však řešení \uv{objevitelnější}, jelikož mocniny jsou hezčí než odmocniny.
+}
+
+\Problem{0}{66-CPSJ-I-3}{
+    Dokažte, že pro všechna reálná čísla $x$, $y$ platí
+    $$
+    (x^2+1)(y^2+1) \ge 2(xy-1)(x+y).
+    $$
+    Pro která celá čísla $x$, $y$ nastává rovnost?
+}{
+    Nerovnost vypadá jako AG nerovnost -- napravo máme dvojnásobek součinu. Nalevo ale nemáme součet, nýbrž součin. Roznásobme proto levou stranu: $x^2y^2+x^2+y^2+1$. Zkusme toto nějak šikovně přepsat.
+}{
+    Trikem je doplnit $x^2y^2+1$ na čtverec, čímž vyrobit $xy-1$, což je výraz z~pravé strany. Co se stane se zbytkem levé strany?
+}{
+    Po roznásobení levé strany a~doplnění $x^2+y^2+1$ a $x^2+y^2$ na čtverec dostaneme:
+    $$
+    \gather
+    (x^2+1)(y^2+1) = 
+    x^2y^2+x^2+y^2+1 = 
+    (x^2y^2+1) + (x^2+y^2) = \\ =
+    [(xy-1)^2 - 2xy] + [(x+y)^2 + 2xy] =
+    (xy-1)^2 + (x+y)^2.
+    \endgather
+    $$
+    Dokazovaná nerovnost je tak ekvivalentní s
+    $$
+    (xy-1)^2 + (x+y)^2 \ge 2(xy-1)(x+y),
+    $$
+    což je po přesunutí všeho na levou stranu zjevný čtverec
+    $$
+    \big( (xy-1) - (x+y) \big)^2 \ge 0.
+    $$
+    Tato nerovnost zjevně platí. Rovnost nastává, právě když $(xy-1) - (x+y) = 0$, čili $xy - x - y = 1$. Toto je trochu teorie čísel. Elegantní řešení spočívá v~přičtení~1  k~oběma stranám a~rozkladu na součin, čímž dostaneme: 
+    $$
+    \align 
+    xy - x - y + 1 &= 1 \\
+    (x-1)(y-1) &= 2.
+    \endalign
+    $$
+    Součin celých čísel $x-1$ a $y-1$ je $2$ ve~čtyřech případech:
+
+    \begitems
+    \i $x-1 = 1$ a $y-1 = 2$, což dává $(x,y)=(2,3)$.
+    \i $x-1 = 2$ a $y-1 = 1$, což dává $(x,y)=(3,2)$.
+    \i $x-1 = -1$ a $y-1 = -2$, což dává $(x,y)=(0,-1)$.
+    \i $x-1 = -2$ a $y-1 = -1$, což dává $(x,y)=(-1,0)$.
+    \enditems
+    
+    \textit{Poznámka.} Trik na levé straně je vlastně speciální případ identity 
+    $$
+    (a^2+b^2)(c^2+d^2) = (ac+bd)^2 - (ac-bd)^2,
+    $$
+    která je zase speciálním případem \uv{Lagrangeovy identity}.
+}
+
+\Problem{0}{}{
+    Najděte všechna celá čísla $n \ge 2$, pro která nerovnost
+    $$
+    a_1^2 + a_2^2 + \cdots + a_n^2 \ge (a_1+\ldots+a_{n-1})a_n
+    $$
+    platí pro všechna reálná čísla $a_1,\ldots,a_n$.
+}{
+    Nerovnost je podobná jako $x^2+y^2+z^2 \ge xy+yz+zx$, a vskutku podobný způsob důkazu funguje. Zkuste vyrobit co nejvíce čtverců.
+}{
+    Trikem je doplnit $a_1^2-a_1a_n$ na čtverec jako $(a_1-a_n/2)^2$ a podobně zbylé. Vznikne nám však velký přebytek členů $a_n^2$. Vyjádřete, kolik přesně jich je. Nezapomínejme, že cílem není nerovnost dokázat, ale odhalit, kdy platí.
+}{
+    Převedeme všechny členy na levou stranu a~upravíme je doplněním na čtverec pro $i=1, \ldots, n-1$:
+    $$
+    \align
+    0 &\le (a_1^2 - a_1a_n) + (a_2^2 - a_2a_n) + \cdots + (a_{n-1}^2 - a_{n-1}a_n) + a_n^2 \\
+    0 &\le \sum_{i=1}^{n-1} \left( a_i^2 - a_ia_n \right) + a_n^2 \\
+    0 &\le \sum_{i=1}^{n-1} \left[ \left(a_i - \frac{a_n}{2}\right)^2 - \frac{a_n^2}{4}     \right] + a_n^2 \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) - (n-1)\frac  {a_n^2}{4} + a_n^2 \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) + a_n^2 \left(1   - \frac{n-1}{4}\right) \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) + a_n^2 \left (\frac{4 - (n-1)}{4}\right) \\
+    0 &\le \left( \sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2 \right) + a_n^2 \left (\frac{5-n}{4}\right).
+    \endalign
+    $$
+    První člen $\sum_{i=1}^{n-1} \left(a_i - \frac{a_n}{2}\right)^2$ je součet čtverců, takže je vždy nezáporný. 
+    
+    Aby nerovnost platila pro všechna $a_1, \ldots, a_n$, musí být i koeficient $\frac{5-n}{4}$ u $a_n^2$ nezáporný -- totiž pokud by byl záporný, mohli bychom zvolit $a_i = a_n/2$ pro $i=1, \ldots, n-1$ a $a_n \ne 0$. Tím by byl první součet roven 0, ale druhý člen $a_n^2 \left(\frac{5-n}{4}\right)$ by byl záporný, což by vedlo ke sporu. Musí tedy platit $\frac{5-n}{4} \ge 0$, z~čehož $5-n \ge 0$, a~tedy $n \le 5$.
+    
+    Jelikož ze zadání víme, že $n \ge 2$, vyhovují všechna celá čísla $n \in \{2, 3, 4, 5\}$. Pro tyto hodnoty $n$ je koeficient $\frac{5-n}{4}$ nezáporný, a~proto je celá pravá strana součtem nezáporných výrazů, takže nerovnost platí.
+}
+
+\Problem{0}{70-CPSJ-I-4}{
+    Najděte nejmenší možnou hodnotu, kterou může nabývat výraz
+    $$
+    x^4+y^4-x^2y-xy^2,
+    $$
+    ve kterém $x$ a $y$ jsou kladná reálná čísla splňující $x+y \le 1$.
+}{
+    Výraz upravíme jako $x^4+y^4-xy(x+y)$. Objevilo se tu $x+y$, takže umíme použít $x+y \leq 1$. Už postačí odhadnout jen zbytek výrazu, což chce ještě jeden krok.
+}{
+    Po použití $x+y \leq 1$ máme $x^4+y^4-xy(x+y) \ge x^4+y^4-xy$, takže odhadujeme $x^4+y^4-xy$. Neumíme odhadnout $x^4+y^4$ tak, abychom vyrobili $xy$ nějakým způsobem?
+}{
+    Označme $V$ zkoumaný výraz. Upravíme ho a~použijeme podmínku $x+y \le 1$:
+    $$
+    V = x^4+y^4-xy(x+y) \ge x^4+y^4-xy(1) = x^4+y^4-xy
+    $$
+    Použitím AG nerovnosti $x^4+y^4 \ge 2\sqrt{x^4y^4} = 2x^2y^2$ dostaneme
+    $$
+    V \ge 2x^2y^2 - xy.
+    $$
+    Substituce $t = xy$ vede na kvadratický výraz $2t^2 - t$. Jeho minimum hledáme doplněním na čtverec:
+    $$
+    2t^2 - t = 2\left(t^2 - \frac{1}{2}t\right) = 2\left(\left(t - \frac{1}{4}\right)^2 - \frac{1}{16}\right) = 2\left(t - \frac{1}{4}\right)^2 - \frac{1}{8}.
+    $$
+    Minimum je $-1/8$ a~nabývá se pro $t = xy = 1/4$.
+    Musíme ověřit, zda je tato hodnota $xy=1/4$ dosažitelná za podmínky $x+y \le 1$. K~tomu však stačí položit $x=y=1/2$.
+}
+
+\Problem{0}{57-CSMO-A-II-4}{
+    Dokažte, že pro nezáporná reálná čísla $x$, $y$ splňující vztah $x^2+y^6=2$ platí
+    $$
+    x^2+2\ge 3xy.
+$$
+}{
+    Dokazovaná nerovnost vypadá jako $AG$ nerovnost pro tři členy. My tam máme členy $x^2$, $1$, $1$. Co nám zůstane dokázat po aplikaci? 
+}{
+    Platí $x^2+2 = x^2+1+1 \ge 3 \root 3 \of{x^2}$, takže stačí dokázat $\root 3 \of{x^2} \ge xy$, což po umocnění na třetí dává $x^2 \ge x^3y^3$, tedy $1 \ge xy^3$. Ještě jsme nepoužili podmínku.
+}{
+    Pro $x=0$ nerovnost zřejmě platí. Nechť $x \neq 0$. Použijeme AG nerovnost pro čísla $x^2$, $1$ a $1$:
+    $$
+    x^2+2 = x^2+1+1 \ge 3 \root 3 \of{x^2 \cdot 1 \cdot 1} = 3\root 3 \of{x^2}.
+    $$
+    K důkazu původní nerovnosti $x^2+2 \ge 3xy$ nám tedy stačí dokázat
+    $$
+    3\root 3 \of{x^2} \ge 3xy \quad \text{právě když}\quad \root 3 \of{x^2} \ge xy.
+    $$
+    Jelikož obě strany nerovnosti $\root 3 \of{x^2} \ge xy$ jsou nezáporné, můžeme je umocnit na třetí:
+    $$
+    x^2 \ge (xy)^3 = x^3y^3.
+    $$
+    Jelikož $x^2 > 0$, můžeme jím nerovnost vydělit a~dostaneme ekvivalentní nerovnost
+    $$
+    1 \ge xy^3.
+    $$
+    Tuto nerovnost dokážeme pomocí podmínky $x^2+y^6=2$ a AG nerovnosti:
+    $$
+    2 = x^2+y^6 \ge 2xy^3 \quad \text{právě když} \quad 1 \ge xy^3,
+    $$
+    takže jsme hotovi. Rovnost nastává, když nastává rovnost v~obou použitých AG nerovnostech:
+    \begitems \style i
+    \i $x^2 = 1 = 1$ (z první AG), což pro $x> 0$ dává $x=1$.
+    \i $x^2 = y^6$ (z druhé AG), což po dosazení $x=1$ dává $1 = y^6$, a~tedy $y=1$ (jelikož $y \ge 0$).
+    \enditems
+    Rovnost nastává právě tehdy, když $x=1$ a $y=1$.
+}
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
@@ -75,6 +76,10 @@ export const RichMathEditorInputArea = forwardRef<
     },
     ref
   ) => {
+    // Get translations
+    const tEditor = useTranslations('ui.editor')
+    const tApiErrors = useTranslations('apiErrors')
+
     // Get needed state from the view-model
     const { textareaRef, state, applyTransform } = viewModel
 
@@ -178,10 +183,10 @@ export const RichMathEditorInputArea = forwardRef<
         if (!canAddMore) {
           switch (contentType) {
             case 'image':
-              toast.error(`Maximálne ${MAX_IMAGES_PER_COMMENT} obrázky na komentár`)
+              toast.error(tEditor('maxImagesReached', { max: MAX_IMAGES_PER_COMMENT }))
               break
             case 'attachment':
-              toast.error(`Maximálne ${MAX_ATTACHMENTS_PER_COMMENT} prílohy na komentár`)
+              toast.error(tEditor('maxAttachmentsReached', { max: MAX_ATTACHMENTS_PER_COMMENT }))
               break
           }
         }
@@ -189,7 +194,7 @@ export const RichMathEditorInputArea = forwardRef<
         // Return pre-toast state
         return canAddMore
       },
-      [state]
+      [state, tEditor]
     )
 
     /**
@@ -243,6 +248,8 @@ export const RichMathEditorInputArea = forwardRef<
           onChange: handleValueChange,
           pushState: pushStateAfterUpload,
           getTextareaState,
+          tEditor,
+          tApiErrors,
         })
 
         // Ensure the caret is visible if the upload was successful
@@ -253,7 +260,15 @@ export const RichMathEditorInputArea = forwardRef<
         // Return success
         return uploadResult.success
       },
-      [state.text, handleValueChange, pushStateAfterUpload, getTextareaState, textareaRef]
+      [
+        state.text,
+        handleValueChange,
+        pushStateAfterUpload,
+        getTextareaState,
+        textareaRef,
+        tEditor,
+        tApiErrors,
+      ]
     )
 
     /**
@@ -305,9 +320,7 @@ export const RichMathEditorInputArea = forwardRef<
 
         // Reject unsupported file types
         if (!isImage && !isAttachment) {
-          toast.error(
-            'Nepodporovaný typ súboru. Povolené: obrázky (PNG, JPEG, WebP, GIF) alebo prílohy (PDF, TXT, MD)'
-          )
+          toast.error(tEditor('unsupportedFileType'))
           return
         }
 
@@ -317,7 +330,7 @@ export const RichMathEditorInputArea = forwardRef<
         // Upload the file (strip extension for images)
         uploadFileToEditor(file, isImage)
       },
-      [uploadFileToEditor, checkAndShowUploadLimitError]
+      [uploadFileToEditor, checkAndShowUploadLimitError, tEditor]
     )
 
     // Configure react-dropzone
@@ -363,6 +376,8 @@ export const RichMathEditorInputArea = forwardRef<
           onChange: handleValueChange,
           pushState: pushStateAfterUpload,
           getTextareaState,
+          tEditor,
+          tApiErrors,
         })
 
         // Handle different paste actions
@@ -388,6 +403,8 @@ export const RichMathEditorInputArea = forwardRef<
         pushStateAfterUpload,
         getTextareaState,
         applyTransform,
+        tApiErrors,
+        tEditor,
       ]
     )
 
@@ -456,7 +473,7 @@ export const RichMathEditorInputArea = forwardRef<
         {/* Drag overlay indicator */}
         {isDragActive && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-indigo-500/20 border-2 border-dashed border-indigo-400 rounded-lg pointer-events-none">
-            <span className="text-indigo-300 text-sm font-medium">Pusť súbor pre nahranie</span>
+            <span className="text-indigo-300 text-sm font-medium">{tEditor('dropToUpload')}</span>
           </div>
         )}
       </div>

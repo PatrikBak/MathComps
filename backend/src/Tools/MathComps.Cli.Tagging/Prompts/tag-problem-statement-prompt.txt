@@ -1,5 +1,5 @@
 Classify a math problem using only tags from the JSON below ("CANDIDATE TAGS").
-Both the tags and the problem are in Slovak. The format of
+The tag names are in English, while the problem statement is in Slovak. The format of
 the JSON is as follows:
 
 {[tag]: {"category": string, "description": string}}

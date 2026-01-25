@@ -1,9 +1,12 @@
+import type { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
+import { API_ERROR_CODES } from '@/lib/api/api-error-codes'
+import { type ApiErrorTranslator, translateApiError } from '@/lib/api/api-error-utils'
 import {
   type FileType,
-  FileValidationError,
   isAllowedMimeType,
+  isFileUploadError,
   validateFile,
 } from '@/lib/file-upload-utils'
 import { uploadAttachment, uploadImage } from '@/lib/file-upload-utils'
@@ -36,15 +39,6 @@ type UploadConfig = {
   createMarkdown: (filename: string, key: string) => string
   /** Async function that performs the actual upload and return the public URL */
   uploadFn: (file: File) => Promise<string>
-  /** Localized error/status messages */
-  messages: {
-    /** Toast message when count limit is exceeded */
-    limitReached: string
-    /** Prefix for loading toast (filename is appended) */
-    uploading: string
-    /** Fallback error message when upload fails */
-    uploadFailed: string
-  }
 }
 
 /**
@@ -56,11 +50,6 @@ const IMAGE_UPLOAD_CONFIG: UploadConfig = {
   countRegex: IMAGE_REGEX,
   createMarkdown: (filename: string, key: string) => `![${filename}](media:${key}?scale=100)`,
   uploadFn: uploadImage,
-  messages: {
-    limitReached: `Maximálne ${MAX_IMAGES_PER_COMMENT} obrázky na komentár`,
-    uploading: 'Nahrávam',
-    uploadFailed: 'Nepodarilo sa nahrať obrázok',
-  },
 }
 
 /**
@@ -72,11 +61,6 @@ const ATTACHMENT_UPLOAD_CONFIG: UploadConfig = {
   countRegex: ATTACHMENT_REGEX,
   createMarkdown: (filename: string, key: string) => `[📎 ${filename}](media:${key})`,
   uploadFn: uploadAttachment,
-  messages: {
-    limitReached: `Maximálne ${MAX_ATTACHMENTS_PER_COMMENT} prílohy na komentár`,
-    uploading: 'Nahrávam',
-    uploadFailed: 'Nepodarilo sa nahrať prílohu',
-  },
 }
 
 /**
@@ -89,6 +73,11 @@ type TextareaState = {
   /** Current cursor position (selection start) */
   selectionStart: number
 }
+
+/**
+ * Type-safe translation function for editor UI strings.
+ */
+type EditorTranslator = ReturnType<typeof useTranslations<'ui.editor'>>
 
 /**
  * Parameters required for handling a file upload in the editor.
@@ -113,6 +102,10 @@ export type FileUploadParams = {
    * Returns null if textarea is not available.
    */
   getTextareaState: () => TextareaState | null
+  /** Translation function for UI strings */
+  tEditor: EditorTranslator
+  /** Translation function for API errors */
+  tApiErrors: ApiErrorTranslator
 }
 
 /**
@@ -151,6 +144,8 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
     onChange,
     pushState,
     getTextareaState,
+    tEditor,
+    tApiErrors,
   } = params
 
   // Get the config based on the file type (MIME type)
@@ -160,19 +155,21 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
   } else if (isAllowedMimeType(file.type, 'attachment')) {
     config = ATTACHMENT_UPLOAD_CONFIG
   } else {
-    throw new Error(`Invalid file type: ${file.type}`)
+    // This shouldn't happen as caller should validate, but handle gracefully
+    toast.error(tApiErrors(API_ERROR_CODES.INVALID_FILE_TYPE))
+    return { success: false }
   }
 
   try {
     // Validate file type and size
     validateFile(file, config.fileType)
   } catch (error) {
-    // Show specific validation error or generic fallback
-    if (error instanceof FileValidationError) {
-      toast.error(error.message)
+    // Show translated validation error
+    if (isFileUploadError(error)) {
+      toast.error(translateApiError(tApiErrors, error.errorResponse))
     } else {
-      // I don't think this can happen?
-      toast.error('Nepodarilo sa overiť súbor')
+      // Fallback for unexpected errors
+      toast.error(tApiErrors(API_ERROR_CODES.SERVER_ERROR))
     }
 
     // Return validation failure
@@ -183,8 +180,8 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
   // The text may change during upload, but we insert at the original position
   const insertPosition = selectionStart
 
-  // Show loading toast
-  const loadingToastId = toast.loading(`${config.messages.uploading} ${filename}...`)
+  // Show loading toast with translated message
+  const loadingToastId = toast.loading(tEditor('uploading', { filename }))
 
   // Perform the actual upload
   config
@@ -233,10 +230,17 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
       // Update the editor state
       pushState(updatedText, newCursor, scrollTop)
     })
-    .catch((error: Error) => {
-      // Clean up loading toast and show error
+    .catch((error: unknown) => {
+      // Clean up loading toast
       toast.dismiss(loadingToastId)
-      toast.error(error.message || config.messages.uploadFailed)
+
+      // Show translated error message
+      if (isFileUploadError(error)) {
+        toast.error(translateApiError(tApiErrors, error.errorResponse))
+      } else {
+        // Fallback for unexpected errors
+        toast.error(tApiErrors(API_ERROR_CODES.SERVER_ERROR))
+      }
     })
 
   // Return success to indicate upload started

@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import Markdown, { type Components } from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -83,6 +84,9 @@ type CustomComponents = Components & {
  * alongside inline ($...$) and display ($$...$$) math.
  */
 export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps) {
+  // Get translations
+  const t = useTranslations('ui.editor')
+
   // Preprocess display math before parsing
   const processedContent = preprocessDisplayMath(content)
 
@@ -243,7 +247,7 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             if (!resolvedSrc || typeof resolvedSrc !== 'string') {
               return (
                 <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-slate-700/50 rounded text-xs text-gray-400 italic">
-                  🖼️ {alt || 'Obrázok'}
+                  🖼️ {alt || t('imageAlt')}
                 </span>
               )
             }
@@ -297,7 +301,9 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             )
           },
           spoiler: ({ children, label }: { children: ReactNode; label?: string }) => (
-            <RichMathEditorSpoiler label={label ?? 'Skrytý text'}>{children}</RichMathEditorSpoiler>
+            <RichMathEditorSpoiler label={label ?? t('hiddenText')}>
+              {children}
+            </RichMathEditorSpoiler>
           ),
         } as CustomComponents
       }

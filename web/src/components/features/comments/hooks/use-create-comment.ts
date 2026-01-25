@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl'
+
 import { useProblemStore } from '@/stores/problem-store'
 
 import type { CommentDto, CommentTarget } from '../api/comment-api-types'
@@ -24,6 +26,9 @@ type CreateCommentParams = {
  * @returns A React Query mutation object.
  */
 export function useCreateComment() {
+  // Get the translations
+  const t = useTranslations('comments')
+
   // We will need to update the number of comments in the problem store
   // if the comment is created on a problem
   const updateProblemCommentCount = useProblemStore((state) => state.updateCommentCount)
@@ -62,9 +67,9 @@ export function useCreateComment() {
     },
 
     // The reason shown in the auth prompt
-    authReason: 'písanie komentárov',
+    authReason: t('authReasons.addComment'),
 
     // The error message shown when the server craps out
-    errorMessage: 'Nepodarilo sa pridať komentár',
+    errorMessage: t('errors.addFailed'),
   })
 }

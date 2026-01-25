@@ -3,17 +3,22 @@
     "Translate All": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "--count 1000 --num-threads 4"
+      "commandLineArgs": "translate --count 100 --num-threads 4"
     },
     "Translate EN": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "--language EN --count 1000 --num-threads 4"
+      "commandLineArgs": "translate --language EN --count 100 --num-threads 4"
     },
-    "Translate CZ": {
+    "Translate CS": {
       "commandName": "Project",
       "workingDirectory": ".",
-      "commandLineArgs": "--language CZ --count 1000 --num-threads 4"
+      "commandLineArgs": "translate --language CS --count 100 --num-threads 4"
+    },
+    "Parse": {
+      "commandName": "Project",
+      "workingDirectory": ".",
+      "commandLineArgs": "parse --count 100"
     }
   }
 }

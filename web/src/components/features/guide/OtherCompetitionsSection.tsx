@@ -1,9 +1,12 @@
 import { Star, User, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
+// Import messages to extract item keys for type safety
+import type messages from '../../../../messages/sk.json'
 import { BulletList } from './layout/BulletList'
 import { CountryBadge } from './layout/CountryBadge'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
@@ -12,16 +15,18 @@ import { GUIDE_TITLES } from './layout/guide-structure'
 import { GUIDE_STYLES } from './layout/guide-styles'
 import { GuideSection } from './layout/GuideSection'
 import { InfoCard } from './layout/InfoCard'
-import { type SchoolLevel as ScholLevel, SchoolLevelBadge } from './layout/SchoolLevelBadge'
+import { type SchoolLevel, SchoolLevelBadge } from './layout/SchoolLevelBadge'
+
+type ItemKey = keyof (typeof messages)['guide']['sections']['otherCompetitions']['items']
 
 type CompetitionType = 'Team' | 'Individual'
 
 type OtherCompetition = {
-  title: string
+  titleKey: ItemKey
   links: string[]
-  description?: string
+  descriptionKey: ItemKey
   details?: string[]
-  levels: ScholLevel[]
+  levels: SchoolLevel[]
   countries: Country[]
   type: CompetitionType
 }
@@ -31,108 +36,117 @@ export default function OtherCompetitionsSection({
 }: {
   sectionNumberer: SectionNumberer
 }) {
+  // Main translator for general guide content (titles, descriptions, etc.)
+  const tGuide = useTranslations('guide')
+
+  // Scoped translator for individual competition item descriptions.
+  const tItems = useTranslations('guide.sections.otherCompetitions.items')
+
+  // Scoped translator for competition titles
+  const tTitles = useTranslations('guide.sections.otherCompetitions.titles')
+
   const competitions: OtherCompetition[] = [
     {
-      title: 'Náboj & Náboj Junior',
+      titleKey: 'naboj',
       links: ['https://math.naboj.org/', 'https://junior.naboj.org/'],
-      description: 'Najpopulárnejšia tímová súťaž v našich končinách s úlohami na výsledok',
-      levels: ['ZŠ', 'SŠ'],
+      descriptionKey: 'naboj',
+      levels: ['elementary', 'highSchool'],
       countries: ['CZ', 'SK', 'INTERNATIONAL'],
       type: 'Team',
     },
     {
-      title: 'DuoGeo',
+      titleKey: 'duogeo',
       links: ['https://duogeo.cz/'],
-      description: 'Súťaž dvojíc v riešení geometrie olympiádneho typu',
-      levels: ['ZŠ', 'SŠ'],
+      descriptionKey: 'duogeo',
+      levels: ['elementary', 'highSchool'],
       countries: ['SK', 'CZ', 'PL'],
       type: 'Team',
     },
     {
-      title: 'Maso',
+      titleKey: 'maso',
       links: ['https://maso.mff.cuni.cz/'],
-      description: 'Súťaž s úlohami ako v Náboji, kde sa za výslekdy odomykajú ťahy do hry',
-      levels: ['ZŠ'],
+      descriptionKey: 'maso',
+      levels: ['elementary'],
       countries: ['CZ'],
       type: 'Team',
     },
     {
-      title: 'Matematický klokan',
+      titleKey: 'klokan',
       links: ['https://matematickyklokan.sk/', 'https://matematickyklokan.upol.cz/'],
-      description: 'Súťaž s výberom z možností',
-      levels: ['ZŠ', 'SŠ'],
+      descriptionKey: 'klokan',
+      levels: ['elementary', 'highSchool'],
       countries: ['CZ', 'SK'],
       type: 'Individual',
     },
     {
-      title: 'Pytagoriáda',
+      titleKey: 'pytagoriada',
       links: ['https://nivam.sk/olympiady-a-sutaze/pytagoriada/', 'https://www.pythagoriada.cz/'],
-      description: 'Súťaž, kde záleží na rýchlosti a správnosti výsledkov',
-      levels: ['ZŠ'],
+      descriptionKey: 'pytagoriada',
+      levels: ['elementary'],
       countries: ['CZ', 'SK'],
       type: 'Individual',
     },
     {
-      title: 'Pangea',
+      titleKey: 'pangea',
       links: ['https://www.pangeasoutez.cz/'],
-      description: 'Súťaž podobná Matematickému klokanovi s tematickými úlohami',
-      levels: ['ZŠ'],
+      descriptionKey: 'pangea',
+      levels: ['elementary'],
       countries: ['CZ'],
       type: 'Individual',
     },
     {
-      title: 'Attomat',
+      titleKey: 'attomat',
       links: ['https://akcie.p-mat.sk/attomat/'],
-      description: 'Online súťaž s úlohami na výsledok',
-      levels: ['ZŠ', 'SŠ'],
+      descriptionKey: 'attomat',
+      levels: ['elementary', 'highSchool'],
       countries: ['SK', 'CZ'],
       type: 'Individual',
     },
     {
-      title: 'Maks a Maksík',
+      titleKey: 'maks',
       links: ['https://talentida.sk/maks/', 'https://talentida.sk/maksik/'],
-      description: 'Súťaž, kde sa úlohy riešia doma a výsledky nahrávajú online',
-      levels: ['ZŠ'],
+      descriptionKey: 'maks',
+      levels: ['elementary'],
       countries: ['SK'],
       type: 'Individual',
     },
     {
-      title: 'Logická olympiáda',
+      titleKey: 'logickaOlympiada',
       links: ['https://www.logickaolympiada.cz', 'https://www.logickaolympiada.sk/'],
-      description: 'Zo zrejmých dôvodov populárna súťaž medzi matematikmi',
-      levels: ['ZŠ', 'SŠ'],
+      descriptionKey: 'logickaOlympiada',
+      levels: ['elementary', 'highSchool'],
       countries: ['SK', 'CZ'],
       type: 'Individual',
     },
     {
-      title: 'Mathrace',
+      titleKey: 'mathrace',
       links: ['https://brkos.math.muni.cz/mathrace/'],
-      description: 'Online súťaž s úlohami ako v Náboji, kde možno používať softvér a programovať',
-      levels: ['SŠ'],
+      descriptionKey: 'mathrace',
+      levels: ['highSchool'],
       countries: ['CZ', 'SK'],
       type: 'Team',
     },
     {
-      title: 'Mathing',
+      titleKey: 'mathing',
       links: ['https://mathing.fme.vutbr.cz/'],
-      description: 'Online súťaž s úlohami ako v olympiáde',
-      levels: ['SŠ'],
+      descriptionKey: 'mathing',
+      levels: ['highSchool'],
       countries: ['CZ', 'SK'],
       type: 'Team',
     },
     {
-      title: 'Brloh',
+      titleKey: 'brloh',
       links: ['https://brloh.math.muni.cz/'],
-      description: 'Súťaž v riešení matematicko-logických úloh',
-      levels: ['ZŠ', 'SŠ'],
+      descriptionKey: 'brloh',
+      levels: ['elementary', 'highSchool'],
       countries: ['SK', 'CZ'],
       type: 'Individual',
     },
     {
-      title: 'Purple Comet',
+      titleKey: 'purpleComet',
       links: ['https://purplecomet.org/'],
-      description: 'Medzinárodná súťaž podobná Náboju s viac ako 80 krajinami',
-      levels: ['SŠ'],
+      descriptionKey: 'purpleComet',
+      levels: ['highSchool'],
       countries: ['INTERNATIONAL'],
       type: 'Team',
     },
@@ -143,7 +157,7 @@ export default function OtherCompetitionsSection({
       <div className="mb-2 sm:mb-3">
         {/* Header with levels and countries */}
         <div className="flex flex-col items-start gap-1 mb-2 sm:mb-3">
-          <h4 className={cn(GUIDE_STYLES.cardTitle, 'mb-0')}>{competition.title}</h4>
+          <h4 className={cn(GUIDE_STYLES.cardTitle, 'mb-0')}>{tTitles(competition.titleKey)}</h4>
           <div className="flex items-center gap-2.5">
             {competition.levels.map((level) => (
               <SchoolLevelBadge key={level} level={level} />
@@ -164,7 +178,9 @@ export default function OtherCompetitionsSection({
 
       {/* Description and details */}
       <div className={GUIDE_STYLES.contentSpacing}>
-        <p className={cn(GUIDE_STYLES.textNormal, 'leading-relaxed')}>{competition.description}</p>
+        <p className={cn(GUIDE_STYLES.textNormal, 'leading-relaxed')}>
+          {tItems(competition.descriptionKey)}
+        </p>
         {competition.details && <BulletList items={competition.details} />}
       </div>
     </InfoCard>
@@ -173,17 +189,15 @@ export default function OtherCompetitionsSection({
   function renderTypeGroup(type: CompetitionType) {
     const typeConfig = {
       Team: {
-        title: GUIDE_TITLES.OTHER_COMPETITIONS_TEAM,
-        description:
-          'Tímové súťaže sú skvelou príležitosťou na zábavu s kamarátmi. Nie je teda prekvapením, že sú populárne a že ich je toľko.',
+        title: tGuide(`titles.${GUIDE_TITLES.OTHER_COMPETITIONS_TEAM}`),
+        description: tGuide('sections.otherCompetitions.team.description'),
         icon: Users,
         iconColor: 'text-green-400',
         iconBackground: 'bg-green-500/10',
       },
       Individual: {
-        title: GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL,
-        description:
-          'Individuálne súťaže, ktoré majú iný formát než matematická olympiáda. Všetky nižšie uvedené vyžadujú iba výsledok, čím sa od nej líšia.',
+        title: tGuide(`titles.${GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL}`),
+        description: tGuide('sections.otherCompetitions.individual.description'),
         icon: User,
         iconColor: 'text-cyan-400',
         iconBackground: 'bg-cyan-500/10',
@@ -210,8 +224,8 @@ export default function OtherCompetitionsSection({
 
   return (
     <GuideSection
-      title={GUIDE_TITLES.OTHER_COMPETITIONS}
-      description="Okrem olympiády a seminárov existuje mnoho ďalších súťaží s rôznymi formátmi, pričom väčšinou ide o jednodňové zábavné udalosti, na ktoré sa typicky netrénuje, ale o to menší nátlak na nich je 😌"
+      title={tGuide(`titles.${GUIDE_TITLES.OTHER_COMPETITIONS}`)}
+      description={tGuide('sections.otherCompetitions.description')}
       icon={{ type: 'lucide', icon: Star }}
       iconColor="text-violet-400"
       iconBackground="bg-violet-500/10"

@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl'
+
 import type { CommentDto, CommentTarget, UpdateCommentResult } from '../api/comment-api-types'
 import { updateComment } from '../api/comment-service'
 import { updateCommentInTree } from '../utils/comment-utils'
@@ -24,6 +26,10 @@ type UpdateCommentParams = {
  * @returns A React Query mutation object.
  */
 export function useUpdateComment() {
+  // Get the translations
+  const t = useTranslations('comments')
+
+  // Reuse the base comment mutation
   return useCommentMutation<UpdateCommentResult, UpdateCommentParams>({
     // Call the API
     apiFn: (apiCall, { commentId, target, content }) =>
@@ -43,9 +49,9 @@ export function useUpdateComment() {
     },
 
     // The reason shown in the auth prompt
-    authReason: 'upravovanie komentárov',
+    authReason: t('authReasons.editComment'),
 
     // The error message shown when the server craps out
-    errorMessage: 'Nepodarilo sa upraviť komentár',
+    errorMessage: t('errors.editFailed'),
   })
 }

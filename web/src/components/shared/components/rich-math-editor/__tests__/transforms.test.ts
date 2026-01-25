@@ -12,8 +12,16 @@ import {
   insertLink,
   insertSpoiler,
   isInMathMode,
+  type TransformLabels,
   wrapSelection,
 } from '../utils/transforms'
+
+/** Mock labels for testing localized transforms */
+const mockLabels: TransformLabels = {
+  spoilerLabel: 'Hidden text',
+  spoilerPlaceholder: 'hidden content',
+  headingPlaceholder: 'Heading',
+}
 
 /**
  * Creates a test context for the editor.
@@ -345,15 +353,15 @@ describe('createMarkdownLink', () => {
 describe('insertHeading', () => {
   it('inserts h3 heading with placeholder', () => {
     const context = createContext('', 0, 0)
-    const result = insertHeading(context)
-    expect(result.newText).toBe('### Nadpis')
+    const result = insertHeading(context, mockLabels)
+    expect(result.newText).toBe('### Heading')
     expect(result.cursorPosition).toBe(4) // after '### '
-    expect(result.selectionEnd).toBe(10) // end of 'Nadpis'
+    expect(result.selectionEnd).toBe(11) // end of 'Heading'
   })
 
   it('prefixes selected text on the line', () => {
     const context = createContext('My Title', 0, 8)
-    const result = insertHeading(context)
+    const result = insertHeading(context, mockLabels)
     expect(result.newText).toBe('### My Title')
     expect(result.cursorPosition).toBe(12) // At the end of the line
     expect(result.selectionEnd).toBeUndefined()
@@ -361,7 +369,7 @@ describe('insertHeading', () => {
 
   it('prefixes current line when cursor is mid-line', () => {
     const context = createContext('text here', 5, 5)
-    const result = insertHeading(context)
+    const result = insertHeading(context, mockLabels)
     expect(result.newText).toBe('### text here')
     // cursor at end of line: '### text here' length is 13
     expect(result.cursorPosition).toBe(13)
@@ -369,13 +377,13 @@ describe('insertHeading', () => {
 
   it('prefixes multiple lines', () => {
     const context = createContext('Line 1\nLine 2', 0, 13)
-    const result = insertHeading(context)
+    const result = insertHeading(context, mockLabels)
     expect(result.newText).toBe('### Line 1\n### Line 2')
   })
 
   it('prefixes multiple lines even if some are empty', () => {
     const context = createContext('Line 1\n\nLine 2', 0, 14)
-    const result = insertHeading(context)
+    const result = insertHeading(context, mockLabels)
     // insertLinePrefix will add prefix to empty line too -> "### "
     expect(result.newText).toBe('### Line 1\n### \n### Line 2')
   })
@@ -525,20 +533,20 @@ describe('handleListContinuation', () => {
 describe('insertSpoiler', () => {
   it('inserts spoiler with placeholder when nothing selected', () => {
     const context = createContext('text', 4, 4)
-    const result = insertSpoiler(context)
-    expect(result.newText).toBe('text:::spoiler[Skrytý text]\nskrytý obsah\n:::')
-    // text(4) + ":::spoiler[Skrytý text]\n" (24) = 28
+    const result = insertSpoiler(context, mockLabels)
+    expect(result.newText).toBe('text:::spoiler[Hidden text]\nhidden content\n:::')
+    // text(4) + ":::spoiler[Hidden text]\n" (length: 11 + 11 + 2 = 24) = 28
     expect(result.cursorPosition).toBe(28)
-    // selection covers 'skrytý obsah' (length 12)
-    expect(result.selectionEnd).toBe(40)
+    // selection covers 'hidden content' (length 14)
+    expect(result.selectionEnd).toBe(42)
   })
 
   it('wraps selected text in spoiler', () => {
     const context = createContext('hidden secret', 0, 13)
-    const result = insertSpoiler(context)
-    expect(result.newText).toBe(':::spoiler[Skrytý text]\nhidden secret\n:::')
-    // ":::spoiler[Skrytý text]\n" = 24 chars
-    expect(result.cursorPosition).toBe(24) // after ":::spoiler[Skrytý text]\n"
+    const result = insertSpoiler(context, mockLabels)
+    expect(result.newText).toBe(':::spoiler[Hidden text]\nhidden secret\n:::')
+    // ":::spoiler[Hidden text]\n" = 24 chars
+    expect(result.cursorPosition).toBe(24) // after ":::spoiler[Hidden text]\n"
     expect(result.selectionEnd).toBeUndefined() // no selection when text was already selected
   })
 })

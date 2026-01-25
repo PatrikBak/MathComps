@@ -1,4 +1,5 @@
 import { AlertTriangle, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Modal } from '@/components/shared/components/Modal'
@@ -35,12 +36,19 @@ export function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText = 'Potvrdiť',
-  cancelText = 'Zrušiť',
+  confirmText,
+  cancelText,
   variant = 'danger',
 }: ConfirmDialogProps) {
+  // Get translations
+  const tActions = useTranslations('ui.actions')
+
   // Whether the confirm action is currently loading
   const [isLoading, setIsLoading] = useState(false)
+
+  // Use translated defaults if not provided
+  const resolvedConfirmText = confirmText ?? tActions('confirm')
+  const resolvedCancelText = cancelText ?? tActions('cancel')
 
   /** Called when we are confirming the action with the main button */
   const handleConfirm = async () => {
@@ -101,7 +109,7 @@ export function ConfirmDialog({
           disabled={isLoading}
           className="px-4 py-2 text-sm font-medium text-gray-300 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {cancelText}
+          {resolvedCancelText}
         </button>
         <button
           type="button"
@@ -114,7 +122,7 @@ export function ConfirmDialog({
             variant === 'default' && 'bg-indigo-600 hover:bg-indigo-500 text-white'
           )}
         >
-          <span className={cn(isLoading ? 'invisible' : '')}>{confirmText}</span>
+          <span className={cn(isLoading ? 'invisible' : '')}>{resolvedConfirmText}</span>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 size={16} className="animate-spin" />

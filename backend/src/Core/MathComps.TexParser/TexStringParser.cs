@@ -1259,87 +1259,28 @@ public static class TexStringParser
     /// <returns>A list of command names found in all blocks.</returns>
     private static ImmutableHashSet<string> FindCommands(IEnumerable<ContentBlock> blocks)
     {
-        // Collect text surfaces from all relevant nodes.
-        var allTexts = new List<string>();
+        // Use ContentTree.Traverse to collect all text surfaces from PlainText and MathTex nodes.
+        var (_, collectedTexts) = ContentTree.Traverse(
+            [.. blocks],
+            ImmutableList<string>.Empty,
+            (node, texts) => node switch
+            {
+                // Collect text from leaf nodes that contain TeX commands
+                PlainText text => (node, texts.Add(text.Text)),
+                MathTex math => (node, texts.Add(math.Text)),
 
-        // Traverse sections and their content to capture all data from all content blocks
-        foreach (var block in blocks)
-            GatherBlockText(block, allTexts);
+                // All other nodes: pass through unchanged
+                _ => (node, texts)
+            }
+        );
 
         // Combine all captured text into a single blob for scanning.
-        var combined = allTexts.ToJoinedString(" ");
+        var combined = collectedTexts.ToJoinedString(" ");
 
         // Match backslash followed by Unicode letters (including diacritics)
         return [.. Regex.Matches(combined, @"\\[\p{L}]+").Select(match => match.Value[1..])];
     }
 
-    /// <summary>
-    /// Recursively walks a content block tree and collects displayable text for command scanning.
-    /// </summary>
-    /// <param name="block">The current block to inspect.</param>
-    /// <param name="collector">The output list that aggregates surface strings.</param>
-    private static void GatherBlockText(ContentBlock block, List<string> collector)
-    {
-        // Handle all types of blocks 
-        switch (block)
-        {
-            case Theorem theorem:
-                collector.AddRange(GatherFromRaw([theorem.Title, .. theorem.Body, .. theorem.Proof]));
-                break;
-
-            case Exercise exercise:
-                collector.AddRange(GatherFromRaw([exercise.Title, .. exercise.Body, .. exercise.Solution]));
-                break;
-
-            case Problem problem:
-                collector.AddRange(GatherFromRaw([problem.Title, .. problem.Body, .. problem.Hints.SelectMany(h => h), .. problem.Solution]));
-                break;
-
-            case Example example:
-                collector.AddRange(GatherFromRaw([.. example.Body, .. example.Solution]));
-                break;
-
-            case RawContentBlock rawBlock:
-                collector.AddRange(GatherFromRaw([rawBlock]));
-                break;
-
-            default: throw new NotImplementedException($"Unhandled block type: {block.GetType()}");
-        }
-    }
-
-    /// <summary>
-    /// Helper that converts a sequence of raw blocks into plain text surfaces.
-    /// </summary>
-    /// <param name="rawBlocks">A sequence of raw content blocks.</param>
-    /// <returns>A list of strings extracted from the raw blocks.</returns>
-    private static IEnumerable<string> GatherFromRaw(IEnumerable<RawContentBlock?> rawBlocks)
-        // Map raw blocks to strings based on their runtime type.
-        => rawBlocks.SelectMany(rawBlock => rawBlock switch
-        {
-            // Null is fine
-            null => [],
-
-            // No text in images
-            Image => [],
-
-            // Text directly here
-            PlainText text => [text.Text],
-            MathTex math => [math.Text],
-
-            // Recurse into containers
-            Paragraph paragraph => GatherFromRaw(paragraph.Content),
-            BoldText bold => GatherFromRaw(bold.Content),
-            ItalicText italic => GatherFromRaw(italic.Content),
-            QuoteText quote => GatherFromRaw(quote.Content),
-            Footnote footnote => GatherFromRaw(footnote.Content),
-            Link link => GatherFromRaw(link.Content),
-
-            // Handle all blocks from all items
-            ItemList list => GatherFromRaw(list.Items.Flatten()),
-
-            // Unhandled cases
-            _ => throw new NotImplementedException($"Unhandled block type: {rawBlock.GetType()}"),
-        });
-
     #endregion
 }
+

@@ -1,66 +1,14 @@
-'use client'
+import { auth } from '@clerk/nextjs/server'
 
-import { useToggle } from '@mantine/hooks'
-import { Menu } from 'lucide-react'
-
-import MathCompsLogo from '@/components/layout/MathCompsLogo'
-import UserMenu from '@/components/layout/UserMenu'
-import { NavLink } from '@/components/shared/components/NavLink'
-import { ROUTES } from '@/constants/routes'
-
-import { cn } from '../shared/utils/css-utils'
-import { MobileNavigationDrawer } from './MobileNavigationDrawer'
+import HeaderClient from './HeaderClient'
 
 /**
- * The main site sticky header with logo + navigation + login button / user-data
- *
- * @remarks **IMPORTANT**: If the header height changes, make sure to update --scroll-offset in globals.css for all breakpoints
+ * The server-side component that will "stream in" later.
  */
-export default function Header() {
-  // Keep track of whether the mobile menu is open
-  const [isMobileNavigationOpen, toggleMobileNavigationOpen] = useToggle()
+export async function Header() {
+  // Fetch authentication state
+  const { isAuthenticated } = await auth()
 
-  return (
-    <>
-      <header className="sticky top-0 left-0 right-0 bg-slate-950/95 z-50">
-        <nav className="max-w-7xl mx-auto flex justify-between items-center px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
-          <MathCompsLogo />
-
-          <div className="flex items-center gap-3">
-            {/* Desktop Navigation */}
-            <div
-              className={cn(
-                'hidden lg:flex items-center gap-6 xl:gap-8 text-xl font-semibold ml-8 xl:ml-12 py-2'
-              )}
-            >
-              <NavLink href={ROUTES.PROBLEMS}>Úlohy</NavLink>
-              <NavLink href={ROUTES.HANDOUTS}>Materiály</NavLink>
-              <NavLink href={ROUTES.GUIDE}>Rozcestník</NavLink>
-              <NavLink href={ROUTES.NEWS}>Novinky</NavLink>
-              <NavLink href={ROUTES.ABOUT}>O projekte</NavLink>
-
-              {/* Auth - UserMenu handles all states (loading, logged out, logged in) */}
-              <UserMenu />
-            </div>
-
-            {/* Mobile Navigation Button */}
-            <button
-              onClick={() => toggleMobileNavigationOpen()}
-              className="lg:hidden text-white p-2 rounded-lg hover:bg-slate-800/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-              aria-label="Otvoriť navigáciu"
-              aria-expanded={isMobileNavigationOpen}
-            >
-              <Menu width={24} height={24} />
-            </button>
-          </div>
-        </nav>
-      </header>
-
-      {/* Mobile maburger menu */}
-      <MobileNavigationDrawer
-        isOpen={isMobileNavigationOpen}
-        onClose={toggleMobileNavigationOpen}
-      />
-    </>
-  )
+  // Pass it to the client component which will then render correct layout
+  return <HeaderClient isAuthenticated={isAuthenticated} />
 }

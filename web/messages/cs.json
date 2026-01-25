@@ -1,0 +1,995 @@
+{
+  "about": {
+    "author": {
+      "alt": "Profilová fotka Patrika Baka",
+      "description": "Jmenuji se <strong>Patrik Bak</strong>. Jako bývalý trojnásobný účastník a dvojnásobný medailista na Mezinárodních matematických olympiádách (IMO), ale také autor mnoha soutěžních úloh (včetně dvou pro IMO), mám k olympiádní matematice hluboký vztah. Už delší dobu mě baví spojovat matematiku s programováním. Tento zájem v minulosti vedl k projektu <strong>GeoGen</strong>, nástroji pro automatické generování geometrických úloh. <strong>MathComps</strong> je dalším logickým krokem na této cestě – snahou vytvořit komplexní a moderní platformu pro komunitu matematické olympiády. Při jejím budování se opírám nejen o vlastní poznatky a zkušenosti, ale díky porozumění a podpoře mnoha skvělých lidí z komunity MO i o jejich připomínky a nápady.",
+      "title": "O autorovi"
+    },
+    "hero": {
+      "title1": "Vytvořeno z nadšení pro",
+      "title2": "matematiku"
+    },
+    "roadmap": {
+      "categories": {
+        "community": "Komunita",
+        "competitions": "Soutěže",
+        "content": "Obsah",
+        "tools": "Nástroje"
+      },
+      "description": "Toto je jen začátek projektu a v plánu je mnoho nových funkcí.",
+      "features": {
+        "aiHints": "AI nápovědy k úlohám",
+        "aiPregrading": "AI předhodnocení",
+        "archiveSKCZ": "Archiv SK/CZ úloh",
+        "contributorPlatform": "Platforma pro přispěvatele",
+        "customLists": "Vlastní seznamy úloh",
+        "discussions": "Diskuze k obsahu",
+        "exportPdfTex": "Export do PDF a TeX",
+        "filterFavorites": "Filtrování oblíbených úloh",
+        "foreignTasks": "Úlohy ze zahraničních soutěží",
+        "fullLocalization": "Plná lokalizace (CZ/EN)",
+        "introTexts": "Úvodní studijní texty",
+        "leaderboards": "Žebříčky a medaile",
+        "likeTasks": "Lajkování úloh",
+        "moreTexts": "Doplnění studijních textů",
+        "newsSection": "Sekce s novinkami",
+        "officialTraining": "Oficiální tréninkové soutěže",
+        "personalizedRecs": "Personalizovaná doporučení úloh",
+        "privateComps": "Možnost soukromých soutěží",
+        "recommendSimilar": "Doporučení podobných úloh",
+        "reportBugs": "Možnost reportovat chyby",
+        "trackProgress": "Sledování progresu v řešení",
+        "trainingPlatform": "Platforma pro tréninkové soutěže",
+        "translationsCZEn": "Překlady úloh (CZ/EN)",
+        "userProfiles": "Uživatelské profily"
+      },
+      "footer": "Tento seznam se bude v čase měnit, klidně <link>přispějte svými nápady</link>.",
+      "implementedLabel": "Zelené funkce jsou již dostupné!",
+      "title": "Funkcionality"
+    },
+    "story": {
+      "text1": "Svět matematických soutěží je velký, plný příkladů, zdrojů, materiálů. Není však žádné místo, které by příjemně sjednocovalo to nejlepší a zejména začátečníkům poskytovalo snadnou cestu, jak do světa soutěží proniknout a neztratit se.",
+      "text2": "Projekt <strong>MathComps</strong> se zrodil s cílem tento stav změnit – vytvořit jedno místo pro celou komunitu, kde bude vše potřebné: přehledný archiv úloh, studijní materiály, diskuze k úlohám a soutěžím, personalizované učení a podobně, fantazii se meze nekladou.",
+      "text3": "Aktuální verze vyžadovala spoustu času a full-time zapálení, které by nebylo možné bez podpory našeho hlavního sponzora, firmy <link>Wincent</link>.",
+      "text4": "Založena bývalými mimořádně úspěšnými řešiteli Matematické olympiády, má velmi blízko k myšlenkám všestranné podpory rozvoje matematických talentů. Tímto jim patří velký dík.",
+      "title": "Proč MathComps vznikl"
+    },
+    "technologies": {
+      "description": "Přehled klíčových technologií, které pohánějí MathComps.",
+      "title": "Technologie"
+    }
+  },
+  "apiErrors": {
+    "FILE_TOO_LARGE": "Soubor je příliš velký. Maximum: {max} MB",
+    "INVALID_FILE_TYPE": "Nepovolený typ souboru",
+    "INVALID_REQUEST": "Neplatný požadavek",
+    "SERVER_ERROR": "Chyba serveru",
+    "UNAUTHORIZED": "Pro tuto akci musíte být přihlášeni",
+    "UPLOAD_URL_FAILED": "Nepodařilo se získat URL pro nahrávání",
+    "VALIDATION_FAILED": "Neplatné údaje ve formuláři"
+  },
+  "auth": {
+    "back": "Zpět",
+    "codeFromEmail": "Kód z emailu",
+    "confirmPassword": "Potvrdit heslo",
+    "continue": "Pokračovat",
+    "continueWithEmail": "Pokračovat s emailem",
+    "emailLabel": "Email",
+    "enterCode": "Zadejte 6místný kód",
+    "enterEmail": "Zadejte email",
+    "enterName": "Zadejte jméno nebo přezdívku",
+    "enterNewPassword": "Zadejte nové heslo",
+    "enterPassword": "Zadejte heslo",
+    "enterPasswordAgain": "Zadejte heslo znovu",
+    "forgotPassword": "Zapomněli jste heslo?",
+    "headers": {
+      "createAccount": "VYTVOŘTE SI ÚČET",
+      "enterCode": "ZADÁNÍ KÓDU",
+      "login": "PŘIHLASTE SE",
+      "loginOrRegister": "PŘIHLÁŠENÍ / REGISTRACE",
+      "newPassword": "NOVÉ HESLO",
+      "passwordReset": "OBNOVENÍ HESLA",
+      "verifyEmail": "OVĚŘENÍ EMAILU"
+    },
+    "loadingButton": "Načítám přihlašovací prvek",
+    "login": "Přihlásit se",
+    "loginRequired": "Pro {reason} se musíte přihlásit",
+    "nameOrNickname": "Jméno nebo přezdívka",
+    "newPassword": "Nové heslo",
+    "or": "NEBO",
+    "password": "Heslo",
+    "passwordResetEmailSent": "Email s kódem pro obnovení hesla byl odeslán.",
+    "passwordResetSuccess": "Heslo bylo úspěšně změněno! Přesměrovávám vás...",
+    "register": "Registrovat se",
+    "resetPassword": "Obnovit heslo",
+    "sendCode": "Odeslat kód",
+    "signIn": "Přihlásit se",
+    "signOut": "Odhlásit se",
+    "termsAgreement": "Pokračováním souhlasíte s",
+    "termsLink": "podmínkami a ochranou soukromí",
+    "useDiscord": "Použijte Discord účet",
+    "useGithub": "Použijte GitHub účet",
+    "useGoogle": "Použijte Google účet",
+    "verificationSent": "Ověřovací kód byl odeslán",
+    "verifyCode": "Ověřit kód",
+    "verifyEmail": "Ověřit email"
+  },
+  "clerkErrors": {
+    "form_code_incorrect": "Nesprávný kód.",
+    "form_identifier_exists": "Účet s tímto emailem již existuje",
+    "form_identifier_not_found": "Nesprávný email nebo heslo",
+    "form_password_incorrect": "Nesprávný email nebo heslo",
+    "form_password_length_too_short": "Heslo musí mít alespoň 8 znaků",
+    "form_password_pwned": "Toto heslo bylo nalezeno v databázi úniku dat. Použijte jiné heslo.",
+    "form_verification_failed": "Ověření kódu selhalo. Zkuste to prosím znovu.",
+    "generic": "Vyskytla se chyba. Zkuste to prosím znovu.",
+    "session_already_exists": "Už jste přihlášeni. Obnovte stránku.",
+    "session_exists": "Už jste přihlášeni. Obnovte stránku.",
+    "too_many_attempts": "Příliš mnoho pokusů. Zkuste to prosím později."
+  },
+  "comments": {
+    "authReasons": {
+      "addComment": "přidání komentářů",
+      "deleteComment": "odstraňování komentářů",
+      "editComment": "upravování komentářů",
+      "likeComment": "lajkování komentářů"
+    },
+    "avatarAlt": "Avatar uživatele {author}",
+    "cancelDelete": "Zrušit",
+    "delete": "Smazat",
+    "deleteComment": "Smazat komentář",
+    "deleteConfirmMessage": "Opravdu chcete smazat tento komentář? Tuto akci nelze vrátit zpět.",
+    "deleted": "Komentář byl smazán",
+    "edit": "Upravit",
+    "edited": "(upraveno)",
+    "editPlaceholder": "Upravit komentář...",
+    "empty": "Zatím žádné komentáře. Buď první!",
+    "errors": {
+      "addFailed": "Nepodařilo se přidat komentář",
+      "deleteFailed": "Nepodařilo se odstranit komentář",
+      "editFailed": "Nepodařilo se upravit komentář",
+      "likeFailed": "Nepodařilo se změnit stav lajku"
+    },
+    "hideReplies": "Skrýt odpovědi",
+    "lastEdited": "Naposledy upraveno {date}",
+    "like": "To se mi líbí",
+    "loadError": "Nepodařilo se načíst komentáře. Zkuste to později.",
+    "loginRequired": "Pro přidání komentáře musíte být přihlášeni.",
+    "reply": "Odpovědět",
+    "replyPlaceholder": "Napiš odpověď...",
+    "show": "Zobrazit",
+    "showReplies": "Zobrazit {count}",
+    "unlike": "Zrušit to se mi líbí",
+    "writePlaceholder": "Napiš komentář..."
+  },
+  "common": {
+    "language": {
+      "change": "Změnit jazyk",
+      "label": "Jazyk",
+      "switchTo": "Přepnout na {language}"
+    },
+    "loading": "Načítá se...",
+    "profile": "Profil",
+    "redirecting": "Přesměrovávám..."
+  },
+  "contact": {
+    "email": "Email",
+    "emailPlaceholder": "vas@email.cz",
+    "message": "Zpráva",
+    "messagePlaceholder": "Sem napište text vaší zprávy...",
+    "name": "Jméno",
+    "namePlaceholder": "Jan Novák",
+    "reasons": {
+      "contentContribution": "Pomoc s obsahem",
+      "featureIdeas": "Nápady na funkce",
+      "feedback": "Zpětná vazba",
+      "sponsorship": "Sponzorství"
+    },
+    "selectPlaceholder": "Vybrat...",
+    "sendFailed": "Zprávu se nepodařilo odeslat",
+    "sendFailedRetry": "Zprávu se nepodařilo odeslat. Zkuste to znovu později.",
+    "sending": "Odesílám...",
+    "sendMessage": "Odeslat zprávu",
+    "subject": "Předmět",
+    "successMessage": "Zpráva úspěšně poslána! Brzy se vám ozveme.",
+    "title": "Napište nám",
+    "websiteLabel": "Webová stránka"
+  },
+  "countries": {
+    "CZ": "Česko",
+    "EN": "English",
+    "INTERNATIONAL": "Mezinárodní",
+    "PL": "Polsko",
+    "SK": "Slovensko"
+  },
+  "email": {
+    "footer": {
+      "privacy": "Soukromí a podmínky"
+    },
+    "passwordReset": {
+      "description": "Obdrželi jsme požadavek na obnovení hesla pro váš MathComps účet. Pro pokračování použijte tento ověřovací kód:",
+      "ignore": "Pokud jste nežádali o obnovení hesla, tento email ignorujte a vaše heslo zůstane nezměněno.",
+      "previewText": "Obnovení hesla pro váš MathComps účet",
+      "requestFor": "Požadavek pro:",
+      "subject": "Obnovení hesla - MathComps",
+      "title": "Obnovení hesla 🔐",
+      "validity": "Tento kód je platný <strong>10 minut</strong>.",
+      "warning": "<strong>⚠️ Pokud jste o obnovení hesla nežádali, tento email ignorujte.</strong>"
+    },
+    "signup": {
+      "description": "Pro dokončení registrace použijte tento ověřovací kód:",
+      "ignore": "Pokud jste nevytvářeli účet na MathComps, tento email ignorujte.",
+      "previewText": "Vítejte v MathComps! Dokončete svou registraci.",
+      "registrationFor": "Registrace pro:",
+      "subject": "Vítejte v MathComps - Ověřovací kód",
+      "title": "Vítejte v MathComps! 🎉",
+      "validity": "Tento kód je platný <strong>10 minut</strong>."
+    }
+  },
+  "footer": {
+    "description": "Dlouhodobou vizí projektu je vytvořit platformu pro začínající i pokročilé řešitele matematických soutěží, jejich tutory a všechny příznivce.",
+    "navigation": "Navigace",
+    "privacy": "Soukromí a podmínky",
+    "project": "Projekt"
+  },
+  "guide": {
+    "hero": {
+      "description": "Seznam soutěží a různých užitečných odkazů týkajících se soutěžní matematiky. Plán je tyto sekce průběžně doplňovat o ty nejlepší věci.",
+      "title": "Rozcestník soutěžní matematiky"
+    },
+    "schoolLevels": {
+      "elementary": "ZŠ",
+      "highSchool": "SŠ"
+    },
+    "sections": {
+      "competitions": {
+        "description": "Nejvýznamnější soutěží je Matematická olympiáda (MO). Je však spousta dalších soutěží a aktivit, které jsou dobré jako trénink pro MO nebo i samy o sobě 😇."
+      },
+      "howToStart": {
+        "description": "Na začátku je vždy mnoho možností, jak začít. Potom je mnoho možností, jak postupovat. Následující rady mají za cíl s tímto procesem pomoci.",
+        "finalNote": {
+          "text": "Základem je bavit se procesem. Svět soutěží a seminářů přitahuje mnoho lidí a všichni nemohou být nejlepší, což ale vůbec neznamená, že to všem nemůže změnit život k lepšímu 😊",
+          "title": "Na závěr"
+        },
+        "steps": {
+          "beginnings": {
+            "points": [
+              "Vyzkoušej korespondenční semináře. Mají úlohy vhodné pro začátečníky a poskytují zpětnou vazbu. Zúčastni se jejich soustředění, kde se naučíš, poznáš lidi a zabavíš.",
+              "Hledej matematické kroužky na škole nebo v okolí. Zeptej se svého učitele matematiky, jestli o něčem neví.",
+              "Zkus řešení úloh s někým dalším, můžete se motivovat a bavit navzájem.",
+              "Najdi si také studijní materiály pro systematické studium, doporučení najdeš o kousek výše."
+            ],
+            "title": "Začátky jsou skvělé, protože člověk se rychle zlepšuje"
+          },
+          "training": {
+            "points": [
+              "Matematiku je třeba aktivně trénovat, ani svaly se nezískají koukáním na videa o cvičení. Vždy je lepší nejprve zkusit úlohu řešit samostatně. Proces přemýšlení, zkoušení a i selhávání pomáhá mysli učit se.",
+              "Až po troše snahy je třeba se podívat na vzorové řešení úloh, které jsi nevyřešil. Mozek se z nich více naučí, když se předtím trápil.",
+              "Určitě se ale podívej i na vzorová řešení úloh, které jsi vyřešil, častokrát se naučíš jiné postupy, možná i efektivnější.",
+              "Někomu více vyhovují systematické materiály a knihy, někomu řešení náhodných úloh. Ideální je věci kombinovat, experimentovat a najít to, co tě baví nejvíce."
+            ],
+            "title": "Principy dobrého tréninku"
+          }
+        }
+      },
+      "mathOlympiad": {
+        "and": "a",
+        "categoriesIntro": "Matematická olympiáda je rozdělena do dvou hlavních částí:",
+        "categoriesOutro": "kategorie, každá s vlastními ročníkovými úrovněmi a koly.",
+        "competitions": {
+          "caps": {
+            "description": "Přípravná soutěž pro IMO týmy účastnících se zemí",
+            "details": ["Formát soutěže jako IMO", "Poslední roky zpravidla na ISTA v Rakousku"]
+          },
+          "cpsj": {
+            "description": "Soutěž pro šest nejlepších prváků SŠ (a mladších) z účastnických zemí",
+            "details": [
+              "Kvalifikace přes speciální výběrové soustředění",
+              "V Česku výběr na základě výsledků kategorie A, na Slovensku kategorie C",
+              "Individuální a týmová část",
+              "Tříčlenné týmy (1 člen z každé země) a losované náhodně"
+            ]
+          },
+          "egmo": {
+            "description": "Soutěž s cílem povzbudit účast dívek v matematických soutěžích",
+            "details": [
+              "6 nejlepších řešitelek ze země",
+              "Kvalifikace přes speciální výběrové soustředění",
+              "Pozvánka na něj na základě výsledků krajského kola kategorie A",
+              "55 a více zemí (i neevropské)",
+              "Formát soutěže jako na IMO"
+            ]
+          },
+          "imo": {
+            "description": "Nejprestižnější mezinárodní olympiáda",
+            "details": [
+              "6 nejlepších řešitelů ze země",
+              "100 a více zemí",
+              "2 soutěžní dny, každý má 3 příklady na 4 a půl hodiny"
+            ]
+          },
+          "memo": {
+            "description": "Soutěž pro nejlepší budoucí potenciální IMO účastníky",
+            "details": [
+              "6 nejlepších řešitelů nejedoucích na IMO, kteří tam ale mohou jet za rok",
+              "11 a více zemí",
+              "Individuální a týmová část"
+            ]
+          }
+        },
+        "description": "Soutěž v řešení zajímavých matematických úloh pro základní i střední školy, která začíná domácím kolem a vrcholí nejprestižnější mezinárodní matematickou olympiádou",
+        "elementary": "základoškolská",
+        "elementaryCategories": {
+          "point1": "Z5 – Z9 podle ročníků ZŠ (a jim odpovídajících ročníků osmiletých gymnázií)",
+          "point2": "V každé kategorii domácí a okresní kola",
+          "point3": "V kategorii Z9 navíc krajské kolo a v Česku i celostátní",
+          "title": "ZŠ kategorie"
+        },
+        "highSchool": "středoškolská",
+        "highSchoolCategories": {
+          "point1": "C pro 1., B pro 2., A pro 3. a 4. ročník (a jim odpovídající ročníky osmiletých gymnázií)",
+          "point2": "V každé kategorii domácí, školní a krajské kolo",
+          "point3": "V kategorii A navíc celostátní kolo, z něj možný postup na výběrové soustředění",
+          "point4": "Z výběrového soustředění se dá postoupit na <strong>mezinárodní soutěže</strong>",
+          "point5": "Zábavné vícedenní události, kde matika bývá jen část programu",
+          "point6": "Střídání hostitelských zemí, výlety na nová místa tedy zaručeny",
+          "selectionNote": "Obě země mají různá pravidla pro postup, na Slovensku je k tomu třeba ještě kvalifikace, viz stránka soutěže",
+          "title": "SŠ kategorie"
+        },
+        "imoLink": "IMO",
+        "organizations": {
+          "cz": "Česká MO",
+          "sk": "Slovenská MO"
+        },
+        "otherCompetitions": "Kromě toho jsou zde další akce:",
+        "sharedTasks": "Česko a Slovensko má společné úlohy, ale samostatné organizace",
+        "tip": "Netřeba se bát zkusit řešit vyšší kategorie, úlohy často nevyžadují složitější znalosti a kategorie se prolínají. Nejlepší z nejlepších často řešili i vyšší kategorie."
+      },
+      "otherCompetitions": {
+        "description": "Kromě olympiády a seminářů existuje mnoho dalších soutěží s různými formáty, přičemž většinou jde o jednodenní zábavné události, na které se typicky netrénuje, ale o to menší nátlak na nich je 😌",
+        "individual": {
+          "description": "Individuální soutěže, které mají jiný formát než matematická olympiáda. Všechny níže uvedené vyžadují pouze výsledek, čímž se od ní liší."
+        },
+        "items": {
+          "attomat": "Online soutěž s úlohami na výsledek",
+          "brloh": "Soutěž v řešení matematicko-logických úloh",
+          "duogeo": "Soutěž dvojic v řešení geometrie olympiádního typu",
+          "klokan": "Soutěž s výběrem z možností",
+          "logickaOlympiada": "Ze zřejmých důvodů populární soutěž mezi matematiky",
+          "maks": "Soutěž, kde se úlohy řeší doma a výsledky nahrávají online",
+          "maso": "Soutěž s úlohami jako v Náboji, kde se za výsledky odemykají tahy do hry",
+          "mathing": "Online soutěž s úlohami jako v olympiádě",
+          "mathrace": "Online soutěž s úlohami jako v Náboji, kde lze používat software a programovat",
+          "naboj": "Nejpopulárnější týmová soutěž v našich končinách s úlohami na výsledek",
+          "pangea": "Soutěž podobná Matematickému klokanovi s tematickými úlohami",
+          "purpleComet": "Mezinárodní soutěž podobná Náboji s více než 80 zeměmi",
+          "pytagoriada": "Soutěž, kde záleží na rychlosti a správnosti výsledků"
+        },
+        "team": {
+          "description": "Týmové soutěže jsou skvělou příležitostí k zábavě s kamarády. Není tedy překvapením, že jsou populární a že jich je tolik."
+        },
+        "titles": {
+          "attomat": "Attomat",
+          "brloh": "Brloh",
+          "duogeo": "DuoGeo",
+          "klokan": "Matematický klokan",
+          "logickaOlympiada": "Logická olympiáda",
+          "maks": "Maks a Maksík",
+          "maso": "Maso",
+          "mathing": "Mathing",
+          "mathrace": "Mathrace",
+          "naboj": "Náboj & Náboj Junior",
+          "pangea": "Pangea",
+          "purpleComet": "Purple Comet",
+          "pytagoriada": "Pytagoriáda"
+        }
+      },
+      "resources": {
+        "description": "Stručný seznam těch nejdůležitějších studijních/komunitních zdrojů ze světa soutěžní matematiky, které se určitě vyplatí znát.",
+        "programs": {
+          "geogebra": "Fantastická pomůcka při učení se geometrie, případně nástroj pro kreslení grafů. Dobře narýsovaný obrázek může dělat rozdíl v tom, jestli řešení vidíme nebo ne, no a <app>GeoGebra</app> je umí rýsovat přesně 📐.",
+          "overleaf": "Online prostředí pro psaní v LaTeXu, což je standard pro matematiku. Obsahuje návody pro začátečníky na LaTeX samotný.",
+          "wolframalpha": "Rychlý a spolehlivý nástroj na řešení rovnic, rozkládání čísel na součin, počítání sum, nebo i derivování, integrování atd."
+        },
+        "studyTexts": {
+          "guidedProblems": "Vyplatí se řešit si i starší domácí kola MO, protože v rámci nich se vydávají návodné a doplňující úlohy (i s řešeními/odkazy na ně), což je dobrý způsob jak nasát nějaké téma.",
+          "intro": "V této sekci si shrneme některé studijní materiály. Priorita je poskytnout začátečníkům přehled, kam se mohou obrát.",
+          "kmsCollection": "Starší, ale nadčasový materiál. Příjemná zdůvodnění a krátké úvody do všech témat s mnoha příklady ze semináře KMS.",
+          "ourMaterials": "Veřejně dostupných materiálů pro začátečníky s dobrými vysvětleními myšlenek není mnoho. Naše materiály na této stránce mají ambici tuto mezeru zaplnit. Průběžně se jejich sbírka bude rozrůstat.",
+          "praseLibrary": "Velká sbírka materiálů ze semináře PraSe. Pro samostatné studium jsou velmi zajímavé takzvané seriály, což jsou tematické texty.",
+          "sampleSolutions": "Nejlehčí úlohy <link>seminářů</link>, případně nižších kategorií MO, jsou dobrým zdrojem. V seminářích jsou řešení psaná více ve stylu, jak na úlohy přijít, zatímco v olympiádě více ve stylu, jak je napsat, když už na to někdo přišel.",
+          "titles": {
+            "guidedProblems": "Návodné úlohy k domácím kolům MO",
+            "kmsCollection": "KMS sbírka",
+            "ourMaterials": "Naše materiály",
+            "praseLibrary": "PraSe knihovna",
+            "sampleSolutions": "Vzorová řešení"
+          }
+        },
+        "tips": {
+          "ai": "Všichni vidíme, že AI se v matice zlepšuje. Může to být rychlá pomůcka při učení se nových věcí. Jen je třeba mít se na pozoru, jelikož ona to nemá vždy pravdu a umí si to povymýšlet kde-co 🙃",
+          "footer": "Je možné, že se ptáte, proč tu není to a to. Je to zejména proto, že tento rozcestník je psán zejména pro začátečníky, a zahlcení množstvím materiálů hned v úvodu nemusí být produktivní. Průběžně budou přibývat odkazy na další studium dovnitř materiálů na stránce, případně později může vzniknout stránka s návodem pro pokročilé, kde bude větší databáze. Ono i tak, v PraSe knihovně je toho fakt hodně 😜."
+        },
+        "websites": {
+          "aops": "Asi největší a nejdůležitější stránka o olympiádní matematice na světě. Fóra, obrovské sbírky úloh, články, vše na jednom místě. Nutnost znát.",
+          "evanchen": "Osobní stránka světoznámého olympiádního experta. Přes jeho stránku se lze proklikat na spoustu nejen jeho materiálů nebo dalších zdrojů a informací.",
+          "mods": "Velký mezinárodní Discord server, kde lze diskutovat s lidmi z celého světa. Už více než 2000 dní připravuje rubriku úloha dne, přičemž je možné přistoupit ke starším úlohám podle oblastí a hodnocení obtížnosti."
+        },
+        "youtube": {
+          "3blue1brown": "Unikátní vizuální zpracování všemožných témat z matematiky.",
+          "michaelpenn": "Vysvětlení řešení soutěžních úloh ze soutěží z celého světa před tabulí.",
+          "mindyourdecisions": "Videa s řešením úloh všech obtížností, od přímo popularizačních až po zajímavé olympiádní."
+        }
+      },
+      "seminars": {
+        "countries": {
+          "CZ": "České",
+          "INTERNATIONAL": "Mezinárodní",
+          "SK": "Slovenské"
+        },
+        "description": "Korespondenční semináře jsou nedílnou součástí česko-slovenské matematické kultury, čemuž odpovídá i jejich počet.",
+        "features": [
+          "Řešení úloh doma a zasílání řešení poštou (odtud název), i když teď už spíše online",
+          "Několik sérií úloh během roku",
+          "Soustředění nabitá zábavou a matikou jako neodmyslitelná součást seminářů"
+        ],
+        "items": {
+          "iks": "Česko-slovenský seminář pro řešitele s ambicí uspět na mezinárodních kolech",
+          "kokos": "Pro 6.-9. ročník ZŠ",
+          "malynar": "Pro 4.-6. ročník ZŠ",
+          "matik": "Pro 7.-9. ročník ZŠ",
+          "mbl": "Původně polský, nyní již mezinárodní seminář s jedním kolem a jedním dlouhým soustředěním",
+          "sezam": "Pro 7.-9. ročník ZŠ",
+          "sezamko": "Pro 4.-6. ročník ZŠ"
+        },
+        "levels": {
+          "elementary": {
+            "description": "ZŠ seminářů je opravdu dost. Většina z nich je pro všeobecně druhý stupeň ZŠ, přičemž ale mají škálované příklady pro všechny."
+          },
+          "highSchool": {
+            "description": "Dva slovenské, dva české a jeden česko-slovenský. Kromě toho mnoho česko-slovenských studentů se účastní i MBL. O zábavu opravdu není nouze."
+          }
+        },
+        "tip": "Mnoho lidí řeší současně více seminářů, a to jak na ZŠ, tak na SŠ. Je také běžné pro Slováky řešit české semináře a naopak. Není náhoda, že mezi nejlepšími řešiteli MO a seminářů je velký překryv 😉"
+      },
+      "whyCompetitions": {
+        "benefits": {
+          "career": {
+            "text": "Lidé z prostředí matematických soutěží jsou ti nejžádanější na různé pozice vyžadující řešení těžkých problémů, např. v oblasti AI, algoritmického obchodování atd. Díky nabytým schopnostem a kontaktům z komunity je pak snadno získávají.",
+            "title": "Velké uplatnění"
+          },
+          "community": {
+            "text": "Prostředí soutěží a soustředění je velmi komunitně orientované a bez toho by mnohé ani neexistovaly. Mnoho lidí si v těchto komunitách našlo přátele a partnery na celý život.",
+            "title": "Komunita a přátelství"
+          },
+          "logic": {
+            "text": "Matematické soutěže rozvíjí schopnost analýzy problémů a hledání kreativních řešení. Tyto dovednosti jsou pak přenositelné do všech sfér života, jelikož problémy je třeba řešit všude.",
+            "title": "Rozvoj logického myšlení"
+          },
+          "potential": {
+            "text": "Mnoho lidí často neví, čeho je jejich mozek schopen, když se snaží. Soutěže poskytují bezpečné prostředí toto otestovat, a pro mnohé jsou tak začátkem jejich budoucí cesty za kariérním i osobním růstem.",
+            "title": "Objevení potenciálu"
+          }
+        },
+        "description": "Matematické soutěže nejsou jen o soutěžení a matematice 🙂."
+      }
+    },
+    "titles": {
+      "competitions": "Seznam soutěží",
+      "howToStart": "Jak začít i pokračovat",
+      "mathOlympiad": "Matematická olympiáda",
+      "otherCompetitions": "Další soutěže",
+      "otherCompetitionsIndividual": "Individuální soutěže",
+      "otherCompetitionsTeam": "Týmové soutěže",
+      "programs": "Programy a nástroje",
+      "resources": "Další odkazy",
+      "seminars": "Korespondenční semináře",
+      "seminarsElementary": "ZŠ semináře",
+      "seminarsHighSchool": "SŠ semináře",
+      "studyTexts": "Studijní texty",
+      "websites": "Webstránky a komunity",
+      "whyCompetitions": "Proč matematické soutěže?",
+      "youtube": "YouTube kanály"
+    }
+  },
+  "handouts": {
+    "aria": {
+      "handoutComments": "Komentáře k materiálu",
+      "openHandout": "Otevřít materiál: {title}"
+    },
+    "environments": {
+      "example": "Příklad",
+      "exercise": "Cvičení",
+      "problem": "Úloha",
+      "slugs": {
+        "example": "priklad",
+        "exercise": "cviceni",
+        "problem": "uloha",
+        "theorem": "tvrzeni"
+      },
+      "theorem": "Tvrzení"
+    },
+    "hero": {
+      "description": "Připravujeme materiály určené pro řešitele začínající se středoškolskou Matematickou olympiádou. Cílem je, aby byly zajímavé i pro zkušenější řešitele díky postupně gradujícím úlohám. Materiály se budou tvořit průběžně ve školním roce 2025/2026.",
+      "title": "Přehled materiálů"
+    },
+    "labels": {
+      "author": "Autor",
+      "authors": "Autoři",
+      "comments": "Komentáře",
+      "hint": "Nápověda",
+      "proof": "Důkaz",
+      "sectionLabel": "Materiály",
+      "solution": "Řešení"
+    }
+  },
+  "home": {
+    "contribute": {
+      "badge": "Otevřený projekt",
+      "content": {
+        "text": "Pokud máte zájem přispívat materiály nebo jinými užitečnými články, určitě <link>se ozvěte</link>.",
+        "title": "Tvorba obsahu"
+      },
+      "description": "MathComps je otevřená platforma a každá pomoc je nesmírně cenná.",
+      "development": {
+        "text": "Jste programátor? Podívejte se na <link>zdrojový kód na GitHubu</link> a klidně přispějte.",
+        "title": "Vývoj a kód"
+      },
+      "feedback": {
+        "text": "Našli jste chybu, máte nápad na funkci nebo jakýkoliv jiný postřeh? <link>Napište</link>.",
+        "title": "Zpětná vazba"
+      },
+      "title": "Přispějte svým dílem"
+    },
+    "hero": {
+      "buttons": {
+        "exploreArchive": "Prozkoumat archiv",
+        "exploreGuide": "Prozkoumat rozcestník",
+        "exploreHandouts": "Prozkoumat materiály"
+      },
+      "description": "Přehledný archiv úloh, studijních materiálů a rozcestník užitečných zdrojů",
+      "title": {
+        "forMath": "pro Matematickou",
+        "modernHome": "Moderní domov",
+        "olympiad": "olympiádu"
+      }
+    },
+    "highlights": {
+      "archive": {
+        "description": "Databáze soutěžních úloh s možností vyhledávání podle klíčových slov a dalších kritérií.",
+        "title": "Archiv"
+      },
+      "guide": {
+        "description": "Seznam soutěží a seminářů spolu s odkazy na různé nástroje užitečné pro žáky i učitele.",
+        "title": "Rozcestník"
+      },
+      "handouts": {
+        "description": "Průběžně doplňované studijní texty, které mají za cíl pokrýt klíčová témata soutěžní matematiky.",
+        "title": "Materiály"
+      },
+      "title": "Vše potřebné",
+      "titleGradient": "na jednom místě"
+    },
+    "sponsorship": {
+      "badge": "Neziskový projekt",
+      "becomeSponsor": "Staňte se sponzorem",
+      "description": "MathComps je nezávislý neziskový projekt s cílem zůstat navždy zcela bezplatný pro všechny. Každý příspěvek pomůže naplnit cíl věnovat se projektu naplno. Velký dík patří podpoře, které se projektu dostalo od našeho hlavního sponzora.",
+      "mainSponsor": "Hlavní sponzor projektu",
+      "title": "Podpořte rozvoj platformy"
+    },
+    "vision": {
+      "aiTools": {
+        "description": "Funkce jako doporučení úloh na míru, zpětná vazba k napsaným řešením a podobně.",
+        "title": "AI nástroje"
+      },
+      "badge": "Kam směřujeme?",
+      "community": {
+        "description": "Prostor pro diskutování o úlohách, materiálech a novinkách ve světě soutěžní matematiky.",
+        "title": "Komunita"
+      },
+      "competitions": {
+        "description": "Pravidelné online soutěže s žebříčkem a s poloautomatizovaným bodováním řešení.",
+        "title": "Soutěže"
+      },
+      "description": "MathComps je na začátku své cesty. V hlavě je spousta nápadů, jak tento projekt vylepšit, aby přinesl co nejvíce užitku světu matematických soutěží. Mimo zvelebování již vytvořeného, další myšlenky jsou:",
+      "title": "Vize do budoucnosti"
+    }
+  },
+  "metadata": {
+    "about": {
+      "description": "Zjistěte více o projektu MathComps, jeho příběhu, autorovi a technologiích.",
+      "title": "O projektu"
+    },
+    "guide": {
+      "description": "Seznam informací o soutěžích a odkazy na různé užitečné věci ze světa soutěžní matematiky.",
+      "title": "Rozcestník"
+    },
+    "handouts": {
+      "description": "Průběžně připravované texty, které mají za cíl pokrýt klíčová témata soutěžní matematiky.",
+      "title": "Materiály"
+    },
+    "home": {
+      "description": "Přehledný archiv úloh, studijních materiálů a rozcestník užitečných zdrojů pro matematické olympiády.",
+      "title": "MathComps - Moderní domov pro matematiku"
+    },
+    "login": {
+      "description": "Přihlaste se do svého účtu.",
+      "title": "Přihlásit se"
+    },
+    "news": {
+      "description": "Nejnovější zprávy o tom, co se děje na webu.",
+      "title": "Novinky"
+    },
+    "privacy": {
+      "description": "Zásady ochrany soukromí a podmínky používání platformy MathComps. Informace o zpracování údajů, cookies a právu na vymazání dat.",
+      "title": "Ochrana soukromí a podmínky používání"
+    },
+    "problems": {
+      "description": "Prohledávatelný archiv úloh z matematických soutěží.",
+      "title": "Úlohy"
+    },
+    "profile": {
+      "description": "Váš uživatelský profil.",
+      "title": "Profil"
+    },
+    "site": {
+      "description": "Platforma pro matematické soutěže s archivem úloh, učebními materiály a rozcestníkem užitečných zdrojů.",
+      "keywords": "matematika, matematické soutěže, matematická olympiáda, matematické úlohy, matematické materiály, matematický archiv"
+    }
+  },
+  "navigation": {
+    "about": "O projektu",
+    "contact": "Kontakt",
+    "guide": "Rozcestník",
+    "handouts": "Materiály",
+    "home": "Domů",
+    "menuClose": "Zavřít navigaci",
+    "menuOpen": "Otevřít navigaci",
+    "news": "Novinky",
+    "privacy": "Ochrana soukromí",
+    "problems": "Úlohy",
+    "sponsors": "Sponzoři",
+    "user": "Uživatel"
+  },
+  "news": {
+    "categories": {
+      "archive": "Archiv",
+      "development": "Vývoj",
+      "handouts": "Materiály",
+      "misc": "Různé"
+    },
+    "comments": "Komentáře",
+    "filtering": "Filtruji:",
+    "newerArticles": "Novější články",
+    "olderArticles": "Starší články",
+    "title": "Novinky"
+  },
+  "notFound": {
+    "description": "Ups! Tato adresa neexistuje nebo byla přesunuta.",
+    "homeButton": "Domů",
+    "title": "Stránka se nenašla"
+  },
+  "plurals": {
+    "available": "{count, plural, =1 {# dostupný} =2 {# dostupné} =3 {# dostupné} =4 {# dostupné} other {# dostupných}}",
+    "planned": "{count, plural, =1 {# plánovaný} =2 {# plánované} =3 {# plánované} =4 {# plánované} other {# plánovaných}}",
+    "problems": "{count, plural, =1 {# úloha} =2 {# úlohy} =3 {# úlohy} =4 {# úlohy} other {# úloh}}",
+    "ready": "{count, plural, =1 {# hotový} =2 {# hotové} =3 {# hotové} =4 {# hotové} other {# hotových}}",
+    "replies": "{count, plural, =1 {# odpověď} =2 {# odpovědi} =3 {# odpovědi} =4 {# odpovědi} other {# odpovědí}}"
+  },
+  "privacy": {
+    "lastUpdated": "Poslední aktualizace: 7. prosince 2025",
+    "sections": {
+      "cookies": {
+        "text": "Soubory cookies jsou používány výhradně na funkcionality stránky (např. udržení přihlášení). Nejsou postupovány třetím stranám.",
+        "title": "3. Cookies"
+      },
+      "data": {
+        "content": "<strong>Obsah:</strong> Veškerý tvůj obsah, který vkládáš na stránku.",
+        "intro": "Používáme a ukládáme následující údaje:",
+        "login": "<strong>Login:</strong> Email, jméno, profilová fotka, případně propojení s Google/Discord/GitHub, pokud se přihlásíš přes ně.",
+        "title": "2. Tvoje údaje"
+      },
+      "deletion": {
+        "text": "Kdykoliv je možné požádat o smazání účtu, stačí napsat na <email></email>.",
+        "title": "4. Smazání účtu"
+      },
+      "intro": {
+        "ageRequirement": "Platforma je určena pro všechny od 16 let. Pokud je ti méně, potřebuješ k používání souhlas rodiče. Vytvořením účtu potvrzuješ, že tyto podmínky splňuješ.",
+        "operator": "Provozovatelem je <strong>Patrik Bak</strong>, kontakt: <email></email>",
+        "title": "1. Kdo jsme a pro koho je web"
+      }
+    },
+    "title": "Ochrana soukromí a podmínky"
+  },
+  "problems": {
+    "commentsButton": "Komentáře",
+    "connectionFailed": "Připojení selhalo",
+    "contestsOverview": "Přehled soutěží",
+    "description": "Prohledávatelný archiv úloh z matematických soutěží.",
+    "emptyState": {
+      "description": "Zkuste upravit filtry a vyhledat znovu.",
+      "title": "Nic se nenašlo"
+    },
+    "errorLoadingStatement": "Nepodařilo se načíst znění úlohy",
+    "errors": {
+      "connectionProblem": "Problém s připojením. Zkouším znovu...",
+      "invalidParameters": "Neplatné parametry požadavku",
+      "maxFiltersExceeded": "Můžete vybrat maximálně {max} filtrů",
+      "problemNotFound": "Úloha \"{problemId}\" nebyla nalezena",
+      "serverError": "Server vrátil chybu. Zkouším znovu...",
+      "unexpectedError": "Nastala neočekávaná chyba. Zkouším znovu...",
+      "urlFiltersIgnored": "Některé parametry v URL byly ignorovány",
+      "urlTooManyFilters": "URL obsahuje příliš mnoho filtrů (maximálně {max})"
+    },
+    "favorites": {
+      "authReason": "lajkování úloh",
+      "likeToggleFailed": "Nepodařilo se změnit stav lajku",
+      "removedFromFavorites": "Úloha byla odstraněna z oblíbených",
+      "undo": "Vrátit"
+    },
+    "filterByAuthor": "Filtrovat podle autora: {name}",
+    "filters": {
+      "activeFilters": "Aktivní filtry",
+      "allProblems": "Všechny úlohy",
+      "competitions": "Soutěže",
+      "contestsOverview": "Přehled soutěží",
+      "facets": {
+        "allCompetitions": "Všechny soutěže",
+        "allSeasons": "Všechny ročníky",
+        "anyOrder": "Libovolné pořadí",
+        "authors": "Autoři",
+        "competition": "Soutěž",
+        "grouping": {
+          "Area": "Oblast",
+          "Goal": "Cíl",
+          "Technique": "Technika",
+          "Type": "Výskyt"
+        },
+        "logic": {
+          "and": "Všechny",
+          "andFull": "AND (všechny)",
+          "currentLogic": "Aktuálně: {mode}. Kliknutím přepnete na {nextMode}",
+          "logicLabel": "Logika: {mode}",
+          "or": "Alespoň jedno",
+          "orFull": "OR (alespoň jedno)",
+          "switchLogic": "Přepnout logiku z {mode} na {nextMode}"
+        },
+        "problemNumber": "Pořadí úlohy",
+        "searchAuthors": "Hledat autory…",
+        "searchCompetitions": "Hledat soutěže",
+        "searchSeasons": "Hledat ročníky…",
+        "searchTags": "Hledat klíčová slova",
+        "season": "Ročník",
+        "selectAuthors": "Vyberte autory",
+        "selectTags": "Vyberte klíčová slova",
+        "tags": "Klíčová slova",
+        "tagsTooltip": "Klíčová slova jsou přidělována částečně na základě heuristik a umělé inteligence, a proto mohou obsahovat nepřesnosti."
+      },
+      "favoritesLoginRequired": "Pro zobrazení oblíbených úloh se musíte přihlásit.",
+      "hideFilters": "Skrýt filtry",
+      "myFavorites": "Moje oblíbené",
+      "reset": "Resetovat",
+      "resetFilters": "Resetovat filtry",
+      "search": {
+        "clear": "Vymazat text vyhledávání",
+        "label": "Vyhledávání",
+        "placeholder": "např. tabulka",
+        "searchInSolution": "Hledat i v řešení"
+      },
+      "searchedText": "Hledaný text",
+      "searching": "Vyhledávám",
+      "searchInSolutionSuffix": "(v zadání i řešení)",
+      "seasons": "Ročníky",
+      "showFilters": "Zobrazit filtry",
+      "tips": {
+        "exclusive": {
+          "desktop": "Dlouhé podržení na položce nebo stisk <kbd>{modifierKey}</kbd> ({modifierName}) + kliknutí na položku {intro}",
+          "title": "Výlučný výběr",
+          "touch": "Dlouhé podržení na položce {intro}"
+        },
+        "intro": "ve stromu soutěží nebo dalších filtrů vybere jen tuto možnost (běžné kliknutí položku přidává/odebírá). Funguje také na klíčová slova v kartičce s úlohami, jméno autora a v panelu s aktivními filtry.",
+        "logic": {
+          "text": "V panelu s aktivními filtry můžete kliknutím na symbol <mono>∧</mono> (AND) nebo <mono>∨</mono> (OR) mezi filtry <hyphens>klí-čo-vých</hyphens> slov nebo autorů přepnout logiku. AND znamená, že musí platit všechny vybrané filtry, OR znamená, že stačí alespoň jeden.",
+          "title": "Přepínání logiky filtrů"
+        },
+        "search": {
+          "text": "Vyhledávání funguje ve slovenštině, češtině a angličtině. Přednastaveně se hledá v textu úlohy, můžete však zapnout hledání i v řešení.",
+          "title": "Vyhledávání"
+        },
+        "title": "Tipy a triky"
+      }
+    },
+    "hideTechniques": "Skrýt techniky",
+    "like": "Lajknout úlohu",
+    "loadContestsFailed": "Nepodařilo se načíst soutěže",
+    "loadingMore": "Načítám další úlohy...",
+    "moreActions": "Další akce",
+    "noContests": "Žádné soutěže",
+    "noSimilarProblems": "Nenašly se žádné podobné úlohy s dostatečnou relevancí.",
+    "noStatementAvailable": "Znění úlohy není k dispozici",
+    "relevance": "Relevance: {percentage}%",
+    "relevanceNote": "Relevance je orientační",
+    "searchContests": "Hledat soutěže...",
+    "share": "Sdílet",
+    "showHiddenTechniques": "Zobrazit skryté techniky řešení pro tuto úlohu",
+    "showMoreTechniques": "Zobrazit další techniky",
+    "showTechniques": "Zobrazit techniky",
+    "similarProblems": "Podobné úlohy",
+    "solution": "Řešení",
+    "solutionLink": "Odkaz na řešení (otevře se v novém okně)",
+    "techniquesHelpTooltip": "Ovládá viditelnost tagů označujících techniky řešení (např. substituce, rozklad, úprava výrazu). Tyto tagy pomáhají identifikovat matematické metody použité v úlohách.",
+    "title": "Úlohy",
+    "toggleSimilar": "Zobrazit/skrýt podobné úlohy",
+    "tryingToConnect": "Pokouším se připojit...",
+    "unlike": "Zrušit lajk"
+  },
+  "profile": {
+    "avatarUpdated": "Profilová fotka nahrána, aktualizace potrvá pár sekund",
+    "defaultUser": "Uživatel",
+    "displayName": "Jméno / Přezdívka",
+    "displayNamePlaceholder": "Zadejte vaše jméno",
+    "email": "Email",
+    "loading": "Načítám uživatelské menu",
+    "memberSince": "Členem od",
+    "title": "Profil"
+  },
+  "ui": {
+    "actions": {
+      "cancel": "Zrušit",
+      "clear": "Vymazat",
+      "close": "Zavřít",
+      "confirm": "Potvrdit",
+      "copy": "Kopírovat",
+      "copyLink": "Kopírovat odkaz na sekci",
+      "delete": "Smazat",
+      "edit": "Upravit",
+      "editField": "Upravit {field}",
+      "getPermalink": "Získat permalink",
+      "linkCopied": "Odkaz byl zkopírován do schránky",
+      "open": "Otevřít",
+      "or": "NEBO",
+      "problemLinkCopied": "Odkaz na úlohu byl zkopírován do schránky",
+      "reset": "Resetovat",
+      "save": "Uložit",
+      "savedSuccessfully": "Úspěšně uloženo",
+      "saveFailed": "Nepodařilo se uložit",
+      "sendCode": "Odeslat kód",
+      "sendMessage": "Odeslat zprávu",
+      "share": "Sdílet",
+      "showCount": "Zobrazit {count} dalších",
+      "showLess": "Zobrazit méně",
+      "showMore": "Zobrazit více",
+      "submit": "Odeslat"
+    },
+    "content": {
+      "imageMissing": "Obrázek se ztratil"
+    },
+    "editor": {
+      "attachment": "Příloha (PDF, TXT, MD)",
+      "blockMath": "Bloková matematika ($$)",
+      "bold": "Tučné (Ctrl+B)",
+      "bulletList": "Odrážkový seznam",
+      "cancelEsc": "Zrušit (Esc)",
+      "dropToUpload": "Pusť soubor pro nahrání",
+      "emojiPicker": {
+        "categories": {
+          "activities": "Aktivity",
+          "animals": "Zvířata a příroda",
+          "flags": "Vlajky",
+          "food": "Jídlo a nápoje",
+          "objects": "Předměty",
+          "smileys": "Smajlíci a lidé",
+          "suggested": "Často používané",
+          "symbols": "Symboly",
+          "travel": "Cestování a místa"
+        },
+        "searchPlaceholder": "Hledat smajlíka...",
+        "title": "Smajlík"
+      },
+      "expandedEditor": "Rozšířený editor",
+      "expandEditor": "Rozšířit editor s náhledem",
+      "expandWithPreview": "Rozšířit + Náhled",
+      "fileTooLarge": "Soubor je příliš velký. Maximum: {max} MB",
+      "heading": "Nadpis",
+      "headingPlaceholder": "Nadpis",
+      "hiddenContentPlaceholder": "skrytý obsah",
+      "hiddenText": "Skrytý text",
+      "image": "Obrázek (vložit diagram/graf, ne snímky textu)",
+      "imageAlt": "Obrázek",
+      "inlineMath": "Inline matematika ($)",
+      "invalidFileType": "Nepovolený typ souboru",
+      "italic": "Kurzíva (Ctrl+I)",
+      "latexPicker": {
+        "categories": {
+          "geometry": "Geometrie",
+          "greek": "Řecké",
+          "operators": "Operátory",
+          "other": "Jiné",
+          "relations": "Relace",
+          "sets": "Množiny"
+        },
+        "title": "LaTeX symboly"
+      },
+      "link": "Odkaz",
+      "maxAttachments": "Maximální počet příloh: {max}",
+      "maxAttachmentsPerComment": "Maximální počet příloh: {max}",
+      "maxAttachmentsReached": "Maximálně {max} přílohy na komentář",
+      "maxCharacters": "Maximální počet znaků: {max}",
+      "maxImages": "Maximální počet obrázků: {max}",
+      "maxImagesPerComment": "Maximální počet obrázků: {max}",
+      "maxImagesReached": "Maximálně {max} obrázky na komentář",
+      "minimize": "Zmenšit",
+      "moreOptions": "Další možnosti",
+      "numberedList": "Číslovaný seznam",
+      "pastedImage": "Přilepený obrázek",
+      "preview": "Náhled",
+      "quote": "Citace",
+      "searchEmoji": "Hledat emoji...",
+      "sectionLinkCopied": "Odkaz na sekci byl zkopírován do schránky",
+      "shrink": "Zmenšit",
+      "shrinkEditor": "Zmenšit editor",
+      "spoiler": "Skrytý text (||[Název]obsah||)",
+      "submit": "Odeslat",
+      "submitShortcut": "Odeslat ({modifier} + Enter)",
+      "unsupportedFileType": "Nepodporovaný typ souboru. Povolené: obrázky (PNG, JPEG, WebP, GIF) nebo přílohy (PDF, TXT, MD)",
+      "uploadAttachmentFailed": "Nepodařilo se nahrát přílohu",
+      "uploadFailed": "Nepodařilo se nahrát soubor",
+      "uploadImageFailed": "Nepodařilo se nahrát obrázek",
+      "uploading": "Nahrávám {filename}...",
+      "uploadUrlFailed": "Nepodařilo se získat URL pro nahrávání",
+      "verificationFailed": "Nepodařilo se ověřit soubor"
+    },
+    "filters": {
+      "apply": "Použít filtry",
+      "clear": "Vymazat",
+      "clearSearch": "Vymazat vyhledávání v {name}",
+      "close": "Zavřít filtry",
+      "closePopover": "Zavřít výběr",
+      "collapseGroup": "Sbalit skupinu",
+      "expandGroup": "Rozbalit skupinu",
+      "logic": "Logika",
+      "logicAll": "Všichni",
+      "logicAtLeastOne": "Alespoň jeden",
+      "noResults": "Žádné výsledky",
+      "open": "Otevřít filtry",
+      "openPopover": "Otevřít {name}",
+      "openWithCount": "Otevřít filtry ({count} aktivních)",
+      "reset": "Reset",
+      "resetFilter": "Resetovat výběr v tomto filtru",
+      "resetSelection": "Resetovat výběr v {name}",
+      "search": "Hledat…",
+      "searchIn": "Hledat {name}",
+      "searchPlaceholder": "Hledat…",
+      "selectedCount": "Počet vybraných: {count}",
+      "selectedInGroup": "{count} vybraných",
+      "selectionLogic": "Logika výběru",
+      "selectPlaceholder": "Vybrat možnost",
+      "sortAlphabetically": "Seřadit podle názvu (A-Z)",
+      "sortByCountAsc": "Seřadit podle počtu (vzestupně)",
+      "sortByCountDesc": "Seřadit podle počtu (sestupně)",
+      "title": "Filtry"
+    },
+    "modal": {
+      "close": "Zavřít"
+    },
+    "userMenu": {
+      "label": "Uživatelské menu",
+      "loading": "Načítám uživatelské menu"
+    }
+  },
+  "validation": {
+    "codeLength": "Kód musí mít {count} znaků",
+    "codeRequired": "Kód je povinný",
+    "confirmPasswordRequired": "Potvrzení hesla je povinné",
+    "invalidEmail": "Zadejte platný email",
+    "messageMinLength": "Zpráva musí mít alespoň {count} znaků",
+    "messageRequired": "Zpráva je povinná",
+    "nameMaxLength": "Jméno může mít maximálně {count} znaků",
+    "nameMinLength": "Jméno musí mít alespoň {count} znaky",
+    "nameRequired": "Jméno je povinné",
+    "passwordMinLength": "Heslo musí mít alespoň {count} znaků",
+    "passwordRequired": "Heslo je povinné",
+    "passwordsDoNotMatch": "Hesla se neshodují",
+    "selectValidSubject": "Prosím vyberte platný předmět"
+  }
+}

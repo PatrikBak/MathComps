@@ -1,5 +1,5 @@
-I will give you a math problem and a candidate list of
-tags (each with an optional description, and a justification why it is
+I will give you a math problem (in Slovak) and a candidate list of
+tags (in English, each with an optional description, and a justification why it is
 being considered for the math problem). Each of the tags given is about
 the problem solution. I want you to verify each of the tags,
 i.e. either approve or reject it.

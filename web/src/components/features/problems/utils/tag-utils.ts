@@ -7,9 +7,10 @@ import type { TagDto, TagType } from '../types/problem-api-types'
 /**
  * Sorts problem tags by category priority (area, type, technique) and alphabetically within each group.
  * @param tags - Array of tag objects to sort
+ * @param locale - Locale to use for alphabetical sorting (e.g., 'sk', 'en')
  * @returns A new array with tags sorted by category then alphabetically
  */
-export const sortTagsByCategory = (tags: TagDto[]): TagDto[] => {
+export const sortTagsByCategory = (tags: TagDto[], locale: string): TagDto[] => {
   // Define the sorting priority for tag types
   const tagTypePriority: Record<TagType, number> = {
     Area: 1,
@@ -29,6 +30,6 @@ export const sortTagsByCategory = (tags: TagDto[]): TagDto[] => {
     }
 
     // Within the same category, sort alphabetically by tag data
-    return firstTag.displayName.localeCompare(secondTag.displayName, 'sk', { sensitivity: 'base' })
+    return firstTag.displayName.localeCompare(secondTag.displayName, locale)
   })
 }

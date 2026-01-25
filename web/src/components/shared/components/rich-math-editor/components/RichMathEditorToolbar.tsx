@@ -10,6 +10,7 @@ import {
   Paperclip,
   SquareSlash,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -27,6 +28,7 @@ import {
   insertLatexCommand,
   insertLink,
   insertSpoiler,
+  type TransformLabels,
 } from '../utils/transforms'
 import type { RichMathEditorVariant } from './RichMathEditor'
 import { RichMathEditorEmojiPicker } from './RichMathEditorEmojiPicker'
@@ -63,6 +65,16 @@ export function RichMathEditorToolbar({
   onImageClick,
   onAttachmentClick,
 }: RichMathEditorToolbarProps) {
+  // Translations for editor
+  const tEditor = useTranslations('ui.editor')
+
+  // Build localized labels for transforms that insert text into the editor
+  const transformLabels: TransformLabels = {
+    spoilerLabel: tEditor('hiddenText'),
+    spoilerPlaceholder: tEditor('hiddenContentPlaceholder'),
+    headingPlaceholder: tEditor('headingPlaceholder'),
+  }
+
   return (
     <div
       className={cn(
@@ -77,19 +89,19 @@ export function RichMathEditorToolbar({
       )}
     >
       {/* Core formatting: Bold, Italic */}
-      <ToolbarButton onClick={() => onEdit(applyBold)} icon={Bold} title="Tučné (Ctrl+B)" />
-      <ToolbarButton onClick={() => onEdit(applyItalic)} icon={Italic} title="Kurzíva (Ctrl+I)" />
+      <ToolbarButton onClick={() => onEdit(applyBold)} icon={Bold} title={tEditor('bold')} />
+      <ToolbarButton onClick={() => onEdit(applyItalic)} icon={Italic} title={tEditor('italic')} />
 
       {/* Math: $, $$, and symbol picker */}
       <ToolbarButton
         onClick={() => onEdit(applyInlineMath)}
         text="$"
-        title="Inline matematika ($)"
+        title={tEditor('inlineMath')}
       />
       <ToolbarButton
         onClick={() => onEdit(insertBlockMath)}
         text="$$"
-        title="Bloková matematika ($$)"
+        title={tEditor('blockMath')}
       />
       <RichMathEditorLaTeXSymbolPicker
         onSymbolClick={(command, args) =>
@@ -102,38 +114,34 @@ export function RichMathEditorToolbar({
         <ToolbarButton
           onClick={() => onEdit(applyNumberedList)}
           icon={ListOrdered}
-          title="Číslovaný zoznam"
+          title={tEditor('numberedList')}
         />
         <ToolbarButton
           onClick={() => onEdit(applyBulletList)}
           icon={List}
-          title="Odrážkový zoznam"
+          title={tEditor('bulletList')}
         />
         <ToolbarButton
           onClick={() => onEdit(applyQuote)}
           icon={MessageSquareQuote}
-          title="Citácia"
+          title={tEditor('quote')}
         />
-        <ToolbarButton onClick={() => onEdit(insertHeading)} icon={Heading3} title="Nadpis" />
-        <ToolbarButton onClick={() => onEdit(insertLink)} icon={Link} title="Odkaz" />
         <ToolbarButton
-          onClick={() => onEdit(insertSpoiler)}
+          onClick={() => onEdit((context) => insertHeading(context, transformLabels))}
+          icon={Heading3}
+          title={tEditor('heading')}
+        />
+        <ToolbarButton onClick={() => onEdit(insertLink)} icon={Link} title={tEditor('link')} />
+        <ToolbarButton
+          onClick={() => onEdit((context) => insertSpoiler(context, transformLabels))}
           icon={SquareSlash}
-          title="Skrytý text (||[Názov]obsah||)"
+          title={tEditor('spoiler')}
         />
-        <ToolbarButton
-          onClick={onAttachmentClick}
-          icon={Paperclip}
-          title="Príloha (PDF, TXT, MD)"
-        />
+        <ToolbarButton onClick={onAttachmentClick} icon={Paperclip} title={tEditor('attachment')} />
       </div>
 
       {/* Image and emoji icons */}
-      <ToolbarButton
-        onClick={onImageClick}
-        icon={Image}
-        title="Obrázok (vložiť diagram/graf, nie snímky textu)"
-      />
+      <ToolbarButton onClick={onImageClick} icon={Image} title={tEditor('image')} />
       <RichMathEditorEmojiPicker onEmojiClick={onInsert} />
 
       {/* Overflow menu for narrow containers */}
@@ -142,44 +150,37 @@ export function RichMathEditorToolbar({
           items={[
             {
               icon: ListOrdered,
-              label: 'Číslovaný zoznam',
-              title: 'Číslovaný zoznam',
+              label: tEditor('numberedList'),
               onClick: () => onEdit(applyNumberedList),
             },
             {
               icon: List,
-              label: 'Odrážkový zoznam',
-              title: 'Odrážkový zoznam',
+              label: tEditor('bulletList'),
               onClick: () => onEdit(applyBulletList),
             },
             {
               icon: MessageSquareQuote,
-              label: 'Citácia',
-              title: 'Citácia',
+              label: tEditor('quote'),
               onClick: () => onEdit(applyQuote),
             },
             {
               icon: Heading3,
-              label: 'Nadpis',
-              title: 'Nadpis',
-              onClick: () => onEdit(insertHeading),
+              label: tEditor('heading'),
+              onClick: () => onEdit((context) => insertHeading(context, transformLabels)),
             },
             {
               icon: Link,
-              label: 'Odkaz',
-              title: 'Odkaz',
+              label: tEditor('link'),
               onClick: () => onEdit(insertLink),
             },
             {
               icon: SquareSlash,
-              label: 'Skrytý text',
-              title: 'Skrytý text (||[Názov]obsah||)',
-              onClick: () => onEdit(insertSpoiler),
+              label: tEditor('spoiler'),
+              onClick: () => onEdit((context) => insertSpoiler(context, transformLabels)),
             },
             {
               icon: Paperclip,
-              label: 'Príloha',
-              title: 'Príloha (PDF, TXT, MD)',
+              label: tEditor('attachment'),
               onClick: onAttachmentClick,
             },
           ]}

@@ -1,0 +1,995 @@
+{
+  "about": {
+    "author": {
+      "alt": "Profile photo of Patrik Bak",
+      "description": "My name is <strong>Patrik Bak</strong>. As a former three-time participant and two-time medalist at the International Mathematical Olympiads (IMO), but also the author of many competition problems (including two for the IMO), I have a deep relationship with Olympiad mathematics. I have long enjoyed combining mathematics with programming. This interest previously led to the <strong>GeoGen</strong> project, a tool for automatically generating geometric problems. <strong>MathComps</strong> is the next logical step on this path – an effort to create a comprehensive and modern platform for the mathematical olympiad community. In building it, I rely not only on my own knowledge and experience but also on feedback and ideas from many great people in the MO community.",
+      "title": "About the author"
+    },
+    "hero": {
+      "title1": "Created from a passion for",
+      "title2": "mathematics"
+    },
+    "roadmap": {
+      "categories": {
+        "community": "Community",
+        "competitions": "Competitions",
+        "content": "Content",
+        "tools": "Tools"
+      },
+      "description": "This is just the beginning of the project and many new features are planned.",
+      "features": {
+        "aiHints": "AI hints for problems",
+        "aiPregrading": "AI pre-grading",
+        "archiveSKCZ": "Archive of SK/CZ problems",
+        "contributorPlatform": "Contributor platform",
+        "customLists": "Custom problem lists",
+        "discussions": "Content discussions",
+        "exportPdfTex": "Export to PDF and TeX",
+        "filterFavorites": "Filtering favorite problems",
+        "foreignTasks": "Problems from foreign competitions",
+        "fullLocalization": "Full localization (CZ/EN)",
+        "introTexts": "Introductory study texts",
+        "leaderboards": "Leaderboards and medals",
+        "likeTasks": "Liking problems",
+        "moreTexts": "Additional study texts",
+        "newsSection": "News section",
+        "officialTraining": "Official training competitions",
+        "personalizedRecs": "Personalized problem recommendations",
+        "privateComps": "Option for private competitions",
+        "recommendSimilar": "Recommendations for similar problems",
+        "reportBugs": "Ability to report bugs",
+        "trackProgress": "Tracking solving progress",
+        "trainingPlatform": "Training competition platform",
+        "translationsCZEn": "Task translations (CZ/EN)",
+        "userProfiles": "User profiles"
+      },
+      "footer": "This list will change over time, feel free to <link>contribute your ideas</link>.",
+      "implementedLabel": "Green features are already available!",
+      "title": "Functionalities"
+    },
+    "story": {
+      "text1": "The world of mathematical competitions is vast, full of problems, sources, and materials. However, there is no place that pleasantly unifies the best of it and, especially for beginners, provides an easy way to enter the world of competitions without getting lost.",
+      "text2": "The <strong>MathComps</strong> project was born with the goal of changing this state – to create a single place for the entire community where everything needed will be: a clear archive of problems, study materials, discussions on problems and competitions, personalized learning, and more; the imagination has no limits.",
+      "text3": "The current version required a lot of time and full-time dedication, which would not have been possible without the support of our main sponsor, the company <link>Wincent</link>.",
+      "text4": "Founded by former extremely successful participants of the Mathematical Olympiad, it has a very close relationship with the ideas of comprehensive support for the development of mathematical talents. Great thanks belong to them.",
+      "title": "Why MathComps was created"
+    },
+    "technologies": {
+      "description": "An overview of the key technologies powering MathComps.",
+      "title": "Technologies"
+    }
+  },
+  "apiErrors": {
+    "FILE_TOO_LARGE": "File is too large. Maximum: {max} MB",
+    "INVALID_FILE_TYPE": "Invalid file type",
+    "INVALID_REQUEST": "Invalid request",
+    "SERVER_ERROR": "Server error",
+    "UNAUTHORIZED": "You must be logged in for this action",
+    "UPLOAD_URL_FAILED": "Failed to get upload URL",
+    "VALIDATION_FAILED": "Invalid form data"
+  },
+  "auth": {
+    "back": "Back",
+    "codeFromEmail": "Code from email",
+    "confirmPassword": "Confirm password",
+    "continue": "Continue",
+    "continueWithEmail": "Continue with email",
+    "emailLabel": "Email",
+    "enterCode": "Enter 6-digit code",
+    "enterEmail": "Enter email",
+    "enterName": "Enter name or nickname",
+    "enterNewPassword": "Enter new password",
+    "enterPassword": "Enter password",
+    "enterPasswordAgain": "Enter password again",
+    "forgotPassword": "Forgot password?",
+    "headers": {
+      "createAccount": "CREATE AN ACCOUNT",
+      "enterCode": "ENTER CODE",
+      "login": "LOG IN",
+      "loginOrRegister": "LOGIN / REGISTER",
+      "newPassword": "NEW PASSWORD",
+      "passwordReset": "PASSWORD RESET",
+      "verifyEmail": "VERIFY EMAIL"
+    },
+    "loadingButton": "Loading login button",
+    "login": "Log in",
+    "loginRequired": "You must log in to {reason}",
+    "nameOrNickname": "Name or nickname",
+    "newPassword": "New password",
+    "or": "OR",
+    "password": "Password",
+    "passwordResetEmailSent": "Password reset email has been sent.",
+    "passwordResetSuccess": "Password was successfully changed! Redirecting you...",
+    "register": "Register",
+    "resetPassword": "Reset password",
+    "sendCode": "Send code",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "termsAgreement": "By continuing you agree to our",
+    "termsLink": "terms and privacy policy",
+    "useDiscord": "Use Discord account",
+    "useGithub": "Use GitHub account",
+    "useGoogle": "Use Google account",
+    "verificationSent": "Verification code sent",
+    "verifyCode": "Verify code",
+    "verifyEmail": "Verify email"
+  },
+  "clerkErrors": {
+    "form_code_incorrect": "Incorrect code.",
+    "form_identifier_exists": "An account with this email already exists",
+    "form_identifier_not_found": "Incorrect email or password",
+    "form_password_incorrect": "Incorrect email or password",
+    "form_password_length_too_short": "Password must be at least 8 characters",
+    "form_password_pwned": "This password has been found in a data breach. Please use a different password.",
+    "form_verification_failed": "Verification failed. Please try again.",
+    "generic": "An error occurred. Please try again.",
+    "session_already_exists": "You are already logged in. Refresh the page.",
+    "session_exists": "You are already logged in. Refresh the page.",
+    "too_many_attempts": "Too many attempts. Please try again later."
+  },
+  "comments": {
+    "authReasons": {
+      "addComment": "adding comments",
+      "deleteComment": "deleting comments",
+      "editComment": "editing comments",
+      "likeComment": "liking comments"
+    },
+    "avatarAlt": "Avatar of {author}",
+    "cancelDelete": "Cancel",
+    "delete": "Delete",
+    "deleteComment": "Delete comment",
+    "deleteConfirmMessage": "Are you sure you want to delete this comment? This action cannot be undone.",
+    "deleted": "Comment was deleted",
+    "edit": "Edit",
+    "edited": "(edited)",
+    "editPlaceholder": "Edit comment...",
+    "empty": "No comments yet. Be the first!",
+    "errors": {
+      "addFailed": "Failed to add comment",
+      "deleteFailed": "Failed to delete comment",
+      "editFailed": "Failed to edit comment",
+      "likeFailed": "Failed to change like status"
+    },
+    "hideReplies": "Hide replies",
+    "lastEdited": "Last edited {date}",
+    "like": "Like",
+    "loadError": "Failed to load comments. Please try again later.",
+    "loginRequired": "You must be logged in to add a comment.",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply...",
+    "show": "Show",
+    "showReplies": "Show {count}",
+    "unlike": "Unlike",
+    "writePlaceholder": "Write a comment..."
+  },
+  "common": {
+    "language": {
+      "change": "Change language",
+      "label": "Language",
+      "switchTo": "Switch to {language}"
+    },
+    "loading": "Loading...",
+    "profile": "Profile",
+    "redirecting": "Redirecting..."
+  },
+  "contact": {
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "message": "Message",
+    "messagePlaceholder": "Type your message here...",
+    "name": "Name",
+    "namePlaceholder": "John Smith",
+    "reasons": {
+      "contentContribution": "Content Contribution",
+      "featureIdeas": "Feature Ideas",
+      "feedback": "Feedback",
+      "sponsorship": "Sponsorship"
+    },
+    "selectPlaceholder": "Select...",
+    "sendFailed": "Failed to send message",
+    "sendFailedRetry": "Failed to send message. Please try again later.",
+    "sending": "Sending...",
+    "sendMessage": "Send message",
+    "subject": "Subject",
+    "successMessage": "Message sent successfully! We'll get back to you soon.",
+    "title": "Contact us",
+    "websiteLabel": "Website"
+  },
+  "countries": {
+    "CZ": "Czechia",
+    "EN": "English",
+    "INTERNATIONAL": "International",
+    "PL": "Poland",
+    "SK": "Slovakia"
+  },
+  "email": {
+    "footer": {
+      "privacy": "Privacy & Terms"
+    },
+    "passwordReset": {
+      "description": "We received a request to reset the password for your MathComps account. Use this verification code to continue:",
+      "ignore": "If you did not request a password reset, please ignore this email and your password will remain unchanged.",
+      "previewText": "Password reset for your MathComps account",
+      "requestFor": "Request for:",
+      "subject": "Password Reset - MathComps",
+      "title": "Password Reset 🔐",
+      "validity": "This code is valid for <strong>10 minutes</strong>.",
+      "warning": "<strong>⚠️ If you did not request a password reset, please ignore this email.</strong>"
+    },
+    "signup": {
+      "description": "Use this verification code to complete your registration:",
+      "ignore": "If you did not create an account on MathComps, please ignore this email.",
+      "previewText": "Welcome to MathComps! Complete your registration.",
+      "registrationFor": "Registration for:",
+      "subject": "Welcome to MathComps - Verification Code",
+      "title": "Welcome to MathComps! 🎉",
+      "validity": "This code is valid for <strong>10 minutes</strong>."
+    }
+  },
+  "footer": {
+    "description": "The long-term vision of the project is to create a platform for beginners and advanced solvers of mathematical competitions, their tutors, and all supporters.",
+    "navigation": "Navigation",
+    "privacy": "Privacy and terms",
+    "project": "Project"
+  },
+  "guide": {
+    "hero": {
+      "description": "List of competitions and various useful links related to competition math, written from a Czech-Slovak perspective. The plan is to continuously update these sections with the best content.",
+      "title": "Competition Math Guide"
+    },
+    "schoolLevels": {
+      "elementary": "ES",
+      "highSchool": "HS"
+    },
+    "sections": {
+      "competitions": {
+        "description": "The most important competition is the Mathematical Olympiad (MO). However, there are plenty of other competitions and activities that are good as training for MO or even on their own 😇."
+      },
+      "howToStart": {
+        "description": "At the beginning, there are always many options on how to start. Then there are many options on how to progress. The following advice aims to help with this process.",
+        "finalNote": {
+          "text": "The key is to enjoy the process. The world of competitions and seminars attracts many people and not everyone can be the best, but that doesn't mean it can't change everyone's life for the better 😊",
+          "title": "In conclusion"
+        },
+        "steps": {
+          "beginnings": {
+            "points": [
+              "Try correspondence seminars. They have problems suitable for beginners and provide feedback. Attend their camps where you'll learn, meet people, and have fun.",
+              "Look for math clubs at school or nearby. Ask your math teacher if they know of any.",
+              "Try solving problems with someone else, you can motivate and entertain each other.",
+              "Also find study materials for systematic learning, recommendations are just above."
+            ],
+            "title": "Beginnings are great because you improve quickly"
+          },
+          "training": {
+            "points": [
+              "Math needs to be actively trained, muscles aren't gained by watching exercise videos either. It's always better to try solving a problem independently first. The process of thinking, trying, and even failing helps the mind learn.",
+              "Only after some effort should you look at model solutions for problems you didn't solve. The brain learns more from them when it struggled beforehand.",
+              "Definitely also look at model solutions for problems you did solve, often you'll learn different approaches, maybe even more efficient ones.",
+              "Some prefer systematic materials and books, others prefer solving random problems. Ideally, combine things, experiment, and find what you enjoy most."
+            ],
+            "title": "Principles of good training"
+          }
+        }
+      },
+      "mathOlympiad": {
+        "and": "and",
+        "categoriesIntro": "The Mathematical Olympiad is divided into two main parts:",
+        "categoriesOutro": "category, each with its own grade levels and rounds.",
+        "competitions": {
+          "caps": {
+            "description": "Preparatory competition for IMO teams of participating countries",
+            "details": ["Same format as IMO", "Recently usually held at ISTA in Austria"]
+          },
+          "cpsj": {
+            "description": "Competition for the six best first-year high school students (and younger) from participating countries",
+            "details": [
+              "Qualification through special selection camp",
+              "In Czechia selection based on category A results, in Slovakia category C",
+              "Individual and team parts",
+              "Three-member teams (1 member from each country) randomly drawn"
+            ]
+          },
+          "egmo": {
+            "description": "Competition aimed at encouraging girls' participation in math competitions",
+            "details": [
+              "6 best female solvers from each country",
+              "Qualification through special selection camp",
+              "Invitation based on results of regional round category A",
+              "55+ countries (including non-European)",
+              "Same format as IMO"
+            ]
+          },
+          "imo": {
+            "description": "The most prestigious international olympiad",
+            "details": [
+              "6 best solvers from each country",
+              "100+ countries",
+              "2 competition days, each with 3 problems over 4.5 hours"
+            ]
+          },
+          "memo": {
+            "description": "Competition for the best future potential IMO participants",
+            "details": [
+              "6 best solvers not going to IMO, who may go next year",
+              "11+ countries",
+              "Individual and team parts"
+            ]
+          }
+        },
+        "description": "A competition in solving interesting mathematical problems for elementary and high schools, which starts with a home round and culminates in the most prestigious international mathematical olympiad",
+        "elementary": "elementary school",
+        "elementaryCategories": {
+          "point1": "Z5 – Z9 by elementary school grades (and corresponding grades of eight-year gymnasiums)",
+          "point2": "Home and district rounds in each category",
+          "point3": "In category Z9, also regional round and in Czechia national round",
+          "title": "Elementary categories"
+        },
+        "highSchool": "high school",
+        "highSchoolCategories": {
+          "point1": "C for 1st, B for 2nd, A for 3rd and 4th year (and corresponding grades of eight-year gymnasiums)",
+          "point2": "Home, school, and regional rounds in each category",
+          "point3": "In category A, also national round, from which progression to selection camp is possible",
+          "point4": "From the selection camp, you can advance to <strong>international competitions</strong>",
+          "point5": "Fun multi-day events where math is only part of the program",
+          "point6": "Rotating host countries, trips to new places guaranteed",
+          "selectionNote": "Both countries have different rules for advancement, in Slovakia there's also a qualification needed, see the competition website",
+          "title": "High school categories"
+        },
+        "imoLink": "IMO",
+        "organizations": {
+          "cz": "Czech MO",
+          "sk": "Slovak MO"
+        },
+        "otherCompetitions": "In addition, there are other events:",
+        "sharedTasks": "Czechia and Slovakia have shared problems but separate organizations",
+        "tip": "Don't be afraid to try solving higher categories, problems often don't require more complex knowledge and categories overlap. The best of the best often solved higher categories too."
+      },
+      "otherCompetitions": {
+        "description": "Besides the olympiad and seminars, there are many other competitions with various formats, mostly one-day fun events that you typically don't train for, but there's less pressure because of that 😌",
+        "individual": {
+          "description": "Individual competitions with a different format than the Mathematical Olympiad. All listed below require only the answer, which is how they differ from it."
+        },
+        "items": {
+          "attomat": "An online competition with answer-only problems",
+          "brloh": "A competition in solving mathematical-logical problems",
+          "duogeo": "A pairs competition in solving olympiad-style geometry",
+          "klokan": "A multiple-choice competition",
+          "logickaOlympiada": "A popular competition among mathematicians for obvious reasons",
+          "maks": "A competition where problems are solved at home and answers uploaded online",
+          "maso": "A competition with problems like Náboj, where answers unlock moves in a game",
+          "mathing": "An online competition with olympiad-style problems",
+          "mathrace": "An online competition with Náboj-style problems where software and programming is allowed",
+          "naboj": "The most popular team competition in our region with answer-only problems",
+          "pangea": "A competition similar to Math Kangaroo with themed problems",
+          "purpleComet": "An international Náboj-like competition with over 80 countries",
+          "pytagoriada": "A competition where speed and accuracy of answers matter"
+        },
+        "team": {
+          "description": "Team competitions are a great opportunity to have fun with friends. It's no surprise that they're popular and there are so many of them."
+        },
+        "titles": {
+          "attomat": "Attomat",
+          "brloh": "Brloh",
+          "duogeo": "DuoGeo",
+          "klokan": "Math Kangaroo",
+          "logickaOlympiada": "Logic Olympiad",
+          "maks": "Maks & Maksík",
+          "maso": "Maso",
+          "mathing": "Mathing",
+          "mathrace": "Mathrace",
+          "naboj": "Náboj & Náboj Junior",
+          "pangea": "Pangea",
+          "purpleComet": "Purple Comet",
+          "pytagoriada": "Pythagoreiad"
+        }
+      },
+      "resources": {
+        "description": "A brief list of the most important study/community resources from the world of competitive mathematics that are definitely worth knowing.",
+        "programs": {
+          "geogebra": "A fantastic tool for learning geometry or drawing graphs. A well-drawn diagram can make the difference in whether we see the solution or not, and <app>GeoGebra</app> can draw them precisely 📐.",
+          "overleaf": "Online environment for writing in LaTeX, which is the standard for mathematics. Contains tutorials for LaTeX beginners.",
+          "wolframalpha": "A fast and reliable tool for solving equations, factoring numbers, calculating sums, or even differentiation, integration, etc."
+        },
+        "studyTexts": {
+          "guidedProblems": "It's worth solving older MO home rounds, because guided and supplementary problems are released with them (with solutions/links), which is a good way to absorb a topic.",
+          "intro": "In this section, we'll summarize some study materials. The priority is to give beginners an overview of where they can turn.",
+          "kmsCollection": "Older but timeless material. Pleasant explanations and short introductions to all topics with many examples from the KMS seminar.",
+          "ourMaterials": "There aren't many publicly available materials for beginners with good explanations of ideas. Our materials on this site aim to fill this gap. The collection will grow over time.",
+          "praseLibrary": "A large collection of materials from the PraSe seminar. For self-study, the so-called series are very interesting - these are thematic texts.",
+          "sampleSolutions": "The easiest problems from <link>seminars</link>, or lower MO categories, are a good source. In seminars, solutions are written more in the style of how to approach problems, while in olympiad more in the style of how to write them once someone has figured it out.",
+          "titles": {
+            "guidedProblems": "Guided problems for MO home rounds",
+            "kmsCollection": "KMS collection",
+            "ourMaterials": "Our materials",
+            "praseLibrary": "PraSe library",
+            "sampleSolutions": "Sample solutions"
+          }
+        },
+        "tips": {
+          "ai": "We all see that AI is getting better at math. It can be a quick helper when learning new things. Just be careful, as it's not always right and can make things up 🙃",
+          "footer": "You might be asking why this or that isn't here. It's mainly because this guide is written primarily for beginners, and overwhelming with materials right at the start may not be productive. Links to further study will gradually be added inside the materials on the site, or later a page with advanced guidance may appear, with a larger database. Anyway, there's really a lot in the PraSe library 😜."
+        },
+        "websites": {
+          "aops": "Probably the biggest and most important website about olympiad mathematics in the world. Forums, huge problem collections, articles, all in one place. A must know.",
+          "evanchen": "Personal website of a world-famous olympiad expert. Through his site, you can navigate to many of his materials and other resources and information.",
+          "mods": "A large international Discord server where you can discuss with people from all over the world. For over 2000 days, it has been running a problem of the day feature, with access to older problems by topic and difficulty rating."
+        },
+        "youtube": {
+          "3blue1brown": "Unique visual treatment of various topics from mathematics.",
+          "michaelpenn": "Solutions to competition problems from competitions around the world, explained on a blackboard.",
+          "mindyourdecisions": "Videos solving problems of all difficulties, from purely popularizing to interesting olympiad ones."
+        }
+      },
+      "seminars": {
+        "countries": {
+          "CZ": "Czech",
+          "INTERNATIONAL": "International",
+          "SK": "Slovak"
+        },
+        "description": "Correspondence seminars are an integral part of Czech-Slovak mathematical culture, which is reflected in their number.",
+        "features": [
+          "Solving problems at home and sending solutions by mail (hence the name), although now mostly online",
+          "Several series of problems during the year",
+          "Camps packed with fun and math as an essential part of seminars"
+        ],
+        "items": {
+          "iks": "Czech-Slovak seminar for solvers with ambition to succeed at international rounds",
+          "kokos": "For grades 6-9 of elementary school",
+          "malynar": "For grades 4-6 of elementary school",
+          "matik": "For grades 7-9 of elementary school",
+          "mbl": "Originally Polish, now international seminar with one round and one long camp",
+          "sezam": "For grades 7-9 of elementary school",
+          "sezamko": "For grades 4-6 of elementary school"
+        },
+        "levels": {
+          "elementary": {
+            "description": "There are really quite a few elementary school seminars. Most of them are generally for upper elementary, but they have scaled problems for everyone."
+          },
+          "highSchool": {
+            "description": "Two Slovak, two Czech, and one Czech-Slovak. In addition, many Czech-Slovak students also participate in MBL. There's really no shortage of fun."
+          }
+        },
+        "tip": "Many people solve multiple seminars at the same time, both at elementary and high school level. It's also common for Slovaks to solve Czech seminars and vice versa. It's no coincidence that there's a big overlap between the best MO and seminar solvers 😉"
+      },
+      "whyCompetitions": {
+        "benefits": {
+          "career": {
+            "text": "People from the math competition environment are the most sought after for various positions requiring solving difficult problems, e.g. in AI, algorithmic trading etc. Thanks to acquired skills and contacts from the community they then easily obtain them.",
+            "title": "Great career opportunities"
+          },
+          "community": {
+            "text": "The environment of competitions and camps is very community-oriented and without it many would not even exist. Many people have found friends and partners for life in these communities.",
+            "title": "Community and friendship"
+          },
+          "logic": {
+            "text": "Math competitions develop the ability to analyze problems and find creative solutions. These skills are then transferable to all spheres of life, as problems need to be solved everywhere.",
+            "title": "Developing logical thinking"
+          },
+          "potential": {
+            "text": "Many people often don't know what their brain is capable of when it tries. Competitions provide a safe environment to test this, and for many are the beginning of their future journey for career and personal growth.",
+            "title": "Discovering potential"
+          }
+        },
+        "description": "Math competitions are not just about competition and math 🙂."
+      }
+    },
+    "titles": {
+      "competitions": "List of competitions",
+      "howToStart": "How to start and continue",
+      "mathOlympiad": "Mathematical Olympiad",
+      "otherCompetitions": "Other competitions",
+      "otherCompetitionsIndividual": "Individual competitions",
+      "otherCompetitionsTeam": "Team competitions",
+      "programs": "Programs and tools",
+      "resources": "Other links",
+      "seminars": "Correspondence seminars",
+      "seminarsElementary": "Elementary school seminars",
+      "seminarsHighSchool": "High school seminars",
+      "studyTexts": "Study texts",
+      "websites": "Websites and communities",
+      "whyCompetitions": "Why math competitions?",
+      "youtube": "YouTube channels"
+    }
+  },
+  "handouts": {
+    "aria": {
+      "handoutComments": "Handout comments",
+      "openHandout": "Open handout: {title}"
+    },
+    "environments": {
+      "example": "Example",
+      "exercise": "Exercise",
+      "problem": "Problem",
+      "slugs": {
+        "example": "example",
+        "exercise": "exercise",
+        "problem": "problem",
+        "theorem": "theorem"
+      },
+      "theorem": "Theorem"
+    },
+    "hero": {
+      "description": "We are preparing materials designed for solvers starting with the high school Mathematical Olympiad. The goal is for them to be interesting even for more experienced solvers thanks to progressively challenging problems. Materials will be created continuously during the 2025/2026 school year.",
+      "title": "Handouts Overview"
+    },
+    "labels": {
+      "author": "Author",
+      "authors": "Authors",
+      "comments": "Comments",
+      "hint": "Hint",
+      "proof": "Proof",
+      "sectionLabel": "Handouts",
+      "solution": "Solution"
+    }
+  },
+  "home": {
+    "contribute": {
+      "badge": "Open project",
+      "content": {
+        "text": "If you are interested in contributing materials or other useful articles, definitely <link>get in touch</link>.",
+        "title": "Content creation"
+      },
+      "description": "MathComps is an open platform and every bit of help is immensely valuable.",
+      "development": {
+        "text": "Are you a programmer? Check out the <link>source code on GitHub</link> and feel free to contribute.",
+        "title": "Development and code"
+      },
+      "feedback": {
+        "text": "Found a bug, have a feature idea, or any other observation? <link>Write to us</link>.",
+        "title": "Feedback"
+      },
+      "title": "Contribute your part"
+    },
+    "hero": {
+      "buttons": {
+        "exploreArchive": "Explore Archive",
+        "exploreGuide": "Explore Guide",
+        "exploreHandouts": "Explore Handouts"
+      },
+      "description": "A clear archive of problems, study materials, and a hub of useful resources",
+      "title": {
+        "forMath": "for Maths",
+        "modernHome": "Modern home",
+        "olympiad": "Olympiad"
+      }
+    },
+    "highlights": {
+      "archive": {
+        "description": "Database of competition problems with the ability to search by keywords and other criteria.",
+        "title": "Archive"
+      },
+      "guide": {
+        "description": "A list of competitions and seminars along with links to various tools useful for students and teachers.",
+        "title": "Guide"
+      },
+      "handouts": {
+        "description": "Continuously updated study texts aimed at covering key topics in competitive mathematics.",
+        "title": "Materials"
+      },
+      "title": "Everything you need",
+      "titleGradient": "in one place"
+    },
+    "sponsorship": {
+      "badge": "Non-profit project",
+      "becomeSponsor": "Become a sponsor",
+      "description": "MathComps is an independent non-profit project with the goal of remaining completely free for everyone forever. Every contribution will help fulfill the goal of focusing on the project full-time. Many thanks to the support the project received from our main sponsor.",
+      "mainSponsor": "Main sponsor of the project",
+      "title": "Support platform development"
+    },
+    "vision": {
+      "aiTools": {
+        "description": "Features such as personalized problem recommendations, feedback on written solutions, and more.",
+        "title": "AI Tools"
+      },
+      "badge": "Where are we heading?",
+      "community": {
+        "description": "A space to discuss problems, materials, and news in the world of competitive mathematics.",
+        "title": "Community"
+      },
+      "competitions": {
+        "description": "Regular online competitions with a leaderboard and semi-automated grading of solutions.",
+        "title": "Competitions"
+      },
+      "description": "MathComps is at the beginning of its journey. There are many ideas on how to improve this project to bring as much benefit as possible to the world of mathematical competitions. Besides improving what's already created, other ideas include:",
+      "title": "Vision for the future"
+    }
+  },
+  "metadata": {
+    "about": {
+      "description": "Learn more about the MathComps project, its story, author, and technologies.",
+      "title": "About project"
+    },
+    "guide": {
+      "description": "A list of competition information and links to various useful resources from the world of competitive mathematics.",
+      "title": "Guide"
+    },
+    "handouts": {
+      "description": "Continuously prepared texts aimed at covering key topics in competitive mathematics.",
+      "title": "Handouts"
+    },
+    "home": {
+      "description": "A clear archive of problems, study materials, and a hub of useful resources for mathematical olympiads.",
+      "title": "MathComps - Modern Home for Mathematics"
+    },
+    "login": {
+      "description": "Sign in to your account.",
+      "title": "Sign in"
+    },
+    "news": {
+      "description": "Latest news about what's happening on the website.",
+      "title": "News"
+    },
+    "privacy": {
+      "description": "Privacy policy and terms of use for the MathComps platform. Information about data processing, cookies, and the right to data deletion.",
+      "title": "Privacy Policy and Terms of Use"
+    },
+    "problems": {
+      "description": "A searchable archive of problems from mathematical competitions.",
+      "title": "Problems"
+    },
+    "profile": {
+      "description": "Your user profile.",
+      "title": "Profile"
+    },
+    "site": {
+      "description": "A platform for mathematical competitions with a problem archive, study materials, and a guide to useful resources.",
+      "keywords": "mathematics, math competitions, mathematical olympiad, math problems, math materials, math archive"
+    }
+  },
+  "navigation": {
+    "about": "About",
+    "contact": "Contact",
+    "guide": "Guide",
+    "handouts": "Handouts",
+    "home": "Home",
+    "menuClose": "Close navigation",
+    "menuOpen": "Open navigation",
+    "news": "News",
+    "privacy": "Privacy",
+    "problems": "Problems",
+    "sponsors": "Sponsors",
+    "user": "User"
+  },
+  "news": {
+    "categories": {
+      "archive": "Archive",
+      "development": "Development",
+      "handouts": "Materials",
+      "misc": "Miscellaneous"
+    },
+    "comments": "Comments",
+    "filtering": "Filtering:",
+    "newerArticles": "Newer articles",
+    "olderArticles": "Older articles",
+    "title": "News"
+  },
+  "notFound": {
+    "description": "Oops! This page doesn't exist or has been moved.",
+    "homeButton": "Home",
+    "title": "Page not found"
+  },
+  "plurals": {
+    "available": "{count, plural, =1 {# available} other {# available}}",
+    "planned": "{count, plural, =1 {# planned} other {# planned}}",
+    "problems": "{count, plural, =1 {# problem} other {# problems}}",
+    "ready": "{count, plural, =1 {# ready} other {# ready}}",
+    "replies": "{count, plural, =1 {# reply} other {# replies}}"
+  },
+  "privacy": {
+    "lastUpdated": "Last updated: December 7, 2025",
+    "sections": {
+      "cookies": {
+        "text": "Cookies are used exclusively for website functionality (e.g., maintaining login sessions). They are not shared with third parties.",
+        "title": "3. Cookies"
+      },
+      "data": {
+        "content": "<strong>Content:</strong> All content you submit to the website.",
+        "intro": "We use and store the following data:",
+        "login": "<strong>Login:</strong> Email, name, profile photo, and optionally connection with Google/Discord/GitHub if you sign in through them.",
+        "title": "2. Your Data"
+      },
+      "deletion": {
+        "text": "You can request account deletion at any time by writing to <email></email>.",
+        "title": "4. Account Deletion"
+      },
+      "intro": {
+        "ageRequirement": "This platform is intended for users 16 years and older. If you are younger, you need parental consent to use it. By creating an account, you confirm that you meet these requirements.",
+        "operator": "The operator is <strong>Patrik Bak</strong>, contact: <email></email>",
+        "title": "1. Who We Are"
+      }
+    },
+    "title": "Privacy Policy and Terms"
+  },
+  "problems": {
+    "commentsButton": "Comments",
+    "connectionFailed": "Connection failed",
+    "contestsOverview": "Contests overview",
+    "description": "A searchable archive of problems from mathematical competitions.",
+    "emptyState": {
+      "description": "Try adjusting the filters and searching again.",
+      "title": "Nothing found"
+    },
+    "errorLoadingStatement": "Error loading problem statement",
+    "errors": {
+      "connectionProblem": "Connection problem. Retrying...",
+      "invalidParameters": "Invalid request parameters",
+      "maxFiltersExceeded": "You can select a maximum of {max} filters",
+      "problemNotFound": "Problem \"{problemId}\" was not found",
+      "serverError": "Server returned an error. Retrying...",
+      "unexpectedError": "An unexpected error occurred. Retrying...",
+      "urlFiltersIgnored": "Some URL parameters were ignored",
+      "urlTooManyFilters": "URL contains too many filters (maximum {max})"
+    },
+    "favorites": {
+      "authReason": "liking problems",
+      "likeToggleFailed": "Failed to change like status",
+      "removedFromFavorites": "Problem was removed from favorites",
+      "undo": "Undo"
+    },
+    "filterByAuthor": "Filter by author: {name}",
+    "filters": {
+      "activeFilters": "Active filters",
+      "allProblems": "All problems",
+      "competitions": "Competitions",
+      "contestsOverview": "Contests overview",
+      "facets": {
+        "allCompetitions": "All competitions",
+        "allSeasons": "All years",
+        "anyOrder": "Any order",
+        "authors": "Authors",
+        "competition": "Competition",
+        "grouping": {
+          "Area": "Area",
+          "Goal": "Goal",
+          "Technique": "Technique",
+          "Type": "Occurrence"
+        },
+        "logic": {
+          "and": "All",
+          "andFull": "AND (all)",
+          "currentLogic": "Current: {mode}. Click to switch to {nextMode}",
+          "logicLabel": "Logic: {mode}",
+          "or": "At least one",
+          "orFull": "OR (at least one)",
+          "switchLogic": "Switch logic from {mode} to {nextMode}"
+        },
+        "problemNumber": "Problem number",
+        "searchAuthors": "Search authors…",
+        "searchCompetitions": "Search competitions",
+        "searchSeasons": "Search years…",
+        "searchTags": "Search keywords",
+        "season": "Year",
+        "selectAuthors": "Select authors",
+        "selectTags": "Select keywords",
+        "tags": "Keywords",
+        "tagsTooltip": "Keywords are assigned partially based on heuristics and AI, and thus may contain inaccuracies."
+      },
+      "favoritesLoginRequired": "You must be logged in to view favorite problems.",
+      "hideFilters": "Hide filters",
+      "myFavorites": "My favorites",
+      "reset": "Reset",
+      "resetFilters": "Reset filters",
+      "search": {
+        "clear": "Clear search text",
+        "label": "Search",
+        "placeholder": "e.g. table",
+        "searchInSolution": "Search in solution"
+      },
+      "searchedText": "Searched text",
+      "searching": "Searching",
+      "searchInSolutionSuffix": "(in problem and solution)",
+      "seasons": "Years",
+      "showFilters": "Show filters",
+      "tips": {
+        "exclusive": {
+          "desktop": "Long press on item or pressing <kbd>{modifierKey}</kbd> ({modifierName}) + click on item {intro}",
+          "title": "Exclusive selection",
+          "touch": "Long press on item {intro}"
+        },
+        "intro": "in the competition tree or other filters selects only this option (normal click adds/removes item). Also works on keywords in problem card, author name and active filters bar.",
+        "logic": {
+          "text": "In the active filters bar you can toggle logic by clicking on <mono>∧</mono> (AND) or <mono>∨</mono> (OR) symbol between <hyphens>key-word</hyphens> or author filters. AND means all selected filters must apply, OR means at least one must apply.",
+          "title": "Toggle filter logic"
+        },
+        "search": {
+          "text": "Search works in Slovak, Czech and English. By default it searches in problem text, but you can enable searching in solution.",
+          "title": "Search"
+        },
+        "title": "Tips and tricks"
+      }
+    },
+    "hideTechniques": "Hide techniques",
+    "like": "Like problem",
+    "loadContestsFailed": "Failed to load contests",
+    "loadingMore": "Loading more problems...",
+    "moreActions": "More actions",
+    "noContests": "No contests",
+    "noSimilarProblems": "No similar problems with sufficient relevance were found.",
+    "noStatementAvailable": "No problem statement available",
+    "relevance": "Relevance: {percentage}%",
+    "relevanceNote": "Relevance is approximate",
+    "searchContests": "Search contests...",
+    "share": "Share",
+    "showHiddenTechniques": "Show hidden solution techniques for this problem",
+    "showMoreTechniques": "Show more techniques",
+    "showTechniques": "Show techniques",
+    "similarProblems": "Similar problems",
+    "solution": "Solution",
+    "solutionLink": "Link to solution (opens in new window)",
+    "techniquesHelpTooltip": "Controls visibility of tags marking solution techniques (e.g., substitution, factoring, expression manipulation). These tags help identify mathematical methods used in problems.",
+    "title": "Problems",
+    "toggleSimilar": "Show/hide similar problems",
+    "tryingToConnect": "Trying to connect...",
+    "unlike": "Unlike problem"
+  },
+  "profile": {
+    "avatarUpdated": "Profile photo uploaded, update will take a few seconds",
+    "defaultUser": "User",
+    "displayName": "Name / Nickname",
+    "displayNamePlaceholder": "Enter your name",
+    "email": "Email",
+    "loading": "Loading user menu",
+    "memberSince": "Member since",
+    "title": "Profile"
+  },
+  "ui": {
+    "actions": {
+      "cancel": "Cancel",
+      "clear": "Clear",
+      "close": "Close",
+      "confirm": "Confirm",
+      "copy": "Copy",
+      "copyLink": "Copy link to section",
+      "delete": "Delete",
+      "edit": "Edit",
+      "editField": "Edit {field}",
+      "getPermalink": "Get permalink",
+      "linkCopied": "Link copied to clipboard",
+      "open": "Open",
+      "or": "OR",
+      "problemLinkCopied": "Problem link copied to clipboard",
+      "reset": "Reset",
+      "save": "Save",
+      "savedSuccessfully": "Saved successfully",
+      "saveFailed": "Failed to save",
+      "sendCode": "Send code",
+      "sendMessage": "Send message",
+      "share": "Share",
+      "showCount": "Show {count} more",
+      "showLess": "Show less",
+      "showMore": "Show more",
+      "submit": "Submit"
+    },
+    "content": {
+      "imageMissing": "Image missing"
+    },
+    "editor": {
+      "attachment": "Attachment (PDF, TXT, MD)",
+      "blockMath": "Block math ($$)",
+      "bold": "Bold (Ctrl+B)",
+      "bulletList": "Bullet list",
+      "cancelEsc": "Cancel (Esc)",
+      "dropToUpload": "Drop file to upload",
+      "emojiPicker": {
+        "categories": {
+          "activities": "Activities",
+          "animals": "Animals & Nature",
+          "flags": "Flags",
+          "food": "Food & Drink",
+          "objects": "Objects",
+          "smileys": "Smileys & People",
+          "suggested": "Frequently used",
+          "symbols": "Symbols",
+          "travel": "Travel & Places"
+        },
+        "searchPlaceholder": "Search emoji...",
+        "title": "Emoji"
+      },
+      "expandedEditor": "Expanded editor",
+      "expandEditor": "Expand editor with preview",
+      "expandWithPreview": "Expand + Preview",
+      "fileTooLarge": "File is too large. Maximum: {max} MB",
+      "heading": "Heading",
+      "headingPlaceholder": "Heading",
+      "hiddenContentPlaceholder": "hidden content",
+      "hiddenText": "Hidden text",
+      "image": "Image (insert diagram/graph, not text screenshots)",
+      "imageAlt": "Image",
+      "inlineMath": "Inline math ($)",
+      "invalidFileType": "Invalid file type",
+      "italic": "Italic (Ctrl+I)",
+      "latexPicker": {
+        "categories": {
+          "geometry": "Geometry",
+          "greek": "Greek",
+          "operators": "Operators",
+          "other": "Other",
+          "relations": "Relations",
+          "sets": "Sets"
+        },
+        "title": "LaTeX symbols"
+      },
+      "link": "Link",
+      "maxAttachments": "Maximum attachments: {max}",
+      "maxAttachmentsPerComment": "Maximum attachments: {max}",
+      "maxAttachmentsReached": "Maximum {max} attachments per comment",
+      "maxCharacters": "Maximum characters: {max}",
+      "maxImages": "Maximum images: {max}",
+      "maxImagesPerComment": "Maximum images: {max}",
+      "maxImagesReached": "Maximum {max} images per comment",
+      "minimize": "Minimize",
+      "moreOptions": "More options",
+      "numberedList": "Numbered list",
+      "pastedImage": "Pasted image",
+      "preview": "Preview",
+      "quote": "Quote",
+      "searchEmoji": "Search emoji...",
+      "sectionLinkCopied": "Section link copied to clipboard",
+      "shrink": "Shrink",
+      "shrinkEditor": "Shrink editor",
+      "spoiler": "Hidden text (||[Title]content||)",
+      "submit": "Submit",
+      "submitShortcut": "Submit ({modifier} + Enter)",
+      "unsupportedFileType": "Unsupported file type. Allowed: images (PNG, JPEG, WebP, GIF) or attachments (PDF, TXT, MD)",
+      "uploadAttachmentFailed": "Failed to upload attachment",
+      "uploadFailed": "Failed to upload file",
+      "uploadImageFailed": "Failed to upload image",
+      "uploading": "Uploading {filename}...",
+      "uploadUrlFailed": "Failed to get upload URL",
+      "verificationFailed": "Failed to verify file"
+    },
+    "filters": {
+      "apply": "Apply Filters",
+      "clear": "Clear",
+      "clearSearch": "Clear search in {name}",
+      "close": "Close filters",
+      "closePopover": "Close selection",
+      "collapseGroup": "Collapse group",
+      "expandGroup": "Expand group",
+      "logic": "Logic",
+      "logicAll": "All",
+      "logicAtLeastOne": "At least one",
+      "noResults": "No results",
+      "open": "Open filters",
+      "openPopover": "Open {name}",
+      "openWithCount": "Open filters ({count} active)",
+      "reset": "Reset",
+      "resetFilter": "Reset selection in this filter",
+      "resetSelection": "Reset selection in {name}",
+      "search": "Search…",
+      "searchIn": "Search {name}",
+      "searchPlaceholder": "Search…",
+      "selectedCount": "Selected count: {count}",
+      "selectedInGroup": "{count} selected",
+      "selectionLogic": "Selection logic",
+      "selectPlaceholder": "Select an option",
+      "sortAlphabetically": "Sort by name (A-Z)",
+      "sortByCountAsc": "Sort by count (ascending)",
+      "sortByCountDesc": "Sort by count (descending)",
+      "title": "Filters"
+    },
+    "modal": {
+      "close": "Close"
+    },
+    "userMenu": {
+      "label": "User menu",
+      "loading": "Loading user menu"
+    }
+  },
+  "validation": {
+    "codeLength": "Code must be {count} characters",
+    "codeRequired": "Code is required",
+    "confirmPasswordRequired": "Please confirm your password",
+    "invalidEmail": "Please enter a valid email",
+    "messageMinLength": "Message must be at least {count} characters",
+    "messageRequired": "Message is required",
+    "nameMaxLength": "Name can be at most {count} characters",
+    "nameMinLength": "Name must be at least {count} characters",
+    "nameRequired": "Name is required",
+    "passwordMinLength": "Password must be at least {count} characters",
+    "passwordRequired": "Password is required",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "selectValidSubject": "Please select a valid subject"
+  }
+}

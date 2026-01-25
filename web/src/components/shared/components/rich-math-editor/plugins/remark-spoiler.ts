@@ -90,10 +90,13 @@ export function remarkSpoiler() {
       const contentNodes = children.filter((node) => !isLabel(node))
 
       // Extract text from the label nodes (e.g., "My Title")
-      // If no label is found, default to 'Skrytý text'
-      let labelText = 'Skrytý text'
+      // If no label is found, the React component will use a translated default
+      let labelText: string | undefined
       if (labelNodes.length > 0) {
-        labelText = labelNodes.map(getTextContent).join('').trim() || 'Skrytý text'
+        const extracted = labelNodes.map(getTextContent).join('').trim()
+        if (extracted) {
+          labelText = extracted
+        }
       }
 
       // Transform for Rehype - tell it how to render this node as HTML

@@ -1,8 +1,12 @@
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Options;
+using MathComps.Shared;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 
@@ -62,8 +66,38 @@ builder.Services.AddMathCompsDbContext(builder.Configuration);
 // Infrastructure services: options + problem filtering service
 builder.Services.AddInfrastructureServices();
 
+// Request localization for Accept-Language header support
+// Auto-detect supported cultures from the Language enum
+var supportedCultures = Enum.GetValues<Language>()
+    .Select(lang => new CultureInfo(lang.ToString().ToLowerInvariant()))
+    .ToArray();
+
+// Get default locale from configuration
+var defaultLocale = builder.Configuration
+    .GetSection(LocalizationOptions.ConfigurationSectionName)
+    .Get<LocalizationOptions>()
+    ?.DefaultLocale
+    ?? throw new InvalidOperationException("Localization options not configured.");
+
+// Configure request localization
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    // Set default locale based on the configuration
+    options.DefaultRequestCulture = new RequestCulture(defaultLocale.ToString().ToLowerInvariant());
+
+    // Set supported cultures
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+
+    // Use Accept-Language header as the primary source
+    options.RequestCultureProviders = [new AcceptLanguageHeaderRequestCultureProvider()];
+});
+
 // The app configured
 var app = builder.Build();
+
+// Enable request localization (must be early in the pipeline)
+app.UseRequestLocalization();
 
 // Configure the HTTP request pipeline
 app.ConfigureSecurityPipeline(app.Environment);

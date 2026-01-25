@@ -1,20 +1,16 @@
 /**
  * Base email template system for MathComps
- * Provides consistent branding across all email types
  */
 
-import { getRequiredEnv } from '@/components/shared/utils/env-utils'
-import { ROUTES } from '@/constants/routes'
+import { getTranslations } from 'next-intl/server'
 
-type BaseEmailProps = {
-  /** Main content HTML to insert into the template */
-  content: string
-  /** Email subject for preview text */
-  previewText?: string
-}
+import { getRequiredEnv } from '@/components/shared/utils/env-utils'
+import { type Locale, ROUTES } from '@/i18n/i18n'
 
 /**
  * Generates the common email header with MathComps branding
+ *
+ * @returns HTML string of the email header
  */
 function generateEmailHeader(): string {
   // Get the site URL so we can use it to load the logo + make the logo clickable
@@ -54,9 +50,17 @@ function generateEmailHeader(): string {
 
 /**
  * Generates the common email footer
+ *
+ * @param locale - The locale for the footer
+ *
+ * @returns HTML string of the email footer
  */
-function generateEmailFooter(): string {
-  const siteUrl = getRequiredEnv('NEXT_PUBLIC_SITE_URL')
+async function generateEmailFooter(locale: Locale): Promise<string> {
+  // Get translations for the footer
+  const t = await getTranslations({ locale, namespace: 'email.footer' })
+
+  // Construct the privacy policy URL
+  const privacyUrl = `${getRequiredEnv('NEXT_PUBLIC_SITE_URL')}${ROUTES.PRIVACY}`
 
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
@@ -68,7 +72,7 @@ function generateEmailFooter(): string {
           </p>
           
           <div>
-             <a href="${siteUrl}${ROUTES.PRIVACY}" style="color: #94a3b8; text-decoration: underline; font-size: 14px;">Súkromie a podmienky</a>
+             <a href="${privacyUrl}" style="color: #94a3b8; text-decoration: underline; font-size: 14px;">${t('privacy')}</a>
           </div>
         </td>
       </tr>
@@ -77,13 +81,22 @@ function generateEmailFooter(): string {
 }
 
 /**
- * Base email template wrapper
- * Wraps content with consistent header, footer, and styling
+ * Base email template wrapper. Wraps content with consistent header, footer, and styling.
+ *
+ * @param content - Main content HTML to insert into the template
+ * @param previewText - Email subject for preview text
+ * @param locale - Locale for footer text
+ *
+ * @returns HTML string of the email template
  */
-export function generateBaseEmail({ content, previewText }: BaseEmailProps): string {
+export async function generateBaseEmail(
+  content: string,
+  previewText: string,
+  locale: Locale
+): Promise<string> {
   return `
     <!DOCTYPE html>
-    <html lang="sk">
+    <html lang="${locale}">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,7 +126,7 @@ export function generateBaseEmail({ content, previewText }: BaseEmailProps): str
                 </td>
               </tr>
               
-              ${generateEmailFooter()}
+              ${await generateEmailFooter(locale)}
               
             </table>
           </td>
@@ -126,6 +139,10 @@ export function generateBaseEmail({ content, previewText }: BaseEmailProps): str
 
 /**
  * Helper to create a verification code display box
+ *
+ * @param code - The verification code to display
+ *
+ * @returns HTML string of the verification code display box
  */
 export function generateCodeBox(code: string): string {
   return `
@@ -145,18 +162,16 @@ export function generateCodeBox(code: string): string {
 
 /**
  * Helper to create an info box with optional styling
+ *
+ * @param content - The content of the info box
+ * @param type - The type of the info box
+ *
+ * @returns HTML string of the info box
  */
-type InfoBoxProps = {
-  /** The content of the info box */
-  content: string
-  /** The type of the info box */
-  type?: 'info' | 'success' | 'warning' | 'error'
-}
-
-/**
- * Helper to create an info box with optional styling
- */
-export function generateInfoBox({ content, type = 'info' }: InfoBoxProps): string {
+export function generateInfoBox(
+  content: string,
+  type: 'info' | 'success' | 'warning' | 'error' = 'info'
+): string {
   // Get the style object based on the type
   const style = {
     info: {

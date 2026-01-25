@@ -1,0 +1,236 @@
+{
+  "competitions": {
+    "csmo": {
+      "shortName": "CSMO",
+      "fullName": "Czech-Slovak Mathematical Olympiad"
+    },
+    "tst": {
+      "shortName": "IMO/MEMO TST",
+      "fullName": "Team Selection Test for IMO and MEMO"
+    },
+    "memo": {
+      "shortName": "MEMO",
+      "fullName": "Middle European Mathematical Olympiad"
+    },
+    "imo": {
+      "shortName": "IMO",
+      "fullName": "International Mathematical Olympiad"
+    },
+    "caps": {
+      "shortName": "CAPS",
+      "fullName": "Czech-Austrian-Polish-Slovak Match"
+    },
+    "egmo": {
+      "shortName": "EGMO",
+      "fullName": "European Girl's Mathematical Olympiad"
+    },
+    "tstc": {
+      "shortName": "CPSJ TST",
+      "fullName": "Team Selection Test for CPSJ"
+    },
+    "cpsj": {
+      "shortName": "CPSJ",
+      "fullName": "Czech-Polish-Slovak Junior Match"
+    }
+  },
+  "rounds": {
+    "csmo": {
+      "withCategories": {
+        "a": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "s": {
+            "shortName": "School Round",
+            "fullName": "School Round"
+          },
+          "ii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          },
+          "iii": {
+            "shortName": "National Round",
+            "fullName": "National Round"
+          }
+        },
+        "b": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "s": {
+            "shortName": "School Round",
+            "fullName": "School Round"
+          },
+          "ii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          },
+          "iii": {
+            "shortName": "National Round",
+            "fullName": "National Round"
+          }
+        },
+        "c": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "s": {
+            "shortName": "School Round",
+            "fullName": "School Round"
+          },
+          "ii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          },
+          "iii": {
+            "shortName": "National Round",
+            "fullName": "National Round"
+          }
+        },
+        "z4": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "ii": {
+            "shortName": "School Round",
+            "fullName": "School Round"
+          }
+        },
+        "z5": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "ii": {
+            "shortName": "District Round",
+            "fullName": "District Round"
+          },
+          "iii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          }
+        },
+        "z6": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "ii": {
+            "shortName": "District Round",
+            "fullName": "District Round"
+          },
+          "iii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          }
+        },
+        "z7": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "ii": {
+            "shortName": "District Round",
+            "fullName": "District Round"
+          },
+          "iii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          }
+        },
+        "z8": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "ii": {
+            "shortName": "District Round",
+            "fullName": "District Round"
+          },
+          "iii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          }
+        },
+        "z9": {
+          "i": {
+            "shortName": "Home Round",
+            "fullName": "Home Round"
+          },
+          "ii": {
+            "shortName": "District Round",
+            "fullName": "District Round"
+          },
+          "iii": {
+            "shortName": "Regional Round",
+            "fullName": "Regional Round"
+          }
+        }
+      }
+    },
+    "memo": {
+      "withoutCategories": {
+        "i": {
+          "shortName": "Individual",
+          "fullName": "Individual Round"
+        },
+        "t": {
+          "shortName": "Team",
+          "fullName": "Team Round"
+        }
+      }
+    },
+    "cpsj": {
+      "withoutCategories": {
+        "i": {
+          "shortName": "Individual",
+          "fullName": "Individual Round"
+        },
+        "t": {
+          "shortName": "Team",
+          "fullName": "Team Round"
+        }
+      }
+    },
+    "tst": {
+      "withoutCategories": {
+        "d1": {
+          "shortName": "Day 1",
+          "fullName": "Day 1"
+        },
+        "d2": {
+          "shortName": "Day 2",
+          "fullName": "Day 2"
+        },
+        "d3": {
+          "shortName": "Day 3",
+          "fullName": "Day 3"
+        },
+        "d4": {
+          "shortName": "Day 4",
+          "fullName": "Day 4"
+        },
+        "d5": {
+          "shortName": "Day 5",
+          "fullName": "Day 5"
+        }
+      }
+    }
+  },
+  "categories": {
+    "a": "A",
+    "b": "B",
+    "c": "C",
+    "z4": "Z4",
+    "z5": "Z5",
+    "z6": "Z6",
+    "z7": "Z7",
+    "z8": "Z8",
+    "z9": "Z9"
+  },
+  "seasonFormat": "Edition {number} ({start}/{end})"
+}

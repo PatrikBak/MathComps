@@ -2,28 +2,31 @@
 
 AI-powered translation of math problem statements and solutions. Preserves TeX formatting and mathematical notation while translating natural language text.
 
-## How It Works
+## Workflow
 
-1. **Query Problems**: Finds problems needing translation in the target language(s)
-2. **AI Translation**: Sends each text to the LLM with instructions to translate natural language while preserving all TeX code
-3. **Database Storage**: Saves translations with metadata tracking the translation date
+1. **`translate`** – AI translates problems and stores raw TeX in the database
+2. **`parse`** – Parses raw TeX into structured JSON for rendering
 
-## Usage
+## Commands
+
+### `translate` - Generate Translations
+
+Translates problems using AI (Gemini) and saves to database.
 
 ```bash
 cd backend/src/Tools/MathComps.Cli.Translation
 
 # Translate to all languages (EN, CZ) - default
-dotnet run -- -n 100
+dotnet run -- translate -n 100
 
 # Translate to a specific language
-dotnet run -- -n 100 -l EN
+dotnet run -- translate -n 100 -l EN
 
 # Translate only statements
-dotnet run -- -n 100 --scope StatementsOnly
+dotnet run -- translate -n 100 --scope StatementsOnly
 
 # Force retranslation + parallel processing
-dotnet run -- -n 100 --force --num-threads 4
+dotnet run -- translate -n 100 --force --num-threads 4
 ```
 
 **Options**:
@@ -34,10 +37,36 @@ dotnet run -- -n 100 --force --num-threads 4
 - `--force` – Force retranslation even if translations exist
 - `--num-threads` – Parallel threads (default: 1, watch rate limits)
 
+### `parse` - Parse Translations
+
+Parses translated raw TeX text into structured JSON content. This step is required after translation to enable proper rendering.
+
+```bash
+# Parse all unparsed translations
+dotnet run -- parse -n 100
+
+# Parse only statements
+dotnet run -- parse -n 100 --scope StatementsOnly
+```
+
+**Options**:
+
+- `-n|--count` – Number of translations to parse (required)
+- `--scope` – Parsing scope: `Both` (default), `StatementsOnly`, or `SolutionsOnly`
+
+**Error Recovery**:
+
+If any translations fail to parse (due to malformed TeX or unknown commands), they are written to `Output/parse-issues.yaml`. YAML is used for easier editing of multiline TeX content. To fix:
+
+1. Edit the `rawText` field in the file to correct the TeX
+2. Rerun the parse command
+
+When a manually fixed entry parses successfully, both `ParsedText` and `RawText` are updated in the database. This ensures your fixes are persisted permanently and won't need to be applied again.
+
 ## Setup
 
 See the [main backend README](../../../README.md) for Gemini API and database setup.
 
 ## Configuration
 
-Edit `appsettings.json` to change the AI model or prompt.
+Edit `appsettings.json` to change the AI model or prompt for translations.

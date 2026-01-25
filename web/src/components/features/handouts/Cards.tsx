@@ -78,7 +78,7 @@ export function CollapsibleCard({
                 {subtitle}
               </span>
             )}
-            {id && <CopyLinkButton sectionSlug={id} iconSize={16} className="ml-0" />}
+            {id && <CopyLinkButton slug={id} iconSize={16} className="ml-0" />}
           </div>
         )}
         <div className="text-gray-300 leading-relaxed">{children}</div>

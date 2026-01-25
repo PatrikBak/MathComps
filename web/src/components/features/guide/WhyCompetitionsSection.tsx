@@ -1,4 +1,5 @@
 import { Brain, Briefcase, Sparkles, Trophy, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -14,45 +15,48 @@ export default function WhyCompetitionsSection({
 }: {
   sectionNumberer: SectionNumberer
 }) {
+  // Common guide translations
+  const guide = useTranslations('guide')
+
+  // Scoped translator for benefits
+  const tBenefits = useTranslations('guide.sections.whyCompetitions.benefits')
+
+  // The displayed benefits
   const benefits = [
     {
-      title: 'Objavenie potenciálu',
+      title: tBenefits('potential.title'),
       icon: Sparkles,
       iconColor: 'text-cyan-400',
       iconBg: 'bg-cyan-500/10',
-      description:
-        'Veľa ľudí často nevie, čoho je ich mozog schopný, keď sa snaží. Súťaže poskytujú bezpečné prostredie toto otestovať, a pre mnohých sú tak začiatkom ich budúcej cesty za kariérnym aj osobným rastom.',
+      description: tBenefits('potential.text'),
     },
     {
       icon: Brain,
       iconColor: 'text-indigo-400',
       iconBg: 'bg-indigo-500/10',
-      title: 'Rozvoj logického myslenia',
-      description:
-        'Matematické súťaže rozvíjajú schopnosť analýzy problémov a hľadania kreatívnych riešení. Tieto zručnosti sú potom prenesiteľné do všetkých sfér života, keďže problémy je treba riešiť všade.',
+      title: tBenefits('logic.title'),
+      description: tBenefits('logic.text'),
     },
     {
-      title: 'Komunita a priateľstvo',
+      title: tBenefits('community.title'),
       icon: Users,
       iconColor: 'text-violet-400',
       iconBg: 'bg-violet-500/10',
-      description:
-        'Prostrednie súťaží a sústredení je veľmi komunitne orientované a bez toho by mnohé ani neexistovali. Veľa ľudí si v týchto komunitách našlo priateľov a partnetov na celý život.',
+      description: tBenefits('community.text'),
     },
     {
       icon: Briefcase,
       iconColor: 'text-emerald-400',
       iconBg: 'bg-emerald-500/10',
-      title: 'Veľké uplatnenie',
-      description:
-        'Ľudia z prostredia matematických súťaží sú tí najžiadanejší na rôzne pozície vyžadujúce riešenie ťažkých problémov, napr. v oblasti AI, algoritmického obchodovania atď. Vďaka nadobudnutým schopnostiam a kontaktom z komunity ich potom ľahko získavajú.',
+      title: tBenefits('career.title'),
+      description: tBenefits('career.text'),
     },
   ]
 
   return (
     <GuideSection
-      title={GUIDE_TITLES.WHY_COMPETITIONS}
-      description="Matematické súťaže nie sú len o súťažení a matematike 🙂."
+      title={guide(`titles.${GUIDE_TITLES.WHY_COMPETITIONS}`)}
+      description={guide('sections.whyCompetitions.description')}
       icon={{ type: 'lucide', icon: Trophy }}
       iconColor="text-amber-400"
       iconBackground="bg-amber-500/10"

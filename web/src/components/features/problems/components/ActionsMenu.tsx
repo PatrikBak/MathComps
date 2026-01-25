@@ -1,4 +1,5 @@
 import { Eye, EyeOff, HelpCircle, MoreVertical, Share2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import {
@@ -33,6 +34,11 @@ type ActionsMenuProps = {
  * - Technique tag visibility toggle (always visible)
  */
 export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: ActionsMenuProps) {
+  // Get translations
+  const tProblems = useTranslations('problems')
+  const tActions = useTranslations('ui.actions')
+
+  // Dropdown state
   const [open, setOpen] = React.useState(false)
 
   return (
@@ -42,7 +48,7 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
           className="inline-flex h-8 w-8 items-center justify-center rounded-md
                text-slate-400 hover:bg-slate-700/50 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
                transition-colors duration-150"
-          aria-label="Ďalšie akcie"
+          aria-label={tProblems('moreActions')}
         >
           <MoreVertical className="h-4 w-4" />
         </button>
@@ -53,13 +59,13 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
         onCloseAutoFocus={(event) => event.preventDefault()}
       >
         {/* Share Button - only visible on small screens (below custom breakpoint) */}
-        <ShareButton filters={filters} asChild>
+        <ShareButton filters={filters}>
           <DropdownMenuItem className="cursor-pointer">
             <div className="flex items-center">
               <span className="mr-2 flex w-5 items-center justify-center">
                 <Share2 className="h-4 w-4" />
               </span>
-              <span>Zdieľať filtre</span>
+              <span>{tActions('share')}</span>
             </div>
           </DropdownMenuItem>
         </ShareButton>
@@ -87,13 +93,10 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
                 )}
               </span>
               <span className={showTechniqueTags ? 'text-indigo-100' : ''}>
-                {showTechniqueTags ? 'Skryť techniky' : 'Zobraziť techniky'}
+                {showTechniqueTags ? tProblems('hideTechniques') : tProblems('showTechniques')}
               </span>
             </div>
-            <Tooltip
-              placement="top"
-              content="Ovláda viditeľnosť tagov označujúcich techniky riešenia (napr. substitúcia, rozklad, úprava výrazu). Tieto tagy pomáhajú identifikovať matematické metódy použité v úlohách."
-            >
+            <Tooltip placement="top" content={tProblems('techniquesHelpTooltip')}>
               <div className="p-1">
                 <HelpCircle className="h-4 w-4 cursor-help text-slate-500 hover:text-slate-400" />
               </div>

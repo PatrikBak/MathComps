@@ -2,6 +2,7 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { useMediaQuery } from '@mantine/hooks'
+import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import React from 'react'
 
@@ -51,6 +52,9 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
 
   // Fetch comments from API
   const { data: commentsDtos, isLoading, error } = useFetchComments(target)
+
+  // Get translations for UI
+  const tComments = useTranslations('comments')
 
   // Convert the comment into our custom structure
   const comments = React.useMemo(() => {
@@ -242,7 +246,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
                 onChange={setReplyInputText}
                 onSend={handleSubmitReply}
                 onCancel={handleCancelReply}
-                placeholder="Napíš odpoveď..."
+                placeholder={tComments('replyPlaceholder')}
                 autoFocus
                 isLoading={isCreatingReplyComment}
               />
@@ -273,6 +277,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       handleLikeComment,
       handleSubmitReply,
       handleCancelReply,
+      tComments,
     ]
   )
 
@@ -305,9 +310,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           }[variant]
         }
       >
-        <div className="py-6 text-center text-red-400 text-sm">
-          Nepodarilo sa načítať komentáre. Skúste to neskôr.
-        </div>
+        <div className="py-6 text-center text-red-400 text-sm">{tComments('loadError')}</div>
       </div>
     )
   }
@@ -332,9 +335,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           }
         >
           {!comments || !comments.some((comment) => !shouldHideComment(comment)) ? (
-            <div className="py-6 text-center text-gray-500 text-sm">
-              Zatiaľ žiadne komentáre. Buď prvý!
-            </div>
+            <div className="py-6 text-center text-gray-500 text-sm">{tComments('empty')}</div>
           ) : (
             comments.map((comment) => renderSingleComment(comment))
           )}
@@ -363,9 +364,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
                   }[variant]
                 }
               >
-                <p className="text-slate-400 text-sm mb-3">
-                  Pre pridanie komentára musíte byť prihlásený.
-                </p>
+                <p className="text-slate-400 text-sm mb-3">{tComments('loginRequired')}</p>
                 <LoginButton onBeforeRedirect={() => savePendingTarget(target)} />
               </div>
             ) : (
@@ -374,7 +373,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
                 value={commentInputText}
                 onChange={setCommentInputText}
                 onSend={handleSubmitComment}
-                placeholder="Napíš komentár..."
+                placeholder={tComments('writePlaceholder')}
                 isLoading={isCreatingRootComment}
               />
             )}
@@ -390,7 +389,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           onChange={setReplyInputText}
           onSend={handleSubmitReply}
           onCancel={handleCancelReply}
-          placeholder="Napíš odpoveď..."
+          placeholder={tComments('replyPlaceholder')}
           autoExpandOnMobile
           isLoading={isCreatingReplyComment}
         />

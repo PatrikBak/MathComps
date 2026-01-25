@@ -1,16 +1,17 @@
 import { useMediaQuery } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, Grid3X3, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
-import { slovakPlural } from '../../../shared/utils/string-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { usePrefetchContestBrowser } from '../hooks/use-contest-browser'
 import { useContestBrowserModal } from '../hooks/use-contest-browser-modal'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
 import { interpretSelectionParts } from '../utils/selection-interpreter'
+import { createDefaultFilters } from '../utils/url-initialization'
 import { ActionsMenu } from './ActionsMenu'
 import type { ChipData } from './CollapsibleChipGroup'
 import { CollapsibleChipGroup } from './CollapsibleChipGroup'
@@ -28,8 +29,6 @@ type ActiveFiltersBarProps = {
   filterOptions: FilterOptionsWithCounts
   /** Snapshot of all available options at page load. */
   baseOptions: FilterOptionsWithCounts
-  /** Default filter state used when user clicks Reset. */
-  initialFilters: SearchFiltersState
   /** Notifies parent of filter changes; type distinguishes UI updates (discrete vs text debouncing). */
   onFiltersChange: (newFilters: SearchFiltersState, type: 'discrete' | 'text') => void
   /** Total number of problems matching the active filters. */
@@ -60,7 +59,6 @@ export default function ActiveFiltersBar({
   filters,
   filterOptions,
   baseOptions,
-  initialFilters,
   onFiltersChange,
   problemCount,
   showTechniqueTags,
@@ -68,6 +66,15 @@ export default function ActiveFiltersBar({
   onMobileFilterClick,
   isSearching,
 }: ActiveFiltersBarProps) {
+  // Get default filters for reset functionality
+  const defaultFilters = createDefaultFilters()
+
+  // Translations for plurals
+  const tPlurals = useTranslations('plurals')
+
+  // Translations for the filters bar
+  const tFilters = useTranslations('problems.filters')
+
   // Sidebar is visible on the desktop viewports
   // Visibility is needed for instance to show the button to open the sidebar
   const isSidebarVisible = useMediaQuery('(min-width: 1024px)')
@@ -111,7 +118,7 @@ export default function ActiveFiltersBar({
     // Update filters with the new selection
     onFiltersChange(
       {
-        ...initialFilters,
+        ...defaultFilters,
         seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName }],
         contestSelection: contestSelections ?? [],
       },
@@ -145,7 +152,7 @@ export default function ActiveFiltersBar({
   const handleClearAll = () => {
     onFiltersChange(
       {
-        ...initialFilters,
+        ...defaultFilters,
       },
       'discrete'
     )
@@ -217,7 +224,7 @@ export default function ActiveFiltersBar({
     if (isExclusiveSelection(event)) {
       onFiltersChange(
         {
-          ...initialFilters,
+          ...defaultFilters,
           searchText: filters.searchText,
           searchInSolution: filters.searchInSolution,
         },
@@ -300,7 +307,7 @@ export default function ActiveFiltersBar({
     filters.searchText && filters.searchText.trim().length > 0
       ? {
           id: 'search-text',
-          displayName: `"${filters.searchText}"${filters.searchInSolution ? ' (v zadaní aj riešení)' : ''}`,
+          displayName: `"${filters.searchText}"${filters.searchInSolution ? ` ${tFilters('searchInSolutionSuffix')}` : ''}`,
           onClick: handleToggleSearchText,
         }
       : null
@@ -329,17 +336,17 @@ export default function ActiveFiltersBar({
     ...(searchTextChip
       ? [
           {
-            label: 'Hľadaný text',
+            label: tFilters('searchedText'),
             chips: [searchTextChip],
           },
         ]
       : []),
     {
-      label: 'Súťaže',
+      label: tFilters('competitions'),
       chips: competitionChips,
     },
     {
-      label: 'Ročníky',
+      label: tFilters('seasons'),
       chips: sortedSeasons.map((season) => ({
         id: `season-${season.slug}`,
         displayName: getLabel(seasonOptions, season.slug, seasonOptionsBase),
@@ -347,7 +354,7 @@ export default function ActiveFiltersBar({
       })),
     },
     {
-      label: 'Poradie úlohy',
+      label: tFilters('facets.problemNumber'),
       chips: sortedProblemNumbers.map((number) => ({
         id: `number-${number}`,
         displayName: String(number),
@@ -355,7 +362,7 @@ export default function ActiveFiltersBar({
       })),
     },
     {
-      label: 'Kľúčové slová',
+      label: tFilters('facets.tags'),
       logic: filters.tagLogic,
       onLogicToggle: handleToggleTagLogic,
       chips: sortedTags.map((keyword) => ({
@@ -365,7 +372,7 @@ export default function ActiveFiltersBar({
       })),
     },
     {
-      label: 'Autori',
+      label: tFilters('facets.authors'),
       logic: filters.authorLogic,
       onLogicToggle: handleToggleAuthorLogic,
       chips: sortedAuthors.map((author) => ({
@@ -401,7 +408,9 @@ export default function ActiveFiltersBar({
         <div className="flex items-center gap-1.5 gap-custom-expand text-sm flex-shrink min-w-0">
           {isSidebarVisible ? (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <h2 className="font-semibold text-slate-200 whitespace-nowrap">Aktívne filtre</h2>
+              <h2 className="font-semibold text-slate-200 whitespace-nowrap">
+                {tFilters('activeFilters')}
+              </h2>
               {activeTokenCount > 0 && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-xs font-medium text-white">
                   {activeTokenCount}
@@ -424,12 +433,12 @@ export default function ActiveFiltersBar({
           {isSearching ? (
             <Loader2
               className="ml-2 h-3 w-3 animate-spin text-slate-400 flex-shrink-0"
-              aria-label="Vyhľadávam"
+              aria-label={tFilters('searching')}
             />
           ) : (
             <div className="ml-2 flex items-center gap-1.5 flex-shrink-0">
               <div className="text-slate-400 flex-shrink-0 whitespace-nowrap text-xs">
-                {problemCount} {slovakPlural(problemCount, ['úloha', 'úlohy', 'úloh'])}
+                {tPlurals('problems', { count: problemCount })}
               </div>
             </div>
           )}
@@ -441,8 +450,8 @@ export default function ActiveFiltersBar({
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400
                 hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
                 flex-shrink-0"
-              aria-label={areFiltersExpanded ? 'Skryť filtre' : 'Zobraziť filtre'}
-              title={areFiltersExpanded ? 'Skryť filtre' : 'Zobraziť filtre'}
+              aria-label={areFiltersExpanded ? tFilters('hideFilters') : tFilters('showFilters')}
+              title={areFiltersExpanded ? tFilters('hideFilters') : tFilters('showFilters')}
             >
               {areFiltersExpanded ? (
                 <ChevronUp className="h-3.5 w-3.5" />
@@ -462,11 +471,11 @@ export default function ActiveFiltersBar({
             className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
               hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
               whitespace-nowrap"
-            aria-label="Prehľad súťaží"
-            title="Prehľad súťaží"
+            aria-label={tFilters('contestsOverview')}
+            title={tFilters('contestsOverview')}
           >
             <Grid3X3 className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="hidden label-custom-show">Súťaže</span>
+            <span className="hidden label-custom-show">{tFilters('competitions')}</span>
           </button>
           {/* Share button */}
           <ShareButton
@@ -483,11 +492,11 @@ export default function ActiveFiltersBar({
             className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
                hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
                disabled:opacity-30 disabled:pointer-events-none whitespace-nowrap"
-            aria-label="Resetovať filtre"
-            title="Resetovať filtre"
+            aria-label={tFilters('resetFilters')}
+            title={tFilters('resetFilters')}
           >
             <FilterX className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="hidden sm:inline">Resetovať</span>
+            <span className="hidden sm:inline">{tFilters('reset')}</span>
           </button>
 
           {/* Actions Menu */}
@@ -513,14 +522,22 @@ export default function ActiveFiltersBar({
               return (
                 <div key={group.label}>
                   <div className="grid grid-cols-1 gap-y-1.5 sm:grid-cols-[5.5rem_1fr] sm:items-baseline sm:gap-x-4 sm:gap-y-0 md:grid-cols-[6rem_1fr] lg:grid-cols-[6.5rem_1fr] xl:grid-cols-[7rem_1fr]">
+                    {/* Group header (what we're filtering by) */}
                     <span className="whitespace-nowrap text-sm font-medium text-slate-400">
                       {group.label}:
                     </span>
 
+                    {/* Chip Group (the actual filters) */}
                     <CollapsibleChipGroup
                       chips={group.chips as ChipData[]}
-                      mode={group.logic}
-                      onModeToggle={group.onLogicToggle}
+                      logicalChipsProps={
+                        group.logic && group.onLogicToggle
+                          ? {
+                              mode: group.logic,
+                              onModeToggle: group.onLogicToggle,
+                            }
+                          : undefined
+                      }
                     />
                   </div>
 

@@ -102,12 +102,10 @@ export function NewsCard({ article }: NewsCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className="text-xl font-bold text-white leading-tight mb-3 line-clamp-2">
-        {article.title}
-      </h3>
+      <h3 className="text-xl font-bold text-white leading-tight mb-3">{article.title}</h3>
 
       {/* MDX Content - server-rendered for SEO */}
-      <div className="line-clamp-4 flex-grow">
+      <div className="flex-grow">
         <MDXRemote source={article.content} components={cardMdxComponents} />
       </div>
     </article>

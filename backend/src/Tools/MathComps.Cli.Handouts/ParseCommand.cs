@@ -23,10 +23,10 @@ public class ParseCommand : Command<ParseCommand.Settings>
     public class Settings : CommandSettings
     {
         /// <summary>
-        /// File patterns to match handout files (e.g., *-sk.tex for Slovak handouts, or specific file like algebra-1-rozklady-sk.tex).
+        /// File patterns to match handout files (e.g., *.sk.tex for Slovak handouts, or specific file like rozklady-na-sucin.sk.tex).
         /// </summary>
         [CommandArgument(0, "<patterns>")]
-        [Description("File pattern(s) to match handout files.\nExample: *-sk.tex OR algebra-1-rozklady-sk.tex")]
+        [Description("File pattern(s) to match handout files.\nExample: *.sk.tex OR rozklady-na-sucin.sk.tex")]
         public required string[] Patterns { get; set; }
     }
 
@@ -186,18 +186,18 @@ public class ParseCommand : Command<ParseCommand.Settings>
         // Collect all discovered images from all sections
         var allDiscoveredImages = ImmutableList.CreateBuilder<ImageData>();
 
-        // Shared state across all sections for unique filenames and deduplication
-        var imageCounter = 1;
-        var processedImages = new Dictionary<string, string>();
+        // Start with initial state for shared counter and deduplication
+        var state = ImageProcessingState.Initial;
 
         // Process each section's content because we need to
         // change image ids to svg ids + get images into wwwroot
         var processedSections = document.Sections.Select(section =>
         {
-            // Process the section's text with shared counter and deduplication
-            var result = TexImageProcessor.Process(section.Text, config, ref imageCounter, processedImages)
-                // It should just work out
-                ?? throw new InvalidOperationException("Processing result is null");
+            // Process the section's text, chaining state between sections
+            var result = TexImageProcessor.Process(section.Text, config, state.ResetImages());
+
+            // Update state for next section (preserves counter and processed map)
+            state = result.State;
 
             // Accumulate discovered images
             allDiscoveredImages.AddRange(result.DiscoveredImages);

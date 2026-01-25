@@ -22,7 +22,10 @@ type NavLinkProps = {
 export const NavLink = ({ href, children, className, onClick }: NavLinkProps) => (
   <AppLink
     href={href}
-    className={cn('text-slate-300 font-semibold hover:text-white transition-colors', className)}
+    className={cn(
+      'text-slate-300 text-xl font-semibold hover:text-white transition-colors',
+      className
+    )}
     onClick={onClick}
   >
     {children}

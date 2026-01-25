@@ -1,4 +1,5 @@
 import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -173,16 +174,15 @@ type MultiSelectFacetProps = {
   }
 }
 
-/** Preconfigured sort modes shared by {@link GroupSortButton} and {@link MultiSelectFacet}. */
-const SORT_MODES = [
-  { key: 'alpha' as const, icon: ArrowDownAZ, label: 'Zoradiť podľa názvu (A-Z)' },
-  {
-    key: 'count-desc' as const,
-    icon: ArrowDownWideNarrow,
-    label: 'Zoradiť podľa počtu (zostupne)',
-  },
-  { key: 'count-asc' as const, icon: ArrowUpNarrowWide, label: 'Zoradiť podľa počtu (vzostupne)' },
-] as const
+/** Sort mode keys used to look up translated labels. */
+type SortModeKey = 'alpha' | 'count-desc' | 'count-asc'
+
+/** Preconfigured sort modes icons. Labels are fetched via translations. */
+const SORT_MODE_CONFIG: { key: SortModeKey; icon: typeof ArrowDownAZ }[] = [
+  { key: 'alpha', icon: ArrowDownAZ },
+  { key: 'count-desc', icon: ArrowDownWideNarrow },
+  { key: 'count-asc', icon: ArrowUpNarrowWide },
+]
 
 /**
  * Facet component that allows selecting multiple values from a list of {@link MultiSelectFacetOption}s.
@@ -196,7 +196,7 @@ export default function MultiSelectFacet({
   options,
   selected,
   onChange,
-  searchPlaceholder = 'Hľadať…',
+  searchPlaceholder,
   className,
   showSearch = true,
   closedLabel,
@@ -204,7 +204,13 @@ export default function MultiSelectFacet({
   titleTooltip,
   grouping,
 }: MultiSelectFacetProps) {
-  // Create the facet which handled internal logic
+  // Get translations
+  const tFilters = useTranslations('ui.filters')
+
+  // We the current locale (for locale-based sorting)
+  const locale = useLocale()
+
+  // Create the facet whfich handled internal logic
   const facet = useFacetBase<MultiSelectFacetOption>({
     options,
     inputKind: 'checkbox',
@@ -212,13 +218,11 @@ export default function MultiSelectFacet({
   })
 
   // Track sort mode for each group (only used when grouping is enabled)
-  const [groupSortModes, setGroupSortModes] = React.useState<
-    Record<string, (typeof SORT_MODES)[number]['key']>
-  >(() => {
+  const [groupSortModes, setGroupSortModes] = React.useState<Record<string, SortModeKey>>(() => {
     if (!grouping) return {}
-    const initial: Record<string, (typeof SORT_MODES)[number]['key']> = {}
+    const initial: Record<string, SortModeKey> = {}
     grouping.keys.forEach((key) => {
-      initial[key] = SORT_MODES[0].key
+      initial[key] = SORT_MODE_CONFIG[0].key
     })
     return initial
   })
@@ -269,12 +273,12 @@ export default function MultiSelectFacet({
 
       // Sort options within each group based on the group's sort mode
       Object.keys(groups).forEach((key) => {
-        const sortMode = groupSortModes[key] || SORT_MODES[0].key
+        const sortMode = groupSortModes[key] || SORT_MODE_CONFIG[0].key
 
         groups[key].sort((a, b) => {
           switch (sortMode) {
             case 'alpha':
-              return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+              return a.displayName.localeCompare(b.displayName, locale)
 
             case 'count-desc':
             case 'count-asc': {
@@ -282,7 +286,7 @@ export default function MultiSelectFacet({
               const bCount = typeof b.count === 'number' ? b.count : 0
               // If counts are equal, fall back to alphabetical
               if (aCount === bCount) {
-                return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+                return a.displayName.localeCompare(b.displayName, locale)
               }
               return sortMode === 'count-desc' ? bCount - aCount : aCount - bCount
             }
@@ -295,21 +299,21 @@ export default function MultiSelectFacet({
 
       return groups
     },
-    [grouping, groupSortModes]
+    [grouping, groupSortModes, locale]
   )
   /**
-   * Sorts options within a group based on the group's current {@link SORT_MODES} selection.
+   * Sorts options within a group based on the group's current sort mode selection.
    *
    * @param options - Options scoped to a single group within {@link MultiSelectFacet}.
-   * @param sortMode - Key of the sort mode provided by {@link SORT_MODES}.
+   * @param sortMode - Key of the sort mode provided by {@link SORT_MODE_CONFIG}.
    * @returns New array of {@link MultiSelectFacetOption} sorted for rendering.
    */
   const sortOptionsByMode = React.useCallback(
-    (options: MultiSelectFacetOption[], sortMode: (typeof SORT_MODES)[number]['key']) => {
+    (options: MultiSelectFacetOption[], sortMode: SortModeKey) => {
       return [...options].sort((a, b) => {
         switch (sortMode) {
           case 'alpha':
-            return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+            return a.displayName.localeCompare(b.displayName, locale)
 
           case 'count-desc':
           case 'count-asc': {
@@ -317,7 +321,7 @@ export default function MultiSelectFacet({
             const bCount = typeof b.count === 'number' ? b.count : 0
             // If counts are equal, fall back to alphabetical
             if (aCount === bCount) {
-              return a.displayName.localeCompare(b.displayName, 'sk', { sensitivity: 'base' })
+              return a.displayName.localeCompare(b.displayName, locale)
             }
             // Otherwise comparing by count asc/desc
             return sortMode === 'count-desc' ? bCount - aCount : aCount - bCount
@@ -328,7 +332,7 @@ export default function MultiSelectFacet({
         }
       })
     },
-    []
+    [locale]
   )
 
   // This memo returns the list of display options for the facet,
@@ -494,16 +498,16 @@ export default function MultiSelectFacet({
   }
 
   /**
-   * Cycles through sort modes defined in {@link SORT_MODES} for a given group.
+   * Cycles through sort modes defined in {@link SORT_MODE_CONFIG} for a given group.
    *
    * @param groupKey - Identifier of the group defined in {@link MultiSelectFacetProps.grouping}.
    */
   function cycleSortMode(groupKey: string) {
     setGroupSortModes((prev) => {
-      const current = prev[groupKey] || SORT_MODES[0].key
-      const currentIndex = SORT_MODES.findIndex((mode) => mode.key === current)
-      const nextIndex = (currentIndex + 1) % SORT_MODES.length
-      const next = SORT_MODES[nextIndex].key
+      const current = prev[groupKey] || SORT_MODE_CONFIG[0].key
+      const currentIndex = SORT_MODE_CONFIG.findIndex((mode) => mode.key === current)
+      const nextIndex = (currentIndex + 1) % SORT_MODE_CONFIG.length
+      const next = SORT_MODE_CONFIG[nextIndex].key
       return { ...prev, [groupKey]: next }
     })
   }
@@ -513,15 +517,29 @@ export default function MultiSelectFacet({
    *
    * @param props - Component props for the {@link GroupSortButton}.
    * @param props.groupKey - Identifier of the group defined in {@link MultiSelectFacetProps.grouping}.
-   * @returns Button element that cycles the group's {@link SORT_MODES}.
+   * @returns Button element that cycles the group's sort mode.
    */
   function GroupSortButton({ groupKey }: { groupKey: string }) {
     // Get the current sort mode for this group, defaulting to the first mode if not set
-    const sortMode = groupSortModes[groupKey] || SORT_MODES[0].key
+    const sortMode = groupSortModes[groupKey] || SORT_MODE_CONFIG[0].key
 
     // Find the matching sort mode configuration, or fall back to the first mode
     const currentMode =
-      SORT_MODES.find((sortModeConfig) => sortModeConfig.key === sortMode) || SORT_MODES[0]
+      SORT_MODE_CONFIG.find((sortModeConfig) => sortModeConfig.key === sortMode) ||
+      SORT_MODE_CONFIG[0]
+
+    // Get translated label based on sort mode key
+    const getSortLabel = (key: SortModeKey) => {
+      switch (key) {
+        case 'alpha':
+          return tFilters('sortAlphabetically')
+        case 'count-desc':
+          return tFilters('sortByCountDesc')
+        case 'count-asc':
+          return tFilters('sortByCountAsc')
+      }
+    }
+    const label = getSortLabel(currentMode.key)
 
     return (
       <button
@@ -531,8 +549,8 @@ export default function MultiSelectFacet({
           cycleSortMode(groupKey)
         }}
         className="p-1 rounded hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-        title={currentMode.label}
-        aria-label={currentMode.label}
+        title={label}
+        aria-label={label}
       >
         <currentMode.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </button>
@@ -556,11 +574,11 @@ export default function MultiSelectFacet({
       'px-2 sm:px-2.5 h-6 sm:h-7 rounded-md text-[11px] sm:text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
     return (
       <div className="flex items-center justify-between gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs text-slate-400">
-        <span className="whitespace-nowrap">Logika</span>
+        <span className="whitespace-nowrap">{tFilters('logic')}</span>
         <div
           className="inline-flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-600 p-0.5"
           role="radiogroup"
-          aria-label="Logika výberu"
+          aria-label={tFilters('selectionLogic')}
         >
           <button
             type="button"
@@ -568,7 +586,7 @@ export default function MultiSelectFacet({
             onClick={() => onChange('or')}
             aria-pressed={value === 'or'}
           >
-            {logic?.labels?.or ?? 'Aspoň jeden'}
+            {logic?.labels?.or ?? tFilters('logicAtLeastOne')}
           </button>
           <button
             type="button"
@@ -576,7 +594,7 @@ export default function MultiSelectFacet({
             onClick={() => onChange('and')}
             aria-pressed={value === 'and'}
           >
-            {logic?.labels?.and ?? 'Všetci'}
+            {logic?.labels?.and ?? tFilters('logicAll')}
           </button>
         </div>
       </div>
@@ -624,7 +642,7 @@ export default function MultiSelectFacet({
             setQuery={facet.setQuery}
             searchRef={facet.searchRef}
             title={title}
-            placeholder={searchPlaceholder}
+            placeholder={searchPlaceholder ?? tFilters('searchPlaceholder')}
             onArrowDownToList={facet.focusFirstItem}
           />
         )}
@@ -641,7 +659,7 @@ export default function MultiSelectFacet({
           noTopPadding={!!grouping}
         >
           {facet.filtered.length === 0 && (
-            <div className="px-3 py-3 text-sm text-slate-400">Žiadne výsledky</div>
+            <div className="px-3 py-3 text-sm text-slate-400">{tFilters('noResults')}</div>
           )}
           {(() => {
             // Render options with or without sections based on grouping prop
@@ -688,7 +706,9 @@ export default function MultiSelectFacet({
                             }
                           }}
                           aria-expanded={!isCollapsed}
-                          aria-label={isCollapsed ? 'Rozbaliť skupinu' : 'Zbaliť skupinu'}
+                          aria-label={
+                            isCollapsed ? tFilters('expandGroup') : tFilters('collapseGroup')
+                          }
                         >
                           <ChevronDown
                             className={cn(
@@ -702,7 +722,7 @@ export default function MultiSelectFacet({
                             {selectedCount > 0 && (
                               <span
                                 className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
-                                aria-label={`${selectedCount} vybraných`}
+                                aria-label={tFilters('selectedInGroup', { count: selectedCount })}
                               >
                                 {selectedCount}
                               </span>

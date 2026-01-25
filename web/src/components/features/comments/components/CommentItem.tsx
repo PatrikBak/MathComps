@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown, Heart, Minus, Pencil, Reply, Trash2 } from 'lucide-react'
+import { useFormatter, useTranslations } from 'next-intl'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
@@ -9,7 +10,6 @@ import { RichMathEditor } from '@/components/shared/components/rich-math-editor/
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
-import { slovakPlural } from '@/components/shared/utils/string-utils'
 
 /** Size of comment avatars in pixels */
 const AVATAR_SIZE = 28
@@ -98,6 +98,13 @@ export function CommentItem({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   // Whether the line connecting the comment to its replies is hovered over
   const [isLineHovered, setIsLineHovered] = useState(false)
+
+  // Translations for plurals and UI text
+  const tPlurals = useTranslations('plurals')
+  const tComments = useTranslations('comments')
+
+  // Date formatter (uses current locale automatically)
+  const format = useFormatter()
 
   // Reset hover state when expanding
   useEffect(() => {
@@ -193,7 +200,7 @@ export function CommentItem({
           onClick={onToggleCollapse}
           onMouseEnter={() => setIsLineHovered(true)}
           onMouseLeave={() => setIsLineHovered(false)}
-          title="Skryť odpovede"
+          title={tComments('hideReplies')}
         >
           <Minus size={10} strokeWidth={3} />
         </button>
@@ -205,7 +212,7 @@ export function CommentItem({
         <div className="flex-shrink-0 z-10">
           <UserAvatarImage
             imageUrl={avatarUrl}
-            altText={`Avatar používateľa ${author}`}
+            altText={tComments('avatarAlt', { author })}
             size={AVATAR_SIZE}
           />
         </div>
@@ -221,7 +228,7 @@ export function CommentItem({
 
               {/* (2) Timestamp + edited */}
               <span className="text-xs text-gray-500 flex items-center gap-1">
-                {timestamp.toLocaleString('sk-SK', {
+                {format.dateTime(timestamp, {
                   day: 'numeric',
                   month: 'numeric',
                   year:
@@ -232,9 +239,8 @@ export function CommentItem({
                 {editedAt && !isDeleted && (
                   <Tooltip
                     placement="top"
-                    content={
-                      'Naposledy upravené ' +
-                      editedAt.toLocaleString('sk-SK', {
+                    content={tComments('lastEdited', {
+                      date: format.dateTime(editedAt, {
                         day: 'numeric',
                         month: 'numeric',
                         year:
@@ -243,11 +249,11 @@ export function CommentItem({
                             : 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
-                      })
-                    }
+                      }),
+                    })}
                   >
                     <span className="ml-1 cursor-help opacity-80 hover:opacity-100 italic">
-                      (upravené)
+                      {tComments('edited')}
                     </span>
                   </Tooltip>
                 )}
@@ -265,7 +271,7 @@ export function CommentItem({
                       'flex items-center gap-1 text-xs transition-colors',
                       isLiked ? 'text-red-400' : 'text-gray-400 hover:text-gray-200'
                     )}
-                    title="Páči sa mi to"
+                    title={tComments('like')}
                   >
                     <Heart size={14} className={cn(isLiked && 'fill-current')} />
                     <span>{likes}</span>
@@ -287,7 +293,7 @@ export function CommentItem({
                   <button
                     onClick={onReply}
                     className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200"
-                    title="Odpovedať"
+                    title={tComments('reply')}
                   >
                     <Reply size={14} />
                   </button>
@@ -298,7 +304,7 @@ export function CommentItem({
                   <button
                     onClick={handleEditStart}
                     className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200"
-                    title="Upraviť"
+                    title={tComments('edit')}
                   >
                     <Pencil size={14} />
                   </button>
@@ -309,7 +315,7 @@ export function CommentItem({
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400"
-                    title="Zmazať"
+                    title={tComments('delete')}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -324,7 +330,7 @@ export function CommentItem({
               <RichMathEditor
                 value={editText}
                 onChange={setEditText}
-                placeholder="Upraviť komentár..."
+                placeholder={tComments('editPlaceholder')}
                 autoFocus
                 onSend={handleEditSubmit}
                 onCancel={handleEditCancel}
@@ -332,7 +338,7 @@ export function CommentItem({
               />
             </div>
           ) : isDeleted ? (
-            <div className="text-sm text-gray-500 italic mb-1.5">[Komentár bol zmazaný]</div>
+            <div className="text-sm text-gray-500 italic mb-1.5">[{tComments('deleted')}]</div>
           ) : (
             <div className="text-sm text-gray-300 leading-relaxed mb-1.5">
               <RichMathEditorRenderer content={content} />
@@ -359,8 +365,7 @@ export function CommentItem({
             >
               <ChevronDown size={14} />
               <span>
-                Zobraziť {replyCount}{' '}
-                {slovakPlural(replyCount, ['odpoveď', 'odpovede', 'odpovedí'])}
+                {tComments('show')} {tPlurals('replies', { count: replyCount })}
               </span>
             </button>
           ) : (
@@ -379,10 +384,10 @@ export function CommentItem({
           isOpen={showDeleteConfirm}
           onClose={() => setShowDeleteConfirm(false)}
           onConfirm={onDelete}
-          title="Zmazať komentár"
-          message="Naozaj chcete zmazať tento komentár? Túto akciu nie je možné vrátiť späť."
-          confirmText="Zmazať"
-          cancelText="Zrušiť"
+          title={tComments('deleteComment')}
+          message={tComments('deleteConfirmMessage')}
+          confirmText={tComments('delete')}
+          cancelText={tComments('cancelDelete')}
           variant="danger"
         />
       )}

@@ -1,8 +1,8 @@
-import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
-import { ROUTES } from '@/constants/routes'
 import { useCurrentUrl } from '@/hooks/use-current-url'
+import { ROUTES } from '@/i18n/i18n'
+import { useRouter } from '@/i18n/navigation'
 
 /**
  * Result of the {@link useLoginRedirect} hook.

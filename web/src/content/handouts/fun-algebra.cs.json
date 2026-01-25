@@ -1,0 +1,2990 @@
+{
+  "document": {
+    "title": "Algebra",
+    "subtitle": "Vtipná algebra",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V této sbírce úloh najdete mé nejoblíbenější úlohy, které mají krátká zajímavá, častokrát triková řešení využívající různé algebraické triky."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Úlohy",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Bez dalšího otálení pojďme na úlohy. Klíčem je najít vtipnou úpravu. Je těžké dát obecný návod – koneckonců, nadstandardní úlohy jsou přece jen dost o kreativitě."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "m \\circ n = \\frac{mn+4}{m+n}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Určete"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(\\dots((42 \\circ 41) \\circ 40) \\circ \\dots \\circ 1) \\circ 0.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V\u00A0úloze jsou zdánlivě náhodné konstanty, například\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "42",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " vypadá, že by mohla být uměle nastavená. Kdybychom měli ručně vyhodnocovat takto velká čísla, zblázníme se. Zkuste si úlohu pro menší konstanty."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "math",
+                              "text": "1 \\circ 0 = 4",
+                              "isDisplay": false
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ],
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "math",
+                              "text": "(2 \\circ 1) \\circ 0 = 2",
+                              "isDisplay": false
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ],
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "math",
+                              "text": "((3 \\circ 2) \\circ 1) \\circ 0 = 2",
+                              "isDisplay": false
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ],
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "math",
+                              "text": "(((4 \\circ 3) \\circ 2) \\circ 1) \\circ 0 = 2",
+                              "isDisplay": false
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ]
+                    ],
+                    "styleType": "Bullet"
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Není podezřelé, že to po čase vychází stále 2?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Všimněme si speciální vlastnosti čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vzhledem k operaci "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro libovolné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\ne -2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "m \\circ 2 = \\frac{2m+4}{m+2} = \\frac{2(m+2)}{m+2} = 2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výraz ze zadání vyhodnocujeme postupně zleva, přičemž čísla vstupují do operace v\u00A0pořadí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "42, 41, \\dots, 2, 1, 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V\u00A0momentě, kdy budeme mezivýsledek skládat s\u00A0číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", se hodnota celého výrazu změní na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Všechny následující operace budou mít tvar "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2 \\circ k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je opět "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Výsledek je proto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou nenulová reálná čísla se součtem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokažte, že"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{a+b}+\\frac{1}{b+c}+\\frac{1}{c+a}=\\frac{a^2+b^2+c^2}{2abc}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Podmínku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a+b+c=0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " chceme šikovně využít, abychom se zbavili komplikovaných zlomků nalevo."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčem je uvědomit si, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a+b=-c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", tedy první zlomek je vlastně roven "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-\\frac 1c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", podobně zbylé."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po úpravě stačí ukázat"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "-\\left(\\frac 1a + \\frac 1b + \\frac 1c\\right) = \\frac{a^2+b^2+c^2}{2abc},",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "po roznásobení"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "2ab+2bc+2ca=a^2+b^2+c^2.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Teď potřebujeme znovu použít podmínku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a+b+c=0",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Co takového bychom s\u00A0ní mohli udělat, abychom dostali výrazy, o\u00A0kterých máme něco dokázat?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0podmínky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyplývá "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b=-c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c=-a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Levou stranu dokazované rovnosti proto upravíme na"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "-\\frac{1}{c} - \\frac{1}{a} - \\frac{1}{b} = -\\frac{ab+bc+ca}{abc}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zároveň umocněním rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na druhou dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "0 = (a+b+c)^2 = a^2+b^2+c^2 + 2(ab+bc+ca),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "z\u00A0čehož vyjádříme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab+bc+ca = -\\frac{1}{2}(a^2+b^2+c^2)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dosazením tohoto výrazu do upravené levé strany ihned získáme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "-\\frac{-\\frac{1}{2}(a^2+b^2+c^2)}{abc} = \\frac{a^2+b^2+c^2}{2abc},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což jsme chtěli dokázat."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou kladná reálná taková, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab+bc+ca=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Určete všechny možné hodnoty výrazu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{a(b^2+1)}{a+b}+\n\\frac{b(c^2+1)}{b+c}+\n\\frac{c(a^2+1)}{c+a}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikem je zjednodušit každý zlomek individuálně použitím podmínky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab+bc+ca=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Náš zkoumaný výraz je plný písmen a\u00A0je tam jedno číslo, "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Co takhle se ho zbavit?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Upravme první zlomek dosazením "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 = ab+bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " do čitatele:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n\\frac{a(b^2+ab+bc+ca)}{a+b} = \\frac{a(b(a+b)+c(a+b))}{a+b} =\\\\= \\frac{a(a+b)(b+c)}{a+b} = ab+ac.\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cyklicky pro druhý a\u00A0třetí zlomek dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bc+ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ca+bc",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Sečtením všech tří upravených výrazů získáme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(ab+ac) + (bc+ab) + (ca+bc) = 2(ab+bc+ca).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab+bc+ca=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", hodnota výrazu je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ještě potřebujeme dokázat, že tato hodnota je dosažitelná – zřejmě však existují kladná čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pro která "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab+bc+ca=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", například "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b=c=\\sqrt{3}/3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou kladná reálná se součinem 1. Určete všechny možné hodnoty výrazu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{1+a+ab}+\n\\frac{1}{1+b+bc}+\n\\frac{1}{1+c+ca}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčem je provést nějakou šikovnou úpravu některých zlomků, která umožní použít podmínku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "abc=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Co je taková běžná věc, kterou umíme dělat se zlomky?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jednoduchý způsob, jak využít "
+                      },
+                      {
+                        "type": "math",
+                        "text": "abc=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " např. v\u00A0prvním zlomku, je rozšířit ho\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", potom máme"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "\\frac{1}{c+ac+abc}=\\frac{1}{c+ac+1}.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Tento zlomek má čistou náhodou stejný jmenovatel jako poslední zlomek."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "První zlomek rozšíříme číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0druhý výrazem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ac",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". S\u00A0využitím "
+                    },
+                    {
+                      "type": "math",
+                      "text": "abc=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak upravíme jejich jmenovatele na tvar shodný se třetím zlomkem:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\n\\frac{1}{1+a+ab} &= \\frac{c}{c+ac+abc} = \\frac{c}{c+ac+1}, \\\\\n\\frac{1}{1+b+bc} &= \\frac{ac}{ac+abc+ab c^2} = \\frac{ac}{ac+1+c}.\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sečtením všech tří zlomků dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{c}{1+c+ac} + \\frac{ac}{1+c+ac} + \\frac{1}{1+c+ac} = \\frac{c+ac+1}{1+c+ac} = 1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jediná možná hodnota výrazu je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Příklad "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b=c=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přitom dokazuje, že tato hodnota je dosažitelná."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Reálná čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b, c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " mají součet 1. Dokažte, že číslo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a + bc)(b + ca)(c + ab)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "je nezáporné."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikem je upravit každou závorku individuálně použitím podmínky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a+b+c=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dobrým indikátorem, jak upravit každou závorku, je fakt, že v\u00A0jednotlivých závorkách máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a+bc",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", kde je první člen stupně\u00A01 a\u00A0druhý stupně\u00A02 – co takhle je nějak oba udělat stupně\u00A02?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Využijeme podmínku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na úpravu výrazů v\u00A0závorce. Pro první závorku platí:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\na + bc = a(a+b+c) + bc = a^2+ab+ac+bc =\\\\= a(a+b)+c(a+b) = (a+c)(a+b).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Analogicky odvodíme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+ca = (a+b)(b+c)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+ab = (a+c)(b+c)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vynásobením všech tří výrazů dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a+bc)(b+ca)(c+ab) = (a+b)^2(b+c)^2(c+a)^2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výsledek je součinem druhých mocnin reálných čísel, a\u00A0proto je nezáporný."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro nenulová reálná čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac1a + \\frac1b + \\frac1c = \\frac1{a+b+c}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že pro každé liché přirozené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac1{a^n} + \\frac1{b^n} + \\frac1{c^n} = \\frac1{a^n+b^n+c^n}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zapomeňte na to, co dokazujeme. Kdy vůbec může platit předpoklad? Zkuste najít všechny trojice "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b,c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", které tuto rovnost splňují."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčem je uvědomit si, že po roznásobení podmínky dostaneme"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "(a+b+c)(ab+bc+ca)-abc=0.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Tento výraz se překvapivě dá rozložit na součin. Odtud to už bude přímočaré."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Upravme podmínku ze zadání vynásobením jmenovateli:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n\\frac{ab+bc+ca}{abc} = \\frac{1}{a+b+c},\\\\\n(a+b+c)(ab+bc+ca) - abc = 0.\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výraz na levé straně upravíme postupným vytýkáním na součin:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\n(a+b+c)(ab+bc+ca) - abc &= \\\\ =\n(a+b+c)(ab + c(a+b)) - abc &= \\\\ =\n(a+b)ab + abc + (a+b)^2c + (a+b)c^2 - abc &= \\\\ =\n(a+b)(ab + ac + bc + c^2) &= \\\\ =\n(a+b)(a(b+c) + c(b+c))  &= \\\\ =\n(a+b)(b+c)(c+a).&\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost tedy platí právě tehdy, když jsou alespoň dvě z\u00A0čísel opačná. Bez újmy na obecnosti nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=-a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom pro každé liché přirozené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^n = (-a)^n = -a^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Levá strana dokazované rovnosti je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{a^n} + \\frac{1}{-a^n} + \\frac{1}{c^n} = \\frac{1}{c^n}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pravá strana je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{a^n - a^n + c^n} = \\frac{1}{c^n}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Levá strana se rovná pravé, čímž je důkaz hotov."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Navzájem různá reálná čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splňují"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a + \\frac1b = b + \\frac1c = c + \\frac1a.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|abc|=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zadání nám říká, že platí"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "\\begin{align*}\na + \\frac 1b &= b + \\frac 1c, \\\\\nb + \\frac 1c &= c + \\frac 1a, \\\\\nc + \\frac 1a &= a + \\frac 1b. \\\\\n\\end{align*}",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Uvědomění si, že jde o\u00A0soustavu tří rovnic, je dobrý krok k\u00A0tomu, aby bylo přirozené zkoušet různě kombinovat rovnice, jak je běžné při práci se soustavami."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po chvíli snadno zjistíme, že sčítání a\u00A0odčítání rovnic k\u00A0ničemu nevede. Klíčem je tyto rovnice násobit. K\u00A0tomu však potřebujeme každou rovnici trochu upravit, aby se nám při násobení něco vykrátilo."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a + \\frac{1}{b} = b + \\frac{1}{c}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyjádříme rozdíl "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a - b = \\frac{1}{c} - \\frac{1}{b} = \\frac{b-c}{bc}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cyklicky pro další dvojice získáme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "b - c = \\frac{c-a}{ca} \\quad\\text{a}\\quad c - a = \\frac{a-b}{ab}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož jsou čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " navzájem různá, rozdíly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b-c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c-a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou nenulové. Vynásobením těchto tří rovností dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a-b)(b-c)(c-a) = \\frac{(b-c)(c-a)(a-b)}{(abc)^2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vydělením nenulovým výrazem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a-b)(b-c)(c-a)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " získáme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 = \\frac{1}{(abc)^2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(abc)^2 = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z\u00A0čehož vyplývá "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|abc|=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro nenulová reálná čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^2-b^2 = bc \\hbox{\\quad a \\quad} b^2-c^2 = ca.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 - c^2 = ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Sečtením rovnic dostaneme přesně levou stranu dokazované rovnosti. Stačí tedy dokázat něco, co vypadá zdánlivě jednodušeji."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Podle prvního návodu jsme už zjistili, že součet rovnic z\u00A0podmínky má smysl. To ještě není všechno, potřebujeme něco dalšího. Jiné než sčítání rovnic je například násobení. Předtím je ale často musíme upravit – ideálně tak, aby se po násobení něco vykrátilo."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sečtením zadaných rovnic dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^2-c^2 = bc+ca.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "K důkazu tvrzení tedy stačí ukázat, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab = bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". První rovnici ze zadání upravíme na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 = b(b+c)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0druhou na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(b-c)(b+c)=ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vynásobením těchto rovností máme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^2(b-c)(b+c) = abc(b+c).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kdyby "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak z\u00A0první upravené rovnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což odporuje zadání. Proto můžeme rovnici vydělit nenulovým výrazem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a(b+c)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čímž dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a(b-c) = bc,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což je zřejmě ekvivalentní dokazovanému vztahu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=bc+ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tím je důkaz hotov."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jen s\u00A0použitím pera a\u00A0papíru (a mozku) najděte dvě čtyřmístná čísla, jejichž součin je roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4^8 + 6^8 + 9^8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Úloha nám naznačuje, že máme hledat rozklad na součin. Náš výraz je ale velmi nepřehledný, zaveďme nejprve vhodnou substituci čísel za písmenka, abychom ho zpřehlednili."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Vyjádření "
+                      },
+                      {
+                        "type": "math",
+                        "text": "4=2^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "9=3^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a "
+                      },
+                      {
+                        "type": "math",
+                        "text": "6=2 \\cdot 3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " naznačují, že klíčová substituce je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a=2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b=3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", výraz je potom roven"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "a^{16}+(ab)^8+b^{16}.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dokážeme toto rozložit na součin?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikem k\u00A0rozkladu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{16}+(ab)^8+b^{16}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "doplnění na čtverec"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": ", zkuste doplnit "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{16}+b^{16}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na čtverec."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Výraz ze zadání je potom roven"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^{16} + a^8 b^8 + b^{16}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tento výraz upravíme doplněním na čtverec a\u00A0následným použitím vzorce pro rozdíl čtverců:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\na^{16}+a^8b^8+b^{16} &= (a^{16} + 2a^8b^8 + b^{16}) - a^8b^8 \\\\\n&= (a^8+b^8)^2 - (a^4b^4)^2 \\\\\n&= (a^8+b^8-a^4b^4)(a^8+b^8+a^4b^4).\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dosadíme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^4=16",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^4=81",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^4b^4 = 1296",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dále "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^8=256",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^8=6561",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^8+b^8 = 256+6561 = 6817",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jednotlivé závorky jsou tedy rovny:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\n6817 - 1296 &= 5521, \\\\\n6817 + 1296 &= 8113.\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Obě nalezená čísla jsou čtyřmístná."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0oboru reálných čísel řešte rovnici"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "x^4+4x^3+6x^2+4x=6.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Konstanty na levé straně nejsou náhodné a\u00A0měly by něco připomínat."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "To něco, co by tyto konstanty měly připomínat, se dokonce učí ve škole a má jméno."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Levá strana rovnice připomíná binomickou větu pro 4\u00A0členy. Vskutku,"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(x+1)^4 = x^4+4x^3+6x^2+4x+1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To je skoro levá strana rovnice, potřebujeme ještě přičíst\u00A01. Rovnice je tedy ekvivalentní s\u00A0rovnicí."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(x+1)^4 = 7.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0oboru reálných čísel má rovnice dvě řešení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=-1\\pm \\sqrt[ 4 ] 7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 2,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0oboru reálných čísel řešte rovnici"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(x^2 + 3x + 2)(x^2 - 2x - 1)(x^2 - 7x + 12) + 24 = 0.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kvadratické členy nejsou náhodné. Co takhle se podívat na každý zvlášť, nedá se přetransformovat?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Prvním krokem úlohy je uvědomit si, že dva ze tří našich kvadratických členů se dají rozložit na součin – kupodivu to vychází i pěkně, je to náhoda?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Co se čtyřmi lineárními členy a\u00A0jedním kvadratickým? Trikem je z\u00A0nich znovu vytvořit tři kvadratické členy."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Aplikováním rad z\u00A0předešlých návodů bychom měli dojít k\u00A0rovnici"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "(x^2 - 2x - 8)(x^2 - 2x - 3)(x^2 - 2x - 1) + 24=0.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Její stupeň umíme zjednodušit vhodnou substitucí. Měla by zůstat rovnice s\u00A0celočíselnými kořeny, kterou už vyřešíme středoškolskými postupy."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rozložíme první a\u00A0třetí závorku na součin lineárních činitelů:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(x+1)(x+2)(x^2-2x-1)(x-3)(x-4) + 24 = 0.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vhodným přeskupením členů máme:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\n(x+1)(x-3) &= x^2-2x-3 \\\\\n(x+2)(x-4) &= x^2-2x-8\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dosazením do původní rovnice máme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(x^2-2x-3)(x^2-2x-8)(x^2-2x-1) + 24 = 0.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zavedeme substituci "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y = x^2-2x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Rovnice přejde do tvaru"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(y-3)(y-8)(y-1) + 24 = 0.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Po roznásobení a\u00A0úpravě získáme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\ny^3 - 12y^2 + 35y &= 0 \\\\\ny(y^2-12y+35) &= 0 \\\\\ny(y-5)(y-7) &= 0.\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y \\in \\{0, 5, 7\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dořešíme kvadratické rovnice pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "x^2-2x = 0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " má kořeny "
+                          },
+                          {
+                            "type": "math",
+                            "text": "0, 2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "x^2-2x-5 = 0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " má kořeny "
+                          },
+                          {
+                            "type": "math",
+                            "text": "1 \\pm \\sqrt{6}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "x^2-2x-7 = 0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " má kořeny "
+                          },
+                          {
+                            "type": "math",
+                            "text": "1 \\pm 2\\sqrt{2}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "Bullet"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Množina řešení je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{0, 2, 1 \\pm \\sqrt{6}, 1 \\pm 2\\sqrt{2}\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 2,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Celá čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splňují"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a-b)^2 + (b-c)^2 + (c-a)^2 = abc.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c+6 \\mid a^3+b^3+c^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčem je vzpomenout si na algebraickou identitu, která jaksi spojuje některé z\u00A0výrazů, o\u00A0kterých je tato úloha."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčová identita je rozklad výrazu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3+b^3+c^3-3abc",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na součin. Pokud to neznáte, zkuste si tento rozklad odvodit. V\u00A0dalším návodu prozradíme možné triky, jak na něj přijít."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "K\u00A0objevení "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3+b^3+c^3-3abc",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " můžeme použít tyto možné postupy:"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Doplníme "
+                            },
+                            {
+                              "type": "math",
+                              "text": "a^3+b^3",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": " na třetí mocninu, tedy vyjádříme z\u00A0rozkladu "
+                            },
+                            {
+                              "type": "math",
+                              "text": "(a+b)^3",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ],
+                      [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Doplníme "
+                            },
+                            {
+                              "type": "math",
+                              "text": "a^3+b^3+c^3",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": " na třetí mocninu, tedy vyjádříme z\u00A0rozkladu "
+                            },
+                            {
+                              "type": "math",
+                              "text": "(a+b+c)^3=...",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": ". Z\u00A0toho extrahujeme "
+                            },
+                            {
+                              "type": "math",
+                              "text": "a^3+b^3+c^3=...",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": ". Zůstanou nám pouze smíšené členy jako "
+                            },
+                            {
+                              "type": "math",
+                              "text": "a^2b",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": ", "
+                            },
+                            {
+                              "type": "math",
+                              "text": "ab^2",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": " a "
+                            },
+                            {
+                              "type": "math",
+                              "text": "abc",
+                              "isDisplay": false
+                            },
+                            {
+                              "type": "text",
+                              "text": ". Ty je potřeba vhodně uspořádat, abychom vytkli něco před závorku."
+                            }
+                          ],
+                          "highligted": false
+                        }
+                      ]
+                    ],
+                    "styleType": "LowerAlphaParens"
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Prozradíme klíčovou identitu"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "a^3+b^3+c^3-3abc = (a+b+c)(a^2+b^2+c^2-ab-bc-ca).",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "(V\u00A0předešlém návodu naznačené odvození najdete v\u00A0řešení.)"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jak využít klíčovou identitu? Potřebujeme ještě jeden trik: uvědomění si, jak druhá závorka rozkladu souvisí s\u00A0podmínkou ze zadání."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Podmínku ze zadání můžeme po roznásobení napsat jako"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "2(a^2+b^2+c^2-ab-bc-ca)=abc.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Shodou okolností se nám tu objevila druhá závorka našeho rozkladu. Teď už stačí dát všechno opatrně dohromady."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejprve odvodíme identitu pro rozklad výrazu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^3+b^3+c^3-3abc",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Součet prvních dvou třetích mocnin doplníme na třetí mocninu součtu podle vztahu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^3+b^3 = (a+b)^3 - 3ab(a+b).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Následně použijeme vzorec pro součet třetích mocnin"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "x^3+y^3=(x+y)(x^2-xy+y^2)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "na členy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a+b)^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\na^3+b^3+c^3-3abc &=\\\\\n(a+b)^3 + c^3 - 3ab(a+b) - 3abc &=\\\\\n(a+b+c)((a+b)^2 - (a+b)c + c^2) - 3ab(a+b+c) &=\\\\\n(a+b+c)(a^2+2ab+b^2 - ac - bc + c^2 - 3ab) &= \\\\\n(a+b+c)(a^2+b^2+c^2-ab-bc-ca)&.\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Druhou závorku označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "K = a^2+b^2+c^2-ab-bc-ca",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b,c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou celá čísla, i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "K",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je celé číslo. Podmínku ze zadání roznásobíme a\u00A0upravíme do tvaru"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a^2-2ab+b^2) + (b^2-2bc+c^2) + (c^2-2ca+a^2) = abc,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2K=abc",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tento vztah dosadíme do odvozené identity:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^3+b^3+c^3 - 3(2K) = (a+b+c)K.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Osamostatněním součtu třetích mocnin dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^3+b^3+c^3 = 6K + (a+b+c)K = K(a+b+c+6).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výraz "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b+c+6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tedy dělí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^3+b^3+c^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Ukážeme ještě alternativní způsob doplnění na třetí mocninu pomocí rozkladu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "{(a+b+c)^3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po roznásobení platí:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n(a+b+c)^3 = a^3+b^3+c^3+ \\\\\n{}+ 3(a^2b+ab^2+b^2c+bc^2+c^2a+ca^2) + 6abc\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\na^3+b^3+c^3 - 3abc = (a+b+c)^3 \\\\\n{}- 3(a^2b+ab^2+b^2c+bc^2+c^2a+ca^2)- 9abc,\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0posledního řádku lze vytknout\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "-3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " před závorku, soustřeďme se pouze na vnitřek této závorky:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\n(a^2b+ab^2+b^2c+bc^2+c^2a+ac^2) + 3abc &= \\\\\na^2b+ab^2+b^2c+c^2b+c^2a+a^2c+3abc &= \\\\\n[a^2b+ab^2+abc]+[b^2c+c^2b+abc]+[c^2a+a^2c+abc] &=\\\\\nab(a+b+c) + bc(b+c+a) + ca(c+a+b) &= \\\\\n(a+b+c)(ab+bc+ca).\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Teď to už jen dát dohromady:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\na^3+b^3+c^3 - 3abc = (a+b+c)^3 \\\\\n{}- 3(a^2b+ab^2+b^2c+bc^2+c^2a+ca^2)- 9abc = \\\\\n(a+b+c)^3 - 3(a+b+c)(ab+bc+ca) \\\\\n(a+b+c)((a+b+c)^2-3(ab+bc+ca)),\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což je alternativní zápis naší dokazované identity."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

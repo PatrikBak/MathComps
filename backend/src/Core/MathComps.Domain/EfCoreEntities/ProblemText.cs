@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using MathComps.Shared;
 
 namespace MathComps.Domain.EfCoreEntities;
 

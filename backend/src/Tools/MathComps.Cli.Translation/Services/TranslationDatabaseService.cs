@@ -2,6 +2,7 @@ using MathComps.Cli.Translation.Dtos;
 using MathComps.Cli.Translation.Enums;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Cli.Translation.Services;
@@ -183,5 +184,70 @@ public class TranslationDatabaseService(IDbContextFactory<MathCompsDbContext> db
 
         // Save changes
         await context.SaveChangesAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<ProblemTextForParsingDto>> GetTextsNeedingParsingAsync(int limit, TranslationScope scope)
+    {
+        // Get DB access
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Start with uniquely sorted translations (non-original) that have RawText but no ParsedText
+        var query = context.Problems
+            .OrderByDefaultProblemSort()
+            .SelectMany(problem => problem.Texts)
+            .Where(text => !text.IsOriginal && text.RawText != null && text.ParsedText == null);
+
+        // Filter by scope
+        query = scope switch
+        {
+            TranslationScope.StatementsOnly => query.Where(text => text.DocumentType == DocumentType.Statement),
+            TranslationScope.SolutionsOnly => query.Where(text => text.DocumentType == DocumentType.Solution),
+            TranslationScope.Both => query,
+            _ => throw new ArgumentException($"Unsupported translation scope: {scope}")
+        };
+
+        // Limit the number of results
+        query = query.Take(limit);
+
+        // Execute the query with a conversion to DTOs
+        return await query
+            .Select(text => new ProblemTextForParsingDto(
+                text.Id,
+                text.ProblemId,
+                text.Problem.Slug,
+                text.Language,
+                text.DocumentType,
+                text.RawText
+            ))
+            .ToListAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateParsedTextAsync(Guid problemTextId, string parsedText)
+    {
+        // Get DB access
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Update the ParsedText field directly
+        await context.ProblemTexts
+            .Where(text => text.Id == problemTextId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(text => text.ParsedText, parsedText)
+                .SetProperty(text => text.DateModified, DateTime.UtcNow));
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateRawTextAsync(Guid problemTextId, string rawText)
+    {
+        // Get DB access
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Update the RawText field directly
+        await context.ProblemTexts
+            .Where(text => text.Id == problemTextId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(text => text.RawText, rawText)
+                .SetProperty(text => text.DateModified, DateTime.UtcNow));
     }
 }

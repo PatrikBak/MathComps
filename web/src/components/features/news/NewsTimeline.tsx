@@ -3,6 +3,7 @@
 import { useWindowEvent } from '@mantine/hooks'
 import { ChevronLeft, ChevronRight, MessageSquare, Newspaper, X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useFormatter, useTranslations } from 'next-intl'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
@@ -13,7 +14,7 @@ import { CommentModal } from '@/components/features/comments/components/CommentM
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
 import { IconBadge } from '@/components/shared/components/IconBadge'
 import { cn } from '@/components/shared/utils/css-utils'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
 
 import { CATEGORY_CONFIG, type NewsArticle, type NewsCategory } from './types'
 
@@ -52,6 +53,9 @@ type TimelineNavButtonProps = {
  * Positioned on the timeline axis at the left or right edge.
  */
 function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonProps) {
+  // Translations for the nav button aria-labels
+  const t = useTranslations('news')
+
   // The correct icon component
   const Icon = direction === 'left' ? ChevronLeft : ChevronRight
 
@@ -66,7 +70,7 @@ function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonPro
         direction === 'left' ? 'left-0' : 'right-0',
         visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       )}
-      aria-label={direction === 'left' ? 'Novšie články' : 'Staršie články'}
+      aria-label={direction === 'left' ? t('newerArticles') : t('olderArticles')}
     >
       <Icon size={18} strokeWidth={2.5} />
     </button>
@@ -87,6 +91,9 @@ type NewsCommentButtonProps = {
  * Comment button specific to the news timeline.
  */
 function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) {
+  // Translations for the comments label
+  const t = useTranslations('news')
+
   // Get the count from the context
   const { count, isLoading } = useCommentCount(articleId)
 
@@ -100,7 +107,7 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
           <MessageSquare size={20} />
         </IconBadge>
       </div>
-      <span className="text-sm font-medium">Komentáre</span>
+      <span className="text-sm font-medium">{t('comments')}</span>
     </button>
   )
 }
@@ -129,6 +136,15 @@ type NewsTimelineProps = {
  * Mobile: Falls back to vertical stacked layout.
  */
 export function NewsTimeline({ items }: NewsTimelineProps) {
+  // Translations for the news timeline
+  const t = useTranslations('news')
+
+  // Translations for the news categories
+  const tCategories = useTranslations('news.categories')
+
+  // Date formatter (uses current locale automatically)
+  const format = useFormatter()
+
   // The navigation used to clear the category filter
   const router = useRouter()
 
@@ -259,11 +275,14 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
     // Parse the date string into a Date object
     const date = new Date(dateString)
 
-    // Return the components. The month is formatted to be short
-    // and without a period, e.g. Jan, Feb, Mar, etc.
+    // Format day + month with locale-aware ordering
+    const dayMonth = format.dateTime(date, {
+      day: 'numeric',
+      month: 'numeric',
+    })
+
     return {
-      day: date.getDate(),
-      month: date.toLocaleDateString('sk-SK', { month: 'short' }).replace('.', ''),
+      dayMonth,
       year: date.getFullYear().toString(),
     }
   }
@@ -275,13 +294,13 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
         {/* Title with icon */}
         <div className="flex items-center justify-center gap-3">
           <Newspaper size={32} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
-          <h1 className="text-3xl font-bold tracking-tight text-white">Novinky</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">{t('title')}</h1>
         </div>
 
         {/* Mobile filter indicator */}
         {categoryFilter && (
           <div className="flex items-center justify-center gap-2">
-            <span className="text-sm text-gray-400">Filtrujem:</span>
+            <span className="text-sm text-gray-400">{t('filtering')}</span>
             <button
               onClick={clearFilter}
               className={cn(
@@ -290,7 +309,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                 'hover:opacity-80 transition-opacity'
               )}
             >
-              {CATEGORY_CONFIG[categoryFilter].label}
+              {tCategories(categoryFilter)}
               <X size={14} />
             </button>
           </div>
@@ -322,7 +341,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                 {/* Title with icon */}
                 <div className="flex items-center gap-3">
                   <Newspaper size={36} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
-                  <h1 className="text-4xl font-bold tracking-tight text-white">Novinky</h1>
+                  <h1 className="text-4xl font-bold tracking-tight text-white">{t('title')}</h1>
                 </div>
 
                 {/* Filter indicator - appears next to title when active */}
@@ -330,7 +349,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                   <>
                     <div className="w-px h-8 bg-gray-600/50" />
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400">Filtrujem:</span>
+                      <span className="text-sm text-gray-400">{t('filtering')}</span>
                       <button
                         onClick={clearFilter}
                         className={cn(
@@ -339,7 +358,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                           'hover:opacity-80 transition-opacity'
                         )}
                       >
-                        {CATEGORY_CONFIG[categoryFilter].label}
+                        {tCategories(categoryFilter)}
                         <X size={14} />
                       </button>
                     </div>
@@ -459,7 +478,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                                   isFirst ? 'text-indigo-300' : 'text-gray-400'
                                 )}
                               >
-                                {dateInfo.day}. {dateInfo.month}
+                                {dateInfo.dayMonth}
                               </div>
                               <div className="text-sm text-gray-500 mt-1">{dateInfo.year}</div>
                             </div>

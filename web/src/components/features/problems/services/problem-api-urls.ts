@@ -1,5 +1,5 @@
 import { buildApiUrl, getApiBaseUrl } from '@/components/shared/utils/url-utils'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
 
 /**
  * The suffix for the URL endpoint for images for different types of content.

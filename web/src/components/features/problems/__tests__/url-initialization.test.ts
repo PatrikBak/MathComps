@@ -1,16 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import type { CompetitionFilterOption } from '../types/problem-api-types'
-import type { SearchFiltersState } from '../types/problem-library-types'
-import { createDefaultFilters, initializeFiltersFromUrl } from '../utils/url-initialization'
+import { initializeFiltersFromUrlOrDefaults } from '../utils/url-initialization'
 
 describe('URL Initialization', () => {
-  const mockOnFiltersChange = vi.fn()
-
-  const createMockSearchParams = (params: Record<string, string>) => {
-    return new URLSearchParams(params)
-  }
-
   const mockCompetitionsTree: CompetitionFilterOption[] = [
     {
       competitionData: { displayName: 'IMO', slug: 'imo', count: 100 },
@@ -38,80 +31,72 @@ describe('URL Initialization', () => {
     },
   ]
 
-  const mockCurrentFilters = createDefaultFilters()
+  it('returns default filters for empty URL', () => {
+    const params = new URLSearchParams({})
+    const result = initializeFiltersFromUrlOrDefaults(params, mockCompetitionsTree)
 
-  beforeEach(() => {
-    vi.clearAllMocks()
+    expect(result.hasInvalidParams).toBe(false)
+    expect(result.filters.searchText).toBe('')
+    expect(result.filters.contestSelection).toEqual([])
   })
 
-  it('should correctly parse, interpret, and apply a complex URL', () => {
-    const searchParams = createMockSearchParams({
+  it('parses complex competition hierarchy (competition-category-round)', () => {
+    const params = new URLSearchParams({
       q: 'algebra',
       competitions: 'csmo-a-i,imo,memo-i',
     })
 
-    const result = initializeFiltersFromUrl({
-      searchParams,
-      currentFilters: mockCurrentFilters,
-      competitionsTree: mockCompetitionsTree,
-      onFiltersChange: mockOnFiltersChange,
-    })
+    const result = initializeFiltersFromUrlOrDefaults(params, mockCompetitionsTree)
 
     expect(result.hasInvalidParams).toBe(false)
-    expect(mockOnFiltersChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        searchText: 'algebra',
-        contestSelection: expect.arrayContaining([
-          expect.objectContaining({
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 'i',
-            displayName: 'CSMO - Category A - Round I',
-          }),
-          expect.objectContaining({
-            type: 'competition',
-            competitionSlug: 'imo',
-            displayName: 'IMO',
-          }),
-          expect.objectContaining({
-            type: 'round',
-            competitionSlug: 'memo',
-            roundSlug: 'i',
-            displayName: 'MEMO - Round I',
-          }),
-        ]),
-      })
+    expect(result.filters.searchText).toBe('algebra')
+    expect(result.filters.contestSelection).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'round',
+          competitionSlug: 'csmo',
+          categorySlug: 'a',
+          roundSlug: 'i',
+          displayName: 'CSMO - Category A - Round I',
+        }),
+        expect.objectContaining({
+          type: 'competition',
+          competitionSlug: 'imo',
+          displayName: 'IMO',
+        }),
+        expect.objectContaining({
+          type: 'round',
+          competitionSlug: 'memo',
+          roundSlug: 'i',
+          displayName: 'MEMO - Round I',
+        }),
+      ])
     )
   })
 
-  it('should return hasInvalidParams for invalid competition slugs', () => {
-    const searchParams = createMockSearchParams({ competitions: 'csmo-x' }) // 'x' is invalid
-    const result = initializeFiltersFromUrl({
-      searchParams,
-      currentFilters: mockCurrentFilters,
-      competitionsTree: mockCompetitionsTree,
-      onFiltersChange: mockOnFiltersChange,
-    })
+  it('rejects invalid competition slugs and returns defaults', () => {
+    const params = new URLSearchParams({ competitions: 'csmo-x' }) // 'x' is not a valid category
+
+    const result = initializeFiltersFromUrlOrDefaults(params, mockCompetitionsTree)
 
     expect(result.hasInvalidParams).toBe(true)
-    expect(mockOnFiltersChange).not.toHaveBeenCalled()
+    expect(result.filters.contestSelection).toEqual([])
   })
 
-  it('should not apply filters if they are identical to the current state', () => {
-    const searchParams = createMockSearchParams({ q: 'test' })
-    const currentFilters: SearchFiltersState = {
-      ...createDefaultFilters(),
-      searchText: 'test',
-    }
-    const result = initializeFiltersFromUrl({
-      searchParams,
-      currentFilters,
-      competitionsTree: mockCompetitionsTree,
-      onFiltersChange: mockOnFiltersChange,
-    })
+  it('rejects unknown URL params', () => {
+    const params = new URLSearchParams({ unknownParam: 'value' })
 
-    expect(result.hasInvalidParams).toBe(false)
-    expect(mockOnFiltersChange).not.toHaveBeenCalled()
+    const result = initializeFiltersFromUrlOrDefaults(params, mockCompetitionsTree)
+
+    expect(result.hasInvalidParams).toBe(true)
+  })
+
+  it('tracks favoritesRequested for auth redirect', () => {
+    const params = new URLSearchParams({ favoritesOnly: 'true' })
+
+    const result = initializeFiltersFromUrlOrDefaults(params, mockCompetitionsTree)
+
+    expect(result.favoritesRequested).toBe(true)
+    expect(result.filters.favoritesOnly).toBe(true)
   })
 })

@@ -14,6 +14,7 @@ import {
 } from '@floating-ui/react'
 import { useIsomorphicEffect } from '@mantine/hooks'
 import { ChevronDown, ChevronUp, FilterX, HelpCircle, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import { Tooltip } from '@/components/shared/components/Tooltip'
@@ -315,6 +316,7 @@ export function FacetHeader({
   titleClassName,
 }: FacetHeaderProps) {
   const showClearVisible = isDirty && !suppressClear
+  const tFilters = useTranslations('ui.filters')
 
   return (
     <div className={facetUI.headerRow}>
@@ -338,11 +340,11 @@ export function FacetHeader({
               'inline-flex h-6 sm:h-7 items-center gap-0.5 sm:gap-1 rounded-md px-1.5 sm:px-2 text-[11px] sm:text-[12px] text-slate-300 hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 whitespace-nowrap',
               !showClearVisible && 'invisible pointer-events-none'
             )}
-            aria-label={`Resetovať výber v „${title}"`}
-            title="Reset"
+            aria-label={tFilters('resetSelection', { name: title })}
+            title={tFilters('reset')}
           >
             <FilterX className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            <span className="hidden sm:inline">Resetovať</span>
+            <span className="hidden sm:inline">{tFilters('reset')}</span>
           </button>
         </div>
       </div>
@@ -365,6 +367,7 @@ type FacetTriggerProps = {
 /** Trigger button that opens/closes the facet popover. */
 function FacetTrigger(props: FacetTriggerProps) {
   const { open, refs, getReferenceProps, closedLabel, title, disabled = false, count = 0 } = props
+  const tFilters = useTranslations('ui.filters')
   return (
     <button
       ref={refs.setReference}
@@ -376,7 +379,13 @@ function FacetTrigger(props: FacetTriggerProps) {
       )}
       aria-haspopup="dialog"
       aria-expanded={open}
-      aria-label={open ? 'Zavrieť výber' : title ? `Otvoriť ${title.toLowerCase()}` : undefined}
+      aria-label={
+        open
+          ? tFilters('closePopover')
+          : title
+            ? tFilters('openPopover', { name: title.toLowerCase() })
+            : undefined
+      }
       aria-disabled={disabled || undefined}
       disabled={disabled}
     >
@@ -386,7 +395,7 @@ function FacetTrigger(props: FacetTriggerProps) {
         {count > 0 && (
           <span
             className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
-            aria-label={`Počet vybraných: ${count}`}
+            aria-label={tFilters('selectedCount', { count })}
           >
             {count}
           </span>
@@ -445,6 +454,7 @@ type FacetPopoverHeaderProps = {
 }
 
 function FacetPopoverHeader({ title, onClear, count }: FacetPopoverHeaderProps) {
+  const tFilters = useTranslations('ui.filters')
   return (
     <div className={facetUI.popoverHeader}>
       <div className="min-w-0">
@@ -458,11 +468,13 @@ function FacetPopoverHeader({ title, onClear, count }: FacetPopoverHeaderProps) 
             'inline-flex h-7 sm:h-8 items-center gap-1 rounded-md px-1.5 sm:px-2 text-[11px] sm:text-xs text-slate-300 hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 whitespace-nowrap',
             count() == 0 && 'invisible pointer-events-none'
           )}
-          aria-label="Resetovať výber v tomto filtri"
-          title="Reset"
+          aria-label={tFilters('resetFilter')}
+          title={tFilters('reset')}
         >
           <FilterX className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
-          <span>Reset ({count()})</span>
+          <span>
+            {tFilters('reset')} ({count()})
+          </span>
         </button>
       </div>
     </div>
@@ -486,7 +498,8 @@ type FacetSearchRowProps = {
  * @returns React element rendering a search input with optional clear button.
  */
 function FacetSearchRow(props: FacetSearchRowProps) {
-  const { query, setQuery, searchRef, title, placeholder = 'Hľadať…', onArrowDownToList } = props
+  const { query, setQuery, searchRef, title, placeholder, onArrowDownToList } = props
+  const tFilters = useTranslations('ui.filters')
 
   // A function to clear the searchbox
   const handleClear = React.useCallback(() => {
@@ -515,8 +528,8 @@ function FacetSearchRow(props: FacetSearchRowProps) {
               handleClear()
             }
           }}
-          aria-label={`Hľadať ${title.toLowerCase()}`}
-          placeholder={placeholder}
+          aria-label={tFilters('searchIn', { name: title.toLowerCase() })}
+          placeholder={placeholder ?? tFilters('search')}
           className={cn(facetUI.searchInput, query.length > 0 && facetUI.searchInputWithClear)}
         />
         {/** The X button */}
@@ -525,8 +538,8 @@ function FacetSearchRow(props: FacetSearchRowProps) {
             type="button"
             onClick={handleClear}
             className={facetUI.searchClearButton}
-            aria-label={`Vymazať vyhľadávanie v „${title.toLowerCase()}"`}
-            title="Vymazať"
+            aria-label={tFilters('clearSearch', { name: title.toLowerCase() })}
+            title={tFilters('clear')}
           >
             <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
           </button>
@@ -573,7 +586,7 @@ function FacetListContainer(props: FacetListContainerProps) {
  */
 function FacetItemLabel({ children }: { children: string }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 pr-3">
       <TruncatedText className={facetUI.itemLabel}>{children}</TruncatedText>
     </div>
   )

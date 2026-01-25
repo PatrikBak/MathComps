@@ -1,3 +1,5 @@
+using MathComps.Shared;
+
 namespace MathComps.Domain.ApiDtos.ProblemQuery;
 
 /// <summary>
@@ -6,7 +8,9 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// </summary>
 /// <param name="Query">The base filter query from the API.</param>
 /// <param name="UserId">ID of the requesting user for personalized data (e.g. likes).</param>
+/// <param name="Language">The language for localized display names.</param>
 public record ProblemFilterOptions(
     FilterQuery Query,
-    Guid? UserId
+    Guid? UserId,
+    Language Language
 );

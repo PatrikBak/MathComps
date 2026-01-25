@@ -2,6 +2,7 @@
 using System;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -24,7 +25,7 @@ namespace MathComps.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "comment_status", new[] { "active", "deleted", "superseded" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "document_type", new[] { "solution", "statement" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "language", new[] { "cz", "en", "sk" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "language", new[] { "cs", "en", "sk" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "tag_type", new[] { "area", "goal", "technique", "type" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "unaccent");
@@ -64,12 +65,6 @@ namespace MathComps.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -172,18 +167,6 @@ namespace MathComps.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("display_name");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("full_name");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -459,6 +442,12 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("height");
 
+                    b.Property<string>("OriginalId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("original_id");
+
                     b.Property<Guid>("ProblemId")
                         .HasColumnType("uuid")
                         .HasColumnName("problem_id");
@@ -626,6 +615,12 @@ namespace MathComps.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_problem_text_problem_document_language");
 
+                    b.HasIndex("ProblemId", "Language", "IsOriginal")
+                        .HasDatabaseName("ix_problem_text_statement_lookup")
+                        .HasFilter("document_type = 'statement' AND parsed_text IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ProblemId", "Language", "IsOriginal"), new[] { "ParsedText" });
+
                     b.ToTable("problem_texts", (string)null);
                 });
 
@@ -648,18 +643,6 @@ namespace MathComps.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("composite_slug");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("display_name");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("full_name");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean")
@@ -742,12 +725,6 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("EditionLabel")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("edition_label");
-
                     b.Property<int>("EditionNumber")
                         .HasColumnType("integer")
                         .HasColumnName("edition_number");
@@ -780,12 +757,6 @@ namespace MathComps.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
 
                     b.Property<string>("Slug")
                         .IsRequired()

@@ -1,4 +1,5 @@
 import { Calendar } from 'lucide-react'
+import { useFormatter } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -14,8 +15,11 @@ type NewsDateLabelProps = {
  * Formatted date label for news articles.
  */
 export function NewsDateLabel({ date }: NewsDateLabelProps) {
-  // Format the date, classic Slovak style 😇
-  const formattedDate = new Date(date).toLocaleDateString('sk-SK', {
+  // Date formatter (uses current locale automatically)
+  const format = useFormatter()
+
+  // Format the date using current locale
+  const formattedDate = format.dateTime(new Date(date), {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

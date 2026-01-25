@@ -1,4 +1,5 @@
 import { Brain, Sparkles, Trophy, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import Badge from '@/components/features/home/layout/Badge'
 import Section from '@/components/shared/components/Section'
@@ -7,24 +8,25 @@ import Section from '@/components/shared/components/Section'
  * Displays the vision/future goals section on the home page.
  */
 export default function VisionSection() {
+  // Translations for section
+  const t = useTranslations('home.vision')
+
+  // The cards to display in the section
   const visionItems = [
     {
       iconComponent: Users,
-      title: 'Komunita',
-      description:
-        'Priestor na diskutovanie o úlohách, materiáloch a novinkách vo svete súťaznej matematiky.',
+      title: t('community.title'),
+      description: t('community.description'),
     },
     {
       iconComponent: Trophy,
-      title: 'Súťaže',
-      description:
-        'Pravidelné online súťaže s rebríčkom a s poloautomatizovaným bodovaním riešení.',
+      title: t('competitions.title'),
+      description: t('competitions.description'),
     },
     {
       iconComponent: Brain,
-      title: 'AI nástroje',
-      description:
-        'Funkcie ako odporúčania úloh na mieru, spätná väzba k napísaným riešeniam, a podobne.',
+      title: t('aiTools.title'),
+      description: t('aiTools.description'),
     },
   ]
 
@@ -33,12 +35,12 @@ export default function VisionSection() {
       badge={
         <Badge
           icon={<Sparkles size={14} className="sm:w-4 sm:h-4" />}
-          text="Kam smerujeme?"
+          text={t('badge')}
           color="sky"
         />
       }
-      title="Vízia do budúcnosti"
-      description="MathComps je na začiatku svojej cesty. V hlave je kopa nápadov, ako tento projekt vylepšiť, aby priniesol čo najviac úžitku svetu matematických súťaží. Mimo zveľaďovania už vytvoreného, ďalšie myšlienky sú:"
+      title={t('title')}
+      description={t('description')}
       cards={visionItems}
     />
   )

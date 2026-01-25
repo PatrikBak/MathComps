@@ -1,7 +1,6 @@
 using Clerk.BackendAPI;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 namespace MathComps.Infrastructure.Services;

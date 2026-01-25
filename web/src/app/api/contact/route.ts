@@ -1,7 +1,10 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { contactFormSchema, getReasonLabel } from '@/components/features/contact/contactFormSchema'
+import {
+  baseContactFormSchema,
+  getReasonLabelForAdmin,
+} from '@/components/features/contact/contactFormSchema'
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 import { withApiHandler } from '@/lib/api/api-handler'
 import { sendEmail } from '@/lib/email/email-sender'
@@ -28,24 +31,27 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   }
 
   // Validate the form data (ZodError is handled by withApiHandler)
-  const validatedData = contactFormSchema.parse(body)
+  const validatedData = baseContactFormSchema.parse(body)
+
+  // Get translated reason label (in English for admin)
+  const reasonLabel = await getReasonLabelForAdmin(validatedData.reason)
 
   // Generate email HTML using unified template
-  const emailHtml = generateContactEmail({
+  const emailHtml = await generateContactEmail({
     name: validatedData.name,
     email: validatedData.email,
-    reason: getReasonLabel(validatedData.reason),
+    reason: reasonLabel,
     message: validatedData.message,
   })
 
   // The form is send to the contact email
-  const sendEmailTo = getRequiredEnv('CONTACT_EMAIL')
+  const sendEmailTo = getRequiredEnv('NEXT_PUBLIC_CONTACT_EMAIL')
 
   // Send email using shared utility to the contact email
   const result = await sendEmail({
     to: sendEmailTo,
     replyTo: validatedData.email,
-    subject: `Nová správa z MathComps: ${getReasonLabel(validatedData.reason)}`,
+    subject: `New MathComps message: ${reasonLabel}`,
     html: emailHtml,
   })
 

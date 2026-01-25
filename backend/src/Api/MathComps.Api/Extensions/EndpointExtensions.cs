@@ -1,9 +1,11 @@
+using System.Globalization;
 using MathComps.Domain.ApiDtos.Comments;
 using MathComps.Domain.ApiDtos.Helpers;
 using MathComps.Domain.ApiDtos.ProblemQuery;
 using MathComps.Domain.ApiDtos.SearchBar;
 using MathComps.Infrastructure.Services;
 using MathComps.Api.Constants;
+using MathComps.Shared;
 
 namespace MathComps.Api.Extensions;
 
@@ -26,10 +28,13 @@ public static class EndpointExtensions
             // Get user ID (optional)
             var userId = await GetUserIdAsync(context, userManager);
 
-            // Create service options
-            var options = new ProblemFilterOptions(query, userId);
+            // Detect language from Accept-Language header
+            var language = GetRequestLanguage();
 
-            // Just call the service
+            // Create service options
+            var options = new ProblemFilterOptions(query, userId, language);
+
+            // Delegate to service
             return Results.Ok(await problemService.FilterAsync(options));
         })
         // Apply search-specific rate limiting
@@ -38,8 +43,11 @@ public static class EndpointExtensions
         // The endpoint for the contest browser - returns competitions grouped by season
         app.MapGet("/problems/contests-by-season", async (IProblemFilterService problemService) =>
         {
-            // No params, just call the service
-            return Results.Ok(await problemService.GetContestsBySeasonAsync());
+            // Detect language from Accept-Language header
+            var language = GetRequestLanguage();
+
+            // Delegate to service
+            return Results.Ok(await problemService.GetContestsBySeasonAsync(language));
         })
         // Apply search-specific rate limiting
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
@@ -71,7 +79,10 @@ public static class EndpointExtensions
                 AuthorLogic: LogicToggle.Or
             );
 
-            // Construct filter options
+            // Detect language from Accept-Language header
+            var language = GetRequestLanguage();
+
+            // Create service options
             var filterOptions = new ProblemFilterOptions(
                 new FilterQuery(
                     filters,
@@ -79,14 +90,12 @@ public static class EndpointExtensions
                     PageNumber: 1,
                     FavoritesOnly: false
                 ),
-                userId
+                userId,
+                language
             );
 
-            // Use the existing filter service to get the results
-            var response = await filterService.FilterAsync(filterOptions);
-
-            // We're happy
-            return Results.Ok(response);
+            // Delegate to service
+            return Results.Ok(await filterService.FilterAsync(filterOptions));
         })
         // Apply standard rate limiting
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
@@ -285,4 +294,19 @@ public static class EndpointExtensions
             ? await userManager.GetUserIdAsync(userExternalId)
             : null;
     }
+
+    /// <summary>
+    /// Gets the request language from the current thread culture.
+    /// The RequestLocalization middleware sets CurrentCulture based on Accept-Language header.
+    /// </summary>
+    /// <returns>The Language enum value for the current request.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when culture cannot be parsed to Language enum.</exception>
+    private static Language GetRequestLanguage()
+        => Enum.TryParse<Language>(
+                CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+                ignoreCase: true,
+                out var language)
+            ? language
+            : throw new InvalidOperationException($"Unsupported culture '{CultureInfo.CurrentCulture.TwoLetterISOLanguageName}'");
 }
+

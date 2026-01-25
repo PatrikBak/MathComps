@@ -1,4 +1,5 @@
 import { ChevronRight, MessageSquare, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import type {
@@ -6,7 +7,7 @@ import type {
   HandoutData,
   HandoutImage,
   RawContentBlock,
-} from '@/components/features/handouts/handout-types'
+} from '@/components/features/handouts/handout-content-types'
 import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
 import {
   renderBlocks,
@@ -16,9 +17,14 @@ import {
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { cn } from '@/components/shared/utils/css-utils'
-import { ANCHORS } from '@/constants/routes'
+import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard } from './Cards'
+
+/**
+ * Translation function for the 'handouts' namespace
+ */
+type HandoutsTranslator = ReturnType<typeof useTranslations<'handouts'>>
 
 /**
  * Props for the HandoutDetail component.
@@ -34,6 +40,8 @@ type HandoutDetailProps = {
   contentId: string
   /** Metadata for each section in the handout */
   sectionMetadata: SectionMetadata[]
+  /** The current locale */
+  locale: Locale
 }
 
 /**
@@ -45,7 +53,8 @@ const imageType = 'handouts'
 // Render a title that can be either a string or RawContentBlock
 function renderTitle(
   title: RawContentBlock | null | undefined,
-  imagesById: Record<string, HandoutImage>
+  imagesById: Record<string, HandoutImage>,
+  imageMissingText: string
 ): React.ReactNode {
   if (!title) return null
 
@@ -56,11 +65,11 @@ function renderTitle(
   // For complex titles, render as React elements to preserve formatting.
   // Crucially, use renderInlineContent to avoid block-level wrappers like <p>.
   if (title.type === 'paragraph' || title.type === 'bold' || title.type === 'italic') {
-    return renderInlineContent(title.content, imagesById, imageType)
+    return renderInlineContent(title.content, imagesById, imageType, imageMissingText)
   }
 
   // Fallback for unexpected types, though paragraph should cover most cases.
-  return renderRawContentBlock(title, imagesById, imageType)
+  return renderRawContentBlock(title, imagesById, imageType, imageMissingText)
 }
 
 function renderDifficultyStars(difficulty: number): React.ReactNode {
@@ -77,21 +86,20 @@ function renderDocumentSections(
     level: number
     sectionIndex: number
   }>,
-  imagesById: Record<string, HandoutImage>
+  imagesById: Record<string, HandoutImage>,
+  t: HandoutsTranslator,
+  imageMissingText: string
 ) {
-  const localizedEnvironmentLabelByType: Record<
-    'theorem' | 'exercise' | 'example' | 'problem',
-    string
-  > = {
-    theorem: 'Tvrdenie',
-    exercise: 'Cvičenie',
-    example: 'Príklad',
-    problem: 'Úloha',
+  /** Environment types supported in handout content */
+  type EnvironmentType = 'theorem' | 'exercise' | 'example' | 'problem'
+
+  const localizedEnvironmentLabelByType: Record<EnvironmentType, string> = {
+    theorem: t('environments.theorem'),
+    exercise: t('environments.exercise'),
+    example: t('environments.example'),
+    problem: t('environments.problem'),
   }
-  const environmentTextColorClassByType: Record<
-    'theorem' | 'exercise' | 'example' | 'problem',
-    string
-  > = {
+  const environmentTextColorClassByType: Record<EnvironmentType, string> = {
     theorem: 'text-green-300',
     exercise: 'text-yellow-300',
     example: 'text-blue-300',
@@ -99,7 +107,7 @@ function renderDocumentSections(
   }
 
   const environmentBadgeClassByType: Record<
-    'theorem' | 'exercise' | 'example' | 'problem',
+    EnvironmentType,
     { text: string; bg: string; border: string }
   > = {
     theorem: {
@@ -124,19 +132,19 @@ function renderDocumentSections(
     },
   }
 
-  const environmentCounters: Record<'theorem' | 'exercise' | 'example' | 'problem', number> = {
+  const environmentCounters: Record<EnvironmentType, number> = {
     theorem: 0,
     exercise: 0,
     example: 0,
     problem: 0,
   }
 
-  // Mapping for Slovak type names used in IDs
-  const environmentTypeSlugMap: Record<'theorem' | 'exercise' | 'example' | 'problem', string> = {
-    theorem: 'tvrdenie',
-    exercise: 'cvicenie',
-    example: 'priklad',
-    problem: 'uloha',
+  // Localized slugs for environment type names used in anchor IDs
+  const environmentTypeSlugMap: Record<EnvironmentType, string> = {
+    theorem: t('environments.slugs.theorem'),
+    exercise: t('environments.slugs.exercise'),
+    example: t('environments.slugs.example'),
+    problem: t('environments.slugs.problem'),
   }
 
   const getNextEnvironmentNumber = (environmentType: keyof typeof environmentCounters) => {
@@ -185,7 +193,7 @@ function renderDocumentSections(
               environmentNumber
             )
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
-            const userProvidedTitle = renderTitle(contentBlock.title, imagesById)
+            const userProvidedTitle = renderTitle(contentBlock.title, imagesById, imageMissingText)
             const difficultyStars =
               contentBlock.type === 'problem'
                 ? renderDifficultyStars(contentBlock.difficulty)
@@ -208,7 +216,7 @@ function renderDocumentSections(
                     subtitle={subtitleBadge}
                     id={environmentId}
                   >
-                    {renderBlocks(contentBlock.body, imagesById, imageType)}
+                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
@@ -228,7 +236,7 @@ function renderDocumentSections(
                             >
                               <span className="w-[8px] h-[8px] bg-green-200 rounded-[2px]"></span>
                             </span>
-                            Dôkaz
+                            {t('labels.proof')}
                           </span>
                           <ChevronRight
                             size={16}
@@ -236,7 +244,12 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.proof, imagesById, imageType)}
+                          {renderBlocks(
+                            contentBlock.proof,
+                            imagesById,
+                            imageType,
+                            imageMissingText
+                          )}
                         </div>
                       </details>
                     </div>
@@ -254,7 +267,7 @@ function renderDocumentSections(
                     subtitle={subtitleBadge}
                     id={environmentId}
                   >
-                    {renderBlocks(contentBlock.body, imagesById, imageType)}
+                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
@@ -274,7 +287,7 @@ function renderDocumentSections(
                             >
                               ✓
                             </span>
-                            Riešenie
+                            {t('labels.solution')}
                           </span>
                           <ChevronRight
                             size={16}
@@ -282,7 +295,12 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.solution, imagesById, imageType)}
+                          {renderBlocks(
+                            contentBlock.solution,
+                            imagesById,
+                            imageType,
+                            imageMissingText
+                          )}
                         </div>
                       </details>
                     </div>
@@ -300,7 +318,7 @@ function renderDocumentSections(
                     subtitle={subtitleBadge}
                     id={environmentId}
                   >
-                    {renderBlocks(contentBlock.body, imagesById, imageType)}
+                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
                     <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                       <details className="group">
                         <summary
@@ -320,7 +338,7 @@ function renderDocumentSections(
                             >
                               ✓
                             </span>
-                            Riešenie
+                            {t('labels.solution')}
                           </span>
                           <ChevronRight
                             size={16}
@@ -328,7 +346,12 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.solution, imagesById, imageType)}
+                          {renderBlocks(
+                            contentBlock.solution,
+                            imagesById,
+                            imageType,
+                            imageMissingText
+                          )}
                         </div>
                       </details>
                     </div>
@@ -346,7 +369,9 @@ function renderDocumentSections(
                   subtitle={subtitleBadge}
                   id={environmentId}
                 >
-                  <div>{renderBlocks(contentBlock.body, imagesById, imageType)}</div>
+                  <div>
+                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
+                  </div>
                   <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
                     {contentBlock.hints.length > 0 &&
                       contentBlock.hints.map((hint, hintIndex) => (
@@ -356,7 +381,7 @@ function renderDocumentSections(
                               <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
                                 {hintIndex + 1}
                               </span>
-                              Nápoveda
+                              {t('labels.hint')}
                             </span>
                             <ChevronRight
                               size={16}
@@ -364,7 +389,7 @@ function renderDocumentSections(
                             />
                           </summary>
                           <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                            {renderBlocks(hint, imagesById, imageType)}
+                            {renderBlocks(hint, imagesById, imageType, imageMissingText)}
                           </div>
                         </details>
                       ))}
@@ -388,7 +413,7 @@ function renderDocumentSections(
                             >
                               ✓
                             </span>
-                            Riešenie
+                            {t('labels.solution')}
                           </span>
                           <ChevronRight
                             size={16}
@@ -396,7 +421,12 @@ function renderDocumentSections(
                           />
                         </summary>
                         <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
-                          {renderBlocks(contentBlock.solution, imagesById, imageType)}
+                          {renderBlocks(
+                            contentBlock.solution,
+                            imagesById,
+                            imageType,
+                            imageMissingText
+                          )}
                         </div>
                       </details>
                     )}
@@ -408,7 +438,12 @@ function renderDocumentSections(
 
           return (
             <div key={`${metadata.label}-blk-${contentBlockIndex}`}>
-              {renderRawContentBlock(contentBlock as RawContentBlock, imagesById, imageType)}
+              {renderRawContentBlock(
+                contentBlock as RawContentBlock,
+                imagesById,
+                imageType,
+                imageMissingText
+              )}
             </div>
           )
         })}
@@ -427,7 +462,11 @@ export default function HandoutDetail({
   authors,
   sectionMetadata,
   contentId,
+  locale,
 }: HandoutDetailProps) {
+  const t = useTranslations('handouts')
+  const tContent = useTranslations('ui.content')
+  const imageMissingText = tContent('imageMissing')
   const { document: documentContent, images } = handout
   // Create images lookup map
   const imagesById: Record<string, HandoutImage> = {}
@@ -461,7 +500,7 @@ export default function HandoutDetail({
                 <Users className="size-4 text-gray-400" aria-hidden />
                 <span className="text-sm uppercase font-semibold text-gray-400">
                   {' '}
-                  {authors.length > 1 ? 'Autori' : 'Autor'}{' '}
+                  {authors.length > 1 ? t('labels.authors') : t('labels.author')}{' '}
                 </span>
               </div>
               <span className="text-gray-200 font-semi-bold text-sm"> {authors.join(', ')} </span>
@@ -471,13 +510,13 @@ export default function HandoutDetail({
       </header>
 
       {/* Math Sections */}
-      {renderDocumentSections(documentContent, sectionMetadata, imagesById)}
+      {renderDocumentSections(documentContent, sectionMetadata, imagesById, t, imageMissingText)}
 
       {/* Comments Section */}
       <ArticleSection
         icon={<MessageSquare size={28} />}
-        title="Komentáre"
-        id={ANCHORS.COMMENTS}
+        title={t('labels.comments')}
+        id={getLocalizedAnchor(ANCHORS.COMMENTS, locale)}
         className="mt-8 sm:mt-12 md:mt-16 min-h-[60vh]"
       >
         <CommentSection variant="inline" target={{ targetType: 'Handout', targetId: contentId }} />

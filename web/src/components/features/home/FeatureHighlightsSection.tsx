@@ -1,37 +1,35 @@
 import { FileText, GitBranch, Search } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import GradientText from '@/components/shared/components/GradientText'
 import Section from '@/components/shared/components/Section'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
 
 /**
  * Displays the main feature highlights section on the home page.
  */
 export default function FeatureHighlights() {
+  // Translations for section
+  const t = useTranslations('home.highlights')
+
+  // The cards to display in the section
   const features = [
     {
       iconComponent: Search,
-      title: 'Archív',
-      description: (
-        <>
-          Databáza súťažných úloh s&nbsp;možnosťou vyhľadávania podľa kľúčových slov a ďalších
-          kritérií.
-        </>
-      ),
+      title: t('archive.title'),
+      description: t('archive.description'),
       href: ROUTES.PROBLEMS,
     },
     {
       iconComponent: FileText,
-      title: 'Materiály',
-      description:
-        'Priebežne dopĺňané študijné texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.',
+      title: t('handouts.title'),
+      description: t('handouts.description'),
       href: ROUTES.HANDOUTS,
     },
     {
       iconComponent: GitBranch,
-      title: 'Rozcestník',
-      description:
-        'Zoznam súťaží a seminárov spolu s odkazmi na rôzne nástroje užitočné pre žiakov aj učiteľov.',
+      title: t('guide.title'),
+      description: t('guide.description'),
       href: ROUTES.GUIDE,
     },
   ]
@@ -40,7 +38,7 @@ export default function FeatureHighlights() {
     <Section
       title={
         <>
-          Všetko potrebné <GradientText className="block">na jednom mieste</GradientText>
+          {t('title')} <GradientText className="block">{t('titleGradient')}</GradientText>
         </>
       }
       cards={features}

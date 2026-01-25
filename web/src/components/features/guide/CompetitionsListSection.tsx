@@ -1,5 +1,5 @@
 import { List } from 'lucide-react'
-import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
@@ -14,10 +14,13 @@ export default function CompetitionsListSection({
 }: {
   sectionNumberer: SectionNumberer
 }) {
+  // Get guide translations
+  const t = useTranslations('guide')
+
   return (
     <GuideSection
-      title={GUIDE_TITLES.COMPETITIONS}
-      description="Najvýznamnejšia súťaž je Matematická olympiáda (MO). Je však kopa ďalších súťaží a aktivít, ktoré sú dobré ako tréning pre MO alebo aj samé osebe 😇."
+      title={t(`titles.${GUIDE_TITLES.COMPETITIONS}`)}
+      description={t('sections.competitions.description')}
       icon={{ type: 'lucide', icon: List }}
       iconColor="text-blue-400"
       iconBackground="bg-blue-500/10"

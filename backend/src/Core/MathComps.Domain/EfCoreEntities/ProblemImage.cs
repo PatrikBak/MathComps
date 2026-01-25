@@ -23,6 +23,13 @@ public class ProblemImage
     public required string ContentId { get; set; }
 
     /// <summary>
+    /// The original image identifier from source TeX (e.g., "fig1.svg").
+    /// Used to map translations back to processed images.
+    /// </summary>
+    [MaxLength(200)]
+    public required string OriginalId { get; set; }
+
+    /// <summary>
     /// The intrinsic width of the image as declared in the SVG (preserves units like px, pt, cm).
     /// </summary>
     public string Width { get; set; } = null!;

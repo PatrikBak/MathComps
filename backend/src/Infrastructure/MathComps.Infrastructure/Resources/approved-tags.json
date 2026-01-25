@@ -1,0 +1,964 @@
+{
+  "area": [
+    {
+      "slug": "3d-geometry",
+      "description": "This should be only about geometry in the tradition of Euclid, i.e., about lines, points, angles, circles, etc. If merely a 3D object is used, that is not enough (e.g., a 'tetrahedron' could be used just for its graph-theoretic properties of vertices and edges—which has nothing to do with its 3D geometry).",
+      "names": {
+        "SK": "3D geometria",
+        "EN": "3D Geometry",
+        "CS": "3D geometrie"
+      }
+    },
+    {
+      "slug": "algebra",
+      "description": "High school math competition algebra. Almost all problems involving real numbers should have this tag.",
+      "names": {
+        "SK": "Algebra",
+        "EN": "Algebra",
+        "CS": "Algebra"
+      }
+    },
+    {
+      "slug": "functional-equation",
+      "description": "",
+      "names": {
+        "SK": "Funkcionálna rovnica",
+        "EN": "Functional Equation",
+        "CS": "Funkcionální rovnice"
+      }
+    },
+    {
+      "slug": "geometry",
+      "description": "This should be only about geometry in the tradition of Euclid, i.e., about lines, points, angles, circles, etc.",
+      "names": {
+        "SK": "Geometria",
+        "EN": "Geometry",
+        "CS": "Geometrie"
+      }
+    },
+    {
+      "slug": "trigonometry",
+      "description": "Algebraic problems about the trigonometric functions.",
+      "names": {
+        "SK": "Goniometria",
+        "EN": "Trigonometry",
+        "CS": "Goniometrie"
+      }
+    },
+    {
+      "slug": "combinatorial-geometry",
+      "description": "This tag is mutually exclusive with the tags 'Geometria' and '3D geometria'. Example terms: convex hulls, packings, tessellations, topology, etc. Make sure that the problem does not fall under (synthetic) geometry; e.g., if it deals with lengths, angles, areas, collinearity, concyclic points, etc., then it's likely a better fit for 'Geometria' or '3D geometria'. Also, if a problem is tagged with this, it should also fall under the area of 'Kombinatorika' (though it shouldn't be tagged as such, due to being less specific).",
+      "names": {
+        "SK": "Kombinatorická geometria",
+        "EN": "Combinatorial Geometry",
+        "CS": "Kombinatorická geometrie"
+      }
+    },
+    {
+      "slug": "combinatorics",
+      "description": "A broad area: high school math competition combinatorics. This includes, but is not limited to, games, problems on grids, graphs, permutations, tilings, puzzles, etc.",
+      "names": {
+        "SK": "Kombinatorika",
+        "EN": "Combinatorics",
+        "CS": "Kombinatorika"
+      }
+    },
+    {
+      "slug": "logic-problem",
+      "description": "Problems that are purely about logic, i.e., there is no underlying theory (it's not about numbers, not about geometry—just pure logic).",
+      "names": {
+        "SK": "Logická úloha",
+        "EN": "Logic Problem",
+        "CS": "Logická úloha"
+      }
+    },
+    {
+      "slug": "number-theory",
+      "description": "Associated with natural numbers/integers, divisibility, rationality/irrationality, etc.",
+      "names": {
+        "SK": "Teória čísel",
+        "EN": "Number Theory",
+        "CS": "Teorie čísel"
+      }
+    },
+    {
+      "slug": "graph-theory",
+      "description": "",
+      "names": {
+        "SK": "Teória grafov",
+        "EN": "Graph Theory",
+        "CS": "Teorie grafů"
+      }
+    }
+  ],
+  "goal": [
+    {
+      "slug": "prove-equivalence",
+      "description": "The objective is to prove equivalence of two propositions. This is usually more specific than 'Všeobecný dôkaz', so use only this tag if both are applicable.",
+      "names": {
+        "SK": "Dôkaz ekvivalencie",
+        "EN": "Prove Equivalence",
+        "CS": "Důkaz ekvivalence"
+      }
+    },
+    {
+      "slug": "prove-existence",
+      "description": "The objective is to prove the existence of some object. The proof need not necessarily be a constructive one (i.e. proving existence without actually constructing one such object is fine).",
+      "names": {
+        "SK": "Dôkaz existencie",
+        "EN": "Prove Existence",
+        "CS": "Důkaz existence"
+      }
+    },
+    {
+      "slug": "prove-uniqueness",
+      "description": "The objective is to prove that there is exactly one solution.",
+      "names": {
+        "SK": "Dôkaz jednoznačnosti",
+        "EN": "Prove Uniqueness",
+        "CS": "Důkaz jednoznačnosti"
+      }
+    },
+    {
+      "slug": "prove-non-existence",
+      "description": "The objective is to prove that no object satisfies the property.",
+      "names": {
+        "SK": "Dôkaz neexistencie",
+        "EN": "Prove Non-existence",
+        "CS": "Důkaz neexistence"
+      }
+    },
+    {
+      "slug": "prove-general-statement",
+      "description": "The objective is to prove that certain objects satisfy some property.",
+      "names": {
+        "SK": "Dôkaz všeobecného tvrdenia",
+        "EN": "Prove General Statement",
+        "CS": "Důkaz obecného tvrzení"
+      }
+    },
+    {
+      "slug": "does-solution-exist",
+      "description": "The objective is to find out if there is a solution -- i.e. either prove that a solution exists, or prove that a solution does not exist, for suitably defined 'solution'.",
+      "names": {
+        "SK": "Existuje riešenie?",
+        "EN": "Does Solution Exist?",
+        "CS": "Existuje řešení?"
+      }
+    },
+    {
+      "slug": "geometric-construction",
+      "description": "The task is to construct some geometric object (e.g., a point with some properties) using only certain tools (e.g., compass and straightedge). Implies the area tag 'Geometria' or '3D geometria'. Prefer this over 'Nájdi riešenie' if applicable.",
+      "names": {
+        "SK": "Geometrická konštrukcia",
+        "EN": "Geometric Construction",
+        "CS": "Geometrická konstrukce"
+      }
+    },
+    {
+      "slug": "find-solution",
+      "description": "The objective is to construct some object (it is not enough to merely prove existence). This is more specific than 'Dôkaz existencie', so use only this tag if both are applicable. Do not award this if 'Geometrická konštrukcia' could be awarded.",
+      "names": {
+        "SK": "Nájdi riešenie",
+        "EN": "Find Solution",
+        "CS": "Najdi řešení"
+      }
+    },
+    {
+      "slug": "find-solution-if-exists",
+      "description": "The objective is to find out if there is a solution, and if there is a solution, find one. This can only be applied to problems where it is not clear whether a solution exists. This is more specific than the tag 'Existuje riešenie?' so use only this tag if both are applicable.",
+      "names": {
+        "SK": "Nájdi riešenie, ak existuje",
+        "EN": "Find Solution If Exists",
+        "CS": "Najdi řešení, pokud existuje"
+      }
+    },
+    {
+      "slug": "optimization-problem",
+      "description": "Problem where we are looking for a 'best' / minimal / maximal solution according to some metric. For example, in combinatorics, it could be about the smallest number of steps to reach some outcome. In algebra, it could be about minimizing some formula. This is more specific than 'Konštrukčná úloha' (since we are asking for best solution, whereas in constructive problems we are asking only for some solution) -- so if both are applicable, use only this tag.",
+      "names": {
+        "SK": "Optimalizačná úloha",
+        "EN": "Optimization Problem",
+        "CS": "Optimalizační úloha"
+      }
+    },
+    {
+      "slug": "is-it-generally-true",
+      "description": "The objective is to either prove that certain objects satisfy some property, or find a counterexample.",
+      "names": {
+        "SK": "Platí vo všeobecnosti?",
+        "EN": "Is It Generally True?",
+        "CS": "Platí obecně?"
+      }
+    },
+    {
+      "slug": "count-solutions",
+      "description": "The objective is to find the number of solutions (we do not actually have to find the solutions themselves, just their number). This includes problems where we are to place an upper or lower bound on the number of solutions. Make sure that the count is the count of solutions (and not count of something else).",
+      "names": {
+        "SK": "Počet riešení",
+        "EN": "Count Solutions",
+        "CS": "Počet řešení"
+      }
+    },
+    {
+      "slug": "drawing-strategy",
+      "description": "The objective is, given a game (usually with 2 players), prove that a certain player can play such that they cannot lose, no matter what the other players are doing. Implies the area tag 'Kombinatorika' or 'Kombinatorická geometria'.",
+      "names": {
+        "SK": "Remizujúca stratégia",
+        "EN": "Drawing Strategy",
+        "CS": "Remízová strategie"
+      }
+    },
+    {
+      "slug": "winning-strategy",
+      "description": "The objective is, given a game (usually with 2 players), determine which player has the winning strategy / prove that a given player has a winning strategy. Implies the area tag 'Kombinatorika' or 'Kombinatorická geometria'.",
+      "names": {
+        "SK": "Víťazná stratégia",
+        "EN": "Winning Strategy",
+        "CS": "Vítězná strategie"
+      }
+    },
+    {
+      "slug": "find-all-solutions",
+      "description": "The objective is to find all solutions, for suitably defined 'solutions'. For example it could be something like 'determine all possible values of some property / variable X'.",
+      "names": {
+        "SK": "Všetky riešenia",
+        "EN": "Find All Solutions",
+        "CS": "Všechna řešení"
+      }
+    },
+    {
+      "slug": "calculate-value",
+      "description": "E.g. calculate the length / circumference / angle / ... Use this only when the problem asks us directly to calculate some value where it is *not immediately obvious how to calculate it*. It must be clear from the problem statement that the value is uniquely determined and that the hard part is calculating it from known information.",
+      "names": {
+        "SK": "Výpočet veličiny",
+        "EN": "Calculate Value",
+        "CS": "Výpočet veličiny"
+      }
+    }
+  ],
+  "type": [
+    {
+      "slug": "absolute-value",
+      "description": "This should be assigned only to problems that explicitly deal with the absolute value function (and not as a vector/segment length indicator). Do not assign this just because the problem involves a (positive) difference.",
+      "names": {
+        "SK": "Absolútna hodnota",
+        "EN": "Absolute Value",
+        "CS": "Absolutní hodnota"
+      }
+    },
+    {
+      "slug": "cryptarithm",
+      "description": "This should be assigned only to problems that involve filling in missing digits into given cells to make a sum work. Do not assign this just because there are digits in a problem.",
+      "names": {
+        "SK": "Algebrogram",
+        "EN": "Cryptarithm",
+        "CS": "Algebrogram"
+      }
+    },
+    {
+      "slug": "arithmetic-sequence",
+      "description": "Do not award this just because there are consecutive numbers in the statement; there must be an explicit mention of an arithmetic progression.",
+      "names": {
+        "SK": "Aritmetická postupnosť",
+        "EN": "Arithmetic Sequence",
+        "CS": "Aritmetická posloupnost"
+      }
+    },
+    {
+      "slug": "floor-function",
+      "description": "",
+      "names": {
+        "SK": "Celá časť",
+        "EN": "Floor Function",
+        "CS": "Celá část"
+      }
+    },
+    {
+      "slug": "digit-sum",
+      "description": "",
+      "names": {
+        "SK": "Ciferný súčet",
+        "EN": "Digit Sum",
+        "CS": "Ciferný součet"
+      }
+    },
+    {
+      "slug": "number-base",
+      "description": "Use this only when the problem involves a non-decimal system. Since most problems are in decimal, this tag is generally not useful.",
+      "names": {
+        "SK": "Číselná sústava",
+        "EN": "Number Base",
+        "CS": "Číselná soustava"
+      }
+    },
+    {
+      "slug": "divisibility",
+      "description": "Only award this when the problem explicitly deals with divisibility.",
+      "names": {
+        "SK": "Deliteľnosť",
+        "EN": "Divisibility",
+        "CS": "Dělitelnost"
+      }
+    },
+    {
+      "slug": "tangent-line",
+      "description": "",
+      "names": {
+        "SK": "Dotyčnica",
+        "EN": "Tangent Line",
+        "CS": "Tečna"
+      }
+    },
+    {
+      "slug": "tangential-quadrilateral",
+      "description": "",
+      "names": {
+        "SK": "Dotyčnicový štvoruholník",
+        "EN": "Tangential Quadrilateral",
+        "CS": "Tečnový čtyřúhelník"
+      }
+    },
+    {
+      "slug": "factorial",
+      "description": "",
+      "names": {
+        "SK": "Faktoriál",
+        "EN": "Factorial",
+        "CS": "Faktoriál"
+      }
+    },
+    {
+      "slug": "fibonacci-sequence",
+      "description": "",
+      "names": {
+        "SK": "Fibonacciho postupnosť",
+        "EN": "Fibonacci Sequence",
+        "CS": "Fibonacciho posloupnost"
+      }
+    },
+    {
+      "slug": "geometric-sequence",
+      "description": "",
+      "names": {
+        "SK": "Geometrická postupnosť",
+        "EN": "Geometric Sequence",
+        "CS": "Geometrická posloupnost"
+      }
+    },
+    {
+      "slug": "game",
+      "description": "",
+      "names": {
+        "SK": "Hra",
+        "EN": "Game",
+        "CS": "Hra"
+      }
+    },
+    {
+      "slug": "iterations",
+      "description": "Use this tag when a problem involves a process that is being repeated.",
+      "names": {
+        "SK": "Iterácie",
+        "EN": "Iterations",
+        "CS": "Iterace"
+      }
+    },
+    {
+      "slug": "binomial-coefficient",
+      "description": "Award this only when there is a binomial number in the problem explicitly; do not assume it is in the solution.",
+      "names": {
+        "SK": "Kombinačné číslo",
+        "EN": "Binomial Coefficient",
+        "CS": "Kombinační číslo"
+      }
+    },
+    {
+      "slug": "rhombus",
+      "description": "",
+      "names": {
+        "SK": "Kosoštvorec",
+        "EN": "Rhombus",
+        "CS": "Kosočtverec"
+      }
+    },
+    {
+      "slug": "circumcircle",
+      "description": "",
+      "names": {
+        "SK": "Kružnica opísaná",
+        "EN": "Circumcircle",
+        "CS": "Kružnice opsaná"
+      }
+    },
+    {
+      "slug": "excircle",
+      "description": "",
+      "names": {
+        "SK": "Kružnica pripísaná",
+        "EN": "Excircle",
+        "CS": "Kružnice připsaná"
+      }
+    },
+    {
+      "slug": "incircle",
+      "description": "",
+      "names": {
+        "SK": "Kružnica vpísaná",
+        "EN": "Incircle",
+        "CS": "Kružnice vepsaná"
+      }
+    },
+    {
+      "slug": "cuboid",
+      "description": "",
+      "names": {
+        "SK": "Kváder",
+        "EN": "Cuboid",
+        "CS": "Kvádr"
+      }
+    },
+    {
+      "slug": "quadratic",
+      "description": "",
+      "names": {
+        "SK": "Kvadratický",
+        "EN": "Quadratic",
+        "CS": "Kvadratický"
+      }
+    },
+    {
+      "slug": "trapezoid",
+      "description": "",
+      "names": {
+        "SK": "Lichobežník",
+        "EN": "Trapezoid",
+        "CS": "Lichoběžník"
+      }
+    },
+    {
+      "slug": "locus",
+      "description": "",
+      "names": {
+        "SK": "Množina bodov",
+        "EN": "Locus",
+        "CS": "Množina bodů"
+      }
+    },
+    {
+      "slug": "grid",
+      "description": "Use this if the problem involves a lattice or some other kind of regular grid.",
+      "names": {
+        "SK": "Mriežka",
+        "EN": "Grid",
+        "CS": "Mřížka"
+      }
+    },
+    {
+      "slug": "lcm",
+      "description": "",
+      "names": {
+        "SK": "Najmenší spoločný násobok",
+        "EN": "LCM",
+        "CS": "Nejmenší společný násobek"
+      }
+    },
+    {
+      "slug": "gcd",
+      "description": "",
+      "names": {
+        "SK": "Najväčší spoločný deliteľ",
+        "EN": "GCD",
+        "CS": "Největší společný dělitel"
+      }
+    },
+    {
+      "slug": "inequality",
+      "description": "This tag is for problems where the goal is to prove an inequality or to find the maximum or minimum of an expression. Do not award this tag just because there is some sort of an inequality sign.",
+      "names": {
+        "SK": "Nerovnosť",
+        "EN": "Inequality",
+        "CS": "Nerovnost"
+      }
+    },
+    {
+      "slug": "coprime-numbers",
+      "description": "",
+      "names": {
+        "SK": "Nesúdeliteľné čísla",
+        "EN": "Coprime Numbers",
+        "CS": "Nesoudělná čísla"
+      }
+    },
+    {
+      "slug": "rectangle",
+      "description": "",
+      "names": {
+        "SK": "Obdĺžnik",
+        "EN": "Rectangle",
+        "CS": "Obdélník"
+      }
+    },
+    {
+      "slug": "volume",
+      "description": "",
+      "names": {
+        "SK": "Objem",
+        "EN": "Volume",
+        "CS": "Objem"
+      }
+    },
+    {
+      "slug": "area",
+      "description": "",
+      "names": {
+        "SK": "Obsah",
+        "EN": "Area",
+        "CS": "Obsah"
+      }
+    },
+    {
+      "slug": "perimeter",
+      "description": "",
+      "names": {
+        "SK": "Obvod",
+        "EN": "Perimeter",
+        "CS": "Obvod"
+      }
+    },
+    {
+      "slug": "orthocenter",
+      "description": "",
+      "names": {
+        "SK": "Ortocentrum",
+        "EN": "Orthocenter",
+        "CS": "Ortocentrum"
+      }
+    },
+    {
+      "slug": "palindrome",
+      "description": "",
+      "names": {
+        "SK": "Palindróm",
+        "EN": "Palindrome",
+        "CS": "Palindrom"
+      }
+    },
+    {
+      "slug": "periodic-sequence",
+      "description": "Award only to problems where we explicitly deal with either a periodic sequence or are proving that a sequence is periodic.",
+      "names": {
+        "SK": "Periodická postupnosť",
+        "EN": "Periodic Sequence",
+        "CS": "Periodická posloupnost"
+      }
+    },
+    {
+      "slug": "permutation",
+      "description": "Award only to problems that deal with a permutation of a sequence of objects. Do not award just because a problem involves determining an order of something; the word 'order' (poradie) alone is not enough.",
+      "names": {
+        "SK": "Permutácia",
+        "EN": "Permutation",
+        "CS": "Permutace"
+      }
+    },
+    {
+      "slug": "fixed-point",
+      "description": "Award only to geometry problems where we are proving that something passes through a fixed point, or (rarely) to algebra problems that explicitly deal with numbers t such that f(t) = t or something similar.",
+      "names": {
+        "SK": "Pevný bod",
+        "EN": "Fixed Point",
+        "CS": "Pevný bod"
+      }
+    },
+    {
+      "slug": "polynomial",
+      "description": "Use this tag only if the polynomial mentioned in the problem has an unknown or variable degree, or a degree of at least 3. Just having an expression is not enough for this tag, such as when merely minimizing an expression.",
+      "names": {
+        "SK": "Polynóm",
+        "EN": "Polynomial",
+        "CS": "Polynom"
+      }
+    },
+    {
+      "slug": "surface-area",
+      "description": "",
+      "names": {
+        "SK": "Povrch",
+        "EN": "Surface Area",
+        "CS": "Povrch"
+      }
+    },
+    {
+      "slug": "right-triangle",
+      "description": "",
+      "names": {
+        "SK": "Pravouhlý trojuholník",
+        "EN": "Right Triangle",
+        "CS": "Pravoúhlý trojúhelník"
+      }
+    },
+    {
+      "slug": "mean",
+      "description": "Here we mean an arithmetic or geometric mean, not the diameter of a circle, which is also 'priemer' in Slovak.",
+      "names": {
+        "SK": "Priemer",
+        "EN": "Mean",
+        "CS": "Průměr"
+      }
+    },
+    {
+      "slug": "prime-numbers",
+      "description": "",
+      "names": {
+        "SK": "Prvočísla",
+        "EN": "Prime Numbers",
+        "CS": "Prvočísla"
+      }
+    },
+    {
+      "slug": "recurrence-sequence",
+      "description": "Use this tag only if the problem statement states the recurrence relation directly. If the recurrence is not immediately obvious, do not use this tag.",
+      "names": {
+        "SK": "Rekurentná postupnosť",
+        "EN": "Recurrence Sequence",
+        "CS": "Rekurentní posloupnost"
+      }
+    },
+    {
+      "slug": "equation",
+      "description": "Be a bit stricter when awarding this tag. Just because there is a condition expressible or expressed as an equation does not mean you have to assign the equation tag. Reserve it for problems involving solving an equation, such as real-valued equations or Diophantine equations.",
+      "names": {
+        "SK": "Rovnica",
+        "EN": "Equation",
+        "CS": "Rovnice"
+      }
+    },
+    {
+      "slug": "parallelogram",
+      "description": "",
+      "names": {
+        "SK": "Rovnobežník",
+        "EN": "Parallelogram",
+        "CS": "Rovnoběžník"
+      }
+    },
+    {
+      "slug": "speed",
+      "description": "",
+      "names": {
+        "SK": "Rýchlosť",
+        "EN": "Speed",
+        "CS": "Rychlost"
+      }
+    },
+    {
+      "slug": "square",
+      "description": "If the problem involves a square grid, use the 'Mriežka' tag instead of this one.",
+      "names": {
+        "SK": "Štvorec",
+        "EN": "Square",
+        "CS": "Čtverec"
+      }
+    },
+    {
+      "slug": "system-of-equations",
+      "description": "Use this tag when there is an explicit system of at least two equations in the statement. Do not use both this tag and 'Rovnica'.",
+      "names": {
+        "SK": "Sústava rovníc",
+        "EN": "System of Equations",
+        "CS": "Soustava rovnic"
+      }
+    },
+    {
+      "slug": "centroid",
+      "description": "",
+      "names": {
+        "SK": "Ťažisko",
+        "EN": "Centroid",
+        "CS": "Těžiště"
+      }
+    },
+    {
+      "slug": "median",
+      "description": "",
+      "names": {
+        "SK": "Ťažnica",
+        "EN": "Median",
+        "CS": "Těžnice"
+      }
+    },
+    {
+      "slug": "cyclic-quadrilateral",
+      "description": "",
+      "names": {
+        "SK": "Tetivový štvoruholník",
+        "EN": "Cyclic Quadrilateral",
+        "CS": "Tětivový čtyřúhelník"
+      }
+    },
+    {
+      "slug": "remainder",
+      "description": "Award only to problems that mention this explicitly, i.e. the remainder after a division.",
+      "names": {
+        "SK": "Zvyšok po delení",
+        "EN": "Remainder",
+        "CS": "Zbytek po dělení"
+      }
+    }
+  ],
+  "technique": [
+    {
+      "slug": "am-gm-inequality",
+      "description": "",
+      "names": {
+        "SK": "AG nerovnosť",
+        "EN": "AM-GM Inequality",
+        "CS": "AG nerovnost"
+      }
+    },
+    {
+      "slug": "cauchy-schwarz-inequality",
+      "description": "",
+      "names": {
+        "SK": "Cauchyho nerovnosť",
+        "EN": "Cauchy-Schwarz Inequality",
+        "CS": "Cauchyho nerovnost"
+      }
+    },
+    {
+      "slug": "cevas-theorem",
+      "description": "",
+      "names": {
+        "SK": "Cevova veta",
+        "EN": "Ceva's Theorem",
+        "CS": "Cevova věta"
+      }
+    },
+    {
+      "slug": "chinese-remainder-theorem",
+      "description": "Award only to problems that require an abstract usage of this theorem, i.e. when it is used to prove the existence of some number. Do not award just because we manually need to find such a problem in a special case.",
+      "names": {
+        "SK": "Čínska zvyšková veta",
+        "EN": "Chinese Remainder Theorem",
+        "CS": "Čínská zbytková věta"
+      }
+    },
+    {
+      "slug": "pigeonhole-principle",
+      "description": "Award only to problems that actually use this principle explicitly in their solution in a non-trivial way. Make sure it is truly a non-trivial and essential step in the solution.",
+      "names": {
+        "SK": "Dirichletov princíp",
+        "EN": "Pigeonhole Principle",
+        "CS": "Dirichletův princip"
+      }
+    },
+    {
+      "slug": "euclids-theorem",
+      "description": "",
+      "names": {
+        "SK": "Euklidova veta",
+        "EN": "Euclid's Theorem",
+        "CS": "Euklidova věta"
+      }
+    },
+    {
+      "slug": "eulers-totient-function",
+      "description": "",
+      "names": {
+        "SK": "Eulerova funkcia",
+        "EN": "Euler's Totient Function",
+        "CS": "Eulerova funkce"
+      }
+    },
+    {
+      "slug": "extremal-principle",
+      "description": "Award only to problems that actually use this technique by explicitly assuming something is maximal or minimal. This is a very subtle technique and should only be awarded where such an assumption is an essential, nontrivial step in the solution - for example, as in the tricky solution to the Sylvester problem. Do not award this tag to problems that merely mention a minimum or maximum in their text or solution, especially not to those that simply ask to prove or determine when something is minimal or maximal.",
+      "names": {
+        "SK": "Extremálny princíp",
+        "EN": "Extremal Principle",
+        "CS": "Extrémální princip"
+      }
+    },
+    {
+      "slug": "herons-formula",
+      "description": "",
+      "names": {
+        "SK": "Herónov vzorec",
+        "EN": "Heron's Formula",
+        "CS": "Heronův vzorec"
+      }
+    },
+    {
+      "slug": "invariant",
+      "description": "Award only when the solution explicitly involves considering something which does not change. Do not award just because the problem contains a mention of a change.",
+      "names": {
+        "SK": "Invariant",
+        "EN": "Invariant",
+        "CS": "Invariant"
+      }
+    },
+    {
+      "slug": "jensens-inequality",
+      "description": "",
+      "names": {
+        "SK": "Jensenova nerovnosť",
+        "EN": "Jensen's Inequality",
+        "CS": "Jensenova nerovnost"
+      }
+    },
+    {
+      "slug": "law-of-cosines",
+      "description": "Explicit mention in the solution is required.",
+      "names": {
+        "SK": "Kosínusová veta",
+        "EN": "Law of Cosines",
+        "CS": "Kosinová věta"
+      }
+    },
+    {
+      "slug": "circle-inversion",
+      "description": "",
+      "names": {
+        "SK": "Kružnicová inverzia",
+        "EN": "Circle Inversion",
+        "CS": "Kružnicová inverze"
+      }
+    },
+    {
+      "slug": "fermats-little-theorem",
+      "description": "",
+      "names": {
+        "SK": "Malá Fermatova veta",
+        "EN": "Fermat's Little Theorem",
+        "CS": "Malá Fermatova věta"
+      }
+    },
+    {
+      "slug": "mathematical-induction",
+      "description": "Induction must be mentioned explicitly, not just implicitly by there being a process.",
+      "names": {
+        "SK": "Matematická indukcia",
+        "EN": "Mathematical Induction",
+        "CS": "Matematická indukce"
+      }
+    },
+    {
+      "slug": "menelauss-theorem",
+      "description": "",
+      "names": {
+        "SK": "Menelaova veta",
+        "EN": "Menelaus's Theorem",
+        "CS": "Menelaova věta"
+      }
+    },
+    {
+      "slug": "miquel-point",
+      "description": "",
+      "names": {
+        "SK": "Miquelov bod",
+        "EN": "Miquel Point",
+        "CS": "Miquelův bod"
+      }
+    },
+    {
+      "slug": "power-of-a-point",
+      "description": "",
+      "names": {
+        "SK": "Mocnosť bodu ku kružnici",
+        "EN": "Power of a Point",
+        "CS": "Mocnost bodu ke kružnici"
+      }
+    },
+    {
+      "slug": "pascals-theorem",
+      "description": "",
+      "names": {
+        "SK": "Pascalova veta",
+        "EN": "Pascal's Theorem",
+        "CS": "Pascalova věta"
+      }
+    },
+    {
+      "slug": "rearrangement-inequality",
+      "description": "",
+      "names": {
+        "SK": "Permutačná nerovnosť",
+        "EN": "Rearrangement Inequality",
+        "CS": "Permutační nerovnost"
+      }
+    },
+    {
+      "slug": "probabilistic-method",
+      "description": "",
+      "names": {
+        "SK": "Pravdepodobnostná metóda",
+        "EN": "Probabilistic Method",
+        "CS": "Pravděpodobnostní metoda"
+      }
+    },
+    {
+      "slug": "ptolemys-theorem",
+      "description": "",
+      "names": {
+        "SK": "Ptolemaiova veta",
+        "EN": "Ptolemy's Theorem",
+        "CS": "Ptolemaiova věta"
+      }
+    },
+    {
+      "slug": "pythagorean-theorem",
+      "description": "",
+      "names": {
+        "SK": "Pytagorova veta",
+        "EN": "Pythagorean Theorem",
+        "CS": "Pythagorova věta"
+      }
+    },
+    {
+      "slug": "factorization",
+      "description": "Award only when the problem involves a tricky, unobvious factorization, such as the Sophie Germain identity. Do not award this just because there is some factorization in a problem - in fact, most problems will have some. This tag is exclusively for tricky usages.",
+      "names": {
+        "SK": "Rozklad na súčin",
+        "EN": "Factorization",
+        "CS": "Rozklad na součin"
+      }
+    },
+    {
+      "slug": "law-of-sines",
+      "description": "Explicit mention in the solution is required.",
+      "names": {
+        "SK": "Sínusová veta",
+        "EN": "Law of Sines",
+        "CS": "Sinová věta"
+      }
+    },
+    {
+      "slug": "angle-bisector-theorem",
+      "description": "Explicit mention in the solution is required, not just there being a perpendicular angle bisector. We need an explicit usage of the fact that the bisector divides a side in the ratio of the other sides.",
+      "names": {
+        "SK": "Veta o osi uhla",
+        "EN": "Angle Bisector Theorem",
+        "CS": "Věta o ose úhlu"
+      }
+    },
+    {
+      "slug": "vieta-jumping",
+      "description": "",
+      "names": {
+        "SK": "Vieta jumping",
+        "EN": "Vieta Jumping",
+        "CS": "Vieta jumping"
+      }
+    },
+    {
+      "slug": "vietas-formulas",
+      "description": "",
+      "names": {
+        "SK": "Vietove vzťahy",
+        "EN": "Vieta's Formulas",
+        "CS": "Vietovy vzorce"
+      }
+    }
+  ]
+}

@@ -7,6 +7,8 @@ import nextPlugin from '@next/eslint-plugin-next'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import prettierConfig from 'eslint-config-prettier'
+import jsoncPlugin from 'eslint-plugin-jsonc'
+import jsoncParser from 'jsonc-eslint-parser'
 
 const config = [
   {
@@ -87,12 +89,33 @@ const config = [
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
     },
-  }, // App dir tweak - prefer default exports (except API routes)
+  },
+  // App dir tweak - prefer default exports (except API routes)
   {
     files: ['src/app/**/*.{js,ts,jsx,tsx}'],
     ignores: ['src/app/api/**/*.{js,ts,jsx,tsx}'],
     rules: {
       'import/prefer-default-export': 'error',
+    },
+  },
+  // i18n translation files - enforce sorted keys for consistency
+  {
+    files: ['messages/*.json'],
+    languageOptions: {
+      parser: jsoncParser,
+    },
+    plugins: {
+      jsonc: jsoncPlugin,
+    },
+    rules: {
+      // Sort all keys alphabetically (recursive, case-insensitive, ascending)
+      'jsonc/sort-keys': [
+        'error',
+        {
+          pathPattern: '.*',
+          order: { type: 'asc', caseSensitive: false, natural: true },
+        },
+      ],
     },
   },
 ]

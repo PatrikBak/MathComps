@@ -4,14 +4,15 @@ import { useSignIn, useSignUp, useUser } from '@clerk/nextjs'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSessionStorage } from '@mantine/hooks'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/i18n/i18n'
 
 import { checkEmailExists } from './actions'
 import AuthFormActions from './AuthFormActions'
@@ -19,6 +20,7 @@ import AuthFormFields from './AuthFormFields'
 import AuthFormHeader from './AuthFormHeader'
 import {
   type AuthFormValues,
+  createAuthSchemas,
   type EmailVerificationFormData,
   type EnterEmailFormData,
   getAuthSchema,
@@ -54,6 +56,14 @@ export type AuthScreenWithValidation = Exclude<AuthScreen, 'hub'>
  * Flow: Hub -> Email Entry -> Login/Signup (determined by email check)
  */
 export default function AuthForm() {
+  // Get the translations
+  const tAuth = useTranslations('auth')
+  const tValidation = useTranslations('validation')
+  const tClerkErrors = useTranslations('clerkErrors')
+
+  // Create Zod schemas with translated validation messages
+  const authSchemas = useMemo(() => createAuthSchemas(tValidation), [tValidation])
+
   // State for current authentication screen
   const [screen, setScreen] = useState<AuthScreen>('hub')
   // State for global error messages to display to the user
@@ -86,7 +96,7 @@ export default function AuthForm() {
   // React Hook Form setup with Zod validation schema based on current screen
   const methods = useForm<AuthFormValues>({
     // Hub screen doesn't require validation
-    resolver: screen === 'hub' ? undefined : zodResolver(getAuthSchema(screen)),
+    resolver: screen === 'hub' ? undefined : zodResolver(getAuthSchema(authSchemas, screen)),
     // This will validat on submit and then watch for changes
     mode: 'onSubmit',
   })
@@ -152,7 +162,7 @@ export default function AuthForm() {
     } catch (error) {
       // Either set the generic provided message or figure
       // out the error message from Clerk
-      setGlobalError(getClerkErrorMessage(error))
+      setGlobalError(getClerkErrorMessage(error, tClerkErrors))
     } finally {
       // No loading state after the operation
       setLoading(false)
@@ -206,9 +216,8 @@ export default function AuthForm() {
         // (which will cause a re-render which will cause a redirect)
         await setActiveSignIn({ session: result.createdSessionId })
       }
-      // Otherwise throw an error
+      // Otherwise throw an error, which will be caught by executeWithLoading
       else {
-        console.error('Sign-in failed with status:', result.status, result)
         throw new Error('Unexpected error while signing in')
       }
     })
@@ -272,7 +281,7 @@ export default function AuthForm() {
       setEnteredEmail(data.email)
 
       // Set success message before changing screen
-      setSuccessMessage('Email s kódom na obnovenie hesla bol odoslaný.')
+      setSuccessMessage(tAuth('passwordResetEmailSent'))
 
       // Switch to the code entry screen
       switchScreen('password-reset-code')
@@ -336,8 +345,8 @@ export default function AuthForm() {
         throw new Error('Password reset failed')
       }
 
-      // Show success message
-      setSuccessMessage('Heslo bolo úspešne zmenené! Presmerovávam vás...')
+      // Otherwise show success message
+      setSuccessMessage(tAuth('passwordResetSuccess'))
 
       // Wait a moment so user can see the confirmation
       await new Promise((resolve) => setTimeout(resolve, 3000))
@@ -432,7 +441,7 @@ export default function AuthForm() {
     } catch (error) {
       // If it fails, stop showing the spinner and show the error
       setIsRedirecting(false)
-      setGlobalError(getClerkErrorMessage(error))
+      setGlobalError(getClerkErrorMessage(error, tClerkErrors))
     }
   }
 
@@ -453,7 +462,6 @@ export default function AuthForm() {
     if (newScreen === 'hub') {
       setEnteredEmail('')
       methods.reset()
-      console.log('Going to hub screen')
     } else {
       // Get current values
       const values = methods.getValues()
@@ -547,12 +555,12 @@ export default function AuthForm() {
       )}
       {/* Privacy Policy Link */}
       <div className="mt-6 text-center text-xs text-slate-400">
-        Pokračovaním súhlasíte <br />s{' '}
+        {tAuth('termsAgreement')} <br />
         <AppLink
           href={ROUTES.PRIVACY}
           className="text-slate-300 hover:text-white underline transition-colors"
         >
-          podmienkami a ochranou súkromia
+          {tAuth('termsLink')}
         </AppLink>
       </div>
     </div>

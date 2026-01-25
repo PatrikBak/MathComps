@@ -1,8 +1,9 @@
-import { ExternalLink, HelpCircle, MedalIcon } from 'lucide-react'
+import { ExternalLink, MedalIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
-import { Tooltip } from '@/components/shared/components/Tooltip'
+import { HelpTooltip } from '@/components/shared/components/HelpTooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
@@ -59,7 +60,7 @@ function OrganizationLink({
       className="group relative flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-gradient-to-br bg-slate-900/50 hover:bg-slate-800/50 border border-slate-600/50 transition-all"
     >
       <div className="flex-shrink-0">
-        <FlagIcon countries={[country]} flagHeight={24} flagWidth={32} />
+        <FlagIcon country={country} flagHeight={24} flagWidth={32} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-sm sm:text-base text-white font-semibold mb-0.5">{name}</div>
@@ -109,89 +110,65 @@ export default function MathOlympiadSection({
 }: {
   sectionNumberer: SectionNumberer
 }) {
+  // Get guide translations
+  const tGuide = useTranslations('guide')
+
+  // Scoped translator for competition data - allows using t.raw() for details arrays
+  const tCompetitions = useTranslations('guide.sections.mathOlympiad.competitions')
+
+  // Scoped translator for elementary and high school categories to get points array
+  const tElementary = useTranslations('guide.sections.mathOlympiad.elementaryCategories')
+  const tHighSchool = useTranslations('guide.sections.mathOlympiad.highSchoolCategories')
+
   const internationalCompetitions: InternationalCompetition[] = [
     {
       id: 'imo',
       acronym: 'IMO',
       fullName: 'International Mathematical Olympiad',
       link: 'https://imo-official.org/',
-      description: 'Najprestížnejšia medzinárodná olympiáda',
-      details: [
-        '6 najlepších riešiteľov z krajiny',
-        '100 a viac krajín',
-        '2 súťažné dni, každý má 3 príklady na 4 a pol hodiny',
-      ],
+      description: tCompetitions('imo.description'),
+      details: tCompetitions.raw('imo.details') as string[],
     },
     {
       id: 'memo',
       acronym: 'MEMO',
       fullName: 'Middle European Mathematical Olympiad',
       link: 'https://memo-official.org/',
-      description: 'Súťaž pre najlepších budúcich potenciálnych IMO účastníkov',
-      details: [
-        '6 najlepších riešiteľov neidúcich na IMO, ktorí tam ale môžu ísť o rok',
-        '11 a viac krajín',
-        'Individuálna a tímová časť',
-      ],
+      description: tCompetitions('memo.description'),
+      details: tCompetitions.raw('memo.details') as string[],
     },
     {
       id: 'egmo',
       acronym: 'EGMO',
       fullName: "European Girls' Mathematical Olympiad",
       link: 'https://egmo.org/',
-      description: 'Súťaž s cieľom povzbudiť účasť dievčat v matematických súťažiach',
-      details: [
-        '6 najlepších riešiteliek z krajiny',
-        'Kvalifikácia cez špeciálne výberové sústredenie',
-        'Pozvánka naň na základe výsledkov krajského kola kategórie A',
-        '55 a viac krajín (aj neeurópske)',
-        'Formát súťaže ako na IMO',
-      ],
+      description: tCompetitions('egmo.description'),
+      details: tCompetitions.raw('egmo.details') as string[],
     },
     {
       id: 'caps',
       acronym: 'CAPS',
       fullName: 'Czech Austrian Polish Slovak Match',
-      description: 'Prípravná súťaž pre IMO tímy účastných krajín',
-      details: [
-        'Formát súťaže ako IMO',
-        <>
-          Posledné roky spravidla na{' '}
-          <a
-            href="https://ista.ac.at/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={GUIDE_STYLES.link}
-          >
-            ISTA
-          </a>{' '}
-          v Rakúsku
-        </>,
-      ],
+      description: tCompetitions('caps.description'),
+      details: tCompetitions.raw('caps.details') as string[],
     },
     {
       id: 'cpsj',
       acronym: 'CPSJ',
       fullName: 'Czech-Polish-Slovak Junior Match',
-      description: 'Súťaž pre šiestich najlepších prvákov SŠ (a mladších) účastníckych krajín',
-      details: [
-        'Kvalifikácia cez špeciálne výberové sústredenie',
-        'V Česku výber na základe výsledkov kategórie A, na Slovensku kategórie C',
-        'Individuálna a tímová časť',
-        'Trojčlenné tímy (1 člen z každej krajiny) a losované náhodne',
-      ],
+      description: tCompetitions('cpsj.description'),
+      details: tCompetitions.raw('cpsj.details') as string[],
     },
   ]
 
   return (
     <GuideSection
-      title={GUIDE_TITLES.MATH_OLYMPIAD}
+      title={tGuide(`titles.${GUIDE_TITLES.MATH_OLYMPIAD}`)}
       description={
         <>
-          Súťaž v riešení zaujímavých matematických úloh pre základné aj stredné školy, ktorá začína
-          domácim kolom a vrcholí najprestížnejšou medzinárodnou matematickou olympiádou{' '}
+          {tGuide('sections.mathOlympiad.description')}{' '}
           <AppLink href="#imo" className={GUIDE_STYLES.link}>
-            IMO
+            {tGuide('sections.mathOlympiad.imoLink')}
           </AppLink>
           .
         </>
@@ -207,20 +184,20 @@ export default function MathOlympiadSection({
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>
           <div className="relative">
             <p className={cn(GUIDE_STYLES.textNormal, 'mb-3 sm:mb-4')}>
-              Česko a Slovensko má spoločné úlohy, ale samostatné organizácie
+              {tGuide('sections.mathOlympiad.sharedTasks')}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <OrganizationLink
                 href="https://skmo.sk/"
                 country="SK"
-                name="Slovenská MO"
+                name={tGuide('sections.mathOlympiad.organizations.sk')}
                 domain="skmo.sk"
                 colorScheme="blue"
               />
               <OrganizationLink
                 href="https://matematickaolympiada.cz/"
                 country="CZ"
-                name="Česká MO"
+                name={tGuide('sections.mathOlympiad.organizations.cz')}
                 domain="matematickaolympiada.cz"
                 colorScheme="red"
               />
@@ -229,10 +206,15 @@ export default function MathOlympiadSection({
         </div>
 
         <p className={cn(GUIDE_STYLES.textNormal, 'my-4 sm:my-6')}>
-          Matematická olympiáda je rozdelená do dvoch hlavných častí:{' '}
-          <span className="text-purple-400 font-semibold">základoškolská</span> a{' '}
-          <span className="text-orange-400 font-semibold">stredoškolská</span> kategória, každá s
-          vlastnými ročníkovými úrovňami a kolami.
+          {tGuide('sections.mathOlympiad.categoriesIntro')}{' '}
+          <span className="text-purple-400 font-semibold">
+            {tGuide('sections.mathOlympiad.elementary')}
+          </span>{' '}
+          {tGuide('sections.mathOlympiad.and')}{' '}
+          <span className="text-orange-400 font-semibold">
+            {tGuide('sections.mathOlympiad.highSchool')}
+          </span>{' '}
+          {tGuide('sections.mathOlympiad.categoriesOutro')}
         </p>
       </div>
 
@@ -241,14 +223,10 @@ export default function MathOlympiadSection({
         {/* ZŠ kategórie */}
         <div className={GUIDE_STYLES.cardLarge}>
           <h4 className={cn(GUIDE_STYLES.schoolCommon, GUIDE_STYLES.elementaryColor)}>
-            ZŠ kategórie
+            {tElementary('title')}
           </h4>
           <BulletList
-            items={[
-              'Z5 – Z9 podľa ročníkov ZŠ (a im zodpodevajúcich ročníkov osemročných gymnázií)',
-              'V každej kategórii domáce a okresné kolá',
-              'V kategórii Z9 navyše krajské kolo a v Česku aj celoštátne',
-            ]}
+            items={[tElementary('point1'), tElementary('point2'), tElementary('point3')]}
             className={GUIDE_STYLES.listSpacing}
           />
         </div>
@@ -256,31 +234,21 @@ export default function MathOlympiadSection({
         {/* SŠ kategórie */}
         <div className={GUIDE_STYLES.cardLarge}>
           <h4 className={cn(GUIDE_STYLES.schoolCommon, GUIDE_STYLES.highSchoolColor)}>
-            SŠ kategórie
+            {tHighSchool('title')}
           </h4>
           <BulletList
             items={[
-              'C pre 1., B pre 2., A pre 3. a 4. ročník (a im zodpovedajúce ročníky osemročných gymnázií)',
-              'V každej kategórii domáce, školské a krajské kolo',
+              tHighSchool('point1'),
+              tHighSchool('point2'),
               <>
-                V kategórii A navyše celoštátne kolo, z neho možný postup na výberové sústredenie{' '}
-                <Tooltip
-                  placement="top"
-                  content={
-                    <>
-                      Obe krajiny majú rôzne pravidlá pre postup, na Slovensku je k tomu treba ešte
-                      &bdquo;kvalifikáciu&ldquo;, viď stránka súťaže
-                    </>
-                  }
-                >
-                  <HelpCircle className="inline h-3.5 w-3.5 text-slate-400/80 cursor-help" />
-                </Tooltip>
+                {tHighSchool('point3')}{' '}
+                <HelpTooltip content={<>{tHighSchool('selectionNote')}</>} />
               </>,
-              <>
-                Z výberového sústredenia sa dá postúpiť na <strong>medzinárodné súťaže</strong>
-              </>,
-              'Zábavné viacdňové udalosti, kde matika býva len časť programu',
-              'Striedanie hostiteľských krajín, výlety na nové miesta teda zaručené',
+              tHighSchool.rich('point4', {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              }),
+              tHighSchool('point5'),
+              tHighSchool('point6'),
             ]}
             className={cn(GUIDE_STYLES.listSpacing, 'mb-4 sm:mb-5')}
           />
@@ -294,7 +262,7 @@ export default function MathOlympiadSection({
           {/* Other international competitions */}
           <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-slate-700/50">
             <p className={cn(GUIDE_STYLES.textNormal, 'mb-3 sm:mb-4 font-medium')}>
-              Okrem toho sú tu ďalšie akcie:
+              {tGuide('sections.mathOlympiad.otherCompetitions')}
             </p>
             <div className="space-y-4 sm:space-y-5">
               {internationalCompetitions.slice(2).map((competition) => (
@@ -305,10 +273,7 @@ export default function MathOlympiadSection({
         </div>
 
         {/* Tip box */}
-        <TipBox>
-          Netreba sa báť skúsiť riešiť vyššie kategórie, úlohy často nevyžadujú zložitejšie znalosti
-          a kategórie sa prelínajú. Najlepší z najlepších často riešili aj vyššie kategórie.
-        </TipBox>
+        <TipBox>{tGuide('sections.mathOlympiad.tip')}</TipBox>
       </div>
     </GuideSection>
   )

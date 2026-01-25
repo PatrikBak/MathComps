@@ -82,7 +82,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
     const resend = new Resend(resendApiKey)
 
     // The email sender will be the contact email
-    const senderEmail = getRequiredEnv('CONTACT_EMAIL')
+    const senderEmail = getRequiredEnv('NEXT_PUBLIC_CONTACT_EMAIL')
 
     // Send email using Resend, as from the contact email
     const { data, error } = await resend.emails.send({

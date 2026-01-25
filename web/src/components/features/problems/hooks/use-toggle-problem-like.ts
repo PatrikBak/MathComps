@@ -1,5 +1,6 @@
 import { useLocalStorage } from '@mantine/hooks'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -32,6 +33,9 @@ type ToggleProblemLikeContext = {
  * Hook to toggle likes on problems
  */
 export function useToggleProblemLike() {
+  // Get the translations
+  const t = useTranslations('problems.favorites')
+
   // After liking a problem, we need to update potential cached queries
   // to reflect the searched for liked-only problems
   const queryClient = useQueryClient()
@@ -81,9 +85,9 @@ export function useToggleProblemLike() {
       // This makes sense because the problem just disappeared from the view
       // In other contexts, the problem stays visible so undo is less critical
       if (isLiked && currentFilters?.favoritesOnly) {
-        toast.info('Úloha bola odstránená z obľúbených', {
+        toast.info(t('removedFromFavorites'), {
           action: {
-            label: 'Vrátiť',
+            label: t('undo'),
             onClick: () => {
               // Re-call the mutation to undo the unlike
               // isLiked: false because the problem is currently unliked (before this re-like toggle)
@@ -109,7 +113,7 @@ export function useToggleProblemLike() {
     },
 
     // Auth configuration
-    authReason: 'lajkovanie úloh',
+    authReason: t('authReason'),
 
     // Ensure we remember they liked the problem so we can apply it after login
     onBeforeLoginPrompt: ({ problemSlug }) => {
@@ -123,7 +127,7 @@ export function useToggleProblemLike() {
     },
 
     // Error message for actual API errors
-    errorMessage: 'Nepodarilo sa zmeniť stav lajku',
+    errorMessage: t('likeToggleFailed'),
   })
 
   // Return a user-friendly function to toggle likes

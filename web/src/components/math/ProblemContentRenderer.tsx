@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RawContentBlock } from '@/components/features/handouts/handout-types'
+import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 
 import type { ProblemImage } from '../features/problems/types/problem-api-types'
 import { ContentRenderer } from './ContentRenderer'

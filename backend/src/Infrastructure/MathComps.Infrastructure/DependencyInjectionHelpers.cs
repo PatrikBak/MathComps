@@ -29,6 +29,10 @@ public static class DependencyInjectionHelpers
             .Validate(options => options.MaxSimilarProblems >= 0, $"{nameof(SimilarityOptions.MaxSimilarProblems)} must >= 0.")
             .Validate(options => options.MinSimilarityScore is >= 0 and <= 1, $"{nameof(SimilarityOptions.MinSimilarityScore)} must be between 0 and 1.");
 
+        // The options for localization
+        services.AddOptions<LocalizationOptions>()
+            .BindConfiguration(LocalizationOptions.ConfigurationSectionName);
+
         // Gemini API settings
         services.AddOptions<GeminiSettings>()
             .BindConfiguration(GeminiSettings.SectionName)
@@ -47,6 +51,9 @@ public static class DependencyInjectionHelpers
             client.Timeout = Timeout.InfiniteTimeSpan;
         });
 
+        // Metadata localization service (singleton - loads data once)
+        services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
+
         // DB service
         services.AddScoped<IProblemFilterService, ProblemFilterService>();
         services.AddScoped<IProblemLookupService, ProblemLookupService>();
@@ -54,6 +61,7 @@ public static class DependencyInjectionHelpers
         services.AddScoped<IUserProblemService, UserProblemService>();
         services.AddScoped<IClerkWebhookService, ClerkWebhook>();
         services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IProblemImageService, ProblemImageService>();
 
         // Clerk API Client
         services.AddScoped(serviceProvider =>

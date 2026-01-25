@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -26,11 +27,16 @@ type LatexSymbol = {
 }
 
 /**
+ * Category key for translation lookup.
+ */
+type CategoryKey = 'greek' | 'operators' | 'relations' | 'sets' | 'geometry' | 'other'
+
+/**
  * Array of symbols grouped by category.
  */
 type LatexSymbolCategory = {
-  /** Category name (e.g., 'Grécke', 'Operátory') */
-  name: string
+  /** Category key for translation lookup */
+  key: CategoryKey
   /** Array of symbols in the category */
   symbols: LatexSymbol[]
 }
@@ -40,7 +46,7 @@ type LatexSymbolCategory = {
  */
 const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
   {
-    name: 'Grécke',
+    key: 'greek',
     symbols: [
       { latex: 'alpha', display: 'α' },
       { latex: 'beta', display: 'β' },
@@ -71,7 +77,7 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
     ],
   },
   {
-    name: 'Operátory',
+    key: 'operators',
     symbols: [
       { latex: 'pm', display: '±' },
       { latex: 'mp', display: '∓' },
@@ -96,7 +102,7 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
     ],
   },
   {
-    name: 'Relácie',
+    key: 'relations',
     symbols: [
       { latex: 'neq', display: '≠' },
       { latex: 'leq', display: '≤' },
@@ -119,7 +125,7 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
     ],
   },
   {
-    name: 'Množiny',
+    key: 'sets',
     symbols: [
       { latex: 'mathbb{N}', display: 'ℕ' },
       { latex: 'mathbb{Z}', display: 'ℤ' },
@@ -139,7 +145,7 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
     ],
   },
   {
-    name: 'Geometria',
+    key: 'geometry',
     symbols: [
       { latex: 'angle', display: '∠' },
       { latex: 'measuredangle', display: '∡' },
@@ -152,7 +158,7 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
     ],
   },
   {
-    name: 'Iné',
+    key: 'other',
     symbols: [
       { latex: 'infty', display: '∞' },
       { latex: 'ldots', display: '…' },
@@ -192,13 +198,17 @@ type RichMathEditorLaTeXSymbolPickerProps = {
 export function RichMathEditorLaTeXSymbolPicker({
   onSymbolClick,
 }: RichMathEditorLaTeXSymbolPickerProps) {
+  // Get translations
+  const tLatexPicker = useTranslations('ui.editor.latexPicker')
+  const tCategories = useTranslations('ui.editor.latexPicker.categories')
+
   // Track the currently active category
   const [activeCategory, setActiveCategory] = useState(SYMBOL_CATEGORIES[0])
 
   return (
     <RichMathEditorPicker
       triggerContent={<span className="font-mono font-semibold text-sm">π</span>}
-      triggerTitle="LaTeX symboly"
+      triggerTitle={tLatexPicker('title')}
       popupClassName="bg-slate-800 w-[320px] sm:w-[420px]"
     >
       {({ close }) => (
@@ -207,7 +217,7 @@ export function RichMathEditorLaTeXSymbolPicker({
           <div className="flex flex-wrap gap-1 p-2 border-b border-slate-700/60 bg-slate-800/80">
             {SYMBOL_CATEGORIES.map((category) => (
               <button
-                key={category.name}
+                key={category.key}
                 type="button"
                 onClick={() => setActiveCategory(category)}
                 onMouseDown={preventFocusLoss}
@@ -218,7 +228,7 @@ export function RichMathEditorLaTeXSymbolPicker({
                     : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700/50'
                 )}
               >
-                {category.name}
+                {tCategories(category.key)}
               </button>
             ))}
           </div>
@@ -228,7 +238,7 @@ export function RichMathEditorLaTeXSymbolPicker({
             <div className="grid">
               {SYMBOL_CATEGORIES.map((category) => (
                 <div
-                  key={category.name}
+                  key={category.key}
                   className={cn(
                     'grid grid-cols-6 sm:grid-cols-8 gap-1 col-start-1 row-start-1 content-start',
                     activeCategory === category ? 'opacity-100' : 'opacity-0 pointer-events-none'

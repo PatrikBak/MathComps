@@ -11,6 +11,39 @@ type ClerkErrorPayload = {
 }
 
 /**
+ * Known Clerk error codes that we translate.
+ */
+const CLERK_ERROR_CODES = [
+  'form_password_incorrect',
+  'form_identifier_not_found',
+  'form_password_pwned',
+  'form_password_length_too_short',
+  'form_identifier_exists',
+  'too_many_attempts',
+  'form_code_incorrect',
+  'form_verification_failed',
+  'session_exists',
+  'session_already_exists',
+  'generic',
+] as const
+
+/**
+ * Type for Clerk error codes.
+ */
+type ClerkErrorCode = (typeof CLERK_ERROR_CODES)[number]
+
+/**
+ * Checks if a code is a known Clerk error code.
+ *
+ * @param code - The error code to check
+ *
+ * @returns True if the code is a known Clerk error code, false otherwise
+ */
+function isKnownClerkError(code: string): code is ClerkErrorCode {
+  return CLERK_ERROR_CODES.includes(code as ClerkErrorCode)
+}
+
+/**
  * Extracts the error code and message from a Clerk error object.
  *
  * @param error - The error object to extract details from
@@ -32,33 +65,26 @@ const getClerkErrorDetails = (error: unknown) => {
 }
 
 /**
- * Converts Clerk error objects to user-friendly Slovak messages.
+ * Type for a Clerk error translator function.
+ * Expects a translation function scoped to 'clerkErrors' namespace.
+ */
+type ClerkErrorTranslator = (key: ClerkErrorCode) => string
+
+/**
+ * Converts Clerk error objects to user-friendly localized messages.
  *
  * @param error - The error object from Clerk
+ * @param t - Translation function scoped to 'clerkErrors' namespace
  *
  * @returns A localized error message string
  */
-export const getClerkErrorMessage = (error: unknown) => {
-  // A map of Clerk error codes to user-friendly messages
-  const errorMessages: Record<string, string> = {
-    form_password_incorrect: 'Nesprávny email alebo heslo',
-    form_identifier_not_found: 'Nesprávny email alebo heslo',
-    form_password_pwned: 'Toto heslo bolo nájdené v databáze úniku dát. Použite iné heslo.',
-    form_password_length_too_short: 'Heslo musí mať aspoň 8 znakov',
-    form_identifier_exists: 'Účet s týmto emailom už existuje',
-    too_many_attempts: 'Príliš mnoho pokusov. Skúste to prosím neskôr.',
-    form_code_incorrect: 'Nesprávny kód.',
-    form_verification_failed: 'Overenie kódu zlyhalo. Skúste to prosím znova.',
-    session_exists: 'Už ste prihlásený. Obnovte stránku.',
-    session_already_exists: 'Už ste prihlásený. Obnovte stránku.',
-  }
-
+export const getClerkErrorMessage = (error: unknown, t: ClerkErrorTranslator) => {
   // Extract error code and message from Clerk error
   const { code, message } = getClerkErrorDetails(error)
 
-  // Return the appropriate error message
-  if (code && errorMessages[code]) {
-    return errorMessages[code]
+  // Return the appropriate translated error message
+  if (code && isKnownClerkError(code)) {
+    return t(code)
   }
 
   // Log the error for debugging purposes with both code and message
@@ -69,5 +95,5 @@ export const getClerkErrorMessage = (error: unknown) => {
   })
 
   // By default a generic error message is returned
-  return 'Vyskytla sa chyba. Skúste to prosím znova.'
+  return t('generic')
 }

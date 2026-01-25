@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using MathComps.Domain.ApiDtos.Helpers;
+using MathComps.Shared;
 
 namespace MathComps.Domain.ApiDtos.ProblemQuery;
 
@@ -8,6 +9,8 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// </summary>
 /// <param name="Slug">URL-safe unique identifier for the problem.</param>
 /// <param name="StatementParsed">Problem statement as structured JSON content blocks.</param>
+/// <param name="StatementLanguage">Language of the returned statement 
+/// (may differ from requested language when fallback to original occurs).</param>
 /// <param name="Source">Competition/season/round/category metadata.</param>
 /// <param name="Tags">Associated tags with type categorization.</param>
 /// <param name="Authors">Associated authors.</param>
@@ -20,6 +23,7 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 public record ProblemDto(
     string Slug,
     string? StatementParsed,
+    Language StatementLanguage,
     ProblemSource Source,
     ImmutableList<TagDto> Tags,
     ImmutableList<LabeledSlug> Authors,

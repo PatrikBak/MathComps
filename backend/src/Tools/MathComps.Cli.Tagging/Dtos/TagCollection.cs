@@ -1,5 +1,4 @@
 using MathComps.Shared.Converters;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Shared;
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
@@ -7,17 +6,18 @@ using System.Text.Json.Serialization;
 namespace MathComps.Cli.Tagging.Dtos;
 
 /// <summary>
-/// Represents tags organized by category, where each category contains an array of tag names.
+/// Represents tags organized by category, where each category contains an array of tag identifiers.
 /// </summary>
+/// <param name="Data">Dictionary mapping tag types to arrays of tags</param>
 [JsonConverter(typeof(GenericDictionaryWrapperConverter<SimpleTagsByCategory>))]
 public record SimpleTagsByCategory(ImmutableDictionary<TagType, string[]> Data)
 {
     /// <summary>
     /// Filters the tags based on approval decisions, returning only approved tags.
     /// </summary>
-    /// <param name="approvals">Dictionary mapping tag names to their approval status</param>
+    /// <param name="approvals">Dictionary mapping tags to their approval status</param>
     /// <param name="unmatchedApprovals">Output parameter containing approval decisions for tags not found in this collection</param>
-    /// <param name="unmatchedCandidates">Output parameter containing tag names that were not in the approvals dictionary</param>
+    /// <param name="unmatchedCandidates">Output parameter containing tags that were not in the approvals dictionary</param>
     /// <returns>A new collection containing only the approved tags</returns>
     public SimpleTagsByCategory Filter(
         ImmutableDictionary<string, bool> approvals,
@@ -67,25 +67,26 @@ public record SimpleTagsByCategory(ImmutableDictionary<TagType, string[]> Data)
     /// <summary>
     /// Removes specified tags from all categories.
     /// </summary>
-    /// <param name="tagsToRemove">Collection of tag names to remove</param>
+    /// <param name="tagsToRemove">Collection of tags to remove</param>
     /// <returns>A new SimpleTagsByCategory with the specified tags removed</returns>
     public SimpleTagsByCategory FilterOut(IEnumerable<string> tagsToRemove) => new(
         Data.ToImmutableDictionary(
                 categoryEntry => categoryEntry.Key,
-                categoryEntry => categoryEntry.Value.Where(tagName => !tagsToRemove.Contains(tagName)).ToArray()
+                categoryEntry => categoryEntry.Value.Where(tag => !tagsToRemove.Contains(tag)).ToArray()
             ));
 }
 
 /// <summary>
-/// Represents tags organized by category, where each category contains a dictionary of tag names to descriptions.
+/// Represents tags organized by category, where each category contains a dictionary of tags to descriptions.
 /// </summary>
+/// <param name="Data">Dictionary mapping tag types to dictionaries of tags to descriptions</param>
 [JsonConverter(typeof(GenericDictionaryWrapperConverter<TagsByCategory>))]
 public record TagsByCategory(ImmutableDictionary<TagType, TagDescriptions> Data)
 {
     /// <summary>
-    /// Converts the categorized tags to a flat dictionary mapping tag names to their type and description.
+    /// Converts the categorized tags to a flat dictionary mapping tags to their type and description.
     /// </summary>
-    /// <returns>A dictionary where keys are tag names and values are tuples containing the TagType and description.</returns>
+    /// <returns>A dictionary where keys are tags and values are tuples containing the <see cref="TagType"/> and description.</returns>
     public ImmutableDictionary<string, (TagType Type, string Description)> MapTagsToTheirData()
         => (from pair in Data
             from tagEntry in pair.Value.Data
@@ -93,7 +94,7 @@ public record TagsByCategory(ImmutableDictionary<TagType, TagDescriptions> Data)
            .ToImmutableDictionary();
 
     /// <summary>
-    /// Converts this <see cref="TagsByCategory"/> to a <see cref="SimpleTagsByCategory"/> by extracting only the tag names.
+    /// Converts this <see cref="TagsByCategory"/> to a <see cref="SimpleTagsByCategory"/> by extracting only the tags.
     /// </summary>
     /// <returns>A <see cref="SimpleTagsByCategory"/> containing the same tags but without descriptions</returns>
     public SimpleTagsByCategory Simple() => new(
@@ -106,39 +107,44 @@ public record TagsByCategory(ImmutableDictionary<TagType, TagDescriptions> Data)
 /// <summary>
 /// Represents a decision about whether a tag should be approved or rejected.
 /// </summary>
+/// <param name="Approved">Whether the tag is approved</param>
+/// <param name="Reason">Reason for the approval decision</param>
 public record TagApprovalDecision(bool Approved, string Reason);
 
 /// <summary>
 /// Represents the fitness score and justification for a tag's appropriateness.
 /// </summary>
+/// <param name="GoodnessOfFit">The fitness score</param>
+/// <param name="Justification">Justification for the fitness score</param>
 public record TagFitness(float GoodnessOfFit, string Justification);
 
 /// <summary>
 /// Represents a collection of tags with their descriptions.
 /// Uses the <see cref="GenericDictionaryWrapperConverter{T}"/> for JSON serialization.
 /// </summary>
+/// <param name="Data">Dictionary mapping tags to descriptions</param>
 [JsonConverter(typeof(GenericDictionaryWrapperConverter<TagDescriptions>))]
 public record TagDescriptions(ImmutableDictionary<string, string> Data)
 {
     /// <summary>
     /// Gets the description for a specific tag, or null if the tag is not found.
     /// </summary>
-    /// <param name="tagName">The name of the tag</param>
+    /// <param name="tag">The tag identifier</param>
     /// <returns>The description of the tag, or null if not found</returns>
-    public string? GetDescription(string tagName) => Data.TryGetValue(tagName, out var description) ? description : null;
+    public string? GetDescription(string tag) => Data.TryGetValue(tag, out var description) ? description : null;
 
     /// <summary>
     /// Checks if a tag exists in this collection.
     /// </summary>
-    /// <param name="tagName">The name of the tag to check</param>
+    /// <param name="tag">The tag to check</param>
     /// <returns>True if the tag exists, false otherwise</returns>
-    public bool ContainsTag(string tagName) => Data.ContainsKey(tagName);
+    public bool ContainsTag(string tag) => Data.ContainsKey(tag);
 
     /// <summary>
-    /// Gets all tag names in this collection.
+    /// Gets all tags in this collection.
     /// </summary>
-    /// <returns>A collection of all tag names</returns>
-    public IEnumerable<string> GetAllTagNames() => Data.Keys;
+    /// <returns>A collection of all tags</returns>
+    public IEnumerable<string> GetAllTags() => Data.Keys;
 
     /// <summary>
     /// Filters tags by description content.
@@ -152,21 +158,24 @@ public record TagDescriptions(ImmutableDictionary<string, string> Data)
 /// <summary>
 /// Represents tag metadata including category and description.
 /// </summary>
+/// <param name="Category">The category of the tag</param>
+/// <param name="Description">The description of the tag</param>
 public record TagMetadata(string Category, string Description);
 
 /// <summary>
 /// Represents a collection of tags with their metadata (category and description).
 /// Uses the <see cref="GenericDictionaryWrapperConverter{T}"/> for JSON serialization.
 /// </summary>
+/// <param name="Data">Dictionary mapping tags to metadata</param>
 [JsonConverter(typeof(GenericDictionaryWrapperConverter<TagMetadataCollection>))]
 public record TagMetadataCollection(ImmutableDictionary<string, TagMetadata> Data)
 {
     /// <summary>
     /// Gets the metadata for a specific tag, or null if the tag is not found.
     /// </summary>
-    /// <param name="tagName">The name of the tag</param>
+    /// <param name="tag">The tag identifier</param>
     /// <returns>The <see cref="TagMetadata"/> of the tag, or null if not found</returns>
-    public TagMetadata? GetMetadata(string tagName) => Data.TryGetValue(tagName, out var metadata) ? metadata : null;
+    public TagMetadata? GetMetadata(string tag) => Data.TryGetValue(tag, out var metadata) ? metadata : null;
 
     /// <summary>
     /// Gets all tags in a specific category.
@@ -179,7 +188,7 @@ public record TagMetadataCollection(ImmutableDictionary<string, TagMetadata> Dat
     /// <summary>
     /// Converts this collection to a simple tag descriptions collection.
     /// </summary>
-    /// <returns>A <see cref="TagDescriptions"/> containing only the tag names and descriptions</returns>
+    /// <returns>A <see cref="TagDescriptions"/> containing only the tags and descriptions</returns>
     public TagDescriptions ToTagDescriptions()
         => new(Data.ToImmutableDictionary(tagEntry => tagEntry.Key, tagEntry => tagEntry.Value.Description));
 }

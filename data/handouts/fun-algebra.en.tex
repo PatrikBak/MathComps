@@ -1,0 +1,556 @@
+\input _template
+
+\Title{Algebra}
+
+\Subtitle{Factorization}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+Why is it good to know how to factorize complex expressions? Imagine you have to prove that the number $n^3-n$ is divisible by six for every integer $n$. Without modification, it is unclear. However, it suffices to factorize the expression:
+$$
+n^3-n = n(n^2-1) = (n-1)n(n+1).
+$$
+Suddenly, we see a product of three consecutive numbers, of which at least one is always even and exactly one is divisible by three. Divisibility by six is thus obvious.
+
+The ability to turn a confusing sum into a clear product is one of the key techniques in solving tricky mathematical problems\fnote{This idea of factoring expressions is thousands of years old -- ancient Babylonians and Greeks already solved problems, which we write as quadratic equations today, using geometric methods that were essentially a visual factorization.}. In this lesson, we will systematically derive known factorizations, explain the tricks and intuition behind them, and practice everything on examples.
+
+\sec Theory 
+
+In this part, we will gradually introduce four key factorization techniques. We will start with basic formulas, move on to the general method of factoring by grouping, and finally explain completing the square. As an interesting point, we will also show that one can complete not only to a square but also to a cube, and surprisingly, this can be useful.
+
+\secc Formulas for difference and sum of powers
+
+\Exercise{}{
+    Verify by expanding that the following hold:
+    \begitems \style i
+    \i $a^2-b^2=(a-b)(a+b)$
+    \i $a^3-b^3=(a-b)(a^2+ab+b^2)$
+    \i $a^4-b^4=(a-b)(a^3+a^2b+ab^2+b^3)$
+    \enditems
+    What will the general formula for $a^n-b^n$ look like for natural $n$?
+}{
+    The answer to the question is Proposition 1.
+}
+
+\Exercise{}{
+    Verify by expanding that the following hold:
+    \begitems \style i
+    \i $a^3+b^3=(a+b)(a^2-ab+b^2)$
+    \i $a^5+b^5=(a+b)(a^4-a^3b+a^2b^2-ab^3+b^4)$
+    \enditems
+    What will the general formula for $a^n+b^n$ look like for odd natural $n$?
+}{
+    The answer to the question is Proposition 2.
+}
+
+After a moment of exploration, we will surely come up with the general formulas:
+
+\Theorem{}{
+    For all real numbers $a,b$ and natural $n$, it holds that
+    $$
+    a^n - b^n = (a-b)(a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1})
+    $$
+}{
+    We subtract the expressions:
+    $$
+    \align
+    a(a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1}) &= a^n  + a^{n-1}b + \cdots + ab^{n-1}  \\
+    b(a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1}) &= \hskip1cm a^{n-1}b + \cdots + ab^{n-1} + b^n
+    \endalign
+    $$
+    On the left, we can factor out the large parenthesis and get exactly the right side of the proven formula. On the right, all terms cancel out. The proposition is proven.
+}
+
+The situation with $a^n+b^n$ is more curious in that such a factorization works only for odd~$n$. The reason is visible from the proof:
+
+\Theorem{}{
+    For all real numbers $a,b$ and odd natural $n$, it holds that
+    $$
+    a^n + b^n = (a+b)(a^{n-1}-a^{n-2}b+\cdots-ab^{n-2}+b^{n-1})
+    $$
+}{
+    The proposition can be proven similarly to the previous one -- by observing which terms are subtracted when expanding the right side. However, a trickier proof is worth mentioning, in which we substitute the value $-b$ instead of $b$ into the formula for $a^n-b^n$. Thanks to the oddness of $n$, then $a^n-(-b)^n=a^n+b^n$. Every second term of the parenthesis $a^{n-1}+a^{n-2}b+\cdots+ab^{n-2}+b^{n-1}$ changes sign when replacing $b$ with $-b$.
+}
+
+How is it for even $n$? For the expression $a^2+b^2$, it can be proven that it truly cannot be factorized (in the domain of real numbers). However, all other $a^n+b^n$ can be factorized, which we will gradually work towards.
+
+\Exercise{}{
+    Factorize into a product of two expressions without roots ($n,k$ are natural numbers).
+    \begitems \style i
+    \i $a^3-27$
+    \i $a^3+8b^3$
+    \i $a^4-4^n$
+    \i $a^6+b^6$
+    \i $a^{4k+2}+b^{4k+2}$
+    \enditems
+}{
+    The individual factorizations are
+    \begitems \style i
+    \i $a^3-27 = a^3 - 3^3 = (a-3)(a^2+3a+9)$
+    \i $a^3+8b^3 = a^3 + (2b)^3 = (a+2b)(a^2-2ab+4b^2)$
+    \i $a^4-4^n = (a^2)^2 - (2^n)^2 = (a^2-2^n)(a^2+2^n)$
+    \i $a^6+b^6 = (a^2)^3 + (b^2)^3 = (a^2+b^2)(a^4 - a^2b^2 + b^4)$
+    \i $a^{4k+2}+b^{4k+2}=(a^{2})^{2k+1}+(b^{2})^{2k+1}=(a^{2}+b^{2})(a^{4k}-a^{4k-2}b^{2}+\cdots-a^{2}b^{4k-2}+b^{4k})$
+    \enditems
+}
+
+In more complex problems, factorization is typically just one of several steps. We can try:
+
+\Problem{0}{}{
+    Prove that for every natural number~$n$, the number $n^5-n$ is divisible by 30.
+}{
+    Factorize the examined expression into a product of as many parentheses as possible.
+}{
+    The sought factorization is $n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)$. To investigate divisibility by 30, it suffices to investigate divisibility by $2$, $3$, and $5$ separately.
+}{
+    It holds that $n^5-n=n(n^4-1)=n(n^2-1)(n^2+1)=n(n-1)(n+1)(n^2+1)$. It suffices to prove that this expression is divisible by $2$, $3$, and $5$. 
+    \begitems
+    \style i
+    \i divisibility by $2$ follows from the fact that out of the consecutive numbers $n$, $n-1$, at least one is even;
+    \i similarly, divisibility by $3$ follows from the numbers $n-1$, $n$, $n+1$;
+    \i divisibility by $5$ is more complex. Certainly, when $n$ gives a remainder of 0, 1, or 4 when divided by 5, we are done, because of the factors $n$, $n-1$, $n+1$. Then if $n=5k+2$ or $n=5k+3$, then $n^2+1 = 25k^2+20k+5$ or $n^2+1=25k^2+30k+10$, so again we have a number divisible by 5.
+    \enditems
+}
+
+\Problem{0}{}{
+    Find three distinct pairs of natural numbers $(a,b)$ such that the number $a^{37} + b^{37}$ is divisible by~$7$ and $0<a<b<7$.
+}{
+    Factorizing $a^{37}+b^{37}$ will hint at a much simpler divisibility that suffices.
+}{
+    Since $a^{37}+b^{37}=(a+b)(\cdots)$, it suffices that $7 \mid a+b$.
+}{
+    It holds that $a^{37}+b^{37}=(a+b)(a^{36}+\cdots+b^{36})$, so $a+b \mid a^{37}+b^{37}$, thus it suffices that $7 \mid a+b$. We can easily achieve this with pairs $(a,b)$ equal to $(1,6), (2,5), (3,4)$.
+}
+
+\Problem{1}{}{
+    Find all natural numbers $n$ greater than 1 such that $n^6-1$ is a product of three not necessarily distinct prime numbers.
+}{
+    The expression $n^6-1$ can be factorized into a product of many parentheses.
+}{
+    One possible factorization is $n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)$. The second parenthesis can indeed be factorized, but it is not at all evident how. A better factorization is $n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)$. We factorize further from here. Consequently, we already have at least 4 factors, which sounds suspicious if the number is to be a product of three primes.
+}{
+    We have the factorization
+    $$
+    n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)=(n-1)(n^2+n+1)(n+1)(n^2-n+1).
+    $$
+    For this to be a product of three primes, one parenthesis must be equal to 1. For $n>1$, this is possible only for the first one, where $n=2$. Then we indeed have $2^6-1=63=3\cdot3\cdot7$.
+}
+
+\secc Factorization by grouping
+
+The common school procedure of gradual factorization works even in harder problems. The idea is: notice that something can be taken out in front of a parenthesis; take it out; and see what happens next. There exists a very important trick for this procedure applicable even in harder problems: \textit{watch when the expression is zero}.
+
+\Example{}{
+    Factorize the expression $a^4-a-b^4+b$. 
+}{
+    Without seeing the resulting factorization, we can say that it will contain $a-b$, because the examined expression is equal to 0 for $a=b$. Thanks to this, we purposefully rearrange the terms as $(a^4-b^4)+(a-b)$. Now we can take $a-b$ out in front of the parenthesis from both expressions and we have
+    $$
+    (a-b)(a^3+a^2b+ab^2+b^3)-(a-b)=(a-b)(a^3+a^2b+ab^2+b^3-1).
+    $$
+}
+
+This perspective explains why in the formulas $a^n-b^n$ and $a^n+b^n$ from the previous section we have $a-b$ and $a+b$; and also why the second one requires odd $n$ -- for $a=b$ or $a=-b$, $a^n-b^n$ or $a^n + b^n$ are zero respectively.
+
+\Exercise{}{Factorize: 
+\begitems \style i
+\i [2 factors] $2ab+a+2b+1$
+\i [3 factors] $abc+ab+bc+ca+a+b+c+1$
+\i [3 factors] $a^2(b-c) + b^2(c-a) + c^2(a-b)$
+\i [4 factors] (harder\fnote{Coming up with this factorization was the first step to solving problem 3 from IMO 2006}) $ab(a^{2}-b^{2})+bc(b^{2}-c^{2})+ca(c^{2}-a^{2})$
+\enditems}{
+    The individual factorizations are:
+    \begitems \style i
+    \i An obvious zero point is $a=-1$, we expect $a+1$ in the result. We easily find $2ab+a+2b+1=(a+1)(2b+1)$.
+    \i Here it holds again that whenever any of the numbers $a,b,c$ is equal to $-1$, the expression will be zero. Thus, we expect $(a+1)(b+1)(c+1)$ in the result. It is essentially everything: $abc+ab+bc+ca+a+b+c+1=(a+1)(b+1)(c+1)$. We can gradually arrive at this as follows: 
+    $$
+    \gather
+    abc+ab+bc+ca+a+b+c+1=
+    (abc+ab)+(bc+b)+(ac+a)+(c+1) = \\ =
+    ab(c+1)+b(c+1)+a(c+1)+(c+1)=
+    (c+1)(ab+b+a+1)=  \\ =
+    (c+1)(b(a+1)+(a+1))=
+    (c+1)(b+1)(a+1).
+    \endgather
+    $$
+    \i When two numbers are equal, e.g., $a=b$, the expression is zero. We modify the expression to have the parenthesis $a-b$ in the result. We expect $b-c$, $c-a$ (or their opposites) to appear there as well. 
+    $$ 
+    \gather
+    a^{2}(b-c)+b^{2}(c-a)+c^{2}(a-b) = (a^2b - ab^2) - c(a^2-b^2) + c^2(a-b) = \\ =
+    ab(a-b) - c(a-b)(a+b) - c^2(a-b) = (a-b)(ab-c(a+b)-c^2) = \\ = (a-b)(a(b-c)-c(b-c)) = (a-b)(b-c)(a-c).
+    \endgather
+    $$
+    \i We proceed similarly to the previous exercise, since we again have equality for $a=b$. The modifications are more complex here:
+    $$
+    \gather
+    ab(a^{2}-b^{2})+bc(b^{2}-c^{2})+ca(c^{2}-a^{2})=
+    ab(a^2-b^2) + b^3c - bc^3 + ac^3 - a^3c = \\ =
+    ab(a^2-b^2) - c(a^3-b^3) + c^3(a-b) = 
+    (a-b)(ab(a+b) - c(a^2+ab+b^2) + c^3).
+    \endgather
+    $$
+    Now let's focus on the parenthesis:
+    $$
+    \gather
+    ab(a+b) - c(a^2+ab+b^2) + c^3 = 
+    a^2b + ab^2 - ca^2 - abc - cb^2 + c^3 = \\ =
+    ab(a-c) + b^2(a-c) - c(a^2-c^2) = 
+    (a-c)(ab+b^2-c(a+c)).
+    \endgather
+    $$
+    Finally the last parenthesis:
+    $$
+    \gather
+    ab+b^2-c(a+c)=(ab-ac)+(b^2-c^2)=\\=a(b-c) + (b-c)(b+c)=  (b-c)(a+b+c).
+    \endgather
+    $$
+    Together we have 
+    $$
+    a^{2}(b-c)+b^{2}(c-a)+c^{2}(a-b) = (a-b)(b-c)(a-c)(a+b+c).
+    $$
+    \enditems
+}
+
+This perspective is not universal, because the factorized components do not have to be linear at all or can be more complex and it is harder to see the root. Then we have no choice but to play with rearranging terms and successive factoring.
+
+\Exercise{}{
+    Factorize into a product of two expressions: 
+    \begitems \style i
+    \i $a^3b + a^2 + ab^3 + b^2$
+    \i $a^3b + a^2 + ab^3 + ab + b^2 + 1$
+    \i $a^3+b^3+c^3+ab(a+b)+bc(b+c)+ca(c+a)$
+    \enditems
+}
+{
+    The individual factorizations are:
+    \begitems \style i
+    \i $a^3b + a^2 + ab^3 + b^2 = a^2(ab+1) + b^2(ab+1)=(a^2+b^2)(ab+1)$.
+    \i
+    $$
+    \abovedisplayskip-19pt
+    \gather
+    a^3b + a^2 + ab^3 + ab + b^2 + 1 = (a^3b+a^2) + (ab^3+b^2) + (ab+1) =\\ 
+    = a^2 (ab+1) + b^2 (ab+1) + (ab+1) = (a^2+b^2+1)(ab+1).
+    \endgather
+    $$
+    \i
+    $$  \abovedisplayskip-19pt
+    \gather
+    a^3+b^3+c^3+ab(a+b)+bc(b+c)+ca(c+a)= \\=
+    (a^3+ab^2+ac^2) + (b^3+bc^2+ba^2) + (c^3+ca^2+cb^2) = \\ =
+    a(a^2+b^2+c^2) + b(a^2+b^2+c^2) + c(a^2+b^2+c^2) = \\ =
+    (a+b+c)(a^2+b^2+c^2).
+    \endgather
+    $$
+    \enditems
+}
+
+Hidden factorization and other algebraic manipulations can be successfully used in this example:
+
+\Problem{1}{CPSJ\fnote{Czech-Polish-Slovak Junior Match} 2018}{For natural numbers $a,b,c$, it holds that
+$$
+(a + b + c)^2 \mid ab(a + b) + bc(b + c) + ca(c + a) + 3abc.
+$$
+Prove that
+$$
+(a + b + c) \mid (a - b)^2 + (b - c)^2 + (c - a)^2.
+$$}{
+    The expression $ab(a+b) + bc(b+c) + ca(c+a) + 3abc$ can be inconspicuously factorized.
+}{
+    It holds that $ab(a+b) + bc(b+c) + ca(c+a) + 3abc = (a+b+c)(ab+bc+ca)$. Thus, our divisibility simplifies to
+    $$
+    a+b+c \mid ab+bc+ca.
+    $$ 
+    The expression $(a-b)^2 + (b-c)^2 + (c-a)^2$ is equal to $2(a^2+b^2+c^2+ab+bc+ca)$, we see the connection.
+}{
+    We factorize the right side of the first divisibility:
+    $$
+    \align
+    ab(a + b) + bc(b + c) + ca(c + a) + 3abc &= \\
+    (ab(a + b)+abc) + (bc(b + c)+abc) + (ca(c + a)+abc) &= \\
+    ab(a+b+c) + bc(a+b+c) + ca(a+b+c) &= \\
+    (a+b+c)(ab+bc+ca).
+    \endalign
+    $$
+    The assumed divisibility translates to $a+b+c \mid ab+bc+ca$. It holds that
+    $$
+    (a-b)^2 + (b-c)^2 + (c-a)^2 = 2(a^2+b^2+c^2+ab+bc+ca).
+    $$
+    The divisibility $a+b+c \mid ab+bc+ca$ simplifies the situation to the fact that it suffices to prove $a+b+c \mid 2(a^2+b^2+c^2)$. We prove this by using
+    $$
+    a+b+c \mid (a+b+c)^2 = a^2+b^2+c^2 + 2(ab+bc+ca).
+    $$
+    Together with $a+b+c \mid ab+bc+ca$, we then have $a+b+c \mid a^2+b^2+c^2$, so we are done.
+}
+
+\secc Completing the square
+
+Completing the square is one of the oldest and most elegant techniques in algebra\fnote{It was made famous by the Persian mathematician of the 9th century, Muhammad ibn Musa al-Khwarizmi (the word \uv{algorithm} comes from his name). He did not solve equations using our symbols, but geometrically -- he literally drew squares and rectangles and tried to \uv{complete} a larger square from them.}. It allows us to \textit{factorize} a quadratic polynomial into a product of simpler linear ones, e.g.,
+$$
+x^2+2x-3=(x+1)^2-4=(x+1-2)(x+1+2)=(x-1)(x+3).
+$$
+In general, for real numbers $a\neq 0$, $b$, $c$ we have
+$$
+\gather
+ax^2+bx+c
+=a\(x^2+\frac ba x + \frac ca\)
+=a\(\(x + \frac{b}{2a}\)^2 + \frac ca - \frac{b^2}{4a^2}\) =\\
+=a\(\(x + \frac{b}{2a}\)^2 - \frac{b^2 - 4ac}{4a^2}\).
+\endgather
+$$
+From this, we easily derive the formula for solutions of a quadratic equation.
+
+Generally, we actually used $a^2+2ab = (a+b)^2 - b^2$. However, we can also complete to a square by \uv{creating} the middle coefficient, i.e., using the formula $a^2+b^2=(a+b)^2-2ab$. We demonstrate this on the following example:
+
+\Example{}{
+    Factorize $m^4+m^2n^2+n^4$.
+}{
+    The first thing that might occur to us is to complete $m^4+m^2n^2$ to a square. By doing this we get
+    $$
+    m^4+m^2n^2+n^4= \(m^2 +\frac{n^2}2\)^2 + \frac{3n^4}4.
+    $$
+    This did not help us much. Let's try something else, let's complete $m^4+n^4$ to a square. Then we have
+    $$
+    \gather
+    m^4+m^2n^2+n^4 = (m^4+n^4)+m^2n^2 = (m^2+n^2)^2 - 2m^2n^2 + m^2n^2 = \\ = (m^2+n^2)^2 - m^2n^2 = (m^2+n^2-mn)(m^2+n^2+mn).
+    \endgather
+    $$
+}
+
+Practice this by deriving the known identity:
+
+\Exercise{Sophie-Germain identity\fnote{It is named after Sophie Germain, one of the most significant female mathematicians at the turn of the 18th and 19th centuries. In a time when women did not have access to universities, she studied mathematics herself and corresponded with the greatest mathematicians of her time, like Gauss, initially under a male pseudonym.}
+}{
+    Factorize $a^4+4b^4$.
+}{
+    By completing to a square we have
+    $$
+    a^4+4b^4 = (a^2)^2 + (2b^2)^2 = (a^2+2b^2)^2 - (2ab)^2 = (a^2+2b^2-2ab)(a^2+2b^2+2ab).
+    $$
+}
+
+Try an example from the national round of the MO:
+
+\Problem{0}{CKMO 2012}{
+    Determine all natural numbers $n$ for which $n^4 - 3n^2 + 9$ is a prime number.
+}{
+    Surprisingly, the examined expression can be factorized. Completing the square is a fine technique. Just be careful what we are completing.
+}{
+    The key completion is
+    $$
+    n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=(n^2+3)^2-9n^2.
+    $$
+    Do we see a known formula?
+}{
+    It holds that
+    $$
+    \gather
+    n^4 - 3n^2 + 9 = (n^4 + 9) - 3n^2 = (n^2+3)^2 - 6n^2 - 3n^2=\\=(n^2+3)^2-9n^2 = (n^2+3-3n)(n^2+3+3n).
+    \endgather
+    $$
+    Obviously $n^2+3+3n > n^2+3-3n$. The second number is positive for $n>0$, because
+    $$
+    n^2-3n+3=\(n-\frac32\)^2 + \frac 34.
+    $$
+    For the product to be a prime number, since $(n^2+3-3n)(n^2+3+3n)$, then $n^2+3-3n=1$. By solving the quadratic equation, we get $n=1$ and $n=2$.
+}
+
+The learned techniques can be nicely put together in this observation:
+
+\Problem{1}{}{
+    Justify that the expression $a^n+b^n$ can be factorized into a product of non-constant expressions with real coefficients for every $n>2$.
+    
+    (Note that it can be proven that $a^2+b^2$ \textit{cannot} be factorized into a product of two non-constant parentheses with real coefficients.)
+    }{
+    For odd $n$ we have a formula. Let's realize that it is enough for $n$ to have an odd divisor. Thanks to this observation, even the even case is simplifiable. Can we solve the first even case $n=4$? Can it help us with the rest?
+}{
+    If $n$ has an odd divisor $k$, where $n=mk$, then we can take out $a^k+b^k$ from $a^n+b^n$ in front of a parenthesis. It remains to solve numbers that do not have an odd divisor -- that is, powers of 2. According to the problem statement $n>2$, so the smallest interesting power is 4; for such powers, we have completing the square. But what about higher powers? Well, those are fortunately divisible by~4.
+}{
+    If $n$ has an odd divisor $k$, where $n=mk$, then
+    $$
+    \gather
+    a^n+b^n
+        = a^{mk}+b^{mk}
+        = (a^m)^k+(b^m)^k =\\
+        = (a^m+b^m)\(a^{m(k-1)}-a^{m(k-2)}b^{m}+a^{m(k-3)}b^{2m}-\cdots
+        - a^{m}b^{m(k-2)}+b^{m(k-1)}\).
+    \endgather
+    $$
+    Otherwise, $n$ is a power of~2 and thanks to $n>2$ it is divisible by 4, so $n=4t$. Then
+    $$
+    \gather
+    a^{4t}+b^{4t}
+        =(a^{2t})^{2}+(b^{2t})^{2}
+        =(a^{2t}+b^{2t})^{2}-2a^{2t}b^{2t}=\\
+        =\(a^{2t}+b^{2t}-\sqrt2\,a^{t}b^{t}\)\(a^{2t}+b^{2t}+\sqrt2\,a^{t}b^{t}\)=\\
+        =\(a^{2t}-\sqrt2\,a^{t}b^{t}+b^{2t}\)\(a^{2t}+\sqrt2\,a^{t}b^{t}+b^{2t}\).
+    \endgather
+    $$ 
+}
+
+A few more harder problems for practice:
+
+\Problem{1}{}{
+    Factorize $2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4$ into a product of four non-constant parentheses.
+}{
+    Notice that $2a^2b^2-a^4-b^4$ appears in the expression, which is equal to $-(a^2-b^2)^2$. The key trick is to combine it with the rest of the expression using \textit{another} completion to a square, where one of these \uv{squares} will be $-(a^2-b^2)^2$.
+}{
+    The second sought \uv{square} will be $-c^4$, as it holds: $-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2$. That fits quite well with the rest of the expression.
+}{
+    First we notice $2a^2b^2-a^4-b^4$ in the expression and create a square:
+    $$
+    2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4 = -(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2.
+    $$
+    Now we apply completing the square to the first two terms, specifically we complete $-(x^2+y^2)$ for $x=a^2-b^2$ and $y=c^2$:
+    $$
+    \gather
+    -(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2= \\
+    = -((a^2-b^2)+c^2)^2 + 2(a^2-b^2)c^2 + 2b^2c^2 + 2c^2a^2= \\
+    = -(a^2-b^2+c^2)^2 + (2a^2c^2 - 2b^2c^2) + 2b^2c^2 + 2c^2a^2= \\
+    = -(a^2-b^2+c^2)^2 + 4a^2c^2= \\
+    = (2ac)^2 - (a^2-b^2+c^2)^2.
+    \endgather
+    $$
+    We can easily factorize this expression by repeated search for squares and using the formula for the difference of squares:
+    $$
+    \gather
+    (2ac - (a^2-b^2+c^2))(2ac + (a^2-b^2+c^2)) = \\
+    = (b^2 - (a^2-2ac+c^2))((a^2+2ac+c^2)-b^2)= \\
+    = (b^2 - (a-c)^2)((a+c)^2 - b^2)= \\
+    = (b-(a-c))(b+(a-c)) \cdot ((a+c)-b)((a+c)+b)= \\
+    = (a+b+c)(a+b-c)(a-b+c)(-a+b+c).
+    \endgather
+    $$
+    Note that we have basically reconstructed Heron's\fnote{Heron of Alexandria was an ancient Greek mathematician and engineer who lived in the 1st century AD. His formula for the area of a triangle appears in his work \textit{Metrica}} formula. For the area~$S$ of a triangle with sides $a,b,c$, it holds that
+    $$
+    16S^2 = 2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4.
+    $$
+    This formula is usually presented in a computationally more acceptable form
+    $$
+    S = \sqrt{s(s-a)(s-b)(s-c)}, \qquad\text{where}\qquad s=\frac{a+b+c}{2}.
+    $$
+    Convince yourself that this form is equivalent to our proven identity
+    $$
+    16S^2=2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4=(a+b+c)(a+b-c)(a-b+c)(-a+b+c).
+    $$
+}
+
+\Problem{1}{}{
+    For which natural numbers $n$ is the number $n^4 + 4^n$ a prime number?
+}{
+    The examined expression resembles the Sophie-Germain identity. Try to fit it there. Perhaps some cases will need to be analyzed.
+}{
+    To be able to use Sophie-Germain, we need $4^n$ to be in the form $4b^4$. This is certainly true for odd $n$, because then
+    $$
+    4^n = 4 \cdot 4^{n-1} = 4 \cdot 2^{2(n-1)} = 4 \cdot \left(2^{\frac{n-1}{2}}\right)^4.
+    $$  
+    On the other hand, the case of even $n$ is evidently non-prime.
+}{
+    We analyze two cases according to the parity of $n$.
+
+    \begitems \style i
+    \i If $n$ is even, then the number $n^4+4^n$ is obviously divisible by 4, so it is not a prime number.
+    \i If $n$ is odd, let's notice that:
+    $$
+    4^n = 4 \cdot 4^{n-1} = 4 \cdot 2^{2(n-1)} = 4 \cdot \left(2^{(n-1)/2}\right)^4.
+    $$  
+    Our expression thus has the form $a^4+4b^4$ for $a=n$, $b=2^{\frac{n-1}2}$. Thus we can use the Sophie-Germain identity
+    $$
+    a^4+4b^4=(a^2+2b^2-2ab)(a^2+2b^2+2ab).
+    $$
+    For this product to be a prime number, one of the factors must be equal to 1. The second factor is obviously greater than 1 for every $a,b \ge 1$. Let's analyze the first factor, which after completing to a square is equal to:
+    $$
+    a^2+2b^2-2ab=(a-b)^2+b^2.
+    $$
+    For this to be equal to 1, we must have $a=b=1$, so $n=1$. Then indeed $n^4+4^n=5$ is a prime number.
+    \enditems
+
+    Thus, the only solution is $n=1$.
+}
+
+\secc Completing the cube
+
+Finally, we will show a non-traditional technique: besides completing the square, one can perform \textit{completing the cube}. This means that if we have $a^3+b^3$, instead of directly applying the formula for factorization into a product, we can use
+$$
+a^3 + b^3 = (a+b)^3 - 3ab(a+b).
+$$
+We will demonstrate this on an example:
+
+\Example{}{
+    Factorize $a^3+b^3+c^3-3abc$.
+}{
+    Using completion to a cube we have
+    $$
+    \align
+    a^3 + b^3 + c^3 - 3abc &= \\
+    (a+b)^3 - 3ab(a+b) + c^3 - 3abc &= \\
+    (a+b)^3 + c^3 - 3ab(a+b+c) &= \\
+    (a+b+c)((a+b)^2 - (a+b)c + c^2) - 3ab(a+b+c) &= \\
+    (a+b+c)((a+b)^2 - (a+b)c + c^2 - 3ab) &= \\
+    (a+b+c)(a^2 + 2ab + b^2 - ac - bc + c^2 - 3ab) &= \\
+    (a+b+c)(a^2 + b^2 + c^2 - ab - bc - ca).
+    \endalign
+    $$
+}
+
+This factorization is very interesting in itself, as it allows us to easily prove an inequality:
+
+\Theorem{}{
+    Let $a,b,c$ be real numbers for which $a+b+c \ge 0$. Then
+    $$
+    a^3+b^3+c^3 \ge 3abc,
+    $$
+    where equality occurs if and only if $a+b+c=0$ or $a=b=c$.
+}{
+    We use our already known factorization
+    $$
+    a^3+b^3+c^3 - 3abc = (a+b+c)(a^2+b^2+c^2-ab-bc-ca).
+    $$
+    Since $a+b+c \ge 0$, it suffices to prove $a^2+b^2+c^2 \ge ab+bc+ca$. This looks tempting from the perspective of completing the square, for example, we can try to complete $a^2-ab$ to a square. However, I will reveal that this will not lead to the goal. The trick to proving this inequality is to multiply it by two and prove the equivalent inequality
+    $$
+    2a^2+2b^2+2c^2 \ge 2ab+2bc+2ca.
+    $$
+    It looks like we haven't helped ourselves. But the next trick is to split $2a^2$ as $a^2+a^2$. After suitable rearrangement of terms, we then have
+    $$
+    \align
+    a^2+a^2+b^2+b^2+c^2+c^2-2ab-2bc-2ca &= \\
+    (a^2-2ab+b^2)+(b^2-2bc+c^2)+(c^2-2ac+a^2) &=\\
+    (a-b)^2 + (b-c)^2 + (c-a)^2.
+    \endalign
+    $$
+    Since this last expression is certainly non-negative, the proof of the inequality is finished. Equality occurs if and only if the first parenthesis $a+b+c$ is zero or the second parenthesis $a^2+b^2+c^2-ab-bc-ca$ is zero. From the proof of its non-negativity, we see that this is exactly when $a-b=0$, $b-c=0$, $c-a=0$, thus when $a=b=c$. We are done.
+}
+
+\sec What to remember
+
+\secc Techniques
+
+\begitems \style N
+\i We look for differences/sums of powers so we can use $a^n+b^n$ and $a^n-b^n$
+\i We watch when the expression is zero, which helps us factorize correctly
+\i We complete to a square/cube. We try more options on how to do it
+\enditems
+
+\secc Useful formulas
+
+\begitems \style N
+\i Factorization of $a^n-b^n$ and $a^n+b^n$ (for odd $n$)
+\i Expressions of the form $a^4+4b^4$ can often be factorized, even if it is not obvious
+\i The non-evident factorization $a^3+b^3+c^3-3abc$ and its consequences (Proposition 3)
+\i Inequality $a^2+b^2+c^2 \ge ab+bc+ca$ and its proof
+\i Other useful factorizations like
+    \begitems \style i
+    \i $a^2+2ab+b^2=(a+b)^2$
+    \i $a^2+b^2+c^2+2ab+2bc+2ca=(a+b+c)^2$
+    \i etc., there are no limits to the imagination of problem authors...
+    \enditems 
+\enditems
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye
