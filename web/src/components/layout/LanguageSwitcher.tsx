@@ -77,6 +77,7 @@ export function LanguageSwitcher() {
           )}
           sideOffset={8}
           align="end"
+          onCloseAutoFocus={(event) => event.preventDefault()}
         >
           {SUPPORTED_LOCALES.map((locale) => {
             // We will highlight the currently active locale
