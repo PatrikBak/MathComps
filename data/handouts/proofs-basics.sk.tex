@@ -1,0 +1,265 @@
+\input _template
+
+\setlanguage{SK}
+
+\Title{Dôkazy}
+
+\Subtitle{Základy dôkazov}
+
+\MathcompsLink{uvod-do-dokazov}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Bežná predstava o matematike je, že je o~počítaní. V~skutočnosti je však o~porozumení všeobecne platných tvrdení. Aby sme mali istotu, že ide naozaj o~platné tvrdenia, a~nie nejakú \uv{chybu merania}, tak tieto tvrdenia precízne zdôvodňujeme, resp. \textit{dokazujeme}. Nemôže byť teda pre nás prekvapením, že dôkazy sú neoddeliteľnou súčasťou matematickej olympiády, ako aj vysokoškolských kurzov. V~tomto materiáli si spravíme základný prehľad o~tom, ako vyzerajú dôkazy v~matematike. Ilustrujeme si ich na niekoľkých príkladoch. Ukážkové príklady budú hlavne o~číslach, kde sa princípy najlepšie ilustrujú. Popísaná teória sa však samozrejme dá aplikovať aj v iných oblastiach -- s~dôkazmi sa stretneme vo všetkých materiáloch.
+
+\sec Základné typy dôkazov
+
+Vo všeobecnosti rozlišujeme dva základné typy dôkazov: \textit{priamy dôkaz} a \textit{dôkaz sporom}. V~krátkosti:
+
+\begitems \style n
+\i Priamy dôkaz: Z~platných tvrdení odvodíme dokazované tvrdenie. 
+\i Dôkaz sporom: Predpokladáme, že dokazované tvrdenie \textit{neplatí} a~snažíme sa odvodiť matematicky neplatné tvrdenie, \textit{dôjsť k~sporu}.
+\enditems 
+
+Toto si vieme predstaviť takto: Povedzme, že všetky tvrdenia, z~ktorých vychádzame, sa nachádzajú vo veľkom hrnci s~polievkou. Proces dokazovania spočíva v~kombinovaní tvrdení z~polievky a~pridávaní nových z~nich -- ak napríklad máme v~polievke $a^3=1$, tak do polievky môžeme pridať $a=1$, vďaka čomu môžeme do polievky pridať $a^4-2a+1=0$, atď. Naše dva typy dôkazov potom vnímame nasledovne:
+
+\begitems \style n
+\i Priamy dôkaz funguje tak, že do polievky postupne pridávame nové a nové tvrdenia, až tam pridáme to, ktoré cielime dokázať.
+\i Na druhej strane, pri dôkaze sporom do polievky pridáme negáciu dokazovaného tvrdenia a~pokračujeme, akoby sme dokazovali priamo. Nové tvrdenia pridávame, až kým sa nám polievka nezrazí a nedostaneme nejaký nezmysel, ako napr. $0=1$, prípadne opak nejakého z~predpokladov.
+\enditems
+
+V~nasledujúcich dvoch sekciách si ukážeme konkrétne zaujímavé príklady dôkazov. Ešte predtým dve poznámky:
+
+\begitems
+\i Veľmi dôležitá technika je \textit{dôkaz matematickou indukciou}. Prísne vzaté nejde o~typ dôkazu, ako skôr o~recept na pridávanie nových platných tvrdení do polievky. 
+\i V škole sa zvyknú rozlišovať dva typy \uv{nepriamych dôkazov}: nepriamy dôkaz sporom a dôkaz obmenenej implikácie. Vysvetlíme, že druhý menovaný je vlastne špeciálnym prípadom dôkazu sporom.
+\enditems
+
+\secc Priamy dôkaz 
+
+Priame dôkazy sú vcelku prirodzené -- kombinujeme predpoklady zo zadania s~existujúcimi znalosťami, až kým nedôjdeme k~dokazovanému tvrdeniu. Každý dôkaz sa teda dá zapísať ako séria reťazcov implikácií:
+
+\Example{}{
+    Dokážte, že druhé mocniny nepárnych čísel dávajú po delení~8 zvyšok~1.
+}{
+    Najprv si vezmeme tento ucelený zápis dôkazu:
+
+    Nepárne čísla sa dajú napísať v~tvare $m=2n+1$ pre celé $n$. Dokazujeme, že $m^2=(2n+1)^2=4n(n+1)+1$ dáva po delení~8 zvyšok~1. Jedno z~čísel $n$, $n+1$ je párne, takže $n(n+1)$ je párne číslo, takže $4n(n+1)$ je deliteľné~8, takže $m^2=4n(n+1)+1$ dáva po delení~8 zvyšok~1, čo bolo treba dokázať.
+
+    Než pôjdeme ďalej, uvedomme si štruktúru toho dôkazu. Skladá sa z~týchto tvrdení:
+
+    \begitems
+    \i $V_0$: $m$ je nepárne celé číslo
+    \i $V_1$: $m=2n+1$ pre nejaké celé $n$
+    \i $V_2$: $n$ je celé, teda $n$ je párne alebo $n+1$ je párne
+    \i $V_3$: $n(n+1)$ je párne
+    \i $V_4$: $4n(n+1)$ je deliteľné~8
+    \i $V_5$: $4n(n+1)+1$ dáva po delení~8 zvyšok~1
+    \i $V_6$: $(2n+1)^2$ dáva po delení~8 zvyšok~1
+    \i $V_7$: $m^2$ dáva po delení~8 zvyšok~1
+    \enditems
+
+    Dôkaz spočíva v~prechodoch $V_0 \Rightarrow V_1$ a $V_2 \Rightarrow V_3 \Rightarrow V_4 \Rightarrow V_5 \Rightarrow V_6$. Kombináciou $V_1$ a $V_6$ dostávame $V_7$. 
+
+    Slovný zápis je zjavne praktickejší ako odrážkový. Jeho problémom môže byť, že sa v~ňom vedia stratiť komplikovanejšie úlohy:    
+    Zle spísané riešenia často pohoria na tom, že z~textu nie sú jasné implikácie. Praktická rada: pri každom tvrdení si položiť otázku: je jasné, aké sú predpoklady a~ako sa z~nich niečo odvodilo? Pri takejto sebakontrole si človek neraz uvedomí, že jeho riešenie má chybu.
+}
+
+\Exercise{}{
+    Dokážte, že pre prvočísla $p \ge 5$ platí, že $p^2-1$ je číslo deliteľné 24.
+}{
+    Výraz rozložíme na súčin $(p-1)(p+1)$. Keďže $p$ je prvočíslo väčšie ako 3, nie je deliteľné 3, teda dáva zvyšok 1 alebo 2. V~prvom prípade delí 3 činiteľ $p-1$, v~druhom $p+1$. Zároveň je $p$ nepárne, takže $p-1$ a~$p+1$ sú dve po sebe idúce párne čísla.
+    Jedno z~nich je preto deliteľné 2 a~druhé dokonca 4, ich súčin je teda deliteľný 8. Keďže je číslo $p^2-1$ deliteľné 3 aj 8, a~tieto čísla sú nesúdeliteľné, je deliteľné aj 24.
+}
+
+\Problem{0}{}{
+    Dokážte, že súčet troch nepárnych druhých mocnín nikdy nie je druhou mocninou.
+}{
+    Kľúčom je pozrieť sa na deliteľnosť ôsmimi. 
+}{
+    Využite predošlý dokázaný príklad.
+}{
+   Podľa predošlého príkladu dáva druhá mocnina nepárneho čísla po delení~8 zvyšok~1. Súčet troch takýchto čísel preto dáva zvyšok~3. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a~znova podľa nášho tvrdenia dávať zvyšok~1.
+}
+
+V~ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť. 
+
+\Example{}{
+    Dokážte, že ak je prirodzené číslo $n$ druhou mocninou celého čísla, tak má nepárny počet deliteľov.
+}{
+    Ako využiť, že $n$ je druhá mocnina celého čísla? Môžeme si zapísať $n=m^2$, čo bol prvý krok v~predošlom ukážkovom príklade -- to nám ale dlho nepomôže. Kľúčom je zamyslieť sa nad deliteľmi, koniec koncov, o~tých niečo dokazujeme. Základná myšlienka je: 
+    
+    Delitele prirodzeného čísla \uv{typicky} chodia v~pároch, $d$ je deliteľ $n$ práve vtedy, keď $n/d$ je deliteľ $n$. Ak by sa nikdy nestalo, že ide o~rovnaké delitele, tak počet deliteľov čísla $n$ je teda párny. 
+
+    Kedy sa ale stane, že toto párovanie páruje deliteľ so sebou samým? Práve keď $d=n/d$, teda keď $d^2=n$. A to je presne náš predpoklad! Tým pádom sa všetky delitele až na deliteľa $\sqrt{n}$ s~nejakým spárujú, dokopy teda budeme mať nepárny počet deliteľov, čo bolo treba dokázať.
+
+    \textit{Poznámka.} Tento príklad v~skutočnosti platí ako ekvivalencia. V~skutočnosti by bol ľahší, ak by bola zadaná obrátená implikácia, lebo fakt, že je štvorec, sa v~úvahovom reťazci používa až na konci. V~súťažných úlohách je ale bežné, že autori sa snažia tieto kľúčové kroky zamaskovať.
+}
+
+Predošlý príklad sa dá vyriešiť aj pomocou všeobecne užitočného vzorca pre počet deliteľov:
+
+\Theorem{}{
+    Nech $n=p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$, kde $p_1,p_2,\dots,p_k$ sú navzájom rôzne prvočísla a~$a_1,a_2,\dots,a_k$ sú celé čísla. Potom má číslo $n$ práve 
+    $$
+    (a_1+1)(a_2+1)\cdots (a_k+1)
+    $$
+    deliteľov.
+}{
+    Každý deliteľ je v~tvare $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$, kde $0 \leq b_i \leq a_i$ pre každé $1 \leq i \leq k$. Pre voľbu $b_i$ máme $a_i+1$ možností ($0,1,\ldots,a_i$). Tieto voľby sú nezávislé, takže podľa kombinatorického pravidla súčinu máme celkovo 
+    $$
+    (a_1+1)(a_2+1)\cdots (a_k+1)
+    $$
+    rôznych $k$-tíc $(b_1,\ldots,b_k)$ odpovedajúcich všetkým deliteľom $n$, takže sme hotoví.
+}
+
+\Exercise{}{
+    Vyriešte predošlý príklad podľa vety o~počte deliteľov, vrátane obrátenej implikácie.
+}{
+    Nech $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Keďže $n$ je druhá mocnina celého čísla, všetky exponenty $a_1, \dots, a_k$ musia byť párne. Podľa vety je počet deliteľov rovný súčinu $(a_1+1)(a_2+1)\cdots(a_k+1)$. Keďže každé $a_i$ je párne, každá zátvorka predstavuje nepárne číslo. Súčin nepárnych čísel je vždy nepárny, teda počet deliteľov je nepárny.
+}
+
+\Problem{0}{}{
+    Je dané zložené číslo $n > 1$. Dokážte, že je deliteľné prvočíslom neprevyšujúcim $\sqrt{n}$.
+}{
+    Číslo~$n$ je zložené, napíšme si ho $ab$, kde $1<a \leq b<n$.
+}{
+    Idea je povedať, že menšie z~čísel $a,b$, teda $a$, je deliteľné dosť malým prvočíslom. Na to stačí povedať, že samo osebe je dosť malé (v~najtesnejšom prípade je samo prvočíslom).
+}{
+    Keďže $n$ je zložené, môžeme ho napísať ako $n=ab$, kde $1 < a \le b < n$. Vynásobením nerovnosti $a \le b$ číslom $a$ dostaneme $a^2 \le ab = n$, odkiaľ $a \le \sqrt{n}$. Číslo $a>1$ má aspoň jedného prvočíselného deliteľa $p$. Zrejme $p \le a \le \sqrt{n}$.
+    Keďže $p$ delí $a$ a~$a$ delí $n$, tak $p$ delí $n$, čo sme chceli dokázať.
+}
+
+\Problem{1}{}{
+    Prirodzené číslo $n$ má práve $k$ deliteľov. Dokážte, že súčin deliteľov $n$ je rovný $\sqrt{n^k}$.
+}{
+    Znova použite trik s~párovým deliteľom. 
+}{
+    Rozlíšte prípady, kedy $n$ je a~nie je štvorec.
+}{
+    V~riešení budeme uvažovať párovanie deliteľov: $d$ je deliteľ~$n$ práve vtedy keď $n/d$ je deliteľ~$n$. Súčin takýchto deliteľov je $n$. 
+    
+    Rozoberme dva prípady:
+    \begitems
+    \i Ak $n$ nie je druhá mocnina, tak pre každý deliteľ platí $d \neq n/d$ (inak by $d^2=n$). Všetkých $k$ deliteľov teda tvorí presne $k/2$ takýchto párov. Celkový súčin je $n^{k/2} = \sqrt{n^k}$.
+    \i Ak $n$ je druhá mocnina, tak $d=\sqrt{n}$ tvorí pár sám so sebou.
+    Ostatných $k-1$ deliteľov tvorí $(k-1)/2$ párov so súčinom $n$.
+    Celkový súčin je preto 
+    $$
+    n^{\frac{k-1}2} \cdot \sqrt{n} = n^{\frac{k}2 - \frac12 + \frac12} = \sqrt{n^k}.
+    $$
+    \enditems
+}
+
+\secc Dôkaz sporom 
+
+Takýto typ dôkazu je obzvlášť užitočný v~prípade, kedy je dokazované ťažké \uv{uchopiť} a~ďaleko jednoduchšie je niečo povedať o~jeho negácii. Veľmi bežný príklad, kde sa to ilustruje:
+
+\Example{}{
+    Dokážte, že číslo $\sqrt{2}$ je iracionálne.
+}{
+    Postupujeme sporom. Predpokladajme, že $\sqrt{2}$ je racionálne číslo, teda sa dá zapísať ako zlomok $\frac pq$ v~základnom tvare (čísla $p, q$ sú nesúdeliteľné). Po umocnení na druhú a~vynásobení menovateľom dostaneme $p^2=2q^2$.
+
+    Pravá strana je deliteľná dvomi, takže aj $p^2$ a~následne $p$ musí byť párne, teda $p=2k$. Dosadením máme $(2k)^2=2q^2$, čo sa upraví na $2k^2=q^2$. Teraz vidíme, že aj $q$ musí byť párne.
+    Čísla $p$ a~$q$ sú teda obe deliteľné dvomi, čo je spor s~predpokladom, že sú nesúdeliteľné.
+}
+
+\Exercise{}{
+    Tento dôkaz by neprešiel, ak by sme mali $\sqrt{4}$. Kde by zlyhal?
+}{
+    Zlyhal by v~kroku, kde sa snažíme ukázať, že aj $q$ je deliteľné.
+    Mali by sme rovnicu $p^2=4q^2$, z~ktorej vyplýva, že $p$ je párne, teda $p=2k$. Dosadením však dostaneme $4k^2=4q^2$, čo sa po krátení upraví na $k^2=q^2$. Z~tejto rovnosti už nevyplýva, že $q$ je párne (ani deliteľné 4). Nedostaneme tak spor s~nesúdeliteľnosťou $p, q$.
+}
+
+\Exercise{}{
+    Dokážte zovšeobecnenie tvrdenia o~iracionalite $\sqrt{2}$: Nech $n$ je prirodzené číslo. Číslo $\sqrt{n}$ je iracionálne práve keď existuje prvočíslo~$p$, ktoré sa v~prvočíselnom rozklade~$n$ nachádza v~nepárnej mocnine.
+}{
+    Postupujeme sporom. Nech $\sqrt{n} = \frac ab$ pre nesúdeliteľné $a, b$. Rovnicu upravíme na $nb^2 = a^2$. V~prvočíselnom rozklade štvorca ($a^2$ aj $b^2$) má každé prvočíslo párny exponent.
+    Na ľavej strane je exponent ľubovoľného prvočísla súčtom jeho exponentu v~$n$ a~v~$b^2$. Aby nastala rovnosť, musí byť tento súčet párny, čo znamená, že exponent každého prvočísla v~$n$ musí byť párny. Ak teda $n$ obsahuje prvočíslo v~nepárnej mocnine, dostávame spor. Naopak, ak sú všetky exponenty párne, $n$ je druhou mocninou a~$\sqrt{n}$ je racionálne číslo.}
+
+\Problem{0}{}{
+    Dokážte, že súčet racionálneho a iracionálneho čísla je číslo iracionálne.
+}{    
+    Postupujeme sporom. Čo ak pre racionálne $r_1,r_2$ a iracionálne $r'$ platí $r_1+r'=r_2$?
+}{
+    Postupujeme sporom. Nech $r_1$ je racionálne a~$r'$ iracionálne číslo. Predpokladajme, že ich súčet $r_2 = r_1 + r'$ je racionálny. Potom môžeme vyjadriť $r' = r_2 - r_1$.
+    Keďže rozdiel dvoch racionálnych čísel je vždy racionálne číslo, musí byť aj $r'$ racionálne. To je však spor s~predpokladom, že $r'$ je iracionálne.
+}
+
+\Problem{0}{}{
+    Dokážte, že číslo $\sqrt{2}+\sqrt{3}$ je iracionálne.
+}{
+    Postupujeme sporom. Nech platí $\sqrt{2}+\sqrt{3}=r$. Potrebujeme sa zbaviť odmocnín. 
+}{
+    Kľúčom k~zbaveniu sa odmocnín je umocnenie. Umocnením rovnosti z~predošlej nápovedy budeme mať namiesto dvoch odmocnín jednu.
+}{
+    Postupujeme sporom. Nech $r = \sqrt{2}+\sqrt{3}$ je racionálne číslo. Umocnením rovnosti dostaneme $r^2 = 5 + 2\sqrt{6}$, z~čoho vyjadríme $\sqrt{6} = \frac{r^2-5}{2}$.
+    Keďže $r$ je racionálne, je racionálna aj pravá strana.
+    To by znamenalo, že $\sqrt{6}$ je racionálne číslo, čo je spor (dôkaz je analogický ako pre $\sqrt{2}$).
+
+    \textit{Poznámka.} Typicky chybný dôkaz môže spočívať v~argumente, že súčet dvoch iracionálnych čísel je vždy iracionálny. Presvedčte sa ale, že to nie je pravda.
+}
+
+Na záver si ešte ukážeme azda najznámejší dôkaz tejto všeobecne známej veci, ktorú vedel dokázať už aj Euklides\fnote{Euklides z~Alexandrie (cca 300 r. pred Kr.) bol starogrécky matematik, často označovaný ako \uv{otec geometrie}.}.
+
+\Theorem{}{
+    Dokážte, že prvočísel je nekonečne veľa.
+}{
+    Postupujeme sporom. Predpokladajme, že existuje konečne veľa prvočísel $p_1, p_2, \dots, p_n$. Uvažujme číslo $N = p_1 \cdot p_2 \cdots p_n + 1$. Toto číslo je väčšie ako 1, preto musí mať aspoň jedného prvočíselného deliteľa $p$. Tento deliteľ $p$ musí byť jedným z~našich prvočísel $p_1, \dots, p_n$. Zároveň však $N$ dáva po delení ľubovoľným $p_i$ zvyšok 1, teda žiadne $p_i$ ho nedelí. To je spor, prvočísel teda musí byť nekonečne veľa.
+}
+
+Skúste si podobným spôsobom vyriešiť ďalšie dve úlohy:
+
+\Problem{1}{}{
+    Dokážte, že existuje nekonečne veľa prvočísel $p$, ktoré delia $n^2+1$ pre vhodné prirodzené $n$.
+}{
+    Ideme sporom. Ak by ich bolo konečne veľa, označme ich $p_1,p_2,\dots,p_k$. Skúste zostrojiť vhodný výraz.
+}{
+    Zamyslite sa nad výrazom $(p_1\cdot p_2 \cdots p_k)^2+1$.
+}{
+    Predpokladajme, že takýchto prvočísel je konečne veľa, označme ich $p_1, p_2, \dots, p_k$. Uvažujme číslo 
+    $$
+    N = (p_1 \cdot p_2 \cdots p_k)^2 + 1.
+    $$
+    Toto číslo je väčšie ako 1, preto má nejakého prvočíselného deliteľa $q$. Keďže $q$ delí $N$, delí číslo tvaru $n^2+1$, takže $q$ musí patriť do nášho zoznamu $p_1, \dots, p_k$. To ale znamená, že $q$ delí súčin $p_1 \cdots p_k$, a~teda delí aj jeho druhú mocninu. Z~toho vyplýva, že $q$ delí rozdiel $N - (p_1 \cdots p_k)^2 = 1$, čo je spor.
+}
+
+\Problem{2}{}{
+    Dokážte, že existuje nekonečne veľa prvočísel tvaru $3n+2$, kde $n$ je prirodzené číslo.
+}{
+    Postupujeme ako v~predošlých prípadoch, označíme si prvočísla, zostrojujeme vhodný výraz. Je treba si však dať pozor na špeciálne prvočíslo~2 (ktoré je tiež nášho tvaru).
+}{
+    Zamyslite sa nad výrazom $3p_1\cdots p_k+2$, kde $p_1,\dots,p_k$ sú \textit{nepárne} prvočísla tvaru $3n+2$.
+}{
+    Kľúčom je nájsť nejaké ďalšie prvočíslo tvaru $3n+2$ v~prvočíselnom rozklade nášho výrazu. Mohlo by v~tomto rozklade nebyť žiadne, čo by to znamenalo?
+}{
+    Predpokladajme, že existuje konečne veľa prvočísel tvaru $3n+2$.
+    Označme $p_1, \dots, p_k$ všetky \textit{nepárne} prvočísla tohto tvaru (číslo 2 vynechávame). Uvažujme číslo
+    $$
+    N = 3p_1 \cdots p_k + 2.
+    $$
+    Keďže $p_i$ sú nepárne, $N$ je súčtom nepárneho čísla a~čísla 2, takže $N$ je nepárne a~nie je deliteľné 2.  Zároveň $N$ dáva po delení tromi zvyšok 2. Preto $N$ musí mať aspoň jedného prvočíselného deliteľa $q$ tvaru $3n+2$ (ak by boli všetky delitele tvaru $3n+1$, aj $N$ by malo tento tvar). Keďže $N$ je nepárne, $q \neq 2$.  Zároveň $q$ nemôže byť žiadne z~$p_i$, pretože inak by delilo $N$ aj $3p_1 \cdots p_k$, a~teda aj ich rozdiel~2. Našli sme teda nové prvočíslo $q$ tvaru $3n+2$, čo je spor. 
+}
+
+Na záver sekcie sa vráťme k~sľúbenému vysvetleniu \textit{dôkazu obmenenej vety}. Vo všeobecnosti ide o~dôkaz implikácie $A \Rightarrow B$, ktorá je ekvivalentná implikácii $B' \Rightarrow A'$, napríklad implikácia \uv{ak $5$ nedelí~$n$, tak ani $25$ nedelí~$n$} je ekvivalentná implikácii \uv{ak $25$ delí $n$, tak $5$ delí $n$}. My sa teda snažíme z~negácie tvrdenia~$B$ dokázať negáciu predpokladu~$A$ -- technicky sa teda snažíme z~predpokladu, že~$B$ neplatí, prísť ku konkrétnemu sporu, a~síce s~predpokladom~$A$. Z~toho vidieť, že takýto dôkaz je vlastne špeciálny prípad dôkazu sporom -- pri ktorom nám ide o~to prísť do sporu s~akýmkoľvek tvrdením, nie nutne predpokladom.
+
+\sec Čo sme sa naučili 
+
+\begitems \style N
+\i Priame dokazovanie používame, keď sa snažíme z~predpokladov odvodiť čo najviac vecí.
+\i Dôkaz sporom sa hodí, keď sa z~negácie dokazovaného tvrdenia dá niečo odvodiť, z~negácie už používame priame odvodzovanie.
+\i Dôkaz obmenenej vety je vlastne špeciálny prípad dôkazu sporom.
+\enditems 
+
+\sec Čo ďalej
+
+V~ďalších materiáloch sa budeme venovať konkrétnym dôkazovým technikám, pričom začneme matematickou indukciou, ktorá je natoľko dôležitá, že si zaslúži samostatný materiál.
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

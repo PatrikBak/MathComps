@@ -1,6 +1,35 @@
 [
   {
     "category": {
+      "sk": "Všeobecné",
+      "cs": "Obecné",
+      "en": "General"
+    },
+    "handouts": [
+      {
+        "status": "ready",
+        "id": "Kp2vR8mLqX3nYwTfJc6Db",
+        "slug": {
+          "sk": "zaklady-dokazov",
+          "cs": "zaklady-dukazu",
+          "en": "proofs-basics"
+        },
+        "title": {
+          "sk": "Základy dôkazov",
+          "cs": "Základy důkazů",
+          "en": "Proofs Basics"
+        },
+        "description": {
+          "sk": "Základný prehľad o tom, ako vyzerajú dôkazy v matematike. Predstavíme priamy dôkaz a dôkaz sporom na príkladoch z teórie čísel.",
+          "cs": "Základní přehled o tom, jak vypadají důkazy v matematice. Představíme přímý důkaz a důkaz sporem na příkladech z teorie čísel.",
+          "en": "A fundamental overview of mathematical proofs. Covers direct proofs and proofs by contradiction with examples from number theory."
+        },
+        "authors": ["Patrik Bak"]
+      }
+    ]
+  },
+  {
+    "category": {
       "sk": "Algebra",
       "cs": "Algebra",
       "en": "Algebra"
