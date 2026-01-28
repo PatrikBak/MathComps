@@ -1,0 +1,3555 @@
+{
+  "document": {
+    "title": "Dôkazy",
+    "subtitle": "Základy dôkazov",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Bežná predstava o matematike je, že je o\u00A0počítaní. V\u00A0skutočnosti je však o\u00A0porozumení všeobecne platných tvrdení. Aby sme mali istotu, že ide naozaj o\u00A0platné tvrdenia, a\u00A0nie nejakú "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "chybu merania"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ", tak tieto tvrdenia precízne zdôvodňujeme, resp. "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "dokazujeme"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Nemôže byť teda pre nás prekvapením, že dôkazy sú neoddeliteľnou súčasťou matematickej olympiády, ako aj vysokoškolských kurzov. V\u00A0tomto materiáli si spravíme základný prehľad o\u00A0tom, ako vyzerajú dôkazy v\u00A0matematike. Ilustrujeme si ich na niekoľkých príkladoch. Ukážkové príklady budú hlavne o\u00A0číslach, kde sa princípy najlepšie ilustrujú. Popísaná teória sa však samozrejme dá aplikovať aj v iných oblastiach – s\u00A0dôkazmi sa stretneme vo všetkých materiáloch."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Základné typy dôkazov",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Vo všeobecnosti rozlišujeme dva základné typy dôkazov: "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "priamy dôkaz"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " a "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "dôkaz sporom"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". V\u00A0krátkosti:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Priamy dôkaz: Z\u00A0platných tvrdení odvodíme dokazované tvrdenie."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dôkaz sporom: Predpokladáme, že dokazované tvrdenie "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "neplatí"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0snažíme sa odvodiť matematicky neplatné tvrdenie, "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "dôjsť k\u00A0sporu"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberDot"
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Toto si vieme predstaviť takto: Povedzme, že všetky tvrdenia, z\u00A0ktorých vychádzame, sa nachádzajú vo veľkom hrnci s\u00A0polievkou. Proces dokazovania spočíva v\u00A0kombinovaní tvrdení z\u00A0polievky a\u00A0pridávaní nových z\u00A0nich – ak napríklad máme v\u00A0polievke "
+                },
+                {
+                  "type": "math",
+                  "text": "a^3=1",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", tak do polievky môžeme pridať "
+                },
+                {
+                  "type": "math",
+                  "text": "a=1",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", vďaka čomu môžeme do polievky pridať "
+                },
+                {
+                  "type": "math",
+                  "text": "a^4-2a+1=0",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", atď. Naše dva typy dôkazov potom vnímame nasledovne:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Priamy dôkaz funguje tak, že do polievky postupne pridávame nové a nové tvrdenia, až tam pridáme to, ktoré cielime dokázať."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Na druhej strane, pri dôkaze sporom do polievky pridáme negáciu dokazovaného tvrdenia a\u00A0pokračujeme, akoby sme dokazovali priamo. Nové tvrdenia pridávame, až kým sa nám polievka nezrazí a nedostaneme nejaký nezmysel, ako napr. "
+                      },
+                      {
+                        "type": "math",
+                        "text": "0=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", prípadne opak nejakého z\u00A0predpokladov."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberDot"
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0nasledujúcich dvoch sekciách si ukážeme konkrétne zaujímavé príklady dôkazov. Ešte predtým dve poznámky:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Veľmi dôležitá technika je "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "dôkaz matematickou indukciou"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Prísne vzaté nejde o\u00A0typ dôkazu, ako skôr o\u00A0recept na pridávanie nových platných tvrdení do polievky."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V škole sa zvyknú rozlišovať dva typy "
+                      },
+                      {
+                        "type": "quote",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "nepriamych dôkazov"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": ": nepriamy dôkaz sporom a dôkaz obmenenej implikácie. Vysvetlíme, že druhý menovaný je vlastne špeciálnym prípadom dôkazu sporom."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "Bullet"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Priamy dôkaz",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Priame dôkazy sú vcelku prirodzené – kombinujeme predpoklady zo zadania s\u00A0existujúcimi znalosťami, až kým nedôjdeme k\u00A0dokazovanému tvrdeniu. Každý dôkaz sa teda dá zapísať ako séria reťazcov implikácií:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že druhé mocniny nepárnych čísel dávajú po delení\u00A08 zvyšok\u00A01."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Najprv si vezmeme tento ucelený zápis dôkazu:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nepárne čísla sa dajú napísať v\u00A0tvare "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m=2n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre celé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokazujeme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^2=(2n+1)^2=4n(n+1)+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva po delení\u00A08 zvyšok\u00A01. Jedno z\u00A0čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je párne, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je párne číslo, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4n(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľné\u00A08, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^2=4n(n+1)+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva po delení\u00A08 zvyšok\u00A01, čo bolo treba dokázať."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Než pôjdeme ďalej, uvedomme si štruktúru toho dôkazu. Skladá sa z\u00A0týchto tvrdení:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "m",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je nepárne celé číslo"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "m=2n+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " pre nejaké celé "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je celé, teda "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je párne alebo "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je párne"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_3",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n(n+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je párne"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_4",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "4n(n+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je deliteľné\u00A08"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "4n(n+1)+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " dáva po delení\u00A08 zvyšok\u00A01"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_6",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "(2n+1)^2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " dáva po delení\u00A08 zvyšok\u00A01"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_7",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "m^2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " dáva po delení\u00A08 zvyšok\u00A01"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "Bullet"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dôkaz spočíva v\u00A0prechodoch "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_0 \\Rightarrow V_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_2 \\Rightarrow V_3 \\Rightarrow V_4 \\Rightarrow V_5 \\Rightarrow V_6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Kombináciou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostávame "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Slovný zápis je zjavne praktickejší ako odrážkový. Jeho problémom môže byť, že sa v\u00A0ňom vedia stratiť komplikovanejšie úlohy: Zle spísané riešenia často pohoria na tom, že z\u00A0textu nie sú jasné implikácie. Praktická rada: pri každom tvrdení si položiť otázku: je jasné, aké sú predpoklady a\u00A0ako sa z\u00A0nich niečo odvodilo? Pri takejto sebakontrole si človek neraz uvedomí, že jeho riešenie má chybu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že pre prvočísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\ge 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je číslo deliteľné 24."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výraz rozložíme na súčin "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1)(p+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prvočíslo väčšie ako 3, nie je deliteľné 3, teda dáva zvyšok 1 alebo 2. V\u00A0prvom prípade delí 3 činiteľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", v\u00A0druhom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zároveň je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nepárne, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú dve po sebe idúce párne čísla. Jedno z\u00A0nich je preto deliteľné 2 a\u00A0druhé dokonca 4, ich súčin je teda deliteľný 8. Keďže je číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " deliteľné 3 aj 8, a\u00A0tieto čísla sú nesúdeliteľné, je deliteľné aj 24."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že súčet troch nepárnych druhých mocnín nikdy nie je druhou mocninou."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom je pozrieť sa na deliteľnosť ôsmimi."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Využite predošlý dokázaný príklad."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podľa predošlého príkladu dáva druhá mocnina nepárneho čísla po delení\u00A08 zvyšok\u00A01. Súčet troch takýchto čísel preto dáva zvyšok\u00A03. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a\u00A0znova podľa nášho tvrdenia dávať zvyšok\u00A01."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že ak je prirodzené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " druhou mocninou celého čísla, tak má nepárny počet deliteľov."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ako využiť, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je druhá mocnina celého čísla? Môžeme si zapísať "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=m^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo bol prvý krok v\u00A0predošlom ukážkovom príklade – to nám ale dlho nepomôže. Kľúčom je zamyslieť sa nad deliteľmi, koniec koncov, o\u00A0tých niečo dokazujeme. Základná myšlienka je:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Delitele prirodzeného čísla "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "typicky"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " chodia v\u00A0pároch, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n/d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ak by sa nikdy nestalo, že ide o\u00A0rovnaké delitele, tak počet deliteľov čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je teda párny."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kedy sa ale stane, že toto párovanie páruje deliteľ so sebou samým? Práve keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d=n/d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d^2=n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". A to je presne náš predpoklad! Tým pádom sa všetky delitele až na deliteľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0nejakým spárujú, dokopy teda budeme mať nepárny počet deliteľov, čo bolo treba dokázať."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Tento príklad v\u00A0skutočnosti platí ako ekvivalencia. V\u00A0skutočnosti by bol ľahší, ak by bola zadaná obrátená implikácia, lebo fakt, že je štvorec, sa v\u00A0úvahovom reťazci používa až na konci. V\u00A0súťažných úlohách je ale bežné, že autori sa snažia tieto kľúčové kroky zamaskovať."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Predošlý príklad sa dá vyriešiť aj pomocou všeobecne užitočného vzorca pre počet deliteľov:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=p_1^{a_1} \\cdot p_2^{a_2} \\cdots p_k^{a_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1,p_2,\\dots,p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú navzájom rôzne prvočísla a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1,a_2,\\dots,a_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú celé čísla. Potom má číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "deliteľov."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Každý deliteľ je v\u00A0tvare "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1^{b_1} \\cdot p_2^{b_2} \\cdots p_k^{b_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq b_i \\leq a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\leq i \\leq k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pre voľbu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " možností ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "0,1,\\ldots,a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Tieto voľby sú nezávislé, takže podľa kombinatorického pravidla súčinu máme celkovo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "rôznych "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tíc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(b_1,\\ldots,b_k)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " odpovedajúcich všetkým deliteľom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže sme hotoví."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyriešte predošlý príklad podľa vety o\u00A0počte deliteľov, vrátane obrátenej implikácie."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n = p_1^{a_1} \\cdot p_2^{a_2} \\cdots p_k^{a_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je druhá mocnina celého čísla, všetky exponenty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1, \\dots, a_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musia byť párne. Podľa vety je počet deliteľov rovný súčinu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a_1+1)(a_2+1)\\cdots(a_k+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je párne, každá zátvorka predstavuje nepárne číslo. Súčin nepárnych čísel je vždy nepárny, teda počet deliteľov je nepárny."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Je dané zložené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n > 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokážte, že je deliteľné prvočíslom neprevyšujúcim "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Číslo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je zložené, napíšme si ho "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", kde "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1<a \\leq b<n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je povedať, že menšie z\u00A0čísel "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", teda "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", je deliteľné dosť malým prvočíslom. Na to stačí povedať, že samo osebe je dosť malé (v\u00A0najtesnejšom prípade je samo prvočíslom)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je zložené, môžeme ho napísať ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 < a \\le b < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vynásobením nerovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\le b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " číslom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 \\le ab = n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", odkiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\le \\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a>1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má aspoň jedného prvočíselného deliteľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zrejme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\le a \\le \\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo sme chceli dokázať."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prirodzené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má práve "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " deliteľov. Dokážte, že súčin deliteľov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je rovný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n^k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Znova použite trik s\u00A0párovým deliteľom."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Rozlíšte prípady, kedy "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je a\u00A0nie je štvorec."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0riešení budeme uvažovať párovanie deliteľov: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľ\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n/d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľ\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Súčin takýchto deliteľov je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rozoberme dva prípady:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Ak "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " nie je druhá mocnina, tak pre každý deliteľ platí "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d \\neq n/d",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " (inak by "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d^2=n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "). Všetkých "
+                          },
+                          {
+                            "type": "math",
+                            "text": "k",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " deliteľov teda tvorí presne "
+                          },
+                          {
+                            "type": "math",
+                            "text": "k/2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " takýchto párov. Celkový súčin je "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n^{k/2} = \\sqrt{n^k}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Ak "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je druhá mocnina, tak "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d=\\sqrt{n}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " tvorí pár sám so sebou. Ostatných "
+                          },
+                          {
+                            "type": "math",
+                            "text": "k-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " deliteľov tvorí "
+                          },
+                          {
+                            "type": "math",
+                            "text": "(k-1)/2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " párov so súčinom "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Celkový súčin je preto"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^{\\frac{k-1}2} \\cdot \\sqrt{n} = n^{\\frac{k}2 - \\frac12 + \\frac12} = \\sqrt{n^k}.",
+                        "isDisplay": true
+                      }
+                    ]
+                  ],
+                  "styleType": "Bullet"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Dôkaz sporom",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Takýto typ dôkazu je obzvlášť užitočný v\u00A0prípade, kedy je dokazované ťažké "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "uchopiť"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " a\u00A0ďaleko jednoduchšie je niečo povedať o\u00A0jeho negácii. Veľmi bežný príklad, kde sa to ilustruje:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je iracionálne."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujeme sporom. Predpokladajme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálne číslo, teda sa dá zapísať ako zlomok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac pq",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0základnom tvare (čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p, q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú nesúdeliteľné). Po umocnení na druhú a\u00A0vynásobení menovateľom dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2=2q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pravá strana je deliteľná dvomi, takže aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0následne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí byť párne, teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=2k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dosadením máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(2k)^2=2q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo sa upraví na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2k^2=q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Teraz vidíme, že aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí byť párne. Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú teda obe deliteľné dvomi, čo je spor s\u00A0predpokladom, že sú nesúdeliteľné."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tento dôkaz by neprešiel, ak by sme mali "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{4}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Kde by zlyhal?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zlyhal by v\u00A0kroku, kde sa snažíme ukázať, že aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľné. Mali by sme rovnicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2=4q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z\u00A0ktorej vyplýva, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je párne, teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=2k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dosadením však dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4k^2=4q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo sa po krátení upraví na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^2=q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0tejto rovnosti už nevyplýva, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je párne (ani deliteľné 4). Nedostaneme tak spor s\u00A0nesúdeliteľnosťou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p, q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte zovšeobecnenie tvrdenia o\u00A0iracionalite "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prirodzené číslo. Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je iracionálne práve keď existuje prvočíslo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktoré sa v\u00A0prvočíselnom rozklade\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nachádza v\u00A0nepárnej mocnine."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujeme sporom. Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n} = \\frac ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre nesúdeliteľné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Rovnicu upravíme na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "nb^2 = a^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V\u00A0prvočíselnom rozklade štvorca ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") má každé prvočíslo párny exponent. Na ľavej strane je exponent ľubovoľného prvočísla súčtom jeho exponentu v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Aby nastala rovnosť, musí byť tento súčet párny, čo znamená, že exponent každého prvočísla v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí byť párny. Ak teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obsahuje prvočíslo v\u00A0nepárnej mocnine, dostávame spor. Naopak, ak sú všetky exponenty párne, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je druhou mocninou a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálne číslo."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že súčet racionálneho a iracionálneho čísla je číslo iracionálne."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme sporom. Čo ak pre racionálne "
+                      },
+                      {
+                        "type": "math",
+                        "text": "r_1,r_2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a iracionálne "
+                      },
+                      {
+                        "type": "math",
+                        "text": "r'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "r_1+r'=r_2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujeme sporom. Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálne a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " iracionálne číslo. Predpokladajme, že ich súčet "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r_2 = r_1 + r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálny. Potom môžeme vyjadriť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r' = r_2 - r_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže rozdiel dvoch racionálnych čísel je vždy racionálne číslo, musí byť aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " racionálne. To je však spor s\u00A0predpokladom, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je iracionálne."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}+\\sqrt{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je iracionálne."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme sporom. Nech platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sqrt{2}+\\sqrt{3}=r",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Potrebujeme sa zbaviť odmocnín."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom k\u00A0zbaveniu sa odmocnín je umocnenie. Umocnením rovnosti z\u00A0predošlej nápovedy budeme mať namiesto dvoch odmocnín jednu."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujeme sporom. Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r = \\sqrt{2}+\\sqrt{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálne číslo. Umocnením rovnosti dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r^2 = 5 + 2\\sqrt{6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z\u00A0čoho vyjadríme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{6} = \\frac{r^2-5}{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálne, je racionálna aj pravá strana. To by znamenalo, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je racionálne číslo, čo je spor (dôkaz je analogický ako pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ")."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Typicky chybný dôkaz môže spočívať v\u00A0argumente, že súčet dvoch iracionálnych čísel je vždy iracionálny. Presvedčte sa ale, že to nie je pravda."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Na záver si ešte ukážeme azda najznámejší dôkaz tejto všeobecne známej veci, ktorú vedel dokázať už aj Euklides"
+                },
+                {
+                  "type": "footnote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Euklides z\u00A0Alexandrie (cca 300 r. pred Kr.) bol starogrécky matematik, často označovaný ako "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "otec geometrie"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že prvočísel je nekonečne veľa."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujeme sporom. Predpokladajme, že existuje konečne veľa prvočísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, p_2, \\dots, p_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Uvažujme číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N = p_1 \\cdot p_2 \\cdots p_n + 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Toto číslo je väčšie ako 1, preto musí mať aspoň jedného prvočíselného deliteľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tento deliteľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí byť jedným z\u00A0našich prvočísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, \\dots, p_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zároveň však "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva po delení ľubovoľným "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zvyšok 1, teda žiadne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ho nedelí. To je spor, prvočísel teda musí byť nekonečne veľa."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Skúste si podobným spôsobom vyriešiť ďalšie dve úlohy:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že existuje nekonečne veľa prvočísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktoré delia "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre vhodné prirodzené "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ideme sporom. Ak by ich bolo konečne veľa, označme ich "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p_1,p_2,\\dots,p_k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Skúste zostrojiť vhodný výraz."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zamyslite sa nad výrazom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p_1\\cdot p_2 \\cdots p_k)^2+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predpokladajme, že takýchto prvočísel je konečne veľa, označme ich "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, p_2, \\dots, p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Uvažujme číslo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N = (p_1 \\cdot p_2 \\cdots p_k)^2 + 1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Toto číslo je väčšie ako 1, preto má nejakého prvočíselného deliteľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", delí číslo tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí patriť do nášho zoznamu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, \\dots, p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". To ale znamená, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí súčin "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1 \\cdots p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0teda delí aj jeho druhú mocninu. Z\u00A0toho vyplýva, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí rozdiel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N - (p_1 \\cdots p_k)^2 = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je spor."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 2,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že existuje nekonečne veľa prvočísel tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prirodzené číslo."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme ako v\u00A0predošlých prípadoch, označíme si prvočísla, zostrojujeme vhodný výraz. Je treba si však dať pozor na špeciálne prvočíslo\u00A02 (ktoré je tiež nášho tvaru)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zamyslite sa nad výrazom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3p_1\\cdots p_k+2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", kde "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p_1,\\dots,p_k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sú "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "nepárne"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " prvočísla tvaru "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3n+2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom je nájsť nejaké ďalšie prvočíslo tvaru "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3n+2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " v\u00A0prvočíselnom rozklade nášho výrazu. Mohlo by v\u00A0tomto rozklade nebyť žiadne, čo by to znamenalo?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predpokladajme, že existuje konečne veľa prvočísel tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, \\dots, p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " všetky "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "nepárne"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " prvočísla tohto tvaru (číslo 2 vynechávame). Uvažujme číslo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N = 3p_1 \\cdots p_k + 2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú nepárne, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je súčtom nepárneho čísla a\u00A0čísla 2, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nepárne a\u00A0nie je deliteľné 2. Zároveň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva po delení tromi zvyšok 2. Preto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí mať aspoň jedného prvočíselného deliteľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (ak by boli všetky delitele tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by malo tento tvar). Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nepárne, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q \\neq 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zároveň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nemôže byť žiadne z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pretože inak by delilo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3p_1 \\cdots p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0teda aj ich rozdiel\u00A02. Našli sme teda nové prvočíslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je spor."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Na záver sekcie sa vráťme k\u00A0sľúbenému vysvetleniu "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "dôkazu obmenenej vety"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Vo všeobecnosti ide o\u00A0dôkaz implikácie "
+                },
+                {
+                  "type": "math",
+                  "text": "A \\Rightarrow B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", ktorá je ekvivalentná implikácii "
+                },
+                {
+                  "type": "math",
+                  "text": "B' \\Rightarrow A'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", napríklad implikácia "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "ak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nedelí\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak ani "
+                    },
+                    {
+                      "type": "math",
+                      "text": "25",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nedelí\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " je ekvivalentná implikácii "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "ak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "25",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". My sa teda snažíme z\u00A0negácie tvrdenia\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " dokázať negáciu predpokladu\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " – technicky sa teda snažíme z\u00A0predpokladu, že\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " neplatí, prísť ku konkrétnemu sporu, a\u00A0síce s\u00A0predpokladom\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Z\u00A0toho vidieť, že takýto dôkaz je vlastne špeciálny prípad dôkazu sporom – pri ktorom nám ide o\u00A0to prísť do sporu s\u00A0akýmkoľvek tvrdením, nie nutne predpokladom."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Čo sme sa naučili",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Priame dokazovanie používame, keď sa snažíme z\u00A0predpokladov odvodiť čo najviac vecí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dôkaz sporom sa hodí, keď sa z\u00A0negácie dokazovaného tvrdenia dá niečo odvodiť, z\u00A0negácie už používame priame odvodzovanie."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dôkaz obmenenej vety je vlastne špeciálny prípad dôkazu sporom."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Čo ďalej",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0ďalších materiáloch sa budeme venovať konkrétnym dôkazovým technikám, pričom začneme matematickou indukciou, ktorá je natoľko dôležitá, že si zaslúži samostatný materiál."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

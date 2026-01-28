@@ -1,0 +1,3559 @@
+{
+  "document": {
+    "title": "Proofs",
+    "subtitle": "Proof Basics",
+    "sections": [
+      {
+        "title": "Introduction",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The common perception of mathematics is that it is about calculation. In reality, however, it is about understanding generally valid statements. To be certain that these are indeed valid statements, and not just some "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "measurement error"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ", we precisely justify, or "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "prove"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ", these statements. It should therefore come as no surprise to us that proofs are an integral part of the Mathematical Olympiad, as well as university courses. In this material, we will provide a basic overview of what proofs look like in mathematics. We will illustrate them with several examples. The illustrative examples will mainly concern numbers, where the principles are best illustrated. However, the described theory can of course be applied in other areas – we will encounter proofs in all materials."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Basic Types of Proofs",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In general, we distinguish two basic types of proofs: "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "direct proof"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " and "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "proof by contradiction"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". In short:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Direct proof: We derive the statement to be proved from valid statements."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Proof by contradiction: We assume that the statement to be proved "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "does not hold"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " and try to derive a mathematically invalid statement, "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "to reach a contradiction"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberDot"
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "We can imagine this as follows: Let's say that all the statements we start from are in a large pot of soup. The process of proving consists of combining statements from the soup and adding new ones from them – for example, if we have "
+                },
+                {
+                  "type": "math",
+                  "text": "a^3=1",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " in the soup, we can add "
+                },
+                {
+                  "type": "math",
+                  "text": "a=1",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " to the soup, thanks to which we can add "
+                },
+                {
+                  "type": "math",
+                  "text": "a^4-2a+1=0",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " to the soup, etc. We then view our two types of proofs as follows:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A direct proof works by gradually adding new and new statements to the soup until we add the one we aim to prove."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "On the other hand, in a proof by contradiction, we add the negation of the statement to be proved to the soup and proceed as if we were proving directly. We add new statements until the soup curdles and we get some nonsense, such as "
+                      },
+                      {
+                        "type": "math",
+                        "text": "0=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", or the opposite of one of the assumptions."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberDot"
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In the following two sections, we will show specific interesting examples of proofs. But first, two notes:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A very important technique is "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "proof by mathematical induction"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Strictly speaking, this is not so much a type of proof as it is a recipe for adding new valid statements to the soup."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "In school, a distinction is usually made between two types of "
+                      },
+                      {
+                        "type": "quote",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "indirect proofs"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": ": indirect proof by contradiction and proof by contrapositive. We will explain that the latter is actually a special case of proof by contradiction."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "Bullet"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Direct Proof",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Direct proofs are quite natural – we combine assumptions from the problem statement with existing knowledge until we reach the statement to be proved. Every proof can therefore be written as a series of chains of implications:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the squares of odd numbers leave a remainder of\u00A01 when divided by\u00A08."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "First, let's take this complete written proof:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Odd numbers can be written in the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m=2n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for an integer "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We are proving that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^2=(2n+1)^2=4n(n+1)+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leaves a remainder of\u00A01 when divided by\u00A08. One of the numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is even, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is an even number, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4n(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by\u00A08, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m^2=4n(n+1)+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leaves a remainder of\u00A01 when divided by\u00A08, which was to be proved."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Before we go further, let's realize the structure of that proof. It consists of these statements:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "m",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is an odd integer"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "m=2n+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " for some integer "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is an integer, thus "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is even or "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is even"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_3",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n(n+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is even"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_4",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "4n(n+1)",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is divisible by\u00A08"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "4n(n+1)+1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " leaves a remainder of\u00A01 when divided by\u00A08"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_6",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "(2n+1)^2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " leaves a remainder of\u00A01 when divided by\u00A08"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "V_7",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "math",
+                            "text": "m^2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " leaves a remainder of\u00A01 when divided by\u00A08"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "Bullet"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The proof consists of the transitions "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_0 \\Rightarrow V_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_2 \\Rightarrow V_3 \\Rightarrow V_4 \\Rightarrow V_5 \\Rightarrow V_6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By combining "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V_7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A verbal description is obviously more practical than a bulleted one. Its problem may be that more complicated problems can get lost in it: Poorly written solutions often fail because the implications are not clear from the text. Practical advice: for every statement, ask yourself the question: is it clear what the assumptions are and how something was derived from them? With such self-checking, one often realizes that their solution has a mistake."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that for prime numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\ge 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", it holds that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a number divisible by 24."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We decompose the expression into the product "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1)(p+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a prime number greater than 3, it is not divisible by 3, so it gives a remainder of 1 or 2. In the first case, 3 divides the factor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", in the second "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". At the same time, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is odd, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are two consecutive even numbers. One of them is therefore divisible by 2 and the other even by 4, so their product is divisible by 8. Since the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by both 3 and 8, and these numbers are coprime, it is also divisible by 24."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the sum of three odd squares is never a square."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key is to look at divisibility by eight."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Use the previously proven example."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "According to the previous example, the square of an odd number leaves a remainder of\u00A01 when divided by\u00A08. The sum of three such numbers therefore leaves a remainder of\u00A03. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of\u00A01."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that if a natural number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the square of an integer, then it has an odd number of divisors."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "How to use the fact that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the square of an integer? We can write "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=m^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which was the first step in the previous illustrative example – but that won't help us for long. The key is to think about divisors, after all, we are proving something about them. The basic idea is:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Divisors of a natural number "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "typically"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " come in pairs, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a divisor of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " if and only if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n/d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a divisor of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". If it never happened that these are the same divisors, then the number of divisors of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is even."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "But when does it happen that this pairing pairs a divisor with itself? Exactly when "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d=n/d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e., when "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d^2=n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". And that is exactly our assumption! Consequently, all divisors except the divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " will pair up with someone, so in total we will have an odd number of divisors, which was to be proved."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Note."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " This example actually holds as an equivalence. In fact, it would be easier if the reverse implication were given, because the fact that it is a square is used only at the end of the reasoning chain. In competition problems, however, it is common for authors to try to mask these key steps."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The previous example can also be solved using the generally useful formula for the number of divisors:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=p_1^{a_1} \\cdot p_2^{a_2} \\cdots p_k^{a_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1,p_2,\\dots,p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are distinct prime numbers and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1,a_2,\\dots,a_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are integers. Then the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has exactly"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "divisors."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Each divisor is in the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1^{b_1} \\cdot p_2^{b_2} \\cdots p_k^{b_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq b_i \\leq a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for each "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\leq i \\leq k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". For the choice of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " options ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "0,1,\\ldots,a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). These choices are independent, so according to the combinatorial rule of product, we have a total of"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "distinct "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tuples "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(b_1,\\ldots,b_k)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " corresponding to all divisors of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so we are done."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Solve the previous example using the theorem on the number of divisors, including the reverse implication."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n = p_1^{a_1} \\cdot p_2^{a_2} \\cdots p_k^{a_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the square of an integer, all exponents "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1, \\dots, a_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must be even. According to the theorem, the number of divisors is equal to the product "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a_1+1)(a_2+1)\\cdots(a_k+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since each "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is even, each parenthesis represents an odd number. The product of odd numbers is always odd, thus the number of divisors is odd."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Given a composite number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n > 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that it is divisible by a prime number not exceeding "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The number\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is composite, let's write it as "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", where "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1<a \\leq b<n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The idea is to say that the smaller of the numbers "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a,b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", i.e., "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", is divisible by a sufficiently small prime. To do this, it suffices to say that it is sufficiently small in itself (in the tightest case, it is a prime itself)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is composite, we can write it as "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 < a \\le b < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Multiplying the inequality "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\le b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 \\le ab = n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", from which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\le \\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a>1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has at least one prime divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Clearly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\le a \\le \\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which we wanted to prove."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A natural number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has exactly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divisors. Prove that the product of the divisors of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is equal to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n^k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Use the trick with the paired divisor again."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Distinguish the cases where "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is and is not a square."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In the solution, we will consider the pairing of divisors: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a divisor of\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " if and only if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n/d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a divisor of\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The product of such divisors is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let's analyze two cases:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is not a square, then for every divisor "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d \\neq n/d",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " holds (otherwise "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d^2=n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "). All "
+                          },
+                          {
+                            "type": "math",
+                            "text": "k",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " divisors thus form exactly "
+                          },
+                          {
+                            "type": "math",
+                            "text": "k/2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " such pairs. The total product is "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n^{k/2} = \\sqrt{n^k}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is a square, then "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d=\\sqrt{n}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " forms a pair with itself. The remaining "
+                          },
+                          {
+                            "type": "math",
+                            "text": "k-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " divisors form "
+                          },
+                          {
+                            "type": "math",
+                            "text": "(k-1)/2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " pairs with product "
+                          },
+                          {
+                            "type": "math",
+                            "text": "n",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". The total product is therefore"
+                          }
+                        ],
+                        "highligted": false
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^{\\frac{k-1}2} \\cdot \\sqrt{n} = n^{\\frac{k}2 - \\frac12 + \\frac12} = \\sqrt{n^k}.",
+                        "isDisplay": true
+                      }
+                    ]
+                  ],
+                  "styleType": "Bullet"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Proof by Contradiction",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "This type of proof is particularly useful in cases where what is being proved is hard to "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "grasp"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " and it is far simpler to say something about its negation. A very common example where this is illustrated:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is irrational."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We proceed by contradiction. Assume that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a rational number, i.e., it can be written as a fraction "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac pq",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in simplest form (numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p, q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are coprime). After squaring and multiplying by the denominator, we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2=2q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The right side is divisible by two, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and subsequently "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must also be even, i.e., "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=2k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By substituting, we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(2k)^2=2q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which simplifies to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2k^2=q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Now we see that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must also be even. The numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are thus both divisible by two, which is a contradiction with the assumption that they are coprime."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This proof would not pass if we had "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{4}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Where would it fail?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It would fail in the step where we try to show that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is also divisible. We would have the equation "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2=4q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", from which it follows that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is even, i.e., "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=2k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". However, by substituting, we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4k^2=4q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which after canceling simplifies to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^2=q^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From this equality, it does not follow that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is even (nor divisible by 4). Thus, we do not get a contradiction with the coprimality of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p, q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove the generalization of the statement about the irrationality of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a natural number. The number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is irrational if and only if there exists a prime number\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " which appears in the prime factorization of\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with an odd power."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We proceed by contradiction. Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n} = \\frac ab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for coprime "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We rearrange the equation to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "nb^2 = a^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". In the prime factorization of a square ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), every prime number has an even exponent. On the left side, the exponent of any prime number is the sum of its exponent in "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and in "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". For equality to hold, this sum must be even, which means that the exponent of every prime number in "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must be even. Thus, if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " contains a prime number with an odd power, we get a contradiction. Conversely, if all exponents are even, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a square and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{n}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a rational number."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the sum of a rational and an irrational number is an irrational number."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We proceed by contradiction. What if for rational "
+                      },
+                      {
+                        "type": "math",
+                        "text": "r_1,r_2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and irrational "
+                      },
+                      {
+                        "type": "math",
+                        "text": "r'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " it holds that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "r_1+r'=r_2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We proceed by contradiction. Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be rational and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be an irrational number. Assume that their sum "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r_2 = r_1 + r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is rational. Then we can express "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r' = r_2 - r_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since the difference of two rational numbers is always a rational number, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must also be rational. However, this is a contradiction with the assumption that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is irrational."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}+\\sqrt{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is irrational."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We proceed by contradiction. Let "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sqrt{2}+\\sqrt{3}=r",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". We need to get rid of the roots."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key to getting rid of the roots is squaring. By squaring the equality from the previous hint, we will have one root instead of two."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We proceed by contradiction. Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r = \\sqrt{2}+\\sqrt{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a rational number. By squaring the equality, we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r^2 = 5 + 2\\sqrt{6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", from which we express "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{6} = \\frac{r^2-5}{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is rational, the right side is also rational. This would mean that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a rational number, which is a contradiction (the proof is analogous to that for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sqrt{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ")."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Note."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " A typically erroneous proof might consist of the argument that the sum of two irrational numbers is always irrational. Convince yourself, however, that this is not true."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Finally, we will show perhaps the most famous proof of this widely known fact, which Euclid"
+                },
+                {
+                  "type": "footnote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Euclid of Alexandria (approx. 300 BC) was an ancient Greek mathematician, often referred to as the "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "father of geometry"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " was already able to prove."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that there are infinitely many prime numbers."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We proceed by contradiction. Assume that there are finitely many prime numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, p_2, \\dots, p_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Consider the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N = p_1 \\cdot p_2 \\cdots p_n + 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This number is greater than 1, so it must have at least one prime divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must be one of our prime numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, \\dots, p_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". At the same time, however, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leaves a remainder of 1 when divided by any "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so no "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides it. This is a contradiction, so there must be infinitely many prime numbers."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Try to solve the next two problems in a similar way:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that there are infinitely many prime numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " that divide "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for a suitable natural "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We go by contradiction. If there were finitely many of them, denote them "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p_1,p_2,\\dots,p_k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Try to construct a suitable expression."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Think about the expression "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p_1\\cdot p_2 \\cdots p_k)^2+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Assume that there are finitely many such prime numbers, denote them "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, p_2, \\dots, p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Consider the number"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N = (p_1 \\cdot p_2 \\cdots p_k)^2 + 1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This number is greater than 1, therefore it has some prime divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", it divides a number of the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must belong to our list "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, \\dots, p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". But this means that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides the product "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1 \\cdots p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and thus also divides its square. From this, it follows that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides the difference "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N - (p_1 \\cdots p_k)^2 = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is a contradiction."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 2,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that there are infinitely many prime numbers of the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a natural number."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We proceed as in the previous cases, we label the primes, we construct a suitable expression. However, one must pay attention to the special prime number\u00A02 (which is also of our form)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Think about the expression "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3p_1\\cdots p_k+2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", where "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p_1,\\dots,p_k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " are "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "odd"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " prime numbers of the form "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3n+2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key is to find some other prime number of the form "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3n+2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in the prime factorization of our expression. Could there be none in this factorization, and what would that mean?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Assume that there are finitely many prime numbers of the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1, \\dots, p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " denote all "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "odd"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " prime numbers of this form (we omit the number 2). Consider the number"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N = 3p_1 \\cdots p_k + 2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are odd, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the sum of an odd number and the number 2, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is odd and is not divisible by 2. At the same time, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leaves a remainder of 2 when divided by three. Therefore, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must have at least one prime divisor "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (if all divisors were of the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " would also have this form). Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is odd, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q \\neq 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". At the same time, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cannot be any of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", because otherwise it would divide "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " as well as "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3p_1 \\cdots p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and thus also their difference\u00A02. We have thus found a new prime number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of the form "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3n+2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is a contradiction."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "At the end of the section, let's return to the promised explanation of the "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "proof by contrapositive"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". In general, this is a proof of the implication "
+                },
+                {
+                  "type": "math",
+                  "text": "A \\Rightarrow B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", which is equivalent to the implication "
+                },
+                {
+                  "type": "math",
+                  "text": "B' \\Rightarrow A'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", for example, the implication "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " does not divide\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "25",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " does not divide\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " either"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " is equivalent to the implication "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "25",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". We are therefore trying to prove the negation of assumption\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " from the negation of statement\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " – technically, we are trying to come to a specific contradiction from the assumption that\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " does not hold, namely with assumption\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". From this, it can be seen that such a proof is actually a special case of proof by contradiction – in which our goal is to come to a contradiction with any statement, not necessarily an assumption."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "What we have learned",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We use direct proof when we try to derive as many things as possible from the assumptions."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Proof by contradiction is useful when something can be derived from the negation of the statement to be proved; from the negation we then use direct derivation."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Proof by contrapositive is actually a special case of proof by contradiction."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "What next",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In the next materials, we will focus on specific proof techniques, starting with mathematical induction, which is so important that it deserves a separate material."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}
