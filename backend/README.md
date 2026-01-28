@@ -194,7 +194,7 @@ dotnet run -c Release
 ### 4. Generate Translations
 
 ```powershell
-.\Invoke-Tool.ps1 translations translate
+.\Invoke-Tool.ps1 translations translate --count 100
 ```
 
 Translates to all languages (EN, CZ) by default.
@@ -202,7 +202,7 @@ Translates to all languages (EN, CZ) by default.
 ### 5. Parse Translations
 
 ```powershell
-.\Invoke-Tool.ps1 translations parse
+.\Invoke-Tool.ps1 translations parse --count 100 --scope StatementsOnly
 ```
 
 Parses the raw TeX in translations to generate structured content. If any translations fail to parse, they are written to `Output/parse-issues.yaml`. To fix: edit the file and rerun.
@@ -241,6 +241,8 @@ If new solution PDFs are available on the SKMO website (using the correct):
 # From backend/src/Tools/MathComps.Cli.SkmoScraper
 dotnet run -c Release -- scrape --start-year 75 --end-year 75
 ```
+
+Remark: Update 75 to the current year.
 
 ### 11. Update Solution Links
 
