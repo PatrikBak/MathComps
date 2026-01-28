@@ -109,15 +109,18 @@ public class ScrapeSkmoCommand(ISkmoScraperService scraperService)
             foreach (var solution in scrapedSolutions)
                 mergedSolutions[(solution.Year, solution.Category, solution.CompetitionId)] = solution;
 
-            // Convert back to list, sorted by year for consistency
-            scrapedSolutions = [.. mergedSolutions.Values
-                .OrderBy(solution => solution.Year)
-                .ThenBy(solution => solution.Category)
-                .ThenBy(solution => solution.CompetitionId)];
+            // Convert back to list
+            scrapedSolutions = [.. mergedSolutions.Values];
 
             // Log merged count
             AnsiConsole.MarkupLine($"[dim]Merged result contains {scrapedSolutions.Count} solution(s).[/]");
         }
+
+        // Ensure consistent ordering
+        scrapedSolutions = [.. scrapedSolutions
+            .OrderBy(solution => solution.Year)
+            .ThenBy(solution => solution.Category)
+            .ThenBy(solution => solution.CompetitionId)];
 
         // Serialize the data to a JSON string.
         var jsonContent = scrapedSolutions.ToJson();
