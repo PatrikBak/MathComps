@@ -1,5 +1,17 @@
 [
   {
+    "id": "Yx7Kp3RmNqWsVtLzJcFbH",
+    "slug": "proofs-basics",
+    "title": {
+      "sk": "Nový materiál o základoch dokazovania",
+      "en": "New Handout on the Basics of Proofs",
+      "cs": "Nový materiál o základech dokazování"
+    },
+    "date": "2026-01-28",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
     "id": "pLm8nXyZ9qRsTuVwAbCdE",
     "slug": "75-second-rounds",
     "title": {
