@@ -510,8 +510,8 @@
       "theorem": "Theorem"
     },
     "hero": {
-      "description": "We are preparing materials designed for solvers starting with the high school Mathematical Olympiad. The goal is for them to be interesting even for more experienced solvers thanks to progressively challenging problems. Materials will be created continuously during the 2025/2026 school year.",
-      "title": "Handouts Overview"
+      "description": "A list of continuously prepared study materials for anyone interested in solving interesting mathematical problems. The goal is to gradually cover all topics of the high school Mathematical Olympiad. Materials are created for beginners, but are also suitable for more experienced solvers thanks to progressively challenging problems.",
+      "title": "Study Materials"
     },
     "labels": {
       "author": "Author",

@@ -25,6 +25,19 @@
           "en": "A fundamental overview of mathematical proofs. Covers direct proofs and proofs by contradiction with examples from number theory."
         },
         "authors": ["Patrik Bak"]
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "matematicka-indukcia",
+          "cs": "matematicka-indukce",
+          "en": "mathematical-induction"
+        },
+        "title": {
+          "sk": "Matematická indukcia",
+          "cs": "Matematická indukce",
+          "en": "Mathematical Induction"
+        }
       }
     ]
   },
@@ -119,6 +132,41 @@
   },
   {
     "category": {
+      "sk": "Geometria",
+      "cs": "Geometrie",
+      "en": "Geometry"
+    },
+    "handouts": [
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "uhly-bez-kruznic",
+          "cs": "uhly-bez-kruznic",
+          "en": "angles-without-circles"
+        },
+        "title": {
+          "sk": "Uhly bez kružníc",
+          "cs": "Úhly bez kružnic",
+          "en": "Angles Without Circles"
+        }
+      },
+      {
+        "status": "planned",
+        "slug": {
+          "sk": "uhly-na-kruznici",
+          "cs": "uhly-na-kruznici",
+          "en": "angles-on-circles"
+        },
+        "title": {
+          "sk": "Uhly na kružnici",
+          "cs": "Úhly na kružnici",
+          "en": "Angles on Circles"
+        }
+      }
+    ]
+  },
+  {
+    "category": {
       "sk": "Teória čísel",
       "cs": "Teorie čísel",
       "en": "Number Theory"
@@ -154,41 +202,6 @@
   },
   {
     "category": {
-      "sk": "Geometria",
-      "cs": "Geometrie",
-      "en": "Geometry"
-    },
-    "handouts": [
-      {
-        "status": "planned",
-        "slug": {
-          "sk": "podobnosti-a-zhodnosti",
-          "cs": "podobnosti-a-shodnosti",
-          "en": "similarity-and-congruence"
-        },
-        "title": {
-          "sk": "Podobnosti a zhodnosti",
-          "cs": "Podobnosti a shodnosti",
-          "en": "Similarity and Congruence"
-        }
-      },
-      {
-        "status": "planned",
-        "slug": {
-          "sk": "uhly",
-          "cs": "uhly",
-          "en": "angles"
-        },
-        "title": {
-          "sk": "Uhly",
-          "cs": "Úhly",
-          "en": "Angles"
-        }
-      }
-    ]
-  },
-  {
-    "category": {
       "sk": "Kombinatorika",
       "cs": "Kombinatorika",
       "en": "Combinatorics"
@@ -198,52 +211,26 @@
         "status": "planned",
         "slug": {
           "sk": "ofarbovanie",
-          "cs": "barveni",
+          "cs": "obarbovani",
           "en": "coloring"
         },
         "title": {
           "sk": "Ofarbovanie",
-          "cs": "Barvení",
+          "cs": "Obarbování",
           "en": "Coloring"
         }
       },
       {
         "status": "planned",
         "slug": {
-          "sk": "dirichletov-princip",
-          "cs": "dirichletuv-princip",
-          "en": "pigeonhole-principle"
+          "sk": "invarianty",
+          "cs": "invarianty",
+          "en": "invariants"
         },
         "title": {
-          "sk": "Dirichletov princíp",
-          "cs": "Dirichletův princip",
-          "en": "Pigeonhole Principle"
-        }
-      },
-      {
-        "status": "planned",
-        "slug": {
-          "sk": "extremalny-princip",
-          "cs": "extremalni-princip",
-          "en": "extremal-principle"
-        },
-        "title": {
-          "sk": "Extremálny princíp",
-          "cs": "Extremální princip",
-          "en": "Extremal Principle"
-        }
-      },
-      {
-        "status": "planned",
-        "slug": {
-          "sk": "grafove-ulohy",
-          "cs": "grafove-ulohy",
-          "en": "graph-problems"
-        },
-        "title": {
-          "sk": "Grafové úlohy",
-          "cs": "Grafové úlohy",
-          "en": "Graph Problems"
+          "sk": "Invarianty",
+          "cs": "Invarianty",
+          "en": "Invariants"
         }
       }
     ]
