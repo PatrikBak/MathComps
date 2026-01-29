@@ -8,8 +8,6 @@ using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
-using System.Globalization;
-
 namespace MathComps.Infrastructure.Services;
 
 /// <summary>
@@ -108,8 +106,8 @@ public class ProblemFilterService(
                         localization.GetSeasonLabel(
                             language,
                             data.problem.RoundInstance.Season.EditionNumber,
-                            data.problem.RoundInstance.Season.EditionNumber - 1,
-                            data.problem.RoundInstance.Season.EditionNumber),
+                            data.problem.RoundInstance.Season.StartYear,
+                            data.problem.RoundInstance.Season.EndYear),
                         null
                     ),
                     // Competition
@@ -193,8 +191,8 @@ public class ProblemFilterService(
                                 localization.GetSeasonLabel(
                                     language,
                                     similarProblem.SimilarProblem.RoundInstance.Season.EditionNumber,
-                                    similarProblem.SimilarProblem.RoundInstance.Season.EditionNumber - 1,
-                                    similarProblem.SimilarProblem.RoundInstance.Season.EditionNumber),
+                                    similarProblem.SimilarProblem.RoundInstance.Season.StartYear,
+                                    similarProblem.SimilarProblem.RoundInstance.Season.EndYear),
                                 null
                             ),
                             // Competition
@@ -546,14 +544,17 @@ public class ProblemFilterService(
 
         // Build season facet options with problem counts
         var seasonGroups = (await seasonsScope
-            // Extract season info for grouping
-            .Select(problem => problem.RoundInstance.Season.EditionNumber)
             // Group by unique seasons
-            .GroupBy(season => season)
+            .GroupBy(problem => new
+            {
+                problem.RoundInstance.Season.EditionNumber,
+                problem.RoundInstance.Season.StartYear
+            })
             // Project to intermediate structure with counts
             .Select(seasonGroup => new
             {
-                EditionNumber = seasonGroup.Key,
+                seasonGroup.Key.EditionNumber,
+                seasonGroup.Key.StartYear,
                 Count = seasonGroup.Count()
             })
             // Sort seasons by edition number descending (most recent first)
@@ -562,8 +563,13 @@ public class ProblemFilterService(
             .ToListAsync())
             // In-memory projection to FacetOption after query execution with localization
             .Select(seasonGroup => new FacetOption(
-                seasonGroup.EditionNumber.ToString(CultureInfo.InvariantCulture),
-                localization.GetSeasonLabel(language, seasonGroup.EditionNumber, seasonGroup.EditionNumber - 1, seasonGroup.EditionNumber),
+                seasonGroup.EditionNumber.ToString(),
+                localization.GetSeasonLabel(
+                    language,
+                    seasonGroup.EditionNumber,
+                    seasonGroup.StartYear,
+                    seasonGroup.StartYear + 1
+                ),
                 FullName: null,
                 seasonGroup.Count))
             // In-memory collection
@@ -766,8 +772,8 @@ public class ProblemFilterService(
         var problemNumbers = problemNumberGroups
             // Map to FacetOption
             .Select(numberGroup => new FacetOption(
-                numberGroup.Number.ToString(CultureInfo.InvariantCulture),
-                numberGroup.Number.ToString(CultureInfo.InvariantCulture),
+                numberGroup.Number.ToString(),
+                numberGroup.Number.ToString(),
                 FullName: null,
                 numberGroup.Count))
             // In-memory collection
@@ -825,7 +831,7 @@ public class ProblemFilterService(
     public async Task<SeasonContestBrowserResult> GetContestsBySeasonAsync(Language language)
     {
         // Group all problems by their common contest data
-        // We will then take only these data + problem count to build the result 
+        // We will then take only these data + problem count to build the result
         var contestData = await dbContext.Problems
             .GroupBy(problem => new
             {

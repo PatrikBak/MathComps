@@ -651,6 +651,52 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(0, p3.CommentCount);
     });
 
+    /// <summary>
+    /// Verifies that the season facet options returned by FilterAsync have correct labels.
+    /// This test ensures the season labels display full calendar years (e.g., "75. ročník (2025/2026)")
+    /// rather than abbreviated or incorrect year formats.
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsCorrectSeasonLabels() => RunTestAsync(async service =>
+    {
+        // Arrange - create a query with no filters to get all season options
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - verify season labels have correct format with full calendar years
+        Assert.NotNull(result.UpdatedOptions);
+        Assert.Equal(2, result.UpdatedOptions!.Seasons.Count);
+
+        // Seasons should be ordered descending (newest first)
+        var season75 = result.UpdatedOptions.Seasons.First(season => season.Slug == "75");
+        var season74 = result.UpdatedOptions.Seasons.First(season => season.Slug == "74");
+
+        // Verify the labels contain full 4-digit years (2025/2026 and 2024/2025)
+        Assert.Equal("75. ročník (2025/2026)", season75.DisplayName);
+        Assert.Equal("74. ročník (2024/2025)", season74.DisplayName);
+    });
+
     #region GetContestsBySeasonAsync Tests
 
     /// <summary>
