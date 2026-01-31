@@ -2,7 +2,7 @@
 
 import { useWindowEvent } from '@mantine/hooks'
 import { ChevronLeft, ChevronRight, MessageSquare, Newspaper, X } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useFormatter, useTranslations } from 'next-intl'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -15,6 +15,7 @@ import { usePendingCommentTarget } from '@/components/features/comments/hooks/us
 import { IconBadge } from '@/components/shared/components/IconBadge'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
+import { useRouter } from '@/i18n/navigation'
 
 import { CATEGORY_CONFIG, type NewsArticle, type NewsCategory } from './types'
 

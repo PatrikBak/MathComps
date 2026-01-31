@@ -1,13 +1,14 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
+import { useRouter } from '@/i18n/navigation'
 import { useProblemStore } from '@/stores/problem-store'
 import { isNetworkError, isServerError, isValidationError } from '@/types/api'
 
