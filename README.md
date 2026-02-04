@@ -1,6 +1,8 @@
 # MathComps
 
-A platform for browsing and searching mathematical competition problems, built with Next.js and .NET.
+A repository for the website https://mathcomps.fun.
+
+It is a platform for browsing and searching mathematical competition problems, built with Next.js and .NET.
 
 ## Quick Start
 
@@ -40,18 +42,24 @@ See [Backend README](backend/README.md) for database setup instructions.
 ```
 MathComps/
 ├── backend/                   # .NET backend (API + CLI tools)
-│   ├── src/
-│   │   ├── Api/               # Web API + Webhooks
-│   │   ├── Core/              # Domain models
-│   │   ├── Infrastructure/    # Database & user management
-│   │   └── Tools/             # CLI tools
+│   └── src/
+│       ├── Api/               # Web API + Webhooks
+│       ├── Core/              # Domain models
+│       ├── Infrastructure/    # Database & user management
+│       ├── Shared/            # Shared utilities
+│       └── Tools/             # CLI tools
 ├── web/                       # Next.js frontend + Webhooks
 │   └── src/
-│       ├── app/               # Pages
-│       └── components/        # React components
+│       ├── app/               # Pages (App Router)
+│       ├── components/        # React components
+│       ├── content/           # News & handouts content
+│       ├── hooks/             # React hooks
+│       ├── i18n/              # Internationalization
+│       └── lib/               # Utilities
 └── data/                      # Raw data files
     ├── skmo/                  # SKMO competition data
     └── handouts/              # TeX handouts
+```
 
 ## Webhooks Architecture
 
@@ -64,35 +72,16 @@ The application uses two separate Clerk webhooks to handle different responsibil
 - **Backend (`/api/webhooks/clerk`)**: Handles **User Synchronization**.
   - **Events**: `user.created`, `user.updated`, `user.deleted`
   - **Purpose**: Syncs Clerk user data to the local PostgreSQL database for relational data integrity.
-```
 
 ## Documentation
 
-- **[Backend README](backend/README.md)** – Database setup, API, CLI tools
-- **[Frontend README](web/README.md)** – Development server, testing, commands
-- **[Similarity System](backend/src/Tools/MathComps.Cli.Similarity/README.md)** – Similar problems suggestions
-- **[Tagging Assistant](backend/src/Tools/MathComps.Cli.Tagging/README.md)** – AI categorization
-- **[Embeddings CLI](backend/src/Tools/MathComps.Cli.Embeddings/README.md)** – Gemini-based embedding generator
-
-## Updating Content
-
-1. **Make changes in data/skmo/archive**
-2. **Run the SKMO parser CLI with default settings** - see [SKMO Parser README](backend/src/Tools/MathComps.Cli.SkmoParser/README.md) for details
-3. **Run the SKMO scraper to scrape links** if there is a new solution link on SKMO - see [SKMO Scraper README](backend/src/Tools/MathComps.Cli.SkmoScraper/README.md) for details
-
-**Deploy (requires DB access):**
-
-4. **Run the database seeder** (needs a connection to the real DB) - see [Database Seeder README](backend/src/Tools/MathComps.Cli.DatabaseSeeder/README.md) for details
-5. **Run the update links** if there is a new link or new problems with an existing link - see [SKMO Scraper README](backend/src/Tools/MathComps.Cli.SkmoScraper/README.md) for details
-6. **Run the tagging tool** to tag new problems if there are any - see [Tagging README](backend/src/Tools/MathComps.Cli.Tagging/README.md) for details
-7. **Generate embeddings** for new problems to enable semantic search - see [Embeddings README](backend/src/Tools/MathComps.Cli.Embeddings/README.md) for details
-8. **Run the similarity tool** to calculate similarities for new problems - see [Similarity README](backend/src/Tools/MathComps.Cli.Similarity/README.md) for details
-9. **Optional: Generate translations** for new problems - see [Translation README](backend/src/Tools/MathComps.Cli.Translation/README.md) for details
+- **[Backend README](backend/README.md)**
+- **[Frontend README](web/README.md)**
 
 ## FAQ
 
-**Q:** Is this vibe-coded?  
+**Q:** Is this vibe-coded?
 **A:** Depends.
 
-- Backend mostly is not. I care about C# code, so I wanted to be in control. Though I find using AI quite efficient sometimes, like when I let it write very well-defined initial code and then fix it manually so it's how I want.
-- Frontend mostly is. When I started coding this, I didn't have much frontend experience beforehand and this really helped. However, as things got bigger, refactoring was needed. For example, the problem library became very complicated and AI couldn't cope. Now I've learned a lot and use AI less, mostly the way I use it for the backend.
+- Backend mostly is not. I care about C# code, so I wanted to be in control. Though I find using AI quite efficient sometimes, like when I let it write very well-defined initial code and then fix it manually so it's how I want 😇
+- Frontend started that way. Nowadays I slowly try to refactor more and more and get rid of AI-ish codes. Only when I looked did I relize how poor AI codes can be, creating solutions that are hard to maintain. I guess I'm not a good vibe-coder for I care too much 🙃
