@@ -17,6 +17,7 @@ const createFilters = (overrides: Partial<SearchFiltersState>): SearchFiltersSta
   authorLogic: 'or',
   contestSelection: [],
   favoritesOnly: false,
+  listContentId: null,
   ...overrides,
 })
 
@@ -76,6 +77,22 @@ describe('Search URL Serialization', () => {
       expect(serialized).not.toContain('searchInSolution')
       expect(serialized).not.toContain('tagLogic')
       expect(serialized).not.toContain('favoritesOnly')
+      expect(serialized).not.toContain('list')
+    })
+
+    it('should serialize and deserialize list param', () => {
+      const filters = createFilters({ listContentId: 'abc123' })
+      const serialized = serializeFilters(filters)
+
+      expect(serialized).toBe('list=abc123')
+
+      const deserialized = deserializeFilters(serialized)
+      expect(deserialized?.listContentId).toBe('abc123')
+    })
+
+    it('should omit list param when null', () => {
+      const filters = createFilters({ listContentId: null })
+      expect(serializeFilters(filters)).toBe('')
     })
 
     it('should produce empty string for default filters', () => {

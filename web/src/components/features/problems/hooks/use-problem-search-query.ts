@@ -8,7 +8,11 @@ import { useProblemStore } from '@/stores/problem-store'
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { CACHE_TIMING } from '../constants/timing-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
-import { isProblemNotFoundError } from '../types/problem-errors'
+import {
+  isListAccessDeniedError,
+  isListNotFoundError,
+  isProblemNotFoundError,
+} from '../types/problem-errors'
 import type {
   FilterOptionsWithCounts,
   SearchFiltersState,
@@ -34,6 +38,8 @@ type ProblemSearchInfiniteData = {
   }
   /** The updated filter options based on the current search results. */
   updatedOptions: FilterOptionsWithCounts | null
+  /** When filtering by a list, the display name of that list. Null otherwise. */
+  listName: string | null
 }
 
 /**
@@ -107,6 +113,9 @@ export const problemQueryKeys = {
   // Key for favorite problems
   favorites: ['problems', 'favorites'] as const,
 
+  // Key for a specific list's search results (used for prefix-match invalidation)
+  list: (contentId: string) => ['problems', `list:${contentId}`] as const,
+
   // Key for initial filter data (all available options)
   initialData: (locale: string, userId: string | null) =>
     [...problemQueryKeys.all, 'initial', locale, userId] as const,
@@ -115,7 +124,13 @@ export const problemQueryKeys = {
   search: (locale: string, filters: SearchFiltersState | null, userId: string | null) =>
     [
       ...problemQueryKeys.all,
-      filters == null ? null : filters.favoritesOnly ? 'favorites' : 'all',
+      filters == null
+        ? null
+        : filters.listContentId
+          ? `list:${filters.listContentId}`
+          : filters.favoritesOnly
+            ? 'favorites'
+            : 'all',
       'search',
       locale,
       filters,
@@ -358,6 +373,15 @@ function useProblemSearchInfinite(
 
     // Don't refetch on window focus for search results (user intent is to adjust filters, not auto-refresh)
     refetchOnWindowFocus: false,
+
+    // Stop retrying on permanent list access errors
+    retry: (_failureCount, error) => {
+      if (isListNotFoundError(error) || isListAccessDeniedError(error)) {
+        return false
+      }
+      // If not a list error, use global default for retries
+      return true
+    },
   })
 
   // Return just the data we need
@@ -395,8 +419,12 @@ type UseProblemSearchQueryReturn = {
   isLoadingMore: boolean
   /** Whether a search is in progress but no data is available to show yet. */
   isSearchingWithNoData: boolean
+  /** When filtering by a list, the display name of that list. Null otherwise. */
+  listName: string | null
   /** The error message if the search failed. */
   error: string | null
+  /** The raw typed error object for type guard inspection (e.g. list access errors). */
+  rawError: Error | null
   /** Whether the search is currently retrying after a failure. */
   isRetrying: boolean
   /** The timestamp of the last successful data update. */
@@ -540,6 +568,11 @@ export function useProblemSearchQuery(
     return infiniteQuery.data?.pages[0]?.problems.totalCount ?? 0
   }, [infiniteQuery.data])
 
+  // Get list name from the first page (consistent across all pages for the same list)
+  const listName = useMemo(() => {
+    return infiniteQuery.data?.pages[0]?.listName ?? null
+  }, [infiniteQuery.data])
+
   // Check if there are more pages to load for infinite scroll
   const hasMore = infiniteQuery.hasNextPage
 
@@ -575,6 +608,7 @@ export function useProblemSearchQuery(
     filterOptions: effectiveFilterOptions,
     totalCount,
     hasMore,
+    listName,
 
     // Loading states (distinguish between initial load, filter changes, and pagination)
     isLoading: infiniteQuery.isLoading,
@@ -585,6 +619,8 @@ export function useProblemSearchQuery(
 
     // Error state
     error: infiniteQuery.error?.message ?? null,
+    // Raw typed error for type guard inspection (list access errors, etc.)
+    rawError: infiniteQuery.error,
     // Retry state - failureCount > 0 means we're retrying or have failed (show toast even between retries)
     isRetrying: infiniteQuery.failureCount > 0,
     // Timestamp of last successful data fetch (for detecting when new data arrives)

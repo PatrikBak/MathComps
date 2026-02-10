@@ -20,6 +20,7 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// <param name="Liked">Whether the current user has liked this problem.</param>
 /// <param name="LikeCount">Total number of likes for this problem.</param>
 /// <param name="CommentCount">Total number of comments for this problem.</param>
+/// <param name="ListContentIds">Content IDs of the user's lists that contain this problem. Empty for anonymous users.</param>
 public record ProblemDto(
     string Slug,
     string? StatementParsed,
@@ -32,5 +33,6 @@ public record ProblemDto(
     string? SolutionLink,
     bool Liked,
     int LikeCount,
-    int CommentCount
+    int CommentCount,
+    ImmutableList<string> ListContentIds
 );

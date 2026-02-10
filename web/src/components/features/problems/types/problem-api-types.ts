@@ -60,6 +60,7 @@ export type Problem = {
   liked: boolean
   likeCount: number
   commentCount: number
+  listContentIds: string[]
 }
 
 export type FilterParameters = {

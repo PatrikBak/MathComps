@@ -59,6 +59,7 @@ public static class DependencyInjectionHelpers
         services.AddScoped<IProblemLookupService, ProblemLookupService>();
         services.AddScoped<IUserManager, UserManager>();
         services.AddScoped<IUserProblemService, UserProblemService>();
+        services.AddScoped<IUserListService, UserListService>();
         services.AddScoped<IClerkWebhookService, ClerkWebhook>();
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IProblemImageService, ProblemImageService>();

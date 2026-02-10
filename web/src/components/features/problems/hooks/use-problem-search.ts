@@ -15,7 +15,11 @@ import { isNetworkError, isServerError, isValidationError } from '@/types/api'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import { getProblemsPageUrl, hasProblemId } from '../services/problem-api-urls'
-import { isProblemNotFoundError } from '../types/problem-errors'
+import {
+  isListAccessDeniedError,
+  isListNotFoundError,
+  isProblemNotFoundError,
+} from '../types/problem-errors'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isTextOnlyChange } from '../utils/search-logic'
@@ -65,6 +69,8 @@ type UseProblemSearchReturn = {
 
     /** Error message if the search or initial load failed. */
     error: string | null
+    /** When filtering by a list, the display name of that list. Null otherwise. */
+    listName: string | null
   }
   /** Handler for updating the search filters. */
   handleFiltersChange: (newFilters: SearchFiltersState) => void
@@ -158,8 +164,10 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   }, [urlParsingResult, tErrors])
 
   // Redirect to login if favorites were requested but user is not logged in
+  // Note: lists are NOT guarded here because they can be publicly shared —
+  // the backend handles access control (200 for public, 401 for private)
   useEffect(() => {
-    // URL needs to be parsed and favorites were requested
+    // URL needs to be parsed and an auth-required feature was requested
     if (!urlParsingResult?.favoritesRequested) return
 
     // We must wait for auth data to be loaded
@@ -356,6 +364,27 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     return undefined
   }, [problemId, initialDataQuery.isSuccess, searchQuery.isRetrying, tErrors])
 
+  // Handle list access errors
+  // Show a toast with a clear message and redirect to /problems to clear the invalid list= URL param
+  useEffect(() => {
+    // Only handle when the search query has a typed error
+    const error = searchQuery.rawError
+    if (!error) return
+
+    // Show a descriptive toast based on the error type
+    if (isListNotFoundError(error)) {
+      toast.error(tErrors('listNotFound'))
+    } else if (isListAccessDeniedError(error)) {
+      toast.error(tErrors('listAccessDenied'))
+    } else {
+      // Not a list access error, nothing to handle here
+      return
+    }
+
+    // Redirect to /problems to clear the invalid list= URL param
+    router.replace(ROUTES.PROBLEMS, { scroll: false })
+  }, [searchQuery.rawError, router, tErrors])
+
   // Get the final filter options.
   // This is where we decide which options to show in the UI dropdowns.
   // Priority order:
@@ -398,6 +427,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       hasMore,
       currentPage: 1,
       error,
+      listName: searchQuery.listName,
     },
     handleFiltersChange,
     loadMore: searchQuery.loadMore,

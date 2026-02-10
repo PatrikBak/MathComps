@@ -4,7 +4,7 @@ import { useLocalStorage } from '@mantine/hooks'
 import { isEqual } from 'lodash'
 import { Loader2, WifiOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { Virtuoso } from 'react-virtuoso'
 
@@ -51,6 +51,7 @@ export default function ProblemsLibrary() {
       hasMore,
       error,
       hasInitialDataLoaded,
+      listName,
     },
     handleFiltersChange,
     loadMore,
@@ -146,6 +147,15 @@ export default function ProblemsLibrary() {
           [...filters.authors, author],
     })
   }
+
+  // Handle selecting a list from the Manage Lists modal (navigates to filtered view)
+  const handleSelectList = useCallback(
+    (contentId: string) => {
+      if (!filters) return
+      handleFiltersChange({ ...filters, favoritesOnly: false, listContentId: contentId })
+    },
+    [filters, handleFiltersChange]
+  )
 
   // Animation state management
   const [searchBatchId, setSearchBatchId] = useState(0)
@@ -336,6 +346,7 @@ export default function ProblemsLibrary() {
                   onFiltersChange={handleFiltersChange}
                   filterOptions={filterOptions}
                   baseOptions={baseOptions ?? filterOptions}
+                  sharedListName={listName}
                 />
               ) : (
                 <FilterSkeleton />
@@ -409,6 +420,7 @@ export default function ProblemsLibrary() {
                           activeTechniqueFilterSlugs={activeTechniqueFilterSlugs}
                           onAuthorClick={handleAuthorClick}
                           selectedAuthorSlugs={selectedAuthorSlugs}
+                          onSelectList={handleSelectList}
                         />
                       )}
                       rangeChanged={({ startIndex, endIndex }) => {
@@ -461,6 +473,7 @@ export default function ProblemsLibrary() {
             filterOptions={filterOptions}
             baseOptions={baseOptions ?? filterOptions}
             activeFilterCount={countActiveFilters(filters)}
+            sharedListName={listName}
           />
         )}
       </div>

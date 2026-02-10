@@ -35,7 +35,7 @@ export default function Chip({
   // Determine styling based on selected state and clickable state
   const getChipStyling = () => {
     const baseStyles =
-      'inline-flex max-w-full items-center gap-1.5 rounded-full py-1 px-2 text-[12px] font-medium transition-colors border'
+      'inline-flex max-w-full items-center gap-1.5 rounded-full py-0.5 px-1.5 sm:py-1 sm:px-2 text-[11px] sm:text-[12px] font-medium transition-colors border'
 
     if (isSelected) {
       // Selected state: bright indigo background with white text

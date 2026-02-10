@@ -702,6 +702,9 @@
     "title": "Ochrana soukromí a podmínky"
   },
   "problems": {
+    "addToList": "Přidat do seznamu",
+    "addToListAuthReason": "přidávání úloh do seznamů",
+    "addToListError": "Nepodařilo se aktualizovat seznam",
     "commentsButton": "Komentáře",
     "connectionFailed": "Připojení selhalo",
     "contestsOverview": "Přehled soutěží",
@@ -714,6 +717,8 @@
     "errors": {
       "connectionProblem": "Problém s připojením. Zkouším znovu...",
       "invalidParameters": "Neplatné parametry požadavku",
+      "listAccessDenied": "Tento seznam je soukromý. Pokud je to váš seznam, nejprve se přihlaste.",
+      "listNotFound": "Seznam nebyl nalezen",
       "maxFiltersExceeded": "Můžete vybrat maximálně {max} filtrů",
       "problemNotFound": "Úloha \"{problemId}\" nebyla nalezena",
       "serverError": "Server vrátil chybu. Zkouším znovu...",
@@ -733,6 +738,12 @@
       "allProblems": "Všechny úlohy",
       "competitions": "Soutěže",
       "contestsOverview": "Přehled soutěží",
+      "copyListLink": "Kopírovat odkaz",
+      "createListError": "Nepodařilo se vytvořit seznam",
+      "deleteList": "Odstranit",
+      "deleteListConfirm": "Klikněte znovu pro potvrzení odstranění",
+      "deleteListConfirmMessage": "Opravdu chcete odstranit seznam \"{name}\"? Tuto akci nelze vrátit zpět.",
+      "deleteListError": "Nepodařilo se odstranit seznam",
       "facets": {
         "allCompetitions": "Všechny soutěže",
         "allSeasons": "Všechny ročníky",
@@ -767,7 +778,18 @@
       },
       "favoritesLoginRequired": "Pro zobrazení oblíbených úloh se musíte přihlásit.",
       "hideFilters": "Skrýt filtry",
+      "listLinkCopied": "Odkaz zkopírován",
+      "listNameInvalid": "Název seznamu musí mít 1–50 znaků",
+      "listShared": "Seznam sdílen a odkaz zkopírován",
+      "manageLists": "Spravovat seznamy",
       "myFavorites": "Moje oblíbené",
+      "newList": "Nový seznam",
+      "newListAuthReason": "vytváření seznamů",
+      "newListPlaceholder": "Název seznamu...",
+      "noLists": "Zatím žádné seznamy",
+      "renameList": "Přejmenovat",
+      "renameListError": "Nepodařilo se přejmenovat seznam",
+      "reorderListsError": "Nepodařilo se změnit pořadí seznamů",
       "reset": "Resetovat",
       "resetFilters": "Resetovat filtry",
       "search": {
@@ -780,6 +802,9 @@
       "searching": "Vyhledávám",
       "searchInSolutionSuffix": "(v zadání i řešení)",
       "seasons": "Ročníky",
+      "sharedListLabel": "Sdílený seznam",
+      "shareList": "Sdílet",
+      "shareListError": "Nepodařilo se změnit sdílení",
       "showFilters": "Zobrazit filtry",
       "tips": {
         "exclusive": {
@@ -797,7 +822,10 @@
           "title": "Vyhledávání"
         },
         "title": "Tipy a triky"
-      }
+      },
+      "unshareList": "Zrušit sdílení",
+      "viewFavoritesAuthReason": "zobrazení oblíbených úloh",
+      "viewList": "Zobrazit"
     },
     "hideTechniques": "Skrýt techniky",
     "like": "Lajknout úlohu",
@@ -809,6 +837,7 @@
     "noStatementAvailable": "Znění úlohy není k dispozici",
     "relevance": "Relevance: {percentage}%",
     "relevanceNote": "Relevance je orientační",
+    "removedFromList": "Úloha byla odstraněna ze seznamu",
     "searchContests": "Hledat soutěže...",
     "share": "Sdílet",
     "showHiddenTechniques": "Zobrazit skryté techniky řešení pro tuto úlohu",

@@ -702,6 +702,9 @@
     "title": "Privacy Policy and Terms"
   },
   "problems": {
+    "addToList": "Add to list",
+    "addToListAuthReason": "adding problems to lists",
+    "addToListError": "Failed to update list",
     "commentsButton": "Comments",
     "connectionFailed": "Connection failed",
     "contestsOverview": "Contests overview",
@@ -714,6 +717,8 @@
     "errors": {
       "connectionProblem": "Connection problem. Retrying...",
       "invalidParameters": "Invalid request parameters",
+      "listAccessDenied": "This list is private. If it is your list, log in first.",
+      "listNotFound": "List not found",
       "maxFiltersExceeded": "You can select a maximum of {max} filters",
       "problemNotFound": "Problem \"{problemId}\" was not found",
       "serverError": "Server returned an error. Retrying...",
@@ -733,6 +738,12 @@
       "allProblems": "All problems",
       "competitions": "Competitions",
       "contestsOverview": "Contests overview",
+      "copyListLink": "Copy link",
+      "createListError": "Failed to create list",
+      "deleteList": "Delete",
+      "deleteListConfirm": "Click again to confirm deletion",
+      "deleteListConfirmMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "deleteListError": "Failed to delete list",
       "facets": {
         "allCompetitions": "All competitions",
         "allSeasons": "All years",
@@ -767,7 +778,18 @@
       },
       "favoritesLoginRequired": "You must be logged in to view favorite problems.",
       "hideFilters": "Hide filters",
+      "listLinkCopied": "Link copied",
+      "listNameInvalid": "List name must be 1–50 characters",
+      "listShared": "List shared and link copied",
+      "manageLists": "Manage lists",
       "myFavorites": "My favorites",
+      "newList": "New list",
+      "newListAuthReason": "creating lists",
+      "newListPlaceholder": "List name...",
+      "noLists": "No lists yet",
+      "renameList": "Rename",
+      "renameListError": "Failed to rename list",
+      "reorderListsError": "Failed to reorder lists",
       "reset": "Reset",
       "resetFilters": "Reset filters",
       "search": {
@@ -780,6 +802,9 @@
       "searching": "Searching",
       "searchInSolutionSuffix": "(in problem and solution)",
       "seasons": "Years",
+      "sharedListLabel": "Shared list",
+      "shareList": "Share",
+      "shareListError": "Failed to change sharing",
       "showFilters": "Show filters",
       "tips": {
         "exclusive": {
@@ -797,7 +822,10 @@
           "title": "Search"
         },
         "title": "Tips and tricks"
-      }
+      },
+      "unshareList": "Stop sharing",
+      "viewFavoritesAuthReason": "viewing favorite problems",
+      "viewList": "View"
     },
     "hideTechniques": "Hide techniques",
     "like": "Like problem",
@@ -809,6 +837,7 @@
     "noStatementAvailable": "No problem statement available",
     "relevance": "Relevance: {percentage}%",
     "relevanceNote": "Relevance is approximate",
+    "removedFromList": "Problem was removed from the list",
     "searchContests": "Search contests...",
     "share": "Share",
     "showHiddenTechniques": "Show hidden solution techniques for this problem",

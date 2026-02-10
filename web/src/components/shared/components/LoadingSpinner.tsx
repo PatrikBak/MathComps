@@ -6,18 +6,21 @@ import { cn } from '@/components/shared/utils/css-utils'
 type LoadingSpinnerProps = {
   /** Optional class name for custom styling */
   className?: string
+  /** Optional inline styles */
+  style?: React.CSSProperties
 }
 
 /**
  * A reusable loading spinner component.
  */
-export const LoadingSpinner = ({ className }: LoadingSpinnerProps) => {
+export const LoadingSpinner = ({ className, style }: LoadingSpinnerProps) => {
   return (
     <div
       className={cn(
         'w-10 h-10 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin',
         className
       )}
+      style={style}
     />
   )
 }

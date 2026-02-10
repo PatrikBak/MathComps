@@ -3,6 +3,7 @@ using MathComps.Domain.ApiDtos.Comments;
 using MathComps.Domain.ApiDtos.Helpers;
 using MathComps.Domain.ApiDtos.ProblemQuery;
 using MathComps.Domain.ApiDtos.SearchBar;
+using MathComps.Domain.ApiDtos.UserLists;
 using MathComps.Infrastructure.Services;
 using MathComps.Api.Constants;
 using MathComps.Shared;
@@ -23,10 +24,40 @@ public static class EndpointExtensions
     {
         // The endpoint for doing problem archive filtering
         // Allows anonymous access but provides personalized data if authenticated
-        app.MapPost("/problems/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService) =>
+        app.MapPost("/problems/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService, IUserListService userListService) =>
         {
             // Get user ID (optional)
             var userId = await GetUserIdAsync(context, userManager);
+
+            // Track the list name for the response (populated when filtering by a specific list)
+            string? listName = null;
+
+            // If filtering by a specific list...
+            if (query.ListContentId is not null)
+            {
+                // Check if the user can access the list
+                var accessResult = await userListService.CheckListAccessAsync(userId, query.ListContentId);
+
+                // Handle all access scenarios
+                switch (accessResult.Status)
+                {
+                    // Bad list id
+                    case ListAccessStatus.NotFound:
+                        return Results.NotFound();
+
+                    // User doesn't own this private list
+                    case ListAccessStatus.NoAccess:
+                        return Results.Unauthorized();
+
+                    // User can access the list — capture the name for the response
+                    case ListAccessStatus.HasAccess:
+                        listName = accessResult.ListName;
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("Unexpected ListAccessStatus");
+                }
+            }
 
             // Detect language from Accept-Language header
             var language = GetRequestLanguage();
@@ -35,7 +66,10 @@ public static class EndpointExtensions
             var options = new ProblemFilterOptions(query, userId, language);
 
             // Delegate to service
-            return Results.Ok(await problemService.FilterAsync(options));
+            var filterResult = await problemService.FilterAsync(options);
+
+            // Wrap with list metadata for the API response
+            return Results.Ok(new ProblemFilterResponse(filterResult, listName));
         })
         // Apply search-specific rate limiting
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
@@ -271,6 +305,219 @@ public static class EndpointExtensions
 
         #endregion Comment Endpoints
 
+        #region User List Endpoints
+
+        // Get all lists for the authenticated user
+        app.MapGet("/users/me/lists", async (
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Get the user's lists
+            var lists = await userListService.GetListsAsync(userId.Value);
+
+            // Return the lists
+            return Results.Ok(lists);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Create a new user list
+        app.MapPost("/users/me/lists", async (
+            CreateListRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Create the list
+            var list = await userListService.CreateListAsync(userId.Value, request.Name);
+
+            // Return the created list
+            return Results.Created($"/users/me/lists/{list.ContentId}", list);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Rename an existing user list
+        app.MapPatch("/users/me/lists/{contentId}", async (
+            string contentId,
+            UpdateListRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Update the list
+            var list = await userListService.UpdateListAsync(userId.Value, contentId, request.Name);
+
+            // Return the updated list
+            return Results.Ok(list);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Delete a user list
+        app.MapDelete("/users/me/lists/{contentId}", async (
+            string contentId,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Delete the list
+            await userListService.DeleteListAsync(userId.Value, contentId);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Add a problem to a user list
+        app.MapPost("/users/me/lists/{contentId}/problems/{problemSlug}", async (
+            string contentId,
+            string problemSlug,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Add the problem to the list
+            await userListService.AddProblemAsync(userId.Value, contentId, problemSlug);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Remove a problem from a user list
+        app.MapDelete("/users/me/lists/{contentId}/problems/{problemSlug}", async (
+            string contentId,
+            string problemSlug,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Remove the problem from the list
+            await userListService.RemoveProblemAsync(userId.Value, contentId, problemSlug);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Reorder all lists for the authenticated user
+        app.MapPut("/users/me/lists/order", async (
+            ReorderListsRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Reorder the lists
+            await userListService.ReorderListsAsync(userId.Value, request.ContentIds);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Enable public sharing for a list
+        app.MapPost("/users/me/lists/{contentId}/share", async (
+            string contentId,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Enable sharing
+            var list = await userListService.SetSharingAsync(userId.Value, contentId, enabled: true);
+
+            // Return the updated list
+            return Results.Ok(list);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Disable public sharing for a list
+        app.MapDelete("/users/me/lists/{contentId}/share", async (
+            string contentId,
+            HttpContext context,
+            IUserManager userManager,
+            IUserListService userListService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // We must have a user
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Disable sharing
+            await userListService.SetSharingAsync(userId.Value, contentId, enabled: false);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        #endregion User List Endpoints
+
         // Add health check endpoint for monitoring
         app.MapHealthChecks("/health");
 
@@ -309,4 +556,3 @@ public static class EndpointExtensions
             ? language
             : throw new InvalidOperationException($"Unsupported culture '{CultureInfo.CurrentCulture.TwoLetterISOLanguageName}'");
 }
-

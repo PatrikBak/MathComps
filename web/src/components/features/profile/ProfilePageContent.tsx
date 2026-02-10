@@ -204,7 +204,8 @@ export default function ProfilePageContent() {
               label={tProfile('displayNamePlaceholder')}
               textClassName={cn(commonFontStyle, 'text-slate-200')}
               innerContainerClassName={containerClassName}
-              iconClassName="w-3.5 h-3.5"
+              iconSize={14}
+              actionsClassName="pr-1"
             />
 
             {/* Row 2, Col 1 - Email label */}

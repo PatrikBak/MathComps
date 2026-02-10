@@ -17,6 +17,8 @@ type MobileFilterDrawerProps = {
   filterOptions: FilterOptionsWithCounts
   baseOptions: FilterOptionsWithCounts
   activeFilterCount: number
+  /** When filtering by a shared list, the display name of that list. Null otherwise. */
+  sharedListName?: string | null
 }
 
 /**
@@ -38,6 +40,7 @@ export const MobileFilterDrawer = ({
   filterOptions,
   baseOptions,
   activeFilterCount,
+  sharedListName,
 }: MobileFilterDrawerProps) => {
   // Prevent background scrolling when drawer is open
   useEffect(() => {
@@ -124,6 +127,7 @@ export const MobileFilterDrawer = ({
                   onFiltersChange={onFiltersChange}
                   filterOptions={filterOptions}
                   baseOptions={baseOptions}
+                  sharedListName={sharedListName}
                 />
               </div>
             </div>

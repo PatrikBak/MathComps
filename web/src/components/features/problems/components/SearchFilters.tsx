@@ -1,5 +1,5 @@
 import { useAuth } from '@clerk/nextjs'
-import { Heart, Layers, Lightbulb, X } from 'lucide-react'
+import { Lightbulb, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useRef } from 'react'
 
@@ -7,63 +7,15 @@ import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
-import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 
 import {
   useSearchFiltersLogic,
   type UseSearchFiltersLogicProps,
 } from '../hooks/use-search-filters-logic'
-import { getProblemsPageUrl } from '../services/problem-api-urls'
 import { createFilterUpdater } from '../utils/filter-update-utils'
-import { serializeFilters } from '../utils/search-url-serialization'
 import MultiSelectFacet from './facets/MultiSelectFacet'
 import TreeSelectFacet from './facets/TreeSelectFacet'
-
-/**
- * Props for {@link ModeToggleButton}
- */
-type ModeToggleButtonProps = {
-  /** Whether this button is active */
-  isActive: boolean
-  /** Click handler */
-  onClick: () => void
-  /** Button label */
-  label: string
-  /** Icon to show before label */
-  icon?: React.ReactElement
-  /** Whether button should show loading state */
-  isLoading?: boolean
-}
-
-/**
- * Individual button within the mode toggle segmented control.
- */
-const ModeToggleButton = ({ isActive, onClick, label, icon, isLoading }: ModeToggleButtonProps) => {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'flex-1 rounded-md px-2 py-2 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 min-w-0',
-        isActive ? 'text-white' : 'text-gray-400 hover:text-gray-300',
-        isLoading && 'opacity-50 cursor-wait'
-      )}
-      title={label}
-    >
-      {/* Icon wrapper  */}
-      <div className="shrink-0">
-        {React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-          className: cn(
-            'h-3.5 w-3.5 transition-all duration-200',
-            isActive ? 'fill-white text-white' : 'fill-none text-gray-400'
-          ),
-        })}
-      </div>
-
-      {/* Label */}
-      <span className="truncate whitespace-nowrap">{label}</span>
-    </button>
-  )
-}
+import { ListsDropdown } from './ListsDropdown'
 
 /**
  * A tooltip icon component that provides helpful information
@@ -144,7 +96,10 @@ function TipsAndTricks() {
 /**
  * Props for the {@link SearchFilters} component
  */
-type SearchFiltersProps = UseSearchFiltersLogicProps
+type SearchFiltersProps = UseSearchFiltersLogicProps & {
+  /** When filtering by a shared list, the display name of that list. Null otherwise. */
+  sharedListName?: string | null
+}
 
 /**
  * Sidebar filter UI for the problems library.
@@ -154,6 +109,7 @@ export const SearchFilters = ({
   onFiltersChange,
   filterOptions,
   baseOptions,
+  sharedListName,
 }: SearchFiltersProps) => {
   // Translations
   const t = useTranslations('problems.filters')
@@ -184,32 +140,6 @@ export const SearchFilters = ({
   // A helper function to update filters
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
 
-  // A function to show the login prompt toast to access favorites
-  const showLoginPrompt = useLoginPromptToast()
-
-  // Handle favorites button click
-  const handleFavoritesClick = () => {
-    // Still loading, do nothing
-    if (!isLoaded) {
-      return
-    }
-
-    // User is not signed in, show login prompt
-    if (!isSignedIn) {
-      // Create filters with favorites enabled to redirect correctly after login
-      const nextFilters = { ...filters, favoritesOnly: true }
-      const queryString = serializeFilters(nextFilters)
-      const redirectUrl = getProblemsPageUrl(queryString)
-
-      // Show login prompt with a redirect URL to the filter with favorite problems
-      showLoginPrompt({ reason: t('myFavorites'), redirectUrl })
-      return
-    }
-
-    // User is signed in, toggle favorites
-    updateFilter('favoritesOnly', true, 'discrete')
-  }
-
   // Clear favoritesOnly when user logs out
   useEffect(() => {
     if (isLoaded && !isSignedIn && filters.favoritesOnly) {
@@ -222,28 +152,13 @@ export const SearchFilters = ({
       {/* Filters Body */}
       <div className="flex-grow overflow-y-auto p-3 sm:p-4 lg:p-5 lg:min-h-0">
         <div className="space-y-3 sm:space-y-4">
-          {/* Section 0: Mode Switch - All vs Favorites */}
+          {/* Section 0: Lists Dropdown — All / Liked / Custom lists */}
           <div className="mb-6">
-            <div className="flex w-full rounded-lg p-1 border border-slate-600/40">
-              <ModeToggleButton
-                isActive={!filters.favoritesOnly}
-                onClick={() => updateFilter('favoritesOnly', false, 'discrete')}
-                icon={<Layers />}
-                label={t('allProblems')}
-              />
-              <ModeToggleButton
-                isActive={filters.favoritesOnly}
-                onClick={handleFavoritesClick}
-                isLoading={!isLoaded}
-                icon={<Heart />}
-                label={t('myFavorites')}
-              />
-            </div>
-            {isLoaded && !isSignedIn && filters.favoritesOnly && (
-              <p className="mt-2 text-xs text-slate-500 text-center px-2">
-                {t('favoritesLoginRequired')}
-              </p>
-            )}
+            <ListsDropdown
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              sharedListName={sharedListName}
+            />
           </div>
 
           {/* Section 1: Full-text search */}

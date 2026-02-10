@@ -828,6 +828,83 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentId")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)")
+                        .HasColumnName("content_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsShared")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_shared");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_problem_lists");
+
+                    b.HasIndex("ContentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_user_problem_list_content_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_problem_list_user_id");
+
+                    b.ToTable("user_problem_lists", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_user_problem_list_sort_order_positive", "\"sort_order\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemListItem", b =>
+                {
+                    b.Property<Guid>("ListId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("list_id");
+
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("added_at");
+
+                    b.HasKey("ListId", "ProblemId")
+                        .HasName("pk_user_problem_list_items");
+
+                    b.HasIndex("ProblemId")
+                        .HasDatabaseName("ix_user_problem_list_item_problem_id");
+
+                    b.ToTable("user_problem_list_items", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.User", "Author")
@@ -1150,6 +1227,39 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Season");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemList", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_problem_lists_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemListItem", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.UserProblemList", "List")
+                        .WithMany("Items")
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_problem_list_items_user_problem_lists_list_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
+                        .WithMany("UserProblemListItems")
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_problem_list_items_problems_problem_id");
+
+                    b.Navigation("List");
+
+                    b.Navigation("Problem");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Author", b =>
                 {
                     b.Navigation("ProblemAuthors");
@@ -1201,6 +1311,8 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("SimilarProblems");
 
                     b.Navigation("Texts");
+
+                    b.Navigation("UserProblemListItems");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemText", b =>
@@ -1226,6 +1338,11 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Tag", b =>
                 {
                     b.Navigation("ProblemTagsAll");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemList", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

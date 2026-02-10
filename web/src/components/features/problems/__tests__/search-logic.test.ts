@@ -20,6 +20,7 @@ describe('Problem Search Logic', () => {
     authorLogic: 'or',
     contestSelection: [],
     favoritesOnly: false,
+    listContentId: null,
   }
 
   describe('shouldTriggerSearch - Complex Search Threshold Logic', () => {
@@ -61,6 +62,15 @@ describe('Problem Search Logic', () => {
         favoritesOnly: true,
       }
       expect(shouldTriggerSearch(favoritesWithShortText)).toBe(true)
+    })
+
+    it('should trigger search if listContentId is active, even with short text', () => {
+      const listWithShortText = {
+        ...mockInitialFilters,
+        searchText: 'x',
+        listContentId: 'abc123',
+      }
+      expect(shouldTriggerSearch(listWithShortText)).toBe(true)
     })
   })
 
@@ -110,6 +120,12 @@ describe('Problem Search Logic', () => {
       const baseFilters = { ...mockInitialFilters, searchText: 'existing search' }
       const favoritesChange = { ...baseFilters, favoritesOnly: true }
       expect(isTextOnlyChange(baseFilters, favoritesChange)).toBe(false)
+    })
+
+    it('should detect listContentId change as a discrete filter change', () => {
+      const baseFilters = { ...mockInitialFilters, searchText: 'existing search' }
+      const listChange = { ...baseFilters, listContentId: 'abc123' }
+      expect(isTextOnlyChange(baseFilters, listChange)).toBe(false)
     })
 
     it('should handle complex selections array comparison logic', () => {

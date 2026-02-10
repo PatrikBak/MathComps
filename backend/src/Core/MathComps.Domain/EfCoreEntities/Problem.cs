@@ -89,4 +89,9 @@ public class Problem
     /// Comments on this problem via the join entity.
     /// </summary>
     public ICollection<ProblemComment> ProblemComments { get; } = [];
+
+    /// <summary>
+    /// List memberships for this problem across all user lists.
+    /// </summary>
+    public ICollection<UserProblemListItem> UserProblemListItems { get; } = [];
 }
