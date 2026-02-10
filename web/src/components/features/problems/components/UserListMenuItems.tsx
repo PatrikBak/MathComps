@@ -110,7 +110,8 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
   // Focus the input when entering creation mode (after Radix's own focus pass)
   useEffect(() => {
     if (isCreating) {
-      requestAnimationFrame(() => inputRef.current?.focus())
+      const timer = setTimeout(() => inputRef.current?.focus(), 0)
+      return () => clearTimeout(timer)
     }
   }, [isCreating])
 
