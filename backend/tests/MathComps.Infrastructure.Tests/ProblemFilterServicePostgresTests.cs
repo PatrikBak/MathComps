@@ -581,8 +581,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Act 2: Query favorites for User 2 (liked only 75-b-i-1)
         var resultUser2Favorites = await service.FilterAsync(favoritesQuery with { UserId = user2Id });
 
-        // Act 3: Query favorites for Anonymous (should return nothing)
-        var resultAnonFavorites = await service.FilterAsync(favoritesQuery);
+        // Act 3: Query favorites for Anonymous (should throw)
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.FilterAsync(favoritesQuery));
 
         // Act 4: Query all problems for User 1 (FavoritesOnly = false)
         var allProblemsQuery = favoritesQuery with { Query = favoritesQuery.Query with { FavoritesOnly = false } };
@@ -599,11 +599,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal("75-b-i-1", resultUser2Favorites.Problems.Items[0].Slug);
         Assert.True(resultUser2Favorites.Problems.Items[0].Liked);
 
-        // Assert 3: Anonymous favorites - should get 0 problems
-        Assert.Empty(resultAnonFavorites.Problems.Items);
-        Assert.Equal(0, resultAnonFavorites.Problems.TotalCount);
-
-        // Assert 4: User 1 all problems - should get all 7 problems
+        // Assert 3: User 1 all problems - should get all 7 problems
         Assert.Equal(7, resultUser1All.Problems.TotalCount);
     });
 
@@ -950,6 +946,258 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     #endregion
 
+    #region ListContentId Filtering Tests
+
+    /// <summary>
+    /// Verifies that filtering by ListContentId returns only problems in the specified list.
+    /// </summary>
+    [Fact]
+    public Task FilterByListContentIdReturnsOnlyListMembers() => RunTestAsync(async service =>
+    {
+        // Arrange — user1 has a list with p1 and p2 seeded
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false,
+                ListContentId: "test-list-1"
+            ),
+            UserId: user1Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert — only p1 and p2 are in the list
+        Assert.Equal(2, result.Problems.TotalCount);
+        Assert.Contains(result.Problems.Items, p => p.Slug == "75-a-i-1");
+        Assert.Contains(result.Problems.Items, p => p.Slug == "75-b-i-1");
+    });
+
+    /// <summary>
+    /// Verifies that filtering by a list with no problems returns empty results.
+    /// </summary>
+    [Fact]
+    public Task FilterByEmptyListReturnsNoProblems() => RunTestAsync(async service =>
+    {
+        // Arrange — user2 has an empty list
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false,
+                ListContentId: "test-list-empty"
+            ),
+            UserId: user2Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert
+        Assert.Empty(result.Problems.Items);
+        Assert.Equal(0, result.Problems.TotalCount);
+    });
+
+    /// <summary>
+    /// Verifies that list filtering composes with other filters (e.g., tags).
+    /// Only problems matching both list membership AND the tag filter should be returned.
+    /// </summary>
+    [Fact]
+    public Task FilterByListContentIdComposesWithTagFilter() => RunTestAsync(async service =>
+    {
+        // Arrange — user1's list has p1 (geometry) and p2 (algebra). Filter by geometry tag.
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: ["geometry"],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false,
+                ListContentId: "test-list-1"
+            ),
+            UserId: user1Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert — only p1 has the geometry tag in the list
+        Assert.Single(result.Problems.Items);
+        Assert.Equal("75-a-i-1", result.Problems.Items[0].Slug);
+    });
+
+    #endregion
+
+    #region ListContentIds Projection Tests
+
+    /// <summary>
+    /// Verifies that ListContentIds correctly reflects which lists contain each problem for the requesting user.
+    /// - p1 is in 1 list ("test-list-1")
+    /// - p2 is in 2 lists ("test-list-1" and "test-list-2")
+    /// - p3 is in 0 lists
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsCorrectListContentIds() => RunTestAsync(async service =>
+    {
+        // Arrange
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: user1Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert
+        var p1 = result.Problems.Items.First(p => p.Slug == "75-a-i-1");
+        var p2 = result.Problems.Items.First(p => p.Slug == "75-b-i-1");
+        var p3 = result.Problems.Items.First(p => p.Slug == "75-c-i-1");
+
+        // p1 is in list1 only
+        Assert.Single(p1.ListContentIds);
+        Assert.Contains("test-list-1", p1.ListContentIds);
+
+        // p2 is in list1 and list2
+        Assert.Equal(2, p2.ListContentIds.Count);
+        Assert.Contains("test-list-1", p2.ListContentIds);
+        Assert.Contains("test-list-2", p2.ListContentIds);
+
+        // p3 is not in any list
+        Assert.Empty(p3.ListContentIds);
+    });
+
+    /// <summary>
+    /// Verifies that ListContentIds is empty for all problems when no user is provided (anonymous access).
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsEmptyListContentIdsForAnonymous() => RunTestAsync(async service =>
+    {
+        // Arrange — no user ID
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert — all problems should have empty ListContentIds
+        Assert.All(result.Problems.Items, p => Assert.Empty(p.ListContentIds));
+    });
+
+    /// <summary>
+    /// Verifies that ListContentIds only includes lists owned by the requesting user.
+    /// User2 owns no lists with items, so all their ListContentIds should be empty
+    /// even for problems that user1 has in their lists.
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsListContentIdsIsolatedBetweenUsers() => RunTestAsync(async service =>
+    {
+        // Arrange — query as user2 (owns only an empty list)
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: user2Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert — user2 has no items in any list, so all should be empty
+        var p1 = result.Problems.Items.First(p => p.Slug == "75-a-i-1");
+        var p2 = result.Problems.Items.First(p => p.Slug == "75-b-i-1");
+
+        Assert.Empty(p1.ListContentIds);
+        Assert.Empty(p2.ListContentIds);
+    });
+
+    #endregion
 
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
@@ -1424,6 +1672,47 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         context.Comments.AddRange(comment2, comment3);
         context.ProblemComments.Add(new ProblemComment { ProblemId = p2.Id, CommentId = comment2.Id });
         context.ProblemComments.Add(new ProblemComment { ProblemId = p2.Id, CommentId = comment3.Id });
+
+        // Add user lists for list filtering tests
+        var list1 = new UserProblemList
+        {
+            Id = Guid.CreateVersion7(),
+            ContentId = "test-list-1",
+            UserId = user1Id,
+            Name = "My Test List",
+            SortOrder = 1,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        var listEmpty = new UserProblemList
+        {
+            Id = Guid.CreateVersion7(),
+            ContentId = "test-list-empty",
+            UserId = user2Id,
+            Name = "Empty List",
+            SortOrder = 1,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        context.UserProblemLists.AddRange(list1, listEmpty);
+
+        // Add p1 and p2 to user1's list
+        context.UserProblemListItems.Add(new UserProblemListItem { ListId = list1.Id, ProblemId = p1.Id, AddedAt = DateTimeOffset.UtcNow });
+        context.UserProblemListItems.Add(new UserProblemListItem { ListId = list1.Id, ProblemId = p2.Id, AddedAt = DateTimeOffset.UtcNow });
+
+        // Second list for user1 — p2 is in both lists (for ListContentIds multi-membership test)
+        var list2 = new UserProblemList
+        {
+            Id = Guid.CreateVersion7(),
+            ContentId = "test-list-2",
+            UserId = user1Id,
+            Name = "Second List",
+            SortOrder = 2,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        context.UserProblemLists.Add(list2);
+        context.UserProblemListItems.Add(new UserProblemListItem { ListId = list2.Id, ProblemId = p2.Id, AddedAt = DateTimeOffset.UtcNow });
 
         // Submit changes
         await context.SaveChangesAsync();

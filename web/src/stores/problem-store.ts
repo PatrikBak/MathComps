@@ -27,6 +27,9 @@ type ProblemState = {
   /* Toggle the like state of a problem in the store. */
   toggleProblemLike: (slug: string) => void
 
+  /* Add or remove a list's contentId from a problem's listContentIds. */
+  toggleListMembership: (problemSlug: string, contentId: string) => void
+
   /* Update the comment count of a problem in the store. */
   updateCommentCount: (slug: string, delta: number) => void
 
@@ -104,6 +107,41 @@ export const useProblemStore = create<ProblemState>((set) => ({
       // Return the updated state
       return {
         problems: updatedProblems,
+        displayedProblems: updatedDisplayed,
+      }
+    }),
+
+  toggleListMembership: (problemSlug, contentId) =>
+    set((state) => {
+      // Get the problem from the store
+      const problem = state.problems[problemSlug]
+
+      // Ensure the problem is there
+      if (!problem) return state
+
+      // Determine whether to add or remove the contentId
+      const isRemoving = problem.listContentIds.includes(contentId)
+
+      // Determine the current list content ids
+      const updatedListContentIds = isRemoving
+        ? problem.listContentIds.filter((id) => id !== contentId)
+        : [...problem.listContentIds, contentId]
+
+      // If removing from a list while viewing that list, hide the problem
+      let updatedDisplayed = state.displayedProblems
+      if (isRemoving && state.currentFilters?.listContentId === contentId) {
+        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
+      }
+
+      // Return updated state
+      return {
+        problems: {
+          ...state.problems,
+          [problemSlug]: {
+            ...problem,
+            listContentIds: updatedListContentIds,
+          },
+        },
         displayedProblems: updatedDisplayed,
       }
     }),

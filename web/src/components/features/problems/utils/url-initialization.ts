@@ -18,6 +18,7 @@ export const createDefaultFilters = (): SearchFiltersState => ({
   authorLogic: 'or',
   contestSelection: [],
   favoritesOnly: false,
+  listContentId: null,
 })
 
 /**
@@ -32,6 +33,8 @@ type UrlInitializationResult = {
   hasTooManyFilters: boolean
   /** Whether favorites mode was requested */
   favoritesRequested: boolean
+  /** Whether a list filter was requested (needed for auth checks) */
+  listRequested: boolean
 }
 
 /**
@@ -53,11 +56,15 @@ export function initializeFiltersFromUrlOrDefaults(
       hasInvalidParams: false,
       hasTooManyFilters: false,
       favoritesRequested: false,
+      listRequested: false,
     }
   }
 
   // Check if favorites was requested (needed for auth checks)
   const favoritesRequested = searchParams.get('favoritesOnly') === 'true'
+
+  // Check if a list filter was requested (needed for auth checks)
+  const listRequested = searchParams.get('list') !== null
 
   // Parse and validate URL parameters
   const parsed = parseAndInterpretFilters(searchParams, competitionsTree)
@@ -69,6 +76,7 @@ export function initializeFiltersFromUrlOrDefaults(
       hasInvalidParams: true,
       hasTooManyFilters: false,
       favoritesRequested,
+      listRequested,
     }
   }
 
@@ -79,6 +87,7 @@ export function initializeFiltersFromUrlOrDefaults(
       hasInvalidParams: false,
       hasTooManyFilters: true,
       favoritesRequested,
+      listRequested,
     }
   }
 
@@ -88,6 +97,7 @@ export function initializeFiltersFromUrlOrDefaults(
     hasInvalidParams: false,
     hasTooManyFilters: false,
     favoritesRequested,
+    listRequested,
   }
 }
 

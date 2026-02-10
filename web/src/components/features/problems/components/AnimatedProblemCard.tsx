@@ -32,6 +32,7 @@ export const AnimatedProblemCard = React.memo(function AnimatedProblemCard({
   onAuthorClick,
   selectedAuthorSlugs,
   activeTechniqueFilterSlugs,
+  onSelectList,
 }: AnimatedProblemCardProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [hasAnimated, setHasAnimated] = useState(false)
@@ -143,6 +144,7 @@ export const AnimatedProblemCard = React.memo(function AnimatedProblemCard({
           onAuthorClick={onAuthorClick}
           selectedAuthorSlugs={selectedAuthorSlugs}
           activeTechniqueFilterSlugs={activeTechniqueFilterSlugs}
+          onSelectList={onSelectList}
         />
       </div>
     </div>

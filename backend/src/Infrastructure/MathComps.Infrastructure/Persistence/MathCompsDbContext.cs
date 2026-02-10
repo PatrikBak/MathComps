@@ -82,6 +82,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Anchor entity for news articles.</summary>
     public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
 
+    /// <summary>User-defined problem lists.</summary>
+    public DbSet<UserProblemList> UserProblemLists => Set<UserProblemList>();
+
+    /// <summary>Join table: problems in user lists.</summary>
+    public DbSet<UserProblemListItem> UserProblemListItems => Set<UserProblemListItem>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -657,6 +663,59 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion NewsArticle
+
+        #region UserProblemList
+
+        modelBuilder.Entity<UserProblemList>(e =>
+        {
+            // Foreign key to User with cascade delete
+            e.HasOne(l => l.User)
+             .WithMany()
+             .HasForeignKey(l => l.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship to items
+            e.HasMany(l => l.Items)
+             .WithOne(i => i.List)
+             .HasForeignKey(i => i.ListId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Index on UserId for efficient lookup of all lists by a user
+            e.HasIndex(l => l.UserId).HasDatabaseName("ix_user_problem_list_user_id");
+
+            // Unique index on ContentId for external-facing lookups
+            e.HasIndex(l => l.ContentId).IsUnique().HasDatabaseName("ux_user_problem_list_content_id");
+
+            // DB-side guard for positive sort order
+            e.ToTable(t => t.HasCheckConstraint("ck_user_problem_list_sort_order_positive", "\"sort_order\" > 0"));
+        });
+
+        #endregion UserProblemList
+
+        #region UserProblemListItem
+
+        modelBuilder.Entity<UserProblemListItem>(e =>
+        {
+            // Composite primary key: a problem can only appear once per list
+            e.HasKey(i => new { i.ListId, i.ProblemId });
+
+            // Foreign key to UserProblemList with cascade delete
+            e.HasOne(i => i.List)
+             .WithMany(l => l.Items)
+             .HasForeignKey(i => i.ListId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Foreign key to Problem with restrict delete (don't lose list data if problem is removed)
+            e.HasOne(i => i.Problem)
+             .WithMany(p => p.UserProblemListItems)
+             .HasForeignKey(i => i.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Index on ProblemId for efficient lookup of all lists containing a problem
+            e.HasIndex(i => i.ProblemId).HasDatabaseName("ix_user_problem_list_item_problem_id");
+        });
+
+        #endregion UserProblemListItem
     }
 
     #endregion OnModelCreating

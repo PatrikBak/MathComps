@@ -3,10 +3,16 @@ import { wrapApi } from '@/lib/api-utils'
 import type { ApiCallError, ApiResult } from '@/types/api'
 
 import type { FilterParameters } from '../types/problem-api-types'
-import type { ProblemError, ProblemNotFoundError } from '../types/problem-errors'
+import type {
+  ListAccessDeniedError,
+  ListNotFoundError,
+  ProblemError,
+  ProblemNotFoundError,
+} from '../types/problem-errors'
 import type {
   ContestSelection,
   FilterResponse,
+  RawProblemFilterResponse,
   SearchFiltersState,
   SingleProblemResult,
 } from '../types/problem-library-types'
@@ -81,6 +87,7 @@ export async function getProblemBySlug(
         authors: [],
         authorLogic: 'or',
         favoritesOnly: false,
+        listContentId: null,
       }
 
       // Return the filters
@@ -123,7 +130,7 @@ export async function getProblemBySlug(
  */
 export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResult<FilterResponse>> {
   return wrapApi(
-    apiCall<FilterResponse>(() => getProblemsFilterApiUrl(), {
+    apiCall<RawProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
       method: 'POST',
       body: JSON.stringify({
         parameters: {
@@ -140,18 +147,20 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
         pageSize: 20,
         pageNumber: 1,
         favoritesOnly: false,
+        listContentId: null,
       }),
     }),
-    // Map the response to the expected type
+    // Flatten the nested response into the frontend FilterResponse shape
     (data) => ({
-      problems: data.problems,
-      updatedOptions: data.updatedOptions || {
+      problems: data.filterResult.problems,
+      updatedOptions: data.filterResult.updatedOptions || {
         competitions: [],
         seasons: [],
         problemNumbers: [],
         tags: [],
         authors: [],
       },
+      listName: data.listName,
     })
   )
 }
@@ -174,27 +183,55 @@ export async function searchProblems(
   pageSize: number,
   pageNumber: number,
   signal: AbortSignal
-): Promise<ApiResult<FilterResponse>> {
+): Promise<ApiResult<FilterResponse, ProblemError>> {
   // Convert frontend filters to backend format
   const filterParameters = searchFiltersStateToFilterParameters(filters)
 
   // Perform the API call
   return wrapApi(
-    apiCall<FilterResponse>(() => getProblemsFilterApiUrl(), {
+    apiCall<RawProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
       method: 'POST',
       body: JSON.stringify({
         parameters: filterParameters,
         pageSize,
         pageNumber,
         favoritesOnly: filters.favoritesOnly,
+        listContentId: filters.listContentId,
       }),
       signal,
     }),
-    // Map the response to the expected type
+    // Flatten the nested response into the frontend FilterResponse shape
     (data) => ({
-      problems: data.problems,
-      updatedOptions: data.updatedOptions || null,
-    })
+      problems: data.filterResult.problems,
+      updatedOptions: data.filterResult.updatedOptions || null,
+      listName: data.listName,
+    }),
+    // Error transformation — classify list access errors by HTTP status code
+    (error: ApiCallError): ProblemError => {
+      // Only transform errors when filtering by a specific list
+      if (filters.listContentId && error.type === 'network') {
+        // 404 — the list doesn't exist (bad ID or was deleted)
+        if (error.statusCode === 404) {
+          return {
+            type: 'LIST_NOT_FOUND',
+            listContentId: filters.listContentId,
+            message: 'List not found',
+          } as ListNotFoundError
+        }
+
+        // 401 — the list is private and the user doesn't have access
+        if (error.statusCode === 401) {
+          return {
+            type: 'LIST_ACCESS_DENIED',
+            listContentId: filters.listContentId,
+            message: 'List access denied',
+          } as ListAccessDeniedError
+        }
+      }
+
+      // Default: pass through the original error
+      return error
+    }
   )
 }
 

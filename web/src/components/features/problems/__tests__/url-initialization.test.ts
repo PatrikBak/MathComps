@@ -99,4 +99,13 @@ describe('URL Initialization', () => {
     expect(result.favoritesRequested).toBe(true)
     expect(result.filters.favoritesOnly).toBe(true)
   })
+
+  it('tracks listRequested for auth redirect', () => {
+    const params = new URLSearchParams({ list: 'abc123' })
+
+    const result = initializeFiltersFromUrlOrDefaults(params, mockCompetitionsTree)
+
+    expect(result.listRequested).toBe(true)
+    expect(result.filters.listContentId).toBe('abc123')
+  })
 })

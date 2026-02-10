@@ -49,6 +49,7 @@ export type SearchFiltersState = {
   authors: LabeledSlug[]
   authorLogic: 'or' | 'and'
   favoritesOnly: boolean
+  listContentId: string | null
 }
 
 /**
@@ -78,6 +79,16 @@ export type FilterResponse = {
     totalPages: number
   }
   updatedOptions: FilterOptionsWithCounts | null
+  listName: string | null
+}
+
+/**
+ * Raw API response shape from the /problems/filter endpoint.
+ * Wraps FilterResult inside a filterResult property alongside listName.
+ */
+export type RawProblemFilterResponse = {
+  filterResult: FilterResponse
+  listName: string | null
 }
 
 /**

@@ -62,8 +62,12 @@ type EditableTextFieldProps = {
   outerContainerClassName?: string
   /** The style applied to the container wrapping the text / input.*/
   innerContainerClassName?: string
-  /**The style applied to the edit/submit/cancel icons */
+  /** The style applied to the edit/submit/cancel icons */
   iconClassName?: string
+  /** Size of the action icons in pixels */
+  iconSize: number
+  /** Additional class for the actions button container (e.g. spacing) */
+  actionsClassName?: string
 }
 
 /**
@@ -83,6 +87,8 @@ export function EditableTextField({
   outerContainerClassName,
   innerContainerClassName,
   iconClassName,
+  iconSize,
+  actionsClassName,
 }: EditableTextFieldProps) {
   // State to track if we're in edit mode
   const [isEditing, setIsEditing] = useState(false)
@@ -339,46 +345,46 @@ export function EditableTextField({
           )}
         </div>
 
-        {/* Container with all buttons on the right */}
-        <div className="flex items-center ml-auto pl-10">
-          <div className="flex items-center gap-2 absolute right-4">
-            {/* Action buttons - visible only when editing */}
-            {isEditing && !isSaving && (
-              <>
-                {/* Save button */}
-                <IconButton
-                  onClick={handleSave}
-                  className="hover:bg-green-500/20 text-green-400"
-                  label={tActions('save')}
-                >
-                  <Check className={iconClassName} />
-                </IconButton>
-
-                {/* Cancel button */}
-                <IconButton
-                  onClick={handleCancel}
-                  className="hover:bg-red-500/20 text-red-400"
-                  label={tActions('cancel')}
-                >
-                  <X className={iconClassName} />
-                </IconButton>
-              </>
-            )}
-
-            {/* Pencil icon on hover - only show when not editing */}
-            {!isEditing && (
+        {/* Action buttons on the right */}
+        <div className={cn('flex items-center gap-2 shrink-0 ml-auto', actionsClassName)}>
+          {/* Action buttons - visible only when editing */}
+          {isEditing && !isSaving && (
+            <>
+              {/* Save button */}
               <IconButton
-                onClick={startEditing}
-                className="text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-slate-500/20"
-                label={tActions('edit')}
+                onClick={handleSave}
+                className="hover:bg-green-500/20 text-green-400"
+                label={tActions('save')}
               >
-                <Pencil className={iconClassName} />
+                <Check size={iconSize} className={iconClassName} />
               </IconButton>
-            )}
 
-            {/* Loading spinner overlay */}
-            {isSaving && <LoadingSpinner className={iconClassName} />}
-          </div>
+              {/* Cancel button */}
+              <IconButton
+                onClick={handleCancel}
+                className="hover:bg-red-500/20 text-red-400"
+                label={tActions('cancel')}
+              >
+                <X size={iconSize} className={iconClassName} />
+              </IconButton>
+            </>
+          )}
+
+          {/* Pencil icon on hover - only show when not editing */}
+          {!isEditing && (
+            <IconButton
+              onClick={startEditing}
+              className="text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-slate-500/20"
+              label={tActions('edit')}
+            >
+              <Pencil size={iconSize} className={iconClassName} />
+            </IconButton>
+          )}
+
+          {/* Loading spinner overlay */}
+          {isSaving && (
+            <LoadingSpinner style={iconSize ? { width: iconSize, height: iconSize } : undefined} />
+          )}
         </div>
       </div>
 
