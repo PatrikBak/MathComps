@@ -443,6 +443,13 @@ export function useProblemSearchQuery(
   // Store previous problems array for efficient comparison (order-dependent)
   const previousProblemsRef = useRef<string[]>([])
 
+  // Track what mark status filter produced the current previousProblems.
+  // This lets us distinguish "mark toggled while filter active" (safe to
+  // optimistically filter) from "user changed the filter dropdown" (previous
+  // problems come from a different filter — optimistic filtering would yield
+  // wrong results, e.g. empty list when switching marked → unmarked).
+  const previousMarkStatusRef = useRef<string | null | undefined>(filters?.markStatus)
+
   // The problems to display
   const finalProblems = useMemo(() => {
     // Flatten the results from all pages
@@ -456,7 +463,8 @@ export function useProblemSearchQuery(
     if (infiniteQuery.isFetching) {
       // All displayed problems already have .marked in the store,
       // so we can filter immediately instead of waiting for the server
-      if (filters?.markStatus) {
+      // We can only do this if the mark status hasn't changed since the last fetch
+      if (filters?.markStatus && filters?.markStatus === previousMarkStatusRef.current) {
         // Get current problems from store
         const problems = useProblemStore.getState().problems
 
@@ -483,6 +491,9 @@ export function useProblemSearchQuery(
       // If we got here, we're fetching and don't do any optimistic updates
       return previousProblems
     }
+
+    // Not fetching — server data is fresh. Update the mark status ref.
+    previousMarkStatusRef.current = filters?.markStatus
 
     // Here we need to figure out if there was a change in the problems
     // First compare lengths
