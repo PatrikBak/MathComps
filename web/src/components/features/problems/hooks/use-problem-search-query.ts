@@ -110,32 +110,13 @@ export const problemQueryKeys = {
   // Base key for all problem-related queries
   all: ['problems'] as const,
 
-  // Key for favorite problems
-  favorites: ['problems', 'favorites'] as const,
-
-  // Key for a specific list's search results (used for prefix-match invalidation)
-  list: (contentId: string) => ['problems', `list:${contentId}`] as const,
-
   // Key for initial filter data (all available options)
   initialData: (locale: string, userId: string | null) =>
     [...problemQueryKeys.all, 'initial', locale, userId] as const,
 
   // Key for problem search results with specific filters + for the current user
   search: (locale: string, filters: SearchFiltersState | null, userId: string | null) =>
-    [
-      ...problemQueryKeys.all,
-      filters == null
-        ? null
-        : filters.listContentId
-          ? `list:${filters.listContentId}`
-          : filters.favoritesOnly
-            ? 'favorites'
-            : 'all',
-      'search',
-      locale,
-      filters,
-      userId,
-    ] as const,
+    [...problemQueryKeys.all, 'search', locale, filters, userId] as const,
 
   // Key for a single problem by slug
   single: (locale: string, problemSlug: string | null, userId: string | null) =>
@@ -462,6 +443,13 @@ export function useProblemSearchQuery(
   // Store previous problems array for efficient comparison (order-dependent)
   const previousProblemsRef = useRef<string[]>([])
 
+  // Track what mark status filter produced the current previousProblems.
+  // This lets us distinguish "mark toggled while filter active" (safe to
+  // optimistically filter) from "user changed the filter dropdown" (previous
+  // problems come from a different filter — optimistic filtering would yield
+  // wrong results, e.g. empty list when switching marked → unmarked).
+  const previousMarkStatusRef = useRef<string | null | undefined>(filters?.markStatus)
+
   // The problems to display
   const finalProblems = useMemo(() => {
     // Flatten the results from all pages
@@ -471,9 +459,41 @@ export function useProblemSearchQuery(
     const previousProblems = previousProblemsRef.current
 
     // If we're searching and have no new data yet, keep showing previous problems
+    // with optimistic client-side filtering for mark status
     if (infiniteQuery.isFetching) {
+      // All displayed problems already have .marked in the store,
+      // so we can filter immediately instead of waiting for the server
+      // We can only do this if the mark status hasn't changed since the last fetch
+      if (filters?.markStatus && filters?.markStatus === previousMarkStatusRef.current) {
+        // Get current problems from store
+        const problems = useProblemStore.getState().problems
+
+        // Filter current visible problems based on mark status
+        return previousProblems.filter((slug) => {
+          // Get the current problem from store
+          const problem = problems[slug]
+
+          /// The problem should be in the store...
+          if (!problem) throw new Error(`Problem ${slug} not found in store`)
+
+          // Filter based on mark status
+          switch (filters.markStatus) {
+            case 'marked':
+              return problem.marked
+            case 'unmarked':
+              return !problem.marked
+            default:
+              throw new Error(`Unknown mark status: ${filters.markStatus}`)
+          }
+        })
+      }
+
+      // If we got here, we're fetching and don't do any optimistic updates
       return previousProblems
     }
+
+    // Not fetching — server data is fresh. Update the mark status ref.
+    previousMarkStatusRef.current = filters?.markStatus
 
     // Here we need to figure out if there was a change in the problems
     // First compare lengths
@@ -491,7 +511,7 @@ export function useProblemSearchQuery(
 
     // The new problems will be displayed
     return newProblems
-  }, [infiniteQuery.data?.pages, infiniteQuery.isFetching])
+  }, [infiniteQuery.data?.pages, infiniteQuery.isFetching, filters?.markStatus])
 
   // Sync problems to the global store
   useEffect(() => {

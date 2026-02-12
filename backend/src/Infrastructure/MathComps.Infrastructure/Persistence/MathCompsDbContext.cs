@@ -61,6 +61,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Likes on problems by users.</summary>
     public DbSet<ProblemLike> ProblemLikes => Set<ProblemLike>();
 
+    /// <summary>Mark statuses on problems by users.</summary>
+    public DbSet<ProblemMarkStatus> ProblemMarkStatuses => Set<ProblemMarkStatus>();
+
     /// <summary>Comments on content.</summary>
     public DbSet<Comment> Comments => Set<Comment>();
 
@@ -294,6 +297,11 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             e.HasMany(p => p.Likes)
              .WithOne(l => l.Problem)
              .HasForeignKey(l => l.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(p => p.MarkStatuses)
+             .WithOne(ms => ms.Problem)
+             .HasForeignKey(ms => ms.ProblemId)
              .OnDelete(DeleteBehavior.Cascade);
 
             // Within the same round instance, problem numbers must be unique.
@@ -532,6 +540,34 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemLike
+
+        #region ProblemMarkStatus
+
+        modelBuilder.Entity<ProblemMarkStatus>(e =>
+        {
+            // Composite primary key: a user can only mark a problem once
+            e.HasKey(ms => new { ms.UserId, ms.ProblemId });
+
+            // Foreign key to User with cascade delete
+            e.HasOne(ms => ms.User)
+             .WithMany()
+             .HasForeignKey(ms => ms.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Foreign key to Problem with cascade delete
+            e.HasOne(ms => ms.Problem)
+             .WithMany(p => p.MarkStatuses)
+             .HasForeignKey(ms => ms.ProblemId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Index on ProblemId for efficient lookup of all marks for a problem
+            e.HasIndex(ms => ms.ProblemId).HasDatabaseName("ix_problem_mark_status_problem_id");
+
+            // Index on UserId for efficient lookup of all marks by a user
+            e.HasIndex(ms => ms.UserId).HasDatabaseName("ix_problem_mark_status_user_id");
+        });
+
+        #endregion ProblemMarkStatus
 
         #region Comment
 

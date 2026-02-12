@@ -1,5 +1,5 @@
 import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { useRestorePendingLike } from '@/hooks/use-restore-pending-like'
+import { useRestorePendingAction } from '@/hooks/use-restore-pending-action'
 import { useProblemStore } from '@/stores/problem-store'
 
 import type { Problem } from '../types/problem-api-types'
@@ -16,7 +16,7 @@ export function usePendingProblemLike() {
   const problems = useProblemStore((state) => state.problems)
 
   // Use the generic restoration hook
-  useRestorePendingLike<Problem>({
+  useRestorePendingAction<Problem>({
     storageKey: PENDING_PROBLEM_LIKE_STORAGE_KEY,
     getItem: (problemSlug) => problems[problemSlug],
     shouldExecute: (problem) => !problem.liked,

@@ -34,6 +34,11 @@ export type ContestSelection = {
 }
 
 /**
+ * Filter values for problem mark status.
+ */
+export type MarkStatusFilter = 'marked' | 'unmarked'
+
+/**
  * SearchFiltersState with enhanced ContestSelection.
  * Uses the UI ContestSelection type with display labels and type information.
  * This is the state managed by React components for the problem library UI.
@@ -49,6 +54,7 @@ export type SearchFiltersState = {
   authors: LabeledSlug[]
   authorLogic: 'or' | 'and'
   favoritesOnly: boolean
+  markStatus: MarkStatusFilter | null
   listContentId: string | null
 }
 

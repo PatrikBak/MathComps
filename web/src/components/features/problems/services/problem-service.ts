@@ -20,6 +20,7 @@ import {
   getProblemBySlugApiUrl,
   getProblemsFilterApiUrl,
   getToggleProblemLikeApiUrl,
+  getToggleProblemMarkApiUrl,
 } from './problem-api-urls'
 
 /**
@@ -87,6 +88,7 @@ export async function getProblemBySlug(
         authors: [],
         authorLogic: 'or',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -147,6 +149,7 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
         pageSize: 20,
         pageNumber: 1,
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }),
     }),
@@ -196,6 +199,7 @@ export async function searchProblems(
         pageSize,
         pageNumber,
         favoritesOnly: filters.favoritesOnly,
+        markStatus: filters.markStatus,
         listContentId: filters.listContentId,
       }),
       signal,
@@ -249,6 +253,24 @@ export async function toggleProblemLike(
   slug: string
 ): Promise<ApiResult<void>> {
   return apiCall<void>(() => getToggleProblemLikeApiUrl(slug), {
+    method: 'POST',
+  })
+}
+
+/**
+ * Toggles a user's mark on a problem.
+ *
+ * @param apiCall - The API caller function.
+ * @param slug - The slug of the problem to toggle the mark for.
+ *
+ * @returns An {@link ApiResult} containing the {@link void}
+ *          if the request is successful, or a {@link ProblemError} if the request fails.
+ */
+export async function toggleProblemMark(
+  apiCall: ApiCaller,
+  slug: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getToggleProblemMarkApiUrl(slug), {
     method: 'POST',
   })
 }

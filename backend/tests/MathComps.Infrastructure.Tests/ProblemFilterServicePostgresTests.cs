@@ -1199,6 +1199,146 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     #endregion
 
+    #region Mark Status Projection Tests
+
+    /// <summary>
+    /// Verifies that the Marked boolean is correctly projected for different users and anonymous access.
+    /// Seed data: p1 and p3 are marked by user1, p3 is marked by user2.
+    /// </summary>
+    [Fact]
+    public Task FilterReturnsCorrectMarkInformation() => RunTestAsync(async service =>
+    {
+        // Arrange
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        var baseQuery = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var resultUser1 = await service.FilterAsync(baseQuery with { UserId = user1Id });
+        var resultUser2 = await service.FilterAsync(baseQuery with { UserId = user2Id });
+        var resultAnon = await service.FilterAsync(baseQuery);
+
+        // Assert: User1 — p1 and p3 are marked
+        var p1User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
+        var p2User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-b-i-1");
+        var p3User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-c-i-1");
+
+        Assert.True(p1User1.Marked);
+        Assert.False(p2User1.Marked);
+        Assert.True(p3User1.Marked);
+
+        // Assert: User2 — only p3 is marked
+        var p1User2 = resultUser2.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
+        var p3User2 = resultUser2.Problems.Items.First(problem => problem.Slug == "75-c-i-1");
+
+        Assert.False(p1User2.Marked);
+        Assert.True(p3User2.Marked);
+
+        // Assert: Anonymous — all unmarked
+        Assert.All(resultAnon.Problems.Items, problem => Assert.False(problem.Marked));
+    });
+
+    /// <summary>
+    /// Verifies that filtering with MarkStatus.Marked returns only problems marked by the user.
+    /// </summary>
+    [Fact]
+    public Task FilterByMarkStatusMarkedReturnsOnlyMarkedProblems() => RunTestAsync(async service =>
+    {
+        // Arrange — user1 has marked p1 and p3
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false,
+                MarkStatus: MarkStatusFilter.Marked
+            ),
+            UserId: user1Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert — p1 and p3 are marked by user1
+        Assert.Equal(2, result.Problems.TotalCount);
+        Assert.Contains(result.Problems.Items, problem => problem.Slug == "75-a-i-1");
+        Assert.Contains(result.Problems.Items, problem => problem.Slug == "75-c-i-1");
+        Assert.All(result.Problems.Items, problem => Assert.True(problem.Marked));
+    });
+
+    /// <summary>
+    /// Verifies that filtering with MarkStatus.Unmarked returns only problems NOT marked by the user.
+    /// </summary>
+    [Fact]
+    public Task FilterByMarkStatusUnmarkedReturnsOnlyUnmarkedProblems() => RunTestAsync(async service =>
+    {
+        // Arrange — user1 has marked p1 and p3, so 5 problems should be unmarked
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false,
+                MarkStatus: MarkStatusFilter.Unmarked
+            ),
+            UserId: user1Id,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert — 5 out of 7 problems are unmarked (p2, p4, p5, p6, p7)
+        Assert.Equal(5, result.Problems.TotalCount);
+        Assert.DoesNotContain(result.Problems.Items, problem => problem.Slug == "75-a-i-1");
+        Assert.DoesNotContain(result.Problems.Items, problem => problem.Slug == "75-c-i-1");
+        Assert.All(result.Problems.Items, problem => Assert.False(problem.Marked));
+    });
+
+    #endregion
+
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -1632,6 +1772,13 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // p2 (75-b-i-1): Liked by user1 and user2
         context.ProblemLikes.Add(new ProblemLike { UserId = user1Id, ProblemId = p2.Id, CreatedAt = DateTimeOffset.UtcNow });
         context.ProblemLikes.Add(new ProblemLike { UserId = user2Id, ProblemId = p2.Id, CreatedAt = DateTimeOffset.UtcNow });
+
+        // Mark statuses for testing mark status projection and filtering
+        // p1 (75-a-i-1): Marked by user1
+        context.ProblemMarkStatuses.Add(new ProblemMarkStatus { UserId = user1Id, ProblemId = p1.Id, CreatedAt = DateTimeOffset.UtcNow });
+        // p3 (75-c-i-1): Marked by user1 and user2
+        context.ProblemMarkStatuses.Add(new ProblemMarkStatus { UserId = user1Id, ProblemId = p3.Id, CreatedAt = DateTimeOffset.UtcNow });
+        context.ProblemMarkStatuses.Add(new ProblemMarkStatus { UserId = user2Id, ProblemId = p3.Id, CreatedAt = DateTimeOffset.UtcNow });
 
         // Add comments for testing
         // p1 (75-a-i-1): 1 active comment, 1 superseded comment

@@ -27,6 +27,9 @@ type ProblemState = {
   /* Toggle the like state of a problem in the store. */
   toggleProblemLike: (slug: string) => void
 
+  /* Toggle the mark state of a problem in the store. */
+  toggleProblemMark: (slug: string) => void
+
   /* Add or remove a list's contentId from a problem's listContentIds. */
   toggleListMembership: (problemSlug: string, contentId: string) => void
 
@@ -101,6 +104,39 @@ export const useProblemStore = create<ProblemState>((set) => ({
       // If we are filtering by "Liked Only" (e.g., favorites tab),
       // and we just unliked it, we should remove it from the view immediately.
       if (state.currentFilters?.favoritesOnly && !problem.liked) {
+        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
+      }
+
+      // Return the updated state
+      return {
+        problems: updatedProblems,
+        displayedProblems: updatedDisplayed,
+      }
+    }),
+
+  toggleProblemMark: (problemSlug) =>
+    set((state) => {
+      // Get the problem from the store
+      const problem = state.problems[problemSlug]
+
+      // Ensure the problem is there
+      if (!problem) return state
+
+      // Update the problem in the store
+      const updatedProblems = {
+        ...state.problems,
+        [problemSlug]: {
+          ...problem,
+          marked: !problem.marked,
+        },
+      }
+
+      // We might update the displayed problems if we are filtering by "Marked Only"
+      let updatedDisplayed = state.displayedProblems
+
+      // If we are filtering by "Marked Only" and we just unmarked it,
+      // we should remove it from the view immediately.
+      if (state.currentFilters?.markStatus === 'marked' && !problem.marked) {
         updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
       }
 

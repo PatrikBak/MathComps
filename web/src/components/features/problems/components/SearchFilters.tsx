@@ -140,12 +140,12 @@ export const SearchFilters = ({
   // A helper function to update filters
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
 
-  // Clear favoritesOnly when user logs out
+  // Clear user-specific filters when user logs out
   useEffect(() => {
-    if (isLoaded && !isSignedIn && filters.favoritesOnly) {
-      updateFilter('favoritesOnly', false, 'discrete')
+    if (isLoaded && !isSignedIn && (filters.favoritesOnly || filters.markStatus)) {
+      onFiltersChange({ ...filters, favoritesOnly: false, markStatus: null }, 'discrete')
     }
-  }, [isLoaded, isSignedIn, filters.favoritesOnly, updateFilter])
+  }, [isLoaded, isSignedIn, filters, onFiltersChange])
 
   return (
     <div className="flex flex-col rounded-lg border border-slate-600/40 bg-slate-800/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">

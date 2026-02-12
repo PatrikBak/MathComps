@@ -17,6 +17,7 @@ const createFilters = (overrides: Partial<SearchFiltersState>): SearchFiltersSta
   authorLogic: 'or',
   contestSelection: [],
   favoritesOnly: false,
+  markStatus: null,
   listContentId: null,
   ...overrides,
 })
@@ -192,6 +193,32 @@ describe('Search URL Serialization', () => {
 
     it('should reject id param (handled by hasProblemId)', () => {
       expect(deserializeFilters('id=75-a-i-5')).toBeNull()
+    })
+  })
+
+  describe('Mark status serialization', () => {
+    it('should serialize markStatus=marked to URL', () => {
+      const filters = createFilters({ markStatus: 'marked' })
+
+      expect(serializeFilters(filters)).toBe('markStatus=marked')
+    })
+
+    it('should omit markStatus when null', () => {
+      const filters = createFilters({ markStatus: null })
+
+      expect(serializeFilters(filters)).not.toContain('markStatus')
+    })
+
+    it('should deserialize valid markStatus value', () => {
+      const result = deserializeFilters('markStatus=unmarked')
+
+      expect(result?.markStatus).toBe('unmarked')
+    })
+
+    it('should reject invalid markStatus value', () => {
+      const result = deserializeFilters('markStatus=invalid')
+
+      expect(result?.markStatus).toBeNull()
     })
   })
 

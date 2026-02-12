@@ -20,6 +20,7 @@ describe('Problem Search Logic', () => {
     authorLogic: 'or',
     contestSelection: [],
     favoritesOnly: false,
+    markStatus: null,
     listContentId: null,
   }
 

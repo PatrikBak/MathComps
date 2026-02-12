@@ -75,8 +75,8 @@ export function useToggleListItem() {
       // Invalidate the lists cache (problem counts may have changed)
       queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
 
-      // Invalidate the search results for this specific list
-      queryClient.invalidateQueries({ queryKey: problemQueryKeys.list(contentId) })
+      // Invalidate all problem search results (list contents may have changed)
+      queryClient.invalidateQueries({ queryKey: problemQueryKeys.all })
 
       // Show undo toast when removing from a list while viewing it
       // (the problem just disappeared from the view, so undo is critical)

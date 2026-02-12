@@ -15,6 +15,7 @@ export function shouldTriggerSearch(searchFilters: SearchFiltersState): boolean 
       searchFilters.problemNumbers.length > 0 ||
       (searchFilters.contestSelection && searchFilters.contestSelection.length > 0) ||
       searchFilters.favoritesOnly ||
+      searchFilters.markStatus != null ||
       searchFilters.listContentId != null
     if (!hasOtherFilters) return false
   }
@@ -39,6 +40,7 @@ export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersSt
     prev.authors.length === next.authors.length &&
     prev.authorLogic === next.authorLogic &&
     prev.favoritesOnly === next.favoritesOnly &&
+    prev.markStatus === next.markStatus &&
     prev.listContentId === next.listContentId &&
     equalSelectionsArrays(prev.contestSelection, next.contestSelection)
   )

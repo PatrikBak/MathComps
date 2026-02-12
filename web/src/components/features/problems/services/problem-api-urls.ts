@@ -59,6 +59,16 @@ export function getToggleProblemLikeApiUrl(slug: string): string {
 }
 
 /**
+ * Builds the API URL for toggling a mark on a problem by its slug.
+ *
+ * @param slug - The problem slug
+ * @returns The API URL path to toggle the mark
+ */
+export function getToggleProblemMarkApiUrl(slug: string): string {
+  return buildApiUrl(`/problems/${slug}/mark`)
+}
+
+/**
  * Builds the API URL for fetching contests grouped by season.
  *
  * @returns The API URL path for the contests-by-season endpoint

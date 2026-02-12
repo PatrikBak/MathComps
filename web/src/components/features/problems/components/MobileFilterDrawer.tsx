@@ -173,7 +173,7 @@ export const MobileFilterButton = ({ onClick, activeFilterCount }: MobileFilterB
       }
     >
       <Filter className="h-4 w-4 flex-shrink-0" />
-      <span className="hidden min-[350px]:inline">{tFilters('title')}</span>
+      <span className="hidden min-[500px]:inline">{tFilters('title')}</span>
       {activeFilterCount > 0 && (
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-xs font-medium text-white flex-shrink-0">
           {activeFilterCount}

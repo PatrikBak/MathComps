@@ -15,6 +15,7 @@ import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { SHOW_TECHNIQUE_TAGS_STORAGE_KEY } from '@/constants/local-storage-constants'
 
 import { usePendingProblemLike } from '../hooks/use-pending-problem-like'
+import { usePendingProblemMark } from '../hooks/use-pending-problem-mark'
 import { useProblemSearch } from '../hooks/use-problem-search'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
@@ -68,6 +69,9 @@ export default function ProblemsLibrary() {
 
   // Handle pending problem likes after user authentication
   usePendingProblemLike()
+
+  // Handle pending problem marks after user authentication
+  usePendingProblemMark()
 
   // We'll track whether we have the needed data. Before that, we show skeletons
   const isPageReady = !isLoading && filters && filterOptions && hasInitialDataLoaded

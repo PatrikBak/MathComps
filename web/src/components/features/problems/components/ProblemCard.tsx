@@ -1,4 +1,5 @@
 import {
+  Check,
   ChevronDown,
   ExternalLink,
   Eye,
@@ -24,6 +25,7 @@ import { useProblem } from '@/stores/problem-store'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
 import { useToggleProblemLike } from '../hooks/use-toggle-problem-like'
+import { useToggleProblemMark } from '../hooks/use-toggle-problem-mark'
 import { sortTagsByCategory } from '../utils/tag-utils'
 import { AddToListMenu } from './AddToListMenu'
 import Chip from './Chip'
@@ -134,6 +136,9 @@ export function ProblemCard({
   // The hook to toggle likes
   const toggleLike = useToggleProblemLike()
 
+  // The hook to toggle mark status
+  const toggleMark = useToggleProblemMark()
+
   // Get translations for the component
   const tProblems = useTranslations('problems')
 
@@ -223,9 +228,11 @@ export function ProblemCard({
   return (
     <div
       className={cn(
-        'bg-slate-800 border rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:border-slate-500/80',
+        'bg-slate-800 border rounded-lg shadow-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10 hover:border-slate-500/80',
         // Highlight border when similar problems section is expanded
-        expandedView !== null ? 'border-indigo-500' : 'border-slate-600/60'
+        expandedView !== null ? 'border-indigo-500' : 'border-slate-600/60',
+        // Dim marked cards for a "dealt with" feel
+        problem.marked && 'opacity-50'
       )}
     >
       {/* Card Header — slug left, action icons right */}
@@ -240,6 +247,22 @@ export function ProblemCard({
 
         {/* Action icons */}
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Mark toggle button */}
+          <button
+            onClick={() => toggleMark(problem.slug)}
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-slate-700/50"
+            title={problem.marked ? tProblems('marks.unmark') : tProblems('marks.mark')}
+          >
+            <Check
+              size={14}
+              className={cn(
+                'sm:!w-[18px] sm:!h-[18px] transition-all duration-500',
+                problem.marked ? 'text-emerald-400' : 'text-gray-400'
+              )}
+              strokeWidth={problem.marked ? 3 : 2}
+            />
+          </button>
+
           {/* Like button */}
           <button
             onClick={() => toggleLike(problem.slug)}
