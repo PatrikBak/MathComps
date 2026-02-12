@@ -1,7 +1,7 @@
 import { useAuth } from '@clerk/nextjs'
 
 import { PENDING_COMMENT_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { useRestorePendingLike } from '@/hooks/use-restore-pending-like'
+import { useRestorePendingAction } from '@/hooks/use-restore-pending-action'
 
 import type { CommentTarget } from '../api/comment-api-types'
 import type { CommentData } from '../components/CommentItem'
@@ -19,7 +19,7 @@ export function usePendingCommentLike(comments: CommentData[] | undefined, targe
   const { mutate: toggleLike } = useToggleCommentLike()
 
   // Use the generic restoration hook...The hook prevents self-liking and double-liking
-  useRestorePendingLike<CommentData>({
+  useRestorePendingAction<CommentData>({
     storageKey: PENDING_COMMENT_LIKE_STORAGE_KEY,
     getItem: (id) => (comments ? findCommentInTree(comments, id) : undefined),
     shouldExecute: (comment) => !comment.isLiked && comment.authorId !== userId,

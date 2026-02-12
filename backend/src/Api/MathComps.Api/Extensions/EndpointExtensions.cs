@@ -165,6 +165,37 @@ public static class EndpointExtensions
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
+        // The endpoint for toggling a mark on a problem
+        app.MapPost("/problems/{slug}/mark", async (
+            string slug,
+            HttpContext context,
+            IUserManager userManager,
+            IProblemLookupService problemLookupService,
+            IUserProblemService userProblemService) =>
+        {
+            // Get user ID
+            var userId = await GetUserIdAsync(context, userManager);
+
+            // No user is very sus, let's say unauthorized
+            if (userId == null)
+                return Results.Unauthorized();
+
+            // Get the internal problem ID
+            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug);
+
+            // Ensure the problem exists 
+            if (problemId == null)
+                return Results.NotFound(new { message = "Problem not found" });
+
+            // Toggle mark
+            await userProblemService.ToggleMarkAsync(userId.Value, problemId.Value);
+
+            // No reason to return anything?
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         #region Comment Endpoints
 
         // Get threaded comments for a target (handout, problem, news)

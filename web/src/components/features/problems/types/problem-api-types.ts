@@ -58,6 +58,7 @@ export type Problem = {
   similarProblems: SimilarProblem[]
   images: ProblemImage[]
   liked: boolean
+  marked: boolean
   likeCount: number
   commentCount: number
   listContentIds: string[]

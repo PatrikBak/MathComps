@@ -4,9 +4,9 @@ import { useEffect } from 'react'
 import { useApi } from '@/hooks/use-api'
 
 /**
- * Configuration for restoring a pending like action.
+ * Configuration for restoring a pending action.
  */
-type UseRestorePendingLikeConfig<T> = {
+type UseRestorePendingActionConfig<T> = {
   /** The local storage key to use for storing the pending ID/Slug */
   storageKey: string
   /**
@@ -16,18 +16,13 @@ type UseRestorePendingLikeConfig<T> = {
   getItem: (id: string) => T | undefined
   /**
    * Function to check if the action should be executed on the item.
-   * Typically checks if the item is already liked to avoid accidental toggles.
+   * Typically checks if the item is already in the desired state to avoid accidental toggles.
    */
   shouldExecute: (item: T) => boolean
   /**
-   * The action to execute (e.g. toggle like).
+   * The action to execute (e.g. toggle like, toggle mark).
    */
   onExecute: (id: string) => void
-  /**
-   * Dependencies to check for readiness (e.g. data source).
-   * The hook will only run when these are truthy.
-   */
-  dependencies?: unknown[]
 }
 
 /**
@@ -35,15 +30,15 @@ type UseRestorePendingLikeConfig<T> = {
  * 1. Storing an ID when unauthenticated
  * 2. Retrieving it after login
  * 3. Finding the corresponding object
- * 4. Performing an action (like)
+ * 4. Performing an action (like, mark, etc.)
  * 5. Clearing the storage
  */
-export function useRestorePendingLike<T>({
+export function useRestorePendingAction<T>({
   storageKey,
   getItem,
   shouldExecute,
   onExecute,
-}: UseRestorePendingLikeConfig<T>) {
+}: UseRestorePendingActionConfig<T>) {
   // Access the pending ID from local storage
   const [pendingId, setPendingId] = useLocalStorage<string | null>({
     key: storageKey,
@@ -63,7 +58,7 @@ export function useRestorePendingLike<T>({
 
       // If item is found (data is loaded)
       if (item) {
-        // Check if we should execute the action (e.g. not already liked)
+        // Check if we should execute the action (e.g. not already liked/marked)
         if (shouldExecute(item)) {
           // If so, execute the action
           onExecute(pendingId)

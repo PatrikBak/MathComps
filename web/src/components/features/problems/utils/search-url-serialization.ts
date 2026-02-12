@@ -1,4 +1,8 @@
-import type { SearchFiltersState, UrlQueryState } from '../types/problem-library-types'
+import type {
+  MarkStatusFilter,
+  SearchFiltersState,
+  UrlQueryState,
+} from '../types/problem-library-types'
 
 /**
  * URL parameter keys for search filter serialization.
@@ -15,6 +19,7 @@ const FILTER_PARAMS = {
   AUTHOR_LOGIC: 'authorLogic',
   COMPETITIONS: 'competitions',
   FAVORITES_ONLY: 'favoritesOnly',
+  MARK_STATUS: 'markStatus',
   LIST: 'list',
 } as const
 
@@ -140,6 +145,10 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
       params.push(`${URL_PARAMS.FAVORITES_ONLY}=true`)
     }
 
+    if (filters.markStatus) {
+      params.push(`${URL_PARAMS.MARK_STATUS}=${filters.markStatus}`)
+    }
+
     if (filters.listContentId) {
       params.push(`${URL_PARAMS.LIST}=${encodeURIComponent(filters.listContentId)}`)
     }
@@ -179,6 +188,7 @@ export const deserializeFilters = (queryString: string): UrlQueryState | null =>
     authorLogic: (params.get(URL_PARAMS.AUTHOR_LOGIC)?.toLowerCase() as 'or' | 'and') || 'or',
     competitionSelectionParts: parseCompetitionSelectionParts(params.get(URL_PARAMS.COMPETITIONS)),
     favoritesOnly: params.get(URL_PARAMS.FAVORITES_ONLY) === 'true',
+    markStatus: parseMarkStatus(params.get(URL_PARAMS.MARK_STATUS)),
     listContentId: params.get(URL_PARAMS.LIST) || null,
   }
 }
@@ -243,4 +253,17 @@ const parseSelectionParts = (selectionString: string): string[] | null => {
   }
 
   return parts
+}
+
+/**
+ * Parses a mark status URL parameter value into a typed filter value.
+ * Only accepts 'marked' or 'unmarked', returns null for invalid/missing values.
+ *
+ * @param value - URL parameter value to parse
+ *
+ * @returns Typed mark status or null
+ */
+const parseMarkStatus = (value: string | null): MarkStatusFilter | null => {
+  if (value === 'marked' || value === 'unmarked') return value
+  return null
 }

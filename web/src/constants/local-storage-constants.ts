@@ -5,6 +5,12 @@
 export const PENDING_PROBLEM_LIKE_STORAGE_KEY = 'pending-problem-like'
 
 /**
+ * Key used to store the slug of a problem that the user attempted to mark while unauthenticated.
+ * Used to restore the action after login.
+ */
+export const PENDING_PROBLEM_MARK_STORAGE_KEY = 'pending-problem-mark'
+
+/**
  * Key used to store the id of a comment that the user attempted to like while unauthenticated.
  * Used to restore the action after login.
  */

@@ -86,6 +86,11 @@ public class Problem
     public ICollection<ProblemLike> Likes { get; } = [];
 
     /// <summary>
+    /// Mark statuses on this problem by users.
+    /// </summary>
+    public ICollection<ProblemMarkStatus> MarkStatuses { get; } = [];
+
+    /// <summary>
     /// Comments on this problem via the join entity.
     /// </summary>
     public ICollection<ProblemComment> ProblemComments { get; } = [];

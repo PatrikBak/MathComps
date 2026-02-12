@@ -1,14 +1,24 @@
 import { useMediaQuery } from '@mantine/hooks'
-import { ChevronDown, ChevronUp, FilterX, Grid3X3, Loader2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, FilterX, Grid3X3, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../../shared/components/DropdownMenu'
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { usePrefetchContestBrowser } from '../hooks/use-contest-browser'
 import { useContestBrowserModal } from '../hooks/use-contest-browser-modal'
-import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
+import type {
+  FilterOptionsWithCounts,
+  MarkStatusFilter,
+  SearchFiltersState,
+} from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
 import { interpretSelectionParts } from '../utils/selection-interpreter'
 import { createDefaultFilters } from '../utils/url-initialization'
@@ -48,11 +58,12 @@ type ActiveFiltersBarProps = {
  * 1. A count of the number of problems matching the active filters
  * 2. A list of active filters as removable chips
  * 3. A "Clear All" button to reset all filters
- * 4. A "Share" button to share the current filters
- * 5. A "Technique Tags" toggle (inside a menu) to show/hide technique tags on problem cards
- * 6. A "Contest Browser" button to open a modal for selecting competitions
- * 7. A "Mobile Filter" button to open the mobile filter drawer on narrow viewports
- * 8. A button to expand/collapse the filter sidebar. If there are too many filters,
+ * 4. A "Technique Tags" toggle (inside a menu) to show/hide technique tags on problem cards
+ * 5. A "Contest Browser" button to open a modal for selecting competitions
+ * 6. A "Share" button to share the current filters (visible on xl screens only)
+ * 7. A "Mark Status" dropdown to filter by marked/unmarked problems
+ * 8. A "Mobile Filter" button to open the mobile filter drawer on narrow viewports
+ * 9. A button to expand/collapse the filter sidebar. If there are too many filters,
  *    the sidebar will always be collapsed automatically.
  */
 export default function ActiveFiltersBar({
@@ -237,15 +248,21 @@ export default function ActiveFiltersBar({
     onFiltersChange({ ...filters, searchText: '', searchInSolution: false }, 'text')
   }
 
-  // --- Handlers for toggling logic modes ---
+  // Handler for changing the tag logic
   const handleToggleTagLogic = () => {
     const newLogic = filters.tagLogic === 'and' ? 'or' : 'and'
     onFiltersChange({ ...filters, tagLogic: newLogic }, 'discrete')
   }
 
+  // Handler for changing the author logic
   const handleToggleAuthorLogic = () => {
     const newLogic = filters.authorLogic === 'and' ? 'or' : 'and'
     onFiltersChange({ ...filters, authorLogic: newLogic }, 'discrete')
+  }
+
+  // Handler for changing the mark status filter
+  const handleMarkStatusChange = (status: MarkStatusFilter | null) => {
+    onFiltersChange({ ...filters, markStatus: status }, 'discrete')
   }
 
   // --- Data Transformation and Grouping ---
@@ -341,6 +358,26 @@ export default function ActiveFiltersBar({
           },
         ]
       : []),
+    // Show mark status chip when filtering by marked/unmarked
+    ...(filters.markStatus
+      ? [
+          {
+            label: tFilters('markStatus'),
+            chips: [
+              {
+                id: 'markStatus',
+                displayName:
+                  filters.markStatus === 'marked'
+                    ? tFilters('markStatusMarked')
+                    : filters.markStatus === 'unmarked'
+                      ? tFilters('markStatusUnmarked')
+                      : 'Invalid mark status',
+                onClick: () => onFiltersChange({ ...filters, markStatus: null }, 'discrete'),
+              },
+            ],
+          },
+        ]
+      : []),
     {
       label: tFilters('competitions'),
       chips: competitionChips,
@@ -387,25 +424,27 @@ export default function ActiveFiltersBar({
   const hasAnyActive =
     activeTokenCount > 0 ||
     Boolean(filters.searchText && filters.searchText.trim().length > 0) ||
-    Boolean(filters.searchInSolution)
+    Boolean(filters.searchInSolution) ||
+    Boolean(filters.markStatus)
 
   return (
     <div className="rounded-xl border border-slate-600/60 bg-slate-800 p-3 lg:p-4">
-      {/* Custom breakpoint for mobile layout adjustments at 500px */}
+      {/* Custom breakpoints for label visibility */}
       <style>{`
-        @media (min-width: 500px) {
-          .share-custom-show { display: inline-flex !important; }
+        /* Show labels and expand gaps on wider mobile screens (no sidebar yet) */
+        @media (min-width: 650px) {
           .label-custom-show { display: inline !important; }
           .gap-custom-expand { gap: 0.5rem !important; }
-          /* Hide Share items in dropdown menu at larger screens */
-          .share-custom-hide-content > :first-child,
-          .share-custom-hide-content > :nth-child(2) { display: none !important; }
+        }
+        /* Hide labels again when sidebar appears (lg) — not enough room */
+        @media (min-width: 1024px) and (max-width: 1279px) {
+          .label-custom-show { display: none !important; }
         }
       `}</style>
       {/* Header Row */}
-      <div className="flex flex-nowrap items-center justify-between gap-x-1.5 gap-custom-expand min-w-0">
+      <div className="flex flex-nowrap items-center justify-between gap-x-0.5 min-[400px]:gap-x-1.5 gap-custom-expand min-w-0">
         {/* STATUS (Left Side) */}
-        <div className="flex items-center gap-1.5 gap-custom-expand text-sm flex-shrink min-w-0">
+        <div className="flex items-center gap-0.5 min-[400px]:gap-1.5 gap-custom-expand text-sm flex-shrink min-w-0">
           {isSidebarVisible ? (
             <div className="flex items-center gap-2 flex-shrink-0">
               <h2 className="font-semibold text-slate-200 whitespace-nowrap">
@@ -463,7 +502,7 @@ export default function ActiveFiltersBar({
         </div>
 
         {/* ACTION (Right Side) */}
-        <div className="flex flex-nowrap items-center justify-end gap-x-1 sm:gap-x-2 flex-shrink-0">
+        <div className="flex flex-nowrap items-center justify-end gap-x-0 min-[400px]:gap-x-1 sm:gap-x-2 flex-shrink-0">
           {/* Contest browser button */}
           <button
             onClick={contestBrowser.open}
@@ -477,13 +516,67 @@ export default function ActiveFiltersBar({
             <Grid3X3 className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="hidden label-custom-show">{tFilters('competitions')}</span>
           </button>
+
           {/* Share button */}
           <ShareButton
             filters={filters}
-            className="hidden share-custom-show h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
+            className="hidden xl:inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
             hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
             disabled:opacity-30 disabled:pointer-events-none whitespace-nowrap"
           />
+
+          {/* Mark status dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={`inline-flex h-7 items-center gap-1 rounded-md px-2.5 text-xs whitespace-nowrap
+                  hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                  ${filters.markStatus === 'marked' ? 'text-emerald-400' : filters.markStatus === 'unmarked' ? 'text-amber-400' : 'text-slate-400 hover:text-slate-300'}`}
+                aria-label={tFilters('markStatus')}
+                title={tFilters('markStatus')}
+              >
+                <Check className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="hidden label-custom-show">
+                  {filters.markStatus
+                    ? filters.markStatus === 'marked'
+                      ? tFilters('markStatusMarked')
+                      : tFilters('markStatusUnmarked')
+                    : tFilters('markStatus')}
+                </span>
+                <ChevronDown className="h-3 w-3 flex-shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-40"
+              onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => handleMarkStatusChange(null)}
+              >
+                <span className={!filters.markStatus ? 'text-indigo-300' : ''}>
+                  {tFilters('markStatusAll')}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => handleMarkStatusChange('marked')}
+              >
+                <span className={filters.markStatus === 'marked' ? 'text-emerald-300' : ''}>
+                  {tFilters('markStatusMarked')}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => handleMarkStatusChange('unmarked')}
+              >
+                <span className={filters.markStatus === 'unmarked' ? 'text-amber-300' : ''}>
+                  {tFilters('markStatusUnmarked')}
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Reset button */}
           <button

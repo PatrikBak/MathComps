@@ -1,5 +1,17 @@
 [
   {
+    "id": "Rm5wKxYz2pLsNtVqJcFbD",
+    "slug": "mark-status",
+    "title": {
+      "sk": "Označovanie úloh",
+      "en": "Problem Marking",
+      "cs": "Označování úloh"
+    },
+    "date": "2026-02-12",
+    "category": "development",
+    "author": "Patrik Bak"
+  },
+  {
     "id": "Tq4vNwXr8sKmLpYzJcFbA",
     "slug": "user-lists",
     "title": {

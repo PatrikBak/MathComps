@@ -18,6 +18,7 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// <param name="Images">The collection of images associated with this problem.</param>
 /// <param name="SolutionLink">Optional external link identifier to the solution (short code/URL key).</param>
 /// <param name="Liked">Whether the current user has liked this problem.</param>
+/// <param name="Marked">Whether the current user has marked this problem.</param>
 /// <param name="LikeCount">Total number of likes for this problem.</param>
 /// <param name="CommentCount">Total number of comments for this problem.</param>
 /// <param name="ListContentIds">Content IDs of the user's lists that contain this problem. Empty for anonymous users.</param>
@@ -32,6 +33,7 @@ public record ProblemDto(
     ImmutableList<ProblemImageDto> Images,
     string? SolutionLink,
     bool Liked,
+    bool Marked,
     int LikeCount,
     int CommentCount,
     ImmutableList<string> ListContentIds

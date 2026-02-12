@@ -116,6 +116,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -152,6 +153,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -180,6 +182,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -208,6 +211,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -243,6 +247,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -273,6 +278,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -318,6 +324,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -356,6 +363,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -437,6 +445,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -482,6 +491,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -512,6 +522,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 
@@ -558,6 +569,7 @@ describe('Competition Chips Logic', () => {
         authors: [],
         authorLogic: 'and',
         favoritesOnly: false,
+        markStatus: null,
         listContentId: null,
       }
 

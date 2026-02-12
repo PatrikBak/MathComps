@@ -29,7 +29,7 @@ public class ProblemFilterService(
     public async Task<FilterResult> FilterAsync(ProblemFilterOptions options)
     {
         // Convenient deconstruct
-        var ((parameters, pageSize, pageNumber, favoritesOnly, listContentId), userId, language) = options;
+        var ((parameters, pageSize, pageNumber, favoritesOnly, listContentId, markStatus), userId, language) = options;
 
         // Positive page numbers indexed from 1
         if (pageNumber <= 0)
@@ -65,7 +65,7 @@ public class ProblemFilterService(
         else textFilteredQuery = dbContext.Problems;
 
         // Apply remaining filters (years, contests, tags, authors, etc.) on top of text filter
-        var filteredQuery = ApplyFilters(textFilteredQuery, parameters, favoritesOnly, listContentId, userId);
+        var filteredQuery = ApplyFilters(textFilteredQuery, parameters, favoritesOnly, listContentId, markStatus, userId);
 
         // Get total count
         var totalCount = await filteredQuery.CountAsync();
@@ -290,6 +290,9 @@ public class ProblemFilterService(
                 // Liked
                 options.UserId != null && data.problem.Likes.Any(like => like.UserId == options.UserId),
 
+                // Marked
+                options.UserId != null && data.problem.MarkStatuses.Any(markStatus => markStatus.UserId == options.UserId),
+
                 // LikeCount
                 data.problem.Likes.Count,
 
@@ -324,7 +327,7 @@ public class ProblemFilterService(
              // Build search bar options with faceting on the text-filtered base query
              // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
              // when AND logic is selected with at least one item
-             await BuildSearchOptionsAsync(textFilteredQuery, parameters, favoritesOnly, listContentId, userId, language);
+             await BuildSearchOptionsAsync(textFilteredQuery, parameters, favoritesOnly, listContentId, markStatus, userId, language);
 
         // Return the complete filter result
         return new FilterResult(pagedResults, searchBarOptions);
@@ -337,9 +340,10 @@ public class ProblemFilterService(
     /// <param name="parameters">Filter parameters containing user selections and search criteria</param>
     /// <param name="favoritesOnly">Whether to filter only favorited problems</param>
     /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
+    /// <param name="markStatus">Optional mark status filter</param>
     /// <param name="userId">The ID of the current user (nullable)</param>
     /// <returns>Filtered queryable with all applicable conditions applied</returns>
-    private static IQueryable<Problem> ApplyFilters(IQueryable<Problem> problems, FilterParameters parameters, bool favoritesOnly, string? listContentId, Guid? userId)
+    private static IQueryable<Problem> ApplyFilters(IQueryable<Problem> problems, FilterParameters parameters, bool favoritesOnly, string? listContentId, MarkStatusFilter? markStatus, Guid? userId)
     {
         // If favorites only is requested...
         if (favoritesOnly)
@@ -352,6 +356,26 @@ public class ProblemFilterService(
             problems = problems.Where(problem =>
                 problem.Likes.Any(like => like.UserId == userId.Value)
             );
+        }
+
+        // Requested only marked problems
+        if (markStatus is MarkStatusFilter.Marked or MarkStatusFilter.Unmarked)
+        {
+            // Mark status filtering requires authentication
+            if (!userId.HasValue)
+                throw new InvalidOperationException("Cannot filter by mark status without an authenticated user.");
+
+            // Only marked or unmarked problems
+            problems = markStatus switch
+            {
+                MarkStatusFilter.Marked => problems.Where(problem =>
+                    problem.MarkStatuses.Any(markStatus => markStatus.UserId == userId.Value)),
+
+                MarkStatusFilter.Unmarked => problems.Where(problem =>
+                    !problem.MarkStatuses.Any(markStatus => markStatus.UserId == userId.Value)),
+
+                _ => throw new InvalidOperationException("Invalid mark status filter.")
+            };
         }
 
         // If filtering by a specific user list...
@@ -530,6 +554,7 @@ public class ProblemFilterService(
     /// <param name="parameters">Current filter parameters used to determine facet counting behavior</param>
     /// <param name="favoritesOnly">Whether to filter only favorited problems</param>
     /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
+    /// <param name="markStatus">Optional mark status filter</param>
     /// <param name="userId">The ID of the current user (nullable)</param>
     /// <returns>Complete search bar options with facet counts and metadata</returns>
     private async Task<SearchBarOptions> BuildSearchOptionsAsync(
@@ -537,26 +562,27 @@ public class ProblemFilterService(
         FilterParameters parameters,
         bool favoritesOnly,
         string? listContentId,
+        MarkStatusFilter? markStatus,
         Guid? userId,
         Language language)
     {
         // Create facet-specific scopes by excluding each facet's own selections
         // This ensures counts reflect available options rather than current selections
-        var seasonsScope = ApplyFilters(baseQuery, parameters with { OlympiadYears = [] }, favoritesOnly, listContentId, userId);
-        var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] }, favoritesOnly, listContentId, userId);
-        var competitionsAndRoundsScope = ApplyFilters(baseQuery, parameters with { Contests = [] }, favoritesOnly, listContentId, userId);
+        var seasonsScope = ApplyFilters(baseQuery, parameters with { OlympiadYears = [] }, favoritesOnly, listContentId, markStatus, userId);
+        var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] }, favoritesOnly, listContentId, markStatus, userId);
+        var competitionsAndRoundsScope = ApplyFilters(baseQuery, parameters with { Contests = [] }, favoritesOnly, listContentId, markStatus, userId);
 
         // For tags: use conjunctive counting when AND logic is selected with at least one tag
         // This shows "how many results if I add this tag" instead of "how many results are available"
         // Otherwise, use disjunctive counting (exclude selected tags)
         var tagsScope = parameters.TagLogic == LogicToggle.And && parameters.TagSlugs.Count > 0
-            ? ApplyFilters(baseQuery, parameters, favoritesOnly, listContentId, userId)
-            : ApplyFilters(baseQuery, parameters with { TagSlugs = [] }, favoritesOnly, listContentId, userId);
+            ? ApplyFilters(baseQuery, parameters, favoritesOnly, listContentId, markStatus, userId)
+            : ApplyFilters(baseQuery, parameters with { TagSlugs = [] }, favoritesOnly, listContentId, markStatus, userId);
 
         // For authors: Analogous logic to that of with tags
         var authorsScope = parameters.AuthorLogic == LogicToggle.And && parameters.AuthorSlugs.Count > 0
-            ? ApplyFilters(baseQuery, parameters, favoritesOnly, listContentId, userId)
-            : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] }, favoritesOnly, listContentId, userId);
+            ? ApplyFilters(baseQuery, parameters, favoritesOnly, listContentId, markStatus, userId)
+            : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] }, favoritesOnly, listContentId, markStatus, userId);
 
         // Build season facet options with problem counts
         var seasonGroups = (await seasonsScope
