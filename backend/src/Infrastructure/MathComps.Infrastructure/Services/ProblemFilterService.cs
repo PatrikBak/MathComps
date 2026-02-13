@@ -926,12 +926,12 @@ public class ProblemFilterService(
                             language,
                             group.CategorySlug
                         ) : null,
-                        localization.GetRoundShortName(
+                        !group.IsDefaultRound ? localization.GetRoundShortName(
                             language,
                             group.CompetitionSlug,
                             group.CategorySlug,
-                            !group.IsDefaultRound ? group.RoundSlug : null
-                        ),
+                            group.RoundSlug
+                        ) : null,
                         group.ProblemCount
                     ));
 

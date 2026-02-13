@@ -11,25 +11,39 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useContestBrowser } from '../hooks/use-contest-browser'
 import type { ContestWithCount, SeasonContestsGroup } from '../types/contest-browser-types'
 
+/** Golden angle in degrees — guarantees maximum hue separation between consecutive indices. */
+const GOLDEN_ANGLE = 137.508
+
 /**
- * Returns the display name of a contest.
+ * Builds a color map for a list of seasons, assigning a distinct HSL color
+ * to each unique competition+category combination using golden angle distribution.
  *
- * @param contest The contest to get the display name for.
+ * @param seasons The seasons to build the color map for.
  *
- * @returns The display name of the contest.
+ * @returns A map from color key to HSL color string.
  */
-function getContestDisplayName(contest: ContestWithCount) {
-  // Start the with competition which always exists
-  let name = contest.competitionName
+function buildHueMap(seasons: SeasonContestsGroup[]): Map<string, number> {
+  // Collect unique keys in order of first appearance
+  const uniqueKeys = [
+    ...new Set(seasons.flatMap((seasonGroup) => seasonGroup.contests.map(getContestColorKey))),
+  ]
 
-  // Category is optional
-  if (contest.categoryName) name += ` ${contest.categoryName}`
+  // Assign golden-angle-spaced hues
+  return new Map(uniqueKeys.map((key, index) => [key, Math.round((index * GOLDEN_ANGLE) % 360)]))
+}
 
-  // Round is optional
-  if (contest.roundName) name += ` - ${contest.roundName}`
-
-  // The final name
-  return name
+/**
+ * Returns the color key for a contest, based on its competition and category.
+ * Contests with the same competition and category share the same color.
+ *
+ * @param contest The contest to get the color key for.
+ *
+ * @returns The color key string.
+ */
+function getContestColorKey(contest: ContestWithCount): string {
+  return contest.categorySlug
+    ? `${contest.competitionSlug}-${contest.categorySlug}`
+    : contest.competitionSlug
 }
 
 /**
@@ -41,6 +55,23 @@ function getContestDisplayName(contest: ContestWithCount) {
  */
 function getSeasonProblemCount(season: SeasonContestsGroup) {
   return season.contests.reduce((sum, contest) => sum + contest.problemCount, 0)
+}
+
+/**
+ * Small decorative label chip used in the contest browser rows.
+ * Not interactive — the entire row is the click target.
+ */
+function Chip({ children, truncate }: { children: React.ReactNode; truncate?: boolean }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-1.5 py-0.5 rounded text-xs text-slate-300 bg-slate-600/30',
+        truncate ? 'truncate' : 'flex-shrink-0'
+      )}
+    >
+      {children}
+    </span>
+  )
 }
 
 /**
@@ -71,20 +102,23 @@ type ContestBrowserModalProps = {
 }
 
 /**
- * Flattened contest item with its parent season.
+ * Flattened contest item with its parent season and visual metadata.
  */
 type FlattenedContest = {
   /** The season of the contest */
   season: SeasonContestsGroup
   /** The contest */
   contest: ContestWithCount
+  /** The hue (0-360) for the competition+category chip */
+  hue: number
 }
 
 /**
  * Modal for browsing competitions organized by year. Features:
  * 1. Search box at the top
  * 2. Virtualized list of seasons with contests
- * 3. Clicking on a contest sets the filters and closes the modal
+ * 3. Color-coded dots for visual grouping by competition+category
+ * 4. Clicking on a contest sets the filters and closes the modal
  */
 export function ContestBrowserModal({
   isOpen,
@@ -103,6 +137,11 @@ export function ContestBrowserModal({
   // Translations for the problems page
   const tProblems = useTranslations('problems')
 
+  // Build the hue map once from all data (not filtered) so colors stay stable during search
+  const hueMap = useMemo(() => {
+    return data?.seasons ? buildHueMap(data.seasons) : new Map<string, number>()
+  }, [data?.seasons])
+
   // The function to filter the seasons based on the search query
   const filteredSeasons = useMemo(() => {
     // Handle no data
@@ -120,26 +159,32 @@ export function ContestBrowserModal({
         ...season,
         contests: season.contests.filter(
           (contest) =>
-            getContestDisplayName(contest).toLowerCase().includes(normalizedSearchQuery) ||
+            contest.competitionName.toLowerCase().includes(normalizedSearchQuery) ||
+            contest.categoryName?.toLowerCase().includes(normalizedSearchQuery) ||
+            contest.roundName?.toLowerCase().includes(normalizedSearchQuery) ||
             season.editionLabel.toLowerCase().includes(normalizedSearchQuery)
         ),
       }))
       .filter((season) => season.contests.length > 0)
   }, [data?.seasons, searchQuery])
 
-  // Flatten data for GroupedVirtuoso - recomputed when search results change
+  // Flatten data for GroupedVirtuoso with precomputed hues
   const { groupCounts, flatContests } = useMemo(() => {
     // Get the counts for each season
     const counts = filteredSeasons.map((season) => season.contests.length)
 
-    // Get the contests for each season
+    // Get the contests for each season with their assigned hue
     const contests: FlattenedContest[] = filteredSeasons.flatMap((season) =>
-      season.contests.map((contest) => ({ season, contest }))
+      season.contests.map((contest) => ({
+        season,
+        contest,
+        hue: hueMap.get(getContestColorKey(contest)) ?? 0,
+      }))
     )
 
     // Return the flattened contests and group counts
     return { groupCounts: counts, flatContests: contests }
-  }, [filteredSeasons])
+  }, [filteredSeasons, hueMap])
 
   /**
    * Handles a contest click, setting the filters.
@@ -214,19 +259,34 @@ export function ContestBrowserModal({
             }}
             itemContent={(index) => {
               // Get the data for the current row
-              const { season, contest } = flatContests[index]
+              const { season, contest, hue } = flatContests[index]
 
               return (
                 <button
                   onClick={() => handleContestClick(season, contest)}
                   className={cn(
-                    'w-full text-left px-3 py-2 rounded-md text-sm',
-                    'flex items-center justify-between gap-4',
-                    'text-slate-200 hover:bg-slate-700/50 transition-colors',
+                    'w-full text-left px-3 py-1.5 rounded-md text-sm',
+                    'flex items-center justify-between gap-3',
+                    'hover:bg-slate-700/50 transition-colors',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
                   )}
                 >
-                  <span className="truncate">{getContestDisplayName(contest)}</span>
+                  <span className="flex items-center gap-2 min-w-0">
+                    {/* Color dot for visual grouping */}
+                    <span
+                      className="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: `hsl(${hue}, 55%, 62%)` }}
+                    />
+
+                    {/* Competition chip */}
+                    <Chip>{contest.competitionName}</Chip>
+
+                    {/* Category chip */}
+                    {contest.categoryName && <Chip>{contest.categoryName}</Chip>}
+
+                    {/* Round chip */}
+                    {contest.roundName && <Chip truncate>{contest.roundName}</Chip>}
+                  </span>
                   <span className="text-xs text-slate-400 tabular-nums flex-shrink-0">
                     {contest.problemCount}
                   </span>
