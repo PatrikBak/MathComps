@@ -46,8 +46,6 @@ type UseProblemSearchReturn = {
     isSearchingInBackground: boolean
     /** Whether more results are being loaded (infinite scroll). */
     isLoadingMore: boolean
-    /** Whether a search is in progress but no data is available to show yet. */
-    isSearchingWithNoData: boolean
     /** Whether the initial filter options and configuration have been loaded. */
     hasInitialDataLoaded: boolean
 
@@ -399,7 +397,6 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     : initialDataQuery.isLoading
   const hasInitialDataLoaded = initialDataQuery.isSuccess
   const isSearchingInBackground = !problemId && searchQuery.isSearching
-  const isSearchingWithNoData = !problemId && searchQuery.isSearchingWithNoData
   const isLoadingMore = !problemId && searchQuery.isLoadingMore
 
   // Problems from global store
@@ -417,7 +414,6 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       isLoading,
       isSearchingInBackground,
       isLoadingMore,
-      isSearchingWithNoData,
       hasInitialDataLoaded,
       filters: displayFilters,
       filterOptions,

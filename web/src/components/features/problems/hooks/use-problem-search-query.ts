@@ -398,8 +398,6 @@ type UseProblemSearchQueryReturn = {
   isSearching: boolean
   /** Whether the next page is being loaded. */
   isLoadingMore: boolean
-  /** Whether a search is in progress but no data is available to show yet. */
-  isSearchingWithNoData: boolean
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
   /** The error message if the search failed. */
@@ -609,18 +607,6 @@ export function useProblemSearchQuery(
     infiniteQuery.refetch()
   }, [infiniteQuery])
 
-  // Determine if we're searching but have no data to show yet
-  // Check the ref directly to avoid timing issues - if we have previous problems, we should show them
-  // This prevents flicker when filters change (previous problems stay visible)
-  const isSearchingWithNoData = useMemo(() => {
-    const isSearching = infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage
-    // Check the ref directly - if we have previous problems stored, we should show them, not skeleton
-    // This ensures we don't show skeleton when filters change (previous problems are kept visible)
-    const hasPreviousProblems = previousProblemsRef.current.length > 0
-    // Only show skeleton if we're searching AND have no previous problems to show
-    return isSearching && !hasPreviousProblems
-  }, [infiniteQuery.isFetching, infiniteQuery.isFetchingNextPage])
-
   // Compose the final result object
   return {
     // Data
@@ -634,8 +620,6 @@ export function useProblemSearchQuery(
     isLoading: infiniteQuery.isLoading,
     isSearching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
     isLoadingMore: infiniteQuery.isFetchingNextPage,
-    // Indicates we're searching but have no data to show yet (should show skeleton)
-    isSearchingWithNoData,
 
     // Error state
     error: infiniteQuery.error?.message ?? null,

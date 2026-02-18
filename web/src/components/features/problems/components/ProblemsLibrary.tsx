@@ -43,7 +43,6 @@ export default function ProblemsLibrary() {
       isLoading,
       isSearchingInBackground,
       isLoadingMore,
-      isSearchingWithNoData,
       filters,
       filterOptions,
       baseOptions,
@@ -380,7 +379,7 @@ export default function ProblemsLibrary() {
 
               {/* The problem list container */}
               <div className="relative flex-1 overflow-hidden">
-                {!isPageReady || isSearchingWithNoData ? (
+                {!isPageReady || isSearchingInBackground ? (
                   <div className="h-full">
                     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                       <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
@@ -392,68 +391,66 @@ export default function ProblemsLibrary() {
                     </div>
                   </div>
                 ) : problems.length > 0 ? (
-                  <>
-                    <Virtuoso
-                      ref={virtuosoRef}
-                      data={problems}
-                      className="h-full"
-                      increaseViewportBy={VIRTUOSO_INCREASE_VIEWPORT_BY}
-                      scrollerRef={(ref) => {
-                        if (ref) {
-                          ref.addEventListener('scroll', handleScroll)
-                          return () => ref.removeEventListener('scroll', handleScroll)
-                        }
-                      }}
-                      endReached={() => {
-                        if (hasMore && !isLoadingMore && !isSearchingInBackground) {
-                          loadMore()
-                        }
-                      }}
-                      itemContent={(index, problemSlug) => (
-                        <AnimatedProblemCard
-                          key={problemSlug}
-                          problemSlug={problemSlug}
-                          ordinalNumber={index + 1}
-                          index={index}
-                          isNewBatch={searchBatchId > 0}
-                          scrollDirection={scrollDirection}
-                          isInitialLoad={isInitialLoadRef.current}
-                          areTechniquesGloballyVisible={showTechniqueTags}
-                          onTagClick={handleTagClick}
-                          selectedTagSlugs={selectedTagSlugs}
-                          activeTechniqueFilterSlugs={activeTechniqueFilterSlugs}
-                          onAuthorClick={handleAuthorClick}
-                          selectedAuthorSlugs={selectedAuthorSlugs}
-                          onSelectList={handleSelectList}
-                        />
-                      )}
-                      rangeChanged={({ startIndex, endIndex }) => {
-                        // Update visible range for animations
-                        setVisibleRange({ startIndex, endIndex })
+                  <Virtuoso
+                    ref={virtuosoRef}
+                    data={problems}
+                    className="h-full"
+                    increaseViewportBy={VIRTUOSO_INCREASE_VIEWPORT_BY}
+                    scrollerRef={(ref) => {
+                      if (ref) {
+                        ref.addEventListener('scroll', handleScroll)
+                        return () => ref.removeEventListener('scroll', handleScroll)
+                      }
+                    }}
+                    endReached={() => {
+                      if (hasMore && !isLoadingMore && !isSearchingInBackground) {
+                        loadMore()
+                      }
+                    }}
+                    itemContent={(index, problemSlug) => (
+                      <AnimatedProblemCard
+                        key={problemSlug}
+                        problemSlug={problemSlug}
+                        ordinalNumber={index + 1}
+                        index={index}
+                        isNewBatch={searchBatchId > 0}
+                        scrollDirection={scrollDirection}
+                        isInitialLoad={isInitialLoadRef.current}
+                        areTechniquesGloballyVisible={showTechniqueTags}
+                        onTagClick={handleTagClick}
+                        selectedTagSlugs={selectedTagSlugs}
+                        activeTechniqueFilterSlugs={activeTechniqueFilterSlugs}
+                        onAuthorClick={handleAuthorClick}
+                        selectedAuthorSlugs={selectedAuthorSlugs}
+                        onSelectList={handleSelectList}
+                      />
+                    )}
+                    rangeChanged={({ startIndex, endIndex }) => {
+                      // Update visible range for animations
+                      setVisibleRange({ startIndex, endIndex })
 
-                        // Early prefetch when within PREFETCH_THRESHOLD from the end
-                        if (
-                          hasMore &&
-                          !isLoadingMore &&
-                          !isSearchingInBackground &&
-                          problems.length - endIndex <= PREFETCH_THRESHOLD
-                        ) {
-                          loadMore()
-                        }
-                      }}
-                      components={{
-                        Footer: () =>
-                          isLoadingMore ? (
-                            <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
-                              <div className="flex items-center gap-3 text-gray-400">
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                                <span className="text-sm">{t('loadingMore')}</span>
-                              </div>
+                      // Early prefetch when within PREFETCH_THRESHOLD from the end
+                      if (
+                        hasMore &&
+                        !isLoadingMore &&
+                        !isSearchingInBackground &&
+                        problems.length - endIndex <= PREFETCH_THRESHOLD
+                      ) {
+                        loadMore()
+                      }
+                    }}
+                    components={{
+                      Footer: () =>
+                        isLoadingMore ? (
+                          <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
+                            <div className="flex items-center gap-3 text-gray-400">
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                              <span className="text-sm">{t('loadingMore')}</span>
                             </div>
-                          ) : null,
-                      }}
-                    />
-                  </>
+                          </div>
+                        ) : null,
+                    }}
+                  />
                 ) : (
                   <EmptyState />
                 )}
