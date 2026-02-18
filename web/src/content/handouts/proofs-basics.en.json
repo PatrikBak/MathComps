@@ -839,6 +839,103 @@
                     }
                   ],
                   "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As an interesting aside, let us present another solution that uses the result from the previous example: squares of odd numbers leave a remainder of\u00A01 when divided by\u00A08. Thanks to this, we actually have that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by\u00A08 – it remains to justify that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by\u00A03. Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is not\u00A03, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has the form either "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3k+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for some\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", in short "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=3k \\pm 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "p^2-1 = (3k \\pm 1)^2 - 1 = 9k^2 \\pm 6k = 3(3k^2 \\pm 2k),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "which is clearly divisible by three."
+                    }
+                  ],
+                  "highligted": false
                 }
               ]
             },
@@ -851,7 +948,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Prove that the sum of three odd squares is never a square."
+                      "text": "Prove that the sum of three squares of odd integers is never a square of an integer."
                     }
                   ],
                   "highligted": false
@@ -876,7 +973,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Use the previously proven example."
+                        "text": "Use the previously proven statement that the squares of odd numbers leave a remainder of\u00A01 when divided by\u00A08."
                       }
                     ],
                     "highligted": false
@@ -889,7 +986,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "According to the previous example, the square of an odd number leaves a remainder of\u00A01 when divided by\u00A08. The sum of three such numbers therefore leaves a remainder of\u00A03. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of\u00A01."
+                      "text": "According to the previously proven statement, the square of an odd number leaves a remainder of\u00A01 when divided by\u00A08. The sum of three such numbers therefore leaves a remainder of\u00A03. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of\u00A01."
                     }
                   ],
                   "highligted": false
@@ -901,7 +998,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement."
+                  "text": "In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement and it is necessary to analyze the situation."
                 }
               ],
               "highligted": false
@@ -1276,7 +1373,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Solve the previous example using the theorem on the number of divisors, including the reverse implication."
+                      "text": "Prove the previous example, i.e., the theorem about the oddness of the number of divisors of perfect squares, using the theorem on the number of divisors. Also prove the reverse implication of this theorem."
                     }
                   ],
                   "highligted": false

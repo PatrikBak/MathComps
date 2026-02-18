@@ -839,6 +839,103 @@
                     }
                   ],
                   "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre zaujímavosť uveďme ešte jedno riešenie, ktoré používa poznatok z\u00A0predošlého príkladu: štvorce nepárnych čísel dávajú po delení\u00A08 zvyšok\u00A01: Vďaka tomu vlastne máme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľné\u00A08 – zostáva zdôvodniť, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľné\u00A03. Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie je\u00A03, tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je v\u00A0tvare buď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3k+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " alebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre nejaké\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", v\u00A0skratke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=3k \\pm 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "p^2-1 = (3k \\pm 1)^2 - 1 = 9k^2 \\pm 6k = 3(3k^2 \\pm 2k),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "čo je zrejme deliteľné tromi."
+                    }
+                  ],
+                  "highligted": false
                 }
               ]
             },
@@ -851,7 +948,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Dokážte, že súčet troch nepárnych druhých mocnín nikdy nie je druhou mocninou."
+                      "text": "Dokážte, že súčet troch druhých mocnín nepárnych celých čísel nikdy nie je druhou mocninou celého čísla."
                     }
                   ],
                   "highligted": false
@@ -876,7 +973,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Využite predošlý dokázaný príklad."
+                        "text": "Využite predošlé dokázané tvrdenie, že druhé mocniny nepárnych čísel dávajú po delení\u00A08 zvyšok\u00A01."
                       }
                     ],
                     "highligted": false
@@ -889,7 +986,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Podľa predošlého príkladu dáva druhá mocnina nepárneho čísla po delení\u00A08 zvyšok\u00A01. Súčet troch takýchto čísel preto dáva zvyšok\u00A03. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a\u00A0znova podľa nášho tvrdenia dávať zvyšok\u00A01."
+                      "text": "Podľa predošlého dokázaného tvrdenia dáva druhá mocnina nepárneho čísla po delení\u00A08 zvyšok\u00A01. Súčet troch takýchto čísel preto dáva zvyšok\u00A03. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a\u00A0znova podľa nášho tvrdenia dávať zvyšok\u00A01."
                     }
                   ],
                   "highligted": false
@@ -901,7 +998,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V\u00A0ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť."
+                  "text": "V\u00A0ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť a je potrebné analyzovať situáciu."
                 }
               ],
               "highligted": false
@@ -1276,7 +1373,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vyriešte predošlý príklad podľa vety o\u00A0počte deliteľov, vrátane obrátenej implikácie."
+                      "text": "Dokážte predošlý príklad, teda vetu o\u00A0nepárnosti počtu deliteľov druhých mocnín, pomocou vety o\u00A0počte deliteľov. Dokážte tiež obrátenú implikáciu tejto vety."
                     }
                   ],
                   "highligted": false

@@ -839,6 +839,103 @@
                     }
                   ],
                   "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro zajímavost uveďme ještě jedno řešení, které používá poznatek z\u00A0předešlého příkladu: čtverce lichých čísel dávají po dělení\u00A08 zbytek\u00A01: Díky tomu vlastně máme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je dělitelné\u00A08 – zbývá zdůvodnit, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je dělitelné\u00A03. Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " není\u00A03, tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je ve tvaru buď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3k+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro nějaké\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ve zkratce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p=3k \\pm 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "p^2-1 = (3k \\pm 1)^2 - 1 = 9k^2 \\pm 6k = 3(3k^2 \\pm 2k),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což je zřejmě dělitelné třemi."
+                    }
+                  ],
+                  "highligted": false
                 }
               ]
             },
@@ -851,7 +948,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Dokažte, že součet tří lichých druhých mocnin nikdy není druhou mocninou."
+                      "text": "Dokažte, že součet tří druhých mocnin lichých celých čísel nikdy není druhou mocninou celého čísla."
                     }
                   ],
                   "highligted": false
@@ -876,7 +973,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Využijte předešlý dokázaný příklad."
+                        "text": "Využijte předešlé dokázané tvrzení, že druhé mocniny lichých čísel dávají po dělení\u00A08 zbytek\u00A01."
                       }
                     ],
                     "highligted": false
@@ -889,7 +986,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Podle předešlého příkladu dává druhá mocnina lichého čísla po dělení\u00A08 zbytek\u00A01. Součet tří takových čísel proto dává zbytek\u00A03. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a\u00A0znovu podle našeho tvrzení dávat zbytek\u00A01."
+                      "text": "Podle předešlého dokázaného tvrzení dává druhá mocnina lichého čísla po dělení\u00A08 zbytek\u00A01. Součet tří takových čísel proto dává zbytek\u00A03. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a\u00A0znovu podle našeho tvrzení dávat zbytek\u00A01."
                     }
                   ],
                   "highligted": false
@@ -901,7 +998,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V\u00A0těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít."
+                  "text": "V\u00A0těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít a je potřeba analyzovat situaci."
                 }
               ],
               "highligted": false
@@ -1276,7 +1373,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vyřešte předešlý příklad podle věty o\u00A0počtu dělitelů, včetně obrácené implikace."
+                      "text": "Dokažte předešlý příklad, tedy větu o\u00A0lichosti počtu dělitelů druhých mocnin, pomocí věty o\u00A0počtu dělitelů. Dokažte také obrácenou implikaci této věty."
                     }
                   ],
                   "highligted": false

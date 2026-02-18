@@ -42,114 +42,120 @@ In the following two sections, we will show specific interesting examples of pro
 Direct proofs are quite natural -- we combine assumptions from the problem statement with existing knowledge until we reach the statement to be proved. Every proof can therefore be written as a series of chains of implications:
 
 \Example{}{
-    Prove that the squares of odd numbers leave a remainder of~1 when divided by~8.
+    Prove that the squares of odd numbers leave a remainder of~1 when divided by~8.
 }{
-    First, let's take this complete written proof:
+    First, let's take this complete written proof:
 
-    Odd numbers can be written in the form $m=2n+1$ for an integer $n$. We are proving that $m^2=(2n+1)^2=4n(n+1)+1$ leaves a remainder of~1 when divided by~8. One of the numbers $n$, $n+1$ is even, so $n(n+1)$ is an even number, so $4n(n+1)$ is divisible by~8, so $m^2=4n(n+1)+1$ leaves a remainder of~1 when divided by~8, which was to be proved.
+    Odd numbers can be written in the form $m=2n+1$ for an integer $n$. We are proving that $m^2=(2n+1)^2=4n(n+1)+1$ leaves a remainder of~1 when divided by~8. One of the numbers $n$, $n+1$ is even, so $n(n+1)$ is an even number, so $4n(n+1)$ is divisible by~8, so $m^2=4n(n+1)+1$ leaves a remainder of~1 when divided by~8, which was to be proved.
 
-    Before we go further, let's realize the structure of that proof. It consists of these statements:
+    Before we go further, let's realize the structure of that proof. It consists of these statements:
 
-    \begitems
-    \i $V_0$: $m$ is an odd integer
-    \i $V_1$: $m=2n+1$ for some integer $n$
-    \i $V_2$: $n$ is an integer, thus $n$ is even or $n+1$ is even
-    \i $V_3$: $n(n+1)$ is even
-    \i $V_4$: $4n(n+1)$ is divisible by~8
-    \i $V_5$: $4n(n+1)+1$ leaves a remainder of~1 when divided by~8
-    \i $V_6$: $(2n+1)^2$ leaves a remainder of~1 when divided by~8
-    \i $V_7$: $m^2$ leaves a remainder of~1 when divided by~8
-    \enditems
+    \begitems
+    \i $V_0$: $m$ is an odd integer
+    \i $V_1$: $m=2n+1$ for some integer $n$
+    \i $V_2$: $n$ is an integer, thus $n$ is even or $n+1$ is even
+    \i $V_3$: $n(n+1)$ is even
+    \i $V_4$: $4n(n+1)$ is divisible by~8
+    \i $V_5$: $4n(n+1)+1$ leaves a remainder of~1 when divided by~8
+    \i $V_6$: $(2n+1)^2$ leaves a remainder of~1 when divided by~8
+    \i $V_7$: $m^2$ leaves a remainder of~1 when divided by~8
+    \enditems
 
-    The proof consists of the transitions $V_0 \Rightarrow V_1$ and $V_2 \Rightarrow V_3 \Rightarrow V_4 \Rightarrow V_5 \Rightarrow V_6$. By combining $V_1$ and $V_6$ we get $V_7$.
+    The proof consists of the transitions $V_0 \Rightarrow V_1$ and $V_2 \Rightarrow V_3 \Rightarrow V_4 \Rightarrow V_5 \Rightarrow V_6$. By combining $V_1$ and $V_6$ we get $V_7$.
 
-    A verbal description is obviously more practical than a bulleted one. Its problem may be that more complicated problems can get lost in it:
-    Poorly written solutions often fail because the implications are not clear from the text. Practical advice: for every statement, ask yourself the question: is it clear what the assumptions are and how something was derived from them? With such self-checking, one often realizes that their solution has a mistake.
+    A verbal description is obviously more practical than a bulleted one. Its problem may be that more complicated problems can get lost in it:
+    Poorly written solutions often fail because the implications are not clear from the text. Practical advice: for every statement, ask yourself the question: is it clear what the assumptions are and how something was derived from them? With such self-checking, one often realizes that their solution has a mistake.
 }
 
 \Exercise{}{
-    Prove that for prime numbers $p \ge 5$, it holds that $p^2-1$ is a number divisible by 24.
+    Prove that for prime numbers $p \ge 5$, it holds that $p^2-1$ is a number divisible by 24.
 }{
-    We decompose the expression into the product $(p-1)(p+1)$. Since $p$ is a prime number greater than 3, it is not divisible by 3, so it gives a remainder of 1 or 2. In the first case, 3 divides the factor $p-1$, in the second $p+1$. At the same time, $p$ is odd, so $p-1$ and $p+1$ are two consecutive even numbers.
-    One of them is therefore divisible by 2 and the other even by 4, so their product is divisible by 8. Since the number $p^2-1$ is divisible by both 3 and 8, and these numbers are coprime, it is also divisible by 24.
+    We decompose the expression into the product $(p-1)(p+1)$. Since $p$ is a prime number greater than 3, it is not divisible by 3, so it gives a remainder of 1 or 2. In the first case, 3 divides the factor $p-1$, in the second $p+1$. At the same time, $p$ is odd, so $p-1$ and $p+1$ are two consecutive even numbers.
+    One of them is therefore divisible by 2 and the other even by 4, so their product is divisible by 8. Since the number $p^2-1$ is divisible by both 3 and 8, and these numbers are coprime, it is also divisible by 24.
+    
+    As an interesting aside, let us present another solution that uses the result from the previous example: squares of odd numbers leave a remainder of~1 when divided by~8. Thanks to this, we actually have that $p^2-1$ is divisible by~8 -- it remains to justify that $p^2-1$ is divisible by~3. Since $p$ is not~3, $p$ has the form either $3k+1$ or $3k-1$ for some~$k$, in short $p=3k \pm 1$. Then 
+    $$
+    p^2-1 = (3k \pm 1)^2 - 1 = 9k^2 \pm 6k = 3(3k^2 \pm 2k), 
+    $$
+    which is clearly divisible by three. 
 }
 
 \Problem{0}{}{
-    Prove that the sum of three odd squares is never a square.
+    Prove that the sum of three squares of odd integers is never a square of an integer.
 }{
-    The key is to look at divisibility by eight.
+    The key is to look at divisibility by eight.
 }{
-    Use the previously proven example.
+    Use the previously proven statement that the squares of odd numbers leave a remainder of~1 when divided by~8.
 }{
-    According to the previous example, the square of an odd number leaves a remainder of~1 when divided by~8. The sum of three such numbers therefore leaves a remainder of~3. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of~1.
+    According to the previously proven statement, the square of an odd number leaves a remainder of~1 when divided by~8. The sum of three such numbers therefore leaves a remainder of~3. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of~1.
 }
 
-In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement.
+In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement and it is necessary to analyze the situation.
 
 \Example{}{
-    Prove that if a natural number $n$ is the square of an integer, then it has an odd number of divisors.
+    Prove that if a natural number $n$ is the square of an integer, then it has an odd number of divisors.
 }{
-    How to use the fact that $n$ is the square of an integer? We can write $n=m^2$, which was the first step in the previous illustrative example -- but that won't help us for long. The key is to think about divisors, after all, we are proving something about them. The basic idea is:
-    
-    Divisors of a natural number \uv{typically} come in pairs, $d$ is a divisor of $n$ if and only if $n/d$ is a divisor of $n$. If it never happened that these are the same divisors, then the number of divisors of $n$ is even.
+    How to use the fact that $n$ is the square of an integer? We can write $n=m^2$, which was the first step in the previous illustrative example -- but that won't help us for long. The key is to think about divisors, after all, we are proving something about them. The basic idea is:
+    
+    Divisors of a natural number \uv{typically} come in pairs, $d$ is a divisor of $n$ if and only if $n/d$ is a divisor of $n$. If it never happened that these are the same divisors, then the number of divisors of $n$ is even.
 
-    But when does it happen that this pairing pairs a divisor with itself? Exactly when $d=n/d$, i.e., when $d^2=n$. And that is exactly our assumption! Consequently, all divisors except the divisor $\sqrt{n}$ will pair up with someone, so in total we will have an odd number of divisors, which was to be proved.
+    But when does it happen that this pairing pairs a divisor with itself? Exactly when $d=n/d$, i.e., when $d^2=n$. And that is exactly our assumption! Consequently, all divisors except the divisor $\sqrt{n}$ will pair up with someone, so in total we will have an odd number of divisors, which was to be proved.
 
-    \textit{Note.} This example actually holds as an equivalence. In fact, it would be easier if the reverse implication were given, because the fact that it is a square is used only at the end of the reasoning chain. In competition problems, however, it is common for authors to try to mask these key steps.
+    \textit{Note.} This example actually holds as an equivalence. In fact, it would be easier if the reverse implication were given, because the fact that it is a square is used only at the end of the reasoning chain. In competition problems, however, it is common for authors to try to mask these key steps.
 }
 
 The previous example can also be solved using the generally useful formula for the number of divisors:
 
 \Theorem{}{
-    Let $n=p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$, where $p_1,p_2,\dots,p_k$ are distinct prime numbers and $a_1,a_2,\dots,a_k$ are integers. Then the number $n$ has exactly
-    $$
-    (a_1+1)(a_2+1)\cdots (a_k+1)
-    $$
-    divisors.
+    Let $n=p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$, where $p_1,p_2,\dots,p_k$ are distinct prime numbers and $a_1,a_2,\dots,a_k$ are integers. Then the number $n$ has exactly
+    $$
+    (a_1+1)(a_2+1)\cdots (a_k+1)
+    $$
+    divisors.
 }{
-    Each divisor is in the form $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$, where $0 \leq b_i \leq a_i$ for each $1 \leq i \leq k$. For the choice of $b_i$ we have $a_i+1$ options ($0,1,\ldots,a_i$). These choices are independent, so according to the combinatorial rule of product, we have a total of
-    $$
-    (a_1+1)(a_2+1)\cdots (a_k+1)
-    $$
-    distinct $k$-tuples $(b_1,\ldots,b_k)$ corresponding to all divisors of $n$, so we are done.
+    Each divisor is in the form $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$, where $0 \leq b_i \leq a_i$ for each $1 \leq i \leq k$. For the choice of $b_i$ we have $a_i+1$ options ($0,1,\ldots,a_i$). These choices are independent, so according to the combinatorial rule of product, we have a total of
+    $$
+    (a_1+1)(a_2+1)\cdots (a_k+1)
+    $$
+    distinct $k$-tuples $(b_1,\ldots,b_k)$ corresponding to all divisors of $n$, so we are done.
 }
 
 \Exercise{}{
-    Solve the previous example using the theorem on the number of divisors, including the reverse implication.
+    Prove the previous example, i.e., the theorem about the oddness of the number of divisors of perfect squares, using the theorem on the number of divisors. Also prove the reverse implication of this theorem.
 }{
-    Let $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Since $n$ is the square of an integer, all exponents $a_1, \dots, a_k$ must be even. According to the theorem, the number of divisors is equal to the product $(a_1+1)(a_2+1)\cdots(a_k+1)$. Since each $a_i$ is even, each parenthesis represents an odd number. The product of odd numbers is always odd, thus the number of divisors is odd.
+    Let $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Since $n$ is the square of an integer, all exponents $a_1, \dots, a_k$ must be even. According to the theorem, the number of divisors is equal to the product $(a_1+1)(a_2+1)\cdots(a_k+1)$. Since each $a_i$ is even, each parenthesis represents an odd number. The product of odd numbers is always odd, thus the number of divisors is odd.
 }
 
 \Problem{0}{}{
-    Given a composite number $n > 1$. Prove that it is divisible by a prime number not exceeding $\sqrt{n}$.
+    Given a composite number $n > 1$. Prove that it is divisible by a prime number not exceeding $\sqrt{n}$.
 }{
-    The number~$n$ is composite, let's write it as $ab$, where $1<a \leq b<n$.
+    The number~$n$ is composite, let's write it as $ab$, where $1<a \leq b<n$.
 }{
-    The idea is to say that the smaller of the numbers $a,b$, i.e., $a$, is divisible by a sufficiently small prime. To do this, it suffices to say that it is sufficiently small in itself (in the tightest case, it is a prime itself).
+    The idea is to say that the smaller of the numbers $a,b$, i.e., $a$, is divisible by a sufficiently small prime. To do this, it suffices to say that it is sufficiently small in itself (in the tightest case, it is a prime itself).
 }{
-    Since $n$ is composite, we can write it as $n=ab$, where $1 < a \le b < n$. Multiplying the inequality $a \le b$ by the number $a$, we get $a^2 \le ab = n$, from which $a \le \sqrt{n}$. The number $a>1$ has at least one prime divisor $p$. Clearly $p \le a \le \sqrt{n}$.
-    Since $p$ divides $a$ and $a$ divides $n$, then $p$ divides $n$, which we wanted to prove.
+    Since $n$ is composite, we can write it as $n=ab$, where $1 < a \le b < n$. Multiplying the inequality $a \le b$ by the number $a$, we get $a^2 \le ab = n$, from which $a \le \sqrt{n}$. The number $a>1$ has at least one prime divisor $p$. Clearly $p \le a \le \sqrt{n}$.
+    Since $p$ divides $a$ and $a$ divides $n$, then $p$ divides $n$, which we wanted to prove.
 }
 
 \Problem{1}{}{
-    A natural number $n$ has exactly $k$ divisors. Prove that the product of the divisors of $n$ is equal to $\sqrt{n^k}$.
+    A natural number $n$ has exactly $k$ divisors. Prove that the product of the divisors of $n$ is equal to $\sqrt{n^k}$.
 }{
-    Use the trick with the paired divisor again.
+    Use the trick with the paired divisor again.
 }{
-    Distinguish the cases where $n$ is and is not a square.
+    Distinguish the cases where $n$ is and is not a square.
 }{
-    In the solution, we will consider the pairing of divisors: $d$ is a divisor of~$n$ if and only if $n/d$ is a divisor of~$n$. The product of such divisors is $n$.
-    
-    Let's analyze two cases:
-    \begitems
-    \i If $n$ is not a square, then for every divisor $d \neq n/d$ holds (otherwise $d^2=n$). All $k$ divisors thus form exactly $k/2$ such pairs. The total product is $n^{k/2} = \sqrt{n^k}$.
-    \i If $n$ is a square, then $d=\sqrt{n}$ forms a pair with itself.
-    The remaining $k-1$ divisors form $(k-1)/2$ pairs with product $n$.
-    The total product is therefore
-    $$
-    n^{\frac{k-1}2} \cdot \sqrt{n} = n^{\frac{k}2 - \frac12 + \frac12} = \sqrt{n^k}.
-    $$
-    \enditems
+    In the solution, we will consider the pairing of divisors: $d$ is a divisor of~$n$ if and only if $n/d$ is a divisor of~$n$. The product of such divisors is $n$.
+    
+    Let's analyze two cases:
+    \begitems
+    \i If $n$ is not a square, then for every divisor $d \neq n/d$ holds (otherwise $d^2=n$). All $k$ divisors thus form exactly $k/2$ such pairs. The total product is $n^{k/2} = \sqrt{n^k}$.
+    \i If $n$ is a square, then $d=\sqrt{n}$ forms a pair with itself.
+    The remaining $k-1$ divisors form $(k-1)/2$ pairs with product $n$.
+    The total product is therefore
+    $$
+    n^{\frac{k-1}2} \cdot \sqrt{n} = n^{\frac{k}2 - \frac12 + \frac12} = \sqrt{n^k}.
+    $$
+    \enditems
 }
 
 \secc Proof by Contradiction
@@ -157,89 +163,89 @@ The previous example can also be solved using the generally useful formula for t
 This type of proof is particularly useful in cases where what is being proved is hard to \uv{grasp} and it is far simpler to say something about its negation. A very common example where this is illustrated:
 
 \Example{}{
-    Prove that the number $\sqrt{2}$ is irrational.
+    Prove that the number $\sqrt{2}$ is irrational.
 }{
-    We proceed by contradiction. Assume that $\sqrt{2}$ is a rational number, i.e., it can be written as a fraction $\frac pq$ in simplest form (numbers $p, q$ are coprime). After squaring and multiplying by the denominator, we get $p^2=2q^2$.
+    We proceed by contradiction. Assume that $\sqrt{2}$ is a rational number, i.e., it can be written as a fraction $\frac pq$ in simplest form (numbers $p, q$ are coprime). After squaring and multiplying by the denominator, we get $p^2=2q^2$.
 
-    The right side is divisible by two, so $p^2$ and subsequently $p$ must also be even, i.e., $p=2k$. By substituting, we have $(2k)^2=2q^2$, which simplifies to $2k^2=q^2$. Now we see that $q$ must also be even.
-    The numbers $p$ and $q$ are thus both divisible by two, which is a contradiction with the assumption that they are coprime.
+    The right side is divisible by two, so $p^2$ and subsequently $p$ must also be even, i.e., $p=2k$. By substituting, we have $(2k)^2=2q^2$, which simplifies to $2k^2=q^2$. Now we see that $q$ must also be even.
+    The numbers $p$ and $q$ are thus both divisible by two, which is a contradiction with the assumption that they are coprime.
 }
 
 \Exercise{}{
-    This proof would not pass if we had $\sqrt{4}$. Where would it fail?
+    This proof would not pass if we had $\sqrt{4}$. Where would it fail?
 }{
-    It would fail in the step where we try to show that $q$ is also divisible.
-    We would have the equation $p^2=4q^2$, from which it follows that $p$ is even, i.e., $p=2k$. However, by substituting, we get $4k^2=4q^2$, which after canceling simplifies to $k^2=q^2$. From this equality, it does not follow that $q$ is even (nor divisible by 4). Thus, we do not get a contradiction with the coprimality of $p, q$.
+    It would fail in the step where we try to show that $q$ is also divisible.
+    We would have the equation $p^2=4q^2$, from which it follows that $p$ is even, i.e., $p=2k$. However, by substituting, we get $4k^2=4q^2$, which after canceling simplifies to $k^2=q^2$. From this equality, it does not follow that $q$ is even (nor divisible by 4). Thus, we do not get a contradiction with the coprimality of $p, q$.
 }
 
 \Exercise{}{
-    Prove the generalization of the statement about the irrationality of $\sqrt{2}$: Let $n$ be a natural number. The number $\sqrt{n}$ is irrational if and only if there exists a prime number~$p$ which appears in the prime factorization of~$n$ with an odd power.
+    Prove the generalization of the statement about the irrationality of $\sqrt{2}$: Let $n$ be a natural number. The number $\sqrt{n}$ is irrational if and only if there exists a prime number~$p$ which appears in the prime factorization of~$n$ with an odd power.
 }{
-    We proceed by contradiction. Let $\sqrt{n} = \frac ab$ for coprime $a, b$. We rearrange the equation to $nb^2 = a^2$. In the prime factorization of a square ($a^2$ and $b^2$), every prime number has an even exponent.
-    On the left side, the exponent of any prime number is the sum of its exponent in $n$ and in $b^2$. For equality to hold, this sum must be even, which means that the exponent of every prime number in $n$ must be even. Thus, if $n$ contains a prime number with an odd power, we get a contradiction. Conversely, if all exponents are even, $n$ is a square and $\sqrt{n}$ is a rational number.}
+    We proceed by contradiction. Let $\sqrt{n} = \frac ab$ for coprime $a, b$. We rearrange the equation to $nb^2 = a^2$. In the prime factorization of a square ($a^2$ and $b^2$), every prime number has an even exponent.
+    On the left side, the exponent of any prime number is the sum of its exponent in $n$ and in $b^2$. For equality to hold, this sum must be even, which means that the exponent of every prime number in $n$ must be even. Thus, if $n$ contains a prime number with an odd power, we get a contradiction. Conversely, if all exponents are even, $n$ is a square and $\sqrt{n}$ is a rational number.}
 
 \Problem{0}{}{
-    Prove that the sum of a rational and an irrational number is an irrational number.
-}{    
-    We proceed by contradiction. What if for rational $r_1,r_2$ and irrational $r'$ it holds that $r_1+r'=r_2$?
+    Prove that the sum of a rational and an irrational number is an irrational number.
+}{    
+    We proceed by contradiction. What if for rational $r_1,r_2$ and irrational $r'$ it holds that $r_1+r'=r_2$?
 }{
-    We proceed by contradiction. Let $r_1$ be rational and $r'$ be an irrational number. Assume that their sum $r_2 = r_1 + r'$ is rational. Then we can express $r' = r_2 - r_1$.
-    Since the difference of two rational numbers is always a rational number, $r'$ must also be rational. However, this is a contradiction with the assumption that $r'$ is irrational.
+    We proceed by contradiction. Let $r_1$ be rational and $r'$ be an irrational number. Assume that their sum $r_2 = r_1 + r'$ is rational. Then we can express $r' = r_2 - r_1$.
+    Since the difference of two rational numbers is always a rational number, $r'$ must also be rational. However, this is a contradiction with the assumption that $r'$ is irrational.
 }
 
 \Problem{0}{}{
-    Prove that the number $\sqrt{2}+\sqrt{3}$ is irrational.
+    Prove that the number $\sqrt{2}+\sqrt{3}$ is irrational.
 }{
-    We proceed by contradiction. Let $\sqrt{2}+\sqrt{3}=r$. We need to get rid of the roots.
+    We proceed by contradiction. Let $\sqrt{2}+\sqrt{3}=r$. We need to get rid of the roots.
 }{
-    The key to getting rid of the roots is squaring. By squaring the equality from the previous hint, we will have one root instead of two.
+    The key to getting rid of the roots is squaring. By squaring the equality from the previous hint, we will have one root instead of two.
 }{
-    We proceed by contradiction. Let $r = \sqrt{2}+\sqrt{3}$ be a rational number. By squaring the equality, we get $r^2 = 5 + 2\sqrt{6}$, from which we express $\sqrt{6} = \frac{r^2-5}{2}$.
-    Since $r$ is rational, the right side is also rational.
-    This would mean that $\sqrt{6}$ is a rational number, which is a contradiction (the proof is analogous to that for $\sqrt{2}$).
+    We proceed by contradiction. Let $r = \sqrt{2}+\sqrt{3}$ be a rational number. By squaring the equality, we get $r^2 = 5 + 2\sqrt{6}$, from which we express $\sqrt{6} = \frac{r^2-5}{2}$.
+    Since $r$ is rational, the right side is also rational.
+    This would mean that $\sqrt{6}$ is a rational number, which is a contradiction (the proof is analogous to that for $\sqrt{2}$).
 
-    \textit{Note.} A typically erroneous proof might consist of the argument that the sum of two irrational numbers is always irrational. Convince yourself, however, that this is not true.
+    \textit{Note.} A typically erroneous proof might consist of the argument that the sum of two irrational numbers is always irrational. Convince yourself, however, that this is not true.
 }
 
 Finally, we will show perhaps the most famous proof of this widely known fact, which Euclid\fnote{Euclid of Alexandria (approx. 300 BC) was an ancient Greek mathematician, often referred to as the \uv{father of geometry}.} was already able to prove.
 
 \Theorem{}{
-    Prove that there are infinitely many prime numbers.
+    Prove that there are infinitely many prime numbers.
 }{
-    We proceed by contradiction. Assume that there are finitely many prime numbers $p_1, p_2, \dots, p_n$. Consider the number $N = p_1 \cdot p_2 \cdots p_n + 1$. This number is greater than 1, so it must have at least one prime divisor $p$. This divisor $p$ must be one of our prime numbers $p_1, \dots, p_n$. At the same time, however, $N$ leaves a remainder of 1 when divided by any $p_i$, so no $p_i$ divides it. This is a contradiction, so there must be infinitely many prime numbers.
+    We proceed by contradiction. Assume that there are finitely many prime numbers $p_1, p_2, \dots, p_n$. Consider the number $N = p_1 \cdot p_2 \cdots p_n + 1$. This number is greater than 1, so it must have at least one prime divisor $p$. This divisor $p$ must be one of our prime numbers $p_1, \dots, p_n$. At the same time, however, $N$ leaves a remainder of 1 when divided by any $p_i$, so no $p_i$ divides it. This is a contradiction, so there must be infinitely many prime numbers.
 }
 
 Try to solve the next two problems in a similar way:
 
 \Problem{1}{}{
-    Prove that there are infinitely many prime numbers $p$ that divide $n^2+1$ for a suitable natural $n$.
+    Prove that there are infinitely many prime numbers $p$ that divide $n^2+1$ for a suitable natural $n$.
 }{
-    We go by contradiction. If there were finitely many of them, denote them $p_1,p_2,\dots,p_k$. Try to construct a suitable expression.
+    We go by contradiction. If there were finitely many of them, denote them $p_1,p_2,\dots,p_k$. Try to construct a suitable expression.
 }{
-    Think about the expression $(p_1\cdot p_2 \cdots p_k)^2+1$.
+    Think about the expression $(p_1\cdot p_2 \cdots p_k)^2+1$.
 }{
-    Assume that there are finitely many such prime numbers, denote them $p_1, p_2, \dots, p_k$. Consider the number
-    $$
-    N = (p_1 \cdot p_2 \cdots p_k)^2 + 1.
-    $$
-    This number is greater than 1, therefore it has some prime divisor $q$. Since $q$ divides $N$, it divides a number of the form $n^2+1$, so $q$ must belong to our list $p_1, \dots, p_k$. But this means that $q$ divides the product $p_1 \cdots p_k$, and thus also divides its square. From this, it follows that $q$ divides the difference $N - (p_1 \cdots p_k)^2 = 1$, which is a contradiction.
+    Assume that there are finitely many such prime numbers, denote them $p_1, p_2, \dots, p_k$. Consider the number
+    $$
+    N = (p_1 \cdot p_2 \cdots p_k)^2 + 1.
+    $$
+    This number is greater than 1, therefore it has some prime divisor $q$. Since $q$ divides $N$, it divides a number of the form $n^2+1$, so $q$ must belong to our list $p_1, \dots, p_k$. But this means that $q$ divides the product $p_1 \cdots p_k$, and thus also divides its square. From this, it follows that $q$ divides the difference $N - (p_1 \cdots p_k)^2 = 1$, which is a contradiction.
 }
 
 \Problem{2}{}{
-    Prove that there are infinitely many prime numbers of the form $3n+2$, where $n$ is a natural number.
+    Prove that there are infinitely many prime numbers of the form $3n+2$, where $n$ is a natural number.
 }{
-    We proceed as in the previous cases, we label the primes, we construct a suitable expression. However, one must pay attention to the special prime number~2 (which is also of our form).
+    We proceed as in the previous cases, we label the primes, we construct a suitable expression. However, one must pay attention to the special prime number~2 (which is also of our form).
 }{
-    Think about the expression $3p_1\cdots p_k+2$, where $p_1,\dots,p_k$ are \textit{odd} prime numbers of the form $3n+2$.
+    Think about the expression $3p_1\cdots p_k+2$, where $p_1,\dots,p_k$ are \textit{odd} prime numbers of the form $3n+2$.
 }{
-    The key is to find some other prime number of the form $3n+2$ in the prime factorization of our expression. Could there be none in this factorization, and what would that mean?
+    The key is to find some other prime number of the form $3n+2$ in the prime factorization of our expression. Could there be none in this factorization, and what would that mean?
 }{
-    Assume that there are finitely many prime numbers of the form $3n+2$.
-    Let $p_1, \dots, p_k$ denote all \textit{odd} prime numbers of this form (we omit the number 2). Consider the number
-    $$
-    N = 3p_1 \cdots p_k + 2.
-    $$
-    Since $p_i$ are odd, $N$ is the sum of an odd number and the number 2, so $N$ is odd and is not divisible by 2. At the same time, $N$ leaves a remainder of 2 when divided by three. Therefore, $N$ must have at least one prime divisor $q$ of the form $3n+2$ (if all divisors were of the form $3n+1$, $N$ would also have this form). Since $N$ is odd, $q \neq 2$. At the same time, $q$ cannot be any of the $p_i$, because otherwise it would divide $N$ as well as $3p_1 \cdots p_k$, and thus also their difference~2. We have thus found a new prime number $q$ of the form $3n+2$, which is a contradiction.
+    Assume that there are finitely many prime numbers of the form $3n+2$.
+    Let $p_1, \dots, p_k$ denote all \textit{odd} prime numbers of this form (we omit the number 2). Consider the number
+    $$
+    N = 3p_1 \cdots p_k + 2.
+    $$
+    Since $p_i$ are odd, $N$ is the sum of an odd number and the number 2, so $N$ is odd and is not divisible by 2. At the same time, $N$ leaves a remainder of 2 when divided by three. Therefore, $N$ must have at least one prime divisor $q$ of the form $3n+2$ (if all divisors were of the form $3n+1$, $N$ would also have this form). Since $N$ is odd, $q \neq 2$. At the same time, $q$ cannot be any of the $p_i$, because otherwise it would divide $N$ as well as $3p_1 \cdots p_k$, and thus also their difference~2. We have thus found a new prime number $q$ of the form $3n+2$, which is a contradiction.
 }
 
 At the end of the section, let's return to the promised explanation of the \textit{proof by contrapositive}. In general, this is a proof of the implication $A \Rightarrow B$, which is equivalent to the implication $B' \Rightarrow A'$, for example, the implication \uv{if $5$ does not divide~$n$, then $25$ does not divide~$n$ either} is equivalent to the implication \uv{if $25$ divides $n$, then $5$ divides $n$}. We are therefore trying to prove the negation of assumption~$A$ from the negation of statement~$B$ -- technically, we are trying to come to a specific contradiction from the assumption that~$B$ does not hold, namely with assumption~$A$. From this, it can be seen that such a proof is actually a special case of proof by contradiction -- in which our goal is to come to a contradiction with any statement, not necessarily an assumption.

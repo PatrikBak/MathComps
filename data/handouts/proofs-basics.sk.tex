@@ -72,19 +72,25 @@ Priame dôkazy sú vcelku prirodzené -- kombinujeme predpoklady zo zadania s~ex
 }{
     Výraz rozložíme na súčin $(p-1)(p+1)$. Keďže $p$ je prvočíslo väčšie ako 3, nie je deliteľné 3, teda dáva zvyšok 1 alebo 2. V~prvom prípade delí 3 činiteľ $p-1$, v~druhom $p+1$. Zároveň je $p$ nepárne, takže $p-1$ a~$p+1$ sú dve po sebe idúce párne čísla.
     Jedno z~nich je preto deliteľné 2 a~druhé dokonca 4, ich súčin je teda deliteľný 8. Keďže je číslo $p^2-1$ deliteľné 3 aj 8, a~tieto čísla sú nesúdeliteľné, je deliteľné aj 24.
+    
+    Pre zaujímavosť uveďme ešte jedno riešenie, ktoré používa poznatok z~predošlého príkladu: štvorce nepárnych čísel dávajú po delení~8 zvyšok~1: Vďaka tomu vlastne máme, že $p^2-1$ je deliteľné~8 -- zostáva zdôvodniť, že $p^2-1$ je deliteľné~3. Keďže $p$ nie je~3, tak $p$ je v~tvare buď $3k+1$ alebo $3k-1$ pre nejaké~$k$, v~skratke $p=3k \pm 1$. Potom 
+    $$
+    p^2-1 = (3k \pm 1)^2 - 1 = 9k^2 \pm 6k = 3(3k^2 \pm 2k), 
+    $$
+    čo je zrejme deliteľné tromi. 
 }
 
 \Problem{0}{}{
-    Dokážte, že súčet troch nepárnych druhých mocnín nikdy nie je druhou mocninou.
+    Dokážte, že súčet troch druhých mocnín nepárnych celých čísel nikdy nie je druhou mocninou celého čísla.
 }{
     Kľúčom je pozrieť sa na deliteľnosť ôsmimi. 
 }{
-    Využite predošlý dokázaný príklad.
+    Využite predošlé dokázané tvrdenie, že druhé mocniny nepárnych čísel dávajú po delení~8 zvyšok~1.
 }{
-   Podľa predošlého príkladu dáva druhá mocnina nepárneho čísla po delení~8 zvyšok~1. Súčet troch takýchto čísel preto dáva zvyšok~3. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a~znova podľa nášho tvrdenia dávať zvyšok~1.
+   Podľa predošlého dokázaného tvrdenia dáva druhá mocnina nepárneho čísla po delení~8 zvyšok~1. Súčet troch takýchto čísel preto dáva zvyšok~3. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a~znova podľa nášho tvrdenia dávať zvyšok~1.
 }
 
-V~ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť. 
+V~ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť a je potrebné analyzovať situáciu.
 
 \Example{}{
     Dokážte, že ak je prirodzené číslo $n$ druhou mocninou celého čísla, tak má nepárny počet deliteľov.
@@ -115,7 +121,7 @@ Predošlý príklad sa dá vyriešiť aj pomocou všeobecne užitočného vzorca
 }
 
 \Exercise{}{
-    Vyriešte predošlý príklad podľa vety o~počte deliteľov, vrátane obrátenej implikácie.
+    Dokážte predošlý príklad, teda vetu o~nepárnosti počtu deliteľov druhých mocnín, pomocou vety o~počte deliteľov. Dokážte tiež obrátenú implikáciu tejto vety.
 }{
     Nech $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Keďže $n$ je druhá mocnina celého čísla, všetky exponenty $a_1, \dots, a_k$ musia byť párne. Podľa vety je počet deliteľov rovný súčinu $(a_1+1)(a_2+1)\cdots(a_k+1)$. Keďže každé $a_i$ je párne, každá zátvorka predstavuje nepárne číslo. Súčin nepárnych čísel je vždy nepárny, teda počet deliteľov je nepárny.
 }

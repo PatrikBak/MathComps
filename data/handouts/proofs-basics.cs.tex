@@ -71,19 +71,25 @@ Přímé důkazy jsou vcelku přirozené -- kombinujeme předpoklady ze zadání
 }{
     Výraz rozložíme na součin $(p-1)(p+1)$. Jelikož $p$ je prvočíslo větší než 3, není dělitelné 3, tedy dává zbytek 1 nebo 2. V~prvním případě dělí 3 činitel $p-1$, ve druhém $p+1$. Zároveň je $p$ liché, takže $p-1$ a~$p+1$ jsou dvě po sobě jdoucí sudá čísla.
     Jedno z~nich je proto dělitelné 2 a~druhé dokonce 4, jejich součin je tedy dělitelný 8. Jelikož je číslo $p^2-1$ dělitelné 3 i 8, a~tato čísla jsou nesoudělná, je dělitelné i 24.
+    
+    Pro zajímavost uveďme ještě jedno řešení, které používá poznatek z~předešlého příkladu: čtverce lichých čísel dávají po dělení~8 zbytek~1: Díky tomu vlastně máme, že $p^2-1$ je dělitelné~8 -- zbývá zdůvodnit, že $p^2-1$ je dělitelné~3. Jelikož $p$ není~3, tak $p$ je ve tvaru buď $3k+1$ nebo $3k-1$ pro nějaké~$k$, ve zkratce $p=3k \pm 1$. Potom 
+    $$
+    p^2-1 = (3k \pm 1)^2 - 1 = 9k^2 \pm 6k = 3(3k^2 \pm 2k), 
+    $$
+    což je zřejmě dělitelné třemi. 
 }
 
 \Problem{0}{}{
-    Dokažte, že součet tří lichých druhých mocnin nikdy není druhou mocninou.
+    Dokažte, že součet tří druhých mocnin lichých celých čísel nikdy není druhou mocninou celého čísla.
 }{
     Klíčem je podívat se na dělitelnost osmi. 
 }{
-    Využijte předešlý dokázaný příklad.
+    Využijte předešlé dokázané tvrzení, že druhé mocniny lichých čísel dávají po dělení~8 zbytek~1.
 }{
-    Podle předešlého příkladu dává druhá mocnina lichého čísla po dělení~8 zbytek~1. Součet tří takových čísel proto dává zbytek~3. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a~znovu podle našeho tvrzení dávat zbytek~1.
+    Podle předešlého dokázaného tvrzení dává druhá mocnina lichého čísla po dělení~8 zbytek~1. Součet tří takových čísel proto dává zbytek~3. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a~znovu podle našeho tvrzení dávat zbytek~1.
 }
 
-V~těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít. 
+V~těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít a je potřeba analyzovat situaci.
 
 \Example{}{
     Dokažte, že pokud je přirozené číslo $n$ druhou mocninou celého čísla, tak má lichý počet dělitelů.
@@ -114,7 +120,7 @@ Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pr
 }
 
 \Exercise{}{
-    Vyřešte předešlý příklad podle věty o~počtu dělitelů, včetně obrácené implikace.
+    Dokažte předešlý příklad, tedy větu o~lichosti počtu dělitelů druhých mocnin, pomocí věty o~počtu dělitelů. Dokažte také obrácenou implikaci této věty.
 }{
     Nechť $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Jelikož $n$ je druhá mocnina celého čísla, všechny exponenty $a_1, \dots, a_k$ musí být sudé. Podle věty je počet dělitelů roven součinu $(a_1+1)(a_2+1)\cdots(a_k+1)$. Jelikož každé $a_i$ je sudé, každá závorka představuje liché číslo. Součin lichých čísel je vždy lichý, tedy počet dělitelů je lichý.
 }
