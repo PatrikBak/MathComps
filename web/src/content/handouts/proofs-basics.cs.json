@@ -3344,38 +3344,37 @@
                 ],
                 "highligted": false
               },
-              "body": [],
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Patrik vybral dvě různá kladná celá čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", každé napsal na 10 karet a všech 20 karet rozmístil po obvodu kruhu. Všiml si, že každé číslo je nyní dělitelem součtu dvou čísel na sousedních kartách. Dokažte, že čísla na kartách se ob jedno střídají."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Patrik vybral dvě různá kladná celá čísla "
-                      },
-                      {
-                        "type": "math",
-                        "text": "a",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", "
-                      },
-                      {
-                        "type": "math",
-                        "text": "b",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", každé napsal na 10 karet a všech 20 karet rozmístil po obvodu kruhu. Všiml si, že každé číslo je nyní dělitelem součtu dvou čísel na sousedních kartách. Dokažte, že čísla na kartách se ob jedno střídají."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
                 [
                   {
                     "type": "paragraph",

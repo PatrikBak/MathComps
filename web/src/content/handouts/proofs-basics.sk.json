@@ -3344,38 +3344,37 @@
                 ],
                 "highligted": false
               },
-              "body": [],
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Patrik vybral dve rôzne kladné celé čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", každé napísal na 10 kariet a všetkých 20\u00A0kariet rozmiestnil po obvode kruhu. Všimol si, že každé číslo je teraz deliteľom súčtu dvoch čísel na susedných kartách. Dokážte, že čísla na kartách sa ob jedno striedajú."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Patrik vybral dve rôzne kladné celé čísla "
-                      },
-                      {
-                        "type": "math",
-                        "text": "a",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", "
-                      },
-                      {
-                        "type": "math",
-                        "text": "b",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", každé napísal na 10 kariet a všetkých 20\u00A0kariet rozmiestnil po obvode kruhu. Všimol si, že každé číslo je teraz deliteľom súčtu dvoch čísel na susedných kartách. Dokážte, že čísla na kartách sa ob jedno striedajú."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
                 [
                   {
                     "type": "paragraph",

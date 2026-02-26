@@ -3348,38 +3348,37 @@
                 ],
                 "highligted": false
               },
-              "body": [],
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Patrik chose two distinct positive integers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", wrote each on 10 cards and placed all 20 cards around the circumference of a circle. He noticed that each number is now a divisor of the sum of the two numbers on the adjacent cards. Prove that the numbers on the cards alternate."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Patrik chose two distinct positive integers "
-                      },
-                      {
-                        "type": "math",
-                        "text": "a",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", "
-                      },
-                      {
-                        "type": "math",
-                        "text": "b",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", wrote each on 10 cards and placed all 20 cards around the circumference of a circle. He noticed that each number is now a divisor of the sum of the two numbers on the adjacent cards. Prove that the numbers on the cards alternate."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
                 [
                   {
                     "type": "paragraph",
