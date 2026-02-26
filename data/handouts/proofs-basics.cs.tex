@@ -79,15 +79,6 @@ Přímé důkazy jsou vcelku přirozené -- kombinujeme předpoklady ze zadání
     což je zřejmě dělitelné třemi. 
 }
 
-\Problem{0}{}{
-    Dokažte, že součet tří druhých mocnin lichých celých čísel nikdy není druhou mocninou celého čísla.
-}{
-    Klíčem je podívat se na dělitelnost osmi. 
-}{
-    Využijte předešlé dokázané tvrzení, že druhé mocniny lichých čísel dávají po dělení~8 zbytek~1.
-}{
-    Podle předešlého dokázaného tvrzení dává druhá mocnina lichého čísla po dělení~8 zbytek~1. Součet tří takových čísel proto dává zbytek~3. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a~znovu podle našeho tvrzení dávat zbytek~1.
-}
 
 V~těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít a je potřeba analyzovat situaci.
 
@@ -157,6 +148,23 @@ Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pr
     \enditems
 }
 
+Na závěr sekce si jedno upozornění. Při sepisování důkazů je často vidět nepřesnost typu \textit{vynechání předpokladů}, například někdo může napsat \uv{$x^2=1$, takže nutně $x=1$}. To může být správná část řešení, pokud v~zadání máme, že $x$ je kladné. Pokud však tento předpoklad do řešení nenapíšeme, tak to zní podezřele, protože není jasné, zda si to řešitel uvědomil, a~proto to může vést ke ztrátě bodů. Správně bychom psali něco jako \uv{$x^2=1$ a $x$ je kladné, takže nutně $x=1$}. Ukážeme si velmi běžnou situaci, kdy se toto stává:
+
+\Example{}{
+	Kdy pro celá čísla $a,b$ platí, že $a \mid b$ a $b \mid a$?
+}{
+	Intuitivní odpověď je, že nutně $a=b$. V~řešení občas opravdu vidět úvahu, že $a \mid b$ a $b \mid a$, takže $a=b$. To opravdu platí, pokud víme, že čísla $a,b$ jsou nezáporná. Situaci si zanalyzujeme podrobně:
+	
+	Vztah $a \mid b$ dává, že existuje celé $u$ takové, že $b=au$. Podobně $b \mid a$ znamená, že existuje celé $v$ takové, že $a=bv$. Vynásobením těchto rovností máme $ab=abuv$. 
+	
+	Pokud $ab=0$, tedy pokud např. $a=0$, tak vztah $b=au$ dává $b=0$. Potom oba vztahy znamenají $0 \mid 0$, což je v~pořádku\fnote{Na první pohled může být překvapivé, že $0 \mid 0$, přece jen, nulou se nedělí. Dělitelnost se ale definuje tak, že $x \mid y$ právě když existuje celé $z$ takové, že $y=zx$. Pro $x=y=0$ takové $z$ existuje, dokonce vyhovuje každé celé $z$} a~platí $a=b$.
+	
+	Pokud $ab\neq 0$, tak $ab=abuv$ dává $1=uv$. Číslo~$1$ se dá zapsat jako součin celých čísel právě dvěma způsoby: $1 \cdot 1$ a $(-1) \cdot (-1)$. To nám dává dvě řešení $(u,v)=(1,1)$ a $(u,v)=(-1,-1)$, která zpětně znamenají $a=b$ a $a=-b$. Pokud bychom však měli, že $a,b$ jsou nezáporná, tak buď je nějaké nulové, to bylo vyřešeno výše, nebo jsou obě kladná, což ale při $a=-b$ nenastane -- tehdy bychom tedy opravdu měli, že nutně $a=b$. 
+	
+	Závěr je, že $a \mid b$ a $b \mid a$ právě tehdy, když $a=b$ nebo $a=-b$, přičemž pro nezáporná čísla dokonce rovnou $a=b$.
+}
+
+
 \secc Důkaz sporem 
 
 Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazované těžké \uv{uchopit} a~daleko jednodušší je něco říci o~jeho negaci. Velmi běžný příklad, kde se to ilustruje:
@@ -204,6 +212,42 @@ Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazovan
     To by znamenalo, že $\sqrt{6}$ je racionální číslo, což je spor (důkaz je analogický jako pro $\sqrt{2}$).
 
     \textit{Poznámka.} Typicky chybný důkaz může spočívat v~argumentu, že součet dvou iracionálních čísel je vždy iracionální. Přesvědčte se ale, že to není pravda.
+}
+
+Následující příklady ukazují, že důkaz sporem je \uv{technicky} i tehdy, pokud dokazujeme, že něco \textit{neplatí}. 
+
+\Problem{0}{}{
+	Dokažte, že součet tří druhých mocnin lichých celých čísel nikdy není druhou mocninou celého čísla.
+}{
+	Klíčem je podívat se na dělitelnost osmi. 
+}{
+	Vzpomeňte si na tvrzení dokázané v~sekci s~přímým důkazem, že druhé mocniny lichých čísel dávají po dělení~8 zbytek~1.
+}{
+	Podle předešlého dokázaného tvrzení dává druhá mocnina lichého čísla po dělení~8 zbytek~1. Součet tří takových čísel proto dává zbytek~3. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a~znovu podle našeho tvrzení dávat zbytek~1.
+}
+
+\Problem{0}{73-CSMO-B-II-1}{
+	
+}{
+	Patrik vybral dvě různá kladná celá čísla $a$, $b$, každé napsal na 10 karet a všech 20\,karet rozmístil po obvodu kruhu. Všiml si, že každé číslo je nyní dělitelem součtu dvou čísel na sousedních kartách. Dokažte, že čísla na kartách se ob jedno střídají.
+}{
+	Dokazujeme, že něco nejde -- co by znamenalo, kdyby to potenciálně šlo, tedy kdyby se čísla nestřídala? Co je vlastně opak tohoto tvrzení?
+}{
+	Kdyby se čísla nestřídala, tak nějaká dvě stejná jsou vedle sebe, např. $aa$. Když se nyní procházíme po kružnici nějakým směrem, např. doprava, tak po čase musíme narazit na $b$, takže máme $aab$. Co z toho dostaneme?
+}{
+	Trojice $aab$ nám dává $a \mid a+b$, takže $a \mid b$. Bylo by skvělé najít něco podobného ještě někde jinde.
+}{
+	Abychom dostali $b \mid a$, potřebujeme najít trojici $bba$. Proč na kružnici musí existovat i $bb$? Zamysli se nad počtem střídavých skupin: pokud spojíš dvě $a$ do jedné skupiny, snížíš tím počet dostupných skupin pro $b$. Kam se potom musí vejít všechna $b$?
+}{
+	Pokud z trojice $aab$ zjistíme, že $a \mid b$, a z trojice $bba$ zjistíme, že $b \mid a$, jaký závěr z toho vyplývá pro dvě přirozená čísla $a, b$?
+}{
+	Tvrzení úlohy dokážeme sporem. Připusťme tedy, že čísla $a$, $b$ nejsou rozmístěna střídavě. To zřejmě znamená, že se v kruhu vedle sebe nacházejí někde dvě $a$ a současně někde dvě $b$\fnote{V kruhu se stejným počtem prvků $a$ a $b$ se tvoří střídavé skupiny, takže počet skupin složených z $a$ se vždy musí rovnat počtu skupin z $b$. Pokud umístíme dvě $a$ vedle sebe, snížíme celkový počet skupin s $a$, čímž se nutně sníží i počet dostupných skupin s $b$. Aby se všechna existující $b$ rozdělila do tohoto menšího počtu skupin, matematicky to vynucuje, že alespoň dvě $b$ musí být umístěna vedle sebe.}. Vyberme dvě sousední $a$. Pokud začneme od této dvojice $aa$ putovat po kruhu jedním směrem, narazíme na číslo $b$ (jinak by v kruhu byla samá $a$). Jakmile se to stane, budeme
+	mít sousední trojici $aab$. Podle zadání potom platí $a \mid a+b$, odkud $a \mid b$. Analogickou úvahou najdeme trojici $bba$, ze které dostaneme $b \mid a$. Pro přirozená čísla $a$, $b$ tak platí $a \mid b$ i $b \mid a$, a tedy $a = b$, což je ve sporu s tím, že čísla $a$, $b$ jsou různá. Tím je celé řešení úlohy hotové.
+	
+	\textit{Poznámka 1.} Bez újmy na obecnosti jsme od začátku důkazu sporem mohli předpokládat, že platí například $a < b$. Potom bychom vystačili jen s úvahou o trojici $bba$ vedoucí ke spornému závěru $b \mid a$.
+	
+	\textit{Poznámka 2.} Ukažme navíc, že pro čísla $a$, $b$ splňující zadání úlohy musí platit buď $b = 2a$, nebo
+	$a = 2b$. S ohledem na symetrii stačí v případě $a < b$ dokázat rovnost $b = 2a$. Při střídavém rozmístění čísel z trojice $aba$ máme $b \mid 2a$, takže $2a = kb$ pro vhodné přirozené číslo $k$. Z předpokladu $a < b$ však vyplývá $kb = 2a < 2b$, odkud $k < 2$ čili $k = 1$, a proto $2a = kb = b$, jak jsme chtěli dokázat.
 }
 
 Na závěr si ještě ukážeme snad nejznámější důkaz této všeobecně známé věci, kterou uměl dokázat už i Eukleides\fnote{Eukleides z~Alexandrie (cca 300 l. před n. l.) byl starořecký matematik, často označovaný jako \uv{otec geometrie}.}.

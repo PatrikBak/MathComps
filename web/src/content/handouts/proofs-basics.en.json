@@ -940,60 +940,6 @@
               ]
             },
             {
-              "type": "problem",
-              "difficulty": 0,
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Prove that the sum of three squares of odd integers is never a square of an integer."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "The key is to look at divisibility by eight."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Use the previously proven statement that the squares of odd numbers leave a remainder of\u00A01 when divided by\u00A08."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "According to the previously proven statement, the square of an odd number leaves a remainder of\u00A01 when divided by\u00A08. The sum of three such numbers therefore leaves a remainder of\u00A03. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of\u00A01."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ]
-            },
-            {
               "type": "paragraph",
               "content": [
                 {
@@ -1985,6 +1931,587 @@
                   "styleType": "Bullet"
                 }
               ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "To conclude this section, one important note. When writing proofs, a common imprecision is "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "omitting assumptions"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ", for example someone may write "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "x^2=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so necessarily "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=1",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". This can be a valid part of a solution, provided the problem statement tells us that "
+                },
+                {
+                  "type": "math",
+                  "text": "x",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " is positive. However, if we do not include this assumption in the solution, it sounds suspicious because it is unclear whether the solver was aware of it, and therefore may lead to a loss of points. Correctly, we would write something like "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "x^2=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is positive, so necessarily "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=1",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Let us illustrate a\u00A0very common situation where this occurs:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When does "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " hold for integers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The intuitive answer is that necessarily "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". In solutions, we sometimes indeed see the reasoning that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This is indeed true if we know that the numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are non-negative. Let us analyze the situation in detail:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The relation "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " gives that there exists an integer "
+                    },
+                    {
+                      "type": "math",
+                      "text": "u",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=au",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Similarly, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " means that there exists an integer "
+                    },
+                    {
+                      "type": "math",
+                      "text": "v",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=bv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Multiplying these equalities, we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=abuv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e., if for example "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then the relation "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=au",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then both relations mean "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\mid 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is fine"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "At first glance it may be surprising that "
+                        },
+                        {
+                          "type": "math",
+                          "text": "0 \\mid 0",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ", after all, one does not divide by zero. However, divisibility is defined as "
+                        },
+                        {
+                          "type": "math",
+                          "text": "x \\mid y",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " if and only if there exists an integer "
+                        },
+                        {
+                          "type": "math",
+                          "text": "z",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " such that "
+                        },
+                        {
+                          "type": "math",
+                          "text": "y=zx",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ". For "
+                        },
+                        {
+                          "type": "math",
+                          "text": "x=y=0",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " such "
+                        },
+                        {
+                          "type": "math",
+                          "text": "z",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " exists, in fact every integer "
+                        },
+                        {
+                          "type": "math",
+                          "text": "z",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " works"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " holds."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab\\neq 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=abuv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1=uv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The number\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " can be written as a product of integers in exactly two ways: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\cdot 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(-1) \\cdot (-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This gives us two solutions "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(u,v)=(1,1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(u,v)=(-1,-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which correspond to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". If, however, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are non-negative, then either one is zero, which was resolved above, or both are positive, which cannot happen when "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – so in that case we would indeed have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The conclusion is that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " if and only if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and for non-negative numbers even directly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
@@ -2712,6 +3239,842 @@
                     {
                       "type": "text",
                       "text": " A typically erroneous proof might consist of the argument that the sum of two irrational numbers is always irrational. Convince yourself, however, that this is not true."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The following examples show that proof by contradiction is "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "technically"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " used even when we are proving that something "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "does not hold"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the sum of three squares of odd integers is never a square of an integer."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key is to look at divisibility by eight."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Recall the statement proved in the section on direct proof, that the squares of odd numbers leave a remainder of\u00A01 when divided by\u00A08."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "According to the previously proven statement, the square of an odd number leaves a remainder of\u00A01 when divided by\u00A08. The sum of three such numbers therefore leaves a remainder of\u00A03. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of\u00A01."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "73-CSMO-B-II-1"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Patrik chose two distinct positive integers "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", wrote each on 10 cards and placed all 20 cards around the circumference of a circle. He noticed that each number is now a divisor of the sum of the two numbers on the adjacent cards. Prove that the numbers on the cards alternate."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We are proving that something cannot happen – what would it mean if it potentially could, i.e., if the numbers did not alternate? What is actually the negation of this statement?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "If the numbers did not alternate, then some two identical numbers are next to each other, e.g. "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aa",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". If we now walk along the circle in some direction, e.g. to the right, we must eventually reach "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so we have "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". What do we get from this?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The triple "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " gives us "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\mid a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\mid b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". It would be great to find something similar somewhere else."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "To obtain "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b \\mid a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we need to find a triple "
+                      },
+                      {
+                        "type": "math",
+                        "text": "bba",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Why must there also be "
+                      },
+                      {
+                        "type": "math",
+                        "text": "bb",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " on the circle? Think about the number of alternating groups: if you merge two "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "'s into one group, you reduce the number of available groups for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Where must all the "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "'s fit then?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "If from the triple "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " we find that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\mid b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", and from the triple "
+                      },
+                      {
+                        "type": "math",
+                        "text": "bba",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " we find that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b \\mid a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", what conclusion follows for two positive integers "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a, b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We prove the claim by contradiction. Suppose that the numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are not placed in alternating fashion. This clearly means that there are two adjacent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "'s and simultaneously two adjacent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "'s somewhere on the circle"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "In a circle with equal numbers of elements "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " and "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ", alternating groups are formed, so the number of groups consisting of "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "'s must always equal the number of groups of "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "'s. If we place two "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "'s next to each other, we reduce the total number of groups with "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ", which necessarily also reduces the number of available groups with "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ". In order to distribute all existing "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "'s into this smaller number of groups, it is mathematically forced that at least two "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "'s must be placed next to each other."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pick two adjacent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "'s. If we start from this pair "
+                    },
+                    {
+                      "type": "math",
+                      "text": "aa",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and travel around the circle in one direction, we will encounter a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (otherwise the circle would contain only "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "'s). Once this happens, we will have an adjacent triple "
+                    },
+                    {
+                      "type": "math",
+                      "text": "aab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". According to the problem statement, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " holds, from which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By an analogous argument, we find a triple "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bba",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", from which we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". For positive integers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we thus have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and therefore "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which contradicts the fact that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are distinct. This completes the solution."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Note 1."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Without loss of generality, we could have assumed from the start of the proof by contradiction that, say, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then we would only need the argument about the triple "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bba",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leading to the contradictory conclusion "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Note 2."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Let us additionally show that for numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " satisfying the problem statement, either "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = 2a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = 2b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must hold. By symmetry, it suffices to prove "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = 2a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in the case "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". With alternating placement, from the triple "
+                    },
+                    {
+                      "type": "math",
+                      "text": "aba",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid 2a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a = kb",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for a suitable positive integer "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From the assumption "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", however, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "kb = 2a < 2b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " follows, from which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k < 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e., "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and therefore "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a = kb = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", as we wanted to prove."
                     }
                   ],
                   "highligted": false

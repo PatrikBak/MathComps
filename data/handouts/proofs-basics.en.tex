@@ -80,15 +80,6 @@ Direct proofs are quite natural -- we combine assumptions from the problem state
     which is clearly divisible by three. 
 }
 
-\Problem{0}{}{
-    Prove that the sum of three squares of odd integers is never a square of an integer.
-}{
-    The key is to look at divisibility by eight.
-}{
-    Use the previously proven statement that the squares of odd numbers leave a remainder of~1 when divided by~8.
-}{
-    According to the previously proven statement, the square of an odd number leaves a remainder of~1 when divided by~8. The sum of three such numbers therefore leaves a remainder of~3. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of~1.
-}
 
 In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement and it is necessary to analyze the situation.
 
@@ -158,6 +149,23 @@ The previous example can also be solved using the generally useful formula for t
     \enditems
 }
 
+To conclude this section, one important note. When writing proofs, a common imprecision is \textit{omitting assumptions}, for example someone may write \uv{$x^2=1$, so necessarily $x=1$}. This can be a valid part of a solution, provided the problem statement tells us that $x$ is positive. However, if we do not include this assumption in the solution, it sounds suspicious because it is unclear whether the solver was aware of it, and therefore may lead to a loss of points. Correctly, we would write something like \uv{$x^2=1$ and $x$ is positive, so necessarily $x=1$}. Let us illustrate a~very common situation where this occurs:
+
+\Example{}{
+	When does $a \mid b$ and $b \mid a$ hold for integers $a,b$?
+}{
+	The intuitive answer is that necessarily $a=b$. In solutions, we sometimes indeed see the reasoning that $a \mid b$ and $b \mid a$, so $a=b$. This is indeed true if we know that the numbers $a,b$ are non-negative. Let us analyze the situation in detail:
+	
+	The relation $a \mid b$ gives that there exists an integer $u$ such that $b=au$. Similarly, $b \mid a$ means that there exists an integer $v$ such that $a=bv$. Multiplying these equalities, we have $ab=abuv$.
+	
+	If $ab=0$, i.e., if for example $a=0$, then the relation $b=au$ gives $b=0$. Then both relations mean $0 \mid 0$, which is fine\fnote{At first glance it may be surprising that $0 \mid 0$, after all, one does not divide by zero. However, divisibility is defined as $x \mid y$ if and only if there exists an integer $z$ such that $y=zx$. For $x=y=0$ such $z$ exists, in fact every integer $z$ works} and $a=b$ holds.
+	
+	If $ab\neq 0$, then $ab=abuv$ gives $1=uv$. The number~$1$ can be written as a product of integers in exactly two ways: $1 \cdot 1$ and $(-1) \cdot (-1)$. This gives us two solutions $(u,v)=(1,1)$ and $(u,v)=(-1,-1)$, which correspond to $a=b$ and $a=-b$. If, however, $a,b$ are non-negative, then either one is zero, which was resolved above, or both are positive, which cannot happen when $a=-b$ -- so in that case we would indeed have $a=b$.
+	
+	The conclusion is that $a \mid b$ and $b \mid a$ if and only if $a=b$ or $a=-b$, and for non-negative numbers even directly $a=b$.
+}
+
+
 \secc Proof by Contradiction
 
 This type of proof is particularly useful in cases where what is being proved is hard to \uv{grasp} and it is far simpler to say something about its negation. A very common example where this is illustrated:
@@ -205,6 +213,42 @@ This type of proof is particularly useful in cases where what is being proved is
     This would mean that $\sqrt{6}$ is a rational number, which is a contradiction (the proof is analogous to that for $\sqrt{2}$).
 
     \textit{Note.} A typically erroneous proof might consist of the argument that the sum of two irrational numbers is always irrational. Convince yourself, however, that this is not true.
+}
+
+The following examples show that proof by contradiction is \uv{technically} used even when we are proving that something \textit{does not hold}.
+
+\Problem{0}{}{
+	Prove that the sum of three squares of odd integers is never a square of an integer.
+}{
+	The key is to look at divisibility by eight.
+}{
+	Recall the statement proved in the section on direct proof, that the squares of odd numbers leave a remainder of~1 when divided by~8.
+}{
+	According to the previously proven statement, the square of an odd number leaves a remainder of~1 when divided by~8. The sum of three such numbers therefore leaves a remainder of~3. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of~1.
+}
+
+\Problem{0}{73-CSMO-B-II-1}{
+	
+}{
+	Patrik chose two distinct positive integers $a$, $b$, wrote each on 10 cards and placed all 20\,cards around the circumference of a circle. He noticed that each number is now a divisor of the sum of the two numbers on the adjacent cards. Prove that the numbers on the cards alternate.
+}{
+	We are proving that something cannot happen -- what would it mean if it potentially could, i.e., if the numbers did not alternate? What is actually the negation of this statement?
+}{
+	If the numbers did not alternate, then some two identical numbers are next to each other, e.g. $aa$. If we now walk along the circle in some direction, e.g. to the right, we must eventually reach $b$, so we have $aab$. What do we get from this?
+}{
+	The triple $aab$ gives us $a \mid a+b$, so $a \mid b$. It would be great to find something similar somewhere else.
+}{
+	To obtain $b \mid a$, we need to find a triple $bba$. Why must there also be $bb$ on the circle? Think about the number of alternating groups: if you merge two $a$'s into one group, you reduce the number of available groups for $b$. Where must all the $b$'s fit then?
+}{
+	If from the triple $aab$ we find that $a \mid b$, and from the triple $bba$ we find that $b \mid a$, what conclusion follows for two positive integers $a, b$?
+}{
+	We prove the claim by contradiction. Suppose that the numbers $a$, $b$ are not placed in alternating fashion. This clearly means that there are two adjacent $a$'s and simultaneously two adjacent $b$'s somewhere on the circle\fnote{In a circle with equal numbers of elements $a$ and $b$, alternating groups are formed, so the number of groups consisting of $a$'s must always equal the number of groups of $b$'s. If we place two $a$'s next to each other, we reduce the total number of groups with $a$, which necessarily also reduces the number of available groups with $b$. In order to distribute all existing $b$'s into this smaller number of groups, it is mathematically forced that at least two $b$'s must be placed next to each other.}. Pick two adjacent $a$'s. If we start from this pair $aa$ and travel around the circle in one direction, we will encounter a $b$ (otherwise the circle would contain only $a$'s). Once this happens, we will
+	have an adjacent triple $aab$. According to the problem statement, $a \mid a+b$ holds, from which $a \mid b$. By an analogous argument, we find a triple $bba$, from which we get $b \mid a$. For positive integers $a$, $b$ we thus have $a \mid b$ and $b \mid a$, and therefore $a = b$, which contradicts the fact that $a$, $b$ are distinct. This completes the solution.
+	
+	\textit{Note 1.} Without loss of generality, we could have assumed from the start of the proof by contradiction that, say, $a < b$. Then we would only need the argument about the triple $bba$ leading to the contradictory conclusion $b \mid a$.
+	
+	\textit{Note 2.} Let us additionally show that for numbers $a$, $b$ satisfying the problem statement, either $b = 2a$ or
+	$a = 2b$ must hold. By symmetry, it suffices to prove $b = 2a$ in the case $a < b$. With alternating placement, from the triple $aba$ we have $b \mid 2a$, so $2a = kb$ for a suitable positive integer $k$. From the assumption $a < b$, however, $kb = 2a < 2b$ follows, from which $k < 2$, i.e., $k = 1$, and therefore $2a = kb = b$, as we wanted to prove.
 }
 
 Finally, we will show perhaps the most famous proof of this widely known fact, which Euclid\fnote{Euclid of Alexandria (approx. 300 BC) was an ancient Greek mathematician, often referred to as the \uv{father of geometry}.} was already able to prove.

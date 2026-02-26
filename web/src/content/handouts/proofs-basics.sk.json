@@ -940,60 +940,6 @@
               ]
             },
             {
-              "type": "problem",
-              "difficulty": 0,
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Dokážte, že súčet troch druhých mocnín nepárnych celých čísel nikdy nie je druhou mocninou celého čísla."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Kľúčom je pozrieť sa na deliteľnosť ôsmimi."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Využite predošlé dokázané tvrdenie, že druhé mocniny nepárnych čísel dávajú po delení\u00A08 zvyšok\u00A01."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Podľa predošlého dokázaného tvrdenia dáva druhá mocnina nepárneho čísla po delení\u00A08 zvyšok\u00A01. Súčet troch takýchto čísel preto dáva zvyšok\u00A03. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a\u00A0znova podľa nášho tvrdenia dávať zvyšok\u00A01."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ]
-            },
-            {
               "type": "paragraph",
               "content": [
                 {
@@ -1985,6 +1931,583 @@
                   "styleType": "Bullet"
                 }
               ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Na záver sekcie si jedno upozornenie. Pri spisovaní dôkazov je často vidieť nepresnosť typu "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "vynechanie predpokladov"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ", napríklad niekto môže napísať "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "x^2=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže nutne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=1",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". To môže byť správna časť riešenia, ak v\u00A0zadaní máme, že "
+                },
+                {
+                  "type": "math",
+                  "text": "x",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " je kladné. Ak však tento predpoklad do riešenia nenapíšeme, tak to znie podozrivo, lebo nie je jasné, či si to riešiteľ uvedomil, a\u00A0preto to môže viesť k\u00A0strate bodov. Správne by sme písali niečo ako "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "x^2=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je kladné, takže nutne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=1",
+                      "isDisplay": false
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Ukážeme si veľmi bežnú situáciu, kedy sa toto stáva:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kedy pre celé čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Intuitívna odpoveď je, že nutne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V\u00A0riešenie občas naozaj vidieť úvahu, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". To naozaj platí, ak vieme, že čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú nezáporné. Situáciu si zanalyzujeme podrobne:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vzťah "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva, že existuje celé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "u",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " také, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=au",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podobne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " znamená, že existuje celé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "v",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " také, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=bv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vynásobením týchto rovností máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=abuv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda ak napr. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak vzťah "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=au",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom oba vzťahy znamenajú "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\mid 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je v\u00A0pohode"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Na prvý pohľad môže byť prekvapivé, že "
+                        },
+                        {
+                          "type": "math",
+                          "text": "0 \\mid 0",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ", predsa len, nulou sa nedelí. Deliteľnosť sa ale definuje tak, že "
+                        },
+                        {
+                          "type": "math",
+                          "text": "x \\mid y",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " práve keď existuje celé "
+                        },
+                        {
+                          "type": "math",
+                          "text": "z",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " také, že "
+                        },
+                        {
+                          "type": "math",
+                          "text": "y=zx",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ". Pre "
+                        },
+                        {
+                          "type": "math",
+                          "text": "x=y=0",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " také "
+                        },
+                        {
+                          "type": "math",
+                          "text": "z",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " existuje, dokonca vyhovuje každé celé "
+                        },
+                        {
+                          "type": "math",
+                          "text": "z",
+                          "isDisplay": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab\\neq 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab=abuv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1=uv",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Číslo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa dá zapísať ako súčin celých čísel práve dvoma spôsobmi: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\cdot 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(-1) \\cdot (-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". To nám dáva dve riešenia "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(u,v)=(1,1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(u,v)=(-1,-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktoré spätne znamenajú "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ak by sme však mali, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú nezáporné, tak buď je nejaké nulové, to bolo vyriešené hore, alebo sú oba kladné, čo ale pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nenastane – vtedy by sme teda naozaj mali, že nutne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Záver je, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " alebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pričom pre nezáporné čísla dokonca rovno "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
@@ -2712,6 +3235,838 @@
                     {
                       "type": "text",
                       "text": " Typicky chybný dôkaz môže spočívať v\u00A0argumente, že súčet dvoch iracionálnych čísel je vždy iracionálny. Presvedčte sa ale, že to nie je pravda."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Nasledovné príklady ukazujú, že dôkaz sporom je "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "technicky"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " aj vtedy, ak dokazujeme, že niečo "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "neplatí"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že súčet troch druhých mocnín nepárnych celých čísel nikdy nie je druhou mocninou celého čísla."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom je pozrieť sa na deliteľnosť ôsmimi."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Spomeňte si na tvrdenie dokázané v\u00A0sekcii s\u00A0priamym dôkazom, že druhé mocniny nepárnych čísel dávajú po delení\u00A08 zvyšok\u00A01."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podľa predošlého dokázaného tvrdenia dáva druhá mocnina nepárneho čísla po delení\u00A08 zvyšok\u00A01. Súčet troch takýchto čísel preto dáva zvyšok\u00A03. Potom ale nemôže byť štvorec, keďže to by musel byť nepárny a\u00A0znova podľa nášho tvrdenia dávať zvyšok\u00A01."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "73-CSMO-B-II-1"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Patrik vybral dve rôzne kladné celé čísla "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", každé napísal na 10 kariet a všetkých 20\u00A0kariet rozmiestnil po obvode kruhu. Všimol si, že každé číslo je teraz deliteľom súčtu dvoch čísel na susedných kartách. Dokážte, že čísla na kartách sa ob jedno striedajú."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dokazujeme, že niečo nejde – čo by znamenalo, ak by to potenciálne išlo, teda ak by sa čísla nestriedali? Čo je vlastne opak tohto tvrdenia?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ak by sa čísla nestriedali, tak nejaké dve rovnaké sú vedľa seba, napr. "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aa",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Keď sa teraz prechádzame po kružnici nejakým smerom, napr. doprava, tak po čase musíme naraziť na "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čo z toho dostaneme?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trojica "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nám dáva "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\mid a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\mid b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Bolo by skvelé nájsť niečo podobné ešte niekde inde."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Aby sme dostali "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b \\mid a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", potrebujeme nájsť trojicu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "bba",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Prečo na kružnici musí existovať aj "
+                      },
+                      {
+                        "type": "math",
+                        "text": "bb",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "? Zamysli sa nad počtom striedavých skupín: ak spojíš dve "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " do jednej skupiny, znížiš tým počet dostupných skupín pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Kam sa potom musia zmestiť všetky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ak z trojice "
+                      },
+                      {
+                        "type": "math",
+                        "text": "aab",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " zistíme, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\mid b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", a z trojice "
+                      },
+                      {
+                        "type": "math",
+                        "text": "bba",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " zistíme, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "b \\mid a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", aký záver z toho vyplýva pre dve prirodzené čísla "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a, b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tvrdenie úlohy dokážeme sporom. Pripusťme teda, že čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie sú rozmiestnené striedavo. To zrejme znamená, že sa v kruhu vedľa seba nachádzajú niekde dve "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a súčasne niekde dve "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "V kruhu s rovnakým počtom prvkov "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " a "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " sa tvoria striedavé skupiny, takže počet skupín zložených z "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " sa vždy musí rovnať počtu skupín z "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ". Ak umiestnime dve "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " vedľa seba, znížime celkový počet skupín s "
+                        },
+                        {
+                          "type": "math",
+                          "text": "a",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ", čím sa nutne zníži aj počet dostupných skupín s "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ". Aby sme všetky existujúce "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " rozdelili do tohto menšieho počtu skupín, matematicky to vynucuje, že aspoň dve "
+                        },
+                        {
+                          "type": "math",
+                          "text": "b",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": " musia byť umiestnené vedľa seba."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vyberme dve susedné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ak začneme od tejto dvojice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "aa",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " putovať po kruhu jedným smerom, narazíme na číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (inak by v kruhu boli samé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Akonáhle sa to stane, budeme mať susednú trojicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "aab",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa zadania potom platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", odkiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Analogickou úvahou nájdeme trojicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bba",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z ktorej dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pre prirodzené čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je v spore s tým, že čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú rôzne. Tým je celé riešenie úlohy hotové."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka 1."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Bez ujmy na všeobecnosti sme od začiatku dôkazu sporom mohli predpokladať, že platí napríklad "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom by sme vystačili len s úvahou o trojici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bba",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vedúcej k spornému záveru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka 2."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Ukážme navyše, že pre čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spĺňajúce zadanie úlohy musí platiť buď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = 2a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", alebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = 2b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". S ohľadom na symetriu stačí v prípade "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dokázať rovnosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = 2a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pri striedavom rozmiestnení čísel z trojice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "aba",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\mid 2a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a = kb",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre vhodné prirodzené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z predpokladu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " však vyplýva "
+                    },
+                    {
+                      "type": "math",
+                      "text": "kb = 2a < 2b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", odkiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k < 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a preto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a = kb = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ako sme chceli dokázať."
                     }
                   ],
                   "highligted": false
