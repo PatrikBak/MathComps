@@ -1081,7 +1081,7 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "61-CSMO-II-2"
+                    "text": "61-CSMO-B-II-2"
                   }
                 ],
                 "highligted": false
@@ -2542,7 +2542,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " mají stejnou hodnotu. Dokažte, že pro jejich součin platí "
+                      "text": " mají stejnou hodnotu. Dokažte, že "
                     },
                     {
                       "type": "math",
