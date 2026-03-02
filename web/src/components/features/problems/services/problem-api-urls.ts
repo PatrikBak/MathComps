@@ -1,4 +1,4 @@
-import { buildApiUrl, getApiBaseUrl } from '@/components/shared/utils/url-utils'
+import { buildApiUrl, getApiBaseUrl, getR2BaseUrl } from '@/components/shared/utils/url-utils'
 import { ROUTES } from '@/i18n/i18n'
 
 /**
@@ -8,13 +8,30 @@ export type ImageType = 'problems' | 'handouts'
 
 /**
  * Builds a public URL to a problem image by its content id.
+ * Handout images are served from Cloudflare R2, problem images from the backend API.
  *
  * @param contentId - The unique identifier of the problem content/image
  * @param type - The type of the image (problems or handouts)
- * @returns The API URL path to the problem image
+ * @returns The URL to the image
  */
 export function getProblemImageUrl(contentId: string, type: ImageType): string {
-  return `${getApiBaseUrl()}/images/${type}/${contentId}`
+  switch (type) {
+    case 'handouts':
+      return `${getR2BaseUrl()}/handouts/images/${contentId}`
+    case 'problems':
+      return `${getApiBaseUrl()}/images/${type}/${contentId}`
+  }
+}
+
+/**
+ * Builds a public URL to a handout PDF by its filename.
+ * PDFs are served from Cloudflare R2.
+ *
+ * @param filename - The PDF filename (e.g., "factorization.sk.pdf")
+ * @returns The public URL to the PDF on R2
+ */
+export function getHandoutPdfUrl(filename: string): string {
+  return `${getR2BaseUrl()}/handouts/pdfs/${filename}`
 }
 
 /**

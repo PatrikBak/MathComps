@@ -1,88 +1,118 @@
-# Handouts Parser CLI
+# Handouts CLI
 
-A .NET tool for parsing handout `.tex` files and converting them into structured `.json` files for the frontend. Automatically discovers and processes handouts based on configurable patterns.
+A .NET tool that orchestrates the full handout build pipeline: generates skeleton worksheets, compiles TeX to PDF, parses structured JSON for the frontend, and uploads PDFs and images to Cloudflare R2.
 
-## How It Works
+## Pipeline
 
-The parser converts PlainTex+OpMaC documents into structured JSON format that the frontend can easily render:
+For each matched `.tex` file, the tool runs these steps in order:
 
-1. **Discovers TeX Files**: Automatically finds all `.tex` files matching a pattern (e.g., `*.sk.tex` for Slovak handouts) in the input directory.
-2. **Parses Content**: Uses a custom TeX parser to analyze the document's structure, including sections, paragraphs, and custom commands for problems and solutions.
-3. **Generates JSON**: Converts the parsed content into structured JSON objects.
-4. **Saves Output**: Writes JSON files to the output directory.
+1. **Generate skeleton** — strips solutions/proofs/hints, produces a `-skeleton.tex` worksheet
+2. **Compile TeX** — runs the configured compiler (2 passes) on both main + skeleton files
+3. **Parse to JSON** — converts the TeX document structure into `RawContentBlock[]` JSON (saved locally to `web/src/content/handouts/`)
+4. **Upload images** — processes SVG images and uploads them to R2 (`handouts/images/`)
+5. **Upload PDFs** — uploads compiled PDFs to R2 (`handouts/pdfs/`)
 
-The tool includes error handling to report any unknown TeX commands, ensuring handouts only contain things we know we can render parsed correctly.
+## Prerequisites
+
+### R2 Credentials
+
+The tool uploads assets to Cloudflare R2. Configure credentials via user secrets (only needed when uploading — use `--skip-upload` to skip):
+
+```bash
+cd backend/src/Tools/MathComps.Cli.Handouts
+dotnet user-secrets set "CloudflareR2:AccountId" "<your-account-id>"
+dotnet user-secrets set "CloudflareR2:BucketName" "<your-bucket-name>"
+dotnet user-secrets set "CloudflareR2:AccessKeyId" "<your-access-key>"
+dotnet user-secrets set "CloudflareR2:SecretAccessKey" "<your-secret-key>"
+```
 
 ## How to Run
-
-Navigate to the tool's directory:
 
 ```bash
 cd backend/src/Tools/MathComps.Cli.Handouts
 ```
 
-### Process All Slovak Handouts (Default)
+### Build All Slovak Handouts
 
 ```bash
-# Processes all *.sk.tex files
 dotnet run -- *.sk.tex
 ```
 
-### Process All English Handouts
+### Build All Locales
 
 ```bash
-# Processes all *.en.tex files
-dotnet run -- *.en.tex
+dotnet run -- *.sk.tex *.en.tex *.cs.tex
 ```
 
-### Process All Handouts (Both Locales)
+### Build a Single File
 
 ```bash
-# Processes all locale files
-dotnet run -- *.sk.tex *.en.tex
-```
-
-### Test a Single File
-
-```bash
-# Process only a specific file
 dotnet run -- factorization.sk.tex
+```
+
+### Skip Compilation (Parse Only)
+
+```bash
+dotnet run -- --skip-compile *.sk.tex
+```
+
+### Skip Uploads (No R2 Credentials Needed)
+
+```bash
+dotnet run -- --skip-upload *.sk.tex
+```
+
+### Custom Compiler
+
+```bash
+dotnet run -- --compiler pdfcsplain *.sk.tex
+```
+
+## Options
+
+| Option           | Default      | Description                                             |
+| ---------------- | ------------ | ------------------------------------------------------- |
+| `<patterns>`     | required     | File pattern(s) to match (e.g. `*.sk.tex`)              |
+| `--compiler`     | `pdfcsplain` | TeX compiler command                                    |
+| `--skip-compile` | `false`      | Skip TeX compilation, only parse and copy existing PDFs |
+| `--skip-upload`  | `false`      | Skip uploading PDFs and images to R2                    |
+
+## Deployment Workflow
+
+After running the CLI:
+
+1. **JSONs** are saved to `web/src/content/handouts/` — commit and push to trigger a frontend redeploy
+2. **PDFs and images** are uploaded directly to R2 — available immediately, no backend deploy needed
+
+```bash
+# 1. Build handouts (generates JSONs locally + uploads PDFs/images to R2)
+dotnet run -- *.sk.tex *.en.tex *.cs.tex
+
+# 2. Commit and push the JSONs (frontend auto-redeploys)
+git add web/src/content/handouts/
+git commit -m "Update handouts"
+git push
 ```
 
 ## File Naming Convention
 
-The tool preserves the original filename structure, only changing the extension:
+The tool preserves the original filename structure:
 
-- `factorization.sk.tex` → `factorization.sk.json`
-- `factorization.en.tex` → `factorization.en.json`
-- `systems-of-equations.sk.tex` → `systems-of-equations.sk.json`
+- `factorization.sk.tex` → `factorization.sk.json` (JSON) + `factorization.sk.pdf` (PDF)
+- Skeletons: `factorization.sk.tex` → `factorization.sk-skeleton.tex` → `factorization.sk-skeleton.pdf`
 
-**Important**: The base filename (before `.{locale}.tex`) must match the `filename` field in `web/src/content/handouts.json`.
+**Important**: The base filename (before `.{locale}.tex`) must match the English slug in `web/src/content/handouts.json`.
 
 ## Adding New Handouts
 
-To add a new handout:
-
-1. Create your `.tex` files in `data/handouts/` for each locale:
-   - `my-handout.sk.tex` (Slovak version)
-   - `my-handout.en.tex` (English version)
-2. Run the parser (it will automatically discover and process the new files)
-3. The corresponding `.json` files will be created in `web/src/content/handouts/`
-4. Update `web/src/content/handouts.json` to reference the new handout with:
-   - `filename: "my-handout"` (base name without locale suffix)
-   - Localized `slug`, `title`, and `description` fields
-
-The tool automatically discovers and processes new `.tex` files—no configuration changes needed!
+1. Create `.tex` files in `data/handouts/` for each locale (e.g. `my-handout.sk.tex`, `my-handout.en.tex`, `my-handout.cs.tex`)
+2. Run the build (it automatically discovers and processes new files)
+3. Update `web/src/content/handouts.json` with localized `slug`, `title`, and `description`
 
 ## Validation
 
-The frontend includes a validation script that ensures:
-
-- All `ReadyHandout` entries have matching content files for all locales
-- All `LocalizedString` fields have values for all supported locales
-
-Run validation from the web directory:
+The frontend includes a validation script to ensure all ready handouts have content files for all locales:
 
 ```bash
-npm run handouts:validate
+cd web && npm run handouts:validate
 ```

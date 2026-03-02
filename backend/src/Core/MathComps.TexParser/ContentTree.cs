@@ -4,6 +4,25 @@ using MathComps.TexParser.Types;
 namespace MathComps.TexParser;
 
 /// <summary>
+/// The result of transforming a <see cref="ContentBlock"/> node during tree traversal.
+/// </summary>
+/// <typeparam name="TState">The type of state threaded through the traversal.</typeparam>
+/// <param name="Node">The transformed node, or null to remove the node from the tree.</param>
+/// <param name="State">The updated state after transformation.</param>
+public readonly record struct NodeTransformResult<TState>(ContentBlock? Node, TState State);
+
+/// <summary>
+/// A function that transforms a <see cref="ContentBlock"/> node during tree traversal.
+/// Return the same node reference to indicate no change.
+/// Return null in <see cref="NodeTransformResult{TState}.Node"/> to remove the node from the tree.
+/// </summary>
+/// <typeparam name="TState">The type of state threaded through the traversal.</typeparam>
+/// <param name="node">The current node being visited.</param>
+/// <param name="state">The current accumulated state.</param>
+/// <returns>A <see cref="NodeTransformResult{TState}"/> with the transformed node and updated state.</returns>
+public delegate NodeTransformResult<TState> NodeTransformer<TState>(ContentBlock node, TState state);
+
+/// <summary>
 /// Provides utilities for traversing and transforming <see cref="ContentBlock"/> trees.
 /// The core method <see cref="Traverse{TState}"/> supports both tree transformations and
 /// data collection in a single pass, using a functional "map-accumulate" pattern.
@@ -28,15 +47,12 @@ public static class ContentTree
     /// <typeparam name="TState">The type of state threaded through the traversal.</typeparam>
     /// <param name="blocks">The content blocks to traverse.</param>
     /// <param name="initialState">The initial state value.</param>
-    /// <param name="transformer">
-    /// A function that receives each node and the current state, returning a (possibly new) node
-    /// and an updated state. Return the same node reference to indicate no change.
-    /// </param>
+    /// <param name="transformer">The transformation function applied to each node.</param>
     /// <returns>A tuple containing the transformed tree and the final state.</returns>
     public static (ImmutableList<ContentBlock> Blocks, TState State) Traverse<TState>(
         ImmutableList<ContentBlock> blocks,
         TState initialState,
-        Func<ContentBlock, TState, (ContentBlock Node, TState State)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // Delegate to the internal method that also tracks whether anything changed.
@@ -50,15 +66,15 @@ public static class ContentTree
     /// Simplified overload for pure transformations that don't need to accumulate state.
     /// </summary>
     /// <param name="blocks">The content blocks to traverse.</param>
-    /// <param name="transformer">A function that transforms each node. Return the same reference for no change.</param>
+    /// <param name="transformer">A function that transforms each node. Return the same reference for no change. Return null to remove the node from the tree.</param>
     /// <returns>The transformed tree.</returns>
     public static ImmutableList<ContentBlock> Map(
         ImmutableList<ContentBlock> blocks,
-        Func<ContentBlock, ContentBlock> transformer
+        Func<ContentBlock, ContentBlock?> transformer
     )
     {
         // Use a dummy unit state since we don't need state accumulation.
-        var (result, _) = Traverse(blocks, 0, (node, state) => (transformer(node), state));
+        var (result, _) = Traverse(blocks, 0, (node, state) => new NodeTransformResult<int>(transformer(node), state));
 
         // Return only the transformed blocks.
         return result;
@@ -88,10 +104,10 @@ public static class ContentTree
     /// <param name="state">The current state.</param>
     /// <param name="transformer">The transformation function.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseNode<TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseNode<TState>(
         ContentBlock block,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // First, recursively process any children this node might have.
@@ -137,18 +153,22 @@ public static class ContentTree
 
             #region Leaf nodes have no children to process.
 
-            _ => new TraversalResult<ContentBlock, TState>(block, state, false)
+            _ => new TraversalResult<ContentBlock?, TState>(block, state, false)
 
             #endregion
         };
 
+        // If children processing returned null, propagate that.
+        if (processedBlock is null)
+            return new(null, newState, true);
+
         // Now apply the user's transformer to the (possibly updated) node.
         var (result, finalState) = transformer(processedBlock, newState);
 
-        // Determine if anything changed: either children changed or the transformer modified the node.
-        var nodeChanged = childrenChanged || !ReferenceEquals(result, processedBlock);
+        // Determine if anything changed: either children changed, transformer modified the node, or node was removed.
+        var nodeChanged = childrenChanged || result is null || !ReferenceEquals(result, processedBlock);
 
-        // Return the final result.
+        // Return the final result (may be null to indicate removal).
         return new(result, finalState, nodeChanged);
     }
 
@@ -165,7 +185,7 @@ public static class ContentTree
     private static TraversalResult<ImmutableList<TItem>, TState> TraverseList<TItem, TState>(
         ImmutableList<TItem> items,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     ) where TItem : ContentBlock
     {
         // Track whether any node in the list was modified.
@@ -180,6 +200,16 @@ public static class ContentTree
             // Recursively traverse this node and its children.
             var (newItem, newState, changed) = TraverseNode(item, state, transformer);
 
+            // Update state for the next iteration.
+            state = newState;
+
+            // If the transformer returned null, skip this item (i.e., remove it from the tree).
+            if (newItem is null)
+            {
+                anyChanged = true;
+                continue;
+            }
+
             // The transformer should return the same type TItem.
             if (newItem is not TItem typedItem)
                 throw new InvalidOperationException($"Transformer returned {newItem.GetType().Name} but expected {typeof(TItem).Name}");
@@ -188,9 +218,8 @@ public static class ContentTree
             if (changed)
                 anyChanged = true;
 
-            // Add to the result builder and update the state for the next iteration.
+            // Add to the result builder.
             builder.Add(typedItem);
-            state = newState;
         }
 
         // Optimization: if nothing changed, return the original list reference.
@@ -215,11 +244,11 @@ public static class ContentTree
     /// <param name="transformer">The transformation function.</param>
     /// <param name="reconstruct">Function to reconstruct the container with new content.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseContainer<TContainer, TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseContainer<TContainer, TState>(
         TContainer container,
         ImmutableList<RawContentBlock> content,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer,
+        NodeTransformer<TState> transformer,
         Func<TContainer, ImmutableList<RawContentBlock>, TContainer> reconstruct
     ) where TContainer : ContentBlock
     {
@@ -232,7 +261,7 @@ public static class ContentTree
             : container;
 
         // Return the result, final state, and whether anything changed downstream.
-        return new TraversalResult<ContentBlock, TState>(result, newState, changed);
+        return new TraversalResult<ContentBlock?, TState>(result, newState, changed);
     }
 
     /// <summary>
@@ -243,10 +272,10 @@ public static class ContentTree
     /// <param name="state">The current state.</param>
     /// <param name="transformer">The transformation function.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseItemList<TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseItemList<TState>(
         ItemList list,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // Track whether any item changed.
@@ -284,10 +313,10 @@ public static class ContentTree
     /// <param name="state">The current state.</param>
     /// <param name="transformer">The transformation function.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseTheorem<TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseTheorem<TState>(
         Theorem theorem,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // Process optional title.
@@ -323,10 +352,10 @@ public static class ContentTree
     /// <param name="state">The current state.</param>
     /// <param name="transformer">The transformation function.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseExercise<TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseExercise<TState>(
         Exercise exercise,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // Process optional title.
@@ -362,10 +391,10 @@ public static class ContentTree
     /// <param name="state">The current state.</param>
     /// <param name="transformer">The transformation function.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseProblem<TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseProblem<TState>(
         Problem problem,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // Process optional title.
@@ -422,10 +451,10 @@ public static class ContentTree
     /// <param name="state">The current state.</param>
     /// <param name="transformer">The transformation function.</param>
     /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
-    private static TraversalResult<ContentBlock, TState> TraverseExample<TState>(
+    private static TraversalResult<ContentBlock?, TState> TraverseExample<TState>(
         Example example,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // Process optional title.
@@ -464,7 +493,7 @@ public static class ContentTree
     private static TraversalResult<RawContentBlock?, TState> TraverseOptional<TState>(
         RawContentBlock? block,
         TState state,
-        Func<ContentBlock, TState, (ContentBlock, TState)> transformer
+        NodeTransformer<TState> transformer
     )
     {
         // If null, nothing to traverse.
@@ -473,6 +502,10 @@ public static class ContentTree
 
         // Traverse the block.
         var (newBlock, newState, changed) = TraverseNode(block, state, transformer);
+
+        // If null, the block was removed.
+        if (newBlock is null)
+            return new(null, newState, true);
 
         // Ensure result is still a raw content block.
         return newBlock is not RawContentBlock rawResult

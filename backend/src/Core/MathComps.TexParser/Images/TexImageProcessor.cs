@@ -51,8 +51,8 @@ public static class TexImageProcessor
     /// <param name="node">The node to process.</param>
     /// <param name="state">Current processing state.</param>
     /// <param name="config">Configuration for image processing.</param>
-    /// <returns>Tuple of (possibly updated node, updated state).</returns>
-    private static (ContentBlock Node, ImageProcessingState State) ProcessNode(
+    /// <returns>A <see cref="NodeTransformResult{TState}"/> with the processed node and updated state.</returns>
+    private static NodeTransformResult<ImageProcessingState> ProcessNode(
         ContentBlock node,
         ImageProcessingState state,
         ImageProcessingConfig config
@@ -60,7 +60,7 @@ public static class TexImageProcessor
     {
         // Only images need special handling; other nodes are returned unchanged.
         if (node is not TexImage image)
-            return (node, state);
+            return new(node, state);
 
         // Resolve the image source path using the provided resolver.
         var sourcePath = config.ImageSourceResolver(image.Id);
@@ -72,27 +72,21 @@ public static class TexImageProcessor
             config.OnMissingImage?.Invoke(image.Id);
 
             // No image changes, state unchanged
-            return (image, state);
+            return new(image, state);
         }
 
         // Check if we've already processed this source image (deduplication)
         if (state.ProcessedImages.TryGetValue(image.Id, out var existingContentId))
         {
             // Reuse existing output file - no need to add metadata again
-            return (image with { Id = existingContentId }, state);
+            return new(image with { Id = existingContentId }, state);
         }
 
         // Build a deterministic file name for stable URLs.
         var newFileName = $"{config.FileNamePrefix}-{state.Counter}.svg";
 
-        // Find its path in the output directory
-        var newFilePath = Path.Combine(config.OutputDirectory, newFileName);
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(config.OutputDirectory);
-
-        // Copy the discovered source file into the output directory (overwrite to keep idempotence).
-        File.Copy(sourcePath, newFilePath, overwrite: true);
+        // Persist the image using the configured strategy (local copy, R2 upload, etc.)
+        config.PersistImage(sourcePath, newFileName);
 
         // Use the new file name as the content id to link content JSON with metadata.
         var contentId = newFileName;
@@ -110,7 +104,7 @@ public static class TexImageProcessor
         );
 
         // Return updated node and state with incremented counter and added metadata.
-        return (image with { Id = contentId }, new ImageProcessingState(
+        return new(image with { Id = contentId }, new ImageProcessingState(
             state.Counter + 1,
             state.ProcessedImages.Add(image.Id, contentId),
             state.DiscoveredImages.Add(imageData)

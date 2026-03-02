@@ -19,6 +19,16 @@ export function getSiteUrl(): string {
 }
 
 /**
+ * Retrieves the public Cloudflare R2 URL from environment variables.
+ * Used for serving handout assets (PDFs, images) from R2 storage.
+ *
+ * @returns The R2 public URL with no trailing slash
+ */
+export function getR2BaseUrl(): string {
+  return getRequiredEnv('NEXT_PUBLIC_R2_URL')
+}
+
+/**
  * Builds API URL for the given endpoint path.
  *
  * Development: Uses /api prefix which Next.js strips via rewrites

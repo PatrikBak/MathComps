@@ -20,6 +20,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard } from './Cards'
+import { HandoutActions } from './HandoutActions'
 
 /**
  * Translation function for the 'handouts' namespace
@@ -38,6 +39,8 @@ type HandoutDetailProps = {
   slug: string
   /** Permanent content ID (nanoid) */
   contentId: string
+  /** PDF filename stem for R2 downloads, e.g. "fun-algebra.sk" */
+  pdfFilenameStem: string
   /** Metadata for each section in the handout */
   sectionMetadata: SectionMetadata[]
   /** The current locale */
@@ -462,6 +465,7 @@ export default function HandoutDetail({
   authors,
   sectionMetadata,
   contentId,
+  pdfFilenameStem,
   locale,
 }: HandoutDetailProps) {
   const t = useTranslations('handouts')
@@ -506,6 +510,9 @@ export default function HandoutDetail({
               <span className="text-gray-200 font-semi-bold text-sm"> {authors.join(', ')} </span>
             </div>
           )}
+
+          {/* Three-dot overflow menu with share and PDF downloads */}
+          <HandoutActions pdfFilenameStem={pdfFilenameStem} />
         </div>
       </header>
 

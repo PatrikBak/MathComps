@@ -180,6 +180,7 @@ export default withLocale(async function RenderPage({
           sectionMetadata={sectionMetadata}
           slug={slug}
           contentId={handoutData.metadata.id}
+          pdfFilenameStem={`${handoutData.metadata.slug.en}.${locale}`}
           locale={locale}
         />
       </Layout>

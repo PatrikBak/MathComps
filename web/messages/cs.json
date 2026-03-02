@@ -517,7 +517,10 @@
       "author": "Autor",
       "authors": "Autoři",
       "comments": "Komentáře",
+      "downloadPdf": "Stáhnout PDF",
+      "downloadSkeleton": "Pouze úlohy (PDF)",
       "hint": "Nápověda",
+      "moreActions": "Další akce",
       "proof": "Důkaz",
       "sectionLabel": "Materiály",
       "solution": "Řešení"

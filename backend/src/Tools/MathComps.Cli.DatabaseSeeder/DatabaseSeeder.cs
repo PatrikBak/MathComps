@@ -247,7 +247,15 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 var imageConfig = new ImageProcessingConfig(
                     ImageSourceResolver: imageId => SkmoImageHelper.FindImageSourcePath(imageId, parsedProblem.RawProblem.OlympiadYear),
                     FileNamePrefix: problemSlug,
-                    OutputDirectory: ProblemImagesOutputDirectory,
+                    PersistImage: (sourcePath, destinationFileName) =>
+                    {
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(ProblemImagesOutputDirectory);
+
+                        // Copy the image to the local wwwroot directory
+                        var destinationPath = Path.Combine(ProblemImagesOutputDirectory, destinationFileName);
+                        File.Copy(sourcePath, destinationPath, overwrite: true);
+                    },
                     OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Problem [yellow]{problemSlug}[/] has a missing image: {imageId}")
                 );
 

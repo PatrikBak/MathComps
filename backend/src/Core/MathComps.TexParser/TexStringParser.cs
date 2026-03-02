@@ -1266,11 +1266,11 @@ public static class TexStringParser
             (node, texts) => node switch
             {
                 // Collect text from leaf nodes that contain TeX commands
-                PlainText text => (node, texts.Add(text.Text)),
-                MathTex math => (node, texts.Add(math.Text)),
+                PlainText text => new(node, texts.Add(text.Text)),
+                MathTex math => new(node, texts.Add(math.Text)),
 
                 // All other nodes: pass through unchanged
-                _ => (node, texts)
+                _ => new(node, texts)
             }
         );
 

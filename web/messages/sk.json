@@ -517,7 +517,10 @@
       "author": "Autor",
       "authors": "Autori",
       "comments": "Komentáre",
+      "downloadPdf": "Stiahnuť PDF",
+      "downloadSkeleton": "Len úlohy (PDF)",
       "hint": "Nápoveda",
+      "moreActions": "Ďalšie akcie",
       "proof": "Dôkaz",
       "sectionLabel": "Materiály",
       "solution": "Riešenie"
