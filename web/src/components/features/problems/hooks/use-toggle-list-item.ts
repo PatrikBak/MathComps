@@ -7,7 +7,6 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { getListItemApiUrl } from '../services/user-list-api-urls'
-import { problemQueryKeys } from './use-problem-search-query'
 import { userListQueryKeys } from './use-user-lists'
 
 /**
@@ -74,9 +73,6 @@ export function useToggleListItem() {
     onSuccess: (_, { problemSlug, contentId, isInList }) => {
       // Invalidate the lists cache (problem counts may have changed)
       queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
-
-      // Invalidate all problem search results (list contents may have changed)
-      queryClient.invalidateQueries({ queryKey: problemQueryKeys.all })
 
       // Show undo toast when removing from a list while viewing it
       // (the problem just disappeared from the view, so undo is critical)
