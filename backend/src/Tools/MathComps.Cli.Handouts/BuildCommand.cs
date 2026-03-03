@@ -106,9 +106,11 @@ public class BuildCommand(IFileUploader fileUploader) : AsyncCommand<BuildComman
         else
             AnsiConsole.MarkupLine("[yellow]⚠ Uploads skipped (--skip-upload)[/]");
 
-        // Collect all files matching any of the provided patterns.
+        // Collect all files matching any of the provided patterns, excluding skeleton files.
         List<FileInfo> inputFiles = [..
-            settings.Patterns.SelectMany(pattern => inputDirectory.GetFiles(pattern, SearchOption.TopDirectoryOnly))
+            settings.Patterns
+                .SelectMany(pattern => inputDirectory.GetFiles(pattern, SearchOption.TopDirectoryOnly))
+                .Where(file => !file.Name.Contains("-skeleton", StringComparison.OrdinalIgnoreCase))
         ];
 
         // Check if any files were found.
