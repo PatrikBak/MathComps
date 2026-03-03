@@ -1,6 +1,7 @@
 using MathComps.Cli.SkmoScraper.Commands;
 using MathComps.Cli.SkmoScraper.Services;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -49,19 +50,10 @@ services.AddMathCompsDbContext(configuration);
 // A custom registrar is used to integrate Spectre.Console.Cli with the DI container.
 using var registrar = new DependencyInjectionRegistrar(services);
 
-// Start the app with DI
-var app = new CommandApp(registrar);
-
-// The application is configured with commands
-app.Configure(config =>
+// Run the app using our custom runner
+return await CliRunner.RunAsync(new CommandApp(registrar), args, config =>
 {
     // Register commands
     config.AddCommand<ScrapeSkmoCommand>("scrape");
     config.AddCommand<UpdateSolutionLinksCommand>("update-solution-links");
-
-    // Helps debugging
-    config.PropagateExceptions();
 });
-
-// Run the app, it'll return the exit code
-return await app.RunAsync(args);

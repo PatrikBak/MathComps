@@ -2,6 +2,7 @@ using MathComps.Cli.UserSync.Commands;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,5 +42,5 @@ services.AddInfrastructureServices();
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
 
-// Single command app
-return await new CommandApp<SyncAllUsersCommand>(registrar).RunAsync(args);
+// Run the app using our custom runner
+return await CliRunner.RunAsync(new CommandApp<SyncAllUsersCommand>(registrar), args);

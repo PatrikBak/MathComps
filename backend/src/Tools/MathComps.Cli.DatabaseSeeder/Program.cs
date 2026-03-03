@@ -1,6 +1,7 @@
 using MathComps.Cli.DatabaseSeeder;
 using MathComps.Cli.DatabaseSeeder.Commands;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,8 +43,5 @@ services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
 
-// Start the app with a single command
-var app = new CommandApp<SeedCommand>(registrar);
-
-// Run the app, it'll return the exit code
-return await app.RunAsync(args);
+// Run the app using our custom runner
+return await CliRunner.RunAsync(new CommandApp<SeedCommand>(registrar), args);

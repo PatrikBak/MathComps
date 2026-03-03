@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\MathComps.TexParser\MathComps.TexParser.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Shared\MathComps.Shared.Cli\MathComps.Shared.Cli.csproj" />
   </ItemGroup>
 
   <ItemGroup>

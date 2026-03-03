@@ -3,6 +3,7 @@ using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
@@ -50,10 +51,9 @@ services.AddScoped<ITaggingDatabaseService, TaggingDatabaseService>();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
-var app = new CommandApp(registrar);
 
-// CLI command configuration defines the available commands and their routing.
-app.Configure(config =>
+// Run the app using our custom runner
+return await CliRunner.RunAsync(new CommandApp(registrar), args, config =>
 {
     // Commands
     config.AddCommand<SuggestTagsCommand>("suggest-tags");
@@ -62,10 +62,4 @@ app.Configure(config =>
     config.AddCommand<PruneTagsCommand>("prune-tags");
     config.AddCommand<InteractiveTagManagerCommand>("interactive");
     config.AddCommand<ImportTagsCommand>("import-tags");
-
-    // Helps debugging
-    config.PropagateExceptions();
 });
-
-// The application runs with the provided command-line arguments and returns the exit code.
-return await app.RunAsync(args);

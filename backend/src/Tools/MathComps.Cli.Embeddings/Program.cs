@@ -3,6 +3,7 @@ using MathComps.Cli.Embeddings.Services;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
@@ -48,5 +49,5 @@ services.AddScoped<IEmbeddingDatabaseService, EmbeddingDatabaseService>();
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
 
-// Single command app
-return await new CommandApp<GenerateEmbeddingsCommand>(registrar).RunAsync(args);
+// Run the app using our custom runner
+return await CliRunner.RunAsync(new CommandApp<GenerateEmbeddingsCommand>(registrar), args);

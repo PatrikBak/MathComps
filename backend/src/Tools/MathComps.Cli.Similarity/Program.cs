@@ -3,6 +3,7 @@ using MathComps.Cli.Similarity.Services;
 using MathComps.Cli.Similarity.Settings;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
@@ -47,18 +48,11 @@ services.AddScoped<IProblemSimilarityService, ProblemSimilarityService>();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
-var app = new CommandApp(registrar);
 
-// CLI command configuration defines the available commands and their routing.
-app.Configure(config =>
+// Run the app using our custom runner
+return await CliRunner.RunAsync(new CommandApp<CalculateSimilaritiesCommand>(registrar), args, config =>
 {
     // Commands
     config.AddCommand<CalculateSimilaritiesCommand>("calculate-similarities");
     config.AddCommand<InteractiveSimilarityManagerCommand>("interactive");
-
-    // Helps debugging
-    config.PropagateExceptions();
 });
-
-// The application runs with the provided command-line arguments and returns the exit code.
-return await app.RunAsync(args);
