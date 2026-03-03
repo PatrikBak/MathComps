@@ -6251,7 +6251,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\begin{gather*}\n(x^2+1)(y^2+1) =\nx^2y^2+x^2+y^2+1 =\n(x^2y^2+1) + (x^2+y^2) = \\\\ =\n[(xy-1)^2 - 2xy] + [(x+y)^2 + 2xy] =\n(xy-1)^2 + (x+y)^2.\n\\end{gather*}",
+                  "text": "\\begin{gather*}\n(x^2+1)(y^2+1) =\nx^2y^2+x^2+y^2+1 =\n(x^2y^2+1) + (x^2+y^2) = \\\\ =\n[(xy-1)^2 + 2xy] + [(x+y)^2 - 2xy] =\n(xy-1)^2 + (x+y)^2.\n\\end{gather*}",
                   "isDisplay": true
                 },
                 {
@@ -6314,7 +6314,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\begin{align*}\nxy - x - y + 1 &= 1 \\\\\n(x-1)(y-1) &= 2.\n\\end{align*}",
+                  "text": "\\begin{align*}\nxy - x - y + 1 &= 2 \\\\\n(x-1)(y-1) &= 2.\n\\end{align*}",
                   "isDisplay": true
                 },
                 {
