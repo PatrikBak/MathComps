@@ -8,6 +8,11 @@ namespace MathComps.Cli.Tagging.Settings;
 public class SuggestTagsSettings
 {
     /// <summary>
+    /// Configuration section name used in appsettings.json for these settings.
+    /// </summary>
+    public const string SectionName = "SuggestTagsSettings";
+
+    /// <summary>
     /// Gemini settings for the tag suggestion phase.
     /// </summary>
     public required AiModelConfig SuggestTags { get; set; }

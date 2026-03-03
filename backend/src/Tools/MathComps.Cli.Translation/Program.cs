@@ -30,7 +30,9 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddHttpClient();
 
 // Add settings for commands
-services.AddOptions<TranslateProblemsSettings>().Bind(configuration.GetSection("TranslateProblemsSettings"));
+services.AddOptions<TranslateProblemsSettings>()
+    .Bind(configuration.GetSection(TranslateProblemsSettings.SectionName))
+    .ValidateDataAnnotations();
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);

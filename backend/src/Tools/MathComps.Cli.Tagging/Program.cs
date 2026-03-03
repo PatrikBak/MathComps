@@ -36,9 +36,15 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddHttpClient();
 
 // Add settings for commands
-services.AddOptions<SuggestTagsSettings>().Bind(configuration.GetSection("SuggestTagsSettings"));
-services.AddOptions<TagProblemsSettings>().Bind(configuration.GetSection("TagProblemsSettings"));
-services.AddOptions<VetoProblemTagsSettings>().Bind(configuration.GetSection("VetoProblemTagsSettings"));
+services.AddOptions<SuggestTagsSettings>()
+    .Bind(configuration.GetSection(SuggestTagsSettings.SectionName))
+    .ValidateDataAnnotations();
+services.AddOptions<TagProblemsSettings>()
+    .Bind(configuration.GetSection(TagProblemsSettings.SectionName))
+    .ValidateDataAnnotations();
+services.AddOptions<VetoProblemTagsSettings>()
+    .Bind(configuration.GetSection(VetoProblemTagsSettings.SectionName))
+    .ValidateDataAnnotations();
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);

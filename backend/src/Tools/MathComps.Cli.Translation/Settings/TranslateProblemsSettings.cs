@@ -8,6 +8,11 @@ namespace MathComps.Cli.Translation.Settings;
 public class TranslateProblemsSettings
 {
     /// <summary>
+    /// Configuration section name used in appsettings.json for these settings.
+    /// </summary>
+    public const string SectionName = "TranslateProblemsSettings";
+
+    /// <summary>
     /// AI model configuration for the translation command.
     /// </summary>
     public required AiModelConfig ModelConfig { get; set; }

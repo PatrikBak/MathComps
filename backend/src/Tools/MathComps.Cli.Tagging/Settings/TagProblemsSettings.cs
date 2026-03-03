@@ -8,6 +8,11 @@ namespace MathComps.Cli.Tagging.Settings;
 public class TagProblemsSettings
 {
     /// <summary>
+    /// Configuration section name used in appsettings.json for these settings.
+    /// </summary>
+    public const string SectionName = "TagProblemsSettings";
+
+    /// <summary>
     /// Gemini settings for tagging problems based on statement only (Area/Goal/Type tags).
     /// </summary>
     public required AiModelConfig TagProblemStatement { get; set; }

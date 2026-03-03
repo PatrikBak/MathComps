@@ -8,6 +8,11 @@ namespace MathComps.Cli.Tagging.Settings;
 public class VetoProblemTagsSettings
 {
     /// <summary>
+    /// Configuration section name used in appsettings.json for these settings.
+    /// </summary>
+    public const string SectionName = "VetoProblemTagsSettings";
+
+    /// <summary>
     /// Gemini settings for vetoing problem statement tags (Area/Goal/Type tags).
     /// </summary>
     public required AiModelConfig VetoProblemStatementTags { get; set; }
