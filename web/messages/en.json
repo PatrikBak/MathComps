@@ -517,7 +517,10 @@
       "author": "Author",
       "authors": "Authors",
       "comments": "Comments",
+      "downloadPdf": "Download PDF",
+      "downloadSkeleton": "Problems only (PDF)",
       "hint": "Hint",
+      "moreActions": "More actions",
       "proof": "Proof",
       "sectionLabel": "Handouts",
       "solution": "Solution"

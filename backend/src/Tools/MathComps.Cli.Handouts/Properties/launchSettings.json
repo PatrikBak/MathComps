@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "ParseHandouts": {
+    "Build": {
       "commandName": "Project",
       "commandLineArgs": "*.sk.tex *.en.tex *.cs.tex",
       "workingDirectory": "."

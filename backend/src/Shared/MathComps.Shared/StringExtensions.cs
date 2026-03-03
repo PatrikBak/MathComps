@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Slugify;
 
 namespace MathComps.Shared;
@@ -91,5 +92,18 @@ public static class StringExtensions
         return text.EndsWith(suffix, comparisonType)
             ? text[..^suffix.Length]
             : text;
+    }
+
+    /// <summary>
+    /// Extracts the first substring matching the given regex pattern.
+    /// </summary>
+    /// <param name="text">The source text to search.</param>
+    /// <param name="pattern">The regex pattern to match.</param>
+    /// <returns>The matched substring, or null if no match was found.</returns>
+    public static string? ExtractMatch(this string text, string pattern)
+    {
+        // Search for the pattern in the text
+        var match = Regex.Match(text, pattern);
+        return match.Success ? match.Value : null;
     }
 }
