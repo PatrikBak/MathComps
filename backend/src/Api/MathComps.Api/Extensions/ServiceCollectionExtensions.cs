@@ -68,7 +68,7 @@ public static class ServiceCollectionExtensions
                 // Allow common headers for browser requests
                 .WithHeaders("Content-Type", "X-Requested-With", "Authorization", "Accept", "Accept-Language")
                 // Only required HTTP methods
-                .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             )
         );
 
