@@ -17,12 +17,12 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// Test user ID 1.
     /// </summary>
-    private static readonly Guid User1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private static readonly Guid _user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
     /// <summary>
     /// Test user ID 2.
     /// </summary>
-    private static readonly Guid User2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+    private static readonly Guid _user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
     /// <summary>
     /// Problem ID 1 — assigned during seed.
@@ -47,22 +47,22 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     public Task ToggleLikeCreatesAndRemovesLike() => RunTestAsync(async service =>
     {
         // Act 1: First toggle — should create the like
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
 
         // Assert 1: Like now exists in the database
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: true);
 
         // Act 2: Second toggle — should remove the like
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
 
         // Assert 2: Like is no longer in the database
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: false);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: false);
 
         // Act 3: Third toggle — should re-create the like
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
 
         // Assert 3: Like exists again after the third toggle
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: true);
     });
 
     /// <summary>
@@ -75,19 +75,19 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     public Task ToggleLikeIsolatedBetweenUsers() => RunTestAsync(async service =>
     {
         // Act — both users like the same problem
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
-        await service.ToggleLikeAsync(User2Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user2Id, _problem1Id);
 
         // Assert — both likes exist independently
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: true);
-        await AssertLikeExistsAsync(User2Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user2Id, _problem1Id, expected: true);
 
         // Act — User1 unlikes the problem
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
 
         // Assert — only User1's like was removed, User2's remains
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: false);
-        await AssertLikeExistsAsync(User2Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: false);
+        await AssertLikeExistsAsync(_user2Id, _problem1Id, expected: true);
     });
 
     /// <summary>
@@ -100,19 +100,19 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     public Task ToggleLikeIsolatedBetweenProblems() => RunTestAsync(async service =>
     {
         // Act — User1 likes both problems
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
-        await service.ToggleLikeAsync(User1Id, _problem2Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem2Id);
 
         // Assert — both likes exist independently
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: true);
-        await AssertLikeExistsAsync(User1Id, _problem2Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem2Id, expected: true);
 
         // Act — unlike only problem1
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
 
         // Assert — only problem1's like was removed, problem2's remains
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: false);
-        await AssertLikeExistsAsync(User1Id, _problem2Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: false);
+        await AssertLikeExistsAsync(_user1Id, _problem2Id, expected: true);
     });
 
     #endregion ToggleLikeAsync Tests
@@ -130,22 +130,22 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     public Task ToggleMarkCreatesAndRemovesMark() => RunTestAsync(async service =>
     {
         // Act 1: First toggle — should create the mark
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
 
         // Assert 1: Mark now exists in the database
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: true);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: true);
 
         // Act 2: Second toggle — should remove the mark
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
 
         // Assert 2: Mark is no longer in the database
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: false);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: false);
 
         // Act 3: Third toggle — should re-create the mark
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
 
         // Assert 3: Mark exists again after the third toggle
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: true);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: true);
     });
 
     /// <summary>
@@ -158,19 +158,19 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     public Task ToggleMarkIsolatedBetweenUsers() => RunTestAsync(async service =>
     {
         // Act — both users mark the same problem
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
-        await service.ToggleMarkAsync(User2Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user2Id, _problem1Id);
 
         // Assert — both marks exist independently
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: true);
-        await AssertMarkExistsAsync(User2Id, _problem1Id, expected: true);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: true);
+        await AssertMarkExistsAsync(_user2Id, _problem1Id, expected: true);
 
         // Act — User1 unmarks the problem
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
 
         // Assert — only User1's mark was removed, User2's remains
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: false);
-        await AssertMarkExistsAsync(User2Id, _problem1Id, expected: true);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: false);
+        await AssertMarkExistsAsync(_user2Id, _problem1Id, expected: true);
     });
 
     /// <summary>
@@ -184,26 +184,26 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
     public Task LikeAndMarkAreIndependent() => RunTestAsync(async service =>
     {
         // Act — like and mark the same problem
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
 
         // Assert — both exist independently
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: true);
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: true);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: true);
 
         // Act — remove the like only
-        await service.ToggleLikeAsync(User1Id, _problem1Id);
+        await service.ToggleLikeAsync(_user1Id, _problem1Id);
 
         // Assert — like is gone, mark remains untouched
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: false);
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: true);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: false);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: true);
 
         // Act — remove the mark
-        await service.ToggleMarkAsync(User1Id, _problem1Id);
+        await service.ToggleMarkAsync(_user1Id, _problem1Id);
 
         // Assert — both are now gone
-        await AssertLikeExistsAsync(User1Id, _problem1Id, expected: false);
-        await AssertMarkExistsAsync(User1Id, _problem1Id, expected: false);
+        await AssertLikeExistsAsync(_user1Id, _problem1Id, expected: false);
+        await AssertMarkExistsAsync(_user1Id, _problem1Id, expected: false);
     });
 
     #endregion ToggleMarkAsync Tests
@@ -326,7 +326,7 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         // Users — two users for cross-user isolation tests
         context.Users.Add(new User
         {
-            Id = User1Id,
+            Id = _user1Id,
             ExternalId = "user1",
             DisplayName = "User 1",
             Email = "user1@test.com",
@@ -335,7 +335,7 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         });
         context.Users.Add(new User
         {
-            Id = User2Id,
+            Id = _user2Id,
             ExternalId = "user2",
             DisplayName = "User 2",
             Email = "user2@test.com",
