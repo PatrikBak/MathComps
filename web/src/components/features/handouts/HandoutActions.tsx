@@ -66,7 +66,7 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
         onCloseAutoFocus={(event) => event.preventDefault()}
       >
         {/* Share — copies the current URL to clipboard */}
-        <DropdownMenuItem className="cursor-pointer" onSelect={handleShare}>
+        <DropdownMenuItem onSelect={handleShare}>
           <div className="flex items-center">
             <span className="mr-2 flex w-5 items-center justify-center">
               <Share2 className="h-4 w-4" />
@@ -78,7 +78,7 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
         <DropdownMenuSeparator />
 
         {/* Download full PDF */}
-        <DropdownMenuItem className="cursor-pointer" asChild>
+        <DropdownMenuItem asChild>
           <a href={fullPdfUrl} target="_blank" rel="noopener noreferrer">
             <div className="flex items-center">
               <span className="mr-2 flex w-5 items-center justify-center">
@@ -90,7 +90,7 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
         </DropdownMenuItem>
 
         {/* Download skeleton (problems only) PDF */}
-        <DropdownMenuItem className="cursor-pointer" asChild>
+        <DropdownMenuItem asChild>
           <a href={skeletonPdfUrl} target="_blank" rel="noopener noreferrer">
             <div className="flex items-center">
               <span className="mr-2 flex w-5 items-center justify-center">

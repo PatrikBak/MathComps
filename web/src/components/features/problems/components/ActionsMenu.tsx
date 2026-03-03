@@ -60,7 +60,7 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
       >
         {/* Share Button - only visible on small screens (below custom breakpoint) */}
         <ShareButton filters={filters}>
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem>
             <div className="flex items-center">
               <span className="mr-2 flex w-5 items-center justify-center">
                 <Share2 className="h-4 w-4" />

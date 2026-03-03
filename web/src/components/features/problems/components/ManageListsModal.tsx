@@ -232,10 +232,7 @@ function SortableListRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             {/* Share / Copy link */}
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onSelect={list.isShared ? handleCopyLink : handleEnableSharing}
-            >
+            <DropdownMenuItem onSelect={list.isShared ? handleCopyLink : handleEnableSharing}>
               <div className="flex items-center gap-2">
                 {list.isShared ? <LinkIcon size={14} /> : <Share2 size={14} />}
                 <span>{list.isShared ? t('copyListLink') : t('shareList')}</span>
@@ -244,10 +241,7 @@ function SortableListRow({
 
             {/* Stop sharing — only when shared */}
             {list.isShared && (
-              <DropdownMenuItem
-                className="cursor-pointer text-red-400"
-                onSelect={handleStopSharing}
-              >
+              <DropdownMenuItem className="text-red-400" onSelect={handleStopSharing}>
                 <div className="flex items-center gap-2">
                   <X size={14} />
                   <span>{t('unshareList')}</span>
@@ -258,7 +252,7 @@ function SortableListRow({
             <DropdownMenuSeparator />
 
             {/* View */}
-            <DropdownMenuItem className="cursor-pointer" onSelect={() => onView(list.contentId)}>
+            <DropdownMenuItem onSelect={() => onView(list.contentId)}>
               <div className="flex items-center gap-2">
                 <Eye size={14} />
                 <span>{t('viewList')}</span>
@@ -266,10 +260,7 @@ function SortableListRow({
             </DropdownMenuItem>
 
             {/* Delete */}
-            <DropdownMenuItem
-              className="cursor-pointer text-red-400"
-              onSelect={() => onDelete(list)}
-            >
+            <DropdownMenuItem className="text-red-400" onSelect={() => onDelete(list)}>
               <div className="flex items-center gap-2">
                 <Trash2 size={14} />
                 <span>{t('deleteList')}</span>
