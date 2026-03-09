@@ -1452,7 +1452,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "(a^4-b^4)+(a-b)",
+                      "text": "(a^4-b^4)-(a-b)",
                       "isDisplay": false
                     },
                     {
