@@ -1,3 +1,6 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
 import { MessageSquare } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -57,12 +60,17 @@ async function loadDocumentBySlug(
   // Return undefined if the handout doesn't exist
   if (!handoutData) return undefined
 
-  // Dynamically import the handout's JSON file for the current locale
-  // Content files use the English slug as the base filename (e.g., "factorization.sk.json")
-  const handoutModule = await import(`@/content/handouts/${handoutData.slug.en}.${locale}.json`)
+  try {
+    // Dynamically import the handout's JSON file for the current locale
+    // Content files use the English slug as the base filename (e.g., "factorization.sk.json")
+    const handoutModule = await import(`@/content/handouts/${handoutData.slug.en}.${locale}.json`)
 
-  // Return the handout and its metadata entry
-  return { data: handoutModule.default as HandoutData, metadata: handoutData }
+    // Return the handout and its metadata entry
+    return { data: handoutModule.default as HandoutData, metadata: handoutData }
+  } catch {
+    // Content file does not exist for this locale yet — treat as not found
+    return undefined
+  }
 }
 
 /**
@@ -77,9 +85,14 @@ export async function generateStaticParams(): Promise<Array<{ locale: Locale; sl
   // Get all ready handouts
   const readyHandouts = sections.flatMap((section) => section.handouts).filter(isReadyHandout)
 
-  // Generate params for all locale + slug combinations
+  // Resolve the content directory for checking file existence
+  const contentDir = path.join(process.cwd(), 'src', 'content', 'handouts')
+
+  // Generate params only for locale + slug combinations that have a content file
   return SUPPORTED_LOCALES.flatMap((locale) =>
-    readyHandouts.map((handout) => ({ locale, slug: handout.slug[locale] }))
+    readyHandouts
+      .filter((handout) => fs.existsSync(path.join(contentDir, `${handout.slug.en}.${locale}.json`)))
+      .map((handout) => ({ locale, slug: handout.slug[locale] }))
   )
 }
 
