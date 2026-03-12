@@ -1,0 +1,1414 @@
+{
+  "document": {
+    "title": "Cifrovanie",
+    "subtitle": "Okolo Náboje s PraSátkem 2026",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Jeden z\u00A0typov úloh na Náboji sú úlohy o\u00A0cifrách – typicky najmä preto, lebo v\u00A0nich hľadáme pekné číselné odpovedi. Ukážeme si niektoré veľmi základné triky používané pri číslach a\u00A0precvičíme si ich na úlohách."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Techniky",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Číslo "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{a_1a_2\\dots a_n}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " rozpíšeme pomocou dekadického zápisu, napr. "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{ab}=10a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " alebo "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{abc}=100a+10b+c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Číslo so sekvenciou cifier "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nasledovanou sekvenciou cifier "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " dĺžky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " zapíšeme ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x \\cdot 10^k + y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", napríklad pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x=42",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y=67",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "4267 = 42 \\cdot 10^2 + 67",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pri úlohách s\u00A0ciframi sa oplatí pozerať na zvyšky po delení\u00A03 alebo\u00A09, lebo číslo dáva rovnaký zvyšok po delení\u00A03 alebo\u00A09 práve keď je tomu tak pre ciferný súčet."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ďalšie dobré kritéria pre cifry sú pre deliteľnosť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " (posledných "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " cifier tvorí číslo deliteľné\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ")."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A ešte jedno kritérium: číslo je deliteľné\u00A011 práve keď súčet cifier na párnych miestach dáva rovnaký zvyšok po delení\u00A011 ako súčet cifier na nepárnych miestach."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "LowerRomanParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Úlohy",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nájdite najväčšie prvočíslo zložené z\u00A010 rôznych cifier."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pozrite sa na ciferný súčet nášho čísla."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zdôvodnite, že každý palindróm s\u00A0párny počtom cifier je deliteľný\u00A011."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kritérium deliteľnosti\u00A011 by nám to malo dať hneď."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4\\underbrace{44\\dots4}_{n}\\underbrace{88\\dots8}_{n}9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je pre každé celé nezáporné číslo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " štvorcom prirodzeného čísla."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Rozpíšme si číslo pomocou desatinného zápisu (technika 2)"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nájdite všetky čísla s\u00A0prvou číslicou\u00A06 také, že po jej odstránení zostane 25-krát menšie číslo."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zapíšte si číslo ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "6 \\cdot 10^k + x",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0preložte rovnicu zo zadania."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Mysli si trojciferné číslo, ktoré neobsahuje nulu a má prvú a poslednú cifru rôznu. Napíš ho odzadu a odčítaj menšie číslo od väčšieho. Vzniknuté číslo prípadne doplň zľava nulou na trojciferné, znova prepíš odzadu a tieto dve čísla sčítaj. Aké najmenšie a\u00A0aké najväčšie číslo sme mohli dostať?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zapíšme si číslo ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{abc}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čo nám zostane po prvej operácii?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V\u00A0ďalšom kroku máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "|\\overline{abc}-\\overline{cba}|=99|a-c|",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Vypíšte si tieto možné čísla."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "123456789101112\\dots 100",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aplikujeme postupne ciferný súčet, až kým nezískame jednociferné číslo. Aké číslo nám zostane?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Stačí nájsť ciferný súčet a použiť deliteľnosť\u00A09."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Na spočítanie ciferného súčtu nášho čísla sa zamyslime, koľkokrát sa každá z\u00A0cifier vyskytuje v\u00A0našom čísle."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Je dané prirodzené číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Určte poslednú číslicu čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ak viete, že\u00A07 je jeho predposledná číslica."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zapíšte číslo ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "10x+y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", kde "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je posledná cifra. Ako vyzerá "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n^2=100x^2+20xy+y^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Kedy môže byť 7 posledná cifra?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Analyzujte vplyv jednotlivých členov súčtu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "100x^2+20xy+y^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na miesto desiatok."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hlavná idea je, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "100x^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " neprispieva na miesto desiatok vôbec a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "20xy",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " prispieva párnou cifrou, takže "
+                      },
+                      {
+                        "type": "math",
+                        "text": "y^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " musí mať nepárnu cifru na mieste desiatok."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nájdite všetky štvorciferné čísla také, že sú druhou mocninou celého čísla, a\u00A0zároveň ich prvá cifra je rovnaká ako druhá a\u00A0tretia je rovnaká ako štvrtá."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zapíšme si naše číslo ako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{aabb}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0rozpíšme, čomu je rovné."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Vychádza nám "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{aabb}=11(100a+b)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Aby bolo toto štvorec, potrebujeme, aby "
+                      },
+                      {
+                        "type": "math",
+                        "text": "100a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " bolo deliteľné\u00A011."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "100a+b=99a+(a+b)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", takže nutne "
+                      },
+                      {
+                        "type": "math",
+                        "text": "11 \\mid a+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To už nie je veľa možností."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zistite, aké najmenšie kladné celé číslo možno vložiť medzi dvojčíslia "
+                    },
+                    {
+                      "type": "math",
+                      "text": "20",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "16",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak, aby výsledné číslo bolo násobkom čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2016",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pozrime sa na modulo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "9",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Keďže\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "2016",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je deliteľné\u00A09, tak ciferný súčet vkladaného čísla musí byť deliteľný\u00A09, lebo ciferný súčet "
+                      },
+                      {
+                        "type": "math",
+                        "text": "20",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "16",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "9",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nájdite všetky trojciferné čísla, ktoré sú súčtom faktoriálov svojich cifier."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Takéto číslo nemôže mať príliš veľké cifry. Akú najväčšiu môže mať?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Rozmyslíme, že najväčšia cifra v\u00A0čísle môže byť 5. Musí tam vôbec nejaká byť?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Rozmyslíme, že cifra\u00A05 tam nutne musí byť. Už to nie je veľa možností, obzvlášť keď sa zamyslíme nad tým, čo môže byť prvá cifra."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Aké najväčšie číslo deliteľné\u00A011 je možné poskladať z\u00A0cifier 1, 2, 3, 4, 5 a\u00A06 tak, že každú použijeme práve raz?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Použijeme kritérium deliteľnosti\u00A011 – chceme, aby rozdiel súčtu cifier na párnych miestach\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "s_p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0na nepárnych miestach\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "s_n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " bol deliteľný\u00A011. Skúste nájsť možnosti pre tieto súčty."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Uvedomíme si, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "s_p+s_n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je ciferný súčet nášho čísla, takže "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1+2+3+4+5+6=21",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Z\u00A0toho nájdeme možnosti pre dvojice "
+                      },
+                      {
+                        "type": "math",
+                        "text": "s_p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "s_n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0tie zanalyzujeme."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Existujú dve rôzne mocniny dvojky s rovnakým počtom cifier, z ktorých by sa jedna dala získať iba preusporiadaním cifier tej druhej."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pozrime sa na modulo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "9",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúmajme mocniny dvojky modulo\u00A09. Jednotlivé mocniny "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^1, 2^2, \\dots",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sú "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2,4,8,7,5,1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0tak\u00A0ďalej. Za akých podmienok "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " dávajú rovnaký zvyšok po delení\u00A09?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Uvažujme nasledovný proces: Začneme s\u00A0ľubovoľným prirodzeným číslom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vygenerujeme postupnosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1,a_2,\\dots",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " prilepením cifry rôznej od\u00A09. Dokážte, že v\u00A0tejto postupnosti bude nevyhnutne existovať nekonečne veľa zložených čísel."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme sporom. Čo ak by tam bolo len konečne veľa zložených čísel? Rozmyslite si, aké cifry vôbec dokážeme pripájať."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Určite nevieme pripájať párne čísla a\u00A05. Zostáva 1, 3, 7. Skúste vylúčiť niektoré z\u00A0nich."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je vylúčiť 1 a\u00A07. Tieto môžeme mať len konečne veľa kvôli tomu, že by sme poškodili deliteľnosť\u00A03. Zostávajú trojky. Môžeme po čase mať iba tie?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trik na trojky je rozpísať si číslo ako"
+                      }
+                    ],
+                    "highligted": false
+                  },
+                  {
+                    "type": "math",
+                    "text": "a\\cdot 10^n + \\underbrace{\\overline{33\\dots3}}_n=\na\\cdot 10^n + \\frac{10^n-1}{3}.",
+                    "isDisplay": true
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Druhú časť vieme tiež napísať explicitne. Rozmyslite si, že by stačilo, aby "
+                      },
+                      {
+                        "type": "math",
+                        "text": "10^n-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " bolo deliteľné\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "3a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre ktoré prirodzené "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-ciferné číslo deliteľné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktoré má všetky cifry nepárne?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúsme také čísla zostrojovať induktívne."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Vezmime si vyhovujúce číslo, ktoré má "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " cifier. Dokážte, že pripojením jednej z\u00A0cifier "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\{1,3,5,7,9\\}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na koniec čísla dostaneme vyhovujúce číslo s "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " ciframi."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že existuje nekonečne veľa kladných celých čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " takých, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zapísané v\u00A0štvorkovej sústave obsahuje iba číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúsme také čísla zostrojovať induktívne."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikom je, že z\u00A0troch kópii čísla vieme zostrojiť nové, ktoré vyhovuje. Nebojte sa zosilniť indukčný predpoklad."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}
