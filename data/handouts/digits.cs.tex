@@ -1,0 +1,195 @@
+\input _template
+
+\setlanguage{CS}
+
+\Title{Číslování}
+
+\Subtitle{Okolo Náboje s PraSátkem 2026}
+
+\MathcompsLink{cifrovani}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Jeden z~typů úloh na Náboji jsou úlohy o~číslicích -- typicky zejména proto, že v~nich hledáme hezké číselné odpovědi. Ukážeme si některé velmi základní triky používané při číslech a~procvičíme si je na úlohách.
+
+\sec Techniky
+
+\begitems \style i
+\i Číslo $\overline{a_1a_2\dots a_n}$ rozepíšeme pomocí dekadického zápisu, např. $\overline{ab}=10a+b$ nebo $\overline{abc}=100a+10b+c$.
+\i Číslo se sekvencí číslic $x$ následovanou sekvencí číslic $y$ délky $k$ zapíšeme jako $x \cdot 10^k + y$, například pro $x=42$ a $y=67$ máme $4267 = 42 \cdot 10^2 + 67$.
+\i U~úloh s~číslicemi se vyplatí dívat se na zbytky po dělení~3 nebo~9, protože číslo dává stejný zbytek po dělení~3 nebo~9 právě když je tomu tak pro ciferný součet.
+\i Další dobrá kritéria pro číslice jsou pro dělitelnost $2^n$ (posledních $n$ číslic tvoří číslo dělitelné~$2^n$).
+\i A ještě jedno kritérium: číslo je dělitelné~11 právě když součet číslic na sudých místech dává stejný zbytek po dělení~11 jako součet číslic na lichých místech.
+\enditems 
+
+\sec Úlohy
+
+\Problem{0}{}{
+	Najděte největší prvočíslo složené z~10 různých číslic.
+}{
+	Podívejte se na ciferný součet našeho čísla.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Zdůvodněte, že každý palindrom se sudým počtem číslic je dělitelný~11.
+}{
+	Kritérium dělitelnosti~11 by nám to mělo dát hned.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Dokažte, že číslo $4\underbrace{44\dots4}_{n}\underbrace{88\dots8}_{n}9$ je pro každé celé nezáporné číslo~$n$ čtvercem přirozeného čísla.
+}{
+	Rozepišme si číslo pomocí dekadického zápisu (technika 2)
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Najděte všechna čísla s~první číslicí~6 taková, že po jejím odstranění vznikne 25-krát menší číslo.
+}{
+	Zapište si číslo jako $6 \cdot 10^k + x$ a~přeložte rovnici ze zadání.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Mysli si trojciferné číslo, které neobsahuje nulu a má první a poslední číslici různou. Napiš ho pozpátku a odečti menší číslo od většího. Vzniklé číslo případně doplň zleva nulou na trojciferné, znovu přepiš pozpátku a tato dvě čísla sečti. Jaké nejmenší a~jaké největší číslo jsme mohli dostat?
+}{
+	Zapišme si číslo jako $\overline{abc}$. Co nám zbyde po první operaci?
+}{
+	V~dalším kroku máme $|\overline{abc}-\overline{cba}|=99|a-c|$. Vypište si tyto možné čísla. 
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Na číslo $123456789101112\dots 100$ postupně aplikujeme ciferný součet, až dokud nezískáme jednociferné číslo. Jaké číslo nám zbyde?
+}{
+	Stačí najít ciferný součet a použít dělitelnost~9.
+}{
+	Pro spočítání ciferného součtu našeho čísla se zamysleme, kolikrát se každá z~číslic vyskytuje v~našem čísle.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Je dáno přirozené číslo $n$. Určete poslední číslici čísla $n^2$, pokud víte, že~7 je jeho předposlední číslice.
+}{
+	Zapište číslo jako $10x+y$, kde $y$ je poslední číslice. Jak vypadá $n^2$?
+}{
+	Platí $n^2=100x^2+20xy+y^2$. Kdy může být 7 poslední číslice?
+}{
+	Analyzujte vliv jednotlivých členů součtu $100x^2+20xy+y^2$ na místo desítek.
+}{
+	Hlavní idea je, že $100x^2$ nepřispívá na místo desítek vůbec a~$20xy$ přispívá sudou číslicí, takže $y^2$ musí mít lichou číslici na místě desítek.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Najděte všechna čtyřciferná čísla taková, že jsou druhou mocninou celého čísla, a~zároveň jejich první číslice je stejná jako druhá a~třetí je stejná jako čtvrtá.
+}{
+	Zapišme si naše číslo jako $\overline{aabb}$ a~rozepišme, čemu je rovno.
+}{
+	Vychází nám $\overline{aabb}=11(100a+b)$. Aby bylo toto čtvercem, potřebujeme, aby $100a+b$ bylo dělitelné~11.
+}{
+	Platí $100a+b=99a+(a+b)$, takže nutně $11 \mid a+b$. To už není mnoho možností.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Zjistěte, jaké nejmenší kladné celé číslo lze vložit mezi dvojčíslí $20$ a $16$ tak, aby výsledné číslo bylo násobkem čísla $2016$.
+}{
+	Podívejme se na modulo~$9$.
+}{
+	Jelikož~$2016$ je dělitelné~9, tak ciferný součet vkládaného čísla musí být dělitelný~9, protože ciferný součet $20$ a~$16$ je~$9$. 
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Najděte všechna trojciferná čísla, která jsou součtem faktoriálů svých číslic.
+}{
+	Takové číslo nemůže mít příliš velké číslice. Jakou největší může mít?
+}{
+	Rozmyslíme, že největší číslice v~čísle může být 5. Musí tam vůbec nějaká být?
+}{
+	Rozmyslíme, že číslice~5 tam nutně musí být. Už to není mnoho možností, obzvlášť když se zamyslíme nad tím, co může být první číslice.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Jaké největší číslo dělitelné~11 je možné složit z~číslic 1, 2, 3, 4, 5 a~6 tak, že každou použijeme právě jednou?
+}{
+	Použijeme kritérium dělitelnosti~11 -- chceme, aby rozdíl součtu číslic na sudých místech~$s_s$ a~na lichých místech~$s_l$ byl dělitelný~11. Zkuste najít možnosti pro tyto součty.
+}{
+	Uvědomíme si, že $s_s+s_l$ je ciferný součet našeho čísla, takže $1+2+3+4+5+6=21$. Z~toho najdeme možnosti pro dvojice $s_s$ a~$s_l$ a~ty zanalyzujeme.
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Existují dvě různé mocniny dvojky se stejným počtem číslic, z nichž by se jedna dala získat pouze přeuspořádáním číslic té druhé.
+}{
+	Podívejme se na modulo~$9$.
+}{
+	Zkoumejme mocniny dvojky modulo~9. Jednotlivé mocniny $2^1, 2^2, \dots$ jsou $2,4,8,7,5,1$ a~tak~dále. Za jakých podmínek $2^a$ a~$2^b$ dávají stejný zbytek po dělení~9?
+}{
+	% SOL
+}
+
+\Problem{0}{}{
+	Uvažujme následující proces: Začneme s~libovolným přirozeným číslem $a_1$ a~vygenerujeme posloupnost $a_1,a_2,\dots$ tak, že $a_{n+1}$ dostaneme z~$a_n$ přilepením číslice různé od~9. Dokažte, že v~této posloupnosti bude nevyhnutelně existovat nekonečně mnoho složených čísel.
+}{
+	Postupujeme sporem. Co kdyby tam bylo jen konečně mnoho složených čísel? Rozmyslete si, jaké číslice vůbec dokážeme připojovat.
+}{
+	Určitě neumíme připojovat sudé číslice a~5. Zbývá 1, 3, 7. Zkuste vyloučit některé z~nich.
+}{
+	Idea je vyloučit 1 a~7. Těchto můžeme mít jen konečně mnoho kvůli tomu, že bychom porušili dělitelnost~3. Zbývají trojky. Můžeme po čase mít pouze ty?
+}{
+	Trik na trojky je rozepsat si číslo jako 
+	$$
+	a\cdot 10^n + \underbrace{\overline{33\dots3}}_n=
+	a\cdot 10^n + \frac{10^n-1}{3}.	
+	$$
+	Druhou část umíme také napsat explicitně. Rozmyslete si, že by stačilo, aby $10^n-1$ bylo dělitelné~$3a$.
+}{
+}
+
+
+\Problem{0}{}{
+	Pro která přirozená $n$ existuje $n$-ciferné číslo dělitelné $5^n$, které má všechny číslice liché?
+}{
+	Zkusme taková čísla konstruovat induktivně. 
+}{
+    Vezměme si vyhovující číslo, které má $n$ číslic. Dokažte, že připojením jedné z~číslic $\{1,3,5,7,9\}$ na konec čísla dostaneme vyhovující číslo s $n+1$ číslicemi.
+}{
+	% SOL
+}
+
+
+\Problem{0}{}{
+	Dokažte, že existuje nekonečně mnoho kladných celých čísel $n$ takových, že $n^2$ zapsané ve~čtyřkové soustavě obsahuje pouze číslice $1$ a~$2$. 
+}{
+	Zkusme taková čísla konstruovat induktivně. 
+}{
+	Trikem je, že ze tří kopií čísla umíme zkonstruovat nové, které vyhovuje. Nebojte se zesílit indukční předpoklad.
+}{
+	% SOL
+}
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye
