@@ -292,7 +292,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "4\\underbrace{44\\dots4}_{n}\\underbrace{88\\dots8}_{n}9",
+                      "text": "\\underbrace{44\\dots4}_{n+1}\\underbrace{88\\dots8}_{n}9",
                       "isDisplay": false
                     },
                     {
