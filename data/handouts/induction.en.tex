@@ -1,0 +1,578 @@
+\input _template
+
+\setlanguage{EN}
+
+\Title{Proofs}
+
+\Subtitle{Mathematical induction}
+
+\MathcompsLink{induction}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+The word \textit{induction} generally means \uv{a mental process from the specific to the general}. When proving problems, we often think this way -- we play with small cases and investigate how to discover new ones from previously derived results. Mathematical induction is a formal proof method based on this idea. In this material, we will formalize it and then demonstrate it on various examples.
+
+\sec Basic induction
+
+We illustrate the idea of mathematical induction using dominoes. They have a property: if the $k$-th one falls, the $(k+1)$-th one will also fall. Thanks to this, if we knock over the first one, the second one falls as well, and therefore the third one, etc. The conclusion is that they all fall. 
+
+\Example{}{
+    Prove that the sum of the first $n$ natural numbers is equal to $\frac{n(n+1)}2$.
+}{
+    For $n=1$ we get $1 = \frac{1\cdot 2}{2}$, which holds. Assume that the statement holds for some~$n$. For $n+1$, the new expression on the left is equal to
+    $$
+    (1+2+\cdots+n)+(n+1) = \frac{n(n+1)}{2}+(n+1) = \frac{(n+1)(n+2)}{2},
+    $$
+    which is exactly the expression on the right side for $n+1$. The proof by induction is complete.
+}
+
+In general, a proof by induction consists of two steps:
+\begitems \style N
+\i Proof of the statement for some initial value $n_0$.
+\i Proof that if the statement holds for some $n \ge n_0$, then it holds for $n+1$.
+\enditems
+
+Try this approach on these memorable identities.
+
+\Exercise{}{
+    Prove the following identities for all natural numbers~$n$:
+    \begitems \style a
+    \i $1+3+\cdots+(2n-1) = n^2$
+    \i $1^2+2^2+\cdots+n^2 = \frac{n(n+1)(2n+1)}{6}$
+    \i $1^3+2^3+\cdots+n^3 = (1+2+\cdots+n)^2$
+    \i $\frac{1}{1\cdot 2}+\frac{1}{2\cdot 3}+\cdots+\frac{1}{n(n+1)} = \frac{n}{n+1}$
+    \i $1\cdot 1!+2\cdot 2!+\cdots+n\cdot n! = (n+1)!-1$
+    \enditems
+}{
+    We will prove all five identities by induction on~$n$.
+    \begitems \style a
+    \i By trying small cases, we guess the formula. For $n=1$, $1=1^2$ holds. Assume that the statement holds for a given~$n$. Then
+    $$
+    1+3+\cdots+(2n-1)+(2n+1) = n^2+2n+1 = (n+1)^2,
+    $$
+    which is exactly the statement for $n+1$.
+    \i For $n=1$, $1 = \frac{1\cdot 2\cdot 3}{6}$ holds. Assume validity for a given~$n$. Then
+    $$
+    \gather
+    1^2+\cdots+n^2+(n+1)^2 = \frac{n(n+1)(2n+1)}{6}+(n+1)^2 = \cr
+    = \frac{(n+1)(n+2)(2n+3)}{6},
+    \endgather
+    $$
+    where the last equality follows from factoring out $(n+1)$ and simplifying
+    $$
+    \frac{n(2n+1)+6(n+1)}{6} = \frac{2n^2+7n+6}{6} = \frac{(n+2)(2n+3)}{6}.
+    $$
+    \i We know that
+    $$
+    1+2+\cdots+n = \frac{n(n+1)}{2},
+    $$
+    so we are proving 
+    $$
+    1^3+\cdots+n^3 = \left(\frac{n(n+1)}{2}\right)^2.
+    $$
+    For $n=1$, $1=1$ holds. Assume validity for a given~$n$. Then
+    $$
+    \gather
+    1^3+\cdots+n^3+(n+1)^3 = \left(\frac{n(n+1)}{2}\right)^2+(n+1)^3 \cr = (n+1)^2\left(\frac{n^2}{4}+n+1\right) = (n+1)^2\cdot\frac{(n+2)^2}{4} = \cr
+    = \left(\frac{(n+1)(n+2)}{2}\right)^2.
+    \endgather
+    $$
+    \i For $n=1$, $\frac{1}{2} = \frac{1}{2}$ holds. Assume validity for a given~$n$. Then
+    $$
+    \gather
+    \frac{1}{1\cdot 2}+\cdots+\frac{1}{n(n+1)}+\frac{1}{(n+1)(n+2)} = \cr
+    = \frac{n}{n+1}+\frac{1}{(n+1)(n+2)} = \frac{n(n+2)+1}{(n+1)(n+2)} = \cr
+    = \frac{n^2+2n+1}{(n+1)(n+2)} = \frac{(n+1)^2}{(n+1)(n+2)} = \frac{n+1}{n+2}.
+    \endgather
+    $$
+    \i For $n=1$, $1=2!-1=1$ holds. Assume validity for a given~$n$. By adding $(n+1)\cdot(n+1)!$ we get
+    $$
+    \gather
+    1\cdot 1!+\cdots+n\cdot n!+(n+1)\cdot(n+1)! = \cr
+    = (n+1)!-1+(n+1)\cdot(n+1)! = \cr
+    = (n+2)\cdot(n+1)!-1 = (n+2)!-1.
+    \endgather
+    $$
+    \enditems
+}
+
+
+\Exercise{}{
+    Prove by induction the following formulas for the sums of the first $n$ terms of known sequences.
+    \begitems \style a
+    \i Sum of an arithmetic sequence:
+    $$
+    a + (a+d) + (a+2d) + \cdots + (a+(n-1)d) = \frac{n(2a+(n-1)d)}{2}.
+    $$
+    \i Sum of a geometric sequence ($q \neq 1$):
+    $$
+    a + aq + aq^2 + \cdots + aq^{n-1} = a\cdot\frac{q^n-1}{q-1}.
+    $$
+    \i Sum of an arithmetico-geometric sequence ($q \neq 1$):
+    $$
+    1 + 2q + 3q^2 + \cdots + nq^{n-1} = \frac{1-(n+1)q^n+nq^{n+1}}{(1-q)^2}.
+    $$
+    \enditems
+}{
+    We will prove all three formulas by induction on~$n$.
+    \begitems \style a
+    \i For $n=1$, $a=\frac{1\cdot(2a)}{2}=a$ holds. Assume validity for a given~$n$. By adding the $(n+1)$-th term $a+nd$ to the right side we get
+    $$
+    \frac{n(2a+(n-1)d)}{2}+a+nd = \frac{(n+1)(2a+nd)}{2}.
+    $$
+    \i For $n=1$, $a = a\cdot\frac{q-1}{q-1}$ holds. Assume validity for a given~$n$. By adding $aq^n$ we get
+    $$
+    \gather
+    a\cdot\frac{q^n-1}{q-1}+aq^n 
+    = a\cdot\frac{q^n-1+q^n(q-1)}{q-1} = a\cdot\frac{q^{n+1}-1}{q-1}.
+    \endgather
+    $$
+    \i For $n=1$, $1=\frac{1-2q+q^2}{(1-q)^2}=1$ holds. Assume validity for a given~$n$. By adding $(n+1)q^n$ to the right side we get
+    $$
+    \gather
+    \frac{1-(n+1)q^n+nq^{n+1}}{(1-q)^2} + \frac{(n+1)q^n(1-q)^2}{(1-q)^2}.
+    \endgather
+    $$
+    After multiplying out and simplifying, the numerator simplifies to $1-(n+2)q^{n+1}+(n+1)q^{n+2}$.
+    
+    As a matter of interest, let us add that this formula can be obtained by differentiating the previous formula written for $n+1$.
+    \enditems
+}
+
+\Exercise{}{
+    Prove the following identities for Fibonacci numbers, defined recursively as $F_1=1$, $F_2=1$ and~$F_{n+2}=F_{n+1}+F_n$:
+    \begitems \style a
+    \i $F_1+F_2+\cdots+F_n = F_{n+2}-1$
+    \i $F_1+F_3+\cdots+F_{2n-1} = F_{2n}$
+    \i $F_2+F_4+\cdots+F_{2n} = F_{2n+1}-1$
+    \enditems
+}{
+    We prove all three by induction on~$n$.
+    \begitems \style a
+    \i For $n=1$, $F_1 = 1 = F_3-1 = 2-1$ holds. Assume 
+    $$
+    F_1+\cdots+F_n = F_{n+2}-1.
+    $$
+    By adding $F_{n+1}$ we have
+    $$
+    F_1+\cdots+F_n+F_{n+1}=F_{n+2}-1+F_{n+1} = F_{n+3}-1,
+    $$
+    which is the statement for $n+1$.
+    \i For $n=1$, $F_1=1=F_2$ holds. Assume
+    $$
+    F_1 + F_3 + \cdots + F_{2n-1}=F_{2n}.
+    $$
+    By adding $F_{2n+1}$ we get
+    $$
+    F_1 + F_3 + \cdots + F_{2n-1}+F_{2n+1}=F_{2n}+F_{2n+1}=F_{2n+2}.
+    $$
+    \i For $n=1$, $F_2=1=F_3-1$ holds. Assume
+    $$
+    F_2+F_4+\cdots+F_{2n} = F_{2n+1}-1.
+    $$
+    By adding $F_{2n+2}$ we have
+    $$
+    F_2+F_4+\cdots+F_{2n}+F_{2n+2}=F_{2n+1}-1+F_{2n+2}=F_{2n+3}-1.
+    $$
+    \enditems
+}
+
+
+So far, we have proved statements for all natural numbers~$n$. In the following example, we will show that this is not necessary and induction can sometimes start later. This example also opens up another type of problems where induction is useful -- inequalities.
+
+\Example{}{
+    For which natural numbers $n$ does $2^n \ge n^2$ hold?
+}{
+    By testing small cases, we get strange behavior: For $n=1$ and $n=2$ the statement holds. One might think it holds always. However, for $n=3$ we have $8 \ge 9$. For $n=4$, things are fine again and we have $16 \ge 16$. For $n=5$ then $32 \ge 25$, further $64 \ge 32$. The differences are increasing, it seems the statement will hold always from now on. We will formally prove it by mathematical induction for $n \ge 4$.
+    
+    For $n=4$ the statement holds. Assume that it holds for a given $n \ge 4$, that is, $2^n \ge n^2$. Then we estimate:
+    $$
+    2^{n+1} = 2 \cdot 2^n \ge 2 \cdot n^2 = 2n^2.
+    $$
+    It would therefore be sufficient to prove that $2n^2 \ge (n+1)^2$, then altogether we would get $2^{n+1} \ge (n+1)^2$.
+    
+    We have $2n^2 \ge (n+1)^2$ if and only if $2n^2-(n+1)^2 = n(n-2)-1$ is non-negative. For $n \ge 4$, the expression $n(n-2)$ is obviously increasing and for $n=4$ it equals~$8$, so the statement holds. 
+    
+    Note that the residual inequality $2n^2 \ge (n+1)^2$ obviously holds already for $n=3$. The problem is that the original inequality does not hold for $n=3$, so the induction really could not have started earlier.
+    
+    The answer to the question from the problem is all natural numbers except $n=3$.
+}
+
+Try a few inequalities for practice.
+
+\Exercise{}{
+    Prove that for all natural numbers $n$ it holds that $2^n \ge n$. 
+}{
+    For $n=1$, $2 \ge 1$ holds. Assume that $2^n \ge n$ for a given~$n$. Then
+    $$
+    2^{n+1} = 2\cdot 2^n \ge 2n \ge n+1,
+    $$
+    since $2n \ge n+1$ for $n \ge 1$.
+}
+
+\Exercise{}{
+    Prove that for all natural numbers $n \ge 4$ it holds that $n! > 2^n$.
+}{
+    For $n=4$, $24 > 16$ holds. Assume that $n! > 2^n$ for a given $n \ge 4$. Then
+    $$
+    (n+1)! = (n+1)\cdot n! > (n+1)\cdot 2^n,
+    $$
+    now we use that $n+1 \ge 5 > 2$, so 
+    $$
+    (n+1)! > (n+1) \cdot 2^n \ge 2 \cdot 2^n = 2^{n+1}.
+    $$
+}
+
+\Exercise{}{
+    Prove that for all natural numbers $n$ it holds that
+    $$
+    \frac{1}{n+1} + \frac{1}{n+2} + \cdots + \frac{1}{2n} \ge \frac{1}{2}.
+    $$
+}{
+    For $n=1$, $\frac{1}{2} \ge \frac{1}{2}$ holds. Assume validity for a given~$n$. Denote $S_n = \frac{1}{n+1}+\cdots+\frac{1}{2n}$. Then
+    $$
+    \gather
+    S_{n+1} = \frac{1}{n+2}+\cdots+\frac{1}{2n}+\frac{1}{2n+1}+\frac{1}{2n+2} = \cr
+    = S_n - \frac{1}{n+1}+\frac{1}{2n+1}+\frac{1}{2n+2}.
+    \endgather
+    $$
+    It suffices to verify that 
+    $$
+    -\frac{1}{n+1}+\frac{1}{2n+1}+\frac{1}{2n+2} \ge 0,
+    $$
+    after rewriting with a common denominator we get
+    $$
+    \frac{1}{2(2n+1)(n+1)} > 0
+    $$
+    which obviously holds.
+}
+
+\Exercise{}{
+    Prove Bernoulli's inequality: for real $x \ge -1$ and natural $n$ it holds that
+    $$
+    (1 + x)^n \ge 1 + nx.
+    $$
+}{
+    For $n=1$, $1+x \ge 1+x$ holds. Assume that 
+    $$
+    (1+x)^n \ge 1+nx
+    $$
+    for a given~$n$. Since $1+x \ge 0$, we can multiply both sides by the expression $(1+x)$:
+    $$
+    (1+x)^{n+1} \ge (1+nx)(1+x) = 1+(n+1)x+nx^2.
+    $$
+    We need to prove that the last expression is at least $1+(n+1)x$, which is obvious, because $nx^2$ is non-negative.
+}
+
+We can also use induction to prove divisibility.
+
+\Example{}{
+    Prove that for all natural numbers~$n$ it holds that $6 \mid n^3-n$.
+}{
+    For $n=1$, $1-1=0$ and~$6 \mid 0$ holds. Assume that $6 \mid n^3-n$ for a given~$n$. Then
+    $$
+    \gather
+    (n+1)^3-(n+1) = n^3+3n^2+3n+1-n-1 = \cr
+    = (n^3-n)+3n(n+1).
+    \endgather
+    $$
+    The first term is divisible by 6 by the induction hypothesis. In the second term, the number $n(n+1)$ is the product of two consecutive numbers, hence even, and after multiplying by~3 we get a multiple of~6.
+}
+
+\Example{}{
+    Prove that for all natural numbers~$n$ it holds that $3 \mid 4^n-1$.
+}{
+    For $n=1$, $4-1=3$ and~$3 \mid 3$ holds. Assume that $3 \mid 4^n-1$ for a given~$n$. Then
+    $$
+    4^{n+1}-1 = 4\cdot 4^n-1 = 4(4^n-1)+3.
+    $$
+    The first addend is divisible by 3 by the induction hypothesis, and~$3$ is obviously divisible by 3, therefore their sum is as well.
+}
+
+\Exercise{}{
+    Prove that for all natural numbers~$n$ it holds that $9 \mid 4^n+6n-1$.
+}{
+    For $n=1$, $4+6-1=9$ and~$9 \mid 9$ holds. Assume that $9 \mid 4^n+6n-1$ for a given~$n$. Then
+    $$
+    \gather
+    4^{n+1}+6(n+1)-1 = 4\cdot 4^n+6n+5 = \cr
+    = 4(4^n+6n-1)-18n+9 = \cr
+    = 4(4^n+6n-1)+9(1-2n).
+    \endgather
+    $$
+    The first addend is divisible by 9 by the induction hypothesis and the second is obviously a multiple of 9.
+}
+
+\Exercise{}{
+    Prove that for all natural numbers~$n$ it holds that $31 \mid 5^{n+1}+6^{2n-1}$.
+}{
+    For $n=1$, $5^2+6^1=31$ and~$31 \mid 31$ holds. Assume that $31 \mid 5^{n+1}+6^{2n-1}$. Then
+    $$
+    \gather
+    5^{n+2}+6^{2n+1} = 5\cdot 5^{n+1}+36\cdot 6^{2n-1} = \cr
+    = 5(5^{n+1}+6^{2n-1})+31\cdot 6^{2n-1}.
+    \endgather
+    $$
+    The first addend is divisible by 31 by the induction hypothesis and the second is obviously a multiple of 31.
+}
+
+
+In a proof, it is really necessary to verify the first step, otherwise anything can be proved. For example, that a number of the form $n^2+n+1$ is always even. Namely, if it holds for a given $n$, then for $n+1$ we have $(n+1)^2+(n+1)+1$, which we easily convince ourselves is equal to $(n^2+n+1)+2(n+1)$. By the induction hypothesis, $n^2+n+1$ is even, and obviously $2(n+1)$ is even, so we have the sum of two even numbers, thus the \uv{proof} is complete. 
+
+The problem is that if we now plug in any $n$, we get an odd number. Where is the mistake? Well, we did not verify that the statement holds for $n=1$ -- then the expression is equal to~3 and is odd. So if we were proving that this expression is always odd, then together with the step for $n=1$ the proof would be complete.
+
+This problem presents another potential pitfall.
+
+\Problem{0}{}{
+    Find the mistake in the \uv{proof} of this statement:
+    
+    \textit{Let us have $n \ge 2$ lines in the plane such that no two are parallel. Then all these lines pass through a single point.}
+    
+    \uv{Proof}: For $n = 2$ the statement holds, because two non-parallel lines intersect in a single point.
+    
+    Induction step: Let the statement hold for some $n \ge 2$ lines. Let us take $n+1$ lines $p_1, p_2, \dots, p_{n+1}$, out of which no two are parallel.
+    
+    The first $n$ lines $p_1, \dots, p_n$ pass through a single point~$X$ by the induction hypothesis. Similarly, the lines $p_1, \dots, p_{n-1}, p_{n+1}$ (there are also~$n$ of them) pass through a single point~$Y$. Since the lines $p_1, \dots, p_{n-1}$ pass through both points $X$ and~$Y$, necessarily $X = Y$. Therefore, all $n+1$ lines pass through point~$X$.
+}{
+    It is evident that the statement does not hold already for $n=3$. To understand the mistake, try writing out the induction step for $n$ equal to~2 (where we prove that the statement holds for $2+1=3$ lines).
+}{
+    The mistake is in the sentence \uv{Since the lines $p_1, \dots, p_{n-1}$ pass through both points $X$ and~$Y$, necessarily $X = Y$.} For $n=2$, the sequence of lines $p_1,\dots,p_{n-1}$ is actually just a single line. Whenever $n>2$, the statement would indeed hold, and that causes the confusion.
+}
+
+\sec Strong induction
+
+In previous problems, we always said in the induction step that the statement holds for some~$n$ and subsequently proved it for $n+1$. In fact, however, we can assume something stronger. For example, let's have a statement for all natural numbers $n$ that we are proving by induction. First, of course, we prove it for $n=1$. Subsequently, we assume that it holds for all $1,2,\dots,n$ and prove it for $n+1$ -- instead of just assuming that it holds for some $n$. This turn is very common in more complex proofs and is called \textit{strong induction}. We illustrate it with an example:
+
+\Theorem{Prime factorization theorem}{
+    Every integer $n>1$ can be factored into a product of several, not necessarily distinct, primes.
+}{
+    The statement obviously holds for $n=2$, which is itself a prime. Assume that we have proved the statement for $2,3,\dots,n$. Now let us take the number $n+1$. If it is a prime, we are done. If it is not a prime, it means that there exist two integers $a>1$ and $b>1$ such that $n+1=ab$. Since both $a$ and $b$ are more than~1, both are less than $n+1$, thus at most $n$. We can apply the induction hypothesis to both of them, namely, that they can be written as a product of primes. Therefore, their product $ab$ can also be written as a product of primes, which is what we needed to prove.
+}
+
+Notice that we could not use traditional induction in this proof; we strictly need the numbers $a,b$ to be \textit{smaller} than $n+1$. 
+
+Furthermore, realize that regular induction is a special case of strong induction -- after all, the assumption that the statement holds for all $1,2,\dots,n$ also includes the fact that it holds for $n$, which is what we base regular induction on. When coming up with a solution by induction, it is therefore more useful to think straight away in the style of strong induction; we won't lose anything.
+
+Another traditional result is the existence of a unique representation in the binary system.
+
+\Example{}{
+    Prove that every natural number can be written as a sum of mutually distinct powers of two.
+}{
+    For $n=1$, $1=2^0$ holds. Assume that the statement holds for all natural numbers less than~$n$. If $n$ is a power of two, we are done. Otherwise, we find the largest power of two $2^k < n$. The number $n-2^k$ is positive and less than~$n$, so by the induction hypothesis, it can be written as a sum of distinct powers of two. Moreover, $n - 2^k < 2^k$ (because $2^{k+1} > n$), so $2^k$ does not appear in its decomposition. By adding $2^k$, we get the representation of~$n$ as a sum of distinct powers of two.
+}
+
+Try a similar proof on harder examples:
+
+\Problem{0}{Zeckendorf's theorem, existence}{
+    Prove that every positive integer can be written as a sum of mutually non-consecutive Fibonacci numbers.
+}{
+    We proceed by induction. Let $n$ be the number we are trying to write as a sum. It pays off to consider the largest Fibonacci number not exceeding $n$, e.g., $F_m$, and apply the induction hypothesis to $n-F_m$. Are we done?
+}{
+    We are not done yet. We need to deal with the fact that the representation of $n-F_m$ might contain $F_{m-1}$, which would break the non-consecutiveness. But what if $n-F_m=F_{m-1}+\cdots$?
+}{
+    For the smallest natural numbers, the statement holds (e.g., $1=F_2, 2=F_3$). Assume that every number less than~$n$ can be written in the required way. Let us find the largest Fibonacci number $F_m \le n$. If $n=F_m$, we are done. Otherwise, the number $n-F_m$ is positive and strictly less than~$n$, so by the induction hypothesis, we can write it as a sum of mutually non-consecutive Fibonacci numbers.
+    
+    By adding $F_m$, we would get the representation for~$n$. A problem would only occur if the number $F_{m-1}$ (or larger) appeared in the representation of $n-F_m$. In such a case, the entire representation would be at least $F_{m-1}$, and thus $n-F_m \ge F_{m-1}$. From this, however, we get $n \ge F_m + F_{m-1} = F_{m+1}$, which is a contradiction with $F_m$ being the largest Fibonacci number not exceeding~$n$.
+    
+    Therefore, the representation for $n-F_m$ contains only numbers at most $F_{m-2}$. Thus, supplementing with the number $F_m$ does not create a pair of consecutive Fibonacci numbers, and we get a valid representation of the number~$n$.
+}
+
+Another numeral system is the factorial base: 
+
+\Problem{0}{Factorial number system}{
+    Prove that every positive integer~$n$ can be written in the form
+    $$
+    n = a_1 \cdot 1! + a_2 \cdot 2! + \cdots + a_k \cdot k!,
+    $$
+    where $0 \le a_i \le i$ for every~$i$.
+}{
+    We proceed by induction. Let $n$ be the number we are trying to write in this way. Consider the largest number $k$ such that $k! \le n$. The trick is to divide $n$ by $k!$ with a remainder, that is, to write $n=a \cdot k! + r$, where $0 \le r < k!$. Where can we apply the induction hypothesis? What remains to be proved?
+}{
+    First of all, realize that $a \le k$ (prove it). This means that for $r=0$ we are done, and that for $r>0$ we can apply the induction hypothesis to $r$. Do we thus already obtain a satisfying expression?
+}{
+    For $n=1$ the statement holds, $1 = 1 \cdot 1!$. Assume that every number less than~$n$ can be written in the required way. Find the largest number $k$ such that $k! \le n$ and divide $n$ by $k!$ with a remainder, so $n = a_k \cdot k! + r$, where $0 \le r < k!$. Since $k!$ was the largest possible, originally we must have had $n < (k+1)!$, which implies
+    $$
+    \gather
+    a_k \cdot k! + r < (k+1)! = (k+1) \cdot k! \cr
+    a_k \cdot k! \le a_k \cdot k! + r < (k+1) \cdot k! \cr
+    a_k < k+1 \implies a_k \le k.
+    \endgather
+    $$
+    We are guaranteed that the condition for the most significant digit is met. If $r=0$, we are done. Otherwise, we have $0 < r < k! \le n$, so $r$ is strictly less than $n$ and we can apply the induction hypothesis to it. We thus get the representation $r = a_1 \cdot 1! + \cdots + a_m \cdot m!$. 
+    
+    Since $r < k!$, the largest factorial in the representation of $r$ can be at most $(k-1)!$, thus $m \le k-1$. By substituting this representation for~$r$ into the expression $n = a_k \cdot k! + r$, we thus obtain the sought representation of the number~$n$, and no two factorials add up together.
+}
+
+Let us add that uniqueness can be proved for both the Fibonacci and the factorial number systems (and of course for binary and our decimal one as well). The proof is easy but technical -- it relies on a general principle: Let us have a system where we can express~1 and in which it holds that the largest number we can express using $k$ digits is 1 less than the smallest number we can express using $k+1$ digits. In such a system, both completeness (every number can be expressed) and uniqueness then hold. You can try to think this statement through for all the examined systems (binary, Fibonacci, and factorial); the already proved exercises can be a good help :)
+
+Technically, one of the forms of strong induction is also when we use the induction hypothesis for only two smaller numbers, e.g., $n-2$ and $n-1$. This is often seen in problems about recurrence sequences.
+
+\Example{}{
+    A sequence is defined by the rule $a_1 = 0$, $a_2 = 1$ and
+    $$
+    a_n = 3a_{n-1}-2a_{n-2}
+    $$
+    for $n \ge 3$. Guess the explicit formula for $a_n$ and prove it by induction.
+}{
+    From the small values $a_1=0, a_2=1, a_3=3, a_4=7, a_5=15, a_6=31$ we guess $a_n = 2^{n-1}-1$. We prove this formula by induction: 
+    
+    For $n=1$, $2^0-1=0$ holds. For $n=2$, $2^1-1=1$ holds. Assume it holds for $n-1$ and~$n$. Then
+    $$
+    \gather
+    a_{n+1} = 3a_n-2a_{n-1} = 3(2^{n-1}-1)-2(2^{n-2}-1)= \cr
+    = 3\cdot 2^{n-1} - 3 - 2^{n-1} + 2 = 2\cdot 2^{n-1}-1 = 2^n-1.
+    \endgather
+    $$
+}
+
+\Exercise{}{
+    A sequence is defined by the rule $a_1 = 1$, $a_2 = 5$ and
+    $$
+    a_n = 5a_{n-1}-6a_{n-2}
+    $$ 
+    for $n \ge 3$. Guess the explicit formula for $a_n$ and prove it by induction.
+}{
+    By trying $a_1=1, a_2=5, a_3=19, a_4=65, a_5=211$ we guess the formula $a_n = 3^n-2^n$. We prove this by induction:
+    
+    For $n=1$, $3-2=1$ holds. For $n=2$, $9-4=5$ holds. Assume it holds for $n-1$ and~$n$. Then
+    $$
+    \gather
+    a_{n+1} = 5a_n-6a_{n-1} = 5(3^n-2^n)-6(3^{n-1}-2^{n-1}) = \cr
+    = 5\cdot 3^n - 5\cdot 2^n - 2\cdot 3^n + 3\cdot 2^n = \cr
+    = 3\cdot 3^n - 2\cdot 2^n = 3^{n+1}-2^{n+1}.
+    \endgather
+    $$
+}
+
+\Problem{0}{}{
+    Prove that for all natural numbers~$n$ it holds that $F_n \le \varphi^{n-1}$, where $F_n$ are the Fibonacci numbers and~$\varphi = \frac{1+\sqrt{5}}{2}$ is the golden ratio.
+}{
+    We verify numerically for $n=1$ and $n=2$. Then induction works. Namely, $F_n = F_{n-1}+F_{n-2}$ for $n \ge 3$.
+}{
+    The key in the proof by induction is the fact that $\phi$ has this magical property that $\phi^2=\phi+1$ (verify). 
+}{
+    We will perform the proof by strong induction. For $n=1$ we have $F_1 = 1 = \varphi^0$. For $n=2$ we have $F_2 = 1 \le \varphi^1$, which holds, since $\varphi > \sqrt{5}/2 > 1$.
+    
+    Assume that the statement holds for a given $n$ and $n-1$. For $n+1$ we have $F_{n+1} = F_n + F_{n-1}$. From the induction hypothesis, we can estimate this sum:
+    $$
+    F_{n+1} \le \varphi^{n-1} + \varphi^{n-2} = \varphi^{n-2}(\varphi+1).
+    $$
+    For $\varphi$, the identity $\varphi^2 = \varphi+1$ holds, which we easily verify. By substituting we have
+    $$
+    F_{n+1} \le \varphi^{n-2}\cdot \varphi^2 = \varphi^n.
+    $$
+    Thus the induction step is proved.
+}
+
+\Problem{0}{}{
+    Let $x$ be a real number such that $x+\frac{1}{x}$ is rational. Prove that then $x^n+\frac{1}{x^n}$ is also rational for every natural~$n$.
+}{
+    We proceed by induction. In order to make the transition from~$n$ to $n+1$, we multiply the expression for $n$ by a suitable expression.
+}{
+    The crucial multiplication is by the expression $x+\frac 1x$. Subsequently, it appears that our induction hypothesis must be strong.
+}{
+    We prove the statement by strong induction. For $n=1$, $x+\frac{1}{x}$ is rational directly from the problem statement. For $n=2$ we have
+    $$
+    x^2+\frac{1}{x^2} = \left(x+\frac{1}{x}\right)^2-2,
+    $$
+    which is obviously a rational number.
+    
+    Assume that the statement holds for all natural numbers up to some $n$ and $n-1$, where $n \ge 2$.
+    $$
+    x^{n+1}+\frac{1}{x^{n+1}} = \left(x^n+\frac{1}{x^n}\right)\left(x+\frac{1}{x}\right) - \left(x^{n-1}+\frac{1}{x^{n-1}}\right).
+    $$
+    By the induction hypothesis, $x^n+\frac{1}{x^n}$ and~$x^{n-1}+\frac{1}{x^{n-1}}$ are rational numbers. Since $x+\frac{1}{x}$ is as well, the entire right side is rational. Thus the induction step is complete.
+}
+
+\sec Other forms of induction
+
+In the tasks so far, we have encountered two types of induction hypotheses: that the statement holds for $n$ or that it holds for suitable numbers not exceeding~$n$. Consequently, we proved from this that the statement holds for $n+1$. However, imagination has no limits, and an induction can easily occur where we prove $n+2$ from~$n$; therefore, we need to prove the statement for consecutive base cases. 
+
+\Example{}{
+    Prove that every integer $n \ge 2$ can be written in the form $n = 2a + 3b$, where $a,b$ are non-negative integers.
+}{
+    We will do the proof by induction with a step of~2, which means we need two consecutive base cases. We verify them directly: $2 = 2\cdot 1$ and~$3 = 3\cdot 1$.
+    
+    Assume that the statement holds for a given $n \ge 2$, that is, $n = 2a+3b$. Then $n+2 = 2(a+1)+3b$, so the statement holds for $n+2$ as well.
+    
+    \textit{Note.} As a point of interest, let us add how it is in general: For two coprime positive integers $p$ and $q$, it can be proved that every integer $n \ge pq-p-q+1$ can be written as $n=pa+qb$ for non-negative $a,b$. The number $pq-p-q$ is called the Frobenius number and it is the largest integer that cannot be written in this way. In our case it is $2\cdot 3-2-3=1$.
+}
+
+Another fascinating form of induction can be seen in Cauchy's proof of the AM-GM inequality, where we first go up and then down.
+
+\Theorem{AM-GM inequality}{
+    For positive real numbers $a_1,a_2,\dots,a_n$ it holds that
+    $$
+    \frac{a_1+a_2+\cdots+a_n}{n} \ge \root n \of {a_1 a_2 \cdots a_n},
+    $$
+    with equality occurring if and only if $a_1=a_2=\cdots=a_n$.
+}{
+    The proof consists of two steps: first we prove the inequality for all powers of two $n = 2^k$ and then we show that from the validity for $n$ variables follows the validity for $n-1$ variables. These two steps combined cover all natural numbers.
+    
+    {\it Step upwards (from~$n$ to $2n$):} For $n=2$ we need to prove that $\frac{a_1+a_2}{2} \ge \sqrt{a_1 a_2}$, which is equivalent to $(\sqrt{a_1}-\sqrt{a_2})^2 \ge 0$, and this always holds.
+    
+    Assume that the inequality holds for $n$ variables.    For $2n$ variables, we divide the numbers into two groups of~$n$. Let us denote
+    $$
+    A = \frac{a_1+\cdots+a_n}{n}, \qquad B = \frac{a_{n+1}+\cdots+a_{2n}}{n}.
+    $$
+    From the induction hypothesis for both groups we have
+    $$
+    A \ge \root n \of{a_1 \cdots a_n}, \qquad B \ge \root n \of{a_{n+1} \cdots a_{2n}}.
+    $$
+    The average of all $2n$ numbers is $\frac{A+B}{2}$. From the base case for two variables we know that $\frac{A+B}{2} \ge \sqrt{AB}$. Thus
+    $$
+    \gather
+    \frac{a_1+\cdots+a_{2n}}{2n} = \frac{A+B}{2} \ge \sqrt{AB} \ge \cr
+    \ge \sqrt{\root n \of{a_1 \cdots a_n} \cdot \root n \of{a_{n+1} \cdots a_{2n}}}    = \root 2n \of{a_1 \cdots a_{2n}}.
+    \endgather
+    $$
+
+    {\it Step downwards (from~$n$ to $n-1$):} Assume that the inequality holds for $n$ variables, and let us take $n-1$ non-negative real numbers $a_1,\dots,a_{n-1}$. Let us set 
+    $$
+    a_n = \frac{a_1+\cdots+a_{n-1}}{n-1}
+    $$
+    thus $a_n$ is the average of the remaining numbers. Then
+    $$
+    \frac{a_1+\cdots+a_{n-1}+a_n}{n} = \frac{(n-1)a_n+a_n}{n} = a_n.
+    $$
+    From the assumption for $n$ variables we obtain
+    $$
+    a_n = \frac{a_1+\cdots+a_n}{n} \ge \root n \of{a_1 \cdots a_{n-1} \cdot a_n}.
+    $$
+    By raising to the $n$-th power we have $a_n^n \ge a_1 \cdots a_{n-1} \cdot a_n$, and after dividing by the positive $a_n$ we get
+    $$
+    a_n^{n-1} \ge a_1 \cdots a_{n-1},
+    $$
+    that is 
+    $$
+    \left(\frac{a_1+\cdots+a_{n-1}}{n-1}\right)^{n-1} \ge a_1 \cdots a_{n-1},
+    $$
+    which is exactly the AM-GM inequality for $n-1$ variables raised to the $n-1$ power.
+}
+
+\sec What we have learned
+
+\begitems \style N
+\i Statements involving natural numbers can often be proved by mathematical induction.
+\i In it, we can assume not only that the statement holds for a given $n$, but directly that it holds e.g. for $1,2,\dots,n$. 
+\i Sometimes it is worthwhile to also make large steps, e.g., from~$n$ to $n+2$, or $2n$, or even backwards (from $n$ to $n-1$).
+\i Induction can be not only on one variable, but also on the sum of variables.
+\enditems
+
+What to watch out for:
+
+\begitems \style N
+\i We always verify small cases and write down in the solution that we have done so.
+\i Induction can fail because for the induction step we need e.g. $n \ge 2$ instead of $n \ge 1$; it pays off to do this induction step at least in our head for small $n$.
+\i If the induction uses both $n-1$ and $n-2$, then we need two base cases.
+\enditems
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

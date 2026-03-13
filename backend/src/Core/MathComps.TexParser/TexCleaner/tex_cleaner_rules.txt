@@ -209,6 +209,7 @@ parallel
 parskip
 perp
 phantom
+phi
 pi
 pm
 pmod
