@@ -1,5 +1,17 @@
 [
   {
+    "id": "Jx9mRtKp4wLnYvQsHc3Fb",
+    "slug": "mathematical-induction",
+    "title": {
+      "sk": "Nový materiál o matematickej indukcii",
+      "en": "New Handout on Mathematical Induction",
+      "cs": "Nový materiál o matematické indukci"
+    },
+    "date": "2026-03-14",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
     "id": "Rm5wKxYz2pLsNtVqJcFbD",
     "slug": "mark-status",
     "title": {

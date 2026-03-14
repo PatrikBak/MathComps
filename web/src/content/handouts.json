@@ -27,17 +27,24 @@
         "authors": ["Patrik Bak"]
       },
       {
-        "status": "planned",
+        "status": "ready",
+        "id": "Wn4tLx7KqRm2YvPsJc8Fb",
         "slug": {
-          "sk": "matematicka-indukcia",
-          "cs": "matematicka-indukce",
-          "en": "mathematical-induction"
+          "sk": "indukcia",
+          "cs": "indukce",
+          "en": "induction"
         },
         "title": {
           "sk": "Matematická indukcia",
           "cs": "Matematická indukce",
           "en": "Mathematical Induction"
-        }
+        },
+        "description": {
+          "sk": "Matematická indukcia od základov po úplnú indukciu a Cauchyho dôkaz AG nerovnosti. Aplikácie na identity, nerovnosti, deliteľnosť a číselné sústavy.",
+          "cs": "Matematická indukce od základů po úplnou indukci a Cauchyho důkaz AG nerovnosti. Aplikace na identity, nerovnosti, dělitelnost a číselné soustavy.",
+          "en": "Mathematical induction from the basics to strong induction and Cauchy's proof of the AM-GM inequality. Applications to identities, inequalities, divisibility, and numeral systems."
+        },
+        "authors": ["Patrik Bak"]
       }
     ]
   },

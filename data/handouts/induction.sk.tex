@@ -1,0 +1,578 @@
+\input _template
+
+\setlanguage{SK}
+
+\Title{Dôkazy}
+
+\Subtitle{Matematická indukcia}
+
+\MathcompsLink{indukcia}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Slovo \textit{indukcia} vo všeobecnosti znamená \uv{myšlienkový postup od jednotlivého k~všeobecnému}. Pri dokazovaní úloh takto často rozmýšľame -- hráme sa s~malými prípadmi a~skúmame, ako z~doposiaľ odvodených výsledkov objaviť nové. Matematická indukcia je formálny spôsob dôkazu založený na tejto myšlienke. V~tomto materiáli si ho sformalizujeme a~následne ukážeme na rôznorodých príkladoch.
+
+\sec Základná indukcia
+
+Ideu matematickej indukcie si ilustrujeme na dominách. Tie majú vlastnosť: ak padne $k$-té, tak padne aj $(k+1)$-vé. Vďaka tomu platí, že ak udrieme do prvého, tak tým pádom padne aj druhé, a teda aj tretie, atď. Záver je, že padnú všetky. 
+
+\Example{}{
+	Dokážte, že súčet prvých $n$ prirodzených čísel je rovný $\frac{n(n+1)}2$.
+}{
+	Pre $n=1$ dostaneme $1 = \frac{1\cdot 2}{2}$, čo platí. Predpokladajme, že tvrdenie platí pre nejaké~$n$. Pre $n+1$ je nový výraz naľavo rovný
+	$$
+	(1+2+\cdots+n)+(n+1) = \frac{n(n+1)}{2}+(n+1) = \frac{(n+1)(n+2)}{2},
+	$$
+	čo je presne výraz na pravej strane pre $n+1$. Dôkaz indukciou je hotový.
+}
+
+Vo všeobecnosti sa dôkaz indukciou skladá z~dvoch krokov:
+\begitems \style N
+\i Dôkaz tvrdenia pre nejakú počiatočnú hodnotu $n_0$.
+\i Dôkaz, že ak tvrdenie platí pre nejaké $n \ge n_0$, tak platí pre $n+1$.
+\enditems
+
+Vyskúšajte si tento prístup na týchto zapamätaniahodných identitách.
+
+\Exercise{}{
+	Dokážte nasledujúce identity pre všetky prirodzené čísla~$n$:
+	\begitems \style a
+	\i $1+3+\cdots+(2n-1) = n^2$
+	\i $1^2+2^2+\cdots+n^2 = \frac{n(n+1)(2n+1)}{6}$
+	\i $1^3+2^3+\cdots+n^3 = (1+2+\cdots+n)^2$
+	\i $\frac{1}{1\cdot 2}+\frac{1}{2\cdot 3}+\cdots+\frac{1}{n(n+1)} = \frac{n}{n+1}$
+	\i $1\cdot 1!+2\cdot 2!+\cdots+n\cdot n! = (n+1)!-1$
+	\enditems
+}{
+	Všetkých päť identít dokážeme indukciou podľa~$n$.
+	\begitems \style a
+	\i Vyskúšaním malých prípadov uhádneme vzorec. Pre $n=1$ platí $1=1^2$. Predpokladajme, že tvrdenie platí pre dané~$n$. Potom
+	$$
+	1+3+\cdots+(2n-1)+(2n+1) = n^2+2n+1 = (n+1)^2,
+	$$
+	čo je presne tvrdenie pre $n+1$.
+	\i Pre $n=1$ platí $1 = \frac{1\cdot 2\cdot 3}{6}$. Predpokladajme platnosť pre dané~$n$. Potom
+	$$
+	\gather
+	1^2+\cdots+n^2+(n+1)^2 = \frac{n(n+1)(2n+1)}{6}+(n+1)^2 = \cr
+	= \frac{(n+1)(n+2)(2n+3)}{6},
+	\endgather
+	$$
+	kde posledná rovnosť plynie z~vytknutia $(n+1)$ a~úpravy
+	$$
+	\frac{n(2n+1)+6(n+1)}{6} = \frac{2n^2+7n+6}{6} = \frac{(n+2)(2n+3)}{6}.
+	$$
+	\i Vieme, že
+	$$
+	1+2+\cdots+n = \frac{n(n+1)}{2},
+	$$
+	takže dokazujeme 
+	$$
+	1^3+\cdots+n^3 = \left(\frac{n(n+1)}{2}\right)^2.
+	$$
+	Pre $n=1$ platí $1=1$. Predpokladajme platnosť pre dané~$n$. Potom
+	$$
+	\gather
+	1^3+\cdots+n^3+(n+1)^3 = \left(\frac{n(n+1)}{2}\right)^2+(n+1)^3 \cr = (n+1)^2\left(\frac{n^2}{4}+n+1\right) = (n+1)^2\cdot\frac{(n+2)^2}{4} = \cr
+	= \left(\frac{(n+1)(n+2)}{2}\right)^2.
+	\endgather
+	$$
+	\i Pre $n=1$ platí $\frac{1}{2} = \frac{1}{2}$. Predpokladajme platnosť pre dané~$n$. Potom
+	$$
+	\gather
+	\frac{1}{1\cdot 2}+\cdots+\frac{1}{n(n+1)}+\frac{1}{(n+1)(n+2)} = \cr
+	= \frac{n}{n+1}+\frac{1}{(n+1)(n+2)} = \frac{n(n+2)+1}{(n+1)(n+2)} = \cr
+	= \frac{n^2+2n+1}{(n+1)(n+2)} = \frac{(n+1)^2}{(n+1)(n+2)} = \frac{n+1}{n+2}.
+	\endgather
+	$$
+	\i Pre $n=1$ platí $1=2!-1=1$. Predpokladajme platnosť pre dané~$n$. Pripočítaním $(n+1)\cdot(n+1)!$ dostaneme
+	$$
+	\gather
+	1\cdot 1!+\cdots+n\cdot n!+(n+1)\cdot(n+1)! = \cr
+	= (n+1)!-1+(n+1)\cdot(n+1)! = \cr
+	= (n+2)\cdot(n+1)!-1 = (n+2)!-1.
+	\endgather
+	$$
+	\enditems
+}
+
+
+\Exercise{}{
+	Dokážte indukciou nasledujúce vzorce pre súčty prvých $n$ členov známych postupností.
+	\begitems \style a
+	\i Súčet aritmetickej postupnosti:
+	$$
+	a + (a+d) + (a+2d) + \cdots + (a+(n-1)d) = \frac{n(2a+(n-1)d)}{2}.
+	$$
+	\i Súčet geometrickej postupnosti ($q \neq 1$):
+	$$
+	a + aq + aq^2 + \cdots + aq^{n-1} = a\cdot\frac{q^n-1}{q-1}.
+	$$
+	\i Súčet geometricko-aritmetickej postupnosti ($q \neq 1$):
+	$$
+	1 + 2q + 3q^2 + \cdots + nq^{n-1} = \frac{1-(n+1)q^n+nq^{n+1}}{(1-q)^2}.
+	$$
+	\enditems
+}{
+	Všetky tri vzorce dokážeme indukciou podľa~$n$.
+	\begitems \style a
+	\i Pre $n=1$ platí $a=\frac{1\cdot(2a)}{2}=a$. Predpokladajme platnosť pre dané~$n$. Pripočítaním $(n+1)$-vého člena $a+nd$ k~pravej strane dostaneme
+	$$
+	\frac{n(2a+(n-1)d)}{2}+a+nd = \frac{(n+1)(2a+nd)}{2}.
+	$$
+	\i Pre $n=1$ platí $a = a\cdot\frac{q-1}{q-1}$. Predpokladajme platnosť pre dané~$n$. Pripočítaním $aq^n$ dostaneme
+	$$
+	\gather
+	a\cdot\frac{q^n-1}{q-1}+aq^n 
+	= a\cdot\frac{q^n-1+q^n(q-1)}{q-1} = a\cdot\frac{q^{n+1}-1}{q-1}.
+	\endgather
+	$$
+	\i Pre $n=1$ platí $1=\frac{1-2q+q^2}{(1-q)^2}=1$. Predpokladajme platnosť pre dané~$n$. Pripočítaním $(n+1)q^n$ k~pravej strane dostaneme
+	$$
+	\gather
+	\frac{1-(n+1)q^n+nq^{n+1}}{(1-q)^2} + \frac{(n+1)q^n(1-q)^2}{(1-q)^2}.
+	\endgather
+	$$
+	Čitateľ sa po roznásobení a~úprave zjednoduší na $1-(n+2)q^{n+1}+(n+1)q^{n+2}$.
+	
+	Pre zaujímavosť dodajme, že tento vzorec je možné dostať derivovaním predošlého vzorca napísaného pre $n+1$.
+	\enditems
+}
+
+\Exercise{}{
+	Dokážte nasledujúce identity pre Fibonacciho čísla, definované rekurzívne ako $F_1=1$, $F_2=1$ a~$F_{n+2}=F_{n+1}+F_n$:
+	\begitems \style a
+	\i $F_1+F_2+\cdots+F_n = F_{n+2}-1$
+	\i $F_1+F_3+\cdots+F_{2n-1} = F_{2n}$
+	\i $F_2+F_4+\cdots+F_{2n} = F_{2n+1}-1$
+	\enditems
+}{
+	Všetky tri dokazujeme indukciou podľa~$n$.
+	\begitems \style a
+	\i Pre $n=1$ platí $F_1 = 1 = F_3-1 = 2-1$. Predpokladajme 
+	$$
+	F_1+\cdots+F_n = F_{n+2}-1.
+	$$
+	Pripočítaním $F_{n+1}$ máme
+	$$
+	F_1+\cdots+F_n+F_{n+1}=F_{n+2}-1+F_{n+1} = F_{n+3}-1,
+	$$
+	čo je tvrdenie pre $n+1$.
+	\i Pre $n=1$ platí $F_1=1=F_2$. Predpokladajme
+	$$
+	F_1 + F_3 + \cdots + F_{2n-1}=F_{2n}.
+	$$
+	Pripočítaním $F_{2n+1}$ dostaneme
+	$$
+	F_1 + F_3 + \cdots + F_{2n-1}+F_{2n+1}=F_{2n}+F_{2n+1}=F_{2n+2}.
+	$$
+	\i Pre $n=1$ platí $F_2=1=F_3-1$. Predpokladajme
+	$$
+	F_2+F_4+\cdots+F_{2n} = F_{2n+1}-1.
+	$$
+	Pripočítaním $F_{2n+2}$ máme
+	$$
+	F_2+F_4+\cdots+F_{2n}+F_{2n+2}=F_{2n+1}-1+F_{2n+2}=F_{2n+3}-1.
+	$$
+	\enditems
+}
+
+
+Doposiaľ sme dokazovali tvrdenia pre všetky prirodzené čísla~$n$. V~nasledovnom príklade ukážeme, že to nie je nutné a~indukcia môže niekedy začínať neskôr. Tento príklad zároveň otvára ďalší typ úloh, kedy sa indukcia hodí -- nerovnosti.
+
+\Example{}{
+	Pre ktoré prirodzené čísla $n$ platí $2^n \ge n^2$?
+}{
+	Vyskúšaním malých prípadov dostaneme zvláštne správanie: Pre $n=1$ a $n=2$ tvrdenie platí. Človek by si myslel, že platí stále. Avšak pre $n=3$ máme $8 \ge 9$. Pre $n=4$ sú však veci znova v~poriadku a máme $16 \ge 16$. Pre $n=5$ potom $32 \ge 25$, ďalej $64 \ge 32$. Rozdiely sa zväčšujú, zdá sa, že tvrdenie už bude platiť stále. Formálne ho dokážeme matematickou indukciou pre $n \ge 4$.
+	
+	Pre $n=4$ tvrdenie platí. Predpokladajme, že platí pre dané $n \ge 4$, teda že $2^n \ge n^2$. Potom odhadujeme:
+	$$
+	2^{n+1} = 2 \cdot 2^n \ge 2 \cdot n^2 = 2n^2.
+	$$
+	Stačilo by teda dokázať, že $2n^2 \ge (n+1)^2$, potom by sme dokopy dostali $2^{n+1} \ge (n+1)^2$.
+	
+	Platí $2n^2 \ge (n+1)^2$ práve vtedy, keď $2n^2-(n+1)^2 = n(n-2)-1$ je nezáporné. Pre $n \ge 4$ je výraz $n(n-2)$ zjavne rastúci a pre $n=4$ rovný~$8$, tvrdenie teda platí. 
+	
+	Poznamenajme, že zvyšková nerovnosť $2n^2 \ge (n+1)^2$ zjavne platí už od $n=3$. Problém je, že pôvodná nerovnosť neplatí pre $n=3$, takže indukcia naozaj nemohla začať skôr.
+	
+	Odpoveď na otázku z~úlohy sú všetky prirodzené čísla okrem $n=3$.
+}
+
+Skúste si niekoľko nerovností na precvičenie.
+
+\Exercise{}{
+	Dokážte, že pre všetky prirodzené čísla $n$ platí $2^n \ge n$. 
+}{
+	Pre $n=1$ platí $2 \ge 1$. Predpokladajme, že $2^n \ge n$ pre dané~$n$. Potom
+	$$
+	2^{n+1} = 2\cdot 2^n \ge 2n \ge n+1,
+	$$
+	keďže $2n \ge n+1$ pre $n \ge 1$.
+}
+
+\Exercise{}{
+	Dokážte, že pre všetky prirodzené čísla $n \ge 4$ platí $n! > 2^n$.
+}{
+	Pre $n=4$ platí $24 > 16$. Predpokladajme, že $n! > 2^n$ pre dané $n \ge 4$. Potom
+	$$
+	(n+1)! = (n+1)\cdot n! > (n+1)\cdot 2^n,
+	$$
+	teraz použijeme, že $n+1 \ge 5 > 2$, takže 
+	$$
+	(n+1)! > (n+1) \cdot 2^n \ge 2 \cdot 2^n = 2^{n+1}.
+	$$
+}
+
+\Exercise{}{
+	Dokážte, že pre všetky prirodzené čísla $n$ platí
+	$$
+	\frac{1}{n+1} + \frac{1}{n+2} + \cdots + \frac{1}{2n} \ge \frac{1}{2}.
+	$$
+}{
+	Pre $n=1$ platí $\frac{1}{2} \ge \frac{1}{2}$. Predpokladajme platnosť pre dané~$n$. Označme $S_n = \frac{1}{n+1}+\cdots+\frac{1}{2n}$. Potom
+	$$
+	\gather
+	S_{n+1} = \frac{1}{n+2}+\cdots+\frac{1}{2n}+\frac{1}{2n+1}+\frac{1}{2n+2} = \cr
+	= S_n - \frac{1}{n+1}+\frac{1}{2n+1}+\frac{1}{2n+2}.
+	\endgather
+	$$
+	Stačí overiť, že 
+	$$
+	-\frac{1}{n+1}+\frac{1}{2n+1}+\frac{1}{2n+2} \ge 0,
+	$$
+	po úprave na spoločný menovateľ dostaneme
+	$$
+	\frac{1}{2(2n+1)(n+1)} > 0
+	$$
+	čo zrejme platí.
+}
+
+\Exercise{}{
+	Dokážte Bernoulliho nerovnosť: pre reálne $x \ge -1$ a~prirodzené $n$ platí
+	$$
+	(1 + x)^n \ge 1 + nx.
+	$$
+}{
+	Pre $n=1$ platí $1+x \ge 1+x$. Predpokladajme, že 
+	$$
+	(1+x)^n \ge 1+nx
+	$$
+	pre dané~$n$. Keďže $1+x \ge 0$, môžeme obe strany vynásobiť výrazom $(1+x)$:
+	$$
+	(1+x)^{n+1} \ge (1+nx)(1+x) = 1+(n+1)x+nx^2.
+	$$
+	Potrebujeme dokázať, že posledný výraz je aspoň $1+(n+1)x$, čo je ale zrejmé, lebo $nx^2$ je nezáporné.
+}
+
+Indukciu vieme použiť aj na dokazovanie deliteľnosti.
+
+\Example{}{
+	Dokážte, že pre všetky prirodzené čísla~$n$ platí $6 \mid n^3-n$.
+}{
+	Pre $n=1$ platí $1-1=0$ a~$6 \mid 0$. Predpokladajme, že $6 \mid n^3-n$ pre dané~$n$. Potom
+	$$
+	\gather
+	(n+1)^3-(n+1) = n^3+3n^2+3n+1-n-1 = \cr
+	= (n^3-n)+3n(n+1).
+	\endgather
+	$$
+	Prvý člen je deliteľný 6 podľa indukčného predpokladu. V~druhom člene je číslo $n(n+1)$ súčin dvoch po sebe idúcich čísel, teda párny, a~po vynásobení~3 dostaneme násobok~6.
+}
+
+\Example{}{
+	Dokážte, že pre všetky prirodzené čísla~$n$ platí $3 \mid 4^n-1$.
+}{
+	Pre $n=1$ platí $4-1=3$ a~$3 \mid 3$. Predpokladajme, že $3 \mid 4^n-1$ pre dané~$n$. Potom
+	$$
+	4^{n+1}-1 = 4\cdot 4^n-1 = 4(4^n-1)+3.
+	$$
+	Prvý sčítanec je deliteľný 3 podľa indukčného predpokladu a~$3$ je zjavne deliteľné 3, teda aj ich súčet.
+}
+
+\Exercise{}{
+	Dokážte, že pre všetky prirodzené čísla~$n$ platí $9 \mid 4^n+6n-1$.
+}{
+	Pre $n=1$ platí $4+6-1=9$ a~$9 \mid 9$. Predpokladajme, že $9 \mid 4^n+6n-1$ pre dané~$n$. Potom
+	$$
+	\gather
+	4^{n+1}+6(n+1)-1 = 4\cdot 4^n+6n+5 = \cr
+	= 4(4^n+6n-1)-18n+9 = \cr
+	= 4(4^n+6n-1)+9(1-2n).
+	\endgather
+	$$
+	Prvý sčítanec je deliteľný 9 podľa indukčného predpokladu a~druhý je zjavne násobok 9.
+}
+
+\Exercise{}{
+	Dokážte, že pre všetky prirodzené čísla~$n$ platí $31 \mid 5^{n+1}+6^{2n-1}$.
+}{
+	Pre $n=1$ platí $5^2+6^1=31$ a~$31 \mid 31$. Predpokladajme, že $31 \mid 5^{n+1}+6^{2n-1}$. Potom
+	$$
+	\gather
+	5^{n+2}+6^{2n+1} = 5\cdot 5^{n+1}+36\cdot 6^{2n-1} = \cr
+	= 5(5^{n+1}+6^{2n-1})+31\cdot 6^{2n-1}.
+	\endgather
+	$$
+	Prvý sčítanec je deliteľný 31 podľa indukčného predpokladu a~druhý je zjavne násobok 31.
+}
+
+
+Pri dôkaze je naozaj nutné overiť prvý krok, inak sa dá dokázať kde-čo. Napríklad aj že číslo tvaru $n^2+n+1$ je vždy párne. Totiž ak to platí pre dané $n$, tak potom pre $n+1$ máme $(n+1)^2+(n+1)+1$, o čom sa ľahko presvedčíme, že je rovné $(n^2+n+1)+2(n+1)$. Z~indukčného predpokladu je $n^2+n+1$ párne a zrejme $2(n+1)$ je párne, takže máme súčet dvoch párnych čísel, takže \uv{dôkaz} je hotový. 
+
+Problém je, že keď si teraz dosadíme akékoľvek $n$, tak dostaneme nepárne číslo. Kde je chyba? Nuž, neoverili sme, že tvrdenie platí pre $n=1$ -- vtedy je výraz rovný~3 a~je nepárny. Ak by sme teda dokazovali, že tento výraz je vždy nepárny, tak spolu s~krokom pre $n=1$ je dôkaz úplný.
+
+Ďalšie možné úskalie predstavuje táto úloha.
+
+\Problem{0}{}{
+	Nájdite chybu v~\uv{dôkaze} tohto tvrdenia:
+	
+	\textit{Majme $n \ge 2$ priamok v~rovine takých, že žiadne dve nie sú rovnobežné. Potom všetky tieto priamky prechádzajú jedným bodom.}
+	
+	\uv{Dôkaz}: Pre $n = 2$ tvrdenie platí, lebo dve nerovnobežné priamky sa pretínajú v~jednom bode.
+	
+	Indukčný krok: Nech tvrdenie platí pre nejakých $n \ge 2$ priamok. Vezmime si $n+1$ priamok $p_1, p_2, \dots, p_{n+1}$, z~ktorých žiadne dve nie sú rovnobežné.
+	
+	Prvých $n$ priamok $p_1, \dots, p_n$ prechádza podľa indukčného predpokladu jedným bodom~$X$. Rovnako priamky $p_1, \dots, p_{n-1}, p_{n+1}$ (tiež ich je~$n$) prechádzajú jedným bodom~$Y$. Keďže priamky $p_1, \dots, p_{n-1}$ prechádzajú oboma bodmi $X$ aj~$Y$, nutne $X = Y$. Tým pádom všetkých $n+1$ priamok prechádza bodom~$X$.
+}{
+	Je evidentné, že tvrdenie neplatí už pre $n=3$. Na pochopenie chyby si skúste napísať indukčný krok pre $n$ rovné~2 (kedy dokazujeme, že tvrdenie platí pre $2+1=3$ priamky).
+}{
+	Chyba je vo vete \uv{Keďže priamky $p_1, \dots, p_{n-1}$ prechádzajú oboma bodmi $X$ aj~$Y$, nutne $X = Y$.} Pre $n=2$ totiž postupnosť priamok $p_1,\dots,p_{n-1}$ je vlastne jediná priamka. Kedykoľvek $n>2$, tak tvrdenie by naozaj platilo, a~to spôsobuje zmätok.
+}
+
+\sec Úplná indukcia
+
+V~predošlých úlohách sme si v~indukčnom kroku vždy povedali, že tvrdenie platí pre nejaké~$n$ a~následne ho dokazovali pre $n+1$. V~skutočnosti môžeme však predpokladať niečo silnejšie. Napríklad majme nejaké tvrdenie pre všetky prirodzené čísla $n$, ktoré dokazujeme indukciou. Najprv ho samozrejme dokážeme pre $n=1$. Následne predpokladáme, že platí pre všetky $1,2,\dots,n$ a dokážeme ho pre $n+1$ -- namiesto toho, aby sme predpokladali len že platí pre nejaké $n$. Tento obrat je veľmi bežný v~komplexnejších dôkazoch a~nazýva sa \textit{úplná indukcia}. Ilustrujeme si ju na príklade:
+
+\Theorem{Veta o~rozklade na prvočísla}{
+	Každé celé číslo $n>1$ sa dá rozložiť na súčin niekoľkých nie nutne rôznych prvočísel.
+}{
+	Tvrdenie zjavne platí pre $n=2$, ktoré je samo osebe prvočíslom. Predpokladajme, že sme tvrdenie dokázali pre $2,3,\dots,n$. Vezmime si teraz číslo $n+1$. Ak je prvočíslo, tak sme hotoví. Ak nie je prvočíslo, tak to znamená, že existujú dve celé čísla $a>1$ a $b>1$ také, že $n+1=ab$. Keďže $a$ aj $b$ sú viac ako~1, tak obe sú menej ako $n+1$, teda najviac $n$. Na obe z~nich môžeme použiť indukčný predpoklad, a~síce, že sa dajú napísať ako súčin prvočísel. Tým pádom sa ale ako súčin prvočísel dá napísať aj ich súčin $ab$, čo sme potrebovali dokázať.
+}
+
+Všimnime si, že v~tomto dôkaze sme nemohli použiť tradičnú indukciu, striktne potrebujeme, že čísla $a,b$ sú \textit{menšie} než $n+1$. 
+
+Ďalej si uvedomme, že bežná indukcia je špeciálnym prípadom úplnej indukcie -- predsa len, že v~predpoklade, že tvrdenie platí pre všetky $1,2,\dots,n$, je zahrnuté aj to, že platí pre $n$, z~čoho vychádzame pri bežnej indukcii. Keď vymýšľame riešenie indukciou, je preto užitočnejšie premýšľať rovno v~štýle úplnej indukcie, o~nič sa neukrátime.
+
+Ďalší tradičný výsledok je existencia jednoznačného zápisu v~binárnej sústave.
+
+\Example{}{
+	Dokážte, že každé prirodzené číslo sa dá zapísať ako súčet navzájom rôznych mocnín dvojky.
+}{
+	Pre $n=1$ platí $1=2^0$. Predpokladajme, že tvrdenie platí pre všetky prirodzené čísla menšie ako~$n$. Ak je $n$ mocnina dvojky, tak sme hotoví. Inak nájdeme najväčšiu mocninu dvojky $2^k < n$. Číslo $n-2^k$ je kladné a~menšie ako~$n$, takže podľa indukčného predpokladu sa dá zapísať ako súčet rôznych mocnín dvojky. Navyše $n - 2^k < 2^k$ (lebo $2^{k+1} > n$), takže v~jeho rozklade sa $2^k$ nevyskytuje. Pripočítaním $2^k$ dostaneme zápis~$n$ ako súčet rôznych mocnín dvojky.
+}
+
+Vyskúšajte si podobný dôkaz na ťažších príkladoch:
+
+\Problem{0}{Zeckendorfova veta, existencia}{
+	Dokážte, že každé kladné celé číslo sa dá zapísať ako súčet navzájom nesusedných Fibonacciho čísel.
+}{
+	Ideme indukciou. Označme $n$ číslo, ktoré sa snažíme zapísať ako súčet. Oplatí sa uvážiť najväčšie Fibonacciho číslo neprevyšujúce $n$, napr. $F_m$, a~použiť indukčný predpoklad na $n-F_m$. Sme hotoví?
+}{
+	Ešte nie sme hotoví. Potrebujeme sa vysporiadať s~tým, že zápis $n-F_m$ môže obsahovať $F_{m-1}$, čo by pokazilo susednosť. Lenže čo ak $n-F_m=F_{m-1}+\cdots$?
+}{
+	Pre najmenšie prirodzené čísla tvrdenie platí (napr. $1=F_2, 2=F_3$). Predpokladajme, že sa požadovaným spôsobom dá zapísať každé číslo menšie ako~$n$. Nájdime najväčšie Fibonacciho číslo $F_m \le n$. Ak $n=F_m$, sme hotoví. Inak je číslo $n-F_m$ kladné a~ostro menšie ako~$n$, takže podľa indukčného predpokladu ho vieme zapísať ako súčet navzájom nesusedných Fibonacciho čísel.
+	
+	Pripočítaním $F_m$ by sme dostali zápis pre~$n$. Problém by nastal len vtedy, ak by v~zápise čísla $n-F_m$ vystupovalo číslo $F_{m-1}$ (alebo väčšie). V~takom prípade by bol celý zápis aspoň $F_{m-1}$, a~teda $n-F_m \ge F_{m-1}$. Z~toho však dostávame $n \ge F_m + F_{m-1} = F_{m+1}$, čo je spor s~tým, že $F_m$ je najväčšie Fibonacciho číslo neprevyšujúce~$n$.
+	
+	Preto sa v~zápise pre $n-F_m$ nachádzajú len čísla nanajvýš $F_{m-2}$. Doplnením čísla $F_m$ teda nevznikne dvojica susedných Fibonacciho čísel a~dostaneme platný zápis čísla~$n$.
+}
+
+Iná číselná sústava je faktoriálová: 
+
+\Problem{0}{Faktoriálová sústava}{
+	Dokážte, že každé kladné celé číslo~$n$ sa dá zapísať v~tvare
+	$$
+	n = a_1 \cdot 1! + a_2 \cdot 2! + \cdots + a_k \cdot k!,
+	$$
+	kde $0 \le a_i \le i$ pre každé~$i$.
+}{
+	Ideme indukciou. Označme $n$ číslo, ktoré sa snažíme takto zapísať. Uvážme najväčšie číslo $k$ také, že $k! \leq n$. Trikom je vydeliť $n$ číslom $k!$ so zvyškom, teda zapísať $n=a \cdot k! + r$, kde $0 \leq r < k!$. Kde môžeme použiť indukčný predpoklad? Čo nám zostane dokázať?
+}{
+	V~prvom rade si uvedomme, že $a \leq k$ (dokážte). To znamená, že pre $r=0$ sme hotoví a~že pre $r>0$ vieme použiť indukčný predpoklad na $r$. Dostaneme tak už vyhovujúce vyjadrenie?
+}{
+	Pre $n=1$ tvrdenie platí, $1 = 1 \cdot 1!$. Predpokladajme, že sa požadovaným spôsobom dá zapísať každé číslo menšie ako~$n$. Nájdime najväčšie číslo $k$ také, že $k! \le n$ a vydelme $n$ číslom $k!$ so zvyškom, teda $n = a_k \cdot k! + r$, pričom $0 \le r < k!$. Keďže $k!$ bolo najväčšie možné, muselo pôvodne platiť $n < (k+1)!$, z~čoho vyplýva
+	$$
+	\gather
+	a_k \cdot k! + r < (k+1)! = (k+1) \cdot k! \cr
+	a_k \cdot k! \le a_k \cdot k! + r < (k+1) \cdot k! \cr
+	a_k < k+1 \implies a_k \le k.
+	\endgather
+	$$
+	Máme zaručené, že podmienka pre najvyššiu cifru je splnená. Ak $r=0$, sme hotoví. Inak máme $0 < r < k! \le n$, teda $r$ je ostro menšie ako $n$ a môžeme naň použiť indukčný predpoklad. Dostaneme tak zápis $r = a_1 \cdot 1! + \cdots + a_m \cdot m!$. 
+	
+	Keďže $r < k!$, najväčší faktoriál v~zápise $r$ môže byť najviac $(k-1)!$, teda $m \le k-1$. Dosadením tohto zápisu za~$r$ do výrazu $n = a_k \cdot k! + r$ tak získame hľadaný zápis čísla~$n$ a~žiadne dva faktoriály sa nám nesčítajú dokopy.
+}
+
+Dodajme, že aj pre Fibonacciho aj pre faktoriálovú sústavu sa dá dokázať unikátnosť (a~samozrejme aj pre binárnu a našu desiatkovú). Dôkaz je ľahký, ale technický -- opiera sa o~všeobecný princíp: Majme sústavu, kde vieme vyjadriť~1 a~v~ktorej platí, že najväčšie číslo, ktoré vieme vyjadriť pomocou $k$ cifier, je o~1 menšie ako najmenšie číslo, ktoré vieme vyjadriť pomocou $k+1$ cifier. V~takejto sústave potom platí aj úplnosť (každé číslo sa dá vyjadriť) aj jednoznačnosť. Môžete si skúsiť toto tvrdenie rozmyslieť pre všetky skúmané sústavy (binárnu, Fibonacciho a faktoriálovú), už dokázané cvičenia môžu byť dobrou pomôckou :)
+
+Technicky jedna z~foriem úplnej indukcie je aj keď indukčný predpoklad použijeme pre iba dve menšie čísla, napr. $n-2$ a $n-1$. To vidieť často pri úlohách o~rekurentných postupnostiach.
+
+\Example{}{
+	Postupnosť je definovaná predpisom $a_1 = 0$, $a_2 = 1$ a
+	$$
+	a_n = 3a_{n-1}-2a_{n-2}
+	$$
+	pre $n \ge 3$. Uhádnite explicitný vzorec pre $a_n$ a~dokážte ho indukciou.
+}{
+	Z~malých hodnôt $a_1=0, a_2=1, a_3=3, a_4=7, a_5=15, a_6=31$ uhádneme $a_n = 2^{n-1}-1$. Tento vzorec dokážeme indukciou: 
+	
+	Pre $n=1$ platí $2^0-1=0$. Pre $n=2$ platí $2^1-1=1$. Predpokladajme platnosť pre $n-1$ a~$n$. Potom
+	$$
+	\gather
+	a_{n+1} = 3a_n-2a_{n-1} = 3(2^{n-1}-1)-2(2^{n-2}-1)= \cr
+	= 3\cdot 2^{n-1} - 3 - 2^{n-1} + 2 = 2\cdot 2^{n-1}-1 = 2^n-1.
+	\endgather
+	$$
+}
+
+\Exercise{}{
+	Postupnosť je definovaná predpisom $a_1 = 1$, $a_2 = 5$ a
+	$$
+	a_n = 5a_{n-1}-6a_{n-2}
+	$$ 
+	pre $n \ge 3$. Uhádnite explicitný vzorec pre $a_n$ a~dokážte ho indukciou.
+}{
+	Vyskúšaním $a_1=1, a_2=5, a_3=19, a_4=65, a_5=211$ uhádneme vzorec $a_n = 3^n-2^n$. Tento dokážeme indukciou:
+	
+	Pre $n=1$ platí $3-2=1$. Pre $n=2$ platí $9-4=5$. Predpokladajme platnosť pre $n-1$ a~$n$. Potom
+	$$
+	\gather
+	a_{n+1} = 5a_n-6a_{n-1} = 5(3^n-2^n)-6(3^{n-1}-2^{n-1}) = \cr
+	= 5\cdot 3^n - 5\cdot 2^n - 2\cdot 3^n + 3\cdot 2^n = \cr
+	= 3\cdot 3^n - 2\cdot 2^n = 3^{n+1}-2^{n+1}.
+	\endgather
+	$$
+}
+
+\Problem{0}{}{
+	Dokážte, že pre všetky prirodzené čísla~$n$ platí $F_n \le \varphi^{n-1}$, kde $F_n$ sú Fibonacciho čísla a~$\varphi = \frac{1+\sqrt{5}}{2}$ je zlatý rez.
+}{
+	Numericky overíme pre $n=1$ a $n=2$. Ďalej funguje indukcia. Totiž, $F_n = F_{n-1}+F_{n-2}$ pre $n \ge 3$.
+}{
+	Kľúčom pri dôkaze indukciou je fakt, že $\phi$ má tú magickú vlastnosť, že $\phi^2=\phi+1$ (overte). 
+}{
+	Dôkaz prevedieme úplnou indukciou. Pre $n=1$ platí $F_1 = 1 = \varphi^0$. Pre $n=2$ platí $F_2 = 1 \le \varphi^1$, čo platí, keďže $\varphi > \sqrt{5}/2 > 1$.
+	
+	Predpokladajme, že tvrdenie platí pre dané $n$ a $n-1$. Pre $n+1$ máme $F_{n+1} = F_n + F_{n-1}$. Z~indukčného predpokladu vieme tento súčet odhadnúť:
+	$$
+	F_{n+1} \le \varphi^{n-1} + \varphi^{n-2} = \varphi^{n-2}(\varphi+1).
+	$$
+	Pre $\varphi$ platí identita $\varphi^2 = \varphi+1$, ktorú ľahko overíme. Dosadením máme
+	$$
+	F_{n+1} \le \varphi^{n-2}\cdot \varphi^2 = \varphi^n.
+	$$
+	Tým je indukčný krok dokázaný.
+}
+
+\Problem{0}{}{
+	Nech $x$ je reálne číslo také, že $x+\frac{1}{x}$ je racionálne. Dokážte, že potom aj $x^n+\frac{1}{x^n}$ je racionálne pre každé prirodzené~$n$.
+}{
+	Ideme indukciou. Aby sme spravili prechod z~$n$ na $n+1$, tak vynásobíme  výraz pre $n$ vhodným výrazom.
+}{
+	Kľúčové násobenie je výrazom $x+\frac 1x$. Následne sa objaví, že náš indukčný predpoklad musí byť úplný.
+}{
+	Tvrdenie dokážeme úplnou indukciou. Pre $n=1$ je $x+\frac{1}{x}$ racionálne priamo zo zadania. Pre $n=2$ máme
+	$$
+	x^2+\frac{1}{x^2} = \left(x+\frac{1}{x}\right)^2-2,
+	$$
+	čo je zjavne racionálne číslo.
+	
+	Predpokladajme, že tvrdenie platí pre všetky prirodzené čísla až po nejaké $n$ a $n-1$, kde $n \ge 2$.
+	$$
+	x^{n+1}+\frac{1}{x^{n+1}} = \left(x^n+\frac{1}{x^n}\right)\left(x+\frac{1}{x}\right) - \left(x^{n-1}+\frac{1}{x^{n-1}}\right).
+	$$
+	Z~indukčného predpokladu sú $x^n+\frac{1}{x^n}$ a~$x^{n-1}+\frac{1}{x^{n-1}}$ racionálne čísla. Keďže aj $x+\frac{1}{x}$, celá pravá strana je racionálna. Tým je indukčný krok hotový.
+}
+
+\sec Ďalšie formy indukcie
+
+V~doterajších úlohách sme sa stretli s~dvoma typmi indukčných predpokladov: že tvrdenie platí pre $n$ alebo že platí pre vhodné čísla neprevyšujúce~$n$. Následne sme z~toho dokazovali, že tvrdenie platí pre $n+1$. Fantázii sa však medze nekladú, pokojne sa môže vyskytnúť indukcia, že z~$n$ dokážeme $n+2$, tým pádom potrebujeme tvrdenie dokázať pre po sebe idúce základy. 
+
+\Example{}{
+	Dokážte, že každé celé číslo $n \ge 2$ sa dá zapísať v~tvare $n = 2a + 3b$, kde $a,b$ sú nezáporné celé čísla.
+}{
+	Dôkaz urobíme indukciou s~krokom~2, čo znamená, že potrebujeme dva po sebe idúce základy. Overíme ich priamo: $2 = 2\cdot 1$ a~$3 = 3\cdot 1$.
+	
+	Predpokladajme, že tvrdenie platí pre dané $n \ge 2$, teda $n = 2a+3b$. Potom $n+2 = 2(a+1)+3b$, takže tvrdenie platí aj pre $n+2$.
+	
+	\textit{Poznámka.} Pre zaujímavosť dodajme, ako je všeobecne: Pre dve nesúdeliteľné kladné celé čísla $p$ a $q$ sa dá dokázať, že každé celé číslo $n \ge pq-p-q+1$ sa dá zapísať ako $n=pa+qb$ pre nezáporné $a,b$. Číslo $pq-p-q$ sa volá Frobeniovo číslo a~je to najväčšie celé číslo, ktoré sa takto zapísať nedá. V~našom prípade je $2\cdot 3-2-3=1$.
+}
+
+Ďalšia fascinujúca forma indukcie je vidieť v Cauchyho dôkaze AG nerovnosti, kedy najprv ideme hore a~potom dole.
+
+\Theorem{AG nerovnosť}{
+	Pre kladné reálne čísla $a_1,a_2,\dots,a_n$ platí
+	$$
+	\frac{a_1+a_2+\cdots+a_n}{n} \ge \root n \of {a_1 a_2 \cdots a_n},
+	$$
+	pričom rovnosť nastáva práve vtedy, keď $a_1=a_2=\cdots=a_n$.
+}{
+	Dôkaz pozostáva z~dvoch krokov: najprv dokážeme nerovnosť pre všetky mocniny dvojky $n = 2^k$ a~potom ukážeme, že z~platnosti pre $n$ premenných vyplýva platnosť pre $n-1$ premenných. Tieto dva kroky dokopy pokryjú všetky prirodzené čísla.
+	
+	{\it Krok nahor (z~$n$ na $2n$):} Pre $n=2$ máme dokázať, že $\frac{a_1+a_2}{2} \ge \sqrt{a_1 a_2}$, čo je ekvivalentné $(\sqrt{a_1}-\sqrt{a_2})^2 \ge 0$, a~to platí vždy.
+	
+	Predpokladajme, že nerovnosť platí pre $n$ premenných.	Pre $2n$ premenných rozdelíme čísla na dve skupiny po~$n$. Označme
+	$$
+	A = \frac{a_1+\cdots+a_n}{n}, \qquad B = \frac{a_{n+1}+\cdots+a_{2n}}{n}.
+	$$
+	Z~indukčného predpokladu pre obe skupiny máme
+	$$
+	A \ge \root n \of{a_1 \cdots a_n}, \qquad B \ge \root n \of{a_{n+1} \cdots a_{2n}}.
+	$$
+	Priemer všetkých $2n$ čísel je $\frac{A+B}{2}$. Zo základného prípadu pre dve premenné vieme, že $\frac{A+B}{2} \ge \sqrt{AB}$. Teda
+	$$
+	\gather
+	\frac{a_1+\cdots+a_{2n}}{2n} = \frac{A+B}{2} \ge \sqrt{AB} \ge \cr
+	\ge \sqrt{\root n \of{a_1 \cdots a_n} \cdot \root n \of{a_{n+1} \cdots a_{2n}}}	= \root 2n \of{a_1 \cdots a_{2n}}.
+	\endgather
+	$$
+
+	{\it Krok nadol (z~$n$ na $n-1$):} Predpokladajme, že nerovnosť platí pre $n$ premenných, a~vezmime si $n-1$ nezáporných reálnych čísel $a_1,\dots,a_{n-1}$. Položme 
+	$$
+	a_n = \frac{a_1+\cdots+a_{n-1}}{n-1}
+	$$
+	teda $a_n$ je priemer zvyšných čísel. Potom
+	$$
+	\frac{a_1+\cdots+a_{n-1}+a_n}{n} = \frac{(n-1)a_n+a_n}{n} = a_n.
+	$$
+	Z~predpokladu pre $n$ premenných dostávame
+	$$
+	a_n = \frac{a_1+\cdots+a_n}{n} \ge \root n \of{a_1 \cdots a_{n-1} \cdot a_n}.
+	$$
+	Umocnením na $n$-tú máme $a_n^n \ge a_1 \cdots a_{n-1} \cdot a_n$, a~po vydelení kladným $a_n$ dostaneme
+	$$
+	a_n^{n-1} \ge a_1 \cdots a_{n-1},
+	$$
+	čiže 
+	$$
+	\left(\frac{a_1+\cdots+a_{n-1}}{n-1}\right)^{n-1} \ge a_1 \cdots a_{n-1},
+	$$
+	čo je presne AG nerovnosť pre $n-1$ premenných umocnená na $n-1$.
+}
+
+\sec Čo sme sa naučili
+
+\begitems \style N
+\i Tvrdenia zahŕňujúce prirodzené čísla sa často dajú dokázať matematickou indukciou.
+\i Môžeme v~nej predpokladať nielen to, že tvrdenie platí pre dané $n$, ale rovno že platí napr. pre $1,2,\dots,n$. 
+\i Občas sa oplatí robiť aj veľké kroky, napr. z~$n$ do $n+2$, alebo $2n$, prípadne aj späť (z $n$ na $n-1$).
+\i Indukcia môže byť nielen podľa jednej premennej, ale aj podľa súčtu premenných.
+\enditems
+
+Na čo si dávať pozor:
+
+\begitems \style N
+\i Vždy overíme malé prípady a~do riešenia zapíšeme, že sme to urobili.
+\i Indukcia môže zlyhať na tom, že na indukčný krok potrebujeme napr. $n \ge 2$ namiesto $n \ge 1$, oplatí sa spraviť si tento indukčný krok aspoň v~hlave pre malé $n$.
+\i Ak indukcia používa $n-1$ aj $n-2$, tak potrebujeme dva základy.
+\enditems
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye
