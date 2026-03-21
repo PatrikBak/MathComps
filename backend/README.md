@@ -235,14 +235,12 @@ Useful when tagging many problems, as manual adjustments can be tedious.
 
 ### 10. Scrape SKMO Links (If Needed)
 
-If new solution PDFs are available on the SKMO website (using the correct):
+If new solution PDFs are available on the SKMO website (using the correct year):
 
 ```powershell
 # From backend/src/Tools/MathComps.Cli.SkmoScraper
 dotnet run -c Release -- scrape --start-year 75 --end-year 75
 ```
-
-Remark: Update 75 to the current year.
 
 ### 11. Update Solution Links
 

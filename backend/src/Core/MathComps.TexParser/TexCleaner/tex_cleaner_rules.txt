@@ -148,6 +148,7 @@ cotg
 cr
 cup
 delta
+Delta
 dfrac
 displaystyle
 dots
