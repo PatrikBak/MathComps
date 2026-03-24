@@ -205,7 +205,7 @@ export function HandoutSectionList({ sections, locale }: HandoutSectionListProps
             <HandoutSectionHeader section={section} locale={locale} />
             <ul role="list" className="grid gap-2.5 sm:gap-4 md:grid-cols-2">
               {section.handouts.map((handout) => (
-                <li key={handout.slug[locale]}>
+                <li key={handout.title[locale]}>
                   {isReadyHandout(handout) ? (
                     <ReadyHandoutCard handout={handout} locale={locale} />
                   ) : (

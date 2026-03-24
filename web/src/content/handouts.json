@@ -146,11 +146,6 @@
     "handouts": [
       {
         "status": "planned",
-        "slug": {
-          "sk": "uhly-bez-kruznic",
-          "cs": "uhly-bez-kruznic",
-          "en": "angles-without-circles"
-        },
         "title": {
           "sk": "Uhly bez kružníc",
           "cs": "Úhly bez kružnic",
@@ -159,11 +154,6 @@
       },
       {
         "status": "planned",
-        "slug": {
-          "sk": "uhly-na-kruznici",
-          "cs": "uhly-na-kruznici",
-          "en": "angles-on-circles"
-        },
         "title": {
           "sk": "Uhly na kružnici",
           "cs": "Úhly na kružnici",
@@ -181,11 +171,6 @@
     "handouts": [
       {
         "status": "planned",
-        "slug": {
-          "sk": "delitelnost",
-          "cs": "delitelnost",
-          "en": "divisibility"
-        },
         "title": {
           "sk": "Deliteľnosť",
           "cs": "Dělitelnost",
@@ -194,11 +179,6 @@
       },
       {
         "status": "planned",
-        "slug": {
-          "sk": "diofanticke-rovnice",
-          "cs": "diofanticke-rovnice",
-          "en": "diophantine-equations"
-        },
         "title": {
           "sk": "Diofantické rovnice",
           "cs": "Diofantické rovnice",
@@ -216,11 +196,6 @@
     "handouts": [
       {
         "status": "planned",
-        "slug": {
-          "sk": "ofarbovanie",
-          "cs": "obarbovani",
-          "en": "coloring"
-        },
         "title": {
           "sk": "Ofarbovanie",
           "cs": "Obarbování",
@@ -229,11 +204,6 @@
       },
       {
         "status": "planned",
-        "slug": {
-          "sk": "invarianty",
-          "cs": "invarianty",
-          "en": "invariants"
-        },
         "title": {
           "sk": "Invarianty",
           "cs": "Invarianty",

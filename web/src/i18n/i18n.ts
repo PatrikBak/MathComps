@@ -11,6 +11,9 @@ export type Locale = (typeof SUPPORTED_LOCALES)[number]
 /** A string value that exists in all supported locales. */
 export type LocalizedString = Record<Locale, string>
 
+/** A string value that may exist in only a subset of supported locales. */
+export type PartialLocalizedString = Partial<Record<Locale, string>>
+
 /** Default (fallback) locale for the application. Users are redirected here when visiting '/'. */
 export const DEFAULT_LOCALE = 'sk' as const satisfies Locale
 

@@ -1,4 +1,5 @@
-import { type LocalizedString, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import type { Locale } from '@/i18n/i18n'
+import { type LocalizedString, type PartialLocalizedString, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 /**
  * Validates that a {@link LocalizedString} has non-empty values for all supported locales.
@@ -23,6 +24,36 @@ export function* validateLocalizedString(
   // Ensure non-empty value for each locale
   for (const locale of SUPPORTED_LOCALES) {
     if (!value[locale] || value[locale].trim() === '') {
+      yield `❌ Missing ${locale} value for ${fieldName} in ${context}`
+    }
+  }
+}
+
+/**
+ * Validates that a {@link PartialLocalizedString} has non-empty values for the specified locales.
+ *
+ * @param value - The {@link PartialLocalizedString} to validate.
+ * @param fieldName - The name of the field being validated (for error messages).
+ * @param context - Description of the containing item (for error messages).
+ * @param locales - The locales that must have values.
+ *
+ * @yields Error messages for any validation failures.
+ */
+export function* validatePartialLocalizedString(
+  value: PartialLocalizedString | undefined,
+  fieldName: string,
+  context: string,
+  locales: readonly Locale[]
+): Generator<string> {
+  // Ensure non-empty value
+  if (!value) {
+    yield `❌ Missing ${fieldName} for ${context}`
+    return
+  }
+
+  // Ensure non-empty value for each required locale
+  for (const locale of locales) {
+    if (!value[locale] || value[locale]!.trim() === '') {
       yield `❌ Missing ${locale} value for ${fieldName} in ${context}`
     }
   }

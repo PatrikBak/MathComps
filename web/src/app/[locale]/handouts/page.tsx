@@ -4,6 +4,7 @@ import type { HandoutSection } from '@/components/features/handouts/handout-meta
 import {
   isPublicHandout,
   isReadyHandout,
+  supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
 import { HandoutSectionList } from '@/components/features/handouts/HandoutSectionList'
 import { HandoutsHero } from '@/components/features/handouts/HandoutsHero'
@@ -49,12 +50,13 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
     'handout'
   )
 
-  // Filter out non-public handouts and drop sections that become empty
+  // Filter out handouts that don't support the current locale or are non-public
   const publicSections = sections
     .map((section) => ({
       ...section,
       handouts: section.handouts.filter(
-        (handout) => !isReadyHandout(handout) || isPublicHandout(handout)
+        (handout) =>
+          supportsLocale(handout, locale) && (!isReadyHandout(handout) || isPublicHandout(handout))
       ),
     }))
     .filter((section) => section.handouts.length > 0)

@@ -8,7 +8,11 @@ import type {
   HandoutSection,
   ReadyHandoutMetadata,
 } from '@/components/features/handouts/handout-metadata-types'
-import { isReadyHandout } from '@/components/features/handouts/handout-metadata-types'
+import {
+  getContentFileBasename,
+  isReadyHandout,
+  supportsLocale,
+} from '@/components/features/handouts/handout-metadata-types'
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
 import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import Layout from '@/components/layout/Layout'
@@ -34,8 +38,8 @@ function findHandoutBySlug(slug: string, locale: Locale): ReadyHandoutMetadata |
       .flatMap((section) => section.handouts)
       // That are ready
       .filter(isReadyHandout)
-      // And find the one with the matching slug in the current locale
-      .find((handout) => handout.slug[locale] === slug)
+      // And find the one with the matching slug in the current locale (only if it supports this locale)
+      .find((handout) => supportsLocale(handout, locale) && handout.slug[locale] === slug)
   )
 }
 
@@ -58,8 +62,9 @@ async function loadDocumentBySlug(
   if (!handoutData) return undefined
 
   // Dynamically import the handout's JSON file for the current locale
-  // Content files use the English slug as the base filename (e.g., "factorization.sk.json")
-  const handoutModule = await import(`@/content/handouts/${handoutData.slug.en}.${locale}.json`)
+  // Content files use the handout slug as the base filename (e.g., "factorization.sk.json")
+  const handoutSlug = getContentFileBasename(handoutData)
+  const handoutModule = await import(`@/content/handouts/${handoutSlug}.${locale}.json`)
 
   // Return the handout and its metadata entry
   return { data: handoutModule.default as HandoutData, metadata: handoutData }
@@ -77,9 +82,11 @@ export async function generateStaticParams(): Promise<Array<{ locale: Locale; sl
   // Get all ready handouts
   const readyHandouts = sections.flatMap((section) => section.handouts).filter(isReadyHandout)
 
-  // Generate params for all locale + slug combinations
+  // Generate params only for locale + slug combinations where the handout supports the locale
   return SUPPORTED_LOCALES.flatMap((locale) =>
-    readyHandouts.map((handout) => ({ locale, slug: handout.slug[locale] }))
+    readyHandouts
+      .filter((handout) => supportsLocale(handout, locale))
+      .map((handout) => ({ locale, slug: handout.slug[locale]! }))
   )
 }
 
@@ -106,7 +113,11 @@ export async function generateMetadata({
     // Search each handout in the section
     for (const handout of section.handouts) {
       // Look for ready handouts with the matching slug in the current locale
-      if (isReadyHandout(handout) && handout.slug[locale] === slug) {
+      if (
+        isReadyHandout(handout) &&
+        supportsLocale(handout, locale) &&
+        handout.slug[locale] === slug
+      ) {
         // Get translations for handouts
         const tHandouts = await getTranslations({ locale, namespace: 'handouts.labels' })
 
@@ -180,7 +191,7 @@ export default withLocale(async function RenderPage({
           sectionMetadata={sectionMetadata}
           slug={slug}
           contentId={handoutData.metadata.id}
-          pdfFilenameStem={`${handoutData.metadata.slug.en}.${locale}`}
+          pdfFilenameStem={`${getContentFileBasename(handoutData.metadata)}.${locale}`}
           locale={locale}
         />
       </Layout>

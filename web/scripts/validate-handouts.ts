@@ -1,7 +1,8 @@
 /**
  * Validates handout content structure:
  * - Every ready handout in handouts.json has matching .{locale}.json content files
- * - All localized fields have values for all supported locales
+ *   for its declared languages (or all locales when languages is absent)
+ * - All localized fields have values for all declared languages
  *
  * Run with: tsx scripts/validate-handouts.ts
  */
@@ -10,13 +11,15 @@ import fs from 'fs'
 import path from 'path'
 
 import {
+  getContentFileBasename,
   type HandoutSection,
   isReadyHandout,
   type ReadyHandoutMetadata,
+  supportsLocale,
 } from '../src/components/features/handouts/handout-metadata-types'
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../src/i18n/i18n'
+import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import {
-  validateLocalizedString,
+  validatePartialLocalizedString,
   validateRequiredArray,
   validateRequiredField,
   validateUniqueness,
@@ -27,6 +30,30 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/handouts')
 
 /** Path to handouts.json */
 const INDEX_PATH = path.join(CONTENT_DIR, '../handouts.json')
+
+/**
+ * Returns the locales a handout supports.
+ * Defaults to all supported locales when `languages` is absent.
+ *
+ * @param handout - The handout metadata to inspect.
+ *
+ * @returns The locales the handout declares, or all supported locales.
+ */
+function getHandoutLocales(handout: { languages?: Locale[] }): readonly Locale[] {
+  return handout.languages ?? SUPPORTED_LOCALES
+}
+
+/**
+ * Returns a human-readable title for error messages, using the first declared language.
+ *
+ * @param handout - The handout metadata to extract a display name from.
+ *
+ * @returns A formatted string like `handout "Průměry"`.
+ */
+function getDisplayName(handout: { title: Record<string, string>; languages?: Locale[] }): string {
+  const locale = handout.languages?.[0] ?? DEFAULT_LOCALE
+  return `handout "${handout.title[locale] ?? 'unknown'}"`
+}
 
 /** Main validation logic */
 function validate(): boolean {
@@ -52,28 +79,31 @@ function validate(): boolean {
     ...validateUniqueness(
       readyHandouts,
       (handout) => handout.id,
-      (handout) => `handout "${handout.title[DEFAULT_LOCALE] || 'unknown'}"`,
+      (handout) => getDisplayName(handout),
       'id'
     )
   )
 
-  // Check for duplicate English slugs (used as content filenames)
+  // Check for duplicate file slugs (used as content filenames)
   errors.push(
     ...validateUniqueness(
       readyHandouts,
-      (handout) => handout.slug.en,
-      (handout) => `handout "${handout.title[DEFAULT_LOCALE] || 'unknown'}"`,
-      'slug.en (filename)'
+      (handout) => getContentFileBasename(handout),
+      (handout) => getDisplayName(handout),
+      'fileSlug'
     )
   )
 
-  // Check for duplicate slugs (per locale)
+  // Check for duplicate slugs (per locale, only among handouts that support that locale)
   for (const locale of SUPPORTED_LOCALES) {
+    // Filter to handouts that support this locale
+    const handoutsForLocale = readyHandouts.filter((handout) => supportsLocale(handout, locale))
+
     errors.push(
       ...validateUniqueness(
-        readyHandouts,
+        handoutsForLocale,
         (handout) => handout.slug[locale],
-        (handout) => `handout "${handout.title[DEFAULT_LOCALE] || 'unknown'}"`,
+        (handout) => getDisplayName(handout),
         `slug.${locale}`
       )
     )
@@ -84,26 +114,54 @@ function validate(): boolean {
     // A string for logging
     const sectionContext = `section "${section.category[DEFAULT_LOCALE] || 'unknown'}"`
 
-    // Validate category
-    errors.push(...validateLocalizedString(section.category, 'category', sectionContext))
+    // Validate category (always required for all locales)
+    errors.push(
+      ...validatePartialLocalizedString(
+        section.category,
+        'category',
+        sectionContext,
+        SUPPORTED_LOCALES
+      )
+    )
 
     // Validate each handout
     for (const handout of section.handouts) {
-      // A string for logging
-      const handoutContext = `handout "${handout.title[DEFAULT_LOCALE] || 'unknown'}"`
+      // Determine which locales this handout must have values for
+      const requiredLocales = isReadyHandout(handout)
+        ? getHandoutLocales(handout)
+        : SUPPORTED_LOCALES
 
-      // Validate common fields
-      errors.push(...validateLocalizedString(handout.slug, 'slug', handoutContext))
-      errors.push(...validateLocalizedString(handout.title, 'title', handoutContext))
+      // Build a display name for error messages
+      const handoutContext = getDisplayName(handout)
+
+      // Validate title (common to both planned and ready handouts)
+      errors.push(
+        ...validatePartialLocalizedString(handout.title, 'title', handoutContext, requiredLocales)
+      )
 
       // Validate ready-specific fields
       if (isReadyHandout(handout)) {
         // Safe cast
         const readyHandout = handout as ReadyHandoutMetadata
 
-        // Validate description
+        // Validate slug (only for declared languages)
         errors.push(
-          ...validateLocalizedString(readyHandout.description, 'description', handoutContext)
+          ...validatePartialLocalizedString(
+            readyHandout.slug,
+            'slug',
+            handoutContext,
+            requiredLocales
+          )
+        )
+
+        // Validate description (only for declared languages)
+        errors.push(
+          ...validatePartialLocalizedString(
+            readyHandout.description,
+            'description',
+            handoutContext,
+            requiredLocales
+          )
         )
 
         // Validate id
@@ -112,11 +170,11 @@ function validate(): boolean {
         // Validate authors
         errors.push(...validateRequiredArray(readyHandout.authors, 'authors', handoutContext))
 
-        // Validate content files exist for all locales
-        // Content files use English slug as filename (e.g., "factorization.sk.json")
-        for (const locale of SUPPORTED_LOCALES) {
-          // Construct the content file path using English slug
-          const contentFile = `${readyHandout.slug.en}.${locale}.json`
+        // Validate content files exist for declared languages
+        const slug = getContentFileBasename(readyHandout)
+        for (const locale of requiredLocales) {
+          // Construct the content file path
+          const contentFile = `${slug}.${locale}.json`
           const contentPath = path.join(CONTENT_DIR, contentFile)
 
           // Check if the content file exists
@@ -138,8 +196,10 @@ function validate(): boolean {
   for (const section of sections) {
     for (const handout of section.handouts) {
       if (isReadyHandout(handout)) {
-        for (const locale of SUPPORTED_LOCALES) {
-          expectedFiles.add(`${handout.slug.en}.${locale}.json`)
+        // Only expect content files for declared languages
+        const slug = getContentFileBasename(handout)
+        for (const locale of getHandoutLocales(handout)) {
+          expectedFiles.add(`${slug}.${locale}.json`)
         }
       }
     }

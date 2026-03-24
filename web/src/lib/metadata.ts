@@ -101,16 +101,13 @@ function buildAlternateLanguages(
 
     // Replace [slug] with actual slug if present
     if (localizedPath.includes('[slug]')) {
-      // Use translation available
+      // Use translation if available
       const slug = slugTranslations?.[locale]
       if (slug) {
         localizedPath = localizedPath.replace('[slug]', slug)
-      }
-      // Throw an error if not
-      else {
-        throw new Error(
-          `[Metadata] Missing slug translation for locale '${locale}' on path '${canonicalPath}'. The URL will contain '[slug]'.`
-        )
+      } else {
+        // Skip locales without a slug (intentionally not translated)
+        continue
       }
     }
 
