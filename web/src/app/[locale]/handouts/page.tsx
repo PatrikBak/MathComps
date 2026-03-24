@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 
 import type { HandoutSection } from '@/components/features/handouts/handout-metadata-types'
-import { isReadyHandout } from '@/components/features/handouts/handout-metadata-types'
+import {
+  isPublicHandout,
+  isReadyHandout,
+} from '@/components/features/handouts/handout-metadata-types'
 import { HandoutSectionList } from '@/components/features/handouts/HandoutSectionList'
 import { HandoutsHero } from '@/components/features/handouts/HandoutsHero'
 import Layout from '@/components/layout/Layout'
@@ -46,11 +49,21 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
     'handout'
   )
 
-  // Render the page with parsed handout data
+  // Filter out non-public handouts and drop sections that become empty
+  const publicSections = sections
+    .map((section) => ({
+      ...section,
+      handouts: section.handouts.filter(
+        (handout) => !isReadyHandout(handout) || isPublicHandout(handout)
+      ),
+    }))
+    .filter((section) => section.handouts.length > 0)
+
+  // Render the page with filtered handout data
   return (
     <Layout>
       <HandoutsHero />
-      <HandoutSectionList sections={sections} locale={locale} />
+      <HandoutSectionList sections={publicSections} locale={locale} />
     </Layout>
   )
 })

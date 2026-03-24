@@ -33,6 +33,8 @@ export type ReadyHandoutMetadata = {
   description: LocalizedString
   /** List of author names (not localized - names stay as-is) */
   authors: string[]
+  /** Whether the handout appears in the public listing (defaults to true when absent) */
+  public?: boolean
 }
 
 /**
@@ -45,6 +47,15 @@ export type HandoutMetadata = PlannedHandoutMetadata | ReadyHandoutMetadata
  */
 export function isReadyHandout(handout: HandoutMetadata): handout is ReadyHandoutMetadata {
   return handout.status === 'ready'
+}
+
+/**
+ * Type guard to check if a handout is ready and publicly listed.
+ * Handouts without an explicit `public` field are considered public.
+ */
+export function isPublicHandout(handout: HandoutMetadata): handout is ReadyHandoutMetadata {
+  // A handout is public when it is ready and not explicitly marked as non-public
+  return isReadyHandout(handout) && handout.public !== false
 }
 
 /**
