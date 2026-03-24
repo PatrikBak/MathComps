@@ -19,9 +19,9 @@ namespace MathComps.Cli.Handouts;
 /// Generates skeletons, compiles TeX to PDF, parses TeX to JSON,
 /// and uploads images and PDFs to Cloudflare R2.
 /// </summary>
-/// <param name="fileUploader">The <see cref="IFileUploader"/> instance for uploading assets to remote storage.</param>
+/// <param name="fileUploader">A lazily-resolved <see cref="IFileUploader"/> for uploading assets to remote storage.</param>
 [Description("Builds handouts: generates skeletons, compiles TeX, parses JSON, and copies assets.")]
-public class BuildCommand(IFileUploader fileUploader) : AsyncCommand<BuildCommand.Settings>
+public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<BuildCommand.Settings>
 {
     /// <summary>
     /// The configuration settings for the build command.
@@ -100,11 +100,17 @@ public class BuildCommand(IFileUploader fileUploader) : AsyncCommand<BuildComman
         if (!jsonOutputDirectory.Exists)
             jsonOutputDirectory.Create();
 
-        // Log whether uploads are active
+        // Resolve the uploader
+        IFileUploader? uploader = null;
         if (!settings.SkipUpload)
+        {
+            uploader = fileUploader.Value;
             AnsiConsole.MarkupLine("[green]✓ R2 uploader initialized[/]");
+        }
         else
+        {
             AnsiConsole.MarkupLine("[yellow]⚠ Uploads skipped (--skip-upload)[/]");
+        }
 
         // Collect all files matching any of the provided patterns, excluding skeleton files.
         List<FileInfo> inputFiles = [..
@@ -192,17 +198,17 @@ public class BuildCommand(IFileUploader fileUploader) : AsyncCommand<BuildComman
                     allUnknownCommands[inputFile.Name] = unknownCommands;
 
                 // Step 4: Upload images and PDFs to R2 (unless skipped)
-                if (!settings.SkipUpload)
+                if (uploader is not null)
                 {
                     // Upload queued images asynchronously
                     foreach (var upload in pendingImageUploads)
-                        await fileUploader.UploadAsync(upload.SourcePath, upload.R2Key);
+                        await uploader.UploadAsync(upload.SourcePath, upload.R2Key);
 
                     // Upload PDFs
-                    await UploadPdfToR2Async(inputFile, inputDirectory, fileUploader);
+                    await UploadPdfToR2Async(inputFile, inputDirectory, uploader);
 
                     // Upload the skeleton PDF
-                    await UploadPdfToR2Async(skeletonFile, inputDirectory, fileUploader);
+                    await UploadPdfToR2Async(skeletonFile, inputDirectory, uploader);
                 }
             }
             catch (Exception exception)

@@ -28,6 +28,9 @@ services.AddOptions<R2Settings>()
 // Register the R2 uploader as the file uploader implementation
 services.AddSingleton<IFileUploader, R2Uploader>();
 
+// Register the lazy service provider so that Lazy<T> can be injected
+services.AddTransient(typeof(Lazy<>), typeof(LazyService<>));
+
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);
 
