@@ -1,0 +1,556 @@
+\input amstex 
+\input opmac
+
+% Document setup
+\fontfam[LM fonts]
+\typosize[13/16]
+\frenchspacing
+\parskip10pt
+\parindent0pt
+\abovedisplayskip12pt
+\abovedisplayshortskip0pt
+\belowdisplayskip12pt
+\belowdisplayshortskip12pt
+\medskipamount10pt
+\raggedbottom
+
+% AmsTeX environments
+\TagsOnRight
+
+% OpMaC hyperlink colors
+\hyperlinks{\Green}{\Blue}
+
+% Toggle to display solutions of examples / proofs of theorems
+\newif\ifDisplayTexts
+\DisplayTextstrue
+
+% Prints the title of the handout
+\def\Title#1{\centerline{\typosize[18/]\bf #1}\medskip}
+% Prints the subtitle of the handout
+\def\Subtitle#1{\centerline{\typosize[15/]\caps\rm #1}\medskip}
+% Prints the author of the handout
+\def\Author#1{\centerline{\typosize[14/]{\em #1}}\bigskip}
+
+% Prints a link to the Mathcomps website to the handout
+\def\MathcompsLink#1{%
+    \centerline{\url{https://mathcomps.fun/\link/#1}}%
+    \vskip2pt
+    \centerline{\typosize[12/]{\em(\linkCaption)}}%
+    \vskip10pt
+}%
+
+% Helper macro to create a link using OpMaC
+\def\Link[#1]#2{\ulink[#1]{#2}}
+
+% Defines the Czech translations of the captions
+\def\definecaptionsCS{%
+	\cslang%
+    \def\captionExercise{Cvičení}%
+    \def\captionTheorem{Tvrzení}%
+    \def\captionProof{Důkaz}%
+    \def\captionDefinition{Definice}%
+    \def\captionExample{Příklad}%
+    \def\captionSolution{Řešení}%
+    \def\captionProblem{Úloha}%
+    \def\captionProblemSolutions{Řešení k úlohám}
+    \def\captionExerciseSolutions{Řešení ke cvičením}
+    \def\captionHints##1{%
+      \ifcase##1
+        % Case 0: TeX starts counting at 0
+      \or
+        První%
+      \or 
+        Druhé%
+      \or 
+        Třetí%
+      \or 
+        Čtvrté%
+      \or 
+        Páté%
+      \or 
+        Šesté%
+      \else
+        \errmessage{Too many hints lol}%
+      \fi
+      \ návody k řešením%
+    }
+    \def\link{cs/materialy}
+    \def\linkCaption{interaktivní online verze}
+}
+
+% Defines the Slovak translations of the captions
+\def\definecaptionsSK{%
+	\sklang%
+    \def\captionExercise{Cvičenie}%
+    \def\captionTheorem{Tvrdenie}%
+    \def\captionProof{Dôkaz}%
+    \def\captionDefinition{Definícia}%
+    \def\captionExample{Príklad}%
+    \def\captionSolution{Riešenie}%
+    \def\captionProblem{Úloha}%
+    \def\captionProblemSolutions{Riešenia k úlohám}
+    \def\captionExerciseSolutions{Riešenia k cvičeniam}
+    \def\captionHints##1{%
+      \ifcase##1
+        % Case 0: TeX starts counting at 0
+      \or
+        Prvé%
+      \or 
+        Druhé%
+      \or 
+        Tretie%
+      \or 
+        Štvrté%
+      \or 
+        Piate%
+      \or 
+        Šieste%
+      \else
+        \errmessage{Too many hints lol}%
+      \fi
+      \space návody k riešeniam%
+    }
+    \def\link{sk/materialy}
+    \def\linkCaption{interaktívna online verzia}
+}
+
+% Defines the English translations of the captions
+\def\definecaptionsEN{%
+	\uslang%
+    \def\captionExercise{Exercise}%
+    \def\captionTheorem{Theorem}%
+    \def\captionProof{Proof}%
+    \def\captionDefinition{Definition}%
+    \def\captionExample{Example}%
+    \def\captionSolution{Solution}%
+    \def\captionProblem{Problem}%
+    \def\captionProblemSolutions{Solutions to problems}
+    \def\captionExerciseSolutions{Solutions to exercises}
+    \def\captionHints##1{%
+      \ifcase##1
+        % Case 0: TeX starts counting at 0
+      \or
+        First%
+      \or 
+        Second%
+      \or 
+        Third%
+      \or 
+        Fourth%
+      \or 
+        Fifth%
+      \or 
+        Sixth%
+      \else
+        \errmessage{Too many hints lol}%
+      \fi
+      \space hints%
+    }
+    \def\link{en/handouts}
+    \def\linkCaption{interactive online version}
+}
+
+% Sets the language of the handout
+\def\setlanguage#1{%
+    \csname definecaptions#1\endcsname
+}
+
+% The default language is Slovak
+\setlanguage{SK}
+
+% Convenience macro for starting an item inside OPMac's itemize
+\let\i\startitem
+
+% Redefine parentheses, math convenience
+\def\({\left(}
+\def\){\right)}
+
+% Helper to print the text on the very right side of the page
+\def\flushright#1{{\unskip\nobreak\hskip\parfillskip\penalty50
+  \hskip0.5em\hbox{}\nobreak\hfil #1
+  \parfillskip=0pt \finalhyphendemerits=0 \par}}
+
+% Prints the qedsquare symbol
+\def\qedsquare{\flushright{\vrule height 5pt width 5pt depth 0pt\relax}}
+
+% Quick mathbb symbols
+\def\defbb #1{\expandafter\long\expandafter\def\csname#1\endcsname{{\bbchar #1}}}
+\defbb N
+\defbb Z 
+\defbb Q 
+\defbb C
+\defbb R
+
+% Quick bold, italic, etc. commands, LaTeX style
+\def\textbf#1{\begingroup\bf #1\endgroup}
+\def\textit#1{\begingroup\it #1\endgroup}
+\def\textrm#1{\begingroup\rm #1\endgroup}
+\def\texttt#1{\begingroup\tt #1\endgroup}
+\def\textsf#1{\begingroup\sf #1\endgroup}
+\def\textsl#1{\begingroup\sl #1\endgroup}
+
+% Helper macros to get rid of spaces when reading/printing
+\long\def\saferead#1{\ignorespaces#1}
+\long\def\safepar{\par\removelastskip}
+
+% Prints the end of a block (exercise, theorem, example, definition)
+\def\endblock{%
+  \safepar\medskip%
+  \centerline{%
+    \hbox{%
+      \vrule width 2em height 0.4pt depth 0pt
+      \hskip 0.75em
+      $\diamond$%
+      \hskip 0.75em
+      \vrule width 2em height 0.4pt depth 0pt
+    }%
+  }%
+  \safepar\medskip%
+}
+
+% Prints a left-aligned bar with the given text
+\long\def\leftbar#1{% 
+  \safepar\medskip\medskip%
+  \hbox{%
+    \vrule width 2pt
+    \hskip 0.75em
+    \vtop{%
+      \hsize=\dimexpr\hsize-1.5em-2pt\relax
+      \parindent=1em
+      \noindent #1\par
+    }%
+  }%
+  \safepar\medskip\medskip%
+}
+
+% Counters for already definied exercises, theorems etc
+\newcount\exercises
+\newcount\theorems
+\newcount\problems
+\newcount\examples
+\newcount\definition
+
+% #1 - Source (might be empty)
+% #2 - Statement
+% #3 - Solution
+\long\def\Exercise#1#2#3{%
+	\advance\exercises by 1\relax%
+	\expandafter\long\expandafter\def\csname e\the\exercises-solution\endcsname{#3}%
+	\leftbar{%
+		{\bf \captionExercise\ \the\exercises}%
+		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
+		\enskip\saferead{#2}\safepar%
+	}%
+}
+
+% #1 - Source (might be empty)
+% #2 - Statement
+% #3 - Solution
+\long\def\Theorem#1#2#3{%
+	\advance\theorems by 1\relax%
+	\leftbar{%
+		{\bf \captionTheorem\ \the\theorems}%
+		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
+		\enskip\saferead{#2}\safepar%
+	}%
+	\safepar{\em \captionProof.}\enskip\saferead{#3}\qedsquare%
+	\endblock%
+}
+
+% #1 - Source (might be empty)
+% #2 - Statement
+% #3 - Solution
+\long\def\Example#1#2#3{%
+	\advance\examples by 1\relax%
+	\leftbar{%
+		{\bf \captionExample\ \the\examples}%
+		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
+		\enskip\saferead{#2}%
+	}%
+	\ifDisplayTexts%
+		\safepar{\em \captionSolution.}\enskip\saferead{#3}\endblock%
+	\else%
+		\safepar\medskip%	
+	\fi%
+}
+
+% A helper macro which prints the given number of stars
+\newcount\starcount
+\def\Stars#1{%
+  \ifnum#1>0%
+    \def\starholder{}%
+    \starcount=#1%
+    \loop\ifnum\starcount>0
+      \expandafter\def\expandafter\starholder\expandafter{\starholder\star}%
+      \advance\starcount by-1
+    \repeat
+    ${}^{\starholder}$%
+  \fi
+}
+
+% The maximal number of hints some problem has
+% This is used to determine how many hint sections we need
+\newcount\maxHints
+\maxHints=0
+
+% Helper to update max hints
+\def\UpdateMaxHints#1{%
+  \ifnum#1>\maxHints%
+    \maxHints=#1%
+  \fi%
+}
+
+% The local variable used to count the args after statement
+% These are the hints and the solution
+\newcount\problemArgsCount
+
+% #1 - Number Of Stars
+% #2 - Source (might be empty)
+% #3 - Statement
+% Then we have an arbitrary number of hints
+% And then the solution
+\long\def\Problem#1#2#3{%
+  \advance\problems by 1\relax%
+  \expandafter\def\csname p\the\problems-difficulty\endcsname{#1}%
+  \problemArgsCount=0\relax%
+  \leftbar{%
+    {\bf \captionProblem\ \the\problems\Stars{#1}}%
+    \def\temp{#2}\ifx\temp\empty\else\ (\temp)\fi.%
+    \enskip\saferead{#3}\safepar
+  }%
+  \ProblemReadArgs%
+}
+
+
+% Helper to identify spaces
+\def\problemSpace{ }
+
+% The macro which starts the search for args of the \Problem macro
+\long\def\ProblemReadArgs{%
+  \futurelet\next\ProblemCheckNext%
+}
+
+% Check what the next token is in the current reading of the \Problem
+\def\ProblemCheckNext{%
+  \ifx\next\bgroup%
+    % If it is a brace {, read the argument
+    \expandafter\ProblemReadOneArg%
+  \else%
+    % If it is a space, eat it and try again
+    \ifx\next\problemSpace%
+      \expandafter\expandafter\expandafter\ProblemIgnoreSpace%
+    \else%
+      % Stop reading, we hit something that isn't { or space.
+      % Now distribute the generic 'args' into 'hints' and 'solution'
+      \ProblemDistributeArgs%
+    \fi%
+  \fi%
+}
+
+% A helper macro which just eats a space and continues with reading problem args
+\def\ProblemIgnoreSpace#1{%
+  \ProblemReadArgs%
+}
+
+% Reads the argument and continues searching for more
+\long\def\ProblemReadOneArg#1{%
+  \advance\problemArgsCount by 1\relax%
+  \expandafter\long\expandafter\def\csname p\the\problems-arg\the\problemArgsCount\endcsname{#1}%
+  \ProblemReadArgs%
+}
+
+% A helper index
+\newcount\currentArgIndex
+
+% Remembers hints and solution of the current problem
+\def\ProblemDistributeArgs{%
+  % Handle no args...At least one should be there, the solution
+  \ifnum\problemArgsCount=0%
+    \errmessage{A problem with no solution?}
+  % We have some args
+  \else%
+    % Set the solution (the last arg)
+    \expandafter\let\expandafter\tempContent\csname p\the\problems-arg\the\problemArgsCount\endcsname%
+    \expandafter\let\csname p\the\problems-solution\endcsname\tempContent%
+    %
+    % Set the hints
+    % Loop from 1 to (Count - 1)
+    \currentArgIndex=1\relax%
+    \loop\ifnum\currentArgIndex<\problemArgsCount%
+      % Get content of pX-argY
+      \expandafter\let\expandafter\tempContent\csname p\the\problems-arg\the\currentArgIndex\endcsname%
+      % Define pX-hintY with that content
+      \expandafter\let\csname p\the\problems-hint\the\currentArgIndex\endcsname\tempContent%
+      % Move on to the next arg
+      \advance\currentArgIndex by 1\relax%
+    \repeat%
+    %
+    % Update max hints
+    \UpdateMaxHints{\the\numexpr\problemArgsCount-1\relax}%
+  \fi%
+}
+
+% Counter for currently displayed solutions
+\newcount\displayedProblemSolutions
+
+% Displays the section with all problem solutions
+\def\DisplayProblemSolutions{%
+  % Use Opmac \sec for the header
+  \csname\string\sec:M\endcsname{\captionProblemSolutions}
+  %
+  % Display each solution
+	\loop\ifnum\displayedProblemSolutions<\problems%
+		\advance\displayedProblemSolutions by 1\relax%
+		{\bf \captionProblem\ \the\displayedProblemSolutions.} %
+		\csname p\the\displayedProblemSolutions-solution\endcsname\endgraf%
+	\repeat%	
+}
+
+% The counter for displayed exercise solutions 
+\newcount\displayedExerciseSolutions
+
+% Displays the section with all exercise solutions
+\def\DisplayExerciseSolutions{%
+  % Use Opmac \sec for the header
+  \csname\string\sec:M\endcsname{\captionExerciseSolutions}
+  % 
+  % Display each solution
+	\loop\ifnum\displayedExerciseSolutions<\exercises%
+		\advance\displayedExerciseSolutions by 1\relax%
+		{\bf \captionExercise\ \the\displayedExerciseSolutions.}\enskip%
+		\csname e\the\displayedExerciseSolutions-solution\endcsname\endgraf%
+	\repeat%	
+}
+
+
+% The current displayed level of hints
+\newcount\hintLevel
+
+% Entry point for displaying all hints recursively
+\def\DisplayHints{%
+  \DisplayHintsLoop%
+}
+
+% Recursive Loop
+\def\DisplayHintsLoop{%
+  % If we haven't displayed all hint levels yet
+  \ifnum\hintLevel<\maxHints%
+    % Increment which level we're displaying
+    \advance\hintLevel by 1\relax%
+    %
+    % Use Opmac \sec for the header
+    \csname\string\sec:M\endcsname{\captionHints{\the\hintLevel}}%
+    %
+    % Call the inner loop (which processes all problems for this level)
+    \DisplayHintsLevel{\the\hintLevel}%
+    %
+    % Recursive call
+    \DisplayHintsLoop%
+  \fi%
+}
+
+% The current problem whose hints are being displayed
+\newcount\currentProblemNumber%
+
+% Display all hints of a specific level
+\def\DisplayHintsLevel#1{%
+  % Reset current problem for this level
+  \currentProblemNumber=0%
+  % Display all hints
+  \loop\ifnum\currentProblemNumber<\problems%
+    \advance\currentProblemNumber by 1\relax%
+    % Check if this specific hint exists
+    \expandafter\ifx\csname p\the\currentProblemNumber-hint#1\endcsname\relax%
+      % Do nothing if hint doesn't exist for this problem
+    \else%
+      {\bf \captionProblem\ \the\currentProblemNumber.}\enskip%
+      \csname p\the\currentProblemNumber-hint#1\endcsname\safepar%
+    \fi%
+  \repeat%
+}
+
+% Main image macro: \Image{path}{scale} or \Image{path} (defaults to scale=1)
+\def\Image#1{%
+  \isnextchar\bgroup{\ImageWithScale{#1}}{\ImageWithScale{#1}{1}}%
+}
+
+% Internal macro that does the actual work
+\def\ImageWithScale#1#2{%
+  % #1 = filename path
+  % #2 = scale factor
+  %
+  \edef\imagepath{Images/#1}%
+  % First, load the PDF image to measure its natural dimensions
+  \pdfximage{\imagepath}%
+  %
+  % Place the image in box 0 at natural size to get its dimensions
+  \setbox0=\hbox{\pdfrefximage\pdflastximage}%
+  %
+  % Extract natural width
+  \dimen0=\wd0
+  %
+  % Extract natural height (height + depth for total vertical size)
+  \dimen2=\ht0
+  \advance\dimen2 by \dp0
+  %
+  % Scale the width by the scale factor
+  \dimen0=#2\dimen0
+  %
+  % Scale the height by the scale factor
+  \dimen2=#2\dimen2
+  %
+  % Load the image again with scaled dimensions
+  \pdfximage width \dimen0 height \dimen2 {\imagepath}%
+  %
+  % Center the image horizontally using \line with \hss
+  \safepar\medskip%
+  \line{\hss\pdfrefximage\pdflastximage\hss}%
+  \safepar\medskip%
+}
+
+% Highlight macro: makes a paragraph stand out with a box
+\long\def\Highlight#1{%
+  % Create some vertical space before the highlight
+  \safepar\medskip\vskip\parskip%
+  %
+  % Start a group to keep settings local
+  \bgroup%
+  %
+  % Set up the frame parameters
+  \setbox0=\vbox{%
+    % Add horizontal padding inside the box
+    \hsize=\dimexpr\hsize-2em\relax%
+    % Add some vertical padding
+    \kern0.5em%
+    % Indent the text slightly
+    \leftskip=1em%
+    \rightskip=1em%
+	% This is to negate the parskip which will come
+	\vskip-\parskip%
+    % The actual content
+    #1\safepar%
+    % Bottom padding
+    \kern0.5em%
+  }%
+  %
+  % Center the box horizontally and add a frame around it
+  \line{\hss%
+    \vbox{%
+      % Draw a frame around box0
+      \hrule%
+      \hbox{%
+        \vrule%
+        \vbox{%
+          \box0%
+        }%
+        \vrule%
+      }%
+      \hrule%
+    }%
+  \hss}%
+  %
+  \egroup%
+  %
+  % Add some vertical space after the highlight
+  \safepar\medskip
+}
