@@ -134,6 +134,23 @@
           "en": "A collection of problems that use clever algebraic manipulations."
         },
         "authors": ["Patrik Bak"]
+      },
+      {
+        "status": "ready",
+        "public": false,
+        "id": "g1UHlmQc6GrEp0db0lGHs",
+        "languages": ["cs"],
+        "fileSlug": "means",
+        "slug": {
+          "cs": "prumery"
+        },
+        "title": {
+          "cs": "Průměry"
+        },
+        "description": {
+          "cs": "Úvod do aritmetického, geometrického a harmonického průměru s důkazy nerovností mezi nimi."
+        },
+        "authors": ["Káťa Danilina"]
       }
     ]
   },

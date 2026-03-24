@@ -1,0 +1,317 @@
+\input _template
+
+\setlanguage{CS}
+
+\Title{Průměry}
+
+\Author{Káťa Danilina}
+
+\sec Úvod
+
+Představme si častou situaci: z~předmětu ve škole máme následující známky
+$$
+1,\ 1,\ 3,\ 2,\ 1
+$$
+a chceme zjistit, co nejspíš dostaneme na vysvědčení. Když si spočteme
+$$
+\frac{1+1+3+2+1}{5}=1{,}6,
+$$
+tak se to naneštěstí pro nás zaokrouhlí na~2. My si ale ukážeme, jak si spočítat trochu jiný průměr, který vašeho učitele (teda aspoň učitele matiky) přesvědčí, že si tu jedničku zasloužíte.
+
+Začneme pár motivačními příklady.
+\Example{}{
+    Dva studenti získali v~testu 70 a~90 bodů. Jaký byl průměrný počet bodů?
+}{
+    Spočítáme si
+    $$
+    \frac{70+90}{2}=80.
+    $$
+}
+
+\Example{}{
+    Obdélník má strany $4\,\rm cm$ a~$9\,\rm cm$. Určete délku strany čtverce, který má stejný obsah jako tento obdélník.
+}{
+    Obsah obdélníku je
+    $$
+    4 \cdot 9 = 36\,\rm cm^2.
+    $$
+    Abychom dostali stranu čtverce se stejným obsahem, stačí výsledek odmocnit:
+    $$
+    \sqrt{36}=6.
+    $$
+    Hledaná strana má tedy délku $6\,\rm cm$.
+}
+
+\Example{}{
+    Cyklista ujede:
+    \begitems
+    \i $60\,\rm km$ rychlostí $30\,\rm km/h$,
+    \i $60\,\rm km$ rychlostí $60\,\rm km/h$.
+    \enditems
+    Jaká je jeho průměrná rychlost?
+}{
+    Průměrnou rychlost dostaneme jako podíl celkové dráhy a~celkového času. Cyklista jel prvních $60\,\rm km$ celkem $2$ hodiny, zbylých $60\,\rm km$ jel $1$ hodinu. Ujel tedy $120\,\rm km$ za $3$ hodiny, a jeho průměrná rychlost je tak
+    $$
+    40\,\rm km/h.
+    $$
+    Můžeme to také rozepsat jedním výrazem
+    $$
+    \frac{120\,\rm km}{\frac{60\,\rm km}{30\,\rm km/h}+\frac{60\,\rm km}{60\,\rm km/h}}
+    =
+    40\,\rm km/h.
+    $$
+}
+
+Nyní si jednotlivé průměry představíme trochu víc.
+
+\Highlight{
+\textbf{Definice. }
+Pro dvě reálná čísla $a,b$ definujeme \textbf{aritmetický průměr} jako
+$$
+A=\frac{a+b}{2}.
+$$
+}
+Aritmetický průměr pro dvě čísla nám dává číslo, co se nachází přešně uprostřed mezi $a$ a~$b$
+
+\Highlight{
+\textbf{Definice. }
+Pro dvě kladná čísla $a,b$ definujeme \textbf{geometrický průměr} jako
+$$
+G=\sqrt{ab}.
+$$
+}
+
+Geometrický průměr dvou čísel si můžeme představit jako stranu čtverce, který má stejný obsah jako obdélník se stranami $a$ a~$b$.
+
+\Highlight{
+\textbf{Definice. }
+Pro dvě kladná čísla $a,b$ definujeme \textbf{harmonický průměr} jako
+$$
+H=\frac{2}{\frac1a+\frac1b}=\frac{2ab}{a+b}.
+$$
+}
+
+\Exercise{}{
+    Rozmysli si, že jsme použili přesně tento vzoreček v~motivačním příkladu s~cyklistou.
+}{
+    Máme
+    $$
+    \frac{120\,\rm km}{60\left(\frac{1}{30\,\rm km/h}+\frac{1}{60\,\rm km/h}\right)}
+    =
+    \frac{2}{\frac1{30}+\frac1{60}}
+    =
+    \frac{2 \cdot 30 \cdot 60}{30+60}
+    =
+    \frac{3600}{90}
+    =
+    40\,\rm km/h.
+    $$
+    Použili jsme tedy skutečně harmonický průměr rychlostí $30$ a~$60$.
+}
+
+\Exercise{}{
+    Pro následující dvojice čísel spočítej:
+    \begitems
+    \i aritmetický průměr,
+    \i geometrický průměr,
+    \i harmonický průměr
+    \enditems
+    a~je seřaď od nejmenšího po největší:
+    $$
+    (2,8), \qquad (3,12), \qquad (5,20).
+    $$
+}{
+    Pro $(2,8)$ dostaneme
+    $$
+    A=5,\qquad G=4,\qquad H=3{,}2,
+    $$
+    takže
+    $$
+    H<G<A.
+    $$
+
+    Pro $(3,12)$ dostaneme
+    $$
+    A=7{,}5,\qquad G=6,\qquad H=4{,}8,
+    $$
+    a
+    $$
+    H<G<A.
+    $$
+
+    Pro $(5,20)$ dostaneme
+    $$
+    A=12{,}5,\qquad G=10,\qquad H=8,
+    $$
+    a zase
+    $$
+    H<G<A.
+    $$
+}
+
+Všimneme si, že ve všech případech vyšel aritmetický průměr jako největší, potom geometrický průměr a~harmonický průměr 
+jako nejmenší. Bude to platit vždycky? Prozradím, že ano, platí následující nerovnost
+$$
+H \le G \le A.
+$$
+Na tobě je tedy najít příklad, ve kterém se všechny průměry budou rovnat.
+
+\Exercise{}{
+    Najdi dvojici čísel $(a,b)$, pro kterou se jejich aritmetický, geometrický a~harmonický průměr rovnají.
+}{
+    Platí to právě tehdy, když $a=b$.
+
+    Pak totiž
+    $$
+    A=\frac{a+b}{2}=\frac{a+a}{2}=a,
+    $$
+    $$
+    G=\sqrt{ab}=\sqrt{a^2}=a,
+    $$
+    $$
+    H=\frac{2ab}{a+b}=\frac{2a^2}{2a}=a.
+    $$
+}
+
+\sec Důkazy nerovností mezi průměry
+
+\Problem{0}{}{
+    Ukaž, že aritmetický průměr dvou čísel je vždy větší nebo roven geometrickému průměru, tedy že pro všechna kladná $a,b$ platí
+    $$
+    \frac{a+b}{2}\ge \sqrt{ab}.
+    $$
+}{
+    Na minulých hodinách jsme si ukazovali, že $(a-b)^2 \ge 0$, a~z~toho plyne, že $a^2+b^2 \ge 2ab$. Zkus si to připomenout.
+}{
+    Chceme ukázat, že platí
+    $$
+    \frac{a+b}{2}\ge \sqrt{ab}
+    $$
+    protože obě strany jsou nezáporné, můžeme nerovnost umocnit na
+    $$
+    \left(\frac{a+b}{2}\right)^2 \ge ab.
+    $$
+    Po úpravě dostaneme
+    $$
+    \frac{(a+b)^2}{4}\ge ab
+    $$
+    a vynásobíme čtyřmi a dostaneme
+    $$
+    (a+b)^2 \ge 4ab.
+    $$
+    Rozepíšeme levou stranu
+    $$
+    a^2+2ab+b^2 \ge 4ab
+    $$
+    a odečteme $4ab$
+    $$
+    a^2-2ab+b^2 \ge 0.
+    $$
+    Všimneme si, že levou stranu můžeme přepsat na 
+    $$
+    (a-b)^2 \ge 0,
+    $$
+    což platí vždycky, protože druhé mocniny nemůžou být záporné. Tím jsme dokázali danou nerovnost.
+}
+
+\Problem{0}{}{
+    Ukaž, že geometrický průměr dvou čísel je vždy větší nebo roven harmonickému průměru, tedy že pro všechna kladná $a,b$ platí
+    $$
+    \sqrt{ab}\ge \frac{2ab}{a+b}.
+    $$
+}{
+    Zkus postupovat podobně jako v~předchozím důkazu -- zbav se odmocniny a~uprav nerovnost tak, abys dostal tvar $(a-b)^2 \ge 0$.
+}{
+    Začneme s~nerovností
+    $$
+    \sqrt{ab}\ge \frac{2ab}{a+b}.
+    $$
+    Protože $a,b>0$, můžeme ji vynásobit výrazem $a+b$:
+    $$
+    (a+b)\sqrt{ab}\ge 2ab.
+    $$
+    Obě strany jsou nezáporné, takže můžeme umocnit a dostaneme
+    $$
+    (a+b)^2ab \ge 4a^2b^2.
+    $$
+    Vydělíme výrazem $ab$
+    $$
+    (a+b)^2 \ge 4ab.
+    $$
+    a rozepíšeme levou stranu:
+    $$
+    a^2+2ab+b^2 \ge 4ab.
+    $$
+    Odečteme $4ab$
+    $$
+    a^2-2ab+b^2 \ge 0.
+    $$
+    Teď je evá strana právě
+    $$
+    (a-b)^2 \ge 0,
+    $$
+    což už víme, že platí, takže jsme hotovi
+}
+
+\sec Definice pro více čísel
+
+Teď se vrátíme ke známkám. Zatím jsme si ukazovali průměry pouze pro dvě čísla, ale můžeme podobně počítat i~pro $n$ čísel, i~když už nevypadají tak pěkně jako předtím a~není nutně vidět, jak tyto průměry vznikají.
+
+\Highlight{
+\textbf{Definice. }
+Pro reálná čísla $a_1,a_2,\dots,a_n$ definujeme \textbf{aritmetický průměr} jako
+$$
+A=\frac{a_1+a_2+\cdots+a_n}{n}.
+$$
+}
+
+\Highlight{
+\textbf{Definice. }
+Pro kladná čísla $a_1,a_2,\dots,a_n$ definujeme \textbf{geometrický průměr} jako
+$$
+G=\root n \of {a_1 a_2 \cdots a_n}.
+$$
+}
+
+\Highlight{
+\textbf{Definice. }
+Pro kladná čísla $a_1,a_2,\dots,a_n$ definujeme \textbf{harmonický průměr} jako
+$$
+H=\frac{n}{\frac1{a_1}+\frac1{a_2}+\cdots+\frac1{a_n}}.
+$$
+}
+
+\sec Známky
+
+\Example{}{
+    Pomocí těchto vzorečků spočítejte aritmetický, geometrický a~harmonický průměr známek
+    $$
+    1,\ 1,\ 3,\ 2,\ 1
+    $$
+    (na geometrický průměr použijte kalkulačku).
+}{
+    Aritmetický průměr:
+    $$
+    A=\frac{1+1+3+2+1}{5}=1{,}6.
+    $$
+
+    Geometrický průměr:
+    $$
+    G=\root 5 \of {1 \cdot 1 \cdot 3 \cdot 2 \cdot 1}=\root 5 \of 6 \approx 1{,}43.
+    $$
+
+    Harmonický průměr:
+    $$
+    H=\frac{5}{1+1+\frac13+\frac12+1}\approx 1{,}30.
+    $$
+}
+
+Všimni si, že zase platí, že aritmetický průměr je největší, potom geometrický a~harmonický je nejmenší. Dokázali jsme to pouze pro dvojici čísel, ale neostré nerovnosti mezi průměry platí pro všechna $n$, jen jejich důkazy jsou mnohem složitější.
+
+Ale ukázali jsme si, že když ti bude vycházet horší známka na vysvědčení, tak si můžeš spočítat harmonický průměr a~pokusit se přesvědčit učitele, že ten se zaokrouhlí nahoru.
+
+\DisplayExerciseSolutions
+
+\DisplayProblemSolutions
+
+\bye
