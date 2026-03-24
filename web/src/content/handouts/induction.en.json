@@ -6211,6 +6211,2057 @@
             }
           ]
         }
+      },
+      {
+        "title": "Problems",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "There are truly many examples of induction and, as we have seen, it can be used in\u00A0virtually all areas of mathematics to prove many interesting ideas. You can try the following ones, ordered roughly by difficulty."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that for every natural number\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " there exist natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1+\\sqrt{2})^n = a\\sqrt{2}+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We proceed by induction. The key is to multiply the assumed equality "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(1+\\sqrt{2})^n = a\\sqrt{2}+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " by "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1+\\sqrt{2}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and simplify."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1+\\sqrt{2})^1 = 1\\cdot\\sqrt{2}+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Assume that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1+\\sqrt{2})^n = a\\sqrt{2}+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for some natural "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n(1+\\sqrt{2})^{n+1} = (a\\sqrt{2}+b)(1+\\sqrt{2}) = \\cr\n= (2a+b)\\sqrt{2}+(a+b).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are natural, so are "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is the statement for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "\u00A0light bulbs in a\u00A0row. Initially, all are off. Each minute we either switch on exactly one bulb that is off, or switch off exactly one bulb that is on. Prove that we can choose the moves so that we pass through every one of all possible configurations exactly once."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "To even be sure that we have passed through all configurations, we need to know how many there are."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The answer to the question of the number of configurations follows from realizing that each bulb is either on or off, so we can use the multiplication rule."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Let us try small cases. If we can construct an algorithm for some "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", can we modify it to construct an algorithm for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0single switch suffices. For "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " we proceed e.g.\\ as follows: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "XX \\rightarrow XO \\rightarrow OX \\rightarrow XX",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". What about "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "? The trick is to leave the last bulb off at the beginning and then switch it on at the right moment. Formally, we use the induction hypothesis that we can solve the problem for smaller\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "First of all, since each bulb can be either on or off, the total number of configurations for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bulbs is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by the multiplication rule."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Now we prove the statement that all configurations are reachable by switching, by mathematical induction on\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^1=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " configurations; it suffices to switch the off bulb on. Assume that for some "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " there exists a\u00A0suitable sequence of moves passing through all "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " configurations, starting from the state where all bulbs are off."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bulbs we proceed as follows: First we leave the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-st bulb off and on the first "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bulbs we perform the assumed sequence of moves for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bulbs. This way we pass through all "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " configurations in which the last bulb is off. Next, we switch on the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-st bulb. Now we perform the sequence of moves for the first "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bulbs "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "in reverse order"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (from end to start). Since the original sequence always changed exactly one bulb, the same holds for the reversed one. This way we successively pass through the remaining "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " configurations in which the last bulb is on."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Altogether, we pass through "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n+2^n=2^{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " configurations, and since we first passed through all those with the last bulb off and then all those with the last bulb on, no configuration was repeated. We have therefore visited every configuration exactly once, completing the induction step."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We have a\u00A0chocolate bar of size "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We break it along gridlines into individual "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\times 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " squares (along gridlines means we cannot break off e.g.\\ a\u00A0corner). What is the smallest number of breaks we need so that all pieces are "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\times 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "When trying it out, we may notice that the number of breaks is always the same. Is this a\u00A0coincidence? What is the number? How would we prove it?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The trick is to solve a\u00A0generalized problem: We have a\u00A0chocolate bar "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m \\times n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", where "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m,n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " are natural numbers. We want to prove that breaking it up requires "
+                      },
+                      {
+                        "type": "math",
+                        "text": "mn-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " breaks. The right approach is mathematical induction, e.g.\\ on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m+n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The idea of the induction hypothesis is that by breaking an "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m \\times n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " bar we always produce two bars whose dimension sums are smaller than the original "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m+n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". We can therefore apply the induction hypothesis, and the rest is just a\u00A0bit of algebra."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We show that for a\u00A0chocolate bar "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we always need exactly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mn-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " breaks regardless of strategy. For the given bar "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " this is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "23",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " breaks."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We prove the statement by strong induction on the sum of dimensions "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = m+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\times 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bar, which needs no breaking, corresponding to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\cdot 1 - 1 = 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Assume that the statement holds for all bars with dimension sum strictly less than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The first break of the bar "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " produces two smaller pieces. Without loss of generality, assume we broke the side of length "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This creates pieces "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1 \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_2 \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1+m_2=m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The dimension sums of both new pieces are "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_2+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which are obviously strictly less than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By the induction hypothesis, fully breaking them requires "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_2n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " breaks. The total number of breaks for our bar is therefore"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "1 + (m_1n-1) + (m_2n-1) = (m_1+m_2)n - 1 = mn-1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The induction step is complete. Every way of breaking up an "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bar requires exactly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mn-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " steps, so the minimum number is also "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mn-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We have 42 cities such that between every two there is a\u00A0one-way street. Prove that there exists a\u00A0city from which we can depart and pass through all other cities."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key is to use strong induction. We solve small cases. The crucial question however is: how can we use the case for smaller "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " for the larger one?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The trick is to pick one city, say\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", and split the remaining cities into two sets: the set of cities from which a\u00A0street leads to\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "; and the set of cities to which a\u00A0street leads from\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Some of these sets may be empty. However, both will certainly be smaller than the final set (since we set "
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " aside)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We prove the statement by strong induction on the number of cities\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " the statement obviously holds (the path consists of a\u00A0single city). Assume that the statement holds for every number of cities "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\le k < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let us have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n \\ge 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cities. Pick any city\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We split the remaining "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cities into two disjoint sets: set "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " consisting of cities from which a\u00A0street leads to\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and set "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " consisting of cities to which a\u00A0street leads from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If set "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is non-empty, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\le |A| < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " holds. By the induction hypothesis for this set alone, there exists a\u00A0path passing through all its cities; let this path end at some city\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "U \\in A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "U \\in A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0street leads from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "U",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If set "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is non-empty, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\le |B| < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " holds. Similarly, by the induction hypothesis for this set alone, there exists a\u00A0path passing through all its cities; let this path start at some city\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "V \\in B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V \\in B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0street leads from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We construct the overall path by joining these segments and distinguish cases depending on whether the sets were empty:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If both "
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " and "
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " are non-empty, we traverse the path in\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " ending at\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "U",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", go from there to\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", and then from\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " to\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "V",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", from where we traverse the rest of the path in\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If "
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is empty (so "
+                          },
+                          {
+                            "type": "math",
+                            "text": "|B|=n-1 \\ge 1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "), we start directly at\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " and go to\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "V",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", from where we continue with the path in\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "If "
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " is empty (so "
+                          },
+                          {
+                            "type": "math",
+                            "text": "|A|=n-1 \\ge 1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "), we traverse the path in\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " ending at\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "U",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " and go from there to\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", where our path ends."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In every case we have constructed a\u00A0path passing through all "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cities, completing the induction step. The statement therefore holds for all natural "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", in particular for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=42",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that for all natural numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " it holds that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "k! \\mid n(n+1)(n+2)\\cdots(n+k-1)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "(in words: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides the product of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " consecutive natural numbers)"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We have two natural variables "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "; it is not clear which one to induct on. The idea is to induct on both, first on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and, when trying to prove the claim for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", to induct on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "First we solve "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Then we assume the claim holds for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Next we go by induction on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". After solving "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we assume validity for a\u00A0given "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Then, denoting "
+                      },
+                      {
+                        "type": "math",
+                        "text": "P(n) = n(n+1)\\cdots(n+k-1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we need "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k! \\mid P(n+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The trick is to look at "
+                      },
+                      {
+                        "type": "math",
+                        "text": "P(n+1)-P(n)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Along the way, it pays off to find where we can use the induction hypothesis for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Denote "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n) = n(n+1)\\cdots(n+k-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We prove the statement by induction on\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n) = n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1! = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which holds trivially. Assume the claim holds for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e.\\ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(k-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides the product of any "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " consecutive numbers. We now prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k! \\mid P(n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for all\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", by induction on\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(1) = k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is obviously divisible by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Assume validity for a\u00A0given\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\nP(n+1) - P(n) = (n+1)(n+2)\\cdots(n+k) - n(n+1)\\cdots(n+k-1)=\\\\\n= (n+1)(n+2)\\cdots(n+k-1)\\cdot[(n+k)-n] = k\\cdot (n+1)(n+2)\\cdots(n+k-1).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The expression "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)(n+2)\\cdots(n+k-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a\u00A0product of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " consecutive numbers, so by the induction hypothesis for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " it is divisible by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(k-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Thus "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n+1)-P(n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k\\cdot(k-1)! = k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is divisible by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Note."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " There is a\u00A0simple combinatorial proof of this problem – the claim follows from the fact that the binomial coefficient"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "{n+k-1 \\choose k} = \\frac{n(n+1)(n+2)\\cdots(n+k-1)}{k!}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "is an integer. The solution above shows that it can also be proved number-theoretically."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
       }
     ]
   },

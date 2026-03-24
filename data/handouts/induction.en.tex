@@ -569,6 +569,127 @@ What to watch out for:
 \i If the induction uses both $n-1$ and $n-2$, then we need two base cases.
 \enditems
 
+\sec Problems
+
+There are truly many examples of induction and, as we have seen, it can be used in~virtually all areas of mathematics to prove many interesting ideas. You can try the following ones, ordered roughly by difficulty.
+
+\Problem{0}{}{
+	Prove that for every natural number~$n$ there exist natural numbers $a,b$ such that $(1+\sqrt{2})^n = a\sqrt{2}+b$.
+}{
+	We proceed by induction. The key is to multiply the assumed equality $(1+\sqrt{2})^n = a\sqrt{2}+b$ by $1+\sqrt{2}$ and simplify.
+}{
+	For $n=1$ we have $(1+\sqrt{2})^1 = 1\cdot\sqrt{2}+1$, so $a=b=1$. Assume that $(1+\sqrt{2})^n = a\sqrt{2}+b$ for some natural $a,b$. Then
+	$$
+	\gather
+		(1+\sqrt{2})^{n+1} = (a\sqrt{2}+b)(1+\sqrt{2}) = \cr
+		= (2a+b)\sqrt{2}+(a+b).
+	\endgather
+	$$
+	Since $a,b$ are natural, so are $2a+b$ and~$a+b$, which is the statement for $n+1$.
+}
+
+\Problem{0}{}{
+	We have $n$~light bulbs in a~row. Initially, all are off. Each minute we either switch on exactly one bulb that is off, or switch off exactly one bulb that is on. Prove that we can choose the moves so that we pass through every one of all possible configurations exactly once.
+}{
+	To even be sure that we have passed through all configurations, we need to know how many there are. 
+}{
+	The answer to the question of the number of configurations follows from realizing that each bulb is either on or off, so we can use the multiplication rule.
+}{
+	Let us try small cases. If we can construct an algorithm for some $n$, can we modify it to construct an algorithm for $n+1$?
+}{
+	For $n=1$ a~single switch suffices. For $n=2$ we proceed e.g.\  as follows: $XX \rightarrow XO \rightarrow OX \rightarrow XX$. What about $n=3$? The trick is to leave the last bulb off at the beginning and then switch it on at the right moment. Formally, we use the induction hypothesis that we can solve the problem for smaller~$n$.
+}{
+	First of all, since each bulb can be either on or off, the total number of configurations for $n$ bulbs is $2^n$ by the multiplication rule. 
+	
+	Now we prove the statement that all configurations are reachable by switching, by mathematical induction on~$n$.
+
+	For $n=1$ we have $2^1=2$ configurations; it suffices to switch the off bulb on. Assume that for some $n$ there exists a~suitable sequence of moves passing through all $2^n$ configurations, starting from the state where all bulbs are off.
+
+	For $n+1$ bulbs we proceed as follows: First we leave the $(n+1)$-st bulb off and on the first $n$ bulbs we perform the assumed sequence of moves for $n$ bulbs. This way we pass through all $2^n$ configurations in which the last bulb is off. Next, we switch on the $(n+1)$-st bulb. Now we perform the sequence of moves for the first $n$ bulbs \textit{in reverse order} (from end to start). Since the original sequence always changed exactly one bulb, the same holds for the reversed one. This way we successively pass through the remaining $2^n$ configurations in which the last bulb is on.
+
+	Altogether, we pass through $2^n+2^n=2^{n+1}$ configurations, and since we first passed through all those with the last bulb off and then all those with the last bulb on, no configuration was repeated. We have therefore visited every configuration exactly once, completing the induction step. 
+}
+
+\Problem{0}{}{
+	We have a~chocolate bar of size $8 \times 3$. We break it along gridlines into individual $1 \times 1$ squares (along gridlines means we cannot break off e.g.\  a~corner). What is the smallest number of breaks we need so that all pieces are $1 \times 1$?
+}{
+	When trying it out, we may notice that the number of breaks is always the same. Is this a~coincidence? What is the number? How would we prove it?
+}{
+	The trick is to solve a~generalized problem: We have a~chocolate bar $m \times n$, where $m,n$ are natural numbers. We want to prove that breaking it up requires $mn-1$ breaks. The right approach is mathematical induction, e.g.\  on $m+n$.
+}{
+	The idea of the induction hypothesis is that by breaking an $m \times n$ bar we always produce two bars whose dimension sums are smaller than the original $m+n$. We can therefore apply the induction hypothesis, and the rest is just a~bit of algebra.
+}{
+	We show that for a~chocolate bar $m \times n$ we always need exactly $mn-1$ breaks regardless of strategy. For the given bar $8 \times 3$ this is $23$ breaks.
+	
+	We prove the statement by strong induction on the sum of dimensions $k = m+n$. For $k=2$ we have a~$1 \times 1$ bar, which needs no breaking, corresponding to $1\cdot 1 - 1 = 0$.
+	
+	Assume that the statement holds for all bars with dimension sum strictly less than $m+n$. The first break of the bar $m \times n$ produces two smaller pieces. Without loss of generality, assume we broke the side of length $m$. This creates pieces $m_1 \times n$ and~$m_2 \times n$, where $m_1+m_2=m$.
+	
+	The dimension sums of both new pieces are $m_1+n$ and~$m_2+n$, which are obviously strictly less than $m+n$. By the induction hypothesis, fully breaking them requires $m_1n-1$ and~$m_2n-1$ breaks. The total number of breaks for our bar is therefore
+	$$
+	1 + (m_1n-1) + (m_2n-1) = (m_1+m_2)n - 1 = mn-1.
+	$$
+	The induction step is complete. Every way of breaking up an $m \times n$ bar requires exactly $mn-1$ steps, so the minimum number is also $mn-1$.
+}
+
+\Problem{1}{}{
+	We have 42 cities such that between every two there is a~one-way street. Prove that there exists a~city from which we can depart and pass through all other cities.	
+}{
+	The key is to use strong induction. We solve small cases. The crucial question however is: how can we use the case for smaller $n$ for the larger one?
+}{
+	The trick is to pick one city, say~$X$, and split the remaining cities into two sets: the set of cities from which a~street leads to~$X$; and the set of cities to which a~street leads from~$X$. Some of these sets may be empty. However, both will certainly be smaller than the final set (since we set $X$ aside).
+}{
+	We prove the statement by strong induction on the number of cities~$n$. 
+
+	For $n=1$ the statement obviously holds (the path consists of a~single city). Assume that the statement holds for every number of cities $k$, where $1 \le k < n$.
+
+	Let us have $n \ge 2$ cities. Pick any city~$X$. We split the remaining $n-1$ cities into two disjoint sets: set $A$ consisting of cities from which a~street leads to~$X$, and set $B$ consisting of cities to which a~street leads from~$X$. 
+
+	If set $A$ is non-empty, $1 \le |A| < n$ holds. By the induction hypothesis for this set alone, there exists a~path passing through all its cities; let this path end at some city~$U \in A$. Since $U \in A$, a~street leads from~$U$ to~$X$. 
+	
+	If set $B$ is non-empty, $1 \le |B| < n$ holds. Similarly, by the induction hypothesis for this set alone, there exists a~path passing through all its cities; let this path start at some city~$V \in B$. Since $V \in B$, a~street leads from~$X$ to~$V$.
+
+	We construct the overall path by joining these segments and distinguish cases depending on whether the sets were empty:
+	\begitems \style i
+	\i If both $A$ and $B$ are non-empty, we traverse the path in~$A$ ending at~$U$, go from there to~$X$, and then from~$X$ to~$V$, from where we traverse the rest of the path in~$B$.
+	\i If $A$ is empty (so $|B|=n-1 \ge 1$), we start directly at~$X$ and go to~$V$, from where we continue with the path in~$B$.
+	\i If $B$ is empty (so $|A|=n-1 \ge 1$), we traverse the path in~$A$ ending at~$U$ and go from there to~$X$, where our path ends.
+	\enditems
+	
+	In every case we have constructed a~path passing through all $n$ cities, completing the induction step. The statement therefore holds for all natural $n$, in particular for $n=42$.
+}
+
+\Problem{1}{}{
+	Prove that for all natural numbers $n$ and~$k$ it holds that 
+	$$
+	k! \mid n(n+1)(n+2)\cdots(n+k-1)
+	$$
+	(in words: $k!$ divides the product of $k$ consecutive natural numbers)
+}{
+	We have two natural variables $n$ and $k$; it is not clear which one to induct on. The idea is to induct on both, first on $k$ and, when trying to prove the claim for $k+1$, to induct on $n$.
+}{
+	First we solve $k=1$. Then we assume the claim holds for $k-1$. Next we go by induction on $n$. After solving $n=1$, we assume validity for a~given $n$. Then, denoting $P(n) = n(n+1)\cdots(n+k-1)$, we need $k! \mid P(n+1)$. The trick is to look at $P(n+1)-P(n)$. Along the way, it pays off to find where we can use the induction hypothesis for $k-1$.
+}{
+	Denote $P(n) = n(n+1)\cdots(n+k-1)$. We prove the statement by induction on~$k$.
+	
+	For $k=1$ we have $P(n) = n$ and~$1! = 1$, which holds trivially. Assume the claim holds for $k-1$, i.e.\  $(k-1)!$ divides the product of any $k-1$ consecutive numbers. We now prove that $k! \mid P(n)$ for all~$n$, by induction on~$n$.
+	
+	For $n=1$ we have $P(1) = k!$, which is obviously divisible by $k!$. Assume validity for a~given~$n$. Then
+	$$
+	\gather
+	P(n+1) - P(n) = (n+1)(n+2)\cdots(n+k) - n(n+1)\cdots(n+k-1)=\\
+	= (n+1)(n+2)\cdots(n+k-1)\cdot[(n+k)-n] = k\cdot (n+1)(n+2)\cdots(n+k-1).
+	\endgather
+	$$
+	The expression $(n+1)(n+2)\cdots(n+k-1)$ is a~product of $k-1$ consecutive numbers, so by the induction hypothesis for $k-1$ it is divisible by $(k-1)!$. Thus $P(n+1)-P(n)$ is divisible by $k\cdot(k-1)! = k!$. Since $P(n)$ is divisible by $k!$, so is $P(n+1)$.
+	
+	\textit{Note.} There is a~simple combinatorial proof of this problem -- the claim follows from the fact that the binomial coefficient
+	$$
+	{n+k-1 \choose k} = \frac{n(n+1)(n+2)\cdots(n+k-1)}{k!}
+	$$
+	is an integer. The solution above shows that it can also be proved number-theoretically.
+}
+
 \DisplayExerciseSolutions
 
 \DisplayHints

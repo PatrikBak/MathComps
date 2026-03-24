@@ -569,6 +569,127 @@ Na co si dávat pozor:
 \i Pokud indukce používá $n-1$ i~$n-2$, tak potřebujeme dva základy.
 \enditems
 
+\sec Úlohy
+
+Příkladů na indukci je opravdu mnoho a jak jsme viděli, dá se použít v~prakticky všech oblastech matematiky a~dokazuje se pomocí ní mnoho zajímavých myšlenek. Můžete si vyzkoušet následující, řazené přibližně podle obtížnosti.
+
+\Problem{0}{}{
+	Dokažte, že pro každé přirozené číslo~$n$ existují přirozená čísla $a,b$ taková, že $(1+\sqrt{2})^n = a\sqrt{2}+b$.
+}{
+	Postupujeme indukcí. Klíčem je předpokládanou rovnost $(1+\sqrt{2})^n = a\sqrt{2}+b$ vynásobit $1+\sqrt{2}$ a~upravit.
+}{
+	Pro $n=1$ platí $(1+\sqrt{2})^1 = 1\cdot\sqrt{2}+1$, tedy $a=b=1$. Předpokládejme, že $(1+\sqrt{2})^n = a\sqrt{2}+b$ pro nějaká přirozená $a,b$. Pak
+	$$
+	\gather
+		(1+\sqrt{2})^{n+1} = (a\sqrt{2}+b)(1+\sqrt{2}) = \cr
+		= (2a+b)\sqrt{2}+(a+b).
+	\endgather
+	$$
+	Jelikož $a,b$ jsou přirozená, tak i~$2a+b$ a~$a+b$ jsou přirozená, což je tvrzení pro $n+1$.
+}
+
+\Problem{0}{}{
+	V~řadě máme $n$~žárovek. Na začátku jsou všechny zhasnuté. Každou minutu buď zapneme právě jednu zhasnutou žárovku, nebo zhasneme právě jednu rozsvícenou. Dokažte, že umíme tahy volit tak, abychom postupně prošli každou ze~všech možných konfigurací právě jednou.
+}{
+	Abychom si vůbec byli jisti, zda jsme prošli všechny konfigurace, potřebujeme vědět, kolik jich vlastně je. 
+}{
+	Odpověď na otázku počtu konfigurací dostaneme tak, že si uvědomíme, že každá žárovka je buď vypnutá nebo zapnutá, a~pak můžeme použít pravidlo součinu.
+}{
+	Vyzkoušíme si malé případy. Když umíme udělat algoritmus pro nějaké $n$, umíme ho modifikovat a~udělat algoritmus pro $n+1$?
+}{
+	Pro $n=1$ nám stačí jedno přepnutí. Pro $n=2$ postupujeme např. takto: $XX \rightarrow XO \rightarrow OX \rightarrow XX$. Co pro $n=3$? Trikem je poslední žárovku na začátku nechat vypnutou a~pak ji ve~vhodnou chvíli zapnout. Formálně používáme indukční předpoklad, že úlohu umíme vyřešit pro menší $n$.
+}{
+	V~první řadě, jelikož každá žárovka může být jen zapnutá nebo zhasnutá, celkový počet konfigurací pro $n$ žárovek je z~pravidla součinu $2^n$. 
+	
+	Nyní dokážeme tvrzení o~tom, že všechny konfigurace jsou přepínáním dosažitelné, matematickou indukcí podle~$n$.
+
+	Pro $n=1$ máme $2^1=2$ konfigurace, stačí zhasnutou žárovku zapnout. Předpokládejme, že pro nějaké $n$ existuje vyhovující posloupnost tahů procházející všemi $2^n$ konfiguracemi, přičemž začínáme ze stavu samých zhasnutých žárovek.
+
+	Pro $n+1$ žárovek postupujeme následovně: Nejprve necháme $(n+1)$-ní žárovku zhasnutou a na prvních $n$ žárovkách vykonáme předpokládanou posloupnost tahů pro $n$ žárovek. Tím projdeme všech $2^n$ konfigurací, v~nichž je poslední žárovka zhasnutá. Následně zapneme $(n+1)$-ní žárovku. Nyní vykonáme posloupnost tahů pro prvních $n$ žárovek \textit{v~opačném pořadí} (od konce na začátek). Jelikož původní posloupnost měnila vždy právě jednu žárovku, platí to i~pro obrácenou. Takto postupně projdeme zbylých $2^n$ konfigurací, v~nichž je poslední žárovka zapnutá.
+
+	Dohromady jsme prošli $2^n+2^n=2^{n+1}$ konfigurací, a~jelikož jsme nejprve prošli všechny se zhasnutou a~pak všechny se zapnutou poslední žárovkou, žádná konfigurace se nezopakovala. Navštívili jsme tedy každou konfiguraci právě jednou, čímž je indukční krok hotový. 
+}
+
+\Problem{0}{}{
+	Máme čokoládu rozměrů $8 \times 3$. Lámeme ji po hranách na jednotlivé čtverečky $1 \cdot 1$ (po hranách znamená, že neumíme ulomit např. z~rohu). Jaký nejmenší počet zlomení potřebujeme na to, aby všechny kusy byly $1 \times 1$?
+}{
+	Když si to zkoušíme, můžeme si všimnout, že počet zlomení je vždy stejný. Je to náhoda? Kolik to vychází? Jak bychom to dokázali?
+}{
+	Trik je řešit zobecněnou úlohu: Máme čokoládu $m \times n$, kde $m,n$ jsou přirozená čísla. Chceme dokázat, že na její zlomení potřebujeme $mn-1$ zlomení. Trikem jak na to je matematická indukce, např. podle $m+n$.
+}{
+	Idea indukčního předpokladu je, že zlomením $m \times n$ na dvě čokolády vždy vyrobíme dvě čokolády, které mají menší součet rozměrů než původní $m+n$. Umíme tedy aplikovat indukční předpoklad a~už je to jen trocha algebry.
+}{
+	Ukážeme, že pro čokoládu $m \times n$ potřebujeme vždy přesně $mn-1$ zlomení bez ohledu na strategii. Pro zadanou čokoládu $8 \times 3$ to tedy je $23$ zlomení.
+	
+	Tvrzení dokážeme úplnou indukcí podle součtu rozměrů $k = m+n$. Pro $k=2$ máme čokoládu $1 \times 1$, kterou už nemusíme lámat, což odpovídá $1\cdot 1 - 1 = 0$.
+	
+	Předpokládejme, že tvrzení platí pro všechny čokolády se součtem rozměrů ostře menším než $m+n$. Prvním zlomením čokolády $m \times n$ dostaneme dvě menší části. Bez újmy na obecnosti předpokládejme, že jsme zlomili stranu délky $m$. Tím vznikly kusy $m_1 \times n$ a~$m_2 \times n$, přičemž $m_1+m_2=m$.
+	
+	Součty rozměrů obou nových kusů jsou $m_1+n$ a~$m_2+n$, což jsou zjevně čísla ostře menší než $m+n$. Podle indukčního předpokladu tak na jejich úplné rozlámání potřebujeme $m_1n-1$ a~$m_2n-1$ zlomení. Celkový počet zlomení naší čokolády pak bude
+	$$
+	1 + (m_1n-1) + (m_2n-1) = (m_1+m_2)n - 1 = mn-1.
+	$$
+	Tím je indukční krok hotový. Každé rozlámání čokolády $m \times n$ vyžaduje právě $mn-1$ kroků, nejmenší počet je tedy rovněž $mn-1$.
+}
+
+\Problem{1}{}{
+	Máme dáno 42 měst takových, že mezi každými dvěma vede jednosměrná ulice. Dokažte, že existuje město takové, že z~něho umíme vyrazit a projít přes všechna ostatní města.	
+}{
+	Klíčem je použít úplnou indukci. Vyřešíme malé případy. Klíčová otázka ale je: jak umíme případ pro menší $n$ použít pro větší?
+}{
+	Trikem je, že si vezmeme jedno město, například~$X$, a~zbylá města si rozdělíme na dvě množiny: množinu měst, ze~kterých vede ulice do~$X$; a~množinu měst, do kterých vede ulice z~$X$. Některé z~těchto množin mohou být prázdné. Určitě však obě budou menší než finální množina (neboť jsme~$X$ dali stranou).
+}{
+	Tvrzení dokážeme úplnou indukcí podle počtu měst~$n$. 
+
+	Pro $n=1$ tvrzení zjevně platí (cesta se skládá z~jediného města). Předpokládejme, že tvrzení platí pro každý počet měst $k$, kde $1 \le k < n$.
+
+	Mějme $n \ge 2$ měst. Zvolme si libovolné město~$X$. Zbylých $n-1$ měst rozdělíme na dvě disjunktní množiny: množinu $A$ tvořenou městy, ze~kterých vede ulice do~$X$, a~množinu $B$ tvořenou městy, do kterých vede ulice z~$X$. 
+
+	Pokud je množina $A$ neprázdná, platí $1 \le |A| < n$. Podle indukčního předpokladu jen pro tuto množinu existuje cesta procházející všemi jejími městy; nechť tato cesta končí v~nějakém městě~$U \in A$. Jelikož $U \in A$, vede ulice z~$U$ do~$X$. 
+	
+	Pokud je množina $B$ neprázdná, platí $1 \le |B| < n$. Podobně podle indukčního předpokladu jen pro tuto množinu existuje cesta procházející všemi jejími městy; nechť tato cesta začíná v~nějakém městě~$V \in B$. Jelikož $V \in B$, vede ulice z~$X$ do~$V$.
+
+	Celkovou cestu vytvoříme spojením těchto úseků a~rozebereme případy podle toho, zda byly množiny prázdné:
+	\begitems \style i
+	\i Pokud jsou $A$ i~$B$ neprázdné, projdeme cestu v~$A$ končící v~$U$, odtud prejdeme do~$X$, a~následně z~$X$ do~$V$, odkud projdeme zbytek cesty v~$B$.
+	\i Pokud je $A$ prázdná (tedy $|B|=n-1 \ge 1$), začneme rovnou v~$X$ a~projdeme do~$V$, odkud pokračujeme cestou v~$B$.
+	\i Pokud je $B$ prázdná (tedy $|A|=n-1 \ge 1$), projdeme cestu v~$A$ končící v~$U$ a~odtud projdeme do~$X$, kde naše cesta skončí.
+	\enditems
+	
+	V~každém případě jsme sestrojili cestu procházející přes všech $n$ měst, čímž je indukční krok hotový. Tvrzení tedy platí pro všechna přirozená $n$, speciálně i~pro $n=42$.
+}
+
+\Problem{1}{}{
+	Dokažte, že pro všechna přirozená čísla $n$ a~$k$ platí 
+	$$
+	k! \mid n(n+1)(n+2)\cdots(n+k-1)
+	$$
+	(slovně: $k!$ dělí součin $k$ po sobě jdoucích přirozených čísel)
+}{
+	Máme dvě přirozené proměnné $n$ a $k$, není jasné, podle čeho indukovat. Idea je indukovat podle obou, nejprve podle $k$ a při snaze dokázat tvrzení pro $k+1$ indukujeme podle $n$.
+}{
+	Nejprve vyřešíme $k=1$. Pak předpokládáme, že tvrzení platí pro $k-1$. Následně jdeme indukcí podle $n$. Po vyřešení $n=1$ předpokládáme platnost pro dané $n$. Následně při označení $P(n) = n(n+1)\cdots(n+k-1)$ potřebujeme $k! \mid P(n+1)$. Trikem je podívat se na $P(n+1)-P(n)$. Po cestě se vyplatí najít místo, kde umíme použít indukční předpoklad pro $k-1$.
+}{
+	Označme $P(n) = n(n+1)\cdots(n+k-1)$. Tvrzení dokazujeme indukcí podle~$k$.
+	
+	Pro $k=1$ je $P(n) = n$ a~$1! = 1$, což platí triviálně. Předpokládejme, že tvrzení platí pro $k-1$, tedy $(k-1)!$ dělí součin libovolných $k-1$ po sobě jdoucích čísel. Nyní dokazujeme, že $k! \mid P(n)$ pro všechna~$n$, indukcí podle~$n$.
+	
+	Pro $n=1$ je $P(1) = k!$, což je zjevně dělitelné $k!$. Předpokládejme platnost pro dané~$n$. Pak
+	$$
+	\gather
+	P(n+1) - P(n) = (n+1)(n+2)\cdots(n+k) - n(n+1)\cdots(n+k-1)=\\
+	= (n+1)(n+2)\cdots(n+k-1)\cdot[(n+k)-n] = k\cdot (n+1)(n+2)\cdots(n+k-1).
+	\endgather
+	$$
+	Výraz $(n+1)(n+2)\cdots(n+k-1)$ je součin $k-1$ po sobě jdoucích čísel, takže podle indukčního předpokladu pro $k-1$ je dělitelný $(k-1)!$. Tedy $P(n+1)-P(n)$ je dělitelné $k\cdot(k-1)! = k!$. Jelikož $P(n)$ je dělitelné $k!$, je dělitelné i~$P(n+1)$.
+	
+	\textit{Poznámka.} Existuje jednoduchý kombinatorický důkaz této úlohy -- tvrzení vyplývá z~toho, že kombinační číslo
+	$$
+	{n+k-1 \choose k} = \frac{n(n+1)(n+2)\cdots(n+k-1)}{k!}
+	$$
+	je celé. Uvedené řešení ukazuje, že se to dá dokázat i~teoreticko-číselně.
+}
+
 \DisplayExerciseSolutions
 
 \DisplayHints

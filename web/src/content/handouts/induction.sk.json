@@ -6211,6 +6211,2057 @@
             }
           ]
         }
+      },
+      {
+        "title": "Úlohy",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Príkladov na indukciu je naozaj veľa a ako sme videli, dá sa použiť v\u00A0prakticky všetkých oblastiach matematiky a\u00A0dokazuje sa pomocou nej mnoho zaujímavých myšlienok. Môžete si vyskúšať nasledovné, radené približne podľa obtiažnosti."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že pre každé prirodzené číslo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existujú prirodzené čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " také, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1+\\sqrt{2})^n = a\\sqrt{2}+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme indukciou. Kľúčom je predpokladanú rovnosť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(1+\\sqrt{2})^n = a\\sqrt{2}+b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " vynásobiť "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1+\\sqrt{2}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0upraviť."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1+\\sqrt{2})^1 = 1\\cdot\\sqrt{2}+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Predpokladajme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1+\\sqrt{2})^n = a\\sqrt{2}+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre nejaké prirodzené "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n(1+\\sqrt{2})^{n+1} = (a\\sqrt{2}+b)(1+\\sqrt{2}) = \\cr\n= (2a+b)\\sqrt{2}+(a+b).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú prirodzené, tak aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú prirodzené, čo je tvrdenie pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0rade máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "\u00A0žiaroviek. Na začiatku sú všetky zhasnuté. Každú minútu buď zapneme práve jednu zhasnutú žiarovku, alebo zhasneme práve jednu rozsvietenú. Dokážte, že vieme ťahy voliť tak, aby sme postupne prešli každou zo všetkých možných konfigurácií práve raz."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Aby sme si vôbec boli istí, či sme prešli všetky konfigurácie, potrebujeme vedieť, koľko ich vlastne je."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Odpoveď na otázku počtu žiaroviek dostaneme tak, že si uvedomíme, že každá žiarovka je buď vypnutá alebo zapnutá, potom môžeme použiť pravidlo súčinu."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Vyskúšame si malé prípady. Keď vieme urobiť algoritmus pre nejaké "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", vieme ho modifikovať a\u00A0urobiť algoritmus pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " nám stačí jedno prepnutie. Pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " postupujeme napr. takto: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "XX \\rightarrow XO \\rightarrow OX \\rightarrow XX",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Čo pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "? Trikom je poslednú žiarovku na začiatku nechať vypnutú a\u00A0potom ju vo vhodnú chvíľu zapnúť. Formálne používame indukčný predpoklad, že úlohu vieme vyriešiť pre menšie "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0prvom rade, keďže každá žiarovka môže byť len zapnutá alebo zhasnutá, celkový počet konfigurácií pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " žiaroviek je z\u00A0pravidla súčinu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Teraz dokážeme tvrdenie o\u00A0tom, že všetky konfigurácie sú prepínaním dosiahnuteľné, matematickou indukciou podľa\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^1=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " konfigurácie, stačí zhasnutú žiarovku zapnúť. Predpokladajme, že pre nejaké "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existuje vyhovujúca postupnosť ťahov prechádzajúca všetkými "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " konfiguráciami, pričom začíname zo stavu samých zhasnutých žiaroviek."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " žiaroviek postupujeme nasledovne: Najprv necháme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-vú žiarovku zhasnutú a na prvých "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " žiarovkách vykonáme predpokladanú postupnosť ťahov pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " žiaroviek. Tým prejdeme všetkých "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " konfigurácií, v\u00A0ktorých je posledná žiarovka zhasnutá. Následne zapneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-vú žiarovku. Teraz vykonáme postupnosť ťahov pre prvých "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " žiaroviek "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "v\u00A0opačnom poradí"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (od konca na začiatok). Keďže pôvodná postupnosť menila vždy práve jednu žiarovku, platí to aj pre obrátenú. Takto postupne prejdeme zvyšných "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " konfigurácií, v\u00A0ktorých je posledná žiarovka zapnutá."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokopy sme prešli "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^n+2^n=2^{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " konfigurácií, a\u00A0keďže sme najprv prešli všetky so zhasnutou a\u00A0potom všetky so zapnutou poslednou žiarovkou, žiadna konfigurácia sa nezopakovala. Navštívili sme teda každú konfiguráciu práve raz, čím je indukčný krok hotový."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Máme čokoládu rozmerov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Lámeme ju po hranách na jednotlivé štvorčeky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\cdot 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (po hranách znamená, že nevieme ulomiť napr. z\u00A0rohu). Aký najmenší počet zlomení potrebujeme na to, aby všetky kusy boli "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\times 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Keď si to skúšame, môžeme si všimnúť, že počet zlomení je vždy rovnaký. Je to náhoda? Koľko to vychádza? Ako by sme to dokázali?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trik je riešiť zovšeobecnenú úlohu: Máme čokoládu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m \\times n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", kde "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m,n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sú prirodzené čísla. Chceme dokázať, že na jej zlomenie potrebujeme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "mn-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " zlomení. Trikom ako na to je matematická indukcia, napr. podľa "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m+n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea indukčného predpokladu je, že zlomením "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m \\times n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na dve čokolády vždy vyrobíme dve čokolády, ktoré majú menší súčet rozmerov než pôvodná "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m+n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Vieme teda aplikovať indukčný predpoklad a\u00A0už je to len trocha algebry."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ukážeme, že pre čokoládu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " potrebujeme vždy presne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mn-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zlomení bez ohľadu na stratégiu. Pre zadanú čokoládu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to teda je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "23",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zlomení."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tvrdenie dokážeme úplnou indukciou podľa súčtu rozmerov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = m+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme čokoládu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\times 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorú už netreba lámať, čo zodpovedá "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\cdot 1 - 1 = 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predpokladajme, že tvrdenie platí pre všetky čokolády so súčtom rozmerov ostro menším ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prvým zlomením čokolády "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme dve menšie časti. Bez ujmy na všeobecnosti predpokladajme, že sme zlomili stranu dĺžky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tým vznikli kusy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1 \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_2 \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pričom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1+m_2=m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Súčty rozmerov oboch nových kusov sú "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_2+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo sú zjavne čísla ostro menšie ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa indukčného predpokladu tak na ich úplné rozlámanie potrebujeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_1n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m_2n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zlomení. Celkový počet zlomení našej čokolády potom bude"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "1 + (m_1n-1) + (m_2n-1) = (m_1+m_2)n - 1 = mn-1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tým je indukčný krok hotový. Každé rozlámanie čokolády "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m \\times n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyžaduje práve "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mn-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " krokov, najmenší počet je teda rovnako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mn-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Máme daných 42 miest takých, že medzi každými dvomi vedie jednosmerná ulica. Dokážte, že existuje miesto také, že z\u00A0neho vieme vyraziť a prejsť cez všetky ostatné mestá."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom je použiť úplnú indukciu. Vyriešime malé prípady. Kľúčová otázka ale je: ako vieme prípad menšie "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " použiť pre väčšie?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikom je, že si vezmeme jedno mesto, napríklad\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", a\u00A0zvyšné mestá si rozdelíme na dve množiny: množinu miest, ktoré vchádzajú do\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "; a\u00A0množinu miest, ktoré vychádzajú z\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Niektoré z\u00A0týchto množín môžu byť prázdne. Určite však obe budú menšie ako finálna množina (lebo sme\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "X",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " dali stranou)."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tvrdenie dokážeme úplnou indukciou podľa počtu miest\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvrdenie zjavne platí (cesta pozostáva z\u00A0jediného mesta). Predpokladajme, že tvrdenie platí pre každý počet miest "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\le k < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Majme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n \\ge 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " miest. Zvoľme si ľubovoľné mesto\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zvyšných "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " miest rozdelíme na dve disjunktné množiny: množinu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvorenú mestami, z\u00A0ktorých vedie ulica do\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0množinu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvorenú mestami, do ktorých vedie ulica z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ak je množina "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " neprázdna, platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\le |A| < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa indukčného predpokladu len pre túto množinu existuje cesta prechádzajúca všetkými jej mestami; nech táto cesta končí v\u00A0nejakom meste\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "U \\in A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "U \\in A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", vedie ulica z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "U",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " do\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ak je množina "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " neprázdna, platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\le |B| < n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podobne podľa indukčného predpokladu len pre túto množinu existuje cesta prechádzajúca všetkými jej mestami; nech táto cesta začína v\u00A0nejakom meste\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "V \\in B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V \\in B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", vedie ulica z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " do\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Celkovú cestu vytvoríme spojením týchto úsekov a\u00A0rozoberieme prípady podľa toho, či boli množiny prázdne:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Ak sú "
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " aj "
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " neprázdne, prejdeme cestu v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " končiacu v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "U",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", odtiaľ prejdeme do\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", a\u00A0následne z\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " do\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "V",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", odkiaľ prejdeme zvyšok cesty v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Ak je "
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " prázdna (teda "
+                          },
+                          {
+                            "type": "math",
+                            "text": "|B|=n-1 \\ge 1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "), začneme rovno v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " a\u00A0prejdeme do\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "V",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", odkiaľ pokračujeme cestou v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Ak je "
+                          },
+                          {
+                            "type": "math",
+                            "text": "B",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " prázdna (teda "
+                          },
+                          {
+                            "type": "math",
+                            "text": "|A|=n-1 \\ge 1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "), prejdeme cestu v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "A",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " končiacu v\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "U",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " a\u00A0odtial prejdeme do\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "X",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", kde naša cesta skončí."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0každom prípade sme zostrojili cestu prechádzajúcu cez všetky z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " miest, čím je indukčný krok hotový. Tvrdenie teda platí pre všetky prirodzené "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", špeciálne aj pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=42",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že pre všetky prirodzené čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "k! \\mid n(n+1)(n+2)\\cdots(n+k-1)",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "(slovne: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí súčin "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po sebe idúcich prirodzených čísel)"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Máme dve prirodzené premenné "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", nie je jasné, podľa čoho indukovať. Idea je indukovať podľa oboch, najprv podľa "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a pri snahe dokázať tvrdenie pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " indukujeme podľa "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Najprv vyriešime "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Potom predpokladáme, že tvrdenie platí pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Následne ideme indukciou podľa "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Po vyriešení "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n=1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " predpokladáme platnosť pre dané "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Následne pri označení "
+                      },
+                      {
+                        "type": "math",
+                        "text": "P(n) = n(n+1)\\cdots(n+k-1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " potrebujeme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k! \\mid P(n+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Trikom je pozrieť sa na "
+                      },
+                      {
+                        "type": "math",
+                        "text": "P(n+1)-P(n)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Po ceste sa oplatí nájsť miesto, kde vieme použiť indukčný predpoklad pre "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n) = n(n+1)\\cdots(n+k-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tvrdenie dokazujeme indukciou podľa\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n) = n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1! = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo platí triviálne. Predpokladajme, že tvrdenie platí pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(k-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí súčin ľubovoľných "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po sebe idúcich čísel. Teraz dokazujeme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k! \\mid P(n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre všetky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", indukciou podľa\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(1) = k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je zjavne deliteľné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Predpokladajme platnosť pre dané\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\nP(n+1) - P(n) = (n+1)(n+2)\\cdots(n+k) - n(n+1)\\cdots(n+k-1)=\\\\\n= (n+1)(n+2)\\cdots(n+k-1)\\cdot[(n+k)-n] = k\\cdot (n+1)(n+2)\\cdots(n+k-1).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výraz "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)(n+2)\\cdots(n+k-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je súčin "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po sebe idúcich čísel, takže podľa indukčného predpokladu pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(k-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n+1)-P(n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k\\cdot(k-1)! = k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je deliteľné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je deliteľné aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Existuje jednoduchý kombinatorický dôkaz tejto úlohy – tvrdenie vyplýva z\u00A0toho, že kombinačné číslo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "{n+k-1 \\choose k} = \\frac{n(n+1)(n+2)\\cdots(n+k-1)}{k!}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "je celé. Uvedené riešenie ukazuje, že sa to dá dokázať aj teóreticko-číselne."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
       }
     ]
   },
