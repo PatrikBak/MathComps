@@ -1,10 +1,9 @@
 'use client'
 
 import { useLocalStorage } from '@mantine/hooks'
-import { isEqual } from 'lodash'
 import { Loader2, WifiOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { Virtuoso } from 'react-virtuoso'
 
@@ -17,7 +16,6 @@ import { SHOW_TECHNIQUE_TAGS_STORAGE_KEY } from '@/constants/local-storage-const
 import { usePendingProblemLike } from '../hooks/use-pending-problem-like'
 import { usePendingProblemMark } from '../hooks/use-pending-problem-mark'
 import { useProblemSearch } from '../hooks/use-problem-search'
-import type { SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
 import ActiveFiltersBar from './ActiveFilterBar'
 import { AnimatedProblemCard } from './AnimatedProblemCard'
@@ -164,60 +162,6 @@ export default function ProblemsLibrary() {
   const [searchBatchId, setSearchBatchId] = useState(0)
   const previousIsSearchingInBackground = React.useRef(isSearchingInBackground)
   const isInitialLoadRef = React.useRef(true)
-
-  // Track previous filter state to detect logic toggle changes
-  const previousFiltersRef = React.useRef<SearchFiltersState | null>(null)
-
-  // Calculate if results can change when searching in background
-  // Results can't change when we just switched from OR to AND with <= 1 selected option
-  // (because with 1 option, OR and AND produce the same results)
-  const isSearchingInBackgroundAndResultsCanChange = useMemo(() => {
-    // We must be searching in the first place
-    if (!isSearchingInBackground) return false
-
-    // Render first-renders with no data
-    if (!filters || !previousFiltersRef.current) return isSearchingInBackground
-
-    // Normalize filters: if there's <= 1 selected option, set logic to 'or'
-    // This makes OR and AND equivalent when there's only one option
-    const normalizeFilters = (filterState: SearchFiltersState): SearchFiltersState => {
-      return {
-        ...filterState,
-        tagLogic: filterState.tags.length <= 1 ? 'or' : filterState.tagLogic,
-        authorLogic: filterState.authors.length <= 1 ? 'or' : filterState.authorLogic,
-      }
-    }
-
-    // Normalize both the previous and current ref
-    const normalizedPrevious = normalizeFilters(previousFiltersRef.current)
-    const normalizedCurrent = normalizeFilters(filters)
-
-    // If normalized filters are equal, results can't change
-    return !isEqual(normalizedPrevious, normalizedCurrent)
-  }, [isSearchingInBackground, filters])
-
-  // Update previous filters ref when filters change
-  useEffect(() => {
-    if (filters) {
-      previousFiltersRef.current = filters
-    }
-  }, [filters])
-
-  // Keep stable count when results can't change to prevent flickering
-  // Store the last "real" count value when we're not in a stable state
-  const lastRealCountRef = React.useRef(totalCount)
-
-  // Compute the count of problems to display
-  const displayCount = useMemo(() => {
-    // Use stable value only when searching in background AND results can't change
-    if (isSearchingInBackground && !isSearchingInBackgroundAndResultsCanChange) {
-      return lastRealCountRef.current
-    }
-
-    // If we have potentially a new value, update ref with the current count and return it
-    lastRealCountRef.current = totalCount
-    return totalCount
-  }, [totalCount, isSearchingInBackground, isSearchingInBackgroundAndResultsCanChange])
 
   // Track visible range for viewport animations
   const [, setVisibleRange] = useState<{ startIndex: number; endIndex: number }>({
@@ -366,11 +310,11 @@ export default function ProblemsLibrary() {
                     filterOptions={filterOptions}
                     baseOptions={baseOptions ?? filterOptions}
                     onFiltersChange={handleFiltersChange}
-                    problemCount={displayCount}
+                    problemCount={totalCount}
                     showTechniqueTags={showTechniqueTags}
                     onShowTechniqueTagsChange={setShowTechniqueTags}
                     onMobileFilterClick={() => setIsMobileFilterOpen(true)}
-                    isSearching={isSearchingInBackgroundAndResultsCanChange}
+                    isSearching={isSearchingInBackground}
                   />
                 ) : (
                   <ActiveFiltersBarSkeleton />

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  isNoOpFilterChange,
   isTextOnlyChange,
   shouldTriggerSearch,
 } from '@/components/features/problems/utils/search-logic'
@@ -163,6 +164,73 @@ describe('Problem Search Logic', () => {
       }
       const emptySelections = { ...mockInitialFilters, contestSelection: [] }
       expect(isTextOnlyChange(undefinedSelections, emptySelections)).toBe(false)
+    })
+  })
+
+  describe('isNoOpFilterChange - No-Op Filter Detection', () => {
+    it('should detect tagLogic toggle as no-op with 0 tags', () => {
+      const before = { ...mockInitialFilters, tagLogic: 'or' as const }
+      const after = { ...mockInitialFilters, tagLogic: 'and' as const }
+      expect(isNoOpFilterChange(before, after)).toBe(true)
+    })
+
+    it('should detect tagLogic toggle as no-op with 1 tag', () => {
+      const before = {
+        ...mockInitialFilters,
+        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tagLogic: 'or' as const,
+      }
+      const after = {
+        ...mockInitialFilters,
+        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tagLogic: 'and' as const,
+      }
+      expect(isNoOpFilterChange(before, after)).toBe(true)
+    })
+
+    it('should NOT detect tagLogic toggle as no-op with 2+ tags', () => {
+      const twoTags = [
+        { slug: 'algebra', displayName: 'Algebra' },
+        { slug: 'geometry', displayName: 'Geometry' },
+      ]
+      const before = { ...mockInitialFilters, tags: twoTags, tagLogic: 'or' as const }
+      const after = { ...mockInitialFilters, tags: twoTags, tagLogic: 'and' as const }
+      expect(isNoOpFilterChange(before, after)).toBe(false)
+    })
+
+    it('should detect authorLogic toggle as no-op with 0-1 authors', () => {
+      const before = { ...mockInitialFilters, authorLogic: 'or' as const }
+      const after = { ...mockInitialFilters, authorLogic: 'and' as const }
+      expect(isNoOpFilterChange(before, after)).toBe(true)
+    })
+
+    it('should NOT detect authorLogic toggle as no-op with 2+ authors', () => {
+      const twoAuthors = [
+        { slug: 'alice', displayName: 'Alice' },
+        { slug: 'bob', displayName: 'Bob' },
+      ]
+      const before = { ...mockInitialFilters, authors: twoAuthors, authorLogic: 'or' as const }
+      const after = { ...mockInitialFilters, authors: twoAuthors, authorLogic: 'and' as const }
+      expect(isNoOpFilterChange(before, after)).toBe(false)
+    })
+
+    it('should NOT treat a tag addition as a no-op', () => {
+      const before = { ...mockInitialFilters }
+      const after = {
+        ...mockInitialFilters,
+        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+      }
+      expect(isNoOpFilterChange(before, after)).toBe(false)
+    })
+
+    it('should NOT treat a list switch as a no-op', () => {
+      const before = { ...mockInitialFilters, listContentId: 'list-a' }
+      const after = { ...mockInitialFilters, listContentId: 'list-b' }
+      expect(isNoOpFilterChange(before, after)).toBe(false)
+    })
+
+    it('should detect identical filters as a no-op', () => {
+      expect(isNoOpFilterChange(mockInitialFilters, { ...mockInitialFilters })).toBe(true)
     })
   })
 })

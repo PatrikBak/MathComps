@@ -47,6 +47,43 @@ export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersSt
 }
 
 /**
+ * Determines if a filter change is a no-op, meaning it can't produce different search results.
+ * Currently detects: toggling tagLogic or authorLogic when ≤1 item is selected
+ * (because OR and AND are equivalent with a single operand).
+ *
+ * @param prev - The previous filter state
+ * @param next - The new filter state
+ * @returns true if the change is guaranteed to produce identical results
+ */
+export function isNoOpFilterChange(prev: SearchFiltersState, next: SearchFiltersState): boolean {
+  // Normalize: treat OR and AND as equivalent when ≤1 item is selected
+  const normalizedPrevTagLogic = prev.tags.length <= 1 ? 'or' : prev.tagLogic
+  const normalizedNextTagLogic = next.tags.length <= 1 ? 'or' : next.tagLogic
+  const normalizedPrevAuthorLogic = prev.authors.length <= 1 ? 'or' : prev.authorLogic
+  const normalizedNextAuthorLogic = next.authors.length <= 1 ? 'or' : next.authorLogic
+
+  // Compare everything using the normalized logic values
+  return (
+    prev.searchText === next.searchText &&
+    prev.searchInSolution === next.searchInSolution &&
+    prev.seasons.length === next.seasons.length &&
+    prev.problemNumbers.length === next.problemNumbers.length &&
+    prev.tags.length === next.tags.length &&
+    normalizedPrevTagLogic === normalizedNextTagLogic &&
+    prev.authors.length === next.authors.length &&
+    normalizedPrevAuthorLogic === normalizedNextAuthorLogic &&
+    prev.favoritesOnly === next.favoritesOnly &&
+    prev.markStatus === next.markStatus &&
+    prev.listContentId === next.listContentId &&
+    equalSelectionsArrays(prev.contestSelection, next.contestSelection) &&
+    prev.seasons.every((season, index) => season.slug === next.seasons[index].slug) &&
+    prev.tags.every((tag, index) => tag.slug === next.tags[index].slug) &&
+    prev.authors.every((author, index) => author.slug === next.authors[index].slug) &&
+    prev.problemNumbers.every((number, index) => number === next.problemNumbers[index])
+  )
+}
+
+/**
  * Compares two selections arrays for equality
  */
 function equalSelectionsArrays(

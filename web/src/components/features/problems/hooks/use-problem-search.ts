@@ -22,7 +22,7 @@ import {
 } from '../types/problem-errors'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
-import { isTextOnlyChange } from '../utils/search-logic'
+import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { initializeFiltersFromUrlOrDefaults } from '../utils/url-initialization'
 import {
@@ -203,6 +203,13 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     // If this is the first load (no previous filters), sync immediately
     if (!prevUrlFiltersRef.current) {
       setQueryFilters(urlFilters)
+      prevUrlFiltersRef.current = urlFilters
+      return
+    }
+
+    // Skip no-op changes (e.g. toggling OR↔AND with ≤1 item selected)
+    // These can't produce different results, so don't trigger a new fetch
+    if (isNoOpFilterChange(prevUrlFiltersRef.current, urlFilters)) {
       prevUrlFiltersRef.current = urlFilters
       return
     }
