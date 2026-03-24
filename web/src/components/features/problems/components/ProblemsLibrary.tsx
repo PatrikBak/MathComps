@@ -3,7 +3,7 @@
 import { useLocalStorage } from '@mantine/hooks'
 import { Loader2, WifiOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { Virtuoso } from 'react-virtuoso'
 
