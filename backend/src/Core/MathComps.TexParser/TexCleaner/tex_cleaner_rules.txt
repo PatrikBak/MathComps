@@ -121,6 +121,7 @@
 
 alpha
 angle
+approx
 ast
 begin
 beta
@@ -226,6 +227,7 @@ rho
 right
 Rightarrow
 rightarrow
+rm
 setminus
 sigma
 sim
