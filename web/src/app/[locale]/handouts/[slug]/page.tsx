@@ -125,7 +125,7 @@ export async function generateMetadata({
         return generatePageMetadata({
           title: handout.title[locale],
           description: handout.description[locale],
-          path: `${ROUTES.HANDOUTS}/${slug}`,
+          path: ROUTES.HANDOUT_DETAIL,
           type: 'article',
           section: `${tHandouts('sectionLabel')} • ${section.category[locale]}`,
           locale,

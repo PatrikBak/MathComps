@@ -25,6 +25,7 @@ export async function generateMetadata({
     namespace: 'metadata.login',
     path: ROUTES.LOGIN,
     useSection: true,
+    noindex: true,
   })
 }
 

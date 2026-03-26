@@ -24,6 +24,7 @@ export async function generateMetadata({
     namespace: 'metadata.profile',
     path: ROUTES.PROFILE,
     useSection: true,
+    noindex: true,
   })
 }
 

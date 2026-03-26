@@ -59,6 +59,56 @@ export async function getSiteMetadata(locale: Locale): Promise<SiteMetadata> {
 }
 
 /**
+ * Resolves the localized path for a given canonical path and locale.
+ * Looks up the path in the next-intl pathnames map and substitutes any [slug] placeholder.
+ *
+ * @param canonicalPath - The canonical (English) route path (e.g., '/about')
+ * @param locale - The target locale
+ * @param slugTranslations - Optional map of localized slugs to replace [slug] with
+ *
+ * @returns The resolved localized path, or undefined if the locale has no slug translation
+ */
+function resolveLocalizedPath(
+  canonicalPath: string,
+  locale: Locale,
+  slugTranslations?: Record<Locale, string>
+): string | undefined {
+  // Get the pathname mapping for this route (if it exists)
+  const pathnameMapping = pathnames[canonicalPath]
+
+  // Determine the localized path based on the mapping type
+  let localizedPath: string
+
+  // Simple path - same for all locales
+  if (typeof pathnameMapping === 'string') {
+    localizedPath = pathnameMapping
+  }
+  // Localized path - get the locale-specific version
+  else if (pathnameMapping && typeof pathnameMapping === 'object') {
+    localizedPath = pathnameMapping[locale] ?? canonicalPath
+  }
+  // Not in pathnames map - use canonical path as-is
+  else {
+    localizedPath = canonicalPath
+  }
+
+  // Replace [slug] with actual slug if present
+  if (localizedPath.includes('[slug]')) {
+    // Use translation if available
+    const slug = slugTranslations?.[locale]
+    if (slug) {
+      localizedPath = localizedPath.replace('[slug]', slug)
+    } else {
+      // No slug for this locale - cannot resolve the path
+      return undefined
+    }
+  }
+
+  // Return the resolved localized path
+  return localizedPath
+}
+
+/**
  * Builds the alternate language URLs for hreflang tags.
  * Dynamically generates URLs for all supported locales plus x-default.
  * Replaces [slug] placeholder with actual localized slug if translations are provided.
@@ -78,38 +128,13 @@ function buildAlternateLanguages(
   // The result will be here
   const languages: Record<string, string> = {}
 
-  // Get the pathname mapping for this route (if it exists)
-  const pathnameMapping = pathnames[canonicalPath]
-
-  // Handle all supported locale
+  // Handle all supported locales
   for (const locale of SUPPORTED_LOCALES) {
-    // Get the localized path
-    let localizedPath: string
+    // Resolve the localized path for this locale
+    const localizedPath = resolveLocalizedPath(canonicalPath, locale, slugTranslations)
 
-    // Simple path - same for all locales
-    if (typeof pathnameMapping === 'string') {
-      localizedPath = pathnameMapping
-    }
-    // Localized path - get the locale-specific version
-    else if (pathnameMapping && typeof pathnameMapping === 'object') {
-      localizedPath = pathnameMapping[locale] ?? canonicalPath
-    }
-    // Not in pathnames map - use canonical path as-is
-    else {
-      localizedPath = canonicalPath
-    }
-
-    // Replace [slug] with actual slug if present
-    if (localizedPath.includes('[slug]')) {
-      // Use translation if available
-      const slug = slugTranslations?.[locale]
-      if (slug) {
-        localizedPath = localizedPath.replace('[slug]', slug)
-      } else {
-        // Skip locales without a slug (intentionally not translated)
-        continue
-      }
-    }
+    // Skip locales where the path couldn't be resolved (e.g. missing slug)
+    if (localizedPath === undefined) continue
 
     // Build full URL with locale prefix
     languages[locale] = `${siteUrl}/${locale}${localizedPath}`
@@ -140,6 +165,8 @@ type PageMetadataOptions = {
   locale: Locale
   /** Optional slug translations for dynamic routes. */
   slugTranslations?: Record<Locale, string>
+  /** Whether to prevent search engines from indexing the page. */
+  noindex?: boolean
 }
 
 /**
@@ -159,26 +186,22 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
     section,
     locale,
     slugTranslations,
+    noindex = false,
   } = options
 
   // Get locale-specific values
   const ogLocale = LOCALE_TO_OG_LOCALE[locale]
 
-  // For the canonical URL, we use the current locale's slug if available
-  let canonicalPathForUrl = path
-  if (path.includes('[slug]')) {
-    const slug = slugTranslations?.[locale]
-    if (slug) {
-      canonicalPathForUrl = path.replace('[slug]', slug)
-    } else {
-      throw new Error(
-        `[Metadata] Missing slug translation for locale '${locale}' on path '${path}'. The URL will contain '[slug]'.`
-      )
-    }
+  // Resolve the fully localized path for the current locale (includes slug substitution)
+  const localizedPath = resolveLocalizedPath(path, locale, slugTranslations)
+
+  // Fail loudly if the path couldn't be resolved (e.g. missing slug translation)
+  if (localizedPath === undefined) {
+    throw new Error(`[Metadata] Missing slug translation for locale '${locale}' on path '${path}'.`)
   }
 
-  // Generate canonical URL for the page
-  const url = getCanonicalUrl(canonicalPathForUrl)
+  // Generate canonical URL with locale prefix (e.g. https://site.com/sk/o-projekte)
+  const url = getCanonicalUrl(`/${locale}${localizedPath}`)
 
   // Generate OG image URL
   const ogImage = `${getRequiredEnv('NEXT_PUBLIC_SITE_URL')}/og-image.png`
@@ -227,17 +250,22 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
     },
 
     // Robots
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
+    robots: noindex
+      ? {
+          index: false,
+          follow: false,
+        }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+          },
+        },
   }
 }
 
@@ -270,6 +298,8 @@ type CreatePageMetadataOptions = {
   type?: 'website' | 'article'
   /** Whether to use title as section (for OG tags). */
   useSection?: boolean
+  /** Whether to prevent search engines from indexing the page. */
+  noindex?: boolean
 }
 
 /**
@@ -287,6 +317,7 @@ export async function createPageMetadata({
   path = '',
   type = 'website',
   useSection = false,
+  noindex = false,
 }: CreatePageMetadataOptions): Promise<Metadata> {
   // Get the translations
   const t = await getTranslations({ locale, namespace })
@@ -303,5 +334,6 @@ export async function createPageMetadata({
     type,
     section: useSection ? title : undefined,
     locale,
+    noindex,
   })
 }
