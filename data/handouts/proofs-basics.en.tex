@@ -104,11 +104,12 @@ The previous example can also be solved using the generally useful formula for t
     $$
     divisors.
 }{
-    Each divisor is in the form $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$, where $0 \leq b_i \leq a_i$ for each $1 \leq i \leq k$. For the choice of $b_i$ we have $a_i+1$ options ($0,1,\ldots,a_i$). These choices are independent, so according to the combinatorial rule of product, we have a total of
+    Consider an arbitrary divisor $d$ of $n$. Since $d$ divides $n$ and the prime factorization of $n$ contains only the primes $p_1,\dots,p_k$, the factorization of $d$ must also contain only these primes. We can therefore write $d = p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$. For each $i$, we must have $0 \leq b_i \leq a_i$ (the upper bound follows from the fact that $d$, as a divisor of $n$, cannot contain a higher power of $p_i$ than $n$ does). Every divisor can thus be uniquely represented as a $k$-tuple $(b_1,\dots,b_k)$ satisfying $0 \leq b_i \leq a_i$. The number of divisors is therefore equal to the number of such $k$-tuples.
+
+    To determine the number of $k$-tuples, we use the combinatorial rule of product. The choices of the individual exponents $b_1,\dots,b_k$ are independent of one another -- the value of $b_i$ does not restrict the values of the other exponents in any way. For the exponent $b_i$, we have $a_i+1$ options, namely all integers from $0$ to $a_i$. By the rule of product, the total number of $k$-tuples is
     $$
-    (a_1+1)(a_2+1)\cdots (a_k+1)
+    (a_1+1)(a_2+1)\cdots (a_k+1).
     $$
-    distinct $k$-tuples $(b_1,\ldots,b_k)$ corresponding to all divisors of $n$, so we are done.
 }
 
 \Exercise{}{

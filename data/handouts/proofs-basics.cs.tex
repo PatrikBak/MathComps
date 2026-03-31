@@ -103,11 +103,12 @@ Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pr
     $$
     dělitelů.
 }{
-    Každý dělitel je ve tvaru $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$, kde $0 \leq b_i \leq a_i$ pro každé $1 \leq i \leq k$. Pro volbu $b_i$ máme $a_i+1$ možností ($0,1,\ldots,a_i$). Tyto volby jsou nezávislé, takže podle kombinatorického pravidla součinu máme celkově 
+    Uvažujme libovolného dělitele $d$ čísla $n$. Jelikož $d$ dělí $n$ a~prvočíselný rozklad $n$ obsahuje pouze prvočísla $p_1,\dots,p_k$, i rozklad čísla $d$ musí obsahovat pouze tato prvočísla. Zapišme tedy $d = p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$. Přitom pro každé $i$ musí platit $0 \leq b_i \leq a_i$ (horní hranice plyne z~toho, že $d$ jako dělitel $n$ by nemohl obsahovat vyšší mocninu $p_i$ než $n$). Každého dělitele tedy umíme jednoznačně reprezentovat jako $k$-tici $(b_1,\dots,b_k)$ s~vlastností $0 \leq b_i \leq a_i$. Počet dělitelů je proto roven počtu takovýchto $k$-tic.
+
+    Na určení počtu $k$-tic použijeme kombinatorické pravidlo součinu. Volby jednotlivých exponentů $b_1,\dots,b_k$ jsou na sobě nezávislé -- hodnota $b_i$ nijak neomezuje hodnoty ostatních exponentů. Pro exponent $b_i$ máme $a_i+1$ možností, konkrétně všechna čísla od $0$ do $a_i$. Podle pravidla součinu je celkový počet $k$-tic roven
     $$
-    (a_1+1)(a_2+1)\cdots (a_k+1)
+    (a_1+1)(a_2+1)\cdots (a_k+1).
     $$
-    různých $k$-tic $(b_1,\ldots,b_k)$ odpovídajících všem dělitelům $n$, takže jsme hotovi.
 }
 
 \Exercise{}{

@@ -1208,16 +1208,88 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Každý deliteľ je v\u00A0tvare "
+                      "text": "Uvažujme ľubovoľného deliteľa "
                     },
                     {
                       "type": "math",
-                      "text": "p_1^{b_1} \\cdot p_2^{b_2} \\cdots p_k^{b_k}",
+                      "text": "d",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", kde "
+                      "text": " čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0prvočíselný rozklad "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obsahuje iba prvočísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1,\\dots,p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", aj rozklad čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí obsahovať iba tieto prvočísla. Zapíšme teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d = p_1^{b_1} \\cdot p_2^{b_2} \\cdots p_k^{b_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pritom pre každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí platiť "
                     },
                     {
                       "type": "math",
@@ -1226,16 +1298,116 @@
                     },
                     {
                       "type": "text",
-                      "text": " pre každé "
+                      "text": " (horná hranica plynie z\u00A0toho, že "
                     },
                     {
                       "type": "math",
-                      "text": "1 \\leq i \\leq k",
+                      "text": "d",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Pre voľbu "
+                      "text": " ako deliteľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by nemohol obsahovať vyššiu mocninu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Každý deliteľ teda vieme jednoznačne reprezentovať ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-ticu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(b_1,\\dots,b_k)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0vlastnosťou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq b_i \\leq a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Počet deliteľov je preto rovný počtu takýchto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tíc."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na určenie počtu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tíc použijeme kombinatorické pravidlo súčinu. Voľby jednotlivých exponentov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_1,\\dots,b_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú na sebe nezávislé – hodnota "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nijako neobmedzuje hodnoty ostatných exponentov. Pre exponent "
                     },
                     {
                       "type": "math",
@@ -1253,31 +1425,25 @@
                     },
                     {
                       "type": "text",
-                      "text": " možností ("
+                      "text": " možností, konkrétne všetky čísla od "
                     },
                     {
                       "type": "math",
-                      "text": "0,1,\\ldots,a_i",
+                      "text": "0",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "). Tieto voľby sú nezávislé, takže podľa kombinatorického pravidla súčinu máme celkovo"
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "math",
-                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1)",
-                  "isDisplay": true
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
+                      "text": " do "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i",
+                      "isDisplay": false
+                    },
                     {
                       "type": "text",
-                      "text": "rôznych "
+                      "text": ". Podľa pravidla súčinu je celkový počet "
                     },
                     {
                       "type": "math",
@@ -1286,28 +1452,15 @@
                     },
                     {
                       "type": "text",
-                      "text": "-tíc "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(b_1,\\ldots,b_k)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " odpovedajúcich všetkým deliteľom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "n",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", takže sme hotoví."
+                      "text": "-tíc rovný"
                     }
                   ],
                   "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1).",
+                  "isDisplay": true
                 }
               ]
             },

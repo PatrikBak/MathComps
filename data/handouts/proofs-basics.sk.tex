@@ -103,11 +103,12 @@ Predošlý príklad sa dá vyriešiť aj pomocou všeobecne užitočného vzorca
     $$
     deliteľov.
 }{
-    Každý deliteľ je v~tvare $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$, kde $0 \leq b_i \leq a_i$ pre každé $1 \leq i \leq k$. Pre voľbu $b_i$ máme $a_i+1$ možností ($0,1,\ldots,a_i$). Tieto voľby sú nezávislé, takže podľa kombinatorického pravidla súčinu máme celkovo 
+    Uvažujme ľubovoľného deliteľa $d$ čísla $n$. Keďže $d$ delí $n$ a~prvočíselný rozklad $n$ obsahuje iba prvočísla $p_1,\dots,p_k$, aj rozklad čísla $d$ musí obsahovať iba tieto prvočísla. Zapíšme teda $d = p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$. Pritom pre každé $i$ musí platiť $0 \leq b_i \leq a_i$ (horná hranica plynie z~toho, že $d$ ako deliteľ $n$ by nemohol obsahovať vyššiu mocninu $p_i$ než $n$). Každý deliteľ teda vieme jednoznačne reprezentovať ako $k$-ticu $(b_1,\dots,b_k)$ s~vlastnosťou $0 \leq b_i \leq a_i$. Počet deliteľov je preto rovný počtu takýchto $k$-tíc.
+
+    Na určenie počtu $k$-tíc použijeme kombinatorické pravidlo súčinu. Voľby jednotlivých exponentov $b_1,\dots,b_k$ sú na sebe nezávislé -- hodnota $b_i$ nijako neobmedzuje hodnoty ostatných exponentov. Pre exponent $b_i$ máme $a_i+1$ možností, konkrétne všetky čísla od $0$ do $a_i$. Podľa pravidla súčinu je celkový počet $k$-tíc rovný
     $$
-    (a_1+1)(a_2+1)\cdots (a_k+1)
+    (a_1+1)(a_2+1)\cdots (a_k+1).
     $$
-    rôznych $k$-tíc $(b_1,\ldots,b_k)$ odpovedajúcich všetkým deliteľom $n$, takže sme hotoví.
 }
 
 \Exercise{}{

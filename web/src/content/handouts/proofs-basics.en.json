@@ -1208,94 +1208,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Each divisor is in the form "
+                      "text": "Consider an arbitrary divisor "
                     },
                     {
                       "type": "math",
-                      "text": "p_1^{b_1} \\cdot p_2^{b_2} \\cdots p_k^{b_k}",
+                      "text": "d",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", where "
-                    },
-                    {
-                      "type": "math",
-                      "text": "0 \\leq b_i \\leq a_i",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " for each "
-                    },
-                    {
-                      "type": "math",
-                      "text": "1 \\leq i \\leq k",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". For the choice of "
-                    },
-                    {
-                      "type": "math",
-                      "text": "b_i",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " we have "
-                    },
-                    {
-                      "type": "math",
-                      "text": "a_i+1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " options ("
-                    },
-                    {
-                      "type": "math",
-                      "text": "0,1,\\ldots,a_i",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "). These choices are independent, so according to the combinatorial rule of product, we have a total of"
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "math",
-                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1)",
-                  "isDisplay": true
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "distinct "
-                    },
-                    {
-                      "type": "math",
-                      "text": "k",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "-tuples "
-                    },
-                    {
-                      "type": "math",
-                      "text": "(b_1,\\ldots,b_k)",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " corresponding to all divisors of "
+                      "text": " of "
                     },
                     {
                       "type": "math",
@@ -1304,10 +1226,241 @@
                     },
                     {
                       "type": "text",
-                      "text": ", so we are done."
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " divides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the prime factorization of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " contains only the primes "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_1,\\dots,p_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the factorization of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must also contain only these primes. We can therefore write "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d = p_1^{b_1} \\cdot p_2^{b_2} \\cdots p_k^{b_k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". For each "
+                    },
+                    {
+                      "type": "math",
+                      "text": "i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we must have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq b_i \\leq a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (the upper bound follows from the fact that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", as a divisor of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", cannot contain a higher power of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " does). Every divisor can thus be uniquely represented as a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tuple "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(b_1,\\dots,b_k)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " satisfying "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq b_i \\leq a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The number of divisors is therefore equal to the number of such "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tuples."
                     }
                   ],
                   "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To determine the number of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tuples, we use the combinatorial rule of product. The choices of the individual exponents "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_1,\\dots,b_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are independent of one another – the value of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " does not restrict the values of the other exponents in any way. For the exponent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " options, namely all integers from "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By the rule of product, the total number of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tuples is"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+1)(a_2+1)\\cdots (a_k+1).",
+                  "isDisplay": true
                 }
               ]
             },
