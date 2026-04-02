@@ -1,7 +1,3 @@
-/**
- * Types for the Novinky (News) section.
- */
-
 import type { LocalizedString } from '@/i18n/i18n'
 
 /**
@@ -44,23 +40,4 @@ export type NewsArticle = {
   author: string
   /** MDX content body (rendered in cards) */
   content: string
-}
-
-/**
- * Category display configuration (colors only).
- * Labels are provided via translations.
- */
-export const CATEGORY_CONFIG: Record<NewsCategory, { bgColor: string }> = {
-  archive: {
-    bgColor: 'bg-indigo-500/80',
-  },
-  handouts: {
-    bgColor: 'bg-green-500/80',
-  },
-  development: {
-    bgColor: 'bg-slate-500/80',
-  },
-  misc: {
-    bgColor: 'bg-violet-500/80',
-  },
 }

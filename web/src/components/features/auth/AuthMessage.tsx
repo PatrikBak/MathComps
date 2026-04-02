@@ -15,8 +15,8 @@ type AuthMessageProps = {
  */
 export default function AuthMessage({ type, message }: AuthMessageProps) {
   const styles = {
-    error: 'bg-red-600/90 border-red-500/30 text-red-100',
-    success: 'bg-green-600/90 border-green-500/30 text-green-100',
+    error: 'bg-error/15 border-error/30 text-error',
+    success: 'bg-success/15 border-success/30 text-success',
   }[type]
 
   return <div className={cn('mb-6 p-3 border rounded-lg text-sm', styles)}>{message}</div>

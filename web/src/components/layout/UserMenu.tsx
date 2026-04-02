@@ -26,7 +26,7 @@ const UserMenuTrigger = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<'
       ref={ref}
       type="button"
       className={cn(
-        'relative flex items-center gap-2 pl-4 pr-3 rounded-full min-w-[95px] border border-transparent transition-all duration-200 before:absolute before:inset-0 before:rounded-full before:ring-1 before:ring-transparent before:ring-offset-0 before:transition-all before:duration-200 before:pointer-events-none hover:before:ring-white/40 hover:before:-inset-x-1 hover:before:-inset-y-3 focus-visible:before:ring-white/60 focus-visible:before:-inset-x-1 focus-visible:before:-inset-y-3 focus-visible:outline-none',
+        'relative flex items-center gap-2 pl-4 pr-3 rounded-full min-w-[95px] border border-transparent transition-all duration-200 before:absolute before:inset-0 before:rounded-full before:ring-1 before:ring-transparent before:ring-offset-0 before:transition-all before:duration-200 before:pointer-events-none hover:before:ring-foreground/40 hover:before:-inset-x-1 hover:before:-inset-y-3 focus-visible:before:ring-foreground/60 focus-visible:before:-inset-x-1 focus-visible:before:-inset-y-3 focus-visible:outline-none',
         className
       )}
       {...rest}
@@ -78,8 +78,8 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
   if (isAuthenticated && (!isLoaded || !mounted)) {
     return (
       <UserMenuTrigger aria-label={tUserMenu('loading')}>
-        <div className="w-10 h-10 rounded-full bg-slate-700/50 animate-pulse -my-2" />
-        <ChevronDown className="w-4 h-4 text-white/30" aria-hidden="true" />
+        <div className="w-10 h-10 rounded-full bg-surface-inset/50 animate-pulse -my-2" />
+        <ChevronDown className="w-4 h-4 text-popover-foreground/30" aria-hidden="true" />
       </UserMenuTrigger>
     )
   }
@@ -91,7 +91,7 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
     return (
       <LoginNavItem
         isLoading={!isLoaded || !mounted}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-200 hover:text-white hover:bg-indigo-500/10 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-foreground hover:text-foreground hover:bg-focus/10 hover:ring-1 hover:ring-focus/30 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       />
     )
   }
@@ -109,7 +109,7 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
           />
           <ChevronDown
             className={cn(
-              'w-4 h-4 text-white/60 transition-transform duration-200',
+              'w-4 h-4 text-popover-foreground/60 transition-transform duration-200',
               'group-data-[state=open]:rotate-180'
             )}
             aria-hidden="true"
@@ -123,7 +123,7 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
           id="user-menu-content"
           className={cn(
             'w-full rounded-lg',
-            'bg-slate-900/95 backdrop-blur-sm border border-white/10',
+            'bg-surface/95 backdrop-blur-sm border border-foreground/10',
             'shadow-lg',
             'overflow-hidden z-50',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
@@ -132,12 +132,12 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
             'data-[side=bottom]:slide-in-from-top-2',
             'data-[side=top]:slide-in-from-bottom-2'
           )}
-          sideOffset={8}
+          sideOffset={16}
           align="end"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
           {/* User Info */}
-          <div className="px-4 py-3 border-b border-white/10">
+          <div className="px-4 py-3 border-b border-foreground/10">
             <UserInfoHeader user={user} size="sm" />
           </div>
 

@@ -76,7 +76,7 @@ export const MobileFilterDrawer = ({
           leaveTo="opacity-0"
         >
           <div
-            className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-surface/50 backdrop-blur-sm"
             onClick={onClose}
             aria-hidden="true"
           />
@@ -92,26 +92,26 @@ export const MobileFilterDrawer = ({
           leaveFrom="translate-x-0"
           leaveTo="-translate-x-full"
         >
-          <div className="fixed left-0 top-0 h-full w-full max-w-[320px] sm:w-96 sm:max-w-[85vw] bg-slate-800 shadow-xl flex flex-col">
+          <div className="fixed left-0 top-0 h-full w-full max-w-[320px] sm:w-96 sm:max-w-[85vw] bg-surface shadow-xl flex flex-col">
             {/* Spacer for main header */}
-            <div className="h-14 sm:h-16 lg:h-20 bg-slate-900/50 flex-shrink-0"></div>
+            <div className="h-14 sm:h-16 lg:h-20 bg-surface/50 flex-shrink-0"></div>
 
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-600/60 p-3 sm:p-4 flex-shrink-0">
+            <div className="flex items-center justify-between border-b border-foreground/10 p-3 sm:p-4 flex-shrink-0">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
-                <h2 className="text-base sm:text-lg font-semibold text-gray-300">
+                <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-muted" />
+                <h2 className="text-base sm:text-lg font-semibold text-muted-foreground">
                   {tFilters('title')}
                 </h2>
                 {activeFilterCount > 0 && (
-                  <span className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-indigo-500 text-[10px] sm:text-xs font-medium text-white">
+                  <span className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-focus text-[10px] sm:text-xs font-medium text-focus-foreground">
                     {activeFilterCount}
                   </span>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-700/50 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md text-muted hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 aria-label={tFilters('close')}
               >
                 <X className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -133,10 +133,10 @@ export const MobileFilterDrawer = ({
             </div>
 
             {/* Apply Filters Footer */}
-            <div className="flex-shrink-0 border-t border-slate-600/60 p-3 sm:p-4 bg-slate-800">
+            <div className="flex-shrink-0 border-t border-foreground/10 p-3 sm:p-4 bg-surface">
               <button
                 onClick={onClose}
-                className="w-full rounded-lg bg-indigo-500/80 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 active:scale-[0.98] transition-all"
+                className="w-full rounded-lg bg-brand/80 px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.98] transition-all"
               >
                 {tFilters('apply')}
               </button>
@@ -165,7 +165,7 @@ export const MobileFilterButton = ({ onClick, activeFilterCount }: MobileFilterB
   return (
     <button
       onClick={onClick}
-      className="inline-flex h-9 items-center gap-1.5 rounded-md border border-slate-600/60 bg-slate-800 px-2 min-[400px]:px-2.5 py-2 text-sm font-medium text-slate-300 shadow-sm hover:bg-slate-700/90 hover:text-slate-200 focus:outline-none active:scale-[0.98] transition-transform"
+      className="inline-flex h-9 items-center gap-1.5 rounded-md border border-foreground/10 bg-surface px-2 min-[400px]:px-2.5 py-2 text-sm font-medium text-muted-foreground shadow-sm hover:bg-surface-hover hover:text-foreground focus:outline-none active:scale-[0.98] transition-transform"
       aria-label={
         activeFilterCount > 0
           ? tFilters('openWithCount', { count: activeFilterCount })
@@ -175,7 +175,7 @@ export const MobileFilterButton = ({ onClick, activeFilterCount }: MobileFilterB
       <Filter className="h-4 w-4 flex-shrink-0" />
       <span className="hidden min-[500px]:inline">{tFilters('title')}</span>
       {activeFilterCount > 0 && (
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-xs font-medium text-white flex-shrink-0">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-focus text-xs font-medium text-focus-foreground flex-shrink-0">
           {activeFilterCount}
         </span>
       )}

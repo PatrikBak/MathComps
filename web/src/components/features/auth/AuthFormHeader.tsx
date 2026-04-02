@@ -24,7 +24,7 @@ export default function AuthFormHeader({ screen }: AuthFormHeaderProps) {
       <div className="flex justify-center mb-5">
         <MathCompsLogo />
       </div>
-      <h5 className="text-lg font-semibold text-slate-400 tracking-wider uppercase mb-2">
+      <h5 className="text-lg font-semibold text-muted tracking-wider uppercase mb-2">
         {(() => {
           switch (screen) {
             case 'hub':

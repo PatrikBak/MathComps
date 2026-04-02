@@ -39,13 +39,13 @@ export default function Chip({
 
     if (isSelected) {
       // Selected state: bright indigo background with white text
-      const selectedStyles = 'border-indigo-400 bg-indigo-500/80 text-white'
-      const hoverStyles = clickable ? 'hover:bg-indigo-400/90 hover:border-indigo-300' : ''
+      const selectedStyles = 'border-focus-light bg-focus/80 text-focus-foreground'
+      const hoverStyles = clickable ? 'hover:bg-focus-light/90 hover:border-focus-light' : ''
       return `${baseStyles} ${selectedStyles} ${hoverStyles}`
     } else {
       // Default state: subtle indigo background
-      const defaultStyles = 'border-slate-600/60 bg-indigo-600/20 text-indigo-100'
-      const hoverStyles = clickable ? 'hover:bg-indigo-500/30 hover:border-indigo-400/60' : ''
+      const defaultStyles = 'border-muted/40 bg-focus/20 text-focus-tint'
+      const hoverStyles = clickable ? 'hover:bg-focus/30 hover:border-focus-light/60' : ''
       return `${baseStyles} ${defaultStyles} ${hoverStyles}`
     }
   }

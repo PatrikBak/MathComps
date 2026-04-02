@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl'
 
 import ContactButton from '@/components/features/contact/ContactButton'
 import Section from '@/components/shared/components/Section'
+import { ACCENT_COLOR_MAP, type AccentColor } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
@@ -22,8 +23,8 @@ type FeatureCategory = {
   title: string
   /* The icon of the category */
   icon: string
-  /* The color of the category */
-  color: string
+  /* The accent color from the global palette */
+  accent: AccentColor
   /* The features of the category */
   features: FeatureItem[]
 }
@@ -31,36 +32,42 @@ type FeatureCategory = {
 /**
  * A badge representing a {@link FeatureItem}.
  */
-const FeatureBadge = ({ title, isImplemented }: FeatureItem) => (
-  <span
-    className={cn(
-      'inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border my-0.5',
-      isImplemented
-        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
-        : 'bg-slate-700/50 text-slate-300 border-slate-600/50'
-    )}
-  >
-    {isImplemented && '✓ '}
-    {title}
-  </span>
-)
+const FeatureBadge = ({ title, isImplemented }: FeatureItem) => {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border my-0.5',
+        isImplemented
+          ? cn(ACCENT_COLOR_MAP.emerald.bg, ACCENT_COLOR_MAP.emerald.text, 'border-foreground/10')
+          : 'bg-foreground/5 text-muted-foreground border-foreground/10'
+      )}
+    >
+      {isImplemented && '✓ '}
+      {title}
+    </span>
+  )
+}
 
 /**
  * A container with features of a single {@link FeatureCategory}.
  */
 const FeatureCategoryCard = (category: FeatureCategory) => {
+  // Resolve the accent palette for this category
+  const scheme = ACCENT_COLOR_MAP[category.accent]
+
   return (
-    <div className="bg-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:bg-slate-900/40 transition-all duration-300">
+    <div className="bg-surface/10 backdrop-blur-sm border border-foreground/10 rounded-xl p-6 hover:bg-surface/20 transition-all duration-300">
       <div className="flex items-center gap-3 mb-4">
         <div
           className={cn(
             'w-8 h-8 rounded-lg flex items-center justify-center text-lg',
-            category.color
+            scheme.bg,
+            scheme.text
           )}
         >
           {category.icon}
         </div>
-        <h3 className="text-xl font-bold text-white">{category.title}</h3>
+        <h3 className="text-xl font-bold text-foreground">{category.title}</h3>
       </div>
       <div className="flex flex-wrap gap-2">
         {category.features.map((feature, index) => (
@@ -78,12 +85,12 @@ export const RoadmapSection = () => {
   // Translations for section
   const t = useTranslations('about.roadmap')
 
-  // Categorized features
+  // Categorized features with accent colors from the global palette
   const featureCategories: FeatureCategory[] = [
     {
       title: t('categories.content'),
       icon: '📚',
-      color: 'bg-blue-500/20 text-blue-400',
+      accent: 'sky',
       features: [
         { title: t('features.archiveSKCZ'), isImplemented: true },
         { title: t('features.introTexts'), isImplemented: true },
@@ -95,7 +102,7 @@ export const RoadmapSection = () => {
     {
       title: t('categories.community'),
       icon: '👥',
-      color: 'bg-green-500/20 text-green-400',
+      accent: 'emerald',
       features: [
         { title: t('features.newsSection'), isImplemented: true },
         { title: t('features.userProfiles'), isImplemented: true },
@@ -109,7 +116,7 @@ export const RoadmapSection = () => {
     {
       title: t('categories.tools'),
       icon: '🛠️',
-      color: 'bg-purple-500/20 text-purple-400',
+      accent: 'purple',
       features: [
         { title: t('features.filterFavorites'), isImplemented: true },
         { title: t('features.exportPdfTex') },
@@ -122,7 +129,7 @@ export const RoadmapSection = () => {
     {
       title: t('categories.competitions'),
       icon: '🏆',
-      color: 'bg-yellow-500/20 text-yellow-400',
+      accent: 'amber',
       features: [
         { title: t('features.trainingPlatform') },
         { title: t('features.privateComps') },
@@ -133,6 +140,9 @@ export const RoadmapSection = () => {
     },
   ]
 
+  // Resolved palette for the "implemented" legend badge
+  const implementedScheme = ACCENT_COLOR_MAP.emerald
+
   return (
     <Section
       id="roadmap-section"
@@ -140,7 +150,13 @@ export const RoadmapSection = () => {
       description={
         <>
           {t('description')}{' '}
-          <span className="block w-fit mx-auto mt-6 items-center px-2 py-0.5 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          <span
+            className={cn(
+              'block w-fit mx-auto mt-6 items-center px-2 py-0.5 rounded-full text-sm font-medium border border-foreground/10',
+              implementedScheme.bg,
+              implementedScheme.text
+            )}
+          >
             ✓ {t('implementedLabel')}
           </span>
         </>
@@ -157,12 +173,12 @@ export const RoadmapSection = () => {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-slate-400 text-sm">
+          <p className="text-muted text-sm">
             {t.rich('footer', {
               link: (chunks) => (
                 <ContactButton
                   reason="featureIdeas"
-                  className="text-indigo-400 hover:text-indigo-300 underline"
+                  className="text-link hover:text-link-hover underline"
                 >
                   {chunks}
                 </ContactButton>

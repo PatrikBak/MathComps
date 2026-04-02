@@ -39,8 +39,8 @@ export function MobileLanguageSwitcher({ onSelect }: MobileLanguageSwitcherProps
               'flex items-center gap-2 px-3 py-2 rounded-lg',
               'text-sm font-medium transition-all duration-200',
               isActive
-                ? 'bg-indigo-500/25 text-white border border-indigo-500/40'
-                : 'bg-slate-700/40 text-slate-300 border border-transparent hover:bg-slate-700/60 hover:text-white'
+                ? 'bg-focus/25 text-focus-foreground border border-focus/40'
+                : 'bg-foreground/5 text-muted-foreground border border-transparent hover:bg-foreground/10 hover:text-foreground'
             )}
             aria-pressed={isActive}
           >

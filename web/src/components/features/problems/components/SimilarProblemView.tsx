@@ -19,7 +19,7 @@ const SimilarityScoreIndicator = ({ score }: { score: number }) => {
 
   return (
     <div className="flex items-center gap-2" title={tProblems('relevance', { percentage })}>
-      <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className="w-16 h-2 bg-foreground/10 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full"
           style={{ width: `${percentage}%`, backgroundColor: color }}
@@ -55,14 +55,14 @@ const SimilarProblemCard = ({
     copyPermalink(problem.slug)
   }
   return (
-    <div className="overflow-hidden border rounded-lg bg-gray-800/50 border-gray-700">
-      <div className="relative px-4 py-3 border-b border-gray-700">
+    <div className="overflow-hidden border rounded-lg bg-surface/50 border-foreground/10">
+      <div className="relative px-4 py-3 border-b border-foreground/10">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           {/* Grouping element for positioning the similarity indicator */}
           <div className="relative">
             <div className="flex items-center gap-3">
-              <span className="text-gray-400 text-sm font-medium">#{ordinalNumber}</span>
-              <span className="text-base font-semibold text-white">
+              <span className="text-muted text-sm font-medium">#{ordinalNumber}</span>
+              <span className="text-base font-semibold text-foreground">
                 {problem.slug.toUpperCase()}
               </span>
             </div>
@@ -77,7 +77,7 @@ const SimilarProblemCard = ({
         <div className="h-6" />
       </div>
 
-      <div className="p-4 text-sm text-gray-300">
+      <div className="p-4 text-sm text-muted-foreground">
         {problem.statement ? (
           (() => {
             try {
@@ -112,7 +112,7 @@ export const SimilarProblemView = ({ view, problem }: SimilarProblemViewProps) =
       case 'similar':
         if (!problem.similarProblems || problem.similarProblems.length === 0) {
           return (
-            <div className="text-center text-gray-400">
+            <div className="text-center text-muted">
               <p>{tProblems('noSimilarProblems')}</p>
             </div>
           )
@@ -120,7 +120,7 @@ export const SimilarProblemView = ({ view, problem }: SimilarProblemViewProps) =
         return (
           <div className="space-y-4">
             <div className="flex justify-end mb-4">
-              <p className="text-xs text-gray-500 italic">{tProblems('relevanceNote')}</p>
+              <p className="text-xs text-muted italic">{tProblems('relevanceNote')}</p>
             </div>
             {problem.similarProblems.map((similarProblem, index) => (
               <SimilarProblemCard
@@ -141,7 +141,7 @@ export const SimilarProblemView = ({ view, problem }: SimilarProblemViewProps) =
     <div
       className={cn(
         view === 'similar' ? 'pl-10 pr-6 py-5' : 'px-6 py-5',
-        'border-t border-gray-700 bg-gray-900/50'
+        'border-t border-foreground/10 bg-surface/50'
       )}
     >
       {renderContent()}

@@ -47,13 +47,13 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           className="inline-flex h-9 w-9 items-center justify-center rounded-full
-               bg-white/5 border border-white/10
-               text-gray-400 hover:bg-white/10 hover:text-gray-200
-               focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50
+               bg-foreground/5 border border-foreground/10
+               text-muted-foreground hover:bg-foreground/5 hover:text-foreground/85
+               focus:outline-none focus-visible:ring-1 focus-visible:ring-focus/50
                transition-colors duration-150"
           aria-label={tHandouts('moreActions')}
         >
@@ -62,7 +62,7 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 bg-slate-900/95 border-slate-700/50"
+        className="w-56 bg-surface/40 backdrop-blur-xl border-foreground/10"
         onCloseAutoFocus={(event) => event.preventDefault()}
       >
         {/* Share — copies the current URL to clipboard */}

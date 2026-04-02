@@ -23,7 +23,7 @@ export const NavLink = ({ href, children, className, onClick }: NavLinkProps) =>
   <AppLink
     href={href}
     className={cn(
-      'text-slate-300 text-xl font-semibold hover:text-white transition-colors',
+      'text-muted-foreground text-xl font-semibold hover:text-foreground transition-colors',
       className
     )}
     onClick={onClick}

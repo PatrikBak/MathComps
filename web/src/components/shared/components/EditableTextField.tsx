@@ -353,7 +353,7 @@ export function EditableTextField({
               {/* Save button */}
               <IconButton
                 onClick={handleSave}
-                className="hover:bg-green-500/20 text-green-400"
+                className="hover:bg-success/20 text-success"
                 label={tActions('save')}
               >
                 <Check size={iconSize} className={iconClassName} />
@@ -362,7 +362,7 @@ export function EditableTextField({
               {/* Cancel button */}
               <IconButton
                 onClick={handleCancel}
-                className="hover:bg-red-500/20 text-red-400"
+                className="hover:bg-error/20 text-error"
                 label={tActions('cancel')}
               >
                 <X size={iconSize} className={iconClassName} />
@@ -374,7 +374,7 @@ export function EditableTextField({
           {!isEditing && (
             <IconButton
               onClick={startEditing}
-              className="text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-slate-500/20"
+              className="text-muted opacity-0 group-hover:opacity-100 hover:bg-muted/20"
               label={tActions('edit')}
             >
               <Pencil size={iconSize} className={iconClassName} />
@@ -391,7 +391,7 @@ export function EditableTextField({
       {/* Error message below - always reserve space */}
       <div
         className={cn(
-          'absolute mt-1 text-xs text-red-400 text-center px-2 max-w-xs mx-auto transition-opacity duration-200',
+          'absolute mt-1 text-xs text-error text-center px-2 max-w-xs mx-auto transition-opacity duration-200',
           error ? 'opacity-100' : 'opacity-0'
         )}
       >

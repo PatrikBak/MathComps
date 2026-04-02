@@ -27,7 +27,7 @@ export const StorySection = () => {
               <AppLink
                 href="https://www.wincent.com/"
                 newTab
-                className="text-slate-300 hover:text-white hover:underline transition-colors duration-300"
+                className="text-muted-foreground hover:text-foreground hover:underline transition-colors duration-300"
               >
                 {chunks}
               </AppLink>

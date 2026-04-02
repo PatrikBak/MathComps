@@ -44,6 +44,7 @@ import {
 import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { Modal } from '@/components/shared/components/Modal'
+import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
 
 import { useCreateUserList } from '../hooks/use-create-user-list'
@@ -187,15 +188,16 @@ function SortableListRow({
     <div
       ref={setNodeRef}
       style={style}
-      className={`col-span-full grid grid-cols-subgrid items-center gap-x-2 rounded-lg px-2 py-1.5 hover:bg-slate-700/30 transition-colors ${
-        isDragging ? 'opacity-50 z-10' : ''
-      }`}
+      className={cn(
+        'col-span-full grid grid-cols-subgrid items-center gap-x-2 rounded-lg px-2 py-1.5 hover:bg-foreground/5 transition-colors',
+        isDragging && 'opacity-50 z-10'
+      )}
     >
       {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className="w-5 h-7 flex items-center justify-center text-slate-500 hover:text-slate-300 cursor-grab active:cursor-grabbing touch-none"
+        className="w-5 h-7 flex items-center justify-center text-muted hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
       >
         <GripVertical size={14} />
       </button>
@@ -210,23 +212,21 @@ function SortableListRow({
           }}
           schema={listNameSchema}
           label={t('renameList')}
-          textClassName="text-sm text-slate-200"
+          textClassName="text-sm text-foreground"
           innerContainerClassName="py-0"
-          iconClassName="text-slate-500 hover:text-slate-300"
+          iconClassName="text-muted hover:text-muted-foreground"
           iconSize={15}
         />
       </div>
 
       {/* Problem count */}
-      <span className="text-right text-xs tabular-nums text-slate-500 px-1">
-        {list.problemCount}
-      </span>
+      <span className="text-right text-xs tabular-nums text-muted px-1">{list.problemCount}</span>
 
       {/* === Mobile: single overflow menu === */}
       <div className="sm:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-600/50 transition-colors">
+            <button className="w-7 h-7 flex items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors">
               <MoreVertical size={15} />
             </button>
           </DropdownMenuTrigger>
@@ -241,7 +241,7 @@ function SortableListRow({
 
             {/* Stop sharing — only when shared */}
             {list.isShared && (
-              <DropdownMenuItem className="text-red-400" onSelect={handleStopSharing}>
+              <DropdownMenuItem className="text-error" onSelect={handleStopSharing}>
                 <div className="flex items-center gap-2">
                   <X size={14} />
                   <span>{t('unshareList')}</span>
@@ -260,7 +260,7 @@ function SortableListRow({
             </DropdownMenuItem>
 
             {/* Delete */}
-            <DropdownMenuItem className="text-red-400" onSelect={() => onDelete(list)}>
+            <DropdownMenuItem className="text-error" onSelect={() => onDelete(list)}>
               <div className="flex items-center gap-2">
                 <Trash2 size={14} />
                 <span>{t('deleteList')}</span>
@@ -275,14 +275,14 @@ function SortableListRow({
       {list.isShared ? (
         <Popover className="relative hidden sm:block">
           <PopoverButton
-            className="w-7 h-7 flex items-center justify-center rounded-md text-blue-400 hover:text-blue-300 hover:bg-slate-600/50 transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-link hover:text-link-hover hover:bg-foreground/5 transition-colors"
             title={t('shareList')}
           >
             <LinkIcon size={15} />
           </PopoverButton>
           <PopoverPanel
             anchor="bottom"
-            className="z-50 mt-1 rounded-lg border border-slate-600/50 bg-slate-800 shadow-xl p-1 min-w-[160px]"
+            className="z-50 mt-1 rounded-lg border border-foreground/10 bg-surface shadow-xl p-1 min-w-[160px]"
           >
             {({ close }) => (
               <>
@@ -291,7 +291,7 @@ function SortableListRow({
                     handleCopyLink()
                     close()
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-foreground hover:bg-foreground/5 transition-colors"
                 >
                   <LinkIcon size={14} />
                   {t('copyListLink')}
@@ -301,7 +301,7 @@ function SortableListRow({
                     handleStopSharing()
                     close()
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-red-400 hover:bg-slate-700/50 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-error hover:bg-foreground/5 transition-colors"
                 >
                   <X size={14} />
                   {t('unshareList')}
@@ -313,7 +313,7 @@ function SortableListRow({
       ) : (
         <button
           onClick={handleEnableSharing}
-          className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-600/50 transition-colors"
+          className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
           title={t('shareList')}
         >
           <Share2 size={15} />
@@ -323,7 +323,7 @@ function SortableListRow({
       {/* View button */}
       <button
         onClick={() => onView(list.contentId)}
-        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-600/50 transition-colors"
+        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
         title={t('viewList')}
       >
         <Eye size={15} />
@@ -332,7 +332,7 @@ function SortableListRow({
       {/* Delete button — opens confirm dialog */}
       <button
         onClick={() => onDelete(list)}
-        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-slate-400 hover:text-red-400 hover:bg-slate-600/50 transition-colors"
+        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-error hover:bg-foreground/5 transition-colors"
         title={t('deleteList')}
       >
         <Trash2 size={15} />
@@ -486,18 +486,16 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
                 </SortableContext>
               </DndContext>
             ) : (
-              <p className="col-span-full text-sm text-slate-400 py-4 text-center">
-                {t('noLists')}
-              </p>
+              <p className="col-span-full text-sm text-muted py-4 text-center">{t('noLists')}</p>
             )}
           </div>
 
           {/* Separator */}
-          <div className="border-t border-slate-600/40 mt-3 pt-3">
+          <div className="border-t border-foreground/10 mt-3 pt-3">
             {isCreating ? (
               /* Inline input for new list */
               <div className="flex items-center gap-2 px-2 py-1.5">
-                <Plus className="h-4 w-4 shrink-0 text-slate-400" />
+                <Plus className="h-4 w-4 shrink-0 text-muted" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -517,7 +515,7 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
                   placeholder={t('newListPlaceholder')}
                   disabled={isCreatePending}
                   autoFocus
-                  className="flex-1 min-w-0 bg-transparent text-sm text-slate-200 placeholder-slate-500 border-none outline-none focus:ring-0"
+                  className="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder-muted border-none outline-none focus:ring-0"
                 />
                 {isCreatePending && <LoadingSpinner className="h-4 w-4 shrink-0" />}
               </div>
@@ -525,7 +523,7 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
               /* Button to start creating a new list */
               <button
                 onClick={() => setIsCreating(true)}
-                className="flex items-center gap-2 px-2 py-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors w-full rounded-md hover:bg-slate-700/30"
+                className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted hover:text-foreground transition-colors w-full rounded-md hover:bg-foreground/5"
               >
                 <Plus className="h-4 w-4" />
                 <span>{t('newList')}</span>

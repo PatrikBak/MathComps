@@ -8,6 +8,10 @@ import { getGuideTableOfContents } from './layout/guide-structure'
 import ResourcesSection from './ResourcesSection'
 import WhyCompetitionsSection from './WhyCompetitionsSection'
 
+/**
+ * Root component for the guide page. Renders the hero, table-of-contents,
+ * and all guide sections with hierarchical numbering.
+ */
 export default function GuideDetail() {
   // Get guide translations
   const tGuide = useTranslations('guide')
@@ -22,11 +26,11 @@ export default function GuideDetail() {
       <div className="space-y-6 sm:space-y-8 md:space-y-10">
         <header>
           <div className="mb-4 sm:mb-6">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
               {tGuide('hero.title')}
             </h1>
           </div>
-          <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-muted max-w-4xl leading-relaxed">
             {tGuide('hero.description')}
           </p>
         </header>

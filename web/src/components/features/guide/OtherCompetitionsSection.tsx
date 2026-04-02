@@ -2,7 +2,6 @@ import { Star, User, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
 // Import messages to extract item keys for type safety
@@ -12,30 +11,53 @@ import { CountryBadge } from './layout/CountryBadge'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import type { Country } from './layout/FlagIcon'
 import { GUIDE_TITLES } from './layout/guide-structure'
-import { GUIDE_STYLES } from './layout/guide-styles'
+import { GuideCard } from './layout/GuideCard'
+import { GuideHeading } from './layout/GuideHeading'
 import { GuideSection } from './layout/GuideSection'
-import { InfoCard } from './layout/InfoCard'
+import { GuideText } from './layout/GuideText'
 import { type SchoolLevel, SchoolLevelBadge } from './layout/SchoolLevelBadge'
 
+/** Translation key for competition item descriptions. */
 type ItemKey = keyof (typeof messages)['guide']['sections']['otherCompetitions']['items']
 
+/** Whether a competition is team-based or individual. */
 type CompetitionType = 'Team' | 'Individual'
 
+/**
+ * Data model for a single competition entry in the "Other Competitions" section.
+ */
 type OtherCompetition = {
+  /** Translation key used to look up the competition title. */
   titleKey: ItemKey
+  /** External URLs to the competition website(s). */
   links: string[]
+  /** Translation key used to look up the competition description. */
   descriptionKey: ItemKey
+  /** Optional bullet-point details. */
   details?: string[]
+  /** School levels this competition targets. */
   levels: SchoolLevel[]
+  /** Countries where the competition is available. */
   countries: Country[]
+  /** Whether the competition is team or individual. */
   type: CompetitionType
 }
 
+/**
+ * Props for the {@link OtherCompetitionsSection} component.
+ */
+type OtherCompetitionsSectionProps = {
+  /** Section numberer for hierarchical section numbering. */
+  sectionNumberer: SectionNumberer
+}
+
+/**
+ * Guide section listing team and individual math competitions
+ * beyond the main Math Olympiad (Náboj, Klokan, etc.).
+ */
 export default function OtherCompetitionsSection({
   sectionNumberer,
-}: {
-  sectionNumberer: SectionNumberer
-}) {
+}: OtherCompetitionsSectionProps) {
   // Main translator for general guide content (titles, descriptions, etc.)
   const tGuide = useTranslations('guide')
 
@@ -45,6 +67,7 @@ export default function OtherCompetitionsSection({
   // Scoped translator for competition titles
   const tTitles = useTranslations('guide.sections.otherCompetitions.titles')
 
+  // All competitions including team and individual types
   const competitions: OtherCompetition[] = [
     {
       titleKey: 'naboj',
@@ -152,12 +175,21 @@ export default function OtherCompetitionsSection({
     },
   ]
 
+  /**
+   * Renders a single competition card.
+   *
+   * @param competition - The competition to render.
+   * @param index - The index of the competition.
+   * @returns The rendered competition card.
+   */
   const renderCompetitionCard = (competition: OtherCompetition, index: number) => (
-    <InfoCard key={index}>
+    <GuideCard key={index}>
       <div className="mb-2 sm:mb-3">
         {/* Header with levels and countries */}
         <div className="flex flex-col items-start gap-1 mb-2 sm:mb-3">
-          <h4 className={cn(GUIDE_STYLES.cardTitle, 'mb-0')}>{tTitles(competition.titleKey)}</h4>
+          <GuideHeading level="h3" className="mb-0">
+            {tTitles(competition.titleKey)}
+          </GuideHeading>
           <div className="flex items-center gap-2.5">
             {competition.levels.map((level) => (
               <SchoolLevelBadge key={level} level={level} />
@@ -177,47 +209,46 @@ export default function OtherCompetitionsSection({
       )}
 
       {/* Description and details */}
-      <div className={GUIDE_STYLES.contentSpacing}>
-        <p className={cn(GUIDE_STYLES.textNormal, 'leading-relaxed')}>
-          {tItems(competition.descriptionKey)}
-        </p>
+      <div className="space-y-2 sm:space-y-3">
+        <GuideText>{tItems(competition.descriptionKey)}</GuideText>
         {competition.details && <BulletList items={competition.details} />}
       </div>
-    </InfoCard>
+    </GuideCard>
   )
 
+  // Render a subsection grouping competitions by team/individual type
   function renderTypeGroup(type: CompetitionType) {
+    // Section header configuration for each type
     const typeConfig = {
       Team: {
         title: tGuide(`titles.${GUIDE_TITLES.OTHER_COMPETITIONS_TEAM}`),
         description: tGuide('sections.otherCompetitions.team.description'),
         icon: Users,
-        iconColor: 'text-green-400',
-        iconBackground: 'bg-green-500/10',
+        accent: 'emerald' as const,
       },
       Individual: {
         title: tGuide(`titles.${GUIDE_TITLES.OTHER_COMPETITIONS_INDIVIDUAL}`),
         description: tGuide('sections.otherCompetitions.individual.description'),
         icon: User,
-        iconColor: 'text-cyan-400',
-        iconBackground: 'bg-cyan-500/10',
+        accent: 'cyan' as const,
       },
     }
 
+    // Filter competitions matching this type and render their cards
     const typeCompetitions = competitions
       .filter((competition) => competition.type === type)
       .map(renderCompetitionCard)
 
+    // Skip rendering if no competitions match
     return typeCompetitions.length === 0 ? null : (
       <GuideSection
         title={typeConfig[type].title}
         description={typeConfig[type].description}
         icon={{ type: 'lucide', icon: typeConfig[type].icon }}
-        iconColor={typeConfig[type].iconColor}
-        iconBackground={typeConfig[type].iconBackground}
+        accent={typeConfig[type].accent}
         sectionNumberer={sectionNumberer}
       >
-        <div className={GUIDE_STYLES.sectionSpacing}>{typeCompetitions}</div>
+        <div className="space-y-4 sm:space-y-5 md:space-y-6">{typeCompetitions}</div>
       </GuideSection>
     )
   }
@@ -227,8 +258,7 @@ export default function OtherCompetitionsSection({
       title={tGuide(`titles.${GUIDE_TITLES.OTHER_COMPETITIONS}`)}
       description={tGuide('sections.otherCompetitions.description')}
       icon={{ type: 'lucide', icon: Star }}
-      iconColor="text-violet-400"
-      iconBackground="bg-violet-500/10"
+      accent="purple"
       sectionNumberer={sectionNumberer}
     >
       {renderTypeGroup('Team')}

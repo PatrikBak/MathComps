@@ -3,36 +3,32 @@ import React from 'react'
 import { CopyLinkButton } from '@/components/shared/components/CopyLinkButton'
 import { cn } from '@/components/shared/utils/css-utils'
 
-type CardType = 'theorem' | 'exercise' | 'example' | 'problem'
+import { CARD_PALETTE, type HandoutEnvironmentType } from './handout-colors'
 
-const PALETTE: Record<CardType, { border: string; title: string; tint: string; summary: string }> =
-  {
-    theorem: {
-      border: 'border-green-500',
-      title: 'text-green-300',
-      tint: 'border-green-500/20',
-      summary: 'text-green-300',
-    },
-    exercise: {
-      border: 'border-yellow-500',
-      title: 'text-yellow-300',
-      tint: 'border-yellow-500/20',
-      summary: 'text-yellow-300',
-    },
-    example: {
-      border: 'border-blue-500',
-      title: 'text-blue-300',
-      tint: 'border-blue-500/20',
-      summary: 'text-blue-300',
-    },
-    problem: {
-      border: 'border-purple-500',
-      title: 'text-purple-300',
-      tint: 'border-purple-500/20',
-      summary: 'text-purple-300',
-    },
-  }
+/**
+ * Props for the {@link CollapsibleCard} component.
+ */
+type CollapsibleCardProps = {
+  /** Mathematical environment type, determines the color scheme. */
+  type: HandoutEnvironmentType
+  /** Heading label (e.g., "Theorem 1", "Exercise 3"). */
+  title: React.ReactNode
+  /** Optional badge next to the title (e.g. "Cauchy–Schwarz"). */
+  subtitle?: React.ReactNode
+  /** Body content of the environment (rendered math blocks, text, images). */
+  children: React.ReactNode
+  /** Label for the built-in collapsible section (e.g., "Proof", "Solution"). */
+  detailsTitle?: string
+  /** Content revealed when the built-in collapsible section is expanded. */
+  details?: React.ReactNode
+  /** Unique anchor ID for deep linking (e.g., "theorem-1"). */
+  id: string
+}
 
+/**
+ * A colored, collapsible card for mathematical environments
+ * (theorems, exercises, examples, problems).
+ */
 export function CollapsibleCard({
   type,
   title,
@@ -41,28 +37,24 @@ export function CollapsibleCard({
   detailsTitle,
   details,
   id,
-}: {
-  type: CardType
-  title?: React.ReactNode
-  subtitle?: React.ReactNode
-  children?: React.ReactNode
-  detailsTitle?: string
-  details?: React.ReactNode
-  /** Unique ID for anchor linking */
-  id: string
-}) {
-  const c = PALETTE[type]
+}: CollapsibleCardProps) {
+  // Resolve the color scheme for this environment type
+  const card = CARD_PALETTE[type]
 
   return (
-    <section id={id} className={cn('bg-gray-800/50 border-l-4 rounded-r-lg my-6 group', c.border)}>
+    <section
+      id={id}
+      className={cn('bg-surface/40 border-l-4 rounded-r-lg my-6 group', card.border)}
+    >
       <div className="p-5 sm:p-6">
+        {/* Header row with title, optional subtitle badge, and anchor link */}
         {(title || subtitle || id) && (
           <div className="mb-2 flex items-center gap-2 flex-wrap">
             {title && (
               <p
                 className={cn(
                   'ui-text ui-nums font-semibold text-[1.06em] sm:text-[1.1em] leading-tight',
-                  c.title
+                  card.title
                 )}
               >
                 {title}
@@ -70,10 +62,11 @@ export function CollapsibleCard({
             )}
             {subtitle && (
               <span
-                className={`ui-text ui-nums ${c.title} border ${c.tint} bg-white/5
-                text-[0.82em] sm:text-[0.86em] font-medium
-                px-[0.6em] py-[0.28em] rounded-full
-                inline-flex items-baseline leading-none`}
+                className={cn(
+                  'ui-text ui-nums border bg-foreground/5 text-[0.82em] sm:text-[0.86em] font-medium px-[0.6em] py-[0.28em] rounded-full inline-flex items-baseline leading-none',
+                  card.title,
+                  card.tint
+                )}
               >
                 {subtitle}
               </span>
@@ -81,15 +74,17 @@ export function CollapsibleCard({
             {id && <CopyLinkButton slug={id} iconSize={16} className="ml-0" />}
           </div>
         )}
-        <div className="text-gray-300 leading-relaxed">{children}</div>
+        {/* Card body content */}
+        <div className="text-foreground/70 leading-relaxed">{children}</div>
       </div>
 
+      {/* Collapsible details section (e.g., proof or solution) */}
       {(detailsTitle || details) && (
-        <details className={cn('border-t group', c.tint)}>
+        <details className={cn('border-t group', card.tint)}>
           <summary
             className={cn(
-              'flex justify-between items-center px-5 sm:px-6 py-3 sm:py-4 hover:bg-white/5',
-              c.summary
+              'flex justify-between items-center px-5 sm:px-6 py-3 sm:py-4 hover:bg-foreground/5',
+              card.summary
             )}
           >
             <span className="ui-text inline-flex items-center gap-2 font-semibold leading-6">
@@ -108,8 +103,8 @@ export function CollapsibleCard({
               />
             </svg>
           </summary>
-          <div className="p-5 sm:p-6 border-t text-gray-300 leading-relaxed">
-            {details ? details : <em className="text-gray-400">—</em>}
+          <div className="p-5 sm:p-6 border-t text-foreground/70 leading-relaxed">
+            {details ? details : <em className="text-muted-foreground">—</em>}
           </div>
         </details>
       )}

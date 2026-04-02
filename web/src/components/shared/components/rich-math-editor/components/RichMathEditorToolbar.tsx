@@ -81,8 +81,8 @@ export function RichMathEditorToolbar({
         '@container flex items-center gap-0.5 px-1 py-1 flex-wrap sticky top-0 z-10',
         {
           card: cn(
-            'bg-slate-800/50',
-            !borderless && 'rounded-t-lg border border-b-0 border-slate-600/60'
+            'bg-surface/50',
+            !borderless && 'rounded-t-lg border border-b-0 border-foreground/10'
           ),
           inline: 'pb-1',
         }[variant]

@@ -56,14 +56,14 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
     profile: {
       icon: User,
       label: tCommon('profile'),
-      bgColor: 'bg-violet-500/10',
-      iconColor: 'text-violet-400',
+      bgColor: 'bg-brand/10',
+      iconColor: 'text-brand-light',
     },
     signOut: {
       icon: LogOut,
       label: tAuth('signOut'),
-      bgColor: 'bg-red-500/10',
-      iconColor: 'text-red-400',
+      bgColor: 'bg-error/10',
+      iconColor: 'text-error',
     },
   }[type]
 
@@ -87,9 +87,9 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
       // Dropdown variant uses Radix DropdownMenu.Item wrapper
       const baseClasses = cn(
         'flex items-center gap-3 px-4 py-2.5 text-sm',
-        'text-white/70 hover:text-white',
+        'text-foreground/70 hover:text-foreground',
         'transition-colors duration-150',
-        'outline-none data-[highlighted]:bg-white/5 data-[highlighted]:text-white',
+        'outline-none data-[highlighted]:bg-foreground/5 data-[highlighted]:text-foreground',
         disabled ? 'opacity-50 cursor-default pointer-events-none' : 'cursor-pointer'
       )
 
@@ -109,7 +109,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
                 href={ROUTES.PROFILE}
                 className={cn(
                   baseClasses,
-                  'text-white/70 font-normal',
+                  'text-popover-foreground/70 font-normal',
                   disabled && 'opacity-50 cursor-default'
                 )}
                 aria-disabled={disabled}
@@ -124,7 +124,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
     case 'mobile':
       // Mobile variant uses plain Link/button with mobile-specific styling
       const mobileClasses = cn(
-        'w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200',
+        'w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 rounded-xl transition-all duration-200',
         disabled ? 'opacity-50 cursor-default pointer-events-none' : 'cursor-pointer'
       )
 

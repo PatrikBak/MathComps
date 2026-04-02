@@ -1,64 +1,95 @@
+import { cva, type VariantProps } from 'class-variance-authority'
 import { Info } from 'lucide-react'
 import React from 'react'
 
+import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 
+import { TIP_BOX_VARIANTS } from '../guide-colors'
+import { GuideHeading } from './GuideHeading'
+import { GuideText } from './GuideText'
+
 /**
- * Props for the TipBox component.
+ * The styles for the tip box.
  */
-interface TipBoxProps {
-  /** The main content of the tip */
-  children: React.ReactNode
-  /** Visual style variant */
-  variant?: 'tip' | 'info'
+const tipBoxVariants = cva('mt-4 rounded-lg border bg-gradient-to-br p-4 sm:mt-5 sm:p-5', {
+  variants: {
+    variant: {
+      note: TIP_BOX_VARIANTS.note,
+      tip: TIP_BOX_VARIANTS.tip,
+    },
+  },
+  defaultVariants: {
+    variant: 'tip',
+  },
+})
+
+/**
+ * Resolved visual scheme for a single {@link TipBox} variant
+ */
+type TipScheme = {
+  /** Tailwind text-color class applied to the leading icon. */
+  iconColor: string
+  /** Tailwind text-color class applied to the callout title. */
+  titleColor: string
+  /** Visible title label rendered inside the callout header. */
+  label: string
+  /** Extra layout / typography classes applied to the icon wrapper. */
+  iconLayoutClass: string
+  /** React node rendered as the leading icon (Lucide component or emoji). */
+  iconNode: React.ReactNode
 }
 
 /**
- * Reusable tip box component for displaying helpful tips and information.
- * Features a prominent emoji, title, and content with consistent styling.
+ * Props for the {@link TipBox} component.
  */
-export default function TipBox({ children, variant = 'tip' }: TipBoxProps) {
-  const scheme = {
-    info: {
-      border: 'border-blue-500/20',
-      bgFrom: 'from-blue-500/5',
-      bgTo: 'to-blue-600/5',
-      iconColor: 'text-blue-400',
-      titleColor: 'text-blue-300',
-      label: 'Info',
-      iconLayoutClass: 'mt-0.5',
-      iconNode: <Info size={20} />,
-    },
-    tip: {
-      border: 'border-amber-500/20',
-      bgFrom: 'from-amber-500/5',
-      bgTo: 'to-amber-600/5',
-      iconColor: 'text-amber-400',
-      titleColor: 'text-amber-300',
-      label: 'Tip',
-      iconLayoutClass: 'text-xl font-bold',
-      iconNode: '💡',
-    },
-  }[variant]
+type TipBoxProps = VariantProps<typeof tipBoxVariants> & {
+  /** Content displayed inside the callout body. */
+  children: React.ReactNode
+}
+
+/**
+ * Callout box for guide-specific tips and informational notes.
+ */
+export default function TipBox({ children, variant }: TipBoxProps) {
+  // Resolve the visual scheme config tailored to the variant
+  const scheme = ((): TipScheme => {
+    switch (variant) {
+      case 'note':
+        // Return info block config
+        return {
+          iconColor: ACCENT_COLOR_MAP.blue.text,
+          titleColor: ACCENT_COLOR_MAP.blue.text,
+          label: 'Info',
+          iconLayoutClass: 'mt-0.5',
+          iconNode: <Info size={20} />,
+        }
+      case 'tip':
+      default:
+        // Return warning block config
+        return {
+          iconColor: ACCENT_COLOR_MAP.amber.text,
+          titleColor: ACCENT_COLOR_MAP.amber.text,
+          label: 'Tip',
+          iconLayoutClass: 'text-xl font-bold',
+          iconNode: '💡',
+        }
+    }
+  })()
 
   return (
-    <div
-      className={cn(
-        'rounded-lg border bg-gradient-to-br p-4 sm:p-5 mt-4 sm:mt-5',
-        scheme.border,
-        scheme.bgFrom,
-        scheme.bgTo
-      )}
-    >
+    <div className={tipBoxVariants({ variant })}>
       <div className="flex items-start gap-3">
         <div className={cn(scheme.iconColor, 'flex-shrink-0', scheme.iconLayoutClass)}>
           {scheme.iconNode}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={cn('text-sm sm:text-base font-semibold mb-1', scheme.titleColor)}>
+          <GuideHeading level="h4" className={cn('mb-1 text-sm sm:text-base', scheme.titleColor)}>
             {scheme.label}
-          </p>
-          <div className="text-sm sm:text-base text-slate-300 leading-relaxed">{children}</div>
+          </GuideHeading>
+          <GuideText variant="small" color="subtle" as="div">
+            {children}
+          </GuideText>
         </div>
       </div>
     </div>

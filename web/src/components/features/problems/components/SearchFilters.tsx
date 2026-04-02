@@ -40,23 +40,23 @@ function TipsAndTricks() {
     <div className="space-y-3 max-w-xs text-xs sm:text-sm">
       {/* Search languages */}
       <div>
-        <div className="font-medium text-slate-200 mb-1.5">{t('search.title')}</div>
-        <p className="text-slate-300/90">{t('search.text')}</p>
+        <div className="font-medium text-foreground mb-1.5">{t('search.title')}</div>
+        <p className="text-muted-foreground">{t('search.text')}</p>
       </div>
 
       {/* Exclusive selection */}
       <div>
-        <div className="font-medium text-slate-200 mb-1.5">{t('exclusive.title')}</div>
+        <div className="font-medium text-foreground mb-1.5">{t('exclusive.title')}</div>
         {isTouchOnly ? (
-          <p className="text-slate-300/90">{t('exclusive.touch', { intro: introText })}</p>
+          <p className="text-muted-foreground">{t('exclusive.touch', { intro: introText })}</p>
         ) : (
-          <p className="text-slate-300/90">
+          <p className="text-muted-foreground">
             {t.rich('exclusive.desktop', {
               modifierKey,
               modifierName,
               intro: introText,
               kbd: (chunks: React.ReactNode) => (
-                <kbd className="px-1 py-0.5 rounded bg-slate-600/50 text-xs font-mono">
+                <kbd className="px-1 py-0.5 rounded bg-foreground/10 text-xs font-mono">
                   {chunks}
                 </kbd>
               ),
@@ -67,11 +67,11 @@ function TipsAndTricks() {
 
       {/* Logic toggle */}
       <div>
-        <div className="font-medium text-slate-200 mb-1.5">{t('logic.title')}</div>
-        <p className="text-slate-300/90">
+        <div className="font-medium text-foreground mb-1.5">{t('logic.title')}</div>
+        <p className="text-muted-foreground">
           {t.rich('logic.text', {
             mono: (chunks: React.ReactNode) => (
-              <span className="font-mono text-indigo-200">{chunks}</span>
+              <span className="font-mono text-focus-light">{chunks}</span>
             ),
             hyphens: (chunks: React.ReactNode) => <ManualHyphens text={String(chunks)} />,
           })}
@@ -84,7 +84,7 @@ function TipsAndTricks() {
   return (
     <Tooltip content={tooltipContent} placement="left">
       <span
-        className="p-1 rounded text-slate-400 hover:text-amber-400/80 hover:bg-slate-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-help"
+        className="p-1 rounded text-muted hover:text-warning/80 hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus cursor-help"
         aria-label={t('title')}
       >
         <Lightbulb className="h-4 w-4" />
@@ -148,7 +148,7 @@ export const SearchFilters = ({
   }, [isLoaded, isSignedIn, filters, onFiltersChange])
 
   return (
-    <div className="flex flex-col rounded-lg border border-slate-600/40 bg-slate-800/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">
+    <div className="flex flex-col rounded-lg border border-foreground/10 bg-surface/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">
       {/* Filters Body */}
       <div className="flex-grow overflow-y-auto p-3 sm:p-4 lg:p-5 lg:min-h-0">
         <div className="space-y-3 sm:space-y-4">
@@ -164,7 +164,7 @@ export const SearchFilters = ({
           {/* Section 1: Full-text search */}
           <div>
             <div className="mb-2 sm:mb-3 flex items-center justify-between gap-2">
-              <label htmlFor="search" className="text-xs sm:text-sm font-semibold text-slate-200">
+              <label htmlFor="search" className="text-xs sm:text-sm font-semibold text-foreground">
                 {t('search.label')}
               </label>
               <TipsAndTricks />
@@ -186,7 +186,7 @@ export const SearchFilters = ({
                     updateFilter('searchText', '', 'text')
                     searchTextRef.current?.focus()
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-slate-400 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                   aria-label={t('search.clear')}
                   title={t('search.clear')}
                 >
@@ -208,8 +208,8 @@ export const SearchFilters = ({
               <label
                 htmlFor="search-solution"
                 className={cn(
-                  'ml-2 text-xs sm:text-[14px] leading-none text-slate-200 transition-colors',
-                  !filters.searchText && 'text-slate-500'
+                  'ml-2 text-xs sm:text-[14px] leading-none text-foreground transition-colors',
+                  !filters.searchText && 'text-muted/40'
                 )}
               >
                 {t('search.searchInSolution')}
@@ -218,7 +218,7 @@ export const SearchFilters = ({
           </div>
 
           {/* Section 2: Contextual Filters */}
-          <div className="space-y-3 sm:space-y-4 border-t border-slate-500/70 pt-3 sm:pt-4 py-2">
+          <div className="space-y-3 sm:space-y-4 border-t border-muted/40 pt-3 sm:pt-4 py-2">
             <TreeSelectFacet
               title={t('facets.competition')}
               options={competitionTreeOpts}
@@ -264,7 +264,7 @@ export const SearchFilters = ({
           </div>
 
           {/* Section 3: Attribute Filters (Multi-select) */}
-          <div className="space-y-3 sm:space-y-4 border-t border-slate-500/70 pt-3 sm:pt-4">
+          <div className="space-y-3 sm:space-y-4 border-t border-muted/40 pt-3 sm:pt-4">
             <MultiSelectFacet
               title={t('facets.tags')}
               titleTooltip={t('facets.tagsTooltip')}

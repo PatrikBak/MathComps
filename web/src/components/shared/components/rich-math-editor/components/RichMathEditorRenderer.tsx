@@ -150,10 +150,12 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             return <p className="mb-2 last:mb-0">{children}</p>
           },
           h3: ({ children }) => (
-            <h3 className="text-lg font-semibold text-white mt-4 mb-2 first:mt-0">{children}</h3>
+            <h3 className="text-lg font-semibold text-foreground mt-4 mb-2 first:mt-0">
+              {children}
+            </h3>
           ),
           strong: ({ children }) => (
-            <strong className="font-semibold text-white">{children}</strong>
+            <strong className="font-semibold text-foreground">{children}</strong>
           ),
           em: ({ children }) => <em className="italic">{children}</em>,
           code: ({ children, className }) => {
@@ -177,13 +179,13 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
 
             // Inline code
             return (
-              <code className="bg-slate-700/50 px-1 py-0.5 rounded text-xs text-indigo-300 font-mono">
+              <code className="bg-foreground/5 px-1 py-0.5 rounded text-xs text-brand-light font-mono">
                 {children}
               </code>
             )
           },
           blockquote: ({ children }) => (
-            <blockquote className="border-l-2 border-indigo-500/50 pl-3 my-2 text-gray-400 italic">
+            <blockquote className="border-l-2 border-focus/50 pl-3 my-2 text-muted italic">
               {children}
             </blockquote>
           ),
@@ -193,8 +195,8 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
           ol: ({ children }) => (
             <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
           ),
-          li: ({ children }) => <li className="text-gray-300">{children}</li>,
-          del: ({ children }) => <del className="line-through text-gray-500">{children}</del>,
+          li: ({ children }) => <li className="text-muted-foreground">{children}</li>,
+          del: ({ children }) => <del className="line-through text-muted">{children}</del>,
           a: ({ href, children }) => {
             // Resolve media: URLs to full R2 URLs
             let normalizedHref = href ? resolveMediaUrl(href) : '#'
@@ -218,7 +220,7 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
               return (
                 <a
                   href={normalizedHref}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-700/60 hover:bg-slate-600/60 rounded text-xs text-indigo-300 hover:text-indigo-200 transition-colors border border-slate-600/40"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-foreground/5 hover:bg-foreground/10 rounded text-xs text-link hover:text-link-hover transition-colors border border-foreground/10"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -231,7 +233,7 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             return (
               <a
                 href={normalizedHref}
-                className="text-indigo-400 hover:text-indigo-300 underline"
+                className="text-link hover:text-link-hover underline"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -246,7 +248,7 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             // Don't render image if src is empty or not a string
             if (!resolvedSrc || typeof resolvedSrc !== 'string') {
               return (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-slate-700/50 rounded text-xs text-gray-400 italic">
+                <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-foreground/5 rounded text-xs text-muted italic">
                   🖼️ {alt || t('imageAlt')}
                 </span>
               )

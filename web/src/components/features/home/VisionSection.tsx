@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl'
 import Badge from '@/components/features/home/layout/Badge'
 import Section from '@/components/shared/components/Section'
 
+import { HOME_CARD_COLOR_SCHEMES } from './home-card-colors'
+
 /**
  * Displays the vision/future goals section on the home page.
  */
@@ -42,6 +44,7 @@ export default function VisionSection() {
       title={t('title')}
       description={t('description')}
       cards={visionItems}
+      cardColorSchemes={HOME_CARD_COLOR_SCHEMES}
     />
   )
 }

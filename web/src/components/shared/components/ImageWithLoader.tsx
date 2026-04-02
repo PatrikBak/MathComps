@@ -63,14 +63,14 @@ export function ImageWithLoader({
       {/* Loading spinner - shown while image is loading */}
       {loadState === 'loading' && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 className="text-gray-400 animate-spin" size={spinnerSize} strokeWidth={2} />
+          <Loader2 className="text-muted animate-spin" size={spinnerSize} strokeWidth={2} />
         </div>
       )}
 
       {/* Error state - shown if image fails to load */}
       {loadState === 'error' && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <ImageOff className="text-gray-500" size={spinnerSize} strokeWidth={1.5} />
+          <ImageOff className="text-muted" size={spinnerSize} strokeWidth={1.5} />
         </div>
       )}
 

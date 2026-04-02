@@ -126,7 +126,7 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
                 transition={{ duration: 0.15, ease: 'easeOut' }}
                 {...getFloatingProps({
                   ref: refs.setFloating,
-                  className: `z-[9999] max-h-48 rounded-lg bg-slate-700/95 px-3 py-1.5 text-sm text-slate-100 shadow-lg backdrop-blur-sm overflow-y-auto ${className}`,
+                  className: `z-[9999] max-h-48 rounded-lg bg-surface/95 px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm overflow-y-auto ${className}`,
                   style: {
                     position: context.strategy,
                     top: y ?? 0,

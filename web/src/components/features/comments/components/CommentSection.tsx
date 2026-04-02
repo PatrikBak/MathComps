@@ -287,7 +287,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       <div
         className={
           {
-            card: 'sm:bg-slate-800 sm:border sm:border-slate-600/60 sm:rounded-lg sm:shadow-lg overflow-hidden',
+            card: 'sm:bg-surface sm:border sm:border-foreground/10 sm:rounded-lg sm:shadow-lg overflow-hidden',
             inline: 'pt-0 pb-6',
           }[variant]
         }
@@ -305,12 +305,12 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       <div
         className={
           {
-            card: 'sm:bg-slate-800 sm:border sm:border-slate-600/60 sm:rounded-lg sm:shadow-lg overflow-hidden',
+            card: 'sm:bg-surface sm:border sm:border-foreground/10 sm:rounded-lg sm:shadow-lg overflow-hidden',
             inline: 'pt-0 pb-6',
           }[variant]
         }
       >
-        <div className="py-6 text-center text-red-400 text-sm">{tComments('loadError')}</div>
+        <div className="py-6 text-center text-error text-sm">{tComments('loadError')}</div>
       </div>
     )
   }
@@ -320,7 +320,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       <div
         className={
           {
-            card: 'sm:bg-slate-800 sm:border sm:border-slate-600/60 sm:rounded-lg sm:shadow-lg overflow-hidden',
+            card: 'sm:bg-surface sm:border sm:border-foreground/10 sm:rounded-lg sm:shadow-lg overflow-hidden',
             inline: '',
           }[variant]
         }
@@ -335,7 +335,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           }
         >
           {!comments || !comments.some((comment) => !shouldHideComment(comment)) ? (
-            <div className="py-6 text-center text-gray-500 text-sm">{tComments('empty')}</div>
+            <div className="py-6 text-center text-muted text-sm">{tComments('empty')}</div>
           ) : (
             comments.map((comment) => renderSingleComment(comment))
           )}
@@ -346,8 +346,8 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           <div
             className={
               {
-                card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 border-t border-slate-600/40',
-                inline: 'pt-4 border-t border-white/10',
+                card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 border-t border-foreground/10',
+                inline: 'pt-4 border-t border-foreground/10',
               }[variant]
             }
           >
@@ -359,12 +359,12 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
               <div
                 className={
                   {
-                    card: 'flex flex-col items-center justify-center py-6 text-center bg-slate-800/50 rounded-lg border border-slate-700/50 border-dashed',
+                    card: 'flex flex-col items-center justify-center py-6 text-center bg-surface/50 rounded-lg border border-foreground/10 border-dashed',
                     inline: 'flex flex-col items-center justify-center py-4 text-center',
                   }[variant]
                 }
               >
-                <p className="text-slate-400 text-sm mb-3">{tComments('loginRequired')}</p>
+                <p className="text-muted text-sm mb-3">{tComments('loginRequired')}</p>
                 <LoginButton onBeforeRedirect={() => savePendingTarget(target)} />
               </div>
             ) : (

@@ -1,21 +1,23 @@
 import { ExternalLink } from 'lucide-react'
 import React from 'react'
 
+import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
 import { shortenYouTubeUrls } from '@/components/shared/utils/string-utils'
 
-import { GUIDE_STYLES } from './guide-styles'
-
 /**
- * Reusable external link component with consistent styling.
- * Used throughout the guide for all external resource links.
+ * Props for the {@link ExternalLinkButton} component.
  */
 type ExternalLinkButtonProps = {
+  /** External destination URL. */
   href: string
   /** Custom text to display instead of the URL. If not provided, the URL will be formatted and displayed. */
   customText?: string
 }
 
+/**
+ * Reusable external link renderer for guide resources and competition links.
+ */
 export function ExternalLinkButton({ href, customText }: ExternalLinkButtonProps) {
   let displayText
 
@@ -31,17 +33,16 @@ export function ExternalLinkButton({ href, customText }: ExternalLinkButtonProps
   }
 
   return (
-    <a
+    <AppLink
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      external
+      newTab
       className={cn(
-        GUIDE_STYLES.link,
-        'inline-flex items-center gap-1.5 text-sm sm:text-base no-underline'
+        'inline-flex items-center gap-1.5 text-sm text-link no-underline transition-colors hover:text-link-hover sm:text-base'
       )}
     >
       <ExternalLink size={13} />
       {displayText}
-    </a>
+    </AppLink>
   )
 }

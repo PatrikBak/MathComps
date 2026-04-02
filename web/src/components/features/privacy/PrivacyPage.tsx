@@ -11,11 +11,14 @@ export default function PrivacyPage() {
 
   return (
     <div>
-      <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-white">{t('title')}</h1>
+      {/* Page title */}
+      <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-foreground">{t('title')}</h1>
 
-      <p className="text-slate-400 mb-8 italic">{t('lastUpdated')}</p>
+      {/* Last updated date */}
+      <p className="text-muted mb-8 italic">{t('lastUpdated')}</p>
 
-      <div className="space-y-8 text-slate-300 leading-relaxed [&_section]:space-y-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-white [&_a]:text-blue-400 [&_a]:hover:text-blue-300 [&_a]:hover:underline [&_a]:transition-colors [&_a]:duration-300">
+      {/* Main content */}
+      <div className="space-y-8 text-muted-foreground leading-relaxed [&_section]:space-y-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_a]:text-link [&_a]:hover:text-link-hover [&_a]:hover:underline [&_a]:transition-colors [&_a]:duration-300">
         {/* Section 1: Intro & Age */}
         <section>
           <h2>{t('sections.intro.title')}</h2>

@@ -419,8 +419,8 @@ export const RichMathEditorInputArea = forwardRef<
 
     // Variant-based style of the textarea
     const variantStyle = {
-      card: cn('bg-slate-700/50', !borderless && 'border-x border-slate-600/60'),
-      inline: 'bg-slate-800/10 border border-b-0 border-white/10 rounded-t-lg',
+      card: cn('bg-surface-inset/50', !borderless && 'border-x border-foreground/10'),
+      inline: 'bg-inset border border-b-0 border-foreground/10 rounded-t-lg',
     }[variant]
 
     return (
@@ -463,17 +463,17 @@ export const RichMathEditorInputArea = forwardRef<
           placeholder={placeholder}
           {...textareaProps}
           className={cn(
-            'appearance-none w-full px-4 py-3 text-sm text-gray-200 font-mono outline-none transition-colors overflow-y-auto min-h-[120px] focus:ring-0 resize-none',
+            'appearance-none w-full px-4 py-3 text-sm text-foreground font-mono outline-none transition-colors overflow-y-auto min-h-[120px] focus:ring-0 resize-none',
             variantStyle,
-            isDragActive && 'bg-slate-700/80 border-indigo-500/50',
+            isDragActive && 'bg-focus/10 border-focus/50',
             textareaProps.className
           )}
         />
 
         {/* Drag overlay indicator */}
         {isDragActive && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-indigo-500/20 border-2 border-dashed border-indigo-400 rounded-lg pointer-events-none">
-            <span className="text-indigo-300 text-sm font-medium">{tEditor('dropToUpload')}</span>
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-focus/10 border-2 border-dashed border-focus rounded-lg pointer-events-none">
+            <span className="text-focus text-sm font-medium">{tEditor('dropToUpload')}</span>
           </div>
         )}
       </div>

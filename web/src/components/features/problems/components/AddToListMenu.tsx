@@ -75,8 +75,8 @@ export function AddToListMenu({ problemSlug, onSelectList }: AddToListMenuProps)
           <button
             onClick={handleTriggerClick}
             className={cn(
-              '-ml-2 -mr-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-slate-700/50',
-              'text-gray-400 hover:text-gray-200'
+              '-ml-2 -mr-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5',
+              'text-muted hover:text-foreground'
             )}
             title={t('addToList')}
           >

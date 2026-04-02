@@ -65,7 +65,7 @@ function Chip({ children, truncate }: { children: React.ReactNode; truncate?: bo
   return (
     <span
       className={cn(
-        'inline-flex items-center px-1.5 py-0.5 rounded text-xs text-slate-300 bg-slate-600/30',
+        'inline-flex items-center px-1.5 py-0.5 rounded text-xs text-muted-foreground bg-foreground/5',
         truncate ? 'truncate' : 'flex-shrink-0'
       )}
     >
@@ -212,13 +212,13 @@ export function ContestBrowserModal({
     >
       {/* Search box */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
         <input
           type="text"
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           placeholder={tProblems('searchContests')}
-          className="form-input !pl-9 w-full text-sm"
+          className="form-input pl-9 w-full text-sm"
           autoFocus
         />
       </div>
@@ -227,14 +227,14 @@ export function ContestBrowserModal({
       <div className="h-[100vh] md:h-[60vh] overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted" />
           </div>
         ) : error ? (
-          <div className="text-center py-12 text-red-400">
+          <div className="text-center py-12 text-error">
             <p>{tProblems('loadContestsFailed')}</p>
           </div>
         ) : filteredSeasons.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-muted">
             <p>{tProblems('noContests')}</p>
           </div>
         ) : (
@@ -249,9 +249,9 @@ export function ContestBrowserModal({
               const problemCount = getSeasonProblemCount(season)
 
               return (
-                <div className="text-sm font-semibold text-slate-200 bg-slate-700 py-2 px-2 flex items-center justify-between">
+                <div className="text-sm font-semibold text-foreground bg-surface py-2 px-2 flex items-center justify-between">
                   <span>{season.editionLabel}</span>
-                  <span className="text-xs font-normal text-slate-400">
+                  <span className="text-xs font-normal text-muted">
                     {tPlurals('problems', { count: problemCount })}
                   </span>
                 </div>
@@ -267,8 +267,8 @@ export function ContestBrowserModal({
                   className={cn(
                     'w-full text-left px-3 py-1.5 rounded-md text-sm',
                     'flex items-center justify-between gap-3',
-                    'hover:bg-slate-700/50 transition-colors',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
+                    'hover:bg-foreground/5 transition-colors',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
                   )}
                 >
                   <span className="flex items-center gap-2 min-w-0">
@@ -287,7 +287,7 @@ export function ContestBrowserModal({
                     {/* Round chip */}
                     {contest.roundName && <Chip truncate>{contest.roundName}</Chip>}
                   </span>
-                  <span className="text-xs text-slate-400 tabular-nums flex-shrink-0">
+                  <span className="text-xs text-muted tabular-nums flex-shrink-0">
                     {contest.problemCount}
                   </span>
                 </button>

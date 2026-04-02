@@ -6,6 +6,8 @@ import Badge from '@/components/features/home/layout/Badge'
 import { AppLink } from '@/components/shared/components/AppLink'
 import Section from '@/components/shared/components/Section'
 
+import { HOME_CARD_COLOR_SCHEMES } from './home-card-colors'
+
 /**
  * Displays the contribute/open-source section on the home page.
  */
@@ -20,7 +22,7 @@ export const ContributeSection = () => {
       title: t('feedback.title'),
       description: t.rich('feedback.text', {
         link: (chunks) => (
-          <ContactButton reason="feedback" className="text-indigo-400 font-medium hover:underline">
+          <ContactButton reason="feedback" className="text-brand-light font-medium hover:underline">
             {chunks}
           </ContactButton>
         ),
@@ -33,7 +35,7 @@ export const ContributeSection = () => {
         link: (chunks) => (
           <AppLink
             href="https://github.com/PatrikBak/MathComps"
-            className="text-indigo-400 font-medium hover:underline"
+            className="text-brand-light font-medium hover:underline"
           >
             {chunks}
           </AppLink>
@@ -47,7 +49,7 @@ export const ContributeSection = () => {
         link: (chunks) => (
           <ContactButton
             reason="contentContribution"
-            className="text-indigo-400 font-medium hover:underline"
+            className="text-brand-light font-medium hover:underline"
           >
             {chunks}
           </ContactButton>
@@ -63,12 +65,13 @@ export const ContributeSection = () => {
         <Badge
           icon={<Shield size={14} className="sm:w-4 sm:h-4" />}
           text={t('badge')}
-          color="green"
+          color="emerald"
         />
       }
       title={t('title')}
       description={t('description')}
       cards={contributeCards}
+      cardColorSchemes={HOME_CARD_COLOR_SCHEMES}
     />
   )
 }

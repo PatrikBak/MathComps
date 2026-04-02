@@ -45,8 +45,8 @@ export function RichMathEditorOverflowMenu({ items }: RichMathEditorOverflowMenu
             className={cn(
               'flex items-center justify-center gap-1.5 px-2 py-1 rounded transition-colors text-xs min-w-[28px]',
               open
-                ? 'text-indigo-400 bg-indigo-500/20'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-slate-600/50'
+                ? 'text-focus bg-focus/10'
+                : 'text-muted hover:text-foreground hover:bg-foreground/10'
             )}
           >
             <Plus size={14} />
@@ -55,7 +55,7 @@ export function RichMathEditorOverflowMenu({ items }: RichMathEditorOverflowMenu
           <MenuItems
             anchor="bottom end"
             transition
-            className="z-[9999] mt-1 shadow-2xl border border-slate-600/60 rounded-xl overflow-hidden bg-slate-800 min-w-[180px] p-1 origin-top-right transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+            className="z-[9999] mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden bg-popover min-w-[180px] p-1 origin-top-right transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
           >
             {items.map((item, index) => (
               <MenuItem key={index}>
@@ -65,8 +65,8 @@ export function RichMathEditorOverflowMenu({ items }: RichMathEditorOverflowMenu
                     onMouseDown={preventFocusLoss}
                     onClick={item.onClick}
                     className={cn(
-                      'w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 rounded transition-colors',
-                      focus && 'bg-slate-700/60'
+                      'w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground rounded transition-colors',
+                      focus && 'bg-foreground/5'
                     )}
                   >
                     {item.icon && <item.icon size={16} />}

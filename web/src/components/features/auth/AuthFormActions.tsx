@@ -42,7 +42,7 @@ export default function AuthFormActions({
               event.stopPropagation()
               onScreenSwitch('forgotten-password')
             }}
-            className="text-indigo-400 font-medium hover:text-indigo-300 hover:underline transition-colors cursor-pointer text-sm"
+            className="text-link font-medium hover:text-link-hover hover:underline transition-colors cursor-pointer text-sm"
           >
             {t('forgotPassword')}
           </button>

@@ -3,6 +3,9 @@
  * Do not modify the structure without coordinating with the backend JSON schema.
  */
 
+/** The four mathematical environment types used in handouts. */
+export type HandoutEnvironmentType = 'theorem' | 'exercise' | 'example' | 'problem'
+
 /** A sequence of raw content blocks, used for inline or nested content. */
 type RawContentSequence = RawContentBlock[]
 

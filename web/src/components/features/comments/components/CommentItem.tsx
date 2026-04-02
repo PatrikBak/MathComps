@@ -167,7 +167,7 @@ export function CommentItem({
         <div
           className={cn(
             'absolute transition-colors cursor-pointer',
-            isLineHovered ? 'bg-indigo-500' : 'bg-slate-600'
+            isLineHovered ? 'bg-focus' : 'bg-foreground/10'
           )}
           style={{
             left: `${AVATAR_SIZE / 2 - 8}px`,
@@ -190,8 +190,8 @@ export function CommentItem({
           className={cn(
             'absolute flex items-center justify-center w-5 h-5 rounded-full border-2 z-20 transition-all duration-150',
             isLineHovered
-              ? 'opacity-100 bg-indigo-500 border-indigo-400 text-white'
-              : 'opacity-0 bg-slate-800 border-slate-600 text-slate-400 hover:opacity-100 hover:border-indigo-500 hover:text-indigo-400'
+              ? 'opacity-100 bg-focus border-focus text-focus-foreground'
+              : 'opacity-0 bg-surface border-foreground/10 text-muted hover:opacity-100 hover:border-focus hover:text-focus'
           )}
           style={{
             left: `${AVATAR_SIZE / 2 - 10}px`,
@@ -224,10 +224,10 @@ export function CommentItem({
             {/* Group: Author + Timestamp (wraps together first, then individually) */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
               {/* (1) Author */}
-              <span className="text-sm font-medium text-gray-200">{author}</span>
+              <span className="text-sm font-medium text-foreground">{author}</span>
 
               {/* (2) Timestamp + edited */}
-              <span className="text-xs text-gray-500 flex items-center gap-1">
+              <span className="text-xs text-muted flex items-center gap-1">
                 {format.dateTime(timestamp, {
                   day: 'numeric',
                   month: 'numeric',
@@ -269,7 +269,7 @@ export function CommentItem({
                     onClick={onLike}
                     className={cn(
                       'flex items-center gap-1 text-xs transition-colors',
-                      isLiked ? 'text-red-400' : 'text-gray-400 hover:text-gray-200'
+                      isLiked ? 'text-error' : 'text-muted hover:text-foreground'
                     )}
                     title={tComments('like')}
                   >
@@ -280,7 +280,7 @@ export function CommentItem({
                   <div
                     className={cn(
                       'flex items-center gap-1 text-xs cursor-default',
-                      isLiked ? 'text-red-400' : 'text-gray-500'
+                      isLiked ? 'text-error' : 'text-muted'
                     )}
                   >
                     <Heart size={14} className={cn(isLiked && 'fill-current')} />
@@ -292,7 +292,7 @@ export function CommentItem({
                 {onReply && (
                   <button
                     onClick={onReply}
-                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200"
+                    className="flex items-center gap-1 text-xs text-muted hover:text-foreground"
                     title={tComments('reply')}
                   >
                     <Reply size={14} />
@@ -303,7 +303,7 @@ export function CommentItem({
                 {onEdit && (
                   <button
                     onClick={handleEditStart}
-                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200"
+                    className="flex items-center gap-1 text-xs text-muted hover:text-foreground"
                     title={tComments('edit')}
                   >
                     <Pencil size={14} />
@@ -314,7 +314,7 @@ export function CommentItem({
                 {onDelete && (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400"
+                    className="flex items-center gap-1 text-xs text-muted hover:text-error"
                     title={tComments('delete')}
                   >
                     <Trash2 size={14} />
@@ -338,9 +338,9 @@ export function CommentItem({
               />
             </div>
           ) : isDeleted ? (
-            <div className="text-sm text-gray-500 italic mb-1.5">[{tComments('deleted')}]</div>
+            <div className="text-sm text-muted italic mb-1.5">[{tComments('deleted')}]</div>
           ) : (
-            <div className="text-sm text-gray-300 leading-relaxed mb-1.5">
+            <div className="text-sm text-muted-foreground leading-relaxed mb-1.5">
               <RichMathEditorRenderer content={content} />
             </div>
           )}
@@ -361,7 +361,7 @@ export function CommentItem({
           {replyCount > 0 && isCollapsed ? (
             <button
               onClick={onToggleCollapse}
-              className="flex items-center gap-1.5 py-2 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="flex items-center gap-1.5 py-2 text-xs text-link hover:text-link-hover transition-colors"
             >
               <ChevronDown size={14} />
               <span>

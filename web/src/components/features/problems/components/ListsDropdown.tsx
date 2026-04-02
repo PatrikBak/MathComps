@@ -128,9 +128,9 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
           <button
             className={cn(
               'flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200',
-              'border-slate-600/40 bg-slate-800/60 text-slate-200',
-              'hover:bg-slate-700/60 hover:border-slate-500/50',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
+              'border-foreground/10 bg-surface/60 text-foreground',
+              'hover:bg-foreground/5 hover:border-muted/50',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
             )}
           >
             <div className="flex items-center gap-2 min-w-0">
@@ -138,14 +138,14 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
                 <LoadingSpinner className="h-4 w-4" />
               ) : (
                 <>
-                  <CurrentIcon className="h-4 w-4 shrink-0 text-slate-400" />
+                  <CurrentIcon className="h-4 w-4 shrink-0 text-muted" />
                   <span className="truncate">{currentLabel}</span>
                 </>
               )}
             </div>
             <ChevronDown
               className={cn(
-                'h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200',
+                'h-4 w-4 shrink-0 text-muted transition-transform duration-200',
                 open && 'rotate-180'
               )}
             />
@@ -162,10 +162,10 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
           <DropdownMenuItem
             disabled={isCreating}
             onSelect={handleSelectAll}
-            className={cn('cursor-pointer', isAllActive && 'text-indigo-300')}
+            className={cn('cursor-pointer', isAllActive && 'text-focus/80')}
           >
             <div className="flex w-full items-center gap-2">
-              <List className={cn('h-4 w-4', isAllActive ? 'text-indigo-400' : 'text-slate-400')} />
+              <List className={cn('h-4 w-4', isAllActive ? 'text-focus' : 'text-muted')} />
               <span>{t('allProblems')}</span>
             </div>
           </DropdownMenuItem>
@@ -174,15 +174,15 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
           <DropdownMenuItem
             disabled={isCreating}
             onSelect={handleSelectLiked}
-            className={cn('cursor-pointer', filters.favoritesOnly && 'text-indigo-300')}
+            className={cn('cursor-pointer', filters.favoritesOnly && 'text-focus/80')}
           >
             <div className="flex w-full items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Heart className="h-4 w-4 text-slate-400" />
+                <Heart className="h-4 w-4 text-muted" />
                 <span>{t('myFavorites')}</span>
               </div>
               {isSignedIn && likedCount !== undefined && (
-                <span className="text-xs text-slate-500">{likedCount}</span>
+                <span className="text-xs text-muted">{likedCount}</span>
               )}
             </div>
           </DropdownMenuItem>

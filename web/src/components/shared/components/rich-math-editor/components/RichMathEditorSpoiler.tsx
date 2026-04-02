@@ -24,22 +24,22 @@ export function RichMathEditorSpoiler({ label, children }: RichMathEditorSpoiler
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="my-2 rounded-lg border border-slate-600/60 bg-slate-800/30 overflow-hidden">
+    <div className="my-2 rounded-lg border border-foreground/10 bg-inset overflow-hidden">
       {/* Clickable header */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
           'flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-left transition-colors',
-          'text-gray-300 hover:text-gray-100 hover:bg-slate-700/50',
-          isOpen && 'bg-slate-700/30'
+          'text-muted-foreground hover:text-foreground hover:bg-foreground/5',
+          isOpen && 'bg-foreground/5'
         )}
         aria-expanded={isOpen}
       >
         {isOpen ? (
-          <ChevronDown size={16} className="text-indigo-400 flex-shrink-0" />
+          <ChevronDown size={16} className="text-focus flex-shrink-0" />
         ) : (
-          <ChevronRight size={16} className="text-gray-500 flex-shrink-0" />
+          <ChevronRight size={16} className="text-muted flex-shrink-0" />
         )}
         <span>{label}</span>
       </button>
@@ -47,13 +47,13 @@ export function RichMathEditorSpoiler({ label, children }: RichMathEditorSpoiler
       {/* Border separator - always present, opacity-controlled */}
       <div
         className={cn(
-          'h-px bg-slate-600/60 transition-opacity duration-150',
+          'h-px bg-foreground/10 transition-opacity duration-150',
           isOpen ? 'opacity-100' : 'opacity-0'
         )}
       />
 
       {/* Collapsible content */}
-      {isOpen && <div className="px-3 py-2 text-sm text-gray-300">{children}</div>}
+      {isOpen && <div className="px-3 py-2 text-sm text-muted-foreground">{children}</div>}
     </div>
   )
 }

@@ -120,7 +120,7 @@ export function RichMathEditor({
               handleComponent={{
                 bottom: (
                   <div className="relative w-full h-1.5 cursor-ns-resize group/resizer flex justify-center -mb-1">
-                    <div className="w-12 h-1 bg-slate-700/50 rounded-full transition-colors group-hover/resizer:bg-indigo-500/50 mt-0.5" />
+                    <div className="w-12 h-1 bg-foreground/10 rounded-full transition-colors group-hover/resizer:bg-focus/50 mt-0.5" />
                   </div>
                 ),
               }}

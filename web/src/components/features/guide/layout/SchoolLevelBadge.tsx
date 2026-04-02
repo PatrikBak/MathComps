@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { GUIDE_STYLES } from './guide-styles'
+import { SCHOOL_LEVEL_COLORS } from '../guide-colors'
 
 /**
  * School level type - uses internal keys for data, translations for display.
@@ -25,10 +25,7 @@ export function SchoolLevelBadge({ level }: SchoolLevelBadgeProps) {
   const t = useTranslations('guide.schoolLevels')
 
   // Get the CSS color class for the school level
-  const color = {
-    elementary: GUIDE_STYLES.elementaryColor,
-    highSchool: GUIDE_STYLES.highSchoolColor,
-  }[level]
+  const color = SCHOOL_LEVEL_COLORS[level]
 
   // Return the badge
   return <span className={cn('text-sm font-semibold', color)}>{t(level)}</span>

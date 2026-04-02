@@ -19,7 +19,7 @@ type HelpTooltipProps = {
 export function HelpTooltip({ content }: HelpTooltipProps) {
   return (
     <Tooltip placement="top" content={content}>
-      <HelpCircle className="inline h-3.5 w-3.5 text-slate-400/80 cursor-help" />
+      <HelpCircle className="inline h-3.5 w-3.5 text-muted/80 cursor-help" />
     </Tooltip>
   )
 }

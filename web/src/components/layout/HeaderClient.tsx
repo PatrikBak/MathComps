@@ -39,7 +39,7 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
 
   return (
     <>
-      <header className="sticky top-0 left-0 right-0 bg-slate-950/95 z-50">
+      <header className="sticky top-0 left-0 right-0 bg-background/95 z-50">
         <nav className="max-w-7xl mx-auto flex items-center px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
           {/* Left: Logo */}
           <MathCompsLogo />
@@ -63,7 +63,7 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
             {/* Mobile Navigation Button */}
             <button
               onClick={() => toggleMobileNavigationOpen()}
-              className="lg:hidden text-white p-2 rounded-lg hover:bg-slate-800/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="lg:hidden text-foreground p-2 rounded-lg hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               aria-label={tNav('menuOpen')}
               aria-expanded={isMobileNavigationOpen}
             >

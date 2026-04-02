@@ -3,6 +3,41 @@
 @import 'flag-icons/css/flag-icons.min.css';
 @import 'katex/dist/katex.min.css';
 
+@theme {
+  /* 1. Core & Surfaces */
+  --color-background: var(--color-slate-950);
+  --color-foreground: var(--color-slate-50);
+  --color-surface: var(--color-slate-800);
+  --color-surface-hover: var(--color-slate-700);
+  --color-surface-inset: var(--color-slate-700);
+  --color-muted: var(--color-slate-400);
+  --color-muted-foreground: var(--color-slate-300);
+
+  /* 2. The One-True-Brand (Violet, AI's and mine favorite color) */
+  --color-brand: var(--color-violet-500);
+  --color-brand-foreground: white;
+  --color-brand-hover: var(--color-violet-700);
+  --color-brand-light: var(--color-violet-300);
+
+  /* 3. Actions & Feedback */
+  --color-focus: var(--color-indigo-500);
+  --color-focus-light: var(--color-indigo-400);
+  --color-focus-tint: var(--color-indigo-100);
+  --color-focus-foreground: white;
+  --color-error: var(--color-red-500);
+  --color-error-foreground: white;
+  --color-success: var(--color-emerald-500);
+  --color-success-foreground: white;
+  --color-warning: var(--color-orange-500);
+  --color-warning-foreground: white;
+  --color-info: var(--color-sky-500);
+  --color-info-foreground: white;
+
+  /* 4. Accents & Effects */
+  --color-link: var(--color-sky-300);
+  --color-link-hover: var(--color-sky-500);
+}
+
 :root {
   scroll-behavior: smooth;
 
@@ -11,6 +46,27 @@
 
   /* Scroll offset for anchor links - must match header height + breathing room */
   --scroll-offset: 66px;
+
+  /* Toast base colors */
+  --toast-success-bg: rgb(22 163 74 / 0.9);
+  --toast-success-border: rgb(34 197 94 / 0.3);
+  --toast-success-text: rgb(220 252 231);
+
+  --toast-error-bg: rgb(220 38 38 / 0.9);
+  --toast-error-border: rgb(239 68 68 / 0.3);
+  --toast-error-text: rgb(254 226 226);
+
+  --toast-info-bg: rgb(37 99 235 / 0.9);
+  --toast-info-border: rgb(59 130 246 / 0.3);
+  --toast-info-text: rgb(219 234 254);
+
+  --toast-warning-bg: rgb(234 179 8 / 0.95);
+  --toast-warning-border: rgb(250 204 21 / 0.4);
+  --toast-warning-text: rgb(20 20 20);
+
+  --toast-loading-bg: rgb(249 115 22 / 0.9);
+  --toast-loading-border: rgb(251 146 60 / 0.3);
+  --toast-loading-text: rgb(254 237 227);
 }
 
 /* sm breakpoint */
@@ -36,7 +92,11 @@
 
 @layer base {
   body {
-    background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 50%);
+    background: radial-gradient(
+      ellipse at top,
+      var(--color-indigo-950) 0%,
+      var(--color-background) 50%
+    );
     background-attachment: fixed;
   }
 
@@ -48,7 +108,7 @@
   @supports (scrollbar-width: thin) {
     * {
       scrollbar-width: thin;
-      scrollbar-color: theme('colors.slate.600') transparent;
+      scrollbar-color: var(--color-surface-hover) transparent;
     }
   }
 }
@@ -105,44 +165,47 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Form Inputs & Buttons */
-.form-input {
-  @apply w-full bg-slate-800/60 border border-slate-500/50 text-slate-200 rounded-lg text-xs sm:text-sm px-2.5 sm:px-3 py-2 sm:py-2.5 transition-all duration-200 ease-in-out outline-none;
-}
-.form-input::placeholder {
-  @apply text-slate-600;
-}
-.form-input:hover {
-  @apply border-slate-400/60 bg-slate-800/70;
-}
-.form-input:focus {
-  @apply border-indigo-500/70 bg-slate-800/80 shadow-[0_0_0_2px_rgba(99,102,241,0.3)];
-}
-.form-input[aria-invalid='true'] {
-  @apply border-red-500/60 shadow-[0_0_0_2px_rgba(239,68,68,0.3)];
-}
-.form-input[aria-invalid='true']:focus {
-  @apply border-red-500/60 shadow-[0_0_0_2px_rgba(239,68,68,0.4)];
-}
-.form-input.disabled {
-  @apply bg-slate-800/30 cursor-not-allowed opacity-60;
-}
+@layer components {
+  /* Form Inputs & Buttons */
+  .form-input {
+    @apply w-full bg-surface/60 border border-muted/50 text-foreground rounded-lg text-xs sm:text-sm px-2.5 sm:px-3 py-2 sm:py-2.5 transition-all duration-200 ease-in-out outline-none;
+  }
+  .form-input::placeholder {
+    @apply text-muted/40;
+  }
+  .form-input:hover {
+    @apply border-muted/80 bg-surface/70;
+  }
+  .form-input:focus {
+    @apply border-focus/70 bg-surface/80 shadow-[0_0_0_2px_rgba(99,102,241,0.3)];
+  }
+  .form-input[aria-invalid='true'] {
+    @apply border-error/60 shadow-[0_0_0_2px_rgba(239,68,68,0.3)];
+  }
+  .form-input[aria-invalid='true']:focus {
+    @apply border-error/60 shadow-[0_0_0_2px_rgba(239,68,68,0.4)];
+  }
+  .form-input.disabled {
+    @apply bg-surface/30 cursor-not-allowed opacity-60;
+  }
 
-/* Form Checkbox */
-.form-checkbox {
-  @apply h-4 w-4 rounded border-slate-400/60 bg-slate-800/60 text-indigo-500 transition-colors duration-0;
+  /* Form Checkbox */
+  .form-checkbox {
+    @apply h-4 w-4 rounded border-muted/60 bg-surface/60 text-focus transition-colors duration-0;
+  }
+
+  .form-checkbox:disabled {
+    @apply cursor-default opacity-50;
+  }
 }
 
 /* Override Tailwind Forms plugin focus styles - only show ring for keyboard navigation */
 input[type='checkbox']:focus-visible {
-  @apply ring-2 ring-indigo-900 ring-offset-0;
+  @apply ring-2 ring-focus/40 ring-offset-0;
 }
 
 input[type='checkbox']:focus:not(:focus-visible) {
   @apply ring-0 ring-offset-0 outline-none shadow-none;
-}
-.form-checkbox:disabled {
-  @apply cursor-default opacity-50;
 }
 
 /*
@@ -361,7 +424,7 @@ input[type='checkbox']:focus:not(:focus-visible) {
 
 /* Set the default color for all footnotes within the article context. */
 .article--math .footnote-ref {
-  color: #7dd3fc; /* text-sky-300 */
+  color: var(--color-link);
 }
 
 /*
@@ -469,132 +532,132 @@ input[type='checkbox']:focus:not(:focus-visible) {
 
 /* Success toast */
 [data-sonner-toast][data-type='success'] {
-  background: rgba(22, 163, 74, 0.9) !important;
-  border-color: rgba(34, 197, 94, 0.3) !important;
-  color: rgb(220, 252, 231) !important;
+  background: var(--toast-success-bg) !important;
+  border-color: var(--toast-success-border) !important;
+  color: var(--toast-success-text) !important;
 }
 
 /* Success toast button */
 [data-sonner-toast][data-type='success'] [data-button='true'] {
-  background: rgba(220, 252, 231, 0.2) !important;
-  border: 1px solid rgba(220, 252, 231, 0.3) !important;
-  color: rgb(220, 252, 231) !important;
+  background: color-mix(in srgb, var(--toast-success-text) 20%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--toast-success-text) 30%, transparent) !important;
+  color: var(--toast-success-text) !important;
 }
 
 /* Success toast button hover */
 [data-sonner-toast][data-type='success'] [data-button='true']:hover {
-  background: rgba(220, 252, 231, 0.3) !important;
-  border-color: rgba(220, 252, 231, 0.4) !important;
+  background: color-mix(in srgb, var(--toast-success-text) 30%, transparent) !important;
+  border-color: color-mix(in srgb, var(--toast-success-text) 40%, transparent) !important;
 }
 
 /* Success toast data description */
 [data-sonner-toast][data-type='success'] [data-description] {
-  color: rgb(220, 252, 231) !important;
+  color: var(--toast-success-text) !important;
   opacity: 0.85 !important;
 }
 
 /* Error toast */
 [data-sonner-toast][data-type='error'] {
-  background: rgba(220, 38, 38, 0.9) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
-  color: rgb(254, 226, 226) !important;
+  background: var(--toast-error-bg) !important;
+  border-color: var(--toast-error-border) !important;
+  color: var(--toast-error-text) !important;
 }
 
 /* Error toast button */
 [data-sonner-toast][data-type='error'] [data-button='true'] {
-  background: rgba(254, 226, 226, 0.2) !important;
-  border: 1px solid rgba(254, 226, 226, 0.3) !important;
-  color: rgb(254, 226, 226) !important;
+  background: color-mix(in srgb, var(--toast-error-text) 20%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--toast-error-text) 30%, transparent) !important;
+  color: var(--toast-error-text) !important;
 }
 
 /* Error toast button hover */
 [data-sonner-toast][data-type='error'] [data-button='true']:hover {
-  background: rgba(254, 226, 226, 0.3) !important;
-  border-color: rgba(254, 226, 226, 0.4) !important;
+  background: color-mix(in srgb, var(--toast-error-text) 30%, transparent) !important;
+  border-color: color-mix(in srgb, var(--toast-error-text) 40%, transparent) !important;
 }
 
 /* Error toast data description */
 [data-sonner-toast][data-type='error'] [data-description] {
-  color: rgb(254, 226, 226) !important;
+  color: var(--toast-error-text) !important;
   opacity: 0.85 !important;
 }
 
 /* Info toast */
 [data-sonner-toast][data-type='info'] {
-  background: rgba(37, 99, 235, 0.9) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
-  color: rgb(219, 234, 254) !important;
+  background: var(--toast-info-bg) !important;
+  border-color: var(--toast-info-border) !important;
+  color: var(--toast-info-text) !important;
 }
 
 /* Info toast button */
 [data-sonner-toast][data-type='info'] [data-button='true'] {
-  background: rgba(219, 234, 254, 0.2) !important;
-  border: 1px solid rgba(219, 234, 254, 0.3) !important;
-  color: rgb(219, 234, 254) !important;
+  background: color-mix(in srgb, var(--toast-info-text) 20%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--toast-info-text) 30%, transparent) !important;
+  color: var(--toast-info-text) !important;
 }
 
 /* Info toast button hover */
 [data-sonner-toast][data-type='info'] [data-button='true']:hover {
-  background: rgba(219, 234, 254, 0.3) !important;
-  border-color: rgba(219, 234, 254, 0.4) !important;
+  background: color-mix(in srgb, var(--toast-info-text) 30%, transparent) !important;
+  border-color: color-mix(in srgb, var(--toast-info-text) 40%, transparent) !important;
 }
 
 /* Info toast data description */
 [data-sonner-toast][data-type='info'] [data-description] {
-  color: rgb(219, 234, 254) !important;
+  color: var(--toast-info-text) !important;
   opacity: 0.85 !important;
 }
 
 /* Warning toast */
 [data-sonner-toast][data-type='warning'] {
-  background: rgba(234, 179, 8, 0.95) !important;
-  border-color: rgba(250, 204, 21, 0.4) !important;
-  color: rgb(20, 20, 20) !important;
+  background: var(--toast-warning-bg) !important;
+  border-color: var(--toast-warning-border) !important;
+  color: var(--toast-warning-text) !important;
 }
 
 /* Warning toast button */
 [data-sonner-toast][data-type='warning'] [data-button='true'] {
   background: transparent !important;
-  border: 1px solid rgba(20, 20, 20, 0.6) !important;
-  color: rgb(20, 20, 20) !important;
+  border: 1px solid color-mix(in srgb, var(--toast-warning-text) 60%, transparent) !important;
+  color: var(--toast-warning-text) !important;
   font-weight: 500 !important;
 }
 
 /* Warning toast button hover */
 [data-sonner-toast][data-type='warning'] [data-button='true']:hover {
-  background: rgba(20, 20, 20, 0.1) !important;
-  border-color: rgb(20, 20, 20) !important;
+  background: color-mix(in srgb, var(--toast-warning-text) 10%, transparent) !important;
+  border-color: var(--toast-warning-text) !important;
 }
 
 /* Warning toast data description */
 [data-sonner-toast][data-type='warning'] [data-description] {
-  color: rgb(20, 20, 20) !important;
+  color: var(--toast-warning-text) !important;
   opacity: 0.75 !important;
 }
 
 /* Loading toast */
 [data-sonner-toast][data-type='loading'] {
-  background: rgba(249, 115, 22, 0.9) !important;
-  border-color: rgba(251, 146, 60, 0.3) !important;
-  color: rgb(254, 237, 227) !important;
+  background: var(--toast-loading-bg) !important;
+  border-color: var(--toast-loading-border) !important;
+  color: var(--toast-loading-text) !important;
 }
 
 /* Loading toast button */
 [data-sonner-toast][data-type='loading'] [data-button='true'] {
-  background: rgba(254, 237, 227, 0.2) !important;
-  border: 1px solid rgba(254, 237, 227, 0.3) !important;
-  color: rgb(254, 237, 227) !important;
+  background: color-mix(in srgb, var(--toast-loading-text) 20%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--toast-loading-text) 30%, transparent) !important;
+  color: var(--toast-loading-text) !important;
 }
 
 /* Loading toast button hover */
 [data-sonner-toast][data-type='loading'] [data-button='true']:hover {
-  background: rgba(254, 237, 227, 0.3) !important;
-  border-color: rgba(254, 237, 227, 0.4) !important;
+  background: color-mix(in srgb, var(--toast-loading-text) 30%, transparent) !important;
+  border-color: color-mix(in srgb, var(--toast-loading-text) 40%, transparent) !important;
 }
 
 /* Loading toast data description */
 [data-sonner-toast][data-type='loading'] [data-description] {
-  color: rgb(254, 237, 227) !important;
+  color: var(--toast-loading-text) !important;
   opacity: 0.85 !important;
   margin-left: 8px !important;
 }
@@ -686,21 +749,21 @@ input[type='checkbox']:focus:not(:focus-visible) {
 /* Emoji Picker Customization (emoji-picker-react) */
 .EmojiPickerReact.epr-dark-theme {
   /* Main Background - Matches editor bg */
-  --epr-bg-color: #1e293b !important; /* slate-800 */
+  --epr-bg-color: var(--color-surface) !important;
 
   /* Category labels background (sticky headers) */
-  --epr-category-label-bg-color: #1e293b !important; /* slate-800 */
+  --epr-category-label-bg-color: var(--color-surface) !important;
 
   /* Text color */
-  --epr-text-color: #e2e8f0 !important; /* slate-200 */
+  --epr-text-color: var(--color-foreground) !important;
 
   /* Search input background */
-  --epr-search-input-bg-color: #0f172a !important; /* slate-900 */
-  --epr-search-input-text-color: #e2e8f0 !important; /* slate-200 */
+  --epr-search-input-bg-color: var(--color-surface-inset) !important;
+  --epr-search-input-text-color: var(--color-foreground) !important;
 
   /* Hover state for emojis */
-  --epr-hover-bg-color: #334155 !important; /* slate-700 */
+  --epr-hover-bg-color: var(--color-surface-hover) !important;
 
   /* Border color */
-  --epr-picker-border-color: #475569 !important; /* slate-600 */
+  --epr-picker-border-color: var(--color-surface-hover) !important;
 }

@@ -5,6 +5,8 @@ import GradientText from '@/components/shared/components/GradientText'
 import Section from '@/components/shared/components/Section'
 import { ROUTES } from '@/i18n/i18n'
 
+import { HOME_CARD_COLOR_SCHEMES } from './home-card-colors'
+
 /**
  * Displays the main feature highlights section on the home page.
  */
@@ -42,6 +44,7 @@ export default function FeatureHighlights() {
         </>
       }
       cards={features}
+      cardColorSchemes={HOME_CARD_COLOR_SCHEMES}
     />
   )
 }

@@ -59,13 +59,17 @@ export const UserInfoHeader = ({
       />
       <div className="min-w-0">
         {user.firstName && (
-          <p className={cn('font-semibold text-white truncate', config.displayName)}>
+          <p className={cn('font-semibold text-foreground truncate', config.displayName)}>
             {user.firstName}
           </p>
         )}
         {user.emailAddresses && user.emailAddresses.length > 0 && (
           <p
-            className={cn('text-white/60 truncate', user.firstName ? 'mt-0.5' : '', config.handle)}
+            className={cn(
+              'text-popover-foreground/60 truncate',
+              user.firstName ? 'mt-0.5' : '',
+              config.handle
+            )}
           >
             {user.emailAddresses[0].emailAddress}
           </p>

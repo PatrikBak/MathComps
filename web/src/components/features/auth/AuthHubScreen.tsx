@@ -73,15 +73,8 @@ export default function AuthHubScreen({
         </AuthButton>
       </div>
 
-      {/* Divider */}
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-600/40"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-slate-900/50 text-slate-400 font-medium">{tAuth('or')}</span>
-        </div>
-      </div>
+      {/* OR option */}
+      <div className="my-6 flex justify-center text-sm text-muted font-medium">{tAuth('or')}</div>
 
       {/* Continue with Email Button */}
       <AuthButton onClick={onContinueWithEmail} disabled={loading} variant="primary">

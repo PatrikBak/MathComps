@@ -18,7 +18,7 @@ import { usePendingCommentTarget } from '@/components/features/comments/hooks/us
 import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { IconBadge } from '@/components/shared/components/IconBadge'
+import { CountBadge } from '@/components/shared/components/CountBadge'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 import { useProblem } from '@/stores/problem-store'
@@ -84,7 +84,7 @@ const AuthorButton = React.memo(function AuthorButton({
       })}
       className={cn(
         'text-xs sm:text-sm transition-colors duration-200 hover:underline select-none',
-        isSelected ? 'text-slate-200 font-medium' : 'text-gray-400 hover:text-gray-200'
+        isSelected ? 'text-foreground font-medium' : 'text-muted hover:text-foreground'
       )}
       title={tProblems('filterByAuthor', { name: author.displayName })}
     >
@@ -228,19 +228,19 @@ export function ProblemCard({
   return (
     <div
       className={cn(
-        'bg-slate-800 border rounded-lg shadow-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10 hover:border-slate-500/80',
+        'bg-surface border rounded-lg shadow-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-focus/10 hover:border-muted/80',
         // Highlight border when similar problems section is expanded
-        expandedView !== null ? 'border-indigo-500' : 'border-slate-600/60',
+        expandedView !== null ? 'border-focus' : 'border-foreground/10',
         // Dim marked cards for a "dealt with" feel
         problem.marked && 'opacity-50'
       )}
     >
       {/* Card Header — slug left, action icons right */}
-      <div className="flex items-center justify-between px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 lg:py-4 border-b border-slate-600/60">
+      <div className="flex items-center justify-between px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 lg:py-4 border-b border-foreground/10">
         {/* Problem identity */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-gray-400 text-xs sm:text-sm font-medium">#{ordinalNumber}</span>
-          <h2 className="text-sm sm:text-base font-medium text-gray-100">
+          <span className="text-muted text-xs sm:text-sm font-medium">#{ordinalNumber}</span>
+          <h2 className="text-sm sm:text-base font-medium text-foreground">
             {problem.slug.toUpperCase()}
           </h2>
         </div>
@@ -250,14 +250,14 @@ export function ProblemCard({
           {/* Mark toggle button */}
           <button
             onClick={() => toggleMark(problem.slug)}
-            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-slate-700/50"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5"
             title={problem.marked ? tProblems('marks.unmark') : tProblems('marks.mark')}
           >
             <Check
               size={14}
               className={cn(
                 'sm:!w-[18px] sm:!h-[18px] transition-all duration-500',
-                problem.marked ? 'text-emerald-400' : 'text-gray-400'
+                problem.marked ? 'text-success' : 'text-muted'
               )}
               strokeWidth={problem.marked ? 3 : 2}
             />
@@ -266,10 +266,10 @@ export function ProblemCard({
           {/* Like button */}
           <button
             onClick={() => toggleLike(problem.slug)}
-            className="w-8 h-8 sm:w-9 sm:h-9 pr-1 sm:pr-1.5 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-slate-700/50"
+            className="w-8 h-8 sm:w-9 sm:h-9 pr-1 sm:pr-1.5 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5"
             title={problem.liked ? tProblems('unlike') : tProblems('like')}
           >
-            <IconBadge count={problem.likeCount} color="red" isHighlighted={problem.liked}>
+            <CountBadge count={problem.likeCount} color="red" isHighlighted={problem.liked}>
               <Heart
                 size={14}
                 className={cn(
@@ -277,22 +277,22 @@ export function ProblemCard({
                   problem.liked && 'fill-current'
                 )}
               />
-            </IconBadge>
+            </CountBadge>
           </button>
 
           {/* Comments button */}
           <button
             onClick={() => setIsCommentsOpen(true)}
-            className="w-8 h-8 sm:w-9 sm:h-9 pr-1 sm:pr-1.5 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-slate-700/50"
+            className="w-8 h-8 sm:w-9 sm:h-9 pr-1 sm:pr-1.5 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5"
             title={tProblems('commentsButton')}
           >
-            <IconBadge
+            <CountBadge
               count={problem.commentCount}
               color="indigo"
               isHighlighted={problem.commentCount > 0}
             >
               <MessageSquare size={14} className="sm:!w-[18px] sm:!h-[18px]" />
-            </IconBadge>
+            </CountBadge>
           </button>
 
           {/* Add to list */}
@@ -301,7 +301,7 @@ export function ProblemCard({
           {/* Permalink sharing button */}
           <button
             onClick={handlePermalinkCopy}
-            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-slate-700/50 text-gray-400 hover:text-gray-200"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5 text-muted hover:text-foreground"
             title={tProblems('share')}
           >
             <Link size={14} className="sm:!w-[18px] sm:!h-[18px]" />
@@ -310,7 +310,7 @@ export function ProblemCard({
       </div>
 
       {/* Problem statement content with math rendering */}
-      <div className="px-2.5 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 leading-relaxed text-gray-200 text-[14px] sm:text-base">
+      <div className="px-2.5 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 leading-relaxed text-foreground text-[14px] sm:text-base">
         {problem.statementParsed ? (
           (() => {
             try {
@@ -340,7 +340,7 @@ export function ProblemCard({
         <div className="flex items-center justify-between gap-3 px-2.5 pb-2 sm:gap-4 sm:px-4 sm:pb-3 lg:px-6 lg:pb-4">
           {/* Authors */}
           {problem.authors.length > 0 ? (
-            <div className="flex items-center gap-1 sm:gap-1.5 italic text-gray-400 text-xs sm:text-sm min-w-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 italic text-muted text-xs sm:text-sm min-w-0">
               <User size={12} className="shrink-0 sm:!w-[14px] sm:!h-[14px]" />
               <div className="flex flex-wrap items-center gap-1 min-w-0">
                 {problem.authors.map((author, authorIndex) => (
@@ -351,7 +351,7 @@ export function ProblemCard({
                       onAuthorClick={onAuthorClick}
                     />
                     {authorIndex < problem.authors.length - 1 && (
-                      <span className="mx-1 text-gray-500">,</span>
+                      <span className="mx-1 text-muted">,</span>
                     )}
                   </span>
                 ))}
@@ -366,7 +366,7 @@ export function ProblemCard({
             <AppLink
               href={problem.solutionLink}
               newTab
-              className="flex items-center gap-1 sm:gap-1.5 shrink-0 text-xs sm:text-sm text-gray-400 hover:text-gray-200 transition-colors duration-200"
+              className="flex items-center gap-1 sm:gap-1.5 shrink-0 text-xs sm:text-sm text-muted hover:text-foreground transition-colors duration-200"
               title={tProblems('solutionLink')}
             >
               <span>{tProblems('solution')}</span>
@@ -378,7 +378,7 @@ export function ProblemCard({
 
       {/* Tag display with technique visibility controls */}
       {problem.tags.length > 0 && (
-        <div className="border-t bg-slate-800/50 border-slate-600/60">
+        <div className="border-t bg-surface/50 border-foreground/10">
           <div className="px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 lg:py-4">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               {/* Render tags sorted by category with technique visibility logic */}
@@ -411,7 +411,7 @@ export function ProblemCard({
                 <Chip
                   onClick={() => setAreTechniquesLocallyVisible(true)}
                   clickable={true}
-                  className="!bg-purple-600/30 !text-purple-200 hover:!bg-purple-600/50"
+                  className="bg-brand/40 text-foreground/85 hover:bg-brand/50"
                   title={tProblems('showHiddenTechniques')}
                 >
                   <div className="flex items-center gap-1.5">
@@ -422,7 +422,7 @@ export function ProblemCard({
                         : tProblems('showTechniques')}
                     </span>
                     {/* Badge showing count of hidden techniques */}
-                    <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-medium text-purple-200 bg-purple-600/50 rounded-full">
+                    <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-medium text-foreground/85 bg-brand/50 rounded-full">
                       {hiddenTechniqueCount}
                     </span>
                   </div>
@@ -435,33 +435,35 @@ export function ProblemCard({
           {problem.similarProblems && problem.similarProblems.length > 0 && (
             <button
               onClick={() => toggleView('similar')}
-              className={`w-full px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 flex items-center justify-center border-t border-slate-600/40 transition-all duration-200 ${
+              className={cn(
+                'w-full px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 flex items-center justify-center border-t border-foreground/10 transition-all duration-200',
                 expandedView === 'similar'
-                  ? 'bg-indigo-500/10 hover:bg-indigo-500/15'
-                  : 'hover:bg-slate-700/30'
-              }`}
+                  ? 'bg-focus/10 hover:bg-focus/15'
+                  : 'hover:bg-foreground/5'
+              )}
               title={tProblems('toggleSimilar')}
             >
               <div className="flex items-center gap-2">
                 {/* Toggle between eye and eye-off icons based on expansion state */}
                 {expandedView === 'similar' ? (
-                  <EyeOff size={15} className="text-gray-400 sm:!w-[18px] sm:!h-[18px]" />
+                  <EyeOff size={15} className="text-muted sm:!w-[18px] sm:!h-[18px]" />
                 ) : (
-                  <Eye size={15} className="text-gray-400 sm:!w-[18px] sm:!h-[18px]" />
+                  <Eye size={15} className="text-muted sm:!w-[18px] sm:!h-[18px]" />
                 )}
-                <span className="text-xs sm:text-sm font-medium text-gray-200">
+                <span className="text-xs sm:text-sm font-medium text-foreground">
                   {tProblems('similarProblems')}
                 </span>
                 {/* Badge showing count of similar problems */}
-                <span className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-xs font-semibold text-indigo-200 bg-indigo-500/30 rounded-full border border-indigo-400/30">
+                <span className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-xs font-semibold text-focus/80 bg-focus/30 rounded-full border border-focus/30">
                   {problem.similarProblems.length}
                 </span>
                 {/* Chevron that rotates when expanded */}
                 <ChevronDown
                   size={18}
-                  className={`text-gray-400 transition-transform duration-200 ml-1 ${
-                    expandedView === 'similar' ? 'rotate-180' : ''
-                  }`}
+                  className={cn(
+                    'text-muted transition-transform duration-200 ml-1',
+                    expandedView === 'similar' && 'rotate-180'
+                  )}
                 />
               </div>
             </button>

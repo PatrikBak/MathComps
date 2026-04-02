@@ -10,7 +10,7 @@ export const HeroSection = () => {
 
   return (
     <AnimatedSection className="text-center">
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight text-balance">
+      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight text-balance">
         {t('title1')}
         <GradientText className="block">{t('title2')}</GradientText>
       </h1>

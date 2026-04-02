@@ -24,7 +24,7 @@ export const AuthorSection = () => {
           />
         </div>
 
-        <div className="text-slate-400 text-sm sm:text-base lg:text-lg leading-relaxed space-y-4 sm:pr-2">
+        <div className="text-muted text-sm sm:text-base lg:text-lg leading-relaxed space-y-4 sm:pr-2">
           <div>
             {t.rich('description', {
               p: (chunks) => <p>{chunks}</p>,
@@ -35,7 +35,7 @@ export const AuthorSection = () => {
           <div className="flex items-center gap-4 sm:gap-6 pt-2">
             <AppLink
               href="https://www.linkedin.com/in/patrik-bak-113385139"
-              className="text-slate-400 hover:text-white transition-colors flex items-center gap-2"
+              className="text-muted hover:text-foreground transition-colors flex items-center gap-2"
               title="LinkedIn"
             >
               <Linkedin size={20} />
@@ -44,7 +44,7 @@ export const AuthorSection = () => {
 
             <AppLink
               href="https://github.com/patrikbak"
-              className="text-slate-400 hover:text-white transition-colors flex items-center gap-2"
+              className="text-muted hover:text-foreground transition-colors flex items-center gap-2"
               title="GitHub"
             >
               <Github size={20} />

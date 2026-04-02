@@ -243,7 +243,7 @@ export default function TreeSelectFacet({
     return (
       <div
         className={cn(
-          'flex items-center rounded-md px-3 py-2 transition-colors hover:bg-slate-700/50 cursor-pointer',
+          'flex items-center rounded-md px-3 py-2 transition-colors hover:bg-foreground/5 cursor-pointer',
           node.count === 0 && 'opacity-50',
           'select-none'
         )}
@@ -261,13 +261,10 @@ export default function TreeSelectFacet({
                 e.stopPropagation() // Prevent triggering the row's selection handler
                 onToggleExpansion()
               }}
-              className="w-5 h-5 hover:bg-slate-100/10 rounded flex items-center justify-center"
+              className="w-5 h-5 hover:bg-foreground/10 rounded flex items-center justify-center"
             >
               <ChevronRight
-                className={cn(
-                  'h-4 w-4 transition-transform text-slate-400',
-                  isExpanded && 'rotate-90'
-                )}
+                className={cn('h-4 w-4 transition-transform text-muted', isExpanded && 'rotate-90')}
               />
             </button>
           )}
@@ -420,7 +417,7 @@ export default function TreeSelectFacet({
           onKeyDown={facet.onListKeyDown}
         >
           {filteredTree.length === 0 && facet.query && (
-            <div className="px-3 py-3 text-sm text-slate-400">{tFilters('noResults')}</div>
+            <div className="px-3 py-3 text-sm text-muted">{tFilters('noResults')}</div>
           )}
           {filteredTree.map((option) => renderNode(option, 0))}
         </FacetListContainer>
