@@ -19,11 +19,11 @@ export default function AuthButton({ className, children, variant, ...props }: A
   // Each variant has a different border and background
   const variantStyles = {
     social:
-      'bg-white/5 border border-slate-600/40 text-slate-200 hover:bg-white/10 hover:border-slate-500/60',
+      'bg-foreground/5 border border-foreground/10 text-foreground hover:bg-foreground/10 hover:border-muted/60',
     primary:
-      'bg-indigo-400/40 border border-slate-600/40 text-white hover:bg-indigo-400/60 hover:border-slate-500/60 hover:shadow-lg',
+      'bg-brand/40 border border-foreground/10 text-brand-foreground hover:bg-brand/60 hover:border-muted/60 hover:shadow-lg',
     secondary:
-      'bg-slate-800/40 border border-slate-600/40 text-slate-400 hover:bg-slate-800/60 hover:border-slate-500/60 hover:text-slate-300',
+      'bg-surface/40 border border-foreground/10 text-muted hover:bg-surface/60 hover:border-muted/60 hover:text-muted-foreground',
   }
 
   return (

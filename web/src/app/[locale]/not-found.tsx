@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import FloatingMath from '@/components/animations/FloatingMath'
 import ParticleSystem from '@/components/animations/ParticleSystem'
 import Layout from '@/components/layout/Layout'
-import ActionButton from '@/components/shared/components/ActionButton'
+import { AppLink } from '@/components/shared/components/AppLink'
 import GradientText from '@/components/shared/components/GradientText'
 import { ROUTES } from '@/i18n/i18n'
 
@@ -28,18 +28,16 @@ export default function NotFound() {
           <GradientText>{t('title')}</GradientText>
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-300/90 mb-6">{t('description')}</p>
+        <p className="text-base sm:text-lg text-muted-foreground mb-6">{t('description')}</p>
 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center">
-          <ActionButton
+          <AppLink
             href={ROUTES.HOME}
-            variant="primary"
-            size="large"
-            className="inline-flex w-full sm:w-auto justify-center"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto rounded-lg px-6 py-3 text-lg font-semibold bg-brand text-brand-foreground hover:bg-brand-hover transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <Home className="mr-2" size={20} />
+            <Home size={20} />
             {t('homeButton')}
-          </ActionButton>
+          </AppLink>
         </div>
       </div>
     </Layout>

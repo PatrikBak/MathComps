@@ -47,12 +47,12 @@ export function ArticleSection({
       <section className={cn('max-w-none', className)}>
         <h2
           id={slug}
-          className="group text-3xl font-bold text-white mt-16 mb-6 border-b border-gray-700 pb-3 flex items-center gap-2"
+          className="group text-3xl font-bold text-foreground mt-16 mb-6 border-b border-foreground/10 pb-3 flex items-center gap-2"
         >
           {icon ? (
-            <span className="text-gray-400">{icon}</span>
+            <span className="text-muted">{icon}</span>
           ) : number ? (
-            <span className="mr-1 text-gray-300">{number}</span>
+            <span className="mr-1 text-muted-foreground">{number}</span>
           ) : null}
           <span>{titleContent || title}</span>
           <CopyLinkButton slug={slug} iconSize={20} />

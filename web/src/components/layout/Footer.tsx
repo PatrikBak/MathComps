@@ -33,7 +33,7 @@ export default function Footer({ hasToc }: FooterProps) {
   return (
     <footer
       className={cn(
-        'max-w-5xl mx-auto bg-slate-950/80 border-t border-slate-800/50 px-6 pt-6 sm:pt-8 lg:pb-6',
+        'max-w-5xl mx-auto bg-background/80 border-t border-surface/50 px-6 pt-6 sm:pt-8 lg:pb-6',
         hasToc ? 'pb-22' : 'pb-4'
       )}
     >
@@ -41,7 +41,7 @@ export default function Footer({ hasToc }: FooterProps) {
         {/* Brand Section */}
         <div className="col-span-1 md:col-span-2 pr-8">
           <MathCompsLogo className="mb-3 sm:mb-4" />
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed text-balance">
+          <p className="text-muted text-sm sm:text-base leading-relaxed text-balance">
             {tFooter('description')}
           </p>
         </div>
@@ -50,7 +50,7 @@ export default function Footer({ hasToc }: FooterProps) {
         <div className="flex justify-evenly text-center md:gap-12 md:text-left md:col-span-2">
           {/* Navigation Links */}
           <div>
-            <h3 className="font-semibold text-white text-sm sm:text-base tracking-wider mb-3 sm:mb-5">
+            <h3 className="font-semibold text-foreground text-sm sm:text-base tracking-wider mb-3 sm:mb-5">
               {tFooter('navigation')}
             </h3>
             <ul className="space-y-2 text-sm sm:text-base">
@@ -68,7 +68,7 @@ export default function Footer({ hasToc }: FooterProps) {
 
           {/* Project Links */}
           <div>
-            <h3 className="font-semibold text-white text-sm sm:text-base tracking-wider mb-3 sm:mb-5">
+            <h3 className="font-semibold text-foreground text-sm sm:text-base tracking-wider mb-3 sm:mb-5">
               {tFooter('project')}
             </h3>
             <ul className="space-y-2 text-sm sm:text-base">
@@ -79,7 +79,7 @@ export default function Footer({ hasToc }: FooterProps) {
                 <AppLink href="/#sponsorship-section">{tNav('sponsors')}</AppLink>
               </li>
               <li>
-                <ContactButton className="text-slate-400 hover:text-white transition-colors duration-300">
+                <ContactButton className="text-muted hover:text-foreground transition-colors duration-300">
                   {tNav('contact')}
                 </ContactButton>
               </li>
@@ -89,8 +89,8 @@ export default function Footer({ hasToc }: FooterProps) {
       </div>
 
       {/* Bottom Section */}
-      <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-800/50 flex flex-col items-center text-center gap-2">
-        <p className="text-slate-400 text-sm sm:text-base flex flex-wrap justify-center items-center gap-x-2">
+      <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-surface/50 flex flex-col items-center text-center gap-2">
+        <p className="text-muted text-sm sm:text-base flex flex-wrap justify-center items-center gap-x-2">
           <span className="whitespace-nowrap">© {BUILD_YEAR} MathComps</span>
           <span className="whitespace-nowrap">
             <span className="text-lg">•</span>

@@ -6,6 +6,16 @@ import GlassCard from '@/components/shared/components/GlassCard'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
+ * Color scheme for icon badges in a card grid.
+ */
+type CardColorScheme = {
+  /** Tailwind text color class for the icon. */
+  iconColor: string
+  /** Tailwind gradient classes for the icon container background. */
+  iconGradient: string
+}
+
+/**
  * Configuration for a card item in the {@link Section} card grid.
  */
 type SectionCardItem = {
@@ -41,27 +51,11 @@ type SectionProps = {
   children?: ReactNode
   /** Container width variant - defaults to 'wide' */
   containerWidth?: 'narrow' | 'standard' | 'wide'
+  /** Optional color schemes for the card grid icons — cycles through by index */
+  cardColorSchemes?: CardColorScheme[]
   /** Optional additional className for the outer wrapper */
   className?: string
 }
-
-/**
- * Color schemes for the three-card grid
- */
-const CARD_COLOR_SCHEMES = [
-  {
-    iconColor: 'text-indigo-300',
-    iconGradient: 'from-indigo-600/30 to-purple-600/30',
-  },
-  {
-    iconColor: 'text-violet-300',
-    iconGradient: 'from-violet-600/30 to-pink-600/30',
-  },
-  {
-    iconColor: 'text-pink-300',
-    iconGradient: 'from-pink-600/30 to-rose-600/30',
-  },
-]
 
 /**
  * Container width classes
@@ -86,6 +80,7 @@ export default function Section({
   footer,
   children,
   containerWidth = 'wide',
+  cardColorSchemes,
   className,
 }: SectionProps) {
   return (
@@ -96,14 +91,14 @@ export default function Section({
           <div className="text-center mb-8 sm:mb-10 md:mb-12">
             {badge}
             {title && (
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-5 md:mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 sm:mb-5 md:mb-6">
                 {title}
               </h2>
             )}
             {description && (
               <p
                 className={cn(
-                  'text-slate-400 text-sm sm:text-base md:text-lg max-w-4xl mx-auto leading-normal sm:leading-relaxed',
+                  'text-muted text-sm sm:text-base md:text-lg max-w-4xl mx-auto leading-normal sm:leading-relaxed',
                   descriptionClassName
                 )}
               >
@@ -117,7 +112,7 @@ export default function Section({
         {cards && cards.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 md:gap-8 max-w-xs sm:max-w-md md:max-w-4xl mx-auto">
             {cards.map((item, index) => {
-              const colorScheme = CARD_COLOR_SCHEMES[index % CARD_COLOR_SCHEMES.length]
+              const colorScheme = cardColorSchemes?.[index % (cardColorSchemes.length || 1)]
 
               return (
                 <GlassCard
@@ -126,10 +121,13 @@ export default function Section({
                     icon: (
                       <item.iconComponent
                         size={20}
-                        className={cn(colorScheme.iconColor, 'sm:w-7 sm:h-7 lg:w-8 lg:h-8')}
+                        className={cn(
+                          colorScheme?.iconColor ?? 'text-muted',
+                          'sm:w-7 sm:h-7 lg:w-8 lg:h-8'
+                        )}
                       />
                     ),
-                    iconGradient: colorScheme.iconGradient,
+                    iconGradient: colorScheme?.iconGradient ?? '',
                   }}
                   title={item.title}
                   description={item.description}
@@ -145,7 +143,7 @@ export default function Section({
 
         {/* Footer */}
         {footer && (
-          <div className="text-center mt-10 sm:mt-14 md:mt-24 text-sm text-slate-500 max-w-xl mx-auto">
+          <div className="text-center mt-10 sm:mt-14 md:mt-24 text-sm text-muted max-w-xl mx-auto">
             {footer}
           </div>
         )}

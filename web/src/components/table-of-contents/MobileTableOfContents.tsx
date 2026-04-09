@@ -69,7 +69,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
       {/* Backdrop overlay - only visible when menu is open */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-gray-900/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-surface/50 backdrop-blur-sm lg:hidden"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
@@ -77,31 +77,31 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
 
       {/* Bottom navigation bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
-        <div className="bg-slate-900/95 backdrop-blur-md border-t border-white/10">
+        <div className="bg-surface/95 backdrop-blur-md border-t border-foreground/10">
           <div className="px-4 py-3">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
                 TOC_CONTAINER_STYLES,
-                'flex w-full items-center justify-between py-3 text-left transition-colors hover:bg-white/10',
+                'flex w-full items-center justify-between py-3 text-left transition-colors hover:bg-foreground/10',
                 isOpen || activeIndex === undefined || !items[activeIndex] ? 'px-4' : 'pl-3 pr-4'
               )}
             >
               {isOpen || activeIndex === undefined || !items[activeIndex] ? (
                 <div className="flex items-center gap-2.5">
-                  <Menu className="h-4 w-4 text-gray-400 shrink-0" />
-                  <span className="text-sm font-medium text-white">
+                  <Menu className="h-4 w-4 text-muted shrink-0" />
+                  <span className="text-sm font-medium text-foreground">
                     {isOpen ? t('menuClose') : t('menuOpen')}
                   </span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Menu className="h-4 w-4 text-gray-400 shrink-0" />
+                  <Menu className="h-4 w-4 text-muted shrink-0" />
                   <div className="flex items-start gap-2 text-sm min-w-0 flex-1">
-                    <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[2rem] pt-0.5 flex items-center">
+                    <span className="text-muted text-xs font-mono shrink-0 min-w-[2rem] pt-0.5 flex items-center">
                       {items[activeIndex].icon ?? items[activeIndex].label}
                     </span>
-                    <span className="font-medium text-white leading-snug line-clamp-1">
+                    <span className="font-medium text-foreground leading-snug line-clamp-1">
                       {items[activeIndex].title}
                     </span>
                   </div>
@@ -109,7 +109,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
               )}
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-gray-400 transition-transform duration-200',
+                  'h-4 w-4 text-muted transition-transform duration-200',
                   isOpen && 'rotate-180'
                 )}
               />
@@ -136,7 +136,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
                           }
                         )}
                       >
-                        <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right flex items-center justify-end">
+                        <span className="text-muted text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right flex items-center justify-end">
                           {item.icon ?? item.label}
                         </span>
                         <span className="text-left leading-snug">{item.title}</span>

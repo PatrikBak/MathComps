@@ -23,7 +23,10 @@ export default function MathCompsLogo({ className }: MathCompsLogoProps) {
   return (
     <AppLink
       href="/"
-      className={cn('font-bold text-2xl text-white flex items-center gap-2 sm:gap-3', className)}
+      className={cn(
+        'font-bold text-2xl text-foreground flex items-center gap-2 sm:gap-3',
+        className
+      )}
       aria-label={`MathComps - ${t('home')}`}
     >
       <span className="inline-flex items-center gap-2 sm:gap-3">
@@ -38,7 +41,7 @@ export default function MathCompsLogo({ className }: MathCompsLogoProps) {
           unoptimized
         />
         <span className="text-xl sm:text-2xl lg:text-3xl">
-          Math<span style={{ color: '#8b5cf6' }}>Comps</span>
+          Math<span className="text-brand">Comps</span>
         </span>
       </span>
     </AppLink>

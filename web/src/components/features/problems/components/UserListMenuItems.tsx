@@ -141,25 +141,22 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                     toggleListItem(props.problemSlug, list.contentId)
                   }
                 }}
-                className={cn('cursor-pointer', isActive && 'text-indigo-300')}
+                className={cn('cursor-pointer', isActive && 'text-focus-light')}
               >
                 <div className="flex w-full items-center justify-between gap-2 overflow-hidden">
                   <div className="flex min-w-0 items-center gap-2 pr-6">
                     {props.mode === 'membership' && isActive ? (
                       // Membership mode, active: checkmark
-                      <Check className="h-4 w-4 shrink-0 text-indigo-400" />
+                      <Check className="h-4 w-4 shrink-0 text-focus" />
                     ) : (
                       // All other cases: layers icon with highlight when active
                       <Layers
-                        className={cn(
-                          'h-4 w-4 shrink-0',
-                          isActive ? 'text-indigo-400' : 'text-slate-400'
-                        )}
+                        className={cn('h-4 w-4 shrink-0', isActive ? 'text-focus' : 'text-muted')}
                       />
                     )}
                     <TruncatedText className="truncate text-sm">{list.name}</TruncatedText>
                   </div>
-                  <span className="w-6 shrink-0 text-right text-xs tabular-nums text-slate-500">
+                  <span className="w-6 shrink-0 text-right text-xs tabular-nums text-muted">
                     {list.problemCount}
                   </span>
                 </div>
@@ -195,7 +192,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 !isCreating && 'invisible'
               )}
             >
-              <Plus className="h-4 w-4 shrink-0 text-slate-400" />
+              <Plus className="h-4 w-4 shrink-0 text-muted" />
               <input
                 ref={inputRef}
                 type="text"
@@ -240,7 +237,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 }}
                 placeholder={t('newListPlaceholder')}
                 disabled={isCreatePending}
-                className="flex-1 min-w-0 bg-transparent text-sm text-slate-200 placeholder-slate-500 border-none outline-none focus:ring-0"
+                className="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder-muted border-none outline-none focus:ring-0"
               />
               <LoadingSpinner className={cn('h-4 w-4 shrink-0', !isCreatePending && 'invisible')} />
             </div>
@@ -267,7 +264,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 setIsCreating(true)
               }}
               className={cn(
-                'cursor-pointer text-slate-400 hover:text-slate-200 col-start-1 row-start-1',
+                'cursor-pointer text-muted hover:text-foreground col-start-1 row-start-1',
                 isCreating && 'invisible'
               )}
             >
@@ -283,7 +280,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
             <DropdownMenuItem
               disabled={isCreating}
               onSelect={() => props.onManage?.()}
-              className="cursor-pointer text-slate-400 hover:text-slate-200"
+              className="cursor-pointer text-muted hover:text-foreground"
             >
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />

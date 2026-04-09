@@ -186,7 +186,7 @@ export function renderRawContentBlock(
       return (
         <AppLink
           href={href}
-          className="text-blue-400 hover:text-blue-300 underline transition-colors"
+          className="text-link hover:text-link-hover underline transition-colors"
           external={isExternalUrl}
           newTab
         >
@@ -233,7 +233,7 @@ export function renderRawContentBlock(
         return renderInlineContent(listItem, imagesById, imageType, imageMissingText)
       }
       return (
-        <ul className={cn('mb-4 pl-6 space-y-1 text-gray-300', listStyle.className)}>
+        <ul className={cn('mb-4 pl-6 space-y-1 text-muted-foreground', listStyle.className)}>
           {block.items.map((listItem, listItemIndex) => (
             <li key={listItemIndex}>{renderListItem(listItem)}</li>
           ))}
@@ -246,7 +246,10 @@ export function renderRawContentBlock(
       const flushInlineRun = () => {
         if (inlineRun.length > 0) {
           paragraphParts.push(
-            <p key={`p-${paragraphParts.length}`} className="leading-relaxed mb-4 text-gray-300">
+            <p
+              key={`p-${paragraphParts.length}`}
+              className="leading-relaxed mb-4 text-muted-foreground"
+            >
               {inlineRun}
             </p>
           )
@@ -296,7 +299,7 @@ export function renderRawContentBlock(
 
         // Image metadata not found - render error placeholder
         return (
-          <span className="inline-flex items-center gap-1 text-gray-500 text-sm">
+          <span className="inline-flex items-center gap-1 text-muted text-sm">
             <ImageOff size={16} strokeWidth={1.5} />
             <span className="italic">{imageMissingText}</span>
           </span>

@@ -23,7 +23,7 @@ export default function ProgressBarProvider({
   return (
     <ProgressProvider
       height="3px"
-      color="#818cf8"
+      color="var(--color-focus)"
       options={{
         // No weird spinner in the right
         showSpinner: false,

@@ -88,18 +88,18 @@ export function ConfirmDialog({
         <div
           className={cn(
             'flex items-center justify-center w-10 h-10 rounded-full',
-            variant === 'danger' && 'bg-red-500/20 text-red-400',
-            variant === 'warning' && 'bg-yellow-500/20 text-yellow-400',
-            variant === 'default' && 'bg-slate-500/20 text-slate-400'
+            variant === 'danger' && 'bg-error/20 text-error',
+            variant === 'warning' && 'bg-warning/20 text-warning',
+            variant === 'default' && 'bg-focus/20 text-focus'
           )}
         >
           <AlertTriangle size={20} />
         </div>
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
       </div>
 
       {/* Message */}
-      <p className="text-sm text-gray-400 mb-5 ml-[52px]">{message}</p>
+      <p className="text-sm text-muted mb-5 ml-[52px]">{message}</p>
 
       {/* Buttons */}
       <div className="flex justify-end gap-3">
@@ -107,7 +107,7 @@ export function ConfirmDialog({
           type="button"
           onClick={handleClose}
           disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-gray-300 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm font-medium text-muted-foreground bg-foreground/5 hover:bg-foreground/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {resolvedCancelText}
         </button>
@@ -117,9 +117,9 @@ export function ConfirmDialog({
           disabled={isLoading}
           className={cn(
             'relative px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed',
-            variant === 'danger' && 'bg-red-600 hover:bg-red-500 text-white',
-            variant === 'warning' && 'bg-yellow-600 hover:bg-yellow-500 text-white',
-            variant === 'default' && 'bg-indigo-600 hover:bg-indigo-500 text-white'
+            variant === 'danger' && 'bg-error hover:bg-error/90 text-error-foreground',
+            variant === 'warning' && 'bg-warning hover:bg-warning/90 text-warning-foreground',
+            variant === 'default' && 'bg-brand hover:bg-brand-hover text-brand-foreground'
           )}
         >
           <span className={cn(isLoading ? 'invisible' : '')}>{resolvedConfirmText}</span>

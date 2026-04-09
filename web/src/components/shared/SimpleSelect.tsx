@@ -12,6 +12,7 @@ import {
   useFacetBase,
 } from '@/components/features/problems/components/facets/facet-shared'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
+import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 
 interface SimpleSelectProps {
@@ -101,7 +102,7 @@ export default function SimpleSelect({
       >
         {/* Left: label */}
         <span className="min-w-0 flex items-center gap-2 truncate">
-          <TruncatedText className="text-slate-200">{displayText}</TruncatedText>
+          <TruncatedText className="text-foreground">{displayText}</TruncatedText>
         </span>
 
         {/* Right: chevron state icon */}
@@ -134,8 +135,9 @@ export default function SimpleSelect({
               key={facetOption.id}
               className={cn(
                 'flex items-center justify-between gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer',
-                'hover:bg-slate-700/50',
-                facetOption.id === value && 'bg-indigo-400/10 ring-1 ring-inset ring-indigo-400/30'
+                'hover:bg-foreground/5',
+                facetOption.id === value &&
+                  cn(ACCENT_COLOR_MAP.indigo.bg, 'ring-1 ring-inset ring-focus/30')
               )}
               onClick={() => handleOptionChange(facetOption.id)}
             >
@@ -144,10 +146,10 @@ export default function SimpleSelect({
                   const originalOption = options.find((option) => option.value === facetOption.id)
                   const IconComponent = originalOption?.icon
                   return IconComponent ? (
-                    <IconComponent className="h-4 w-4 text-slate-300 flex-shrink-0" />
+                    <IconComponent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   ) : null
                 })()}
-                <TruncatedText className="truncate text-xs sm:text-sm font-medium text-slate-100">
+                <TruncatedText className="truncate text-xs sm:text-sm font-medium text-foreground">
                   {facetOption.displayName}
                 </TruncatedText>
               </div>

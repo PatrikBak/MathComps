@@ -54,7 +54,7 @@ function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: T
                 marginLeft: `${indentPx}px`,
               }}
             >
-              <span className="text-slate-500 text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right flex items-center justify-end">
+              <span className="text-muted text-xs font-mono shrink-0 min-w-[1.25rem] pt-0.5 text-right flex items-center justify-end">
                 {item.icon ?? item.label}
               </span>
               <span className="leading-snug">{item.title}</span>
@@ -100,8 +100,8 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             'p-5 font-variant-numeric-tabular-nums hyphens-none leading-relaxed text-[0.95rem] max-h-[80vh] overflow-y-auto'
           )}
         >
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2 mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-focus"></span>
             Obsah
           </h3>
           <nav className="text-sm">

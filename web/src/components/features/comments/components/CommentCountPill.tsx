@@ -30,10 +30,10 @@ export function CommentCountPill({ targetId }: CommentCountPillProps) {
     <div
       className={cn(
         'inline-flex items-center gap-2 leading-none transition-colors duration-200',
-        hasComments ? 'text-indigo-300' : 'text-gray-500'
+        hasComments ? 'text-focus/80' : 'text-muted'
       )}
     >
-      <MessageSquare className={cn('w-4 h-4', hasComments ? 'fill-indigo-400/20' : 'opacity-40')} />
+      <MessageSquare className={cn('w-4 h-4', hasComments ? 'fill-focus/20' : 'opacity-40')} />
       <span className="text-sm font-bold tracking-tight">
         {isLoading ? <LoadingSpinner className="w-3 h-3 border-2" /> : count}
       </span>

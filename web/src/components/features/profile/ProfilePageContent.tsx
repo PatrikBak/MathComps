@@ -16,6 +16,8 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 
+import { PROFILE_AVATAR_GLOW, PROFILE_BANNER_GRADIENT } from './profile-colors'
+
 /**
  * Props for the ProfileInfoField component
  */
@@ -31,7 +33,7 @@ type ProfileInfoFieldProps = {
  */
 function ProfileInfoField({ icon: Icon, label }: ProfileInfoFieldProps) {
   return (
-    <div className="text-slate-200 font-medium text-base md:text-right flex items-center justify-start md:justify-end gap-2 pt-4 md:pt-0">
+    <div className="text-foreground font-medium text-base md:text-right flex items-center justify-start md:justify-end gap-2 pt-4 md:pt-0">
       <Icon className="w-5 h-5" />
       <span className="whitespace-nowrap">{label}</span>
     </div>
@@ -137,18 +139,18 @@ export default function ProfilePageContent() {
   /** The class for the font of the text inside the data fields */
   const commonFontStyle = 'truncate text-base font-medium'
   /** The class for the container of the data fields */
-  const containerClassName = 'py-2 px-3 bg-slate-800/30 rounded-lg border border-slate-800'
+  const containerClassName = 'py-2 px-3 bg-surface/30 rounded-lg border border-foreground/10'
   /** The class for the read-only data fields */
   const readOnlyContainerClassName = cn(
     containerClassName,
-    'truncate text-slate-500 cursor-not-allowed'
+    'truncate text-muted cursor-not-allowed'
   )
 
   return (
     <div className="flex items-center justify-center px-4 py-8 sm:py-12 md:py-16 lg:py-20 sm:px-6 lg:px-8">
-      <div className="w-full max-w-2xl bg-slate-900/95 rounded-2xl border border-slate-700/60 overflow-hidden shadow-xl backdrop-blur-sm">
+      <div className="w-full max-w-2xl bg-surface/50 rounded-2xl border border-surface-inset/60 overflow-hidden shadow-xl backdrop-blur-sm">
         {/* Header with Avatar */}
-        <div className="relative h-24 sm:h-28 md:h-32 bg-gradient-to-r from-indigo-900/40 via-purple-900/40 to-pink-900/40">
+        <div className={cn('relative h-24 sm:h-28 md:h-32', PROFILE_BANNER_GRADIENT)}>
           {/* Texture Overlay */}
           <div
             className="absolute inset-0 opacity-[0.15]"
@@ -175,10 +177,15 @@ export default function ProfilePageContent() {
               onClick={() => fileInputRef.current?.click()}
             >
               {/* Avatar gradient */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full opacity-75 group-hover:opacity-100 transition duration-200 blur"></div>
+              <div
+                className={cn(
+                  'absolute -inset-0.5 rounded-full opacity-75 group-hover:opacity-100 transition duration-200 blur',
+                  PROFILE_AVATAR_GLOW
+                )}
+              ></div>
 
               {/* Avatar image */}
-              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-slate-900 overflow-hidden bg-slate-800">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-background overflow-hidden bg-surface">
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
                   altText={user.firstName || tProfile('defaultUser')}
@@ -202,7 +209,7 @@ export default function ProfilePageContent() {
               onSave={onUpdateDisplayName}
               schema={createDisplayNameSchema(tValidation)}
               label={tProfile('displayNamePlaceholder')}
-              textClassName={cn(commonFontStyle, 'text-slate-200')}
+              textClassName={cn(commonFontStyle, 'text-foreground')}
               innerContainerClassName={containerClassName}
               iconSize={14}
               actionsClassName="pr-1"
@@ -234,17 +241,17 @@ export default function ProfilePageContent() {
         </div>
 
         {/* Sign out button */}
-        <div className="py-6 border-t border-slate-800 flex flex-col items-center gap-4">
+        <div className="py-6 border-t border-foreground/10 flex flex-col items-center gap-4">
           <SignOutButton redirectUrl={ROUTES.HOME}>
             <button
               className={cn(
                 'inline-flex items-center justify-center gap-2',
                 'rounded-lg font-medium transition-all duration-200',
-                'px-5 py-2.5 text-sm text-red-400',
-                'bg-red-950/20 hover:bg-red-900/30',
-                'border border-red-900/30 hover:border-red-800/50',
+                'px-5 py-2.5 text-sm text-error',
+                'bg-error/10 hover:bg-error/15',
+                'border border-error/20 hover:border-error/30',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                'focus-visible:ring-red-900/40 focus-visible:ring-offset-slate-900'
+                'focus-visible:ring-error/40 focus-visible:ring-offset-inset'
               )}
             >
               <LogOut className="w-4 h-4" />

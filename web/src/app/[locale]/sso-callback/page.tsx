@@ -40,7 +40,7 @@ export default function SSOCallbackPage() {
       </div>
 
       {/* Status message */}
-      <p className="mt-4 text-slate-400 text-center">{t('redirecting')}</p>
+      <p className="mt-4 text-muted text-center">{t('redirecting')}</p>
     </div>
   )
 }

@@ -3,47 +3,66 @@ import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
-import { cn } from '@/components/shared/utils/css-utils'
+import type { AccentColor } from '@/components/shared/utils/accent-colors'
 import { getSiteUrl } from '@/components/shared/utils/url-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 import { ROUTES } from '@/i18n/i18n'
 
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import { GUIDE_TITLES } from './layout/guide-structure'
-import { GUIDE_STYLES } from './layout/guide-styles'
+import { GuideCard } from './layout/GuideCard'
+import { GuideHeading } from './layout/GuideHeading'
 import { GuideSection } from './layout/GuideSection'
-import { InfoCard } from './layout/InfoCard'
+import { GuideText } from './layout/GuideText'
 import TipBox from './layout/TipBox'
 
+/**
+ * A single resource entry (website, tool, video channel, etc.).
+ */
 type Resource = {
+  /** Display title (e.g., "AoPS", "GeoGebra"). */
   title: string
+  /** Optional expanded name shown below the title. */
   fullName?: string
+  /** Descriptive text or rich content for the resource. */
   description: string | React.ReactNode
+  /** External URL to the resource. */
   link?: string
 }
 
+/**
+ * Configuration for a group of related resources.
+ */
 type ResourceCategoryType = {
+  /** Category heading (e.g., "Websites", "YouTube"). */
   title: string
+  /** Lucide icon displayed in the section header. */
   icon: LucideIcon
-  iconColor: string
-  iconBg: string
+  /** Decorative accent color from the approved palette. */
+  accent: AccentColor
+  /** Optional introductory text for the category. */
   description?: string | React.ReactNode
+  /** Individual resources within this category. */
   resources: Resource[]
+  /** Optional footer renderer for tips or notes. */
   renderFooter?: () => React.ReactNode
 }
 
 /**
  * Render a single resource card with name, optional acronym, description, and link.
- * Follows the same pattern as competition cards in OtherCompetitionsSection.
  */
 function renderResourceCard(resource: Resource, resourceIndex: number) {
   return (
-    <InfoCard key={resourceIndex}>
+    <GuideCard key={resourceIndex}>
       {/* Header with name and optional acronym */}
       <div className="mb-2 sm:mb-3">
-        <h4 className={cn(GUIDE_STYLES.cardTitle, 'mb-0')}>{resource.title}</h4>
+        <GuideHeading level="h3" className="mb-0">
+          {resource.title}
+        </GuideHeading>
         {resource.fullName && (
-          <p className={cn(GUIDE_STYLES.textAcronym, 'mt-0.5')}>({resource.fullName})</p>
+          <GuideText variant="acronym" className="mt-0.5">
+            ({resource.fullName})
+          </GuideText>
         )}
       </div>
 
@@ -55,18 +74,25 @@ function renderResourceCard(resource: Resource, resourceIndex: number) {
       )}
 
       {/* Description */}
-      <p className={cn(GUIDE_STYLES.textNormal, 'leading-relaxed')}>{resource.description}</p>
-    </InfoCard>
+      <GuideText as="div">{resource.description}</GuideText>
+    </GuideCard>
   )
 }
 
-function ResourceCategory({
-  category,
-  sectionNumberer,
-}: {
+/**
+ * Props for the {@link ResourceCategory} component.
+ */
+type ResourceCategoryProps = {
+  /** Category configuration containing title, icon, accent, and resources. */
   category: ResourceCategoryType
+  /** Section numberer for hierarchical section numbering. */
   sectionNumberer: SectionNumberer
-}) {
+}
+
+/**
+ * Renders a single resource category as a subsection with individual resource cards.
+ */
+function ResourceCategory({ category, sectionNumberer }: ResourceCategoryProps) {
   // Get translations
   const t = useTranslations('guide')
 
@@ -75,8 +101,7 @@ function ResourceCategory({
       title={category.title}
       description={category.description}
       icon={{ type: 'lucide', icon: category.icon }}
-      iconColor={category.iconColor}
-      iconBackground={category.iconBg}
+      accent={category.accent}
       sectionNumberer={sectionNumberer}
     >
       <div className="space-y-3 sm:space-y-4">
@@ -90,11 +115,18 @@ function ResourceCategory({
   )
 }
 
-export default function ResourcesSection({
-  sectionNumberer,
-}: {
+/**
+ * Props for the {@link ResourcesSection} component.
+ */
+type ResourcesSectionProps = {
+  /** Section numberer for hierarchical section numbering. */
   sectionNumberer: SectionNumberer
-}) {
+}
+
+/**
+ * Guide section listing useful resources grouped by category.
+ */
+export default function ResourcesSection({ sectionNumberer }: ResourcesSectionProps) {
   // Common guide translations
   const tGuide = useTranslations('guide')
 
@@ -105,12 +137,12 @@ export default function ResourcesSection({
   const tStudyTexts = useTranslations('guide.sections.resources.studyTexts')
   const tTips = useTranslations('guide.sections.resources.tips')
 
+  // List of all categories resources to be rendered
   const resourceCategories: ResourceCategoryType[] = [
     {
       title: tGuide(`titles.${GUIDE_TITLES.WEBSITES}`),
       icon: MessageSquare,
-      iconColor: 'text-indigo-400',
-      iconBg: 'bg-indigo-500/10',
+      accent: 'blue',
       resources: [
         {
           title: 'AoPS',
@@ -134,8 +166,7 @@ export default function ResourcesSection({
     {
       title: tGuide(`titles.${GUIDE_TITLES.PROGRAMS}`),
       icon: Wrench,
-      iconColor: 'text-violet-400',
-      iconBg: 'bg-violet-500/10',
+      accent: 'purple',
       resources: [
         {
           title: 'GeoGebra',
@@ -159,8 +190,7 @@ export default function ResourcesSection({
     {
       title: tGuide(`titles.${GUIDE_TITLES.YOUTUBE}`),
       icon: Youtube,
-      iconColor: 'text-pink-400',
-      iconBg: 'bg-pink-500/10',
+      accent: 'red',
       resources: [
         {
           title: 'MindYourDecisions',
@@ -182,8 +212,7 @@ export default function ResourcesSection({
     {
       title: tGuide(`titles.${GUIDE_TITLES.STUDY_TEXTS}`),
       icon: BookOpen,
-      iconColor: 'text-emerald-400',
-      iconBg: 'bg-emerald-500/10',
+      accent: 'emerald',
       description: tStudyTexts('intro'),
       resources: [
         {
@@ -200,7 +229,10 @@ export default function ResourcesSection({
           title: tStudyTexts('titles.sampleSolutions'),
           description: tGuide.rich('sections.resources.studyTexts.sampleSolutions', {
             link: (chunks) => (
-              <AppLink href="#seminars" className={GUIDE_STYLES.link}>
+              <AppLink
+                href="#seminars"
+                className="text-link underline transition-colors hover:text-link-hover"
+              >
                 {chunks}
               </AppLink>
             ),
@@ -216,7 +248,7 @@ export default function ResourcesSection({
           link: 'https://prase.cz/knihovna/',
         },
       ],
-      renderFooter: () => <TipBox variant="info">{tTips('footer')}</TipBox>,
+      renderFooter: () => <TipBox variant="note">{tTips('footer')}</TipBox>,
     },
   ]
 
@@ -225,11 +257,10 @@ export default function ResourcesSection({
       title={tGuide(`titles.${GUIDE_TITLES.RESOURCES}`)}
       description={tGuide('sections.resources.description')}
       icon={{ type: 'lucide', icon: Link2 }}
-      iconColor="text-blue-400"
-      iconBackground="bg-blue-500/10"
+      accent="sky"
       sectionNumberer={sectionNumberer}
     >
-      <div className={GUIDE_STYLES.sectionSpacing}>
+      <div className="space-y-4 sm:space-y-5 md:space-y-6">
         {resourceCategories.map((category, index) => (
           <ResourceCategory key={index} category={category} sectionNumberer={sectionNumberer} />
         ))}

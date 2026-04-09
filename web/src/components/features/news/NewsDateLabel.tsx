@@ -27,7 +27,7 @@ export function NewsDateLabel({ date }: NewsDateLabelProps) {
 
   // Return the formatted date with calendar icon
   return (
-    <div className={cn('inline-flex items-center gap-2 text-gray-400 text-sm')}>
+    <div className={cn('inline-flex items-center gap-2 text-muted-foreground text-sm')}>
       <Calendar size={14} />
       <time>{formattedDate}</time>
     </div>

@@ -66,39 +66,39 @@ const POPOVER_MAX_HEIGHT = 520
 export const facetUI = {
   headerRow: 'flex items-center justify-between gap-2 mb-1 sm:mb-1.5',
 
-  title: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-semibold text-slate-200',
+  title: 'flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-semibold text-foreground',
 
   trigger:
-    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)] text-slate-300',
+    'w-full flex items-center justify-between gap-2 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg border border-muted/30 bg-surface/95 text-xs sm:text-sm text-muted-foreground outline-none transition-all hover:border-muted/60 focus:border-focus/60 focus:ring-2 focus:ring-focus/35',
 
-  triggerIconBox: 'shrink-0 text-slate-300',
+  triggerIconBox: 'shrink-0 text-muted-foreground',
 
   popover:
-    'z-[1000] flex flex-col overflow-hidden rounded-lg border border-slate-700 bg-gray-800/95 shadow-2xl backdrop-blur',
+    'z-[1000] flex flex-col overflow-hidden rounded-lg border border-foreground/10 bg-surface/95 shadow-2xl backdrop-blur',
 
   popoverHeader:
-    'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
+    'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-foreground/10 bg-surface/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
 
   searchRow:
-    'relative flex items-center gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
+    'relative flex items-center gap-2 border-b border-foreground/10 bg-surface/95 px-2.5 sm:px-3 py-1.5 sm:py-2',
 
   searchInputWrapper: 'relative flex-1',
   searchInput:
-    'h-8 sm:h-9 w-full rounded-md border border-transparent bg-slate-900/70 px-2.5 sm:px-3 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400/70',
+    'h-8 sm:h-9 w-full rounded-md border border-foreground/10 bg-surface-inset/40 px-2.5 sm:px-3 text-xs sm:text-sm text-foreground placeholder-muted focus:border-focus/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-focus/70',
   searchInputWithClear: 'pr-8 sm:pr-9',
   searchClearButton:
-    'absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded text-slate-400 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors',
+    'absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded text-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus transition-colors',
 
   itemBase:
     'flex items-center justify-between gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors',
 
-  itemHover: 'hover:bg-slate-700/50',
+  itemHover: 'hover:bg-foreground/5',
 
-  itemSelected: 'bg-indigo-400/10 ring-1 ring-inset ring-indigo-400/30',
+  itemSelected: 'bg-focus/10 ring-1 ring-inset ring-focus/30',
 
   itemLabel: 'truncate text-xs sm:text-sm font-medium',
 
-  itemCount: 'text-right text-[10px] sm:text-xs tabular-nums text-slate-400 shrink-0 ml-auto',
+  itemCount: 'text-right text-[10px] sm:text-xs tabular-nums text-muted shrink-0 ml-auto',
 }
 
 // #endregion
@@ -326,7 +326,7 @@ export function FacetHeader({
         </h3>
         {titleTooltip && (
           <Tooltip placement="top" content={titleTooltip}>
-            <HelpCircle className="h-4 w-4 cursor-help text-slate-400/80" />
+            <HelpCircle className="h-4 w-4 cursor-help text-muted/80" />
           </Tooltip>
         )}
       </div>
@@ -337,7 +337,7 @@ export function FacetHeader({
             type="button"
             onClick={onClear}
             className={cn(
-              'inline-flex h-6 sm:h-7 items-center gap-0.5 sm:gap-1 rounded-md px-1.5 sm:px-2 text-[11px] sm:text-[12px] text-slate-300 hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 whitespace-nowrap',
+              'inline-flex h-6 sm:h-7 items-center gap-0.5 sm:gap-1 rounded-md px-1.5 sm:px-2 text-[11px] sm:text-[12px] text-muted-foreground hover:bg-foreground/5 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus whitespace-nowrap',
               !showClearVisible && 'invisible pointer-events-none'
             )}
             aria-label={tFilters('resetSelection', { name: title })}
@@ -394,7 +394,7 @@ function FacetTrigger(props: FacetTriggerProps) {
         <span className="truncate">{closedLabel}</span>
         {count > 0 && (
           <span
-            className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
+            className="shrink-0 rounded-full bg-foreground/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
             aria-label={tFilters('selectedCount', { count })}
           >
             {count}
@@ -458,14 +458,14 @@ function FacetPopoverHeader({ title, onClear, count }: FacetPopoverHeaderProps) 
   return (
     <div className={facetUI.popoverHeader}>
       <div className="min-w-0">
-        <span className="text-xs sm:text-sm font-medium text-slate-200">{title}</span>
+        <span className="text-xs sm:text-sm font-medium text-foreground">{title}</span>
       </div>
       <div className="w-[80px] sm:w-[96px] flex justify-end">
         <button
           type="button"
           onClick={onClear}
           className={cn(
-            'inline-flex h-7 sm:h-8 items-center gap-1 rounded-md px-1.5 sm:px-2 text-[11px] sm:text-xs text-slate-300 hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 whitespace-nowrap',
+            'inline-flex h-7 sm:h-8 items-center gap-1 rounded-md px-1.5 sm:px-2 text-[11px] sm:text-xs text-muted-foreground hover:bg-foreground/5 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus whitespace-nowrap',
             count() == 0 && 'invisible pointer-events-none'
           )}
           aria-label={tFilters('resetFilter')}

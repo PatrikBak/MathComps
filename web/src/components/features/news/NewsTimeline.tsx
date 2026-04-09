@@ -12,12 +12,13 @@ import {
 } from '@/components/features/comments/components/CommentCountContext'
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
-import { IconBadge } from '@/components/shared/components/IconBadge'
+import { CountBadge } from '@/components/shared/components/CountBadge'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
-import { CATEGORY_CONFIG, type NewsArticle, type NewsCategory } from './types'
+import { CATEGORY_COLORS } from './news-colors'
+import { type NewsArticle, type NewsCategory } from './types'
 
 /**
  * Validates and parses the category URL parameter.
@@ -31,7 +32,7 @@ function parseCategory(value: string | null): NewsCategory | null {
   if (value === null) return null
 
   // Guard against invalid categories
-  if (!Object.keys(CATEGORY_CONFIG).includes(value)) return null
+  if (!Object.keys(CATEGORY_COLORS).includes(value)) return null
 
   // Return the category
   return value as NewsCategory
@@ -65,8 +66,8 @@ function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonPro
       onClick={onClick}
       className={cn(
         'absolute bottom-[45px] -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full',
-        'bg-slate-900 border-2 border-indigo-500/60 text-indigo-400',
-        'hover:bg-slate-700 hover:border-indigo-400 hover:text-indigo-300',
+        'bg-background border-2 border-focus/60 text-focus-light',
+        'hover:bg-surface-hover hover:border-focus-light hover:text-focus-light',
         'transition-all duration-200',
         direction === 'left' ? 'left-0' : 'right-0',
         visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -101,12 +102,12 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
   return (
     <button
       onClick={openComments}
-      className="w-fit self-center flex items-center justify-center gap-4 py-2 px-4 text-gray-400 hover:bg-slate-800/50 rounded-lg transition-colors"
+      className="w-fit self-center flex items-center justify-center gap-4 py-2 px-4 text-muted hover:bg-surface/50 rounded-lg transition-colors"
     >
       <div className="flex items-center gap-1.5">
-        <IconBadge count={count} color="indigo" isHighlighted={count > 0} isLoading={isLoading}>
+        <CountBadge count={count} color="indigo" isHighlighted={count > 0} isLoading={isLoading}>
           <MessageSquare size={20} />
-        </IconBadge>
+        </CountBadge>
       </div>
       <span className="text-sm font-medium">{t('comments')}</span>
     </button>
@@ -248,8 +249,15 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
     // Guard against a not set state?
     if (!container) return
 
-    // Scroll by roughly one card width + gap
-    const scrollAmount = 400
+    // Navigate to cards row → first card for precise width measurement
+    const firstCard = container.querySelector('[data-cards-row]')?.firstElementChild as HTMLElement
+
+    // Guard against no cards
+    if (!firstCard) return
+
+    // gap-6 = 1.5rem = 24px at default root font size
+    const gapPx = 24
+    const scrollAmount = firstCard.offsetWidth + gapPx
 
     // Calculate the new scroll position
     const newPosition =
@@ -294,19 +302,19 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
       <div className="md:hidden text-center flex flex-col gap-4">
         {/* Title with icon */}
         <div className="flex items-center justify-center gap-3">
-          <Newspaper size={32} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
-          <h1 className="text-3xl font-bold tracking-tight text-white">{t('title')}</h1>
+          <Newspaper size={32} className="text-focus-light shrink-0" strokeWidth={1.5} />
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('title')}</h1>
         </div>
 
         {/* Mobile filter indicator */}
         {categoryFilter && (
           <div className="flex items-center justify-center gap-2">
-            <span className="text-sm text-gray-400">{t('filtering')}</span>
+            <span className="text-sm text-muted-foreground">{t('filtering')}</span>
             <button
               onClick={clearFilter}
               className={cn(
                 'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
-                CATEGORY_CONFIG[categoryFilter].bgColor,
+                CATEGORY_COLORS[categoryFilter],
                 'hover:opacity-80 transition-opacity'
               )}
             >
@@ -341,21 +349,23 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
               <div className="flex items-center gap-4">
                 {/* Title with icon */}
                 <div className="flex items-center gap-3">
-                  <Newspaper size={36} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
-                  <h1 className="text-4xl font-bold tracking-tight text-white">{t('title')}</h1>
+                  <Newspaper size={36} className="text-focus-light shrink-0" strokeWidth={1.5} />
+                  <h1 className="text-4xl font-bold tracking-tight text-foreground">
+                    {t('title')}
+                  </h1>
                 </div>
 
                 {/* Filter indicator - appears next to title when active */}
                 {categoryFilter && (
                   <>
-                    <div className="w-px h-8 bg-gray-600/50" />
+                    <div className="w-px h-8 bg-foreground/10" />
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400">{t('filtering')}</span>
+                      <span className="text-sm text-muted-foreground">{t('filtering')}</span>
                       <button
                         onClick={clearFilter}
                         className={cn(
                           'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
-                          CATEGORY_CONFIG[categoryFilter].bgColor,
+                          CATEGORY_COLORS[categoryFilter],
                           'hover:opacity-80 transition-opacity'
                         )}
                       >
@@ -401,7 +411,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
 
                 <div className="flex flex-col min-w-max">
                   {/* Cards row */}
-                  <div className="flex gap-6">
+                  <div data-cards-row className="flex gap-6">
                     {filteredItems.map((item) => {
                       return (
                         <div
@@ -423,7 +433,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                   {/* Timeline row - scrolls together with cards */}
                   <div className="relative mt-6 pt-4">
                     {/* Horizontal line spanning entire width - fade towards older */}
-                    <div className="absolute top-4 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-400 via-indigo-500/30 to-gray-700/10" />
+                    <div className="absolute top-4 left-0 right-0 h-[3px] bg-gradient-to-r from-focus-light via-focus/30 to-muted/10" />
 
                     {/* Date markers */}
                     <div className="flex gap-6">
@@ -437,14 +447,12 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                         return (
                           <div
                             key={item.article.id}
-                            className="w-[340px] lg:w-[380px] flex-shrink-0 flex flex-col items-center"
+                            className="w-[340px] lg:w-[388px] flex-shrink-0 flex flex-col items-center"
                           >
                             {/* Timeline dot with optional glow ring for newest */}
                             <div className="relative -mt-[6px] z-10">
                               {/* Animated glow ring for first/newest item */}
-                              {isFirst && (
-                                <div className="absolute inset-0 -m-2 rounded-full border-2 border-indigo-400/60 animate-pulse shadow-[0_0_12px_4px_rgba(129,140,248,0.4)]" />
-                              )}
+                              {isFirst && <div className="absolute inset-0 rounded-full" />}
                               {/* Dot - oldest dots get progressively darker borders */}
                               {(() => {
                                 // Calculate border color - fades from indigo to dark slate
@@ -452,15 +460,15 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                                 const borderColor = isFirst
                                   ? // First item is styled with className, others with inline style
                                     undefined
-                                  : `rgb(99 102 241 / ${borderOpacity}%)`
+                                  : `color-mix(in srgb, var(--color-focus) ${borderOpacity}%, transparent)`
 
                                 return (
                                   <div
                                     className={cn(
                                       'w-4 h-4 rounded-full border-[3px]',
                                       isFirst
-                                        ? 'bg-indigo-400 border-indigo-200 shadow-lg shadow-indigo-500/60'
-                                        : 'bg-slate-900'
+                                        ? 'bg-focus-light border-focus-light/50'
+                                        : 'bg-background'
                                     )}
                                     style={isFirst ? undefined : { borderColor }}
                                   />
@@ -476,12 +484,12 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                               <div
                                 className={cn(
                                   'text-xl font-bold',
-                                  isFirst ? 'text-indigo-300' : 'text-gray-400'
+                                  isFirst ? 'text-focus-light' : 'text-muted'
                                 )}
                               >
                                 {dateInfo.dayMonth}
                               </div>
-                              <div className="text-sm text-gray-500 mt-1">{dateInfo.year}</div>
+                              <div className="text-sm text-muted mt-1">{dateInfo.year}</div>
                             </div>
                           </div>
                         )

@@ -46,7 +46,7 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
       <DropdownMenuTrigger asChild>
         <button
           className="inline-flex h-8 w-8 items-center justify-center rounded-md
-               text-slate-400 hover:bg-slate-700/50 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+               text-muted hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
                transition-colors duration-150"
           aria-label={tProblems('moreActions')}
         >
@@ -87,18 +87,18 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
               {/* Fixed-width container for alignment */}
               <span className="mr-2 flex w-5 items-center justify-center">
                 {showTechniqueTags ? (
-                  <Eye className="h-4 w-4 text-indigo-400" />
+                  <Eye className="h-4 w-4 text-focus" />
                 ) : (
-                  <EyeOff className="h-4 w-4 text-slate-500" />
+                  <EyeOff className="h-4 w-4 text-muted" />
                 )}
               </span>
-              <span className={showTechniqueTags ? 'text-indigo-100' : ''}>
+              <span className={showTechniqueTags ? 'text-focus/80' : ''}>
                 {showTechniqueTags ? tProblems('hideTechniques') : tProblems('showTechniques')}
               </span>
             </div>
             <Tooltip placement="top" content={tProblems('techniquesHelpTooltip')}>
               <div className="p-1">
-                <HelpCircle className="h-4 w-4 cursor-help text-slate-500 hover:text-slate-400" />
+                <HelpCircle className="h-4 w-4 cursor-help text-muted hover:text-muted" />
               </div>
             </Tooltip>
           </div>

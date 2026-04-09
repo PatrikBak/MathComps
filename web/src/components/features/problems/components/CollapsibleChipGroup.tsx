@@ -127,8 +127,8 @@ function ExpandCollapseButton({ isExpanded, hiddenCount, onToggle }: ExpandColla
     <button
       onClick={onToggle}
       className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium 
-        text-indigo-300 hover:bg-indigo-400/10 hover:text-indigo-200
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+        text-focus/80 hover:bg-focus/10 hover:text-focus/70
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
         transition-colors whitespace-nowrap"
       aria-label={isExpanded ? tActions('showLess') : tActions('showCount', { count: hiddenCount })}
       type="button"
@@ -209,8 +209,8 @@ function JoinedChips({ items, logicalChipsProps }: JoinedChipsProps) {
               <span
                 className={cn(
                   'inline-flex items-center justify-center mx-1.5 px-1.5 py-0.5',
-                  'text-indigo-100 text-[11px] font-medium leading-none',
-                  'hover:text-indigo-200 hover:bg-indigo-400/10 rounded transition-colors'
+                  'text-focus/80 text-[11px] font-medium leading-none',
+                  'hover:text-focus/70 hover:bg-focus/10 rounded transition-colors'
                 )}
               >
                 {modeConfig.symbol}

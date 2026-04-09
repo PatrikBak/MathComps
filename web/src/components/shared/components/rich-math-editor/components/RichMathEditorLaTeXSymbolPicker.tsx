@@ -209,12 +209,12 @@ export function RichMathEditorLaTeXSymbolPicker({
     <RichMathEditorPicker
       triggerContent={<span className="font-mono font-semibold text-sm">π</span>}
       triggerTitle={tLatexPicker('title')}
-      popupClassName="bg-slate-800 w-[320px] sm:w-[420px]"
+      popupClassName="bg-surface w-[320px] sm:w-[420px]"
     >
       {({ close }) => (
         <>
           {/* Category Tabs */}
-          <div className="flex flex-wrap gap-1 p-2 border-b border-slate-700/60 bg-slate-800/80">
+          <div className="flex flex-wrap gap-1 p-2 border-b border-foreground/10 bg-surface/80">
             {SYMBOL_CATEGORIES.map((category) => (
               <button
                 key={category.key}
@@ -224,8 +224,8 @@ export function RichMathEditorLaTeXSymbolPicker({
                 className={cn(
                   'px-2 py-1 text-xs rounded transition-colors',
                   activeCategory === category
-                    ? 'bg-indigo-500/30 text-indigo-300'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700/50'
+                    ? 'bg-foreground/10 text-foreground'
+                    : 'text-muted hover:text-foreground hover:bg-foreground/5'
                 )}
               >
                 {tCategories(category.key)}
@@ -253,7 +253,7 @@ export function RichMathEditorLaTeXSymbolPicker({
                         onSymbolClick(symbol.latex, symbol.args ?? 0)
                         close()
                       }}
-                      className="flex items-center justify-center w-10 h-10 text-lg rounded hover:bg-slate-700/60 transition-colors text-gray-200"
+                      className="flex items-center justify-center w-10 h-10 text-lg rounded hover:bg-foreground/5 transition-colors text-foreground"
                     >
                       {symbol.display}
                     </button>

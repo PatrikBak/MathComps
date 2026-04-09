@@ -40,7 +40,7 @@ export const UserAvatarImage = ({ imageUrl, altText, size, className }: UserAvat
       alt={altText}
       width={size}
       height={size}
-      className={cn('rounded-full ring-2 ring-white/20 object-cover flex-none', className)}
+      className={cn('rounded-full ring-2 ring-foreground/20 object-cover flex-none', className)}
       style={{ width: size, height: size }}
       onError={(event) => {
         // Ensure future renders use the fallback when the original image fails

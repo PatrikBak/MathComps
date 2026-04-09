@@ -1,6 +1,7 @@
 import { Mail } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import type { AccentColor } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
 
@@ -9,28 +10,39 @@ import { BulletList } from './layout/BulletList'
 import { ExternalLinkButton } from './layout/ExternalLinkButton'
 import { FlagIcon } from './layout/FlagIcon'
 import { GUIDE_TITLES } from './layout/guide-structure'
-import { GUIDE_STYLES } from './layout/guide-styles'
+import { GuideHeading } from './layout/GuideHeading'
 import { GuideSection } from './layout/GuideSection'
+import { GuideText } from './layout/GuideText'
 import { type SchoolLevel, SchoolLevelBadge } from './layout/SchoolLevelBadge'
 import TipBox from './layout/TipBox'
 
+/** Country code used for seminar geographic tagging. */
 type Country = 'SK' | 'CZ' | 'INTERNATIONAL'
 
+/** Translation key for seminar item descriptions. */
 type SeminarDescriptionKey = keyof (typeof messages)['guide']['sections']['seminars']['items']
 
+/**
+ * Data model for a single seminar entry.
+ */
 type Seminar = {
+  /** Seminar display name (e.g., "KMS"). */
   title: string
+  /** External URL to the seminar homepage. */
   link: string
-  /** Translation key for description in sections.seminars.items */
+  /** Translation key for the localized description (if there's any). */
   descriptionKey?: SeminarDescriptionKey
+  /** Optional bullet-point details. */
   details?: string[]
+  /** Target school level. */
   level: SchoolLevel
+  /** Country where the seminar operates. */
   country: Country
 }
 
 /**
- * Section showcasing correspondence seminars and training programs.
- * Uses a clean, list-based layout emphasizing key information over visual effects.
+ * Guide section showcasing correspondence seminars and training programs.
+ * Renders a list-based layout grouped by school level.
  */
 export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: SectionNumberer }) {
   // Common guide translations
@@ -39,6 +51,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
   // Scoped translator for seminar common content
   const tSeminars = useTranslations('guide.sections.seminars')
 
+  // List of all seminars to be rendered
   const seminars: Seminar[] = [
     {
       title: 'KMS',
@@ -139,29 +152,37 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     },
   ]
 
+  /**
+   * Renders a single seminar row.
+   *
+   * @param seminar - The seminar to render.
+   * @param index - The index of the seminar.
+   * @returns The rendered seminar row.
+   */
   const renderSeminarRow = (seminar: Seminar, index: number) => (
     <div
       key={index}
-      className="group relative flex items-start gap-3 py-4 px-4 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-200"
+      className="group relative flex items-start gap-3 py-4 px-4 rounded-lg border border-foreground/10 bg-foreground/5 hover:bg-foreground/10 hover:border-foreground/15 transition-all duration-200"
     >
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap mb-0.5">
-          <h4
+          <GuideHeading
+            level="h4"
             className={cn(
-              GUIDE_STYLES.cardTitleSmall,
-              'font-semibold group-hover:text-white transition-colors'
+              'text-base sm:text-lg',
+              'font-semibold group-hover:text-foreground transition-colors'
             )}
           >
             {seminar.title}
-          </h4>
+          </GuideHeading>
           <ExternalLinkButton href={seminar.link} />
         </div>
 
         {seminar.descriptionKey && (
-          <p className={cn(GUIDE_STYLES.textSmall, 'leading-relaxed mt-1.5')}>
+          <GuideText variant="small" color="muted" className="mt-1.5">
             {tGuide(`sections.seminars.items.${seminar.descriptionKey}`)}
-          </p>
+          </GuideText>
         )}
 
         {seminar.details && (
@@ -173,7 +194,15 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     </div>
   )
 
+  /**
+   * Renders a group of seminars for a specific country and school level.
+   *
+   * @param country - The country code.
+   * @param level - The school level.
+   * @returns The rendered country group.
+   */
   const renderCountryGroup = (country: Country, level: SchoolLevel) => {
+    // Filter seminars for the given country and level
     const rightSeminars = seminars
       .filter((seminar) => seminar.country == country && seminar.level == level)
       .map(renderSeminarRow)
@@ -182,12 +211,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
       <div className="mb-10 last:mb-0">
         <div className="flex items-center gap-2.5 mb-4">
           <FlagIcon country={country} className="h-5 w-7" />
-          <h4
-            className={cn(
-              GUIDE_STYLES.textSmall,
-              'font-semibold uppercase tracking-wide text-white/70'
-            )}
-          >
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground sm:text-base">
             {tGuide(`sections.seminars.countries.${country}`)}
           </h4>
         </div>
@@ -196,19 +220,24 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     )
   }
 
+  /**
+   * Renders a group of seminars for a specific school level.
+   *
+   * @param level - The school level.
+   * @returns The rendered level group.
+   */
   function renderLevelGroup(level: SchoolLevel) {
+    // Get level-specific configuration
     const levelConfig = {
       elementary: {
         title: tGuide(`titles.${GUIDE_TITLES.SEMINARS_ELEMENTARY}`),
         description: tGuide('sections.seminars.levels.elementary.description'),
-        iconColor: 'text-purple-400',
-        iconBackground: 'bg-purple-500/10',
+        accent: 'purple' as AccentColor,
       },
       highSchool: {
         title: tGuide(`titles.${GUIDE_TITLES.SEMINARS_HIGH_SCHOOL}`),
         description: tGuide('sections.seminars.levels.highSchool.description'),
-        iconColor: 'text-orange-400',
-        iconBackground: 'bg-orange-500/10',
+        accent: 'orange' as AccentColor,
       },
     }
 
@@ -217,8 +246,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
         title={levelConfig[level].title}
         description={levelConfig[level].description}
         icon={{ type: 'custom', icon: <SchoolLevelBadge level={level} /> }}
-        iconColor={levelConfig[level].iconColor}
-        iconBackground={levelConfig[level].iconBackground}
+        accent={levelConfig[level].accent}
         sectionNumberer={sectionNumberer}
       >
         <div className="mt-8">
@@ -230,6 +258,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
     )
   }
 
+  // List of common seminar features to be rendered
   const features = tSeminars.raw('features') as string[]
 
   return (
@@ -242,8 +271,7 @@ export default function SeminarsSection({ sectionNumberer }: { sectionNumberer: 
         </>
       }
       icon={{ type: 'lucide', icon: Mail }}
-      iconColor="text-blue-400"
-      iconBackground="bg-blue-500/10"
+      accent="blue"
       sectionNumberer={sectionNumberer}
     >
       {renderLevelGroup('elementary')}

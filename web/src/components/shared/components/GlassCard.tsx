@@ -78,12 +78,12 @@ export default function GlassCard({
         </div>
       )}
       <TitleElement
-        className={cn('font-bold text-white mb-2 sm:mb-4', titleSizeClasses[TitleElement])}
+        className={cn('font-bold text-foreground mb-2 sm:mb-4', titleSizeClasses[TitleElement])}
       >
         {title}
       </TitleElement>
       {description && (
-        <div className="text-slate-400 text-sm sm:text-base lg:text-lg leading-relaxed mb-3 sm:mb-6">
+        <div className="text-muted text-sm sm:text-base lg:text-lg leading-relaxed mb-3 sm:mb-6">
           {description}
         </div>
       )}
@@ -93,7 +93,7 @@ export default function GlassCard({
 
   // Common card styles used for both clickable and non-clickable cards
   const cardClassName = cn(
-    'relative overflow-hidden bg-slate-800/40 backdrop-blur-md border border-violet-500/20 hover:border-violet-400/50 p-2 sm:p-4 lg:p-6 rounded-2xl transition-colors duration-300',
+    'relative overflow-hidden bg-surface/40 backdrop-blur-md border border-foreground/10 hover:border-brand/50 p-2 sm:p-4 lg:p-6 rounded-2xl transition-colors duration-300',
     align === 'center' && 'text-center'
   )
 

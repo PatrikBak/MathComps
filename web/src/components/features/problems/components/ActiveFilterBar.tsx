@@ -428,7 +428,7 @@ export default function ActiveFiltersBar({
     Boolean(filters.markStatus)
 
   return (
-    <div className="rounded-xl border border-slate-600/60 bg-slate-800 p-3 lg:p-4">
+    <div className="rounded-xl border border-foreground/10 bg-surface p-3 lg:p-4">
       {/* Custom breakpoints for label visibility */}
       <style>{`
         /* Show labels and expand gaps on wider mobile screens (no sidebar yet) */
@@ -447,11 +447,11 @@ export default function ActiveFiltersBar({
         <div className="flex items-center gap-0.5 min-[400px]:gap-1.5 gap-custom-expand text-sm flex-shrink min-w-0">
           {isSidebarVisible ? (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <h2 className="font-semibold text-slate-200 whitespace-nowrap">
+              <h2 className="font-semibold text-foreground whitespace-nowrap">
                 {tFilters('activeFilters')}
               </h2>
               {activeTokenCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-xs font-medium text-white">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-focus text-xs font-medium text-focus-foreground">
                   {activeTokenCount}
                 </span>
               )}
@@ -466,17 +466,17 @@ export default function ActiveFiltersBar({
           )}
 
           {/* Separator */}
-          <div className="hidden lg:block h-6 w-px bg-slate-600/40 flex-shrink-0" />
+          <div className="hidden lg:block h-6 w-px bg-foreground/10 flex-shrink-0" />
 
           {/* Compact count with spinner when searching */}
           {isSearching ? (
             <Loader2
-              className="ml-2 h-3 w-3 animate-spin text-slate-400 flex-shrink-0"
+              className="ml-2 h-3 w-3 animate-spin text-muted flex-shrink-0"
               aria-label={tFilters('searching')}
             />
           ) : (
             <div className="ml-2 flex items-center gap-1.5 flex-shrink-0">
-              <div className="text-slate-400 flex-shrink-0 whitespace-nowrap text-xs">
+              <div className="text-muted flex-shrink-0 whitespace-nowrap text-xs">
                 {tPlurals('problems', { count: problemCount })}
               </div>
             </div>
@@ -486,8 +486,8 @@ export default function ActiveFiltersBar({
           {filterGroups.length > 0 && (
             <button
               onClick={() => setManualExpansionOverride(!areFiltersExpanded)}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400
-                hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted
+                hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
                 flex-shrink-0"
               aria-label={areFiltersExpanded ? tFilters('hideFilters') : tFilters('showFilters')}
               title={areFiltersExpanded ? tFilters('hideFilters') : tFilters('showFilters')}
@@ -507,8 +507,8 @@ export default function ActiveFiltersBar({
           <button
             onClick={contestBrowser.open}
             onMouseEnter={prefetchContestBrowser}
-            className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
-              hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+            className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted
+              hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
               whitespace-nowrap"
             aria-label={tFilters('contestsOverview')}
             title={tFilters('contestsOverview')}
@@ -520,8 +520,8 @@ export default function ActiveFiltersBar({
           {/* Share button */}
           <ShareButton
             filters={filters}
-            className="hidden xl:inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
-            hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+            className="hidden xl:inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted
+            hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
             disabled:opacity-30 disabled:pointer-events-none whitespace-nowrap"
           />
 
@@ -530,8 +530,8 @@ export default function ActiveFiltersBar({
             <DropdownMenuTrigger asChild>
               <button
                 className={`inline-flex h-7 items-center gap-1 rounded-md px-2.5 text-xs whitespace-nowrap
-                  hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
-                  ${filters.markStatus === 'marked' ? 'text-emerald-400' : filters.markStatus === 'unmarked' ? 'text-amber-400' : 'text-slate-400 hover:text-slate-300'}`}
+                  hover:bg-foreground/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
+                  ${filters.markStatus === 'marked' ? 'text-success' : filters.markStatus === 'unmarked' ? 'text-warning' : 'text-muted hover:text-muted-foreground'}`}
                 aria-label={tFilters('markStatus')}
                 title={tFilters('markStatus')}
               >
@@ -555,7 +555,7 @@ export default function ActiveFiltersBar({
                 className="cursor-pointer"
                 onSelect={() => handleMarkStatusChange(null)}
               >
-                <span className={!filters.markStatus ? 'text-indigo-300' : ''}>
+                <span className={!filters.markStatus ? 'text-focus-light/80' : ''}>
                   {tFilters('markStatusAll')}
                 </span>
               </DropdownMenuItem>
@@ -563,7 +563,7 @@ export default function ActiveFiltersBar({
                 className="cursor-pointer"
                 onSelect={() => handleMarkStatusChange('marked')}
               >
-                <span className={filters.markStatus === 'marked' ? 'text-emerald-300' : ''}>
+                <span className={filters.markStatus === 'marked' ? 'text-success/80' : ''}>
                   {tFilters('markStatusMarked')}
                 </span>
               </DropdownMenuItem>
@@ -571,7 +571,7 @@ export default function ActiveFiltersBar({
                 className="cursor-pointer"
                 onSelect={() => handleMarkStatusChange('unmarked')}
               >
-                <span className={filters.markStatus === 'unmarked' ? 'text-amber-300' : ''}>
+                <span className={filters.markStatus === 'unmarked' ? 'text-warning/80' : ''}>
                   {tFilters('markStatusUnmarked')}
                 </span>
               </DropdownMenuItem>
@@ -582,8 +582,8 @@ export default function ActiveFiltersBar({
           <button
             onClick={handleClearAll}
             disabled={!hasAnyActive}
-            className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-slate-400
-               hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+            className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted
+               hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
                disabled:opacity-30 disabled:pointer-events-none whitespace-nowrap"
             aria-label={tFilters('resetFilters')}
             title={tFilters('resetFilters')}
@@ -604,7 +604,7 @@ export default function ActiveFiltersBar({
       {/* Filter Rows - only show when filters are active and expanded */}
       {filterGroups.length > 0 && areFiltersExpanded && (
         <div
-          className="max-h-[40vh] overflow-y-auto border-t border-slate-600/60 pt-3 mt-3 lg:mt-4 lg:pt-4 animate-in fade-in slide-in-from-top-2 duration-200 pr-1"
+          className="max-h-[40vh] overflow-y-auto border-t border-foreground/10 pt-3 mt-3 lg:mt-4 lg:pt-4 animate-in fade-in slide-in-from-top-2 duration-200 pr-1"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'rgb(71 85 105) transparent',
@@ -616,7 +616,7 @@ export default function ActiveFiltersBar({
                 <div key={group.label}>
                   <div className="grid grid-cols-1 gap-y-1.5 sm:grid-cols-[5.5rem_1fr] sm:items-baseline sm:gap-x-4 sm:gap-y-0 md:grid-cols-[6rem_1fr] lg:grid-cols-[6.5rem_1fr] xl:grid-cols-[7rem_1fr]">
                     {/* Group header (what we're filtering by) */}
-                    <span className="whitespace-nowrap text-sm font-medium text-slate-400">
+                    <span className="whitespace-nowrap text-sm font-medium text-muted">
                       {group.label}:
                     </span>
 
@@ -636,7 +636,7 @@ export default function ActiveFiltersBar({
 
                   {/* Divider between groups on mobile only (not after the last one) */}
                   {groupIndex < filterGroups.length - 1 && (
-                    <div className="mt-3 border-t border-slate-600/30 sm:hidden" />
+                    <div className="mt-3 border-t border-foreground/5 sm:hidden" />
                   )}
                 </div>
               )

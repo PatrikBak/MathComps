@@ -22,15 +22,14 @@ interface ContactFormProps {
 }
 
 const formClasses = {
-  baseInput:
-    'w-full flex items-center justify-between gap-2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-100 outline-none transition-all hover:border-slate-500/80 focus:border-indigo-500/60 focus:shadow-[0_0_0_2px_rgba(99,102,241,0.35)]',
+  baseInput: 'form-input flex items-center justify-between gap-2 bg-surface/95',
   iconSpan: 'absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-3.5 pointer-events-none',
-  icon: 'h-4 w-4 sm:h-5 sm:w-5 text-slate-100',
-  label: 'block text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2',
-  error: 'mt-1 text-xs sm:text-sm text-red-400',
+  icon: 'h-4 w-4 sm:h-5 sm:w-5 text-foreground',
+  label: 'block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2',
+  error: 'mt-1 text-xs sm:text-sm text-error',
   inputWithIcon: 'pl-10 sm:pl-11',
   submitButton:
-    'w-full flex items-center justify-center gap-2 bg-indigo-800 hover:bg-indigo-900 disabled:bg-indigo-600/50 text-white font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-sm sm:text-base',
+    'w-full flex items-center justify-center gap-2 bg-brand/70 hover:bg-brand/80 disabled:bg-brand/30 text-brand-foreground font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-inset text-sm sm:text-base',
 }
 
 export default function ContactForm({

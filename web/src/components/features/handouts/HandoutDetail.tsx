@@ -16,10 +16,18 @@ import {
 } from '@/components/math/ContentRenderer'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
+import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard } from './Cards'
+import {
+  ENVIRONMENT_BADGE,
+  ENVIRONMENT_TEXT_COLOR,
+  type HandoutEnvironmentType,
+  HINT_BADGE,
+  HINT_TEXT_COLOR,
+} from './handout-colors'
 import { HandoutActions } from './HandoutActions'
 
 /**
@@ -77,7 +85,7 @@ function renderTitle(
 
 function renderDifficultyStars(difficulty: number): React.ReactNode {
   if (difficulty === 0) return null
-  return <sup className="text-purple-400">{'*'.repeat(difficulty)}</sup>
+  return <sup className={ENVIRONMENT_TEXT_COLOR.problem}>{'*'.repeat(difficulty)}</sup>
 }
 
 function renderDocumentSections(
@@ -93,49 +101,17 @@ function renderDocumentSections(
   t: HandoutsTranslator,
   imageMissingText: string
 ) {
-  /** Environment types supported in handout content */
-  type EnvironmentType = 'theorem' | 'exercise' | 'example' | 'problem'
-
-  const localizedEnvironmentLabelByType: Record<EnvironmentType, string> = {
+  const localizedEnvironmentLabelByType: Record<HandoutEnvironmentType, string> = {
     theorem: t('environments.theorem'),
     exercise: t('environments.exercise'),
     example: t('environments.example'),
     problem: t('environments.problem'),
   }
-  const environmentTextColorClassByType: Record<EnvironmentType, string> = {
-    theorem: 'text-green-300',
-    exercise: 'text-yellow-300',
-    example: 'text-blue-300',
-    problem: 'text-purple-300',
-  }
+  const environmentTextColorClassByType = ENVIRONMENT_TEXT_COLOR
 
-  const environmentBadgeClassByType: Record<
-    EnvironmentType,
-    { text: string; bg: string; border: string }
-  > = {
-    theorem: {
-      text: 'text-green-200',
-      bg: 'bg-green-500/15',
-      border: 'border-green-400/20',
-    },
-    exercise: {
-      text: 'text-yellow-200',
-      bg: 'bg-yellow-500/15',
-      border: 'border-yellow-400/20',
-    },
-    example: {
-      text: 'text-blue-200',
-      bg: 'bg-blue-500/15',
-      border: 'border-blue-400/20',
-    },
-    problem: {
-      text: 'text-purple-200',
-      bg: 'bg-purple-500/15',
-      border: 'border-purple-400/20',
-    },
-  }
+  const environmentBadgeClassByType = ENVIRONMENT_BADGE
 
-  const environmentCounters: Record<EnvironmentType, number> = {
+  const environmentCounters: Record<HandoutEnvironmentType, number> = {
     theorem: 0,
     exercise: 0,
     example: 0,
@@ -143,7 +119,7 @@ function renderDocumentSections(
   }
 
   // Localized slugs for environment type names used in anchor IDs
-  const environmentTypeSlugMap: Record<EnvironmentType, string> = {
+  const environmentTypeSlugMap: Record<HandoutEnvironmentType, string> = {
     theorem: t('environments.slugs.theorem'),
     exercise: t('environments.slugs.exercise'),
     example: t('environments.slugs.example'),
@@ -220,11 +196,11 @@ function renderDocumentSections(
                     id={environmentId}
                   >
                     {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                    <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
+                    <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.theorem
                           )}
                         >
@@ -237,7 +213,7 @@ function renderDocumentSections(
                                 environmentBadgeClassByType.theorem.border
                               )}
                             >
-                              <span className="w-[8px] h-[8px] bg-green-200 rounded-[2px]"></span>
+                              <span className="w-[8px] h-[8px] bg-current rounded-[2px]"></span>
                             </span>
                             {t('labels.proof')}
                           </span>
@@ -246,7 +222,7 @@ function renderDocumentSections(
                             className="opacity-70 transition-transform group-open:rotate-90"
                           />
                         </summary>
-                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
+                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
                           {renderBlocks(
                             contentBlock.proof,
                             imagesById,
@@ -271,11 +247,11 @@ function renderDocumentSections(
                     id={environmentId}
                   >
                     {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                    <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
+                    <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.exercise
                           )}
                         >
@@ -297,7 +273,7 @@ function renderDocumentSections(
                             className="opacity-70 transition-transform group-open:rotate-90"
                           />
                         </summary>
-                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
+                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
                           {renderBlocks(
                             contentBlock.solution,
                             imagesById,
@@ -322,11 +298,11 @@ function renderDocumentSections(
                     id={environmentId}
                   >
                     {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                    <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
+                    <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.example
                           )}
                         >
@@ -348,7 +324,7 @@ function renderDocumentSections(
                             className="opacity-70 transition-transform group-open:rotate-90"
                           />
                         </summary>
-                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
+                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
                           {renderBlocks(
                             contentBlock.solution,
                             imagesById,
@@ -375,13 +351,25 @@ function renderDocumentSections(
                   <div>
                     {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
                   </div>
-                  <div className="mt-3 rounded-xl border border-white/10 divide-y divide-white/10 overflow-hidden">
+                  <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
                     {contentBlock.hints.length > 0 &&
                       contentBlock.hints.map((hint, hintIndex) => (
                         <details key={`hint-${hintIndex}`} className="group">
-                          <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  text-amber-200 hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden">
+                          <summary
+                            className={cn(
+                              'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
+                              HINT_TEXT_COLOR
+                            )}
+                          >
                             <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
-                              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-200 border border-amber-400/20">
+                              <span
+                                className={cn(
+                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
+                                  HINT_BADGE.bg,
+                                  HINT_BADGE.text,
+                                  HINT_BADGE.border
+                                )}
+                              >
                                 {hintIndex + 1}
                               </span>
                               {t('labels.hint')}
@@ -391,7 +379,7 @@ function renderDocumentSections(
                               className="opacity-70 transition-transform group-open:rotate-90"
                             />
                           </summary>
-                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
+                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
                             {renderBlocks(hint, imagesById, imageType, imageMissingText)}
                           </div>
                         </details>
@@ -401,7 +389,7 @@ function renderDocumentSections(
                       <details className="group">
                         <summary
                           className={cn(
-                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5  hover:bg-white/5 cursor-pointer [&::-webkit-details-marker]:hidden',
+                            'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
                             environmentTextColorClassByType.problem
                           )}
                         >
@@ -423,7 +411,7 @@ function renderDocumentSections(
                             className="opacity-70 transition-transform group-open:rotate-90"
                           />
                         </summary>
-                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-gray-300">
+                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
                           {renderBlocks(
                             contentBlock.solution,
                             imagesById,
@@ -468,6 +456,7 @@ export default function HandoutDetail({
   pdfFilenameStem,
   locale,
 }: HandoutDetailProps) {
+  const infoAccent = ACCENT_COLOR_MAP.blue
   const t = useTranslations('handouts')
   const tContent = useTranslations('ui.content')
   const imageMissingText = tContent('imageMissing')
@@ -481,7 +470,7 @@ export default function HandoutDetail({
       {/* Header */}
       <header className="lg:mb-12">
         <div className="mb-6">
-          <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
+          <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight">
             <MathRendererClient content={documentContent.subtitle || documentContent.title || ''} />
           </h1>
         </div>
@@ -489,9 +478,15 @@ export default function HandoutDetail({
         {/* Title */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           {documentContent.subtitle && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/15 to-purple-500/15 border border-blue-400/20">
-              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-              <span className="text-blue-200 font-medium text-sm">
+            <div
+              className={cn(
+                'inline-flex items-center gap-2 px-4 py-2 rounded-full border border-foreground/10',
+                infoAccent.bg,
+                infoAccent.text
+              )}
+            >
+              <div className="w-2 h-2 rounded-full bg-current"></div>
+              <span className="font-medium text-sm">
                 <MathRendererClient content={documentContent.title || ''} />
               </span>
             </div>
@@ -499,15 +494,18 @@ export default function HandoutDetail({
 
           {/* Authors */}
           {authors.length > 0 && (
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 leading-5">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-foreground/5 border border-foreground/10 leading-5">
               <div className="flex items-center gap-2">
-                <Users className="size-4 text-gray-400" aria-hidden />
-                <span className="text-sm uppercase font-semibold text-gray-400">
+                <Users className="size-4 text-muted-foreground" aria-hidden />
+                <span className="text-sm uppercase font-semibold text-muted-foreground">
                   {' '}
                   {authors.length > 1 ? t('labels.authors') : t('labels.author')}{' '}
                 </span>
               </div>
-              <span className="text-gray-200 font-semi-bold text-sm"> {authors.join(', ')} </span>
+              <span className="text-foreground/85 font-semi-bold text-sm">
+                {' '}
+                {authors.join(', ')}{' '}
+              </span>
             </div>
           )}
 

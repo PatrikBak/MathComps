@@ -9,11 +9,19 @@ import MathOlympiadSection from './MathOlympiadSection'
 import OtherCompetitionsSection from './OtherCompetitionsSection'
 import SeminarsSection from './SeminarsSection'
 
-export default function CompetitionsListSection({
-  sectionNumberer,
-}: {
+/**
+ * Props for the {@link CompetitionsListSection} component.
+ */
+type CompetitionsListSectionProps = {
+  /** Section numberer for hierarchical section numbering. */
   sectionNumberer: SectionNumberer
-}) {
+}
+
+/**
+ * Parent guide section that groups all competition subsections:
+ * Math Olympiad, Seminars, and Other Competitions.
+ */
+export default function CompetitionsListSection({ sectionNumberer }: CompetitionsListSectionProps) {
   // Get guide translations
   const t = useTranslations('guide')
 
@@ -22,8 +30,7 @@ export default function CompetitionsListSection({
       title={t(`titles.${GUIDE_TITLES.COMPETITIONS}`)}
       description={t('sections.competitions.description')}
       icon={{ type: 'lucide', icon: List }}
-      iconColor="text-blue-400"
-      iconBackground="bg-blue-500/10"
+      accent="blue"
       sectionNumberer={sectionNumberer}
     >
       {/* Nested subsections */}

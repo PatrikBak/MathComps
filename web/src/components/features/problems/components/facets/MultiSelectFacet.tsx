@@ -548,7 +548,7 @@ export default function MultiSelectFacet({
           event.stopPropagation()
           cycleSortMode(groupKey)
         }}
-        className="p-1 rounded hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className="p-1 rounded hover:bg-foreground/5 text-muted hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         title={label}
         aria-label={label}
       >
@@ -571,18 +571,18 @@ export default function MultiSelectFacet({
   }) {
     const { value, onChange } = props
     const baseBtn =
-      'px-2 sm:px-2.5 h-6 sm:h-7 rounded-md text-[11px] sm:text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
+      'px-2 sm:px-2.5 h-6 sm:h-7 rounded-md text-[11px] sm:text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
     return (
-      <div className="flex items-center justify-between gap-2 border-b border-slate-700 bg-gray-800/95 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs text-slate-400">
+      <div className="flex items-center justify-between gap-2 border-b border-foreground/10 bg-surface/95 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs text-muted">
         <span className="whitespace-nowrap">{tFilters('logic')}</span>
         <div
-          className="inline-flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-600 p-0.5"
+          className="inline-flex items-center gap-0.5 sm:gap-1 rounded-lg border border-foreground/10 p-0.5"
           role="radiogroup"
           aria-label={tFilters('selectionLogic')}
         >
           <button
             type="button"
-            className={cn(baseBtn, value === 'or' && 'bg-indigo-900 text-white')}
+            className={cn(baseBtn, value === 'or' && 'bg-focus text-focus-foreground')}
             onClick={() => onChange('or')}
             aria-pressed={value === 'or'}
           >
@@ -590,7 +590,7 @@ export default function MultiSelectFacet({
           </button>
           <button
             type="button"
-            className={cn(baseBtn, value === 'and' && 'bg-indigo-900 text-white')}
+            className={cn(baseBtn, value === 'and' && 'bg-focus text-focus-foreground')}
             onClick={() => onChange('and')}
             aria-pressed={value === 'and'}
           >
@@ -659,7 +659,7 @@ export default function MultiSelectFacet({
           noTopPadding={!!grouping}
         >
           {facet.filtered.length === 0 && (
-            <div className="px-3 py-3 text-sm text-slate-400">{tFilters('noResults')}</div>
+            <div className="px-3 py-3 text-sm text-muted">{tFilters('noResults')}</div>
           )}
           {(() => {
             // Render options with or without sections based on grouping prop
@@ -695,7 +695,7 @@ export default function MultiSelectFacet({
                     return (
                       <div key={groupKey}>
                         <div
-                          className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white border-b border-slate-700 bg-gray-800 sticky top-0 z-10 flex items-center gap-2 cursor-pointer"
+                          className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-foreground border-b border-foreground/10 bg-surface sticky top-0 z-10 flex items-center gap-2 cursor-pointer"
                           role="button"
                           tabIndex={0}
                           onClick={() => toggleGroupCollapse(groupKey)}
@@ -721,7 +721,7 @@ export default function MultiSelectFacet({
                             {grouping.labels[groupKey]}
                             {selectedCount > 0 && (
                               <span
-                                className="shrink-0 rounded-full bg-white/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
+                                className="shrink-0 rounded-full bg-foreground/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
                                 aria-label={tFilters('selectedInGroup', { count: selectedCount })}
                               >
                                 {selectedCount}

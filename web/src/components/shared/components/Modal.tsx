@@ -53,7 +53,7 @@ export function Modal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-background/50 backdrop-blur-sm" />
         </TransitionChild>
 
         {/* Modal container */}
@@ -75,7 +75,7 @@ export function Modal({
             >
               <DialogPanel
                 className={cn(
-                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-slate-800/95 backdrop-blur-sm border border-slate-700/50 p-3 sm:p-6 text-left align-middle shadow-xl transition-all',
+                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 p-3 sm:p-6 text-left align-middle shadow-xl transition-all',
                   className
                 )}
               >
@@ -85,7 +85,7 @@ export function Modal({
                     {title && (
                       <DialogTitle
                         as="h3"
-                        className="text-xl font-bold text-white flex items-start gap-2 min-w-0"
+                        className="text-xl font-bold text-foreground flex items-start gap-2 min-w-0"
                       >
                         {title}
                       </DialogTitle>
@@ -93,7 +93,7 @@ export function Modal({
                     {showCloseButton && (
                       <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors duration-200 ml-auto flex-shrink-0"
+                        className="text-muted hover:text-foreground transition-colors duration-200 ml-auto flex-shrink-0"
                         aria-label={tModal('close')}
                       >
                         <X size={24} />

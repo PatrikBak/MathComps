@@ -53,8 +53,9 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
         aria-label={t('loadingButton')}
         aria-busy="true"
       >
+        {/* The skeleton for the icon */}
         <div className="w-5 h-5 rounded bg-current opacity-20" />
-        {/* Visible skeleton bar overlaid on invisible text (for exact width) */}
+        {/* The skeleton for the text */}
         <span className="relative">
           <span className="invisible">{t('signIn')}</span>
           <span className="absolute inset-0 rounded bg-current opacity-20" />

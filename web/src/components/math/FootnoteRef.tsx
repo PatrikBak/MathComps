@@ -13,11 +13,11 @@ export default function FootnoteRef({ children }: { children: React.ReactNode })
     <Tooltip
       content={<div className="max-w-none">{children}</div>}
       className={
-        'z-[1000] min-w-[150px] max-w-[300px] !bg-slate-900/95 border border-white/10 shadow-xl !rounded-md !text-gray-200 article--math footnote-popover'
+        'z-[1000] min-w-[150px] max-w-[300px] !bg-surface/95 border border-foreground/10 shadow-xl !rounded-md !text-foreground article--math footnote-popover'
       }
       placement="top"
     >
-      <span className="group inline-block align-super footnote-ref font-bold text-blue-600 cursor-help">
+      <span className="group inline-block align-super footnote-ref font-bold text-link cursor-help">
         †
       </span>
     </Tooltip>

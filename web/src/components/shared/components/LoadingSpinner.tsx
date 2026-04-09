@@ -17,7 +17,7 @@ export const LoadingSpinner = ({ className, style }: LoadingSpinnerProps) => {
   return (
     <div
       className={cn(
-        'w-10 h-10 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin',
+        'w-10 h-10 border-2 border-focus/30 border-t-focus rounded-full animate-spin',
         className
       )}
       style={style}

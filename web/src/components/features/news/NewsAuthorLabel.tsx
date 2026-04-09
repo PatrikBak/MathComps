@@ -15,7 +15,7 @@ type NewsAuthorLabelProps = {
  */
 export function NewsAuthorLabel({ author }: NewsAuthorLabelProps) {
   return (
-    <div className={cn('inline-flex items-center gap-1.5 text-gray-400 text-sm')}>
+    <div className={cn('inline-flex items-center gap-1.5 text-muted-foreground text-sm')}>
       <User size={14} />
       <span>{author}</span>
     </div>

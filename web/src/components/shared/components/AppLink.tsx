@@ -53,7 +53,7 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
 export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
   ({ href, className, prefetch, newTab, external, ...rest }, ref) => {
     // Apply default link styling with any custom classes
-    const classes = cn('text-slate-400 hover:text-white transition-colors duration-300', className)
+    const classes = cn('text-muted hover:text-foreground transition-colors duration-300', className)
 
     // Determine if this should behave as an external link:
     // - Explicitly marked as external, OR

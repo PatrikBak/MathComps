@@ -7,10 +7,9 @@ import type { SectionNumberer } from '@/components/table-of-contents/SectionNumb
 import { SectionHeader, type SectionHeaderProps } from './SectionHeader'
 
 /**
- * Props for the GuideSection component.
- * Extends SectionHeaderProps to reuse common header properties.
+ * Props for the {@link GuideSection} component.
  */
-interface GuideSectionProps extends Omit<SectionHeaderProps, 'title' | 'number' | 'sectionSlug'> {
+type GuideSectionProps = Omit<SectionHeaderProps, 'title' | 'number' | 'sectionSlug'> & {
   /** Section title */
   title: string
   /** Section numberer instance for hierarchical numbering */
@@ -20,15 +19,13 @@ interface GuideSectionProps extends Omit<SectionHeaderProps, 'title' | 'number' 
 }
 
 /**
- * Reusable guide section component that provides consistent structure and styling
- * for all guide sections. Handles section numbering using the SectionNumberer.
+ * Reusable guide section component.
  */
 export function GuideSection({
   title,
   description,
   icon,
-  iconColor,
-  iconBackground,
+  accent,
   sectionNumberer,
   children,
 }: GuideSectionProps) {
@@ -44,8 +41,7 @@ export function GuideSection({
         <div className="max-w-7xl mx-auto px-0.5">
           <SectionHeader
             icon={icon}
-            iconColor={iconColor}
-            iconBackground={iconBackground}
+            accent={accent}
             number={sectionData.number}
             title={sectionData.title}
             description={description}

@@ -20,14 +20,22 @@ import { countActiveFilters } from '../utils/filter-validation'
 import ActiveFiltersBar from './ActiveFilterBar'
 import { AnimatedProblemCard } from './AnimatedProblemCard'
 import { EmptyState } from './EmptyState'
-import FilterSkeleton from './FilterSkeleton'
 import { MobileFilterDrawer } from './MobileFilterDrawer'
 import { SearchFilters } from './SearchFilters'
 
 const ActiveFiltersBarSkeleton = () => (
   <div className="flex animate-pulse items-center justify-between">
-    <div className="h-5 w-48 rounded-md bg-gray-700"></div>
-    <div className="h-5 w-24 rounded-md bg-gray-700"></div>
+    <div className="h-5 w-48 rounded-md bg-foreground/10"></div>
+    <div className="h-5 w-24 rounded-md bg-foreground/10"></div>
+  </div>
+)
+
+const FilterSkeleton = () => (
+  <div className="flex flex-col space-y-4 animate-pulse">
+    <div className="h-8 w-32 bg-foreground/10 rounded" />
+    {Array.from({ length: 3 }, (_, index) => (
+      <div key={index} className="h-6 w-64 bg-foreground/10 rounded" />
+    ))}
   </div>
 )
 
@@ -223,15 +231,15 @@ export default function ProblemsLibrary() {
   // Handle critical initial load failures - only show error if we have no data at all
   if (error && !hasInitialDataLoaded) {
     return (
-      <div className="fixed inset-0 text-gray-300">
+      <div className="fixed inset-0 text-muted-foreground">
         <div className="flex h-full flex-col">
           <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
           <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <WifiOff className="mx-auto mb-4 h-16 w-16 text-red-400/60" />
-                <h2 className="mb-2 text-2xl font-bold text-white">{t('connectionFailed')}</h2>
-                <div className="flex items-center justify-center gap-3 text-gray-400">
+                <WifiOff className="mx-auto mb-4 h-16 w-16 text-error/60" />
+                <h2 className="mb-2 text-2xl font-bold text-foreground">{t('connectionFailed')}</h2>
+                <div className="flex items-center justify-center gap-3 text-muted">
                   <Loader2 className="h-5 w-5 animate-spin" />
                   <span className="text-sm">{t('tryingToConnect')}</span>
                 </div>
@@ -246,7 +254,7 @@ export default function ProblemsLibrary() {
   // Early return to prevent rendering issues during loading
   if (isLoading) {
     return (
-      <div className="fixed inset-0 text-gray-300">
+      <div className="fixed inset-0 text-muted-foreground">
         <div className="flex h-full flex-col">
           <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
           <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
@@ -269,7 +277,7 @@ export default function ProblemsLibrary() {
                   </div>
                 </div>
                 <div className="flex h-3 sm:h-4 lg:h-6 flex-shrink-0 items-end justify-center">
-                  <div className="h-1 w-8 rounded-full bg-gray-700" />
+                  <div className="h-1 w-8 rounded-full bg-foreground/10" />
                 </div>
               </div>
             </div>
@@ -280,7 +288,7 @@ export default function ProblemsLibrary() {
   }
 
   return (
-    <div className="fixed inset-0 text-gray-300">
+    <div className="fixed inset-0 text-muted-foreground">
       <div className="flex h-full flex-col">
         <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
         <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
@@ -387,7 +395,7 @@ export default function ProblemsLibrary() {
                       Footer: () =>
                         isLoadingMore ? (
                           <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
-                            <div className="flex items-center gap-3 text-gray-400">
+                            <div className="flex items-center gap-3 text-muted">
                               <Loader2 className="h-5 w-5 animate-spin" />
                               <span className="text-sm">{t('loadingMore')}</span>
                             </div>
@@ -402,7 +410,7 @@ export default function ProblemsLibrary() {
 
               {/* End of List Anchor (No Changes) */}
               <div className="flex h-3 sm:h-4 lg:h-6 flex-shrink-0 items-end justify-center">
-                <div className="h-1 w-8 rounded-full bg-gray-700" />
+                <div className="h-1 w-8 rounded-full bg-foreground/10" />
               </div>
             </div>
           </div>

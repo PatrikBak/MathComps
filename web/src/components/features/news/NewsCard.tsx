@@ -35,7 +35,7 @@ const cardMdxComponents = {
 
   // Paragraph
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p className="text-gray-300 text-sm leading-relaxed" {...props} />
+    <p className="text-foreground/70 text-sm leading-relaxed" {...props} />
   ),
 
   // Links - styled for cards
@@ -47,7 +47,11 @@ const cardMdxComponents = {
 
     // Let the AppLink handle navigation properly
     return (
-      <AppLink href={href} className="text-indigo-400 hover:text-indigo-300 underline" {...props}>
+      <AppLink
+        href={href}
+        className="text-link hover:text-link-hover transition-colors underline"
+        {...props}
+      >
         {children}
       </AppLink>
     )
@@ -55,11 +59,11 @@ const cardMdxComponents = {
 
   // Inline formatting
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong className="text-white font-semibold" {...props} />
+    <strong className="text-foreground font-semibold" {...props} />
   ),
   em: (props: React.HTMLAttributes<HTMLElement>) => <em className="italic" {...props} />,
   code: (props: React.HTMLAttributes<HTMLElement>) => (
-    <code className="bg-slate-700/50 px-1 py-0.5 rounded text-xs text-indigo-300" {...props} />
+    <code className="bg-surface-inset/70 px-1 py-0.5 rounded text-xs text-brand-light" {...props} />
   ),
 
   // Block elements not allowed in cards
@@ -86,7 +90,7 @@ type NewsCardProps = {
  */
 export function NewsCard({ article }: NewsCardProps) {
   return (
-    <article className="bg-slate-800/50 border border-white/10 rounded-xl p-4 sm:p-5 h-full flex flex-col overflow-hidden">
+    <article className="bg-surface/50 border border-foreground/10 rounded-xl p-4 sm:p-5 h-full flex flex-col overflow-hidden">
       {/* Metadata: Badge pinned top-right, Author in left column */}
       <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 mb-3 text-sm items-start">
         {/* Left column: Date + Author wrap naturally */}
@@ -102,7 +106,7 @@ export function NewsCard({ article }: NewsCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className="text-xl font-bold text-white leading-tight mb-3">{article.title}</h3>
+      <h3 className="text-xl font-bold text-foreground leading-tight mb-3">{article.title}</h3>
 
       {/* MDX Content - server-rendered for SEO */}
       <div className="flex-grow">

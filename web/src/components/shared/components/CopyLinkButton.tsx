@@ -42,9 +42,9 @@ export function CopyLinkButton({ slug, iconSize = 20, className }: CopyLinkButto
       className={cn(
         'transition-all duration-200',
         'p-1.5 ml-2 rounded-lg',
-        'text-gray-400 hover:text-gray-200 hover:bg-white/10',
+        'text-muted hover:text-foreground hover:bg-foreground/10',
         'cursor-pointer',
-        'outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50',
+        'outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
         className
       )}
       aria-label={tActions('copyLink')}

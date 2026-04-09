@@ -2,6 +2,7 @@ import { AtSign, KeyRound, Lock, LockKeyhole, Mail, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useFormContext } from 'react-hook-form'
 
+import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { AuthScreen } from './AuthForm'
@@ -69,12 +70,14 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
             <div
               className={cn(
                 'flex items-start gap-2 rounded-lg',
-                'bg-blue-500/10 px-3 py-2.5',
-                'border border-blue-500/20'
+                `${ACCENT_COLOR_MAP.blue.bg} px-3 py-2.5`,
+                'border border-info/20'
               )}
             >
-              <Mail className="mt-0.5 size-4 shrink-0 text-blue-400" />
-              <p className="text-xs leading-relaxed text-slate-300">{tAuth('verificationSent')}</p>
+              <Mail className={cn('mt-0.5 size-4 shrink-0', ACCENT_COLOR_MAP.blue.text)} />
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {tAuth('verificationSent')}
+              </p>
             </div>
           )}
 

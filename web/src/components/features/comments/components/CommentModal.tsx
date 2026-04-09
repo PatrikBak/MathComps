@@ -2,7 +2,7 @@
 
 import { MessageSquare } from 'lucide-react'
 
-import { IconBadge } from '@/components/shared/components/IconBadge'
+import { CountBadge } from '@/components/shared/components/CountBadge'
 import { Modal } from '@/components/shared/components/Modal'
 
 import type { CommentTarget } from '../api/comment-api-types'
@@ -47,7 +47,7 @@ export function CommentModal({ isOpen, onClose, title, target }: CommentModalPro
       title={
         <>
           {/* Title icon */}
-          <IconBadge
+          <CountBadge
             count={commentCount}
             color="indigo"
             isHighlighted={commentCount > 0}
@@ -55,7 +55,7 @@ export function CommentModal({ isOpen, onClose, title, target }: CommentModalPro
             className="mr-5"
           >
             <MessageSquare size={22} />
-          </IconBadge>
+          </CountBadge>
           {/* Title text */}
           <span>{title}</span>
         </>

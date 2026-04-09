@@ -38,8 +38,8 @@ export function RichMathEditorPicker({
             className={cn(
               'flex items-center gap-1.5 px-2 py-1 rounded transition-colors text-xs',
               open
-                ? 'text-indigo-400 bg-indigo-500/20'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-slate-600/50'
+                ? 'text-focus bg-focus/10'
+                : 'text-muted hover:text-foreground hover:bg-foreground/10'
             )}
           >
             {triggerContent}
@@ -49,7 +49,7 @@ export function RichMathEditorPicker({
             anchor="bottom start"
             transition
             className={cn(
-              'z-[9999] mt-1 shadow-2xl border border-slate-600/60 rounded-xl overflow-hidden',
+              'z-[9999] mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden',
               'origin-top-left transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
               popupClassName
             )}

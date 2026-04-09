@@ -482,7 +482,7 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="w-full max-w-[350px] m-4 sm:m-8 md:m-12 p-8 bg-slate-900/50 backdrop-blur-xl rounded-xl border border-slate-700/50 shadow-2xl">
+    <div className="w-full max-w-[350px] m-4 sm:m-8 md:m-12 p-8 bg-surface/50 backdrop-blur-xl rounded-xl border border-foreground/10 shadow-2xl">
       {/* Header */}
       <AuthFormHeader screen={screen} />
 
@@ -555,11 +555,11 @@ export default function AuthForm() {
         </FormProvider>
       )}
       {/* Privacy Policy Link */}
-      <div className="mt-6 text-center text-xs text-slate-400">
+      <div className="mt-6 text-center text-xs text-muted">
         {tAuth('termsAgreement')} <br />
         <AppLink
           href={ROUTES.PRIVACY}
-          className="text-slate-300 hover:text-white underline transition-colors"
+          className="text-muted-foreground hover:text-foreground underline transition-colors"
         >
           {tAuth('termsLink')}
         </AppLink>

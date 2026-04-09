@@ -33,7 +33,7 @@ export default function AboutPanelSection({
         titleElement="h3"
         description={
           description ?? (
-            <div className="text-slate-300 text-base sm:text-lg leading-relaxed space-y-5">
+            <div className="text-muted-foreground text-base sm:text-lg leading-relaxed space-y-5">
               {description}
             </div>
           )

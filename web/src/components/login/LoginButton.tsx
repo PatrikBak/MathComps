@@ -34,9 +34,9 @@ export function LoginButton({ className, onBeforeRedirect }: LoginButtonProps) {
         redirectToLogin()
       }}
       className={cn(
-        'flex items-center gap-2 text-violet-300 hover:text-violet-200',
+        'flex items-center gap-2 text-brand-light hover:text-brand-light/80',
         'py-2 px-4 rounded-full',
-        'outline outline-slate-600 hover:outline-white/50',
+        'outline outline-foreground/10 hover:outline-foreground/50',
         'transition-all text-sm',
         className
       )}

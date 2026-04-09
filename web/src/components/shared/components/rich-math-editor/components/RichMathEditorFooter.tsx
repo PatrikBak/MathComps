@@ -47,7 +47,7 @@ function CounterBadge({
       className={cn(
         'flex items-center gap-1 transition-colors',
         tabular && 'tabular-nums',
-        isOver ? 'text-red-400 font-medium' : isNear ? 'text-amber-400' : 'text-gray-500'
+        isOver ? 'text-error font-medium' : isNear ? 'text-warning' : 'text-muted'
       )}
       title={title}
     >
@@ -151,10 +151,10 @@ export function RichMathEditorFooter({
         'grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1.5',
         {
           card: cn(
-            'bg-slate-800/50',
-            !borderless && 'rounded-b-lg border border-t-0 border-slate-600/60'
+            'bg-surface/50',
+            !borderless && 'rounded-b-lg border border-t-0 border-foreground/10'
           ),
-          inline: 'bg-slate-800/10 border border-white/10 rounded-b-lg',
+          inline: 'bg-inset border border-foreground/10 rounded-b-lg',
         }[variant]
       )}
     >
@@ -165,7 +165,7 @@ export function RichMathEditorFooter({
           <button
             type="button"
             onClick={modeConfig.onExpand}
-            className="flex items-center gap-1.5 pl-0.5 pr-2 sm:px-2 py-1 rounded text-xs transition-colors text-gray-400 hover:text-gray-200 hover:bg-slate-600/50 whitespace-nowrap"
+            className="flex items-center gap-1.5 pl-0.5 pr-2 sm:px-2 py-1 rounded text-xs transition-colors text-muted hover:text-foreground hover:bg-foreground/10 whitespace-nowrap"
             title={tEditor('expandEditor')}
           >
             <Expand size={12} />
@@ -179,7 +179,7 @@ export function RichMathEditorFooter({
           <button
             type="button"
             onClick={modeConfig.onShrink}
-            className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors text-gray-400 hover:text-gray-200 hover:bg-slate-600/50 whitespace-nowrap"
+            className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors text-muted hover:text-foreground hover:bg-foreground/10 whitespace-nowrap"
             title={tEditor('shrinkEditor')}
           >
             <Shrink size={12} />
@@ -239,7 +239,7 @@ export function RichMathEditorFooter({
               className={cn(
                 'flex items-center justify-center rounded-lg transition-colors duration-200',
                 'w-8 h-8 sm:w-10 sm:h-10',
-                'bg-slate-700/30 text-gray-400 hover:bg-slate-600/50 hover:text-gray-200'
+                'bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground'
               )}
               title={tEditor('cancelEsc')}
             >
@@ -255,8 +255,8 @@ export function RichMathEditorFooter({
               'flex items-center justify-center rounded-lg transition-colors duration-200',
               'w-8 h-8 sm:w-10 sm:h-10',
               isValid
-                ? 'bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 hover:text-indigo-300'
-                : 'bg-slate-700/20 text-gray-500 cursor-not-allowed',
+                ? 'bg-focus/10 text-focus hover:bg-focus/20 hover:text-focus/80'
+                : 'bg-foreground/5 text-muted cursor-not-allowed',
               isLoading && 'cursor-wait opacity-90'
             )}
             title={
@@ -266,7 +266,7 @@ export function RichMathEditorFooter({
             }
           >
             {isLoading ? (
-              <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 border-white/20 border-t-white" />
+              <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 border-foreground/20 border-t-foreground" />
             ) : (
               <>
                 <Send size={16} className="sm:hidden" />

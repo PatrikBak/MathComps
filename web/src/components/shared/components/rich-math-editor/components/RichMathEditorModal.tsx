@@ -76,15 +76,15 @@ export function RichMathEditorExpandedModal({
     >
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-6 -mb-6 px-4 md:px-6 pb-4 md:pb-6">
         {/* Mobile: Tab switcher */}
-        <div className="md:hidden flex border-b border-slate-600/60 mb-2">
+        <div className="md:hidden flex border-b border-foreground/10 mb-2">
           <button
             type="button"
             onClick={() => setMobileModalView('editor')}
             className={cn(
               'flex-1 py-1.5 text-xs font-medium transition-colors',
               mobileModalView === 'editor'
-                ? 'text-indigo-400 border-b-2 border-indigo-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'text-focus border-b-2 border-focus'
+                : 'text-muted hover:text-foreground'
             )}
           >
             {tEditor('expandedEditor')}
@@ -95,8 +95,8 @@ export function RichMathEditorExpandedModal({
             className={cn(
               'flex-1 py-1.5 text-xs font-medium transition-colors',
               mobileModalView === 'preview'
-                ? 'text-indigo-400 border-b-2 border-indigo-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'text-focus border-b-2 border-focus'
+                : 'text-muted hover:text-foreground'
             )}
           >
             {tEditor('preview')}
@@ -104,7 +104,7 @@ export function RichMathEditorExpandedModal({
         </div>
 
         {/* Editor and Preview container */}
-        <div className="flex-1 flex flex-col overflow-hidden border border-slate-600/60 rounded-lg">
+        <div className="flex-1 flex flex-col overflow-hidden border border-foreground/10 rounded-lg">
           {/* Top row: Editor + Preview */}
           <div className="flex-1 grid grid-cols-1 grid-rows-1 md:flex md:flex-row min-h-0 overflow-hidden">
             {/* Left: Editor panel */}
@@ -140,7 +140,7 @@ export function RichMathEditorExpandedModal({
             </div>
 
             {/* Vertical divider (desktop only) */}
-            <div className="hidden md:block w-px bg-slate-600/60 flex-shrink-0" />
+            <div className="hidden md:block w-px bg-foreground/10 flex-shrink-0" />
 
             {/* Right: Preview panel */}
             <div
@@ -152,11 +152,11 @@ export function RichMathEditorExpandedModal({
             >
               <div className="h-full flex flex-col overflow-y-auto">
                 {/* Header - desktop only */}
-                <div className="hidden md:block sticky top-0 z-10 px-4 pt-3 pb-2 bg-slate-800/50 text-xs text-gray-500 uppercase tracking-wide font-medium">
+                <div className="hidden md:block sticky top-0 z-10 px-4 pt-3 pb-2 bg-surface/80 text-xs text-muted uppercase tracking-wide font-medium">
                   {tEditor('preview')}
                 </div>
                 {/* Content */}
-                <div className="flex-1 px-4 py-3 text-sm text-gray-300 leading-relaxed min-h-[200px] bg-slate-700/50">
+                <div className="flex-1 px-4 py-3 text-sm text-muted-foreground leading-relaxed min-h-[200px] bg-surface-inset/50">
                   {state.hasContent && <RichMathEditorRenderer content={state.text} />}
                 </div>
               </div>
