@@ -41,11 +41,13 @@ type UseProblemSearchReturn = {
    */
   state: {
     /** Whether the initial data or search results are currently loading. */
-    isLoading: boolean
+    isPageLoading: boolean
     /** Whether a search is happening in the background (e.g., while typing or filtering). */
-    isSearchingInBackground: boolean
+    isActiveSearchFetching: boolean
+    /** Whether a search with genuinely new filters is in progress (first fetch, no cached data). */
+    isBlankSlateLoading: boolean
     /** Whether more results are being loaded (infinite scroll). */
-    isLoadingMore: boolean
+    isPaginationLoading: boolean
     /** Whether the initial filter options and configuration have been loaded. */
     hasInitialDataLoaded: boolean
 
@@ -398,13 +400,22 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   //   3. Initial data: use base options (before any search)
   const filterOptions = singleProblemQuery.data?.options ?? searchQuery.filterOptions ?? baseOptions
 
-  // Loading states
-  const isLoading = problemId
+  // Are we loading anything?
+  const isPageLoading = problemId
     ? singleProblemQuery.isLoading && !singleProblemQuery.error
     : initialDataQuery.isLoading
+
+  // Do we have the data with search filter options ready?
   const hasInitialDataLoaded = initialDataQuery.isSuccess
-  const isSearchingInBackground = !problemId && searchQuery.isSearching
-  const isLoadingMore = !problemId && searchQuery.isLoadingMore
+
+  // Are we loading new data, i.e. a new query key?
+  const isBlankSlateLoading = !problemId && searchQuery.isPending
+
+  // Is any search query currently running?
+  const isActiveSearchFetching = !problemId && searchQuery.isFetching
+
+  // Are we loading more pages?
+  const isPaginationLoading = !problemId && searchQuery.isFetchingNextPage
 
   // Problems from global store
   const displayedProblems = useProblemStore((state) => state.displayedProblems)
@@ -418,9 +429,10 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // State + actions to return
   return {
     state: {
-      isLoading,
-      isSearchingInBackground,
-      isLoadingMore,
+      isPageLoading,
+      isActiveSearchFetching,
+      isBlankSlateLoading,
+      isPaginationLoading,
       hasInitialDataLoaded,
       filters: displayFilters,
       filterOptions,

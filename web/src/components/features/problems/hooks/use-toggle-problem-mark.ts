@@ -27,8 +27,13 @@ export function useToggleProblemMark() {
     apiFn: toggleProblemMark,
     toggleInStore: toggleProblemMarkInStore,
     stateKey: 'marked',
-    isFilteredView: () => currentFilters?.markStatus === 'marked',
-    invalidateQueryKeys: problemQueryKeys.all,
+    // Any mark status filter creates a filtered view (both 'marked' and 'unmarked')
+    isFilteredView: () => !!currentFilters?.markStatus,
+    // Unmarking in "marked" view or marking in "unmarked" view removes the item
+    willLeaveFilteredView: (isActive) =>
+      (currentFilters?.markStatus === 'marked' && isActive) ||
+      (currentFilters?.markStatus === 'unmarked' && !isActive),
+    invalidateQueryKeys: problemQueryKeys.allSearches(),
     pendingStorageKey: PENDING_PROBLEM_MARK_STORAGE_KEY,
     messages: {
       authReason: t('authReason'),

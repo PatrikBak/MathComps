@@ -140,6 +140,12 @@ export const useProblemStore = create<ProblemState>((set) => ({
         updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
       }
 
+      // If we are filtering by "Unmarked Only" and we just marked it,
+      // we should remove it from the view immediately.
+      if (state.currentFilters?.markStatus === 'unmarked' && problem.marked) {
+        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
+      }
+
       // Return the updated state
       return {
         problems: updatedProblems,

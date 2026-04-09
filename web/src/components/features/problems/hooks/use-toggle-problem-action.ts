@@ -35,8 +35,10 @@ type ToggleProblemActionConfig = {
   toggleInStore: (slug: string) => void
   /** Property on Problem to read current state (e.g. 'liked', 'marked') */
   stateKey: keyof Problem
-  /** Whether the current view filters by this action (triggers undo toast + display filtering) */
+  /** Whether the current view filters by this property (any mark/like filter active) */
   isFilteredView: () => boolean
+  /** Whether this specific toggle direction causes the item to leave the filtered view */
+  willLeaveFilteredView: (isActive: boolean) => boolean
   /** React Query keys to invalidate on success */
   invalidateQueryKeys: readonly unknown[]
   /** localStorage key for pending action */
@@ -109,22 +111,22 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
 
     // After successful server call
     onSuccess: (_, { problemSlug, isActive }) => {
-      // Invalidate related queries to refetch
-      queryClient.invalidateQueries({
-        queryKey: config.invalidateQueryKeys,
-      })
+      // Invalidate in any filtered view to sync the result set with the server.
+      // Covers both deactivation (item removed) and undo (item restored).
+      if (config.isFilteredView()) {
+        queryClient.invalidateQueries({
+          queryKey: config.invalidateQueryKeys,
+        })
+      }
 
-      // Show undo toast only when:
-      // 1. We deactivated (isActive was true before the toggle)
-      // 2. AND we're currently in a filtered view for this action
-      // This makes sense because the item just disappeared from the view
-      if (isActive && config.isFilteredView()) {
+      // Show undo toast only when the item leaves the filtered view
+      if (config.willLeaveFilteredView(isActive)) {
         toast.info(config.messages.removedMessage, {
           action: {
             label: config.messages.undoLabel,
             onClick: () => {
-              // Re-call the mutation to undo
-              mutation.mutate({ problemSlug, isActive: false })
+              // Pass the current (toggled) state so the mutation knows the direction
+              mutation.mutate({ problemSlug, isActive: !isActive })
             },
           },
         })
