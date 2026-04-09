@@ -165,7 +165,6 @@
   "common": {
     "language": {
       "change": "Change language",
-      "label": "Language",
       "switchTo": "Switch to {language}"
     },
     "loading": "Loading...",

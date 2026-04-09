@@ -165,7 +165,6 @@
   "common": {
     "language": {
       "change": "Zmeniť jazyk",
-      "label": "Jazyk",
       "switchTo": "Prepnúť na {language}"
     },
     "loading": "Načítava sa...",

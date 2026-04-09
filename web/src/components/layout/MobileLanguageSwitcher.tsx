@@ -14,17 +14,16 @@ type MobileLanguageSwitcherProps = {
 }
 
 /**
- * Mobile-friendly language switcher showing inline buttons for each locale.
- * Designed for use inside the mobile navigation drawer.
+ * Mobile-friendly language switcher rendered as a compact segmented control.
  */
 export function MobileLanguageSwitcher({ onSelect }: MobileLanguageSwitcherProps) {
   // The currently active locale
   const { currentLocale, changeLocale } = useLanguageSwitcher()
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="self-start inline-flex items-stretch rounded-xl bg-foreground/5 border border-foreground/5 p-1 gap-0.5">
       {SUPPORTED_LOCALES.map((locale) => {
-        // We will highlight the currently active locale
+        // Determine whether this locale is the active one
         const isActive = locale === currentLocale
 
         // The country flag data for the locale being rendered
@@ -36,16 +35,17 @@ export function MobileLanguageSwitcher({ onSelect }: MobileLanguageSwitcherProps
             type="button"
             onClick={() => changeLocale(locale, onSelect)}
             className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-lg',
-              'text-sm font-medium transition-all duration-200',
+              'flex items-center justify-center gap-2 px-4 py-2 rounded-lg',
+              'text-sm transition-all duration-200',
               isActive
-                ? 'bg-focus/25 text-focus-foreground border border-focus/40'
-                : 'bg-foreground/5 text-muted-foreground border border-transparent hover:bg-foreground/10 hover:text-foreground'
+                ? 'bg-foreground/10 text-foreground font-semibold'
+                : 'text-muted-foreground font-medium hover:text-foreground'
             )}
             aria-pressed={isActive}
+            aria-label={LOCALE_NAMES[locale]}
           >
-            <FlagIcon country={country} flagHeight={14} flagWidth={20} />
-            <span>{LOCALE_NAMES[locale]}</span>
+            <FlagIcon country={country} flagHeight={13} flagWidth={18} />
+            <span>{LOCALE_TO_COUNTRY[locale]}</span>
           </button>
         )
       })}

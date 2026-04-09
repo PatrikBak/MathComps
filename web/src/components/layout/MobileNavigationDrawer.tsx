@@ -40,9 +40,6 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
   // Translations for navigation links
   const tNav = useTranslations('navigation')
 
-  // Translations for common text
-  const tCommon = useTranslations('common')
-
   // Helper component for mobile navigation links
   const MobileLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
     // We will higlight the current page in the navigation drawer
@@ -53,7 +50,7 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
         href={href}
         onClick={onClose}
         className={cn(
-          'block -mx-6 px-6 pt-4 pb-3 -mt-1 text-lg font-semibold border-b border-foreground/5 last:border-0 transition-colors',
+          'block -mx-6 px-6 py-3 text-lg font-semibold border-b border-foreground/5 last:border-0 transition-colors',
           isActive
             ? 'text-foreground bg-foreground/5'
             : 'text-muted-foreground hover:text-foreground'
@@ -105,48 +102,50 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto">
-              <div className="flex flex-col min-h-full px-6 py-2 scroll-p-2">
+              <div className="flex flex-col gap-4 px-6 pt-1">
                 {/* User Info Section */}
                 {isLoaded && user && (
-                  <div className="mb-2 p-4 rounded-xl bg-foreground/5 border border-foreground/5">
+                  <div className="mt-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5">
                     <UserInfoHeader user={user} size="md" />
                   </div>
                 )}
 
                 {/* Main Navigation */}
-                <nav className="space-y-1 mb-4">
+                <nav className="flex flex-col">
                   <MobileLink href={ROUTES.PROBLEMS}>{tNav('problems')}</MobileLink>
                   <MobileLink href={ROUTES.HANDOUTS}>{tNav('handouts')}</MobileLink>
                   <MobileLink href={ROUTES.GUIDE}>{tNav('guide')}</MobileLink>
                   <MobileLink href={ROUTES.NEWS}>{tNav('news')}</MobileLink>
                 </nav>
 
-                {/* Bottom Actions (Language & Auth) */}
-                <div className="space-y-6 pb-8">
-                  {/* Language Section */}
-                  <div className="space-y-3">
-                    <div className="text-xs font-bold text-muted uppercase tracking-wider">
-                      {tCommon('language.label')}
-                    </div>
-                    <MobileLanguageSwitcher onSelect={onClose} />
-                  </div>
+                {/* Separator — only when logged in */}
+                {isLoaded && user && <div className="-mx-6 -mt-2 border-t border-foreground/10" />}
 
-                  {/* Auth Actions */}
-                  {isLoaded && (
-                    <div className="pt-4 border-t border-foreground/10">
-                      {user ? (
-                        <div className="space-y-1">
-                          <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
-                          <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
-                        </div>
-                      ) : (
+                {/* Auth Actions */}
+                {isLoaded && (
+                  <div>
+                    {user ? (
+                      <div className="flex flex-col -my-2">
+                        <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
+                        <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
+                      </div>
+                    ) : (
+                      <div className="pb-4">
                         <LoginNavItem
-                          className="flex items-center justify-center max-w-[240px] mx-auto py-2.5 px-4 rounded-lg text-sm font-semibold text-brand-foreground bg-brand/70 hover:bg-brand/80 active:bg-brand/60 transition-colors shadow-lg shadow-brand/20"
+                          className="flex items-center justify-center w-full py-3 px-4 rounded-lg text-sm font-semibold text-brand-foreground bg-brand/70 hover:bg-brand/80 active:bg-brand/60 transition-colors shadow-lg shadow-brand/20"
                           onClick={onClose}
                         />
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Separator — only when logged in */}
+                {isLoaded && user && <div className="-mx-6 border-t border-foreground/10" />}
+
+                {/* Language Switcher */}
+                <div className="flex justify-center pb-4">
+                  <MobileLanguageSwitcher onSelect={onClose} />
                 </div>
               </div>
             </div>
