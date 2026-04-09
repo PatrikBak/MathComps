@@ -46,9 +46,10 @@ export default function ProblemsLibrary() {
   // The hook to handle all difficult logic of problem search
   const {
     state: {
-      isLoading,
-      isSearchingInBackground,
-      isLoadingMore,
+      isPageLoading,
+      isActiveSearchFetching,
+      isBlankSlateLoading,
+      isPaginationLoading,
       filters,
       filterOptions,
       baseOptions,
@@ -79,7 +80,7 @@ export default function ProblemsLibrary() {
   usePendingProblemMark()
 
   // We'll track whether we have the needed data. Before that, we show skeletons
-  const isPageReady = !isLoading && filters && filterOptions && hasInitialDataLoaded
+  const isPageReady = !isPageLoading && filters && filterOptions && hasInitialDataLoaded
 
   // Create a set of selected tag slugs for efficient lookup
   const selectedTagSlugs = useMemo(
@@ -168,7 +169,7 @@ export default function ProblemsLibrary() {
 
   // Animation state management
   const [searchBatchId, setSearchBatchId] = useState(0)
-  const previousIsSearchingInBackground = React.useRef(isSearchingInBackground)
+  const previousIsSearchingInBackground = React.useRef(isActiveSearchFetching)
   const isInitialLoadRef = React.useRef(true)
 
   // Track visible range for viewport animations
@@ -186,10 +187,10 @@ export default function ProblemsLibrary() {
   useEffect(() => {
     // Detect transition from searching → not searching
     // prevIsSearchingRef ensures we only trigger on the transition, not on initial mount
-    const searchJustCompleted = previousIsSearchingInBackground.current && !isSearchingInBackground
+    const searchJustCompleted = previousIsSearchingInBackground.current && !isActiveSearchFetching
 
     // If initial load completed...
-    if (searchJustCompleted && !isLoadingMore && isInitialLoadRef.current) {
+    if (searchJustCompleted && !isPaginationLoading && isInitialLoadRef.current) {
       // This should trigger animation
       setSearchBatchId((prev) => prev + 1)
 
@@ -198,8 +199,8 @@ export default function ProblemsLibrary() {
     }
 
     // Track current searching state for next render
-    previousIsSearchingInBackground.current = isSearchingInBackground
-  }, [isSearchingInBackground, isLoadingMore, problems.length])
+    previousIsSearchingInBackground.current = isActiveSearchFetching
+  }, [isActiveSearchFetching, isPaginationLoading, problems.length])
 
   // Scroll to top when problems set changes (new search), but not during infinite scroll
   useEffect(() => {
@@ -252,7 +253,7 @@ export default function ProblemsLibrary() {
   }
 
   // Early return to prevent rendering issues during loading
-  if (isLoading) {
+  if (isPageLoading) {
     return (
       <div className="fixed inset-0 text-muted-foreground">
         <div className="flex h-full flex-col">
@@ -322,7 +323,7 @@ export default function ProblemsLibrary() {
                     showTechniqueTags={showTechniqueTags}
                     onShowTechniqueTagsChange={setShowTechniqueTags}
                     onMobileFilterClick={() => setIsMobileFilterOpen(true)}
-                    isSearching={isSearchingInBackground}
+                    isSearching={isActiveSearchFetching}
                   />
                 ) : (
                   <ActiveFiltersBarSkeleton />
@@ -331,7 +332,7 @@ export default function ProblemsLibrary() {
 
               {/* The problem list container */}
               <div className="relative flex-1 overflow-hidden">
-                {!isPageReady || isSearchingInBackground ? (
+                {!isPageReady || isBlankSlateLoading ? (
                   <div className="h-full">
                     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                       <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
@@ -355,7 +356,7 @@ export default function ProblemsLibrary() {
                       }
                     }}
                     endReached={() => {
-                      if (hasMore && !isLoadingMore && !isSearchingInBackground) {
+                      if (hasMore && !isPaginationLoading && !isActiveSearchFetching) {
                         loadMore()
                       }
                     }}
@@ -384,8 +385,8 @@ export default function ProblemsLibrary() {
                       // Early prefetch when within PREFETCH_THRESHOLD from the end
                       if (
                         hasMore &&
-                        !isLoadingMore &&
-                        !isSearchingInBackground &&
+                        !isPaginationLoading &&
+                        !isActiveSearchFetching &&
                         problems.length - endIndex <= PREFETCH_THRESHOLD
                       ) {
                         loadMore()
@@ -393,7 +394,7 @@ export default function ProblemsLibrary() {
                     }}
                     components={{
                       Footer: () =>
-                        isLoadingMore ? (
+                        isPaginationLoading ? (
                           <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
                             <div className="flex items-center gap-3 text-muted">
                               <Loader2 className="h-5 w-5 animate-spin" />

@@ -114,9 +114,12 @@ export const problemQueryKeys = {
   initialData: (locale: string, userId: string | null) =>
     [...problemQueryKeys.all, 'initial', locale, userId] as const,
 
+  // Prefix covering all search queries
+  allSearches: () => [...problemQueryKeys.all, 'search'] as const,
+
   // Key for problem search results with specific filters + for the current user
   search: (locale: string, filters: SearchFiltersState | null, userId: string | null) =>
-    [...problemQueryKeys.all, 'search', locale, filters, userId] as const,
+    [...problemQueryKeys.allSearches(), locale, filters, userId] as const,
 
   // Key for a single problem by slug
   single: (locale: string, problemSlug: string | null, userId: string | null) =>
@@ -392,12 +395,12 @@ type UseProblemSearchQueryReturn = {
   totalCount: number
   /** Whether there are more pages available to load. */
   hasMore: boolean
-  /** Whether the initial search is loading. */
-  isLoading: boolean
-  /** Whether a search is currently in progress (excluding pagination). */
-  isSearching: boolean
-  /** Whether the next page is being loaded. */
-  isLoadingMore: boolean
+  /** True ONLY when a query is loading and there is zero cached data. This typically happens when the user clicks a totally new filter combination. */
+  isPending: boolean
+  /** True anytime a network request is currently active (excluding pagination). This includes both initial loads, filter changes, and background invalidation syncs. */
+  isFetching: boolean
+  /** True only when scrolling and infinite-fetching the subsequent page. */
+  isFetchingNextPage: boolean
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
   /** The error message if the search failed. */
@@ -406,12 +409,8 @@ type UseProblemSearchQueryReturn = {
   rawError: Error | null
   /** Whether the search is currently retrying after a failure. */
   isRetrying: boolean
-  /** The timestamp of the last successful data update. */
-  dataUpdatedAt: number
   /** Function to load the next page of results. */
   loadMore: () => void
-  /** Function to manually refetch the search results. */
-  refetch: () => void
 }
 
 /**
@@ -438,15 +437,11 @@ export function useProblemSearchQuery(
   // Get the function to update displayed problems
   const setDisplayedProblems = useProblemStore((state) => state.setDisplayedProblems)
 
-  // Store previous problems array for efficient comparison (order-dependent)
+  // Store previous problems array. We will use it to determine whether
+  // we have fetched / obtained from cache the same problems as before.
+  // If yes, we can then return the old problem array reference and avoid
+  // unnecessary re-renders of components that use the problems array.
   const previousProblemsRef = useRef<string[]>([])
-
-  // Track what mark status filter produced the current previousProblems.
-  // This lets us distinguish "mark toggled while filter active" (safe to
-  // optimistically filter) from "user changed the filter dropdown" (previous
-  // problems come from a different filter — optimistic filtering would yield
-  // wrong results, e.g. empty list when switching marked → unmarked).
-  const previousMarkStatusRef = useRef<string | null | undefined>(filters?.markStatus)
 
   // The problems to display
   const finalProblems = useMemo(() => {
@@ -456,46 +451,9 @@ export function useProblemSearchQuery(
     // Get the old currently visible problems
     const previousProblems = previousProblemsRef.current
 
-    // If we're searching and have no new data yet, keep showing previous problems
-    // with optimistic client-side filtering for mark status
-    if (infiniteQuery.isFetching) {
-      // All displayed problems already have .marked in the store,
-      // so we can filter immediately instead of waiting for the server
-      // We can only do this if the mark status hasn't changed since the last fetch
-      if (filters?.markStatus && filters?.markStatus === previousMarkStatusRef.current) {
-        // Get current problems from store
-        const problems = useProblemStore.getState().problems
-
-        // Filter current visible problems based on mark status
-        return previousProblems.filter((slug) => {
-          // Get the current problem from store
-          const problem = problems[slug]
-
-          /// The problem should be in the store...
-          if (!problem) throw new Error(`Problem ${slug} not found in store`)
-
-          // Filter based on mark status
-          switch (filters.markStatus) {
-            case 'marked':
-              return problem.marked
-            case 'unmarked':
-              return !problem.marked
-            default:
-              throw new Error(`Unknown mark status: ${filters.markStatus}`)
-          }
-        })
-      }
-
-      // If we got here, we're fetching and don't do any optimistic updates
-      return previousProblems
-    }
-
-    // Not fetching — server data is fresh. Update the mark status ref.
-    previousMarkStatusRef.current = filters?.markStatus
-
     // Here we need to figure out if there was a change in the problems
-    // First compare lengths
     if (
+      // First compare lengths
       newProblems.length === previousProblems.length &&
       // Otherwise we need order-dependent comparison: check if all problems are equal in order and slug
       newProblems.every((slug, index) => slug === previousProblems[index])
@@ -509,7 +467,7 @@ export function useProblemSearchQuery(
 
     // The new problems will be displayed
     return newProblems
-  }, [infiniteQuery.data?.pages, infiniteQuery.isFetching, filters?.markStatus])
+  }, [infiniteQuery.data?.pages])
 
   // Sync problems to the global store
   useEffect(() => {
@@ -518,6 +476,7 @@ export function useProblemSearchQuery(
 
   // Get the most recent filter options (from the last page) to keep filter dropdowns in sync
   const filterOptions = useMemo(() => {
+    // Ensure we even have any data
     const pages = infiniteQuery.data?.pages
     if (!pages || pages.length === 0) return null
 
@@ -537,7 +496,6 @@ export function useProblemSearchQuery(
     stableFiltersRef.current = filters
   }
 
-  // Helper to check if filters represent a "reset" (empty/minimal state)
   const isResetState = (filters: SearchFiltersState | null): boolean => {
     if (!filters) return true
     return (
@@ -556,6 +514,7 @@ export function useProblemSearchQuery(
     current: SearchFiltersState | null,
     stable: SearchFiltersState | null
   ): boolean => {
+    // If either is null, they're not similar
     if (!current || !stable) return false
     // If current is a reset, they're not similar
     if (isResetState(current)) return false
@@ -616,10 +575,10 @@ export function useProblemSearchQuery(
     hasMore,
     listName,
 
-    // Loading states (distinguish between initial load, filter changes, and pagination)
-    isLoading: infiniteQuery.isLoading,
-    isSearching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
-    isLoadingMore: infiniteQuery.isFetchingNextPage,
+    // Loading states mapped to strict React Query terminology
+    isPending: infiniteQuery.isLoading,
+    isFetching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
+    isFetchingNextPage: infiniteQuery.isFetchingNextPage,
 
     // Error state
     error: infiniteQuery.error?.message ?? null,
@@ -627,11 +586,8 @@ export function useProblemSearchQuery(
     rawError: infiniteQuery.error,
     // Retry state - failureCount > 0 means we're retrying or have failed (show toast even between retries)
     isRetrying: infiniteQuery.failureCount > 0,
-    // Timestamp of last successful data fetch (for detecting when new data arrives)
-    dataUpdatedAt: infiniteQuery.dataUpdatedAt,
 
     // Actions
     loadMore,
-    refetch,
   }
 }

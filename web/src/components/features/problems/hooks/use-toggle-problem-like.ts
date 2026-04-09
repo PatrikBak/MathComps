@@ -28,7 +28,8 @@ export function useToggleProblemLike() {
     toggleInStore: toggleProblemLikeInStore,
     stateKey: 'liked',
     isFilteredView: () => currentFilters?.favoritesOnly ?? false,
-    invalidateQueryKeys: problemQueryKeys.all,
+    willLeaveFilteredView: (isActive) => isActive && (currentFilters?.favoritesOnly ?? false),
+    invalidateQueryKeys: problemQueryKeys.allSearches(),
     pendingStorageKey: PENDING_PROBLEM_LIKE_STORAGE_KEY,
     messages: {
       authReason: t('authReason'),
