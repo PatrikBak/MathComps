@@ -561,11 +561,6 @@ export function useProblemSearchQuery(
     }
   }, [hasMore, infiniteQuery])
 
-  // Manual refetch function for retry scenarios (error states)
-  const refetch = useCallback(() => {
-    infiniteQuery.refetch()
-  }, [infiniteQuery])
-
   // Compose the final result object
   return {
     // Data
