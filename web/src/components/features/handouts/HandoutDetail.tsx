@@ -522,7 +522,7 @@ export default function HandoutDetail({
         icon={<MessageSquare size={28} />}
         title={t('labels.comments')}
         id={getLocalizedAnchor(ANCHORS.COMMENTS, locale)}
-        className="mt-8 sm:mt-12 md:mt-16 min-h-[60vh]"
+        className="mt-8 sm:mt-12 md:mt-16"
       >
         <CommentSection variant="inline" target={{ targetType: 'Handout', targetId: contentId }} />
       </ArticleSection>
