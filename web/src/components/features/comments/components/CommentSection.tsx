@@ -72,7 +72,12 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   usePendingCommentLike(comments, target)
 
   // We need a function to save the target to the pending comment target
+  // so we can restore the page after logging in
   const { savePendingTarget } = usePendingCommentTarget()
+  const handleBeforeLoginRedirect = useCallback(
+    () => savePendingTarget(target),
+    [savePendingTarget, target]
+  )
 
   // The text for the editor at the bottom (for new non-reply comments)
   const [commentInputText, setCommentInputText] = useState('')
@@ -335,50 +340,48 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           }
         >
           {!comments || !comments.some((comment) => !shouldHideComment(comment)) ? (
-            <div className="py-6 text-center text-muted text-sm">{tComments('empty')}</div>
+            <div className="py-6 flex flex-col items-center gap-3 text-center text-muted text-sm">
+              <span>{tComments('empty')}</span>
+              {isUserLoaded && !userId && (
+                <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
+              )}
+            </div>
           ) : (
             comments.map((comment) => renderSingleComment(comment))
           )}
         </div>
 
         {/* New comment input - hidden when replying on desktop (mobile uses modal instead) */}
-        {!(userId && replyCommentId !== null && !isMobile) && (
-          <div
-            className={
-              {
-                card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 border-t border-foreground/10',
-                inline: 'pt-4 border-t border-foreground/10',
-              }[variant]
-            }
-          >
-            {!isUserLoaded ? (
-              <div className="flex justify-center py-4">
-                <LoadingSpinner />
-              </div>
-            ) : !userId ? (
-              <div
-                className={
-                  {
-                    card: 'flex flex-col items-center justify-center py-6 text-center bg-surface/50 rounded-lg border border-foreground/10 border-dashed',
-                    inline: 'flex flex-col items-center justify-center py-4 text-center',
-                  }[variant]
-                }
-              >
-                <p className="text-muted text-sm mb-3">{tComments('loginRequired')}</p>
-                <LoginButton onBeforeRedirect={() => savePendingTarget(target)} />
-              </div>
-            ) : (
-              <RichMathEditor
-                variant={variant}
-                value={commentInputText}
-                onChange={setCommentInputText}
-                onSend={handleSubmitComment}
-                placeholder={tComments('writePlaceholder')}
-                isLoading={isCreatingRootComment}
-              />
-            )}
-          </div>
-        )}
+        {!(userId && replyCommentId !== null && !isMobile) &&
+          (userId || comments.some((comment) => !shouldHideComment(comment))) && (
+            <div
+              className={
+                {
+                  card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 border-t border-foreground/10',
+                  inline: 'pt-4 border-t border-foreground/10',
+                }[variant]
+              }
+            >
+              {!isUserLoaded ? (
+                <div className="flex justify-center py-4">
+                  <LoadingSpinner />
+                </div>
+              ) : !userId ? (
+                <div className="flex justify-center py-4">
+                  <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
+                </div>
+              ) : (
+                <RichMathEditor
+                  variant={variant}
+                  value={commentInputText}
+                  onChange={setCommentInputText}
+                  onSend={handleSubmitComment}
+                  placeholder={tComments('writePlaceholder')}
+                  isLoading={isCreatingRootComment}
+                />
+              )}
+            </div>
+          )}
       </div>
 
       {/* Mobile reply editor - rendered outside CommentItem to avoid padding issues */}
