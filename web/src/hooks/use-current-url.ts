@@ -1,8 +1,6 @@
 import type { ReadonlyURLSearchParams } from 'next/navigation'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-
-import { usePathname } from '@/i18n/navigation'
 
 /**
  * A custom hook that reconstructs the current URL path including search parameters.
