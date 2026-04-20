@@ -221,7 +221,7 @@
   \safepar\medskip\medskip%
 }
 
-% Counters for already definied exercises, theorems etc
+% Counters for already defined exercises, theorems etc
 \newcount\exercises
 \newcount\theorems
 \newcount\problems
@@ -251,8 +251,9 @@
 		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
 		\enskip\saferead{#2}\safepar%
 	}%
-	\safepar{\em \captionProof.}\enskip\saferead{#3}\qedsquare%
-	\endblock%
+  \def\temp{#3}\ifx\temp\empty\else%
+    \safepar{\em \captionProof.}\enskip\saferead{#3}\qedsquare\endblock%
+  \fi%
 }
 
 % #1 - Source (might be empty)
