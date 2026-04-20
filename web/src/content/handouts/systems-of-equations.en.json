@@ -3465,7 +3465,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "32x^5-32x=0 \\implies x(x^5-1)=0,",
+                  "text": "32x^5-32x=0 \\implies 32x(x^4-1)=0 \\implies 32x(x-1)(x+1)(x^2+1)=0,",
                   "isDisplay": true
                 },
                 {
@@ -3473,7 +3473,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "so "
+                      "text": "so (since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^2+1>0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") "
                     },
                     {
                       "type": "math",
@@ -3482,11 +3491,20 @@
                     },
                     {
                       "type": "text",
-                      "text": " or "
+                      "text": ", "
                     },
                     {
                       "type": "math",
                       "text": "x=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=-1",
                       "isDisplay": false
                     },
                     {
@@ -3510,11 +3528,20 @@
                     },
                     {
                       "type": "text",
-                      "text": " and "
+                      "text": ", "
                     },
                     {
                       "type": "math",
                       "text": "(1,1,1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(-1,-1,-1)",
                       "isDisplay": false
                     },
                     {
