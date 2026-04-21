@@ -89,7 +89,7 @@ We can also form hypotheses. A good hypothesis is the key to solving hard proble
 
 \sec Known Sub-claims
 
-In today's problems we will need several statements that are generally very useful and worth being able to apply directly in a complex diagram. Here is a short list of some of the most important ones that could also aid us in solving the handout's problems.:
+In today's problems we will need several statements that are generally very useful and worth being able to apply directly in a complex diagram. Here is a short list of some of the most important ones that could also aid us in solving the handout's problems:
 
 \Theorem{Basic angles}{Let $ABC$ be an acute triangle. Then:
 
@@ -150,7 +150,9 @@ The following problems are of roughly four types:
 \i Same as above, but even after such an addition it is not easy.
 \enditems
 
-\secc Problems
+\secc Standard problems
+
+The following problems are roughly ordered by difficulty and use roughly speaking \uv{standard} tricks.
 
 \Problem{0}{}{
     A pentagon~$ABCDE$ has all interior angles equal. Prove that the perpendicular bisector of~$AB$, the perpendicular bisector of~$CD$, and the bisector of angle~$DEA$ meet at a single point.
@@ -169,14 +171,6 @@ The following problems are of roughly four types:
 }{}
 
 \Problem{0}{}{
-    Inside a parallelogram $ABCD$ there is a point~$P$ such that $\angle APB + \angle CPD = 180^\circ$. Prove that $\angle PBC=\angle PDC$.
-}{
-    Try to shift point~$P$ so that the condition on the sum of angles makes sense.
-}{
-    The key point is the image~$P'$ of point~$P$ under the translation in the direction of~$AC$ (or~$BC$). Then we have a cyclic quadrilateral $CP'DP$ as well as plenty of parallelograms.
-}{}
-
-\Problem{0}{}{
     Let $ABC$ be an acute triangle with orthocenter~$H$, and let~$M$ be the midpoint of~$BC$. Points~$P$ and~$Q$ lie on sides~$AB$ and~$AC$ respectively such that $P$, $H$, $Q$ are collinear on a line perpendicular to~$MH$. Prove that $HP = HQ$.
 }{
     In the problem we have~$H$, the midpoint of~$BC$, and somehow line~$MH$ also plays a role. Well, what are we going to do with that orthocenter~:)?
@@ -192,20 +186,12 @@ The following problems are of roughly four types:
     A good midpoint to add is the midpoint of~$AB$ or~$CD$. Thanks to the parallelism coming from the midlines we can neatly rephrase the condition from the statement. Then we finish it off.
 }{}
 
-\Problem{0}{Czech-Slovak Olympiad}{
+\Problem{0}{Czech-Slovak Olympiad 2009}{
     Let $ABCD$ be a cyclic quadrilateral. Prove that the line connecting the orthocenter of triangle~$ABC$ with the orthocenter of triangle~$ABD$ is parallel to line~$CD$.
 }{
     Orthocentres are complicated points if we draw all the altitudes. Discard such a drawing immediately. Their images under suitable reflections give a better understanding of the situation. It also helps to rephrase what we are actually proving, so that after reflecting the orthocenters we can still state the claim clearly.
 }{
     First, it suffices to show that the segment connecting the orthocenters has the same length as~$CD$ (then we have a parallelogram). This realization gives us confidence that when we reflect these orthocenters over an axis, we still have a good statement to prove, namely the equality of two chords of the circle.
-}{}
-
-\Problem{0}{Czech-Slovak Olympiad 2026}{
-    We are given a convex hexagon $ABCDEF$ such that $AB = BC$, $CD = DE \neq AD$, $EF = FA$, $\angle BDC + \angle EDF = \angle FDB$. Prove that $\angle CBA + \angle EDC + \angle AFE = 360^\circ$.
-}{
-    The angle sum condition is key. We need to introduce a~point that exploits the angle-sum condition and makes it a little more meaningful.
-}{
-    The key point is the reflection of $C$ in $BD$, or analogously the reflection of $E$ in $DF$. It is the same point. And it is all we need.  Do not forget to use the inequality part of the condition $CD=DE \neq AD$. Without that, the problem does not hold.
 }{}
 
 \Problem{0}{}{
@@ -230,6 +216,22 @@ The following problems are of roughly four types:
     It pays to draw segment~$AD$ horizontally (unconventionally so), giving the best diagram (redraw right now if you haven't). Even in the new diagram it may not be clear what should happen. The midpoint of~$AD$ does not look easy to handle. Perhaps it needs some further midpoints to cooperate with. Ideally ones that are also related to points~$K$ and~$L$.
 }{
     The key is the remaining midpoints of the sides of triangle~$ABP$. Then magic happens and we are just a few easy arguments from the solution.
+}{}
+
+\Problem{0}{}{
+    Inside a parallelogram $ABCD$ there is a point~$P$ such that $\angle APB + \angle CPD = 180^\circ$. Prove that $\angle PBC=\angle PDC$.
+}{
+    Try to shift point~$P$ so that the condition on the sum of angles makes sense.
+}{
+    The key point is the image~$P'$ of point~$P$ under the translation in the direction of~$AC$ (or~$BC$). Then we have a cyclic quadrilateral $CP'DP$ as well as plenty of parallelograms.
+}{}
+
+\Problem{0}{Czech-Slovak Olympiad 2026}{
+    We are given a convex hexagon $ABCDEF$ such that $AB = BC$, $CD = DE \neq AD$, $EF = FA$, $\angle BDC + \angle EDF = \angle FDB$. Prove that $\angle CBA + \angle EDC + \angle AFE = 360^\circ$.
+}{
+    The angle sum condition is key. We need to introduce a~point that exploits the angle-sum condition and makes it a little more meaningful.
+}{
+    The key point is the reflection of $C$ in $BD$, or analogously the reflection of $E$ in $DF$. It is the same point. And it is all we need.  Do not forget to use the inequality part of the condition $CD=DE \neq AD$. Without that, the problem does not hold.
 }{}
 
 \Problem{0}{Czech-Slovak Olympiad 2024}{
@@ -258,14 +260,6 @@ The following problems are of roughly four types:
     It makes sense to reflect~$Q$ through~$M$ to transfer angle~$PQA$; it suddenly equals~$PQ'A$. The statement to be proved will then, after a brief angle chase, tell us what it suffices to show.
 }{}
 
-\Problem{0}{CPSJ 2019}{
-    Let $ABCD$ be a cyclic quadrilateral. Points $K$, $L$, $M$, $N$ lie on sides~$AB$, $BC$, $CD$, $DA$ respectively, such that $\angle ADK = \angle BCK$, $\angle BAL = \angle CDL$, $\angle CBM = \angle DAM$ and $\angle DCN=\angle ABN$. Prove that $KM \perp LN$.
-}{
-    Draw only one point, say~$K$, and try to better understand the strange angle condition by which it is defined. Adding further points will start to make sense only once you discover something.
-}{
-    In the diagram with only point~$K$ one can angle-chase $\angle BKC=\angle KDC$. Line~$AB$ is therefore tangent to the circumcircle of~$KCD$. This is reminiscent of the power of a point --- one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points~$L$, $M$, $N$.
-}{}
-
 \Problem{0}{}{
     Let $ABCD$ be a trapezoid with $AB \parallel CD$. Points $K$ and~$L$ lie on~$AB$ and~$CD$ respectively such that $AK \cdot CL = BK \cdot DL$. Points $P$ and~$Q$ lie on~$KL$ such that $\angle APB = \angle DCB$ and $\angle CQD=\angle CBA$. Prove that $B$, $C$, $P$, $Q$ lie on a circle.
 }{
@@ -274,12 +268,20 @@ The following problems are of roughly four types:
     Consider the homothety mapping~$AB$ to $DC$; under it, $K$ maps to~$L$. If we map~$P$ to~$P'$ under it, then points $K$, $L$, $P$, $Q$, $P'$ all lie on a line. The problem turns into a nice angle-chasing exercise.
 }{}
 
-\Problem{0}{IMO 2018, P1}{
-    Let $ABC$ be an acute triangle with circumscribed circle $\Gamma$. Points $D$ and $E$ lie in the interiors of sides $AB$ and $AC$ respectively, with $AD = AE$. The perpendicular bisectors of $BD$ and $CE$ intersect the shorter arcs $AB$ and $AC$ of $\Gamma$ at points $F$ and $G$ respectively. Prove that lines $DE$ and $FG$ are parallel (or coincide).
+\Problem{0}{CPSJ 2019, Team Contest}{
+    Let $ABCD$ be a cyclic quadrilateral. Points $K$, $L$, $M$, $N$ lie on sides~$AB$, $BC$, $CD$, $DA$ respectively, such that $\angle ADK = \angle BCK$, $\angle BAL = \angle CDL$, $\angle CBM = \angle DAM$ and $\angle DCN=\angle ABN$. Prove that $KM \perp LN$.
 }{
-    We have $FB = FD$, but it is not clear how to use this. It gives us equal angles $\angle FBD$ and $\angle FDB$. The second one in particular looks stranded. Try intersecting something with something to transfer these angles somewhere.
+    Draw only one point, say~$K$, and try to better understand the strange angle condition by which it is defined. Adding further points will start to make sense only once you discover something.
 }{
-    The key is to extend segment $FD$ to a chord of $\Gamma$, and similarly extend $GE$ on the other side. Suddenly we obtain isosceles triangles that interact well with the condition $AD = AE$. No further points are needed --- it becomes an angle-chasing exercise.
+    In the diagram with only point~$K$ one can angle-chase $\angle BKC=\angle KDC$. Line~$AB$ is therefore tangent to the circumcircle of~$KCD$. This is reminiscent of the power of a point --- one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points~$L$, $M$, $N$.
+}{}
+
+\Problem{0}{CAPS 2024, P4}{
+    Let $ABCD$ be a quadrilateral such that $AB = BC = CD$. There are points $X$, $Y$ on rays $CA$, $BD$ respectively such that $BX = CY$. Let $P$, $Q$, $R$, $S$ be the midpoints of segments $BX$, $CY$, $XD$, $YA$ respectively. Prove that points $P$, $Q$, $R$, $S$ lie on a circle.
+}{
+    We have many midpoints. Do we reflect or do we introduce even more? Here the latter makes more sense. 
+}{
+    The key point to introduce is the midpoint of~$XY$, as it will create many midlines. And they will give a~clear path of what to use to prove the concyclicity.
 }{}
 
 \Problem{0}{}{
@@ -290,15 +292,15 @@ The following problems are of roughly four types:
     Reflect~$Q$ under the homothety centred at~$P$ that maps~$AB$ to~$CD$. Suddenly the definition of~$Q$ changes into something meaningful and out of nowhere we have everything we need --- we just put it together.
 }{}
 
-\Problem{0}{CAPS 2024}{
-    Let $ABCD$ be a quadrilateral such that $AB = BC = CD$. There are points $X$, $Y$ on rays $CA$, $BD$ respectively such that $BX = CY$. Let $P$, $Q$, $R$, $S$ be the midpoints of segments $BX$, $CY$, $XD$, $YA$ respectively. Prove that points $P$, $Q$, $R$, $S$ lie on a circle.
+\Problem{0}{IMO 2018, P1}{
+    Let $ABC$ be an acute triangle with circumscribed circle $\Gamma$. Points $D$ and $E$ lie in the interiors of sides $AB$ and $AC$ respectively, with $AD = AE$. The perpendicular bisectors of $BD$ and $CE$ intersect the shorter arcs $AB$ and $AC$ of $\Gamma$ at points $F$ and $G$ respectively. Prove that lines $DE$ and $FG$ are parallel (or coincide).
 }{
-    We have many midpoints. Do we reflect or do we introduce even more? Here the latter makes more sense. 
+    We have $FB = FD$, but it is not clear how to use this. It gives us equal angles $\angle FBD$ and $\angle FDB$. The second one in particular looks stranded. Try intersecting something with something to transfer these angles somewhere.
 }{
-    The key point to introduce is the midpoint of~$XY$, as it will create many midlines. And they will give a~clear path of what to use to prove the concyclicity.
+    The key is to extend segment $FD$ to a chord of $\Gamma$, and similarly extend $GE$ on the other side. Suddenly we obtain isosceles triangles that interact well with the condition $AD = AE$. No further points are needed --- it becomes an angle-chasing exercise.
 }{}
 
-\Problem{0}{IMO 2004, P1}{
+\Problem{0}{IMO 2024, P1}{
     Let $ABC$ be a triangle such that $AB < AC < BC$. Let $\omega$ be the inscribed circle of triangle $ABC$ and $I$ its center. Let $X$ be a point on line $BC$ different from $C$ such that the line passing through $X$ parallel to $AC$ touches $\omega$. Similarly, let $Y$ be a point on line $BC$ different from $B$ such that the line passing through $Y$ parallel to $AB$ touches $\omega$. Line $AI$ intersects the circumcircle of triangle $ABC$ a second time at point $P \neq A$. Let $K$ and $L$ be the midpoints of sides $AC$ and $AB$ respectively. Prove that $\angle KIL + \angle YPX = 180^\circ$.
 }{
     We are almost given a parallelogram with those parallel lines.
@@ -309,7 +311,7 @@ The following problems are of roughly four types:
 }{}
 
 \Problem{0}{}{
-    Let $ABC$ be an acute triangle with midpoint~$M$ of side~$BC$. Let~$P \neq M$ be a point on side~$BC$. Denote by~$Q$ the midpoint of the arc~$AC$ not containing~$P$ of the circumcircle of~$APC$. Similarly, $R$ is the midpoint of the arc~$AB$ not containing~$P$ of the circumcircle of~$APB$. Prove that $\angle QMR=90^\circ$.
+    Let $ABC$ be an acute triangle with midpoint~$M$ of side~$BC$. Let~$P \neq M$ be a point on side~$BC$. Denote by~$Q$ the midpoint of the arc~$AC$ not containing~$P$ of the circumcircle of~$APC$. Similarly, $R$ is the midpoint of the arc~$AB$ not containing~$P$ of the circumcircle of~$APB$. Prove that $Q, M, P, R$ are concyclic.
 }{
     The most problematic point is~$M$: as a midpoint it has no nice angles around it. It needs to be given better meaning. The statement to be proved also hints at what we want to do.
 }{
@@ -332,7 +334,7 @@ The following problems are of roughly four types:
     If~$T$ is the second intersection of~$k_1$ and~$k_2$, then the diameters give us right angles, from which~$T$, $X$, $Y$ are collinear. The proof that~$H$ also lies on this line can be rephrased as a perpendicularity. Have we accidentally eliminated~$X$ and~$Y$?
 }{}
 
-\Problem{0}{IMO 2014, 1}{
+\Problem{0}{IMO 2014, P1}{
     Points~$P$ and~$Q$ are chosen on side~$BC$ of an acute triangle $ABC$ such that $\angle PAB = \angle ACB$ and $\angle QAC = \angle CBA$. Points~$M$ and~$N$ lie on rays~$AP$ and~$AQ$ respectively such that $AP = PM$ and $AQ = QN$. Prove that lines~$BM$ and~$CN$ meet on the circumcircle of triangle~$ABC$.
 }{
     Points~$Q$ and~$P$ are midpoints of~$AN$ and~$AM$ respectively. This fact is hard to use on its own. The key is to define some further midpoints. At best these midpoints will help us eliminate the not-so-natural-looking points~$M$ and~$N$.
@@ -372,7 +374,7 @@ The following problems are of roughly four types:
     The key is to discover $BC \parallel DE$. The diagram contains the intersection of~$CE$ and~$BD$. This may inspire adding the image of~$A$ under the homothety mapping~$BC$ to~$DE$. Suddenly everything becomes beautiful.
 }{}
 
-\Problem{0}{IMO 2019, 2}{
+\Problem{0}{IMO 2019, P2}{
     In triangle~$ABC$, let~$B_1$ be a point on side~$AC$ and~$C_1$ a point on side~$AB$. Let $P$ and~$Q$ be points on segments~$BB_1$ and~$CC_1$ respectively such that line~$PQ$ is parallel to~$BC$. Let~$P_1$ be a point on line~$PC_1$ such that~$C_1$ lies strictly between~$P$ and~$P_1$ and $\angle PP_1A=\angle CBA$. Let~$Q_1$ be a point on line~$QB_1$ such that~$B_1$ lies strictly between~$Q$ and~$Q_1$ and $\angle AQ_1Q=\angle ACB$. Prove that $P$, $Q$, $P_1$, $Q_1$ lie on a common circle.
 }{
     The goal is to add something that clarifies the strange angle condition for~$P_1$ and~$Q_1$. However the problem has too many points and various things that look promising can be added without much help --- for instance the intersection of~$P_1P$ with~$BC$ or of~$PQ$ with~$AB$ (try it). The trouble with these intersections is that while they do give a cyclic quadrilateral, it provides no further useful angles to transfer. It is therefore better to intersect some lines with a circle in a way that introduces one more angle into the equality~$\angle PP_1A=\angle CBA$.
@@ -380,13 +382,17 @@ The following problems are of roughly four types:
     The key magic point is the second intersection of line~$BB_1$ with the circumcircle of~$ABC$, call it~$C_2$. Thanks to it we get $\angle CBA=\angle CC_2A$, which magically gives the cyclic quadrilateral~$C_1C_2P_1A$. Analogously we define~$B_2$. And believe it or not, it is now only a moderately hard angle-chasing problem.
 }{}
 
-\Problem{0}{IMO 2012, 5}{
+\Problem{0}{IMO 2012, P5}{
     In a right triangle~$ABC$ with the right angle at vertex~$A$, let~$D$ be the foot of the altitude from~$A$. Let~$X$ be an arbitrary interior point of segment~$AD$. Let~$K$ be the point on segment~$BX$ such that $CK = CA$. Similarly, let~$L$ be the point on segment~$CX$ such that $BL = BA$. Denote by~$M$ the intersection of lines~$BL$ and~$CK$. Prove that $MK = ML$.
 }{
     Nothing meaningful can be seen in the configuration. Something is hidden there --- but it is not easy to see exactly what. One option is to try to do something meaningful with lines~$BX$ and~$CX$. Points~$K$ and~$L$ lie on them and we do not see how to use that. One possibility is to intersect them with something meaningful.
 }{
     The key points are the intersections~$E$ and~$F$ of lines~$BX$ and~$CX$ with the circle on diameter~$BC$. Even those alone do not suffice --- but the next point is quite natural: the intersection~$G$ of lines~$BF$ and~$CE$. It clearly lies on line~$AXD$ and~$X$ is the orthocenter of triangle~$GBC$. Although it may not seem so, the problem can now be finished --- by combining power of a point, inscribed angles and cyclic quadrilaterals. Even at this stage it is not an easy problem.
 }{}
+
+\secc My Favorites
+
+A few constructions I particularly find very adorable. Not necessarily the hardest problems here :)
 
 \Problem{0}{}{
     Let $ABC$ be an acute triangle. Points $X$, $Y$, $Z$ lie on the altitudes from $A$, $B$, $C$ respectively, inside the triangle, such that $A_{BCX} + A_{CAY} + A_{ABZ} = S_{ABC}$, where $A_{PQR}$ denotes the area of triangle $PQR$. Prove that the circumcircle of triangle $XYZ$ passes through the orthocenter of triangle $ABC$.

@@ -623,7 +623,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "In today's problems we will need several statements that are generally very useful and worth being able to apply directly in a complex diagram. Here is a short list of some of the most important ones that could also aid us in solving the handout's problems.:"
+                  "text": "In today's problems we will need several statements that are generally very useful and worth being able to apply directly in a complex diagram. Here is a short list of some of the most important ones that could also aid us in solving the handout's problems:"
                 }
               ],
               "highligted": false
@@ -1493,10 +1493,33 @@
         }
       },
       {
-        "title": "Problems",
+        "title": "Standard problems",
         "level": 2,
         "text": {
           "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The following problems are roughly ordered by difficulty and use roughly speaking "
+                },
+                {
+                  "type": "quote",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "standard"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " tricks."
+                }
+              ],
+              "highligted": false
+            },
             {
               "type": "problem",
               "difficulty": 0,
@@ -1764,139 +1787,6 @@
                       {
                         "type": "text",
                         "text": "."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": []
-            },
-            {
-              "type": "problem",
-              "difficulty": 0,
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Inside a parallelogram "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABCD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " there is a point\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "P",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " such that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle APB + \\angle CPD = 180^\\circ",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Prove that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle PBC=\\angle PDC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Try to shift point\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "P",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " so that the condition on the sum of angles makes sense."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "The key point is the image\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "P'",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " of point\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "P",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " under the translation in the direction of\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "AC",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " (or\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "BC",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": "). Then we have a cyclic quadrilateral "
-                      },
-                      {
-                        "type": "math",
-                        "text": "CP'DP",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " as well as plenty of parallelograms."
                       }
                     ],
                     "highligted": false
@@ -2233,7 +2123,7 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "Czech-Slovak Olympiad"
+                    "text": "Czech-Slovak Olympiad 2009"
                   }
                 ],
                 "highligted": false
@@ -2315,158 +2205,6 @@
                       {
                         "type": "text",
                         "text": " (then we have a parallelogram). This realization gives us confidence that when we reflect these orthocenters over an axis, we still have a good statement to prove, namely the equality of two chords of the circle."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": []
-            },
-            {
-              "type": "problem",
-              "difficulty": 0,
-              "title": {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "Czech-Slovak Olympiad 2026"
-                  }
-                ],
-                "highligted": false
-              },
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "We are given a convex hexagon "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABCDEF",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " such that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB = BC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CD = DE \\neq AD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "EF = FA",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle BDC + \\angle EDF = \\angle FDB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Prove that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle CBA + \\angle EDC + \\angle AFE = 360^\\circ",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "The angle sum condition is key. We need to introduce a\u00A0point that exploits the angle-sum condition and makes it a little more meaningful."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "The key point is the reflection of "
-                      },
-                      {
-                        "type": "math",
-                        "text": "C",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " in "
-                      },
-                      {
-                        "type": "math",
-                        "text": "BD",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", or analogously the reflection of "
-                      },
-                      {
-                        "type": "math",
-                        "text": "E",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " in "
-                      },
-                      {
-                        "type": "math",
-                        "text": "DF",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ". It is the same point. And it is all we need. Do not forget to use the inequality part of the condition "
-                      },
-                      {
-                        "type": "math",
-                        "text": "CD=DE \\neq AD",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ". Without that, the problem does not hold."
                       }
                     ],
                     "highligted": false
@@ -3021,6 +2759,291 @@
                       {
                         "type": "text",
                         "text": ". Then magic happens and we are just a few easy arguments from the solution."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Inside a parallelogram "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " there is a point\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle APB + \\angle CPD = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle PBC=\\angle PDC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Try to shift point\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "P",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " so that the condition on the sum of angles makes sense."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key point is the image\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "P'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " of point\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "P",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " under the translation in the direction of\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "AC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " (or\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "BC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "). Then we have a cyclic quadrilateral "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CP'DP",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " as well as plenty of parallelograms."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Czech-Slovak Olympiad 2026"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We are given a convex hexagon "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCDEF",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD = DE \\neq AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EF = FA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BDC + \\angle EDF = \\angle FDB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CBA + \\angle EDC + \\angle AFE = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The angle sum condition is key. We need to introduce a\u00A0point that exploits the angle-sum condition and makes it a little more meaningful."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key point is the reflection of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "C",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", or analogously the reflection of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "E",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DF",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". It is the same point. And it is all we need. Do not forget to use the inequality part of the condition "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CD=DE \\neq AD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Without that, the problem does not hold."
                       }
                     ],
                     "highligted": false
@@ -3609,257 +3632,6 @@
             {
               "type": "problem",
               "difficulty": 0,
-              "title": {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "CPSJ 2019"
-                  }
-                ],
-                "highligted": false
-              },
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Let "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABCD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " be a cyclic quadrilateral. Points "
-                    },
-                    {
-                      "type": "math",
-                      "text": "K",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "L",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "M",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "N",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " lie on sides\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "DA",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " respectively, such that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle ADK = \\angle BCK",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle BAL = \\angle CDL",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle CBM = \\angle DAM",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " and "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle DCN=\\angle ABN",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Prove that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "KM \\perp LN",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Draw only one point, say\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "K",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", and try to better understand the strange angle condition by which it is defined. Adding further points will start to make sense only once you discover something."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "In the diagram with only point\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "K",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " one can angle-chase "
-                      },
-                      {
-                        "type": "math",
-                        "text": "\\angle BKC=\\angle KDC",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ". Line\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "AB",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " is therefore tangent to the circumcircle of\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "KCD",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ". This is reminiscent of the power of a point — one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "L",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", "
-                      },
-                      {
-                        "type": "math",
-                        "text": "M",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", "
-                      },
-                      {
-                        "type": "math",
-                        "text": "N",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": "."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": []
-            },
-            {
-              "type": "problem",
-              "difficulty": 0,
               "body": [
                 {
                   "type": "paragraph",
@@ -4169,6 +3941,650 @@
                 "content": [
                   {
                     "type": "text",
+                    "text": "CPSJ 2019, Team Contest"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a cyclic quadrilateral. Points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "K",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie on sides\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " respectively, such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ADK = \\angle BCK",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAL = \\angle CDL",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CBM = \\angle DAM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DCN=\\angle ABN",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "KM \\perp LN",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draw only one point, say\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "K",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", and try to better understand the strange angle condition by which it is defined. Adding further points will start to make sense only once you discover something."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "In the diagram with only point\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "K",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " one can angle-chase "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\angle BKC=\\angle KDC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Line\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is therefore tangent to the circumcircle of\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "KCD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". This is reminiscent of the power of a point — one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "L",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "M",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "N",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "CAPS 2024, P4"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a quadrilateral such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = BC = CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". There are points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " on rays "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " respectively such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BX = CY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be the midpoints of segments "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "YA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " respectively. Prove that points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie on a circle."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We have many midpoints. Do we reflect or do we introduce even more? Here the latter makes more sense."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key point to introduce is the midpoint of\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "XY",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", as it will create many midlines. And they will give a\u00A0clear path of what to use to prove the concyclicity."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The diagonals of trapezoid\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB \\parallel CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " meet at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Point\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies inside triangle\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BCP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AQB= \\angle CQD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DQP = \\angle BAQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Point\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "Q",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is defined in a fairly arbitrary way. There is nothing for it but to add some further point that brings meaningful structure. The trapezoid itself gives a fairly good hint."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Reflect\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "Q",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " under the homothety centred at\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "P",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " that maps\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "CD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Suddenly the definition of\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "Q",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " changes into something meaningful and out of nowhere we have everything we need — we just put it together."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
                     "text": "IMO 2018, P1"
                   }
                 ],
@@ -4424,405 +4840,12 @@
             {
               "type": "problem",
               "difficulty": 0,
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "The diagonals of trapezoid\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABCD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " with "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB \\parallel CD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " meet at\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "P",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Point\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "Q",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " lies inside triangle\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "BCP",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " such that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle AQB= \\angle CQD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Prove that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\angle DQP = \\angle BAQ",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Point\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "Q",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " is defined in a fairly arbitrary way. There is nothing for it but to add some further point that brings meaningful structure. The trapezoid itself gives a fairly good hint."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Reflect\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "Q",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " under the homothety centred at\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "P",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " that maps\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "AB",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " to\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "CD",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ". Suddenly the definition of\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "Q",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " changes into something meaningful and out of nowhere we have everything we need — we just put it together."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": []
-            },
-            {
-              "type": "problem",
-              "difficulty": 0,
               "title": {
                 "type": "paragraph",
                 "content": [
                   {
                     "type": "text",
-                    "text": "CAPS 2024"
-                  }
-                ],
-                "highligted": false
-              },
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Let "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABCD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " be a quadrilateral such that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB = BC = CD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". There are points "
-                    },
-                    {
-                      "type": "math",
-                      "text": "X",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "Y",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " on rays "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CA",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " respectively such that "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BX = CY",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Let "
-                    },
-                    {
-                      "type": "math",
-                      "text": "P",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "Q",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "R",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "S",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " be the midpoints of segments "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BX",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CY",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "XD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "YA",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " respectively. Prove that points "
-                    },
-                    {
-                      "type": "math",
-                      "text": "P",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "Q",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "R",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "S",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " lie on a circle."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "We have many midpoints. Do we reflect or do we introduce even more? Here the latter makes more sense."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ],
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "The key point to introduce is the midpoint of\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "XY",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ", as it will create many midlines. And they will give a\u00A0clear path of what to use to prove the concyclicity."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": []
-            },
-            {
-              "type": "problem",
-              "difficulty": 0,
-              "title": {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "IMO 2004, P1"
+                    "text": "IMO 2024, P1"
                   }
                 ],
                 "highligted": false
@@ -5279,12 +5302,12 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle QMR=90^\\circ",
+                      "text": "Q, M, P, R",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "."
+                      "text": " are concyclic."
                     }
                   ],
                   "highligted": false
@@ -6044,7 +6067,7 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "IMO 2014, 1"
+                    "text": "IMO 2014, P1"
                   }
                 ],
                 "highligted": false
@@ -7416,7 +7439,7 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "IMO 2019, 2"
+                    "text": "IMO 2019, P2"
                   }
                 ],
                 "highligted": false
@@ -7829,7 +7852,7 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "IMO 2012, 5"
+                    "text": "IMO 2012, P5"
                   }
                 ],
                 "highligted": false
@@ -8152,6 +8175,24 @@
                 ]
               ],
               "solution": []
+            }
+          ]
+        }
+      },
+      {
+        "title": "My Favorites",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "A few constructions I particularly find very adorable. Not necessarily the hardest problems here :)"
+                }
+              ],
+              "highligted": false
             },
             {
               "type": "problem",
