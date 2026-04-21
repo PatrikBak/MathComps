@@ -227,7 +227,6 @@ function renderDocumentSections(
                     textColorClass: HINT_TEXT_COLOR,
                     badge: HINT_BADGE,
                     badgeContent: hintIndex + 1,
-                    labelWeight: 'medium',
                     children: renderBlocks(hint, imagesById, imageType, imageMissingText),
                   })
                 })
