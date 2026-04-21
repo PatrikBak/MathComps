@@ -176,6 +176,22 @@
           "cs": "Úhly na kružnici",
           "en": "Angles on Circles"
         }
+      },
+      {
+        "status": "ready",
+        "id": "RZtGbqo7HslApJ1qgkOOB",
+        "languages": ["en"],
+        "public": false,
+        "slug": {
+          "en": "adding-points"
+        },
+        "title": {
+          "en": "Adding Points to the Picture"
+        },
+        "description": {
+          "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by 24 problems from national olympiads, MEMO, ISL, and IMO."
+        },
+        "authors": ["Patrik Bak"]
       }
     ]
   },
