@@ -15,7 +15,7 @@ type CardPaletteEntry = {
 }
 
 /** Color classes for a badge's text, background, and border. */
-type BadgePaletteEntry = {
+export type BadgePaletteEntry = {
   /** Badge text color (e.g., `text-green-200`). */
   text: string
   /** Badge background fill (e.g., `bg-green-500/15`). */

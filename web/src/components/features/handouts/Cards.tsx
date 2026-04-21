@@ -1,9 +1,66 @@
+import { ChevronRight } from 'lucide-react'
 import React from 'react'
 
 import { CopyLinkButton } from '@/components/shared/components/CopyLinkButton'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { CARD_PALETTE, type HandoutEnvironmentType } from './handout-colors'
+import { type BadgePaletteEntry, CARD_PALETTE, type HandoutEnvironmentType } from './handout-colors'
+
+/**
+ * Props for a single disclosure panel (proof / solution / hint) rendered
+ * inside a {@link CollapsibleCard}.
+ */
+export type DisclosurePanelProps = {
+  /** Translated label, e.g. "Proof", "Solution", "Hint". */
+  label: string
+  /** Tailwind text color class for the summary row. */
+  textColorClass: string
+  /** Badge palette data for the badge circle (small square / `✓)`. */
+  badge: BadgePaletteEntry
+  /** Content rendered inside the badge circle */
+  badgeContent: React.ReactNode
+  /** Panel body shown when expanded. */
+  children: React.ReactNode
+}
+
+/**
+ * A single disclosure panel rendered inside a {@link CollapsibleCard}.
+ */
+function DisclosurePanel({
+  label,
+  textColorClass,
+  badge,
+  badgeContent,
+  children,
+}: DisclosurePanelProps) {
+  return (
+    <details className="group">
+      <summary
+        className={cn(
+          'ui-text flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden leading-6 font-medium',
+          textColorClass
+        )}
+      >
+        <span
+          className={cn(
+            'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
+            badge.bg,
+            badge.text,
+            badge.border
+          )}
+        >
+          {badgeContent}
+        </span>
+        {label}
+        <ChevronRight
+          size={16}
+          className="ml-auto opacity-70 transition-transform group-open:rotate-90"
+        />
+      </summary>
+      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">{children}</div>
+    </details>
+  )
+}
 
 /**
  * Props for the {@link CollapsibleCard} component.
@@ -17,25 +74,21 @@ type CollapsibleCardProps = {
   subtitle?: React.ReactNode
   /** Body content of the environment (rendered math blocks, text, images). */
   children: React.ReactNode
-  /** Label for the built-in collapsible section (e.g., "Proof", "Solution"). */
-  detailsTitle?: string
-  /** Content revealed when the built-in collapsible section is expanded. */
-  details?: React.ReactNode
+  /** Collapsible panels (proof / solution / hints) shown after the body. */
+  disclosures?: DisclosurePanelProps[]
   /** Unique anchor ID for deep linking (e.g., "theorem-1"). */
   id: string
 }
 
 /**
- * A colored, collapsible card for mathematical environments
- * (theorems, exercises, examples, problems).
+ * A colored, collapsible card for mathematical environments (theorems, exercises, examples, problems).
  */
 export function CollapsibleCard({
   type,
   title,
   subtitle,
   children,
-  detailsTitle,
-  details,
+  disclosures,
   id,
 }: CollapsibleCardProps) {
   // Resolve the color scheme for this environment type
@@ -75,39 +128,17 @@ export function CollapsibleCard({
           </div>
         )}
         {/* Card body content */}
-        <div className="text-foreground/70 leading-relaxed">{children}</div>
+        <div className="text-foreground/70 leading-relaxed">
+          {children}
+          {disclosures && disclosures.length > 0 && (
+            <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
+              {disclosures.map((d, i) => (
+                <DisclosurePanel key={i} {...d} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Collapsible details section (e.g., proof or solution) */}
-      {(detailsTitle || details) && (
-        <details className={cn('border-t group', card.tint)}>
-          <summary
-            className={cn(
-              'flex justify-between items-center px-5 sm:px-6 py-3 sm:py-4 hover:bg-foreground/5',
-              card.summary
-            )}
-          >
-            <span className="ui-text inline-flex items-center gap-2 font-semibold leading-6">
-              {detailsTitle}
-            </span>{' '}
-            <svg
-              className="w-5 h-5 transition-transform group-open:rotate-90"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </summary>
-          <div className="p-5 sm:p-6 border-t text-foreground/70 leading-relaxed">
-            {details ? details : <em className="text-muted-foreground">—</em>}
-          </div>
-        </details>
-      )}
     </section>
   )
 }

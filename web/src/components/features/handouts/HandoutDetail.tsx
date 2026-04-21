@@ -1,4 +1,4 @@
-import { ChevronRight, MessageSquare, Users } from 'lucide-react'
+import { MessageSquare, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
@@ -20,7 +20,7 @@ import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
-import { CollapsibleCard } from './Cards'
+import { CollapsibleCard, type DisclosurePanelProps } from './Cards'
 import {
   ENVIRONMENT_BADGE,
   ENVIRONMENT_TEXT_COLOR,
@@ -107,9 +107,6 @@ function renderDocumentSections(
     example: t('environments.example'),
     problem: t('environments.problem'),
   }
-  const environmentTextColorClassByType = ENVIRONMENT_TEXT_COLOR
-
-  const environmentBadgeClassByType = ENVIRONMENT_BADGE
 
   const environmentCounters: Record<HandoutEnvironmentType, number> = {
     theorem: 0,
@@ -186,249 +183,81 @@ function renderDocumentSections(
 
             const subtitleBadge = userProvidedTitle ? userProvidedTitle : undefined
 
-            if (contentBlock.type === 'theorem') {
-              return (
-                <div key={`${metadata.label}-env-${contentBlockIndex}`}>
-                  <CollapsibleCard
-                    type="theorem"
-                    title={mainTitle}
-                    subtitle={subtitleBadge}
-                    id={environmentId}
-                  >
-                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                    {contentBlock.proof.length > 0 && (
-                      <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
-                        <details className="group">
-                          <summary
-                            className={cn(
-                              'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
-                              environmentTextColorClassByType.theorem
-                            )}
-                          >
-                            <span className="ui-text inline-flex items-center gap-2 font-semibold leading-6">
-                              <span
-                                className={cn(
-                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
-                                  environmentBadgeClassByType.theorem.bg,
-                                  environmentBadgeClassByType.theorem.text,
-                                  environmentBadgeClassByType.theorem.border
-                                )}
-                              >
-                                <span className="w-[8px] h-[8px] bg-current rounded-[2px]"></span>
-                              </span>
-                              {t('labels.proof')}
-                            </span>
-                            <ChevronRight
-                              size={16}
-                              className="opacity-70 transition-transform group-open:rotate-90"
-                            />
-                          </summary>
-                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
-                            {renderBlocks(
-                              contentBlock.proof,
-                              imagesById,
-                              imageType,
-                              imageMissingText
-                            )}
-                          </div>
-                        </details>
-                      </div>
-                    )}
-                  </CollapsibleCard>
-                </div>
-              )
+            const disclosures: DisclosurePanelProps[] = []
+            switch (contentBlock.type) {
+              case 'theorem':
+                if (contentBlock.proof.length > 0) {
+                  disclosures.push({
+                    label: t('labels.proof'),
+                    textColorClass: ENVIRONMENT_TEXT_COLOR.theorem,
+                    badge: ENVIRONMENT_BADGE.theorem,
+                    badgeContent: (
+                      <span className="w-[8px] h-[8px] bg-current rounded-[2px]"></span>
+                    ),
+                    children: renderBlocks(
+                      contentBlock.proof,
+                      imagesById,
+                      imageType,
+                      imageMissingText
+                    ),
+                  })
+                }
+                break
+              case 'exercise':
+              case 'example':
+                if (contentBlock.solution.length > 0) {
+                  disclosures.push({
+                    label: t('labels.solution'),
+                    textColorClass: ENVIRONMENT_TEXT_COLOR[contentBlock.type],
+                    badge: ENVIRONMENT_BADGE[contentBlock.type],
+                    badgeContent: '✓',
+                    children: renderBlocks(
+                      contentBlock.solution,
+                      imagesById,
+                      imageType,
+                      imageMissingText
+                    ),
+                  })
+                }
+                break
+              case 'problem':
+                contentBlock.hints.forEach((hint, hintIndex) => {
+                  disclosures.push({
+                    label: t('labels.hint'),
+                    textColorClass: HINT_TEXT_COLOR,
+                    badge: HINT_BADGE,
+                    badgeContent: hintIndex + 1,
+                    labelWeight: 'medium',
+                    children: renderBlocks(hint, imagesById, imageType, imageMissingText),
+                  })
+                })
+                if (contentBlock.solution.length > 0) {
+                  disclosures.push({
+                    label: t('labels.solution'),
+                    textColorClass: ENVIRONMENT_TEXT_COLOR.problem,
+                    badge: ENVIRONMENT_BADGE.problem,
+                    badgeContent: '✓',
+                    children: renderBlocks(
+                      contentBlock.solution,
+                      imagesById,
+                      imageType,
+                      imageMissingText
+                    ),
+                  })
+                }
+                break
             }
 
-            if (contentBlock.type === 'exercise') {
-              return (
-                <div key={`${metadata.label}-env-${contentBlockIndex}`}>
-                  <CollapsibleCard
-                    type="exercise"
-                    title={mainTitle}
-                    subtitle={subtitleBadge}
-                    id={environmentId}
-                  >
-                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                    {contentBlock.solution.length > 0 && (
-                      <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
-                        <details className="group">
-                          <summary
-                            className={cn(
-                              'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
-                              environmentTextColorClassByType.exercise
-                            )}
-                          >
-                            <span className="ui-text inline-flex items-center gap-2 font-semibold leading-6">
-                              <span
-                                className={cn(
-                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
-                                  environmentBadgeClassByType.exercise.bg,
-                                  environmentBadgeClassByType.exercise.text,
-                                  environmentBadgeClassByType.exercise.border
-                                )}
-                              >
-                                ✓
-                              </span>
-                              {t('labels.solution')}
-                            </span>
-                            <ChevronRight
-                              size={16}
-                              className="opacity-70 transition-transform group-open:rotate-90"
-                            />
-                          </summary>
-                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
-                            {renderBlocks(
-                              contentBlock.solution,
-                              imagesById,
-                              imageType,
-                              imageMissingText
-                            )}
-                          </div>
-                        </details>
-                      </div>
-                    )}
-                  </CollapsibleCard>
-                </div>
-              )
-            }
-
-            if (contentBlock.type === 'example') {
-              return (
-                <div key={`${metadata.label}-env-${contentBlockIndex}`}>
-                  <CollapsibleCard
-                    type="example"
-                    title={mainTitle}
-                    subtitle={subtitleBadge}
-                    id={environmentId}
-                  >
-                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                    {contentBlock.solution.length > 0 && (
-                      <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
-                        <details className="group">
-                          <summary
-                            className={cn(
-                              'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
-                              environmentTextColorClassByType.example
-                            )}
-                          >
-                            <span className="ui-text inline-flex items-center gap-2 font-semibold leading-6">
-                              <span
-                                className={cn(
-                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
-                                  environmentBadgeClassByType.example.bg,
-                                  environmentBadgeClassByType.example.text,
-                                  environmentBadgeClassByType.example.border
-                                )}
-                              >
-                                ✓
-                              </span>
-                              {t('labels.solution')}
-                            </span>
-                            <ChevronRight
-                              size={16}
-                              className="opacity-70 transition-transform group-open:rotate-90"
-                            />
-                          </summary>
-                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
-                            {renderBlocks(
-                              contentBlock.solution,
-                              imagesById,
-                              imageType,
-                              imageMissingText
-                            )}
-                          </div>
-                        </details>
-                      </div>
-                    )}
-                  </CollapsibleCard>
-                </div>
-              )
-            }
-
-            // contentBlock.type === 'problem'
             return (
               <div key={`${metadata.label}-env-${contentBlockIndex}`}>
                 <CollapsibleCard
-                  type="problem"
+                  type={contentBlock.type}
                   title={mainTitle}
                   subtitle={subtitleBadge}
                   id={environmentId}
+                  disclosures={disclosures}
                 >
-                  <div>
-                    {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
-                  </div>
-                  {(contentBlock.hints.length > 0 || contentBlock.solution.length > 0) && (
-                    <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
-                      {contentBlock.hints.map((hint, hintIndex) => (
-                        <details key={`hint-${hintIndex}`} className="group">
-                          <summary
-                            className={cn(
-                              'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
-                              HINT_TEXT_COLOR
-                            )}
-                          >
-                            <span className="ui-text inline-flex items-center gap-2 font-medium leading-6">
-                              <span
-                                className={cn(
-                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
-                                  HINT_BADGE.bg,
-                                  HINT_BADGE.text,
-                                  HINT_BADGE.border
-                                )}
-                              >
-                                {hintIndex + 1}
-                              </span>
-                              {t('labels.hint')}
-                            </span>
-                            <ChevronRight
-                              size={16}
-                              className="opacity-70 transition-transform group-open:rotate-90"
-                            />
-                          </summary>
-                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
-                            {renderBlocks(hint, imagesById, imageType, imageMissingText)}
-                          </div>
-                        </details>
-                      ))}
-
-                      {contentBlock.solution.length > 0 && (
-                        <details className="group">
-                          <summary
-                            className={cn(
-                              'flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden',
-                              environmentTextColorClassByType.problem
-                            )}
-                          >
-                            <span className="ui-text inline-flex items-center gap-2 font-semibold leading-6">
-                              <span
-                                className={cn(
-                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
-                                  environmentBadgeClassByType.problem.bg,
-                                  environmentBadgeClassByType.problem.text,
-                                  environmentBadgeClassByType.problem.border
-                                )}
-                              >
-                                ✓
-                              </span>
-                              {t('labels.solution')}
-                            </span>
-                            <ChevronRight
-                              size={16}
-                              className="opacity-70 transition-transform group-open:rotate-90"
-                            />
-                          </summary>
-                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">
-                            {renderBlocks(
-                              contentBlock.solution,
-                              imagesById,
-                              imageType,
-                              imageMissingText
-                            )}
-                          </div>
-                        </details>
-                      )}
-                    </div>
-                  )}
+                  {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
                 </CollapsibleCard>
               </div>
             )
@@ -463,12 +292,15 @@ export default function HandoutDetail({
   pdfFilenameStem,
   locale,
 }: HandoutDetailProps) {
-  const infoAccent = ACCENT_COLOR_MAP.blue
+  // The translations objects
   const t = useTranslations('handouts')
   const tContent = useTranslations('ui.content')
   const imageMissingText = tContent('imageMissing')
-  const { document: documentContent, images } = handout
-  // Create images lookup map
+
+  // The handout data
+  const { document, images } = handout
+
+  // Create images lookup map by their id
   const imagesById: Record<string, HandoutImage> = {}
   for (const image of images) imagesById[image.contentId] = image
 
@@ -478,23 +310,22 @@ export default function HandoutDetail({
       <header className="lg:mb-12">
         <div className="mb-6">
           <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight">
-            <MathRendererClient content={documentContent.subtitle || documentContent.title || ''} />
+            <MathRendererClient content={document.subtitle || document.title || ''} />
           </h1>
         </div>
 
-        {/* Title */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          {documentContent.subtitle && (
+          {document.subtitle && (
             <div
               className={cn(
                 'inline-flex items-center gap-2 px-4 py-2 rounded-full border border-foreground/10',
-                infoAccent.bg,
-                infoAccent.text
+                ACCENT_COLOR_MAP.blue.bg,
+                ACCENT_COLOR_MAP.blue.text
               )}
             >
               <div className="w-2 h-2 rounded-full bg-current"></div>
               <span className="font-medium text-sm">
-                <MathRendererClient content={documentContent.title || ''} />
+                <MathRendererClient content={document.title || ''} />
               </span>
             </div>
           )}
@@ -522,7 +353,7 @@ export default function HandoutDetail({
       </header>
 
       {/* Math Sections */}
-      {renderDocumentSections(documentContent, sectionMetadata, imagesById, t, imageMissingText)}
+      {renderDocumentSections(document, sectionMetadata, imagesById, t, imageMissingText)}
 
       {/* Comments Section */}
       <ArticleSection
