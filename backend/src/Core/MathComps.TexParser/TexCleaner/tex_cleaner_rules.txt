@@ -193,10 +193,12 @@ mathsfit
 max
 mid
 min
+mod
 mskip
 mu
 ne
 neq
+nmid
 not
 notin
 nparallel

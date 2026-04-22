@@ -217,6 +217,21 @@
           "cs": "Diofantické rovnice",
           "en": "Diophantine Equations"
         }
+      },
+      {
+        "status": "ready",
+        "id": "FWv-ivSDvsiD7HuULfBmT",
+        "languages": ["en"],
+        "slug": {
+          "en": "inverses-mod-p"
+        },
+        "title": {
+          "en": "Inverses Modulo $p$"
+        },
+        "description": {
+          "en": "A small theory of multiplicative inverses modulo a prime — existence, addition, and multiplication rules — applied to olympiad problems including Wilson's theorem, Wolstenholme, and IMO 2005."
+        },
+        "authors": ["Patrik Bak"]
       }
     ]
   },

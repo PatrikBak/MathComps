@@ -1,0 +1,2510 @@
+{
+  "document": {
+    "title": "Inverses Modulo $p$",
+    "sections": [
+      {
+        "title": "Introduction",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "We assume familiarity with congruences modulo a prime\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "p",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". In this handout we build a small theory of multiplicative inverses modulo\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "p",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " and use it to solve problems."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Theory",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Throughout, "
+                },
+                {
+                  "type": "math",
+                  "text": "p",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " denotes a prime."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Recap",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "We freely use the following standard facts about congruences modulo\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "p",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ":"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Congruences may be added, subtracted, and multiplied: if "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\equiv b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "c \\equiv d \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", then "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\pm c \\equiv b \\pm d",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ac \\equiv bd \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Cancellation: if "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\not\\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ax \\equiv ay \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", then "
+                      },
+                      {
+                        "type": "math",
+                        "text": "x \\equiv y \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For any "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\not\\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", the residues "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a, 2a, \\ldots, (p-1)a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " are a permutation of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1, 2, \\ldots, p-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " modulo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Fermat's Little Theorem: for any "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\not\\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we have "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^{p-1} \\equiv 1 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Order: the order of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\not\\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is the smallest positive integer "
+                      },
+                      {
+                        "type": "math",
+                        "text": "d",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " with "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^d \\equiv 1 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". It divides "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p - 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Primitive root: there exists "
+                      },
+                      {
+                        "type": "math",
+                        "text": "g \\not\\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " of order "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p - 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Every "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\not\\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " equals "
+                      },
+                      {
+                        "type": "math",
+                        "text": "g^k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " for some "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "Bullet"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Inverses",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Existence and Uniqueness of Inverse"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then there exists a unique residue "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^{-1} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a \\cdot a^{-1} \\equiv 1 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We write "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{1}{a}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{b}{a}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b \\cdot a^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": []
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Inverses Add Like Fractions"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b, d \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then for any "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{a}{b} + \\frac{c}{d} \\equiv a \\cdot b^{-1} + c \\cdot d^{-1} \\equiv (ad + bc) \\cdot (bd)^{-1} \\equiv \\frac{ad + bc}{bd} \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "just like normal fractions."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": []
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Inverses Multiply Like Fractions"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b, d \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then for any "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{a}{b} \\cdot \\frac{c}{d} \\equiv (a \\cdot b^{-1}) \\cdot (c \\cdot d^{-1}) \\equiv (ac) \\cdot (bd)^{-1} \\equiv \\frac{ac}{bd} \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "just like normal fractions."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": []
+            }
+          ]
+        }
+      },
+      {
+        "title": "Problems",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The problems below all benefit from the theory above — working with fractions modulo\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "p",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " as if they were ordinary numbers. They are ordered roughly by difficulty."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Wilson"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime. Prove that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(p-1)! \\equiv -1 \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "In the product "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1 \\cdot 2 \\cdots (p-1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", try to pair factors with their inverse. Which numbers do not have a pair?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The numbers without the pair are those satisfying "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k \\equiv 1/k \\mod p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Find them all."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime. Prove that there exist integers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", neither divisible by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a^2 + b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " if and only if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 1 \\pmod{4}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The condition "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\mid a^2 + b^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " rewrites as "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a/b)^2 \\equiv -1 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". So the question becomes: for which primes is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a square modulo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For one direction, raise the relation "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a/b)^2 \\equiv -1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to the "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p-1)/2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-th power. The left side becomes "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a/b)^{p-1}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Apply Fermat's Little Theorem to the left side. What does the resulting equation force on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\mod 4",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For the converse with "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\equiv 1 \\pmod{4}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", you need an explicit square root of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " modulo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". A natural source: Wilson's theorem, "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p-1)! \\equiv -1 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "In the product "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p-1)!",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", pair "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " with "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p - k \\equiv -k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". What does the result look like for "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\equiv 1 \\pmod{4}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 2 \\pmod{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime. Show that if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a^2 + ab + b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Note that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^3 - b^3 = (a - b)(a^2 + ab + b^2)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\mid a^3 - b^3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Assume for contradiction that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\nmid b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". This is similar to the previous problem."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Raise to the "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p-2)/3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-th power, which is a positive integer since "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\equiv 2 \\pmod{3}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The left side becomes "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a/b)^{p-2}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Multiply both sides by "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a/b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to get "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(a/b)^{p-1} \\equiv a/b \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Apply Fermat's Little Theorem to conclude "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a \\equiv b \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Substitute this back."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime and let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq k \\leq p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be an integer. Prove that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{p-1}{k} \\equiv (-1)^k \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Expand the binomial coefficient as "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\binom{p-1}{k} = \\frac{(p-1)(p-2) \\cdots (p-k)}{k!}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Reduce each factor in the numerator modulo "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ": "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p - j \\equiv -j \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Aren't we left with something familiar?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime. Show that if"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{1} + \\frac{1}{2} + \\frac{1}{3} + \\cdots + \\frac{1}{p-1} = \\frac{m}{n},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Looking at this modulo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we have the sum of inverses of all possible non-zero values mod "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Realize that this sum is actually the sum of all values from "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", not necessarily in this order."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "IMO 2005"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Determine all positive integers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " that are coprime to every term of the sequence"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a_m = 2^m + 3^m + 6^m - 1, \\quad m \\geq 1.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Show that for every prime "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", some "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a_m",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is divisible by "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Then the only valid "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n = 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Small primes are easy: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a_1 = 10",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " handles "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p = 2, 5",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a_2 = 48",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " handles "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p = 3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Focus on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\geq 5",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and try to choose "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " depending on "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " so that the four terms collapse."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\geq 5",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", take "
+                      },
+                      {
+                        "type": "math",
+                        "text": "m = p - 2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Then "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^m \\equiv 1/2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3^m \\equiv 1/3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "6^m \\equiv 1/6 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Compute "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a_{p-2} \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Poland"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p > 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 2 \\pmod{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_k = k^2 + k + 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a_1 a_2 \\cdots a_{p-1} \\equiv 3 \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k \\neq 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", factor "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k^2 + k + 1 = \\frac{k^3 - 1}{k - 1}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Isolate the "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k = 1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " term, which contributes\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "3",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The product becomes "
+                      },
+                      {
+                        "type": "math",
+                        "text": "3 \\cdot \\frac{\\prod_{k=2}^{p-1}(k^3 - 1)}{(p-2)!}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". We need to calculate the numerator and denominator mod\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " separately."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "It would be great if the product of all the numbers "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k^3-1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " was actually something we could calculate."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Singapore 2012"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be an odd prime. Prove that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{i=1}^{(p-1)/2} i^{p-2} \\equiv \\frac{2 - 2^p}{p} \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Since "
+                      },
+                      {
+                        "type": "math",
+                        "text": "i^{p-2} \\equiv 1/i \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", the left-hand side is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{i=1}^{(p-1)/2} 1/i",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Now work on the right-hand side to get the hint."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Expand "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^p = (1+1)^p = \\sum_{k=0}^{p} \\binom{p}{k}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\frac{2^p - 2}{p} = \\frac{1}{p} \\sum_{k=1}^{p-1} \\binom{p}{k}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Use "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\binom{p}{k} = \\frac{p}{k} \\binom{p-1}{k-1}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to rewrite each summand: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\frac{2^p - 2}{p} = \\sum_{k=1}^{p-1} \\frac{\\binom{p-1}{k-1}}{k}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Apply "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\binom{p-1}{k-1} \\equiv (-1)^{k-1} \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " from a\u00A0previous problem to simplify."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The right-hand side reduces to "
+                      },
+                      {
+                        "type": "math",
+                        "text": "-\\sum_{k=1}^{p-1} (-1)^{k-1}/k \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Split this into even and odd "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", and use "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{k=1}^{p-1} 1/k \\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " from a\u00A0previous problem."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Show that for every prime "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ","
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{2p}{p} \\equiv 2 \\pmod{p^2}.",
+                  "isDisplay": true
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Write "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\binom{2p}{p} = \\frac{(2p)(2p-1)\\cdots(p+1)}{p!}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Pull out the factor "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in the numerator and the "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p! = p \\cdot (p-1)!",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to get "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\binom{2p}{p} = \\frac{2 \\prod_{k=1}^{p-1}(p+k)}{(p-1)!}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Factor each numerator term as "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p + k = k\\bigl(1 + \\frac{p}{k}\\bigr)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\prod_{k=1}^{p-1}(p+k) = (p-1)! \\cdot \\prod_{k=1}^{p-1}\\bigl(1 + \\frac{p}{k}\\bigr)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Expand "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\prod\\bigl(1 + \\frac{p}{k}\\bigr)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " modulo "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ": only the constant and linear-in-"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " terms survive, giving "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1 + p \\sum_{k=1}^{p-1} 1/k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "By P4, "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{k=1}^{p-1} 1/k \\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p \\sum 1/k \\equiv 0 \\pmod{p^2}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime and let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a positive integer with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1) \\nmid e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Show that if"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{1^e} + \\frac{1}{2^e} + \\frac{1}{3^e} + \\cdots + \\frac{1}{(p-1)^e} = \\frac{m}{n},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The claim is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{k=1}^{p-1} \\frac{1}{k^e} \\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The trick is to look for an "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " such that multiplying every "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " by "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " shuffles the terms but rescales the whole sum."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Use the assumption "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p-1) \\nmid e",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " to find "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " with "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a^e \\not\\equiv 1 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The trick is to consider a primitive root."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Wolstenholme"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a prime. Show that if"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{1} + \\frac{1}{2} + \\frac{1}{3} + \\cdots + \\frac{1}{p-1} = \\frac{m}{n},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2 \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pair "
+                      },
+                      {
+                        "type": "math",
+                        "text": "k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " with "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p - k",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "This gives "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{k=1}^{p-1} 1/k = p \\sum_{k=1}^{(p-1)/2} 1/(k(p-k))",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". We need the right-hand factor to be divisible by\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Modulo "
+                      },
+                      {
+                        "type": "math",
+                        "text": "p",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "1/(k(p-k)) \\equiv -1/k^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". So it suffices that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{k=1}^{(p-1)/2} 1/k^2 \\equiv 0 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Note "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(p-k)^2 \\equiv k^2 \\pmod{p}",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", so "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\sum_{k=1}^{p-1} 1/k^2 = 2 \\sum_{k=1}^{(p-1)/2} 1/k^2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Can we now use a previous problem?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}
