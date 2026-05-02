@@ -511,7 +511,7 @@
 % #2 - Body
 \long\def\Definition#1#2{%
 	\advance\definition by 1\relax%
-	\Highlight{%
+	\leftbar{%
 		{\bf \captionDefinition\ \the\definition}%
 		\def\temp{#1}\ifx\temp\empty\else\ (#1)\fi.%
 		\enskip\saferead{#2}\safepar%
