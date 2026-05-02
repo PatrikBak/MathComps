@@ -140,3 +140,6 @@ dotnet_diagnostic.CA1861.severity = none
 
 # CA1515: Consider making public types internal - disable, we decide accessibility ourselves
 dotnet_diagnostic.CA1515.severity = none
+
+# CA1873: Check IsEnabled before evaluating log arguments - disable until logging is refactored to LoggerMessage
+dotnet_diagnostic.CA1873.severity = none

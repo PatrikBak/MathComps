@@ -268,7 +268,7 @@ public static class ProblemRenderer
                 if (!inList)
                 {
                     // Decide the style from the first label
-                    currentStyle = DetectStyleFromLabel(match.Groups[1].Value)!;
+                    currentStyle = DetectStyleFromLabel(match.Groups[1].Value);
 
                     // Start the list
                     stringBuilder.Append($"\\begitems  \\style {currentStyle}\n");
@@ -841,7 +841,7 @@ public static class ProblemRenderer
         var rawSvg = svgProvider(img.Id);
 
         // Get the final SVG content
-        var svgContent = rawSvg is not null ? StripXmlProlog(rawSvg!) : BuildPlaceholderSvg(img.Id);
+        var svgContent = rawSvg is not null ? StripXmlProlog(rawSvg) : BuildPlaceholderSvg(img.Id);
 
         // Convert SVG to data URL
         var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(svgContent));

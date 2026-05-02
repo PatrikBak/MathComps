@@ -21,7 +21,7 @@ public class ProblemImageService(IDbContextFactory<MathCompsDbContext> dbContext
             .ToListAsync();
 
         // Build dictionary (OriginalId -> ContentId)
-        return mappings.ToDictionary(data => data.OriginalId!, data => data.ContentId);
+        return mappings.ToDictionary(data => data.OriginalId, data => data.ContentId);
     }
 }
 
