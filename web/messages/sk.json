@@ -497,10 +497,12 @@
       "openHandout": "Otvoriť materiál: {title}"
     },
     "environments": {
+      "definition": "Definícia",
       "example": "Príklad",
       "exercise": "Cvičenie",
       "problem": "Úloha",
       "slugs": {
+        "definition": "definicia",
         "example": "priklad",
         "exercise": "cvicenie",
         "problem": "uloha",

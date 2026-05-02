@@ -497,10 +497,12 @@
       "openHandout": "Open handout: {title}"
     },
     "environments": {
+      "definition": "Definition",
       "example": "Example",
       "exercise": "Exercise",
       "problem": "Problem",
       "slugs": {
+        "definition": "definition",
         "example": "example",
         "exercise": "exercise",
         "problem": "problem",

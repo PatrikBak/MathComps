@@ -1,8 +1,13 @@
 {
   "profiles": {
-    "Build": {
+    "Build All": {
       "commandName": "Project",
       "commandLineArgs": "*.sk.tex *.en.tex *.cs.tex",
+      "workingDirectory": "."
+    },
+    "Build AST": {
+      "commandName": "Project",
+      "commandLineArgs": "*.sk.tex *.en.tex *.cs.tex --skip-upload --skip-compile",
       "workingDirectory": "."
     }
   }

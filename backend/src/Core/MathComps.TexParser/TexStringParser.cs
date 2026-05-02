@@ -209,7 +209,7 @@ public static class TexStringParser
         var blocks = new List<ContentBlock>();
 
         // Define a regex to find the start of any major block-level command.
-        var commandRegex = new Regex(@"\\(Theorem|Exercise|Problem|Example|Highlight)");
+        var commandRegex = new Regex(@"\\(Theorem|Exercise|Problem|Example|Highlight|Definition)");
 
         // Initialize the cursor for scanning the content string.
         var currentIndex = 0;
@@ -281,6 +281,9 @@ public static class TexStringParser
             // Highlight has 1 argument (it's just a special paragraph)
             "Highlight" => (1, 1),
 
+            // Definition has 2 arguments (title + body)
+            "Definition" => (2, 2),
+
             // Problem has variable arguments
             "Problem" => (4, (int?)null),
 
@@ -333,6 +336,11 @@ public static class TexStringParser
             "Highlight" => new Paragraph(
                 Content: [.. ParseRawContent(arguments[0])],
                 Highligted: true
+            ),
+
+            "Definition" => new Definition(
+                Title: ParseAtMostSingleRawBlock(arguments[0]),
+                Body: [.. ParseRawContent(arguments[1])]
             ),
 
             // This case should be unreachable due to the initial regex match.
