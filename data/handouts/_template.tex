@@ -507,6 +507,17 @@
   \safepar\medskip%
 }
 
+% #1 - Name/title of the concept being defined (might be empty)
+% #2 - Body
+\long\def\Definition#1#2{%
+	\advance\definition by 1\relax%
+	\leftbar{%
+		{\bf \captionDefinition\ \the\definition}%
+		\def\temp{#1}\ifx\temp\empty\else\ (#1)\fi.%
+		\enskip\saferead{#2}\safepar%
+	}%
+}
+
 % Highlight macro: makes a paragraph stand out with a box
 \long\def\Highlight#1{%
   % Create some vertical space before the highlight

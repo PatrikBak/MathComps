@@ -3,8 +3,8 @@
  * Do not modify the structure without coordinating with the backend JSON schema.
  */
 
-/** The four mathematical environment types used in handouts. */
-export type HandoutEnvironmentType = 'theorem' | 'exercise' | 'example' | 'problem'
+/** The five mathematical environment types used in handouts. */
+export type HandoutEnvironmentType = 'theorem' | 'exercise' | 'example' | 'problem' | 'definition'
 
 /** A sequence of raw content blocks, used for inline or nested content. */
 type RawContentSequence = RawContentBlock[]
@@ -183,11 +183,27 @@ type ExampleBlock = {
   solution: RawContentSequence
 }
 
+/** A definition environment with a body and an optional title naming the concept. */
+type DefinitionBlock = {
+  /** Discriminator */
+  type: 'definition'
+  /** Optional inline title naming the concept being defined */
+  title?: RawContentBlock | null
+  /** The definition statement */
+  body: RawContentSequence
+}
+
 /**
  * Union type representing any possible content block.
  * Includes both raw inline types and structured environment blocks.
  */
-type ContentBlock = RawContentBlock | TheoremBlock | ExerciseBlock | ProblemBlock | ExampleBlock
+type ContentBlock =
+  | RawContentBlock
+  | TheoremBlock
+  | ExerciseBlock
+  | ProblemBlock
+  | ExampleBlock
+  | DefinitionBlock
 
 /** A container for a sequence of content blocks. */
 type Text = {

@@ -31,12 +31,12 @@ import {
 import { HandoutActions } from './HandoutActions'
 
 /**
- * Translation function for the 'handouts' namespace
+ * Translation function bound to the {@link 'handouts'} message namespace.
  */
 type HandoutsTranslator = ReturnType<typeof useTranslations<'handouts'>>
 
 /**
- * Props for the HandoutDetail component.
+ * Props for the {@link HandoutDetail} component.
  */
 type HandoutDetailProps = {
   /** The handout data */
@@ -61,20 +61,29 @@ type HandoutDetailProps = {
  */
 const imageType = 'handouts'
 
-// Render a title that can be either a string or RawContentBlock
+/**
+ * Renders the optional title of an environment block (e.g. theorem name,
+ * definition concept) into a React node.
+ *
+ * @param title The optional inline title block, or null/undefined if absent.
+ * @param imagesById Lookup map of {@link HandoutImage}s keyed by content ID.
+ * @param imageMissingText Fallback text to display when an image is not found.
+ * @returns The rendered React node, or null if no title was provided.
+ */
 function renderTitle(
   title: RawContentBlock | null | undefined,
   imagesById: Record<string, HandoutImage>,
   imageMissingText: string
 ): React.ReactNode {
+  // No title
   if (!title) return null
 
+  // Plain text
   if (title.type === 'text') {
     return title.text
   }
 
   // For complex titles, render as React elements to preserve formatting.
-  // Crucially, use renderInlineContent to avoid block-level wrappers like <p>.
   if (title.type === 'paragraph' || title.type === 'bold' || title.type === 'italic') {
     return renderInlineContent(title.content, imagesById, imageType, imageMissingText)
   }
@@ -83,71 +92,76 @@ function renderTitle(
   return renderRawContentBlock(title, imagesById, imageType, imageMissingText)
 }
 
+/**
+ * Renders the difficulty indicator for a problem as a superscript run of asterisks.
+ *
+ * @param difficulty The numeric difficulty rating; 0 means no stars are shown.
+ * @returns A `<sup>` element with the stars, or null when difficulty is 0.
+ */
 function renderDifficultyStars(difficulty: number): React.ReactNode {
+  // No stars
   if (difficulty === 0) return null
+
+  // Some starts as a superscript
   return <sup className={ENVIRONMENT_TEXT_COLOR.problem}>{'*'.repeat(difficulty)}</sup>
 }
 
+/**
+ * Renders all sections of a handout {@link Document} as a sequence of
+ * {@link ArticleSection} blocks, with each environment (theorem, exercise,
+ * example, problem, definition) wrapped in a {@link CollapsibleCard} carrying
+ * its proof / solution / hint disclosures. Environment numbers are tracked
+ * per-type across the whole document.
+ *
+ * @param documentContent The parsed {@link Document} to render.
+ * @param sectionMetadata Pre-computed per-section metadata (id, label, title, level).
+ * @param imagesById Lookup map of {@link HandoutImage}s keyed by content ID.
+ * @param t Translator bound to the handouts namespace.
+ * @param imageMissingText Fallback text for missing images.
+ * @returns The rendered document tree wrapped in a math-styled container.
+ */
 function renderDocumentSections(
   documentContent: Document,
-  sectionMetadata: Array<{
-    id: string
-    label: string
-    title: string
-    level: number
-    sectionIndex: number
-  }>,
+  sectionMetadata: SectionMetadata[],
   imagesById: Record<string, HandoutImage>,
   t: HandoutsTranslator,
   imageMissingText: string
 ) {
+  // Translate the environment labels
   const localizedEnvironmentLabelByType: Record<HandoutEnvironmentType, string> = {
     theorem: t('environments.theorem'),
     exercise: t('environments.exercise'),
     example: t('environments.example'),
     problem: t('environments.problem'),
+    definition: t('environments.definition'),
   }
 
-  const environmentCounters: Record<HandoutEnvironmentType, number> = {
-    theorem: 0,
-    exercise: 0,
-    example: 0,
-    problem: 0,
-  }
-
-  // Localized slugs for environment type names used in anchor IDs
+  // Translate the environment slugs
   const environmentTypeSlugMap: Record<HandoutEnvironmentType, string> = {
     theorem: t('environments.slugs.theorem'),
     exercise: t('environments.slugs.exercise'),
     example: t('environments.slugs.example'),
     problem: t('environments.slugs.problem'),
+    definition: t('environments.slugs.definition'),
   }
 
-  const getNextEnvironmentNumber = (environmentType: keyof typeof environmentCounters) => {
-    environmentCounters[environmentType] += 1
-    return `${environmentCounters[environmentType]}`
+  // Running counters per environment type — shared across the whole document,
+  // not reset per section. Pre-incremented at each environment site to claim
+  // the next number (e.g. "Theorem 3", "Definition 2").
+  const environmentCounters: Record<HandoutEnvironmentType, number> = {
+    theorem: 0,
+    exercise: 0,
+    example: 0,
+    problem: 0,
+    definition: 0,
   }
 
-  /**
-   * Generate a hierarchical ID for an environment (theorem/problem/example/exercise).
-   * Format: {section-slug}-{type-slug}-{number}
-   * Example: "zakladne-vety-uloha-2"
-   */
-  const generateEnvironmentId = (
-    sectionSlug: string,
-    environmentType: keyof typeof environmentCounters,
-    environmentNumber: string
-  ): string => {
-    const typeSlug = environmentTypeSlugMap[environmentType]
-    return `${sectionSlug}-${typeSlug}-${environmentNumber}`
-  }
-  const renderedSections: React.ReactNode[] = []
-
-  documentContent.sections.forEach((section, index) => {
+  // Render each section
+  const renderedSections = documentContent.sections.map((section, index) => {
     // Get pre-computed metadata for this section (guaranteed to exist at same index)
     const metadata = sectionMetadata[index]
 
-    renderedSections.push(
+    return (
       <ArticleSection
         key={`${metadata.label}-${section.title}`}
         id={metadata.id}
@@ -160,20 +174,29 @@ function renderDocumentSections(
             contentBlock.type === 'theorem' ||
             contentBlock.type === 'exercise' ||
             contentBlock.type === 'example' ||
-            contentBlock.type === 'problem'
+            contentBlock.type === 'problem' ||
+            contentBlock.type === 'definition'
           ) {
-            const environmentNumber = getNextEnvironmentNumber(contentBlock.type)
-            const environmentId = generateEnvironmentId(
-              metadata.id,
-              contentBlock.type,
-              environmentNumber
-            )
+            // Pre-increment claims the next number for this environment type.
+            const environmentNumber = `${++environmentCounters[contentBlock.type]}`
+
+            // Hierarchical anchor ID, e.g. `"zakladne-vety-uloha-2"`. Format:
+            // `{section-slug}-{type-slug}-{number}`.
+            const environmentId = `${metadata.id}-${environmentTypeSlugMap[contentBlock.type]}-${environmentNumber}`
+
+            // Localized environment label, e.g. "Theorem" / "Definice" / "Úloha".
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
+
+            // The optional inline name authored in TeX (e.g. \Definition{Aritmetický průměr}).
             const userProvidedTitle = renderTitle(contentBlock.title, imagesById, imageMissingText)
+
+            // Difficulty asterisks are problem-only (e.g. "Úloha 4**").
             const difficultyStars =
               contentBlock.type === 'problem'
                 ? renderDifficultyStars(contentBlock.difficulty)
                 : null
+
+            // Composed card heading, e.g. "Theorem 3" or "Úloha 4**".
             const mainTitle = (
               <>
                 {environmentBaseTitle} {environmentNumber}
@@ -181,10 +204,15 @@ function renderDocumentSections(
               </>
             )
 
+            // Subtitle badge: shown only when the author provided a title.
             const subtitleBadge = userProvidedTitle ? userProvidedTitle : undefined
 
+            // The collapsible parts of the environment
             const disclosures: DisclosurePanelProps[] = []
             switch (contentBlock.type) {
+              case 'definition':
+                // Definitions are self-contained — no proof, solution, or hints.
+                break
               case 'theorem':
                 if (contentBlock.proof.length > 0) {
                   disclosures.push({
@@ -263,7 +291,7 @@ function renderDocumentSections(
           }
 
           return (
-            <div key={`${metadata.label}-blk-${contentBlockIndex}`}>
+            <div key={`${metadata.label}-block-${contentBlockIndex}`}>
               {renderRawContentBlock(
                 contentBlock as RawContentBlock,
                 imagesById,
@@ -281,7 +309,9 @@ function renderDocumentSections(
 }
 
 /**
- * Renders the detailed view of a handout.
+ * Renders the detailed view of a handout — title header, author chips, action
+ * menu, all environment-aware document sections (via {@link renderDocumentSections}),
+ * and the inline {@link CommentSection}.
  */
 export default function HandoutDetail({
   handout,
@@ -313,6 +343,7 @@ export default function HandoutDetail({
           </h1>
         </div>
 
+        {/* Title & subtitle */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           {document.subtitle && (
             <div

@@ -148,6 +148,7 @@ public static class ContentTree
             Exercise exercise => TraverseExercise(exercise, state, transformer),
             Problem problem => TraverseProblem(problem, state, transformer),
             Example example => TraverseExample(example, state, transformer),
+            Definition definition => TraverseDefinition(definition, state, transformer),
 
             #endregion
 
@@ -478,6 +479,41 @@ public static class ContentTree
                 Solution = newSolution
             }
             : example;
+
+        // Return the result, final state, and whether anything changed downstream.
+        return new(result, state, anyChanged);
+    }
+
+    /// <summary>
+    /// Traverses a <see cref="Definition" /> block with Title and Body properties.
+    /// </summary>
+    /// <param name="definition">The definition to traverse.</param>
+    /// <param name="state">The current state.</param>
+    /// <param name="transformer">The transformation function.</param>
+    /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result.</returns>
+    private static TraversalResult<ContentBlock?, TState> TraverseDefinition<TState>(
+        Definition definition,
+        TState state,
+        NodeTransformer<TState> transformer
+    )
+    {
+        // Process optional title.
+        (var newTitle, state, var titleChanged) = TraverseOptional(definition.Title, state, transformer);
+
+        // Process body.
+        (var newBody, state, var bodyChanged) = TraverseList(definition.Body, state, transformer);
+
+        // Determine if anything changed.
+        var anyChanged = titleChanged || bodyChanged;
+
+        // Reconstruct only if needed.
+        var result = anyChanged
+            ? definition with
+            {
+                Title = newTitle,
+                Body = newBody,
+            }
+            : definition;
 
         // Return the result, final state, and whether anything changed downstream.
         return new(result, state, anyChanged);

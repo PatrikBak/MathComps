@@ -52,6 +52,12 @@ export const CARD_PALETTE: Record<HandoutEnvironmentType, CardPaletteEntry> = {
     tint: 'border-purple-500/20',
     summary: 'text-purple-300',
   },
+  definition: {
+    border: 'border-orange-500',
+    title: 'text-orange-300',
+    tint: 'border-orange-500/20',
+    summary: 'text-orange-300',
+  },
 }
 
 /**
@@ -63,6 +69,7 @@ export const ENVIRONMENT_TEXT_COLOR: Record<HandoutEnvironmentType, string> = {
   exercise: 'text-yellow-300',
   example: 'text-blue-300',
   problem: 'text-purple-300',
+  definition: 'text-orange-300',
 }
 
 /**
@@ -89,6 +96,11 @@ export const ENVIRONMENT_BADGE: Record<HandoutEnvironmentType, BadgePaletteEntry
     text: 'text-purple-200',
     bg: 'bg-purple-500/15',
     border: 'border-purple-400/20',
+  },
+  definition: {
+    text: 'text-orange-200',
+    bg: 'bg-orange-500/15',
+    border: 'border-orange-400/20',
   },
 }
 

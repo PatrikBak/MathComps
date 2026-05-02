@@ -11,6 +11,7 @@ namespace MathComps.TexParser.Types;
 [JsonDerivedType(typeof(Exercise), typeDiscriminator: "exercise")]
 [JsonDerivedType(typeof(Problem), typeDiscriminator: "problem")]
 [JsonDerivedType(typeof(Example), typeDiscriminator: "example")]
+[JsonDerivedType(typeof(Definition), typeDiscriminator: "definition")]
 [JsonDerivedType(typeof(Paragraph), typeDiscriminator: "paragraph")]
 [JsonDerivedType(typeof(Footnote), typeDiscriminator: "footnote")]
 [JsonDerivedType(typeof(ItemList), typeDiscriminator: "list")]
@@ -80,7 +81,18 @@ public record Example(
 ) : ContentBlock;
 
 /// <summary>
-/// A type of content block that cannot contain <see cref="Problem"/>, <see cref="Exercise"/>, 
+/// Represents a definition block, containing an optional title and a body.
+/// Corresponds to the \Definition{title}{body} command.
+/// </summary>
+/// <param name="Title">The optional name of the concept being defined.</param>
+/// <param name="Body">The content of the definition.</param>
+public record Definition(
+    RawContentBlock? Title,
+    ImmutableList<RawContentBlock> Body
+) : ContentBlock;
+
+/// <summary>
+/// A type of content block that cannot contain <see cref="Problem"/>, <see cref="Exercise"/>,
 /// <see cref="Theorem"/>, or <see cref="Example"/> blocks.
 /// </summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]

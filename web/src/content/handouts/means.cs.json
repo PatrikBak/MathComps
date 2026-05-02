@@ -353,23 +353,24 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
+              "type": "definition",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Aritmetický průměr"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
                 {
                   "type": "paragraph",
                   "content": [
                     {
-                      "type": "bold",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Definice. "
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "text": " Pro dvě reálná čísla "
+                      "text": "Pro dvě reálná čísla "
                     },
                     {
                       "type": "math",
@@ -401,8 +402,7 @@
                   "text": "A=\\frac{a+b}{2}.",
                   "isDisplay": true
                 }
-              ],
-              "highligted": true
+              ]
             },
             {
               "type": "paragraph",
@@ -429,23 +429,24 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
+              "type": "definition",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Geometrický průměr"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
                 {
                   "type": "paragraph",
                   "content": [
                     {
-                      "type": "bold",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Definice. "
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "text": " Pro dvě kladná čísla "
+                      "text": "Pro dvě kladná čísla "
                     },
                     {
                       "type": "math",
@@ -477,8 +478,7 @@
                   "text": "G=\\sqrt{ab}.",
                   "isDisplay": true
                 }
-              ],
-              "highligted": true
+              ]
             },
             {
               "type": "paragraph",
@@ -509,23 +509,24 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
+              "type": "definition",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Harmonický průměr"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
                 {
                   "type": "paragraph",
                   "content": [
                     {
-                      "type": "bold",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Definice. "
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "text": " Pro dvě kladná čísla "
+                      "text": "Pro dvě kladná čísla "
                     },
                     {
                       "type": "math",
@@ -557,8 +558,7 @@
                   "text": "H=\\frac{2}{\\frac1a+\\frac1b}=\\frac{2ab}{a+b}.",
                   "isDisplay": true
                 }
-              ],
-              "highligted": true
+              ]
             },
             {
               "type": "exercise",
@@ -1324,23 +1324,33 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
+              "type": "definition",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Aritmetický průměr ("
+                  },
+                  {
+                    "type": "math",
+                    "text": "n",
+                    "isDisplay": false
+                  },
+                  {
+                    "type": "text",
+                    "text": " čísel)"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
                 {
                   "type": "paragraph",
                   "content": [
                     {
-                      "type": "bold",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Definice. "
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "text": " Pro reálná čísla "
+                      "text": "Pro reálná čísla "
                     },
                     {
                       "type": "math",
@@ -1372,27 +1382,36 @@
                   "text": "A=\\frac{a_1+a_2+\\cdots+a_n}{n}.",
                   "isDisplay": true
                 }
-              ],
-              "highligted": true
+              ]
             },
             {
-              "type": "paragraph",
-              "content": [
+              "type": "definition",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Geometrický průměr ("
+                  },
+                  {
+                    "type": "math",
+                    "text": "n",
+                    "isDisplay": false
+                  },
+                  {
+                    "type": "text",
+                    "text": " čísel)"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
                 {
                   "type": "paragraph",
                   "content": [
                     {
-                      "type": "bold",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Definice. "
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "text": " Pro kladná čísla "
+                      "text": "Pro kladná čísla "
                     },
                     {
                       "type": "math",
@@ -1424,27 +1443,36 @@
                   "text": "G=\\sqrt[ n ] {a_1 a_2 \\cdots a_n}.",
                   "isDisplay": true
                 }
-              ],
-              "highligted": true
+              ]
             },
             {
-              "type": "paragraph",
-              "content": [
+              "type": "definition",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Harmonický průměr ("
+                  },
+                  {
+                    "type": "math",
+                    "text": "n",
+                    "isDisplay": false
+                  },
+                  {
+                    "type": "text",
+                    "text": " čísel)"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
                 {
                   "type": "paragraph",
                   "content": [
                     {
-                      "type": "bold",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "Definice. "
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "text": " Pro kladná čísla "
+                      "text": "Pro kladná čísla "
                     },
                     {
                       "type": "math",
@@ -1476,8 +1504,7 @@
                   "text": "H=\\frac{n}{\\frac1{a_1}+\\frac1{a_2}+\\cdots+\\frac1{a_n}}.",
                   "isDisplay": true
                 }
-              ],
-              "highligted": true
+              ]
             }
           ]
         }

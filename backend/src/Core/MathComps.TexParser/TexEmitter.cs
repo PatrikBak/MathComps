@@ -127,6 +127,11 @@ public static class TexEmitter
                 EmitExample(builder, example);
                 break;
 
+            // Emit a definition block with its title and body.
+            case Definition definition:
+                EmitDefinition(builder, definition);
+                break;
+
             // Emit a paragraph, possibly highlighted.
             case Paragraph paragraph:
                 EmitParagraph(builder, paragraph, indent);
@@ -474,6 +479,28 @@ public static class TexEmitter
         builder.AppendLine();
     }
 
+
+    /// <summary>
+    /// Emits a definition block: <c>\Definition{title}{body}</c>.
+    /// </summary>
+    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="definition">The definition to emit.</param>
+    private static void EmitDefinition(StringBuilder builder, Definition definition)
+    {
+        // Open the \Definition command and emit the title argument.
+        builder.Append(@"\Definition{");
+        EmitOptionalTitle(builder, definition.Title);
+        builder.AppendLine("}{");
+
+        // Emit the definition body as indented content.
+        EmitContentBlocks(builder, definition.Body, Indent);
+        TrimTrailingWhitespace(builder);
+        builder.AppendLine();
+
+        // Close the definition block with a trailing blank line.
+        builder.AppendLine("}");
+        builder.AppendLine();
+    }
 
     /// <summary>
     /// Emits the optional title content for statement blocks (Theorem, Exercise, etc.).
