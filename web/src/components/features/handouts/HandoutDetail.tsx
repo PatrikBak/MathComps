@@ -63,8 +63,8 @@ const imageType = 'handouts'
 
 /**
  * Renders the optional title of an environment block (e.g. theorem name,
- * definition concept) into a React node. 
- * 
+ * definition concept) into a React node.
+ *
  * @param title The optional inline title block, or null/undefined if absent.
  * @param imagesById Lookup map of {@link HandoutImage}s keyed by content ID.
  * @param imageMissingText Fallback text to display when an image is not found.
@@ -94,7 +94,7 @@ function renderTitle(
 
 /**
  * Renders the difficulty indicator for a problem as a superscript run of asterisks.
- * 
+ *
  * @param difficulty The numeric difficulty rating; 0 means no stars are shown.
  * @returns A `<sup>` element with the stars, or null when difficulty is 0.
  */
@@ -112,7 +112,7 @@ function renderDifficultyStars(difficulty: number): React.ReactNode {
  * example, problem, definition) wrapped in a {@link CollapsibleCard} carrying
  * its proof / solution / hint disclosures. Environment numbers are tracked
  * per-type across the whole document.
- * 
+ *
  * @param documentContent The parsed {@link Document} to render.
  * @param sectionMetadata Pre-computed per-section metadata (id, label, title, level).
  * @param imagesById Lookup map of {@link HandoutImage}s keyed by content ID.
