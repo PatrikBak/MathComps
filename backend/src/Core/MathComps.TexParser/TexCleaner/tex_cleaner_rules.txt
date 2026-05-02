@@ -90,6 +90,9 @@
 \\ż\{\} => ż
 \\Ż\{\} => Ż
 
+\\SlightSmile(?![A-Za-z]) => 🙂
+\\Laugh(?![A-Za-z]) => 😄
+
 [remove]
 
 \\hskip(?![A-Za-z])\s*[+-]?\d+(?:\.\d+)?[A-Za-z]*
