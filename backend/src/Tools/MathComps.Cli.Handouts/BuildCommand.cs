@@ -353,10 +353,10 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // Postamble: \bye
         builder.AppendLine(@"\bye");
 
-        // Write the skeleton file
+        // Write the skeleton file with LF line endings for Git compatibility
         var skeletonName = Path.GetFileNameWithoutExtension(inputFile.Name) + "-skeleton.tex";
         var skeletonPath = Path.Combine(outputDirectory.FullName, skeletonName);
-        File.WriteAllText(skeletonPath, builder.ToString());
+        File.WriteAllText(skeletonPath, builder.ToString().Replace("\r\n", "\n"));
 
         AnsiConsole.MarkupLine($"  [green]✓ Skeleton:[/] {Markup.Escape(skeletonName)} ({allStatements.Count} statements)");
 
