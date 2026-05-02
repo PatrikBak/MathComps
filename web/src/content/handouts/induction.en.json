@@ -4358,7 +4358,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " digits. In such a system, both completeness (every number can be expressed) and uniqueness then hold. You can try to think this statement through for all the examined systems (binary, Fibonacci, and factorial); the already proved exercises can be a good help :)"
+                  "text": " digits. In such a system, both completeness (every number can be expressed) and uniqueness then hold. You can try to think this statement through for all the examined systems (binary, Fibonacci, and factorial); the already proved exercises can be a good help \uD83D\uDE42"
                 }
               ],
               "highligted": false
