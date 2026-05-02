@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run ci
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+          cache: true
+          cache-dependency-path: backend/Directory.Packages.props
+
+      - run: dotnet restore backend/MathComps.sln
+      - run: dotnet format backend/MathComps.sln --verify-no-changes --no-restore
+      - run: dotnet build backend/MathComps.sln --configuration Release --no-restore
+      - run: dotnet test backend/MathComps.sln --configuration Release --no-build
+
+      - name: Regenerate archive JSON
+        working-directory: backend/src/Tools/MathComps.Cli.SkmoParser
+        run: dotnet run --configuration Release --no-build
+
+      - name: Verify archive JSON unchanged (run SkmoParser locally if this fails)
+        run: |
+          git add data/skmo/archive.parsed.json
+          git diff --staged --exit-code
+
+      - name: Regenerate handout JSONs
+        working-directory: backend/src/Tools/MathComps.Cli.Handouts
+        run: dotnet run --configuration Release --no-build -- --skip-compile --skip-upload '*.sk.tex' '*.en.tex' '*.cs.tex'
+
+      - name: Verify handout skeletons and JSONs unchanged (run Handouts CLI locally if this fails)
+        run: |
+          git add data/handouts/ web/src/content/handouts/
+          git diff --staged --exit-code

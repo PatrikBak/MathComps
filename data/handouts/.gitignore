@@ -1,0 +1,8 @@
+*
+!.gitignore
+!_template.tex
+!*.sk.tex
+!*.en.tex
+!*.cs.tex
+!Images/
+!Images/**

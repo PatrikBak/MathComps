@@ -51,7 +51,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Assert - verify we get all problems and all available filter options
         Assert.Equal(7, initialResult.Problems.TotalCount);
         Assert.NotNull(initialResult.UpdatedOptions);
-        Assert.Equal(2, initialResult.UpdatedOptions!.Seasons.Count);
+        Assert.Equal(2, initialResult.UpdatedOptions.Seasons.Count);
         Assert.Equal(2, initialResult.UpdatedOptions.Competitions.Count);
         Assert.Equal(3, initialResult.UpdatedOptions.Authors.Count);
         Assert.Equal(3, initialResult.UpdatedOptions.Tags.Count);
@@ -682,7 +682,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Assert - verify season labels have correct format with full calendar years
         Assert.NotNull(result.UpdatedOptions);
-        Assert.Equal(2, result.UpdatedOptions!.Seasons.Count);
+        Assert.Equal(2, result.UpdatedOptions.Seasons.Count);
 
         // Seasons should be ordered descending (newest first)
         var season75 = result.UpdatedOptions.Seasons.First(season => season.Slug == "75");

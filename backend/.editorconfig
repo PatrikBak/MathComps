@@ -127,6 +127,10 @@ dotnet_diagnostic.CA1861.severity = none
 # IDE0320: Make anonymous function static
 dotnet_diagnostic.IDE0320.severity = none
 
+# CA1873: Check IsEnabled before evaluating log arguments - disable, the recommended fix
+# (LoggerMessage source generators) is way too much ceremony for the simple log calls we have
+dotnet_diagnostic.CA1873.severity = none
+
 [**/Migrations/*.cs]
 dotnet_diagnostic.IDE0005.severity = none  # Unnecessary using directives
 dotnet_diagnostic.IDE0161.severity = none  # Convert to file-scoped namespace
