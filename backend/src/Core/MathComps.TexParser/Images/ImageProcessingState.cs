@@ -4,7 +4,7 @@ namespace MathComps.TexParser.Images;
 
 /// <summary>
 /// Immutable state for image processing, threaded through tree traversal.
-/// Can be passed between multiple <see cref="TexImageProcessor.Process(MathComps.TexParser.Types.Text, ImageProcessingConfig, ImageProcessingState)"/> calls
+/// Can be passed between multiple <see cref="TexImageProcessor.Process(Types.Text, ImageProcessingConfig, ImageProcessingState)"/> calls
 /// to maintain consistent numbering and deduplication across multiple texts.
 /// </summary>
 /// <param name="Counter">Running counter used to suffix image files.</param>
