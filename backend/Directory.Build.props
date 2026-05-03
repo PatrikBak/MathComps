@@ -16,15 +16,4 @@
 
   </PropertyGroup>
 
-  <!-- Suppress specific analyzer warnings -->
-  <ItemGroup>
-    <CompilerVisibleProperty Include="NoWarn" />
-  </ItemGroup>
-  <PropertyGroup>
-    <!-- CA1848: Use LoggerMessage delegates - we prefer simple logging for readability -->
-    <!-- CA1852: Type can be sealed - we decide when to seal classes -->
-    <!-- CS1591: Missing XML comment - GenerateDocumentationFile is on so IDE0005 runs at build, not because we require docs on every public member -->
-    <NoWarn>$(NoWarn);CA1848;CA1852;CS1591</NoWarn>
-  </PropertyGroup>
-
 </Project>

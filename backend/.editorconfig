@@ -79,8 +79,16 @@ dotnet_analyzer_diagnostic.category-Design.severity = warning
 dotnet_analyzer_diagnostic.category-Performance.severity = warning
 dotnet_analyzer_diagnostic.category-Reliability.severity = warning
 
-# Documentation: warn if public APIs lack XML docs (keep as warning to avoid breaking builds)
-dotnet_diagnostic.CS1591.severity = warning
+# CS1591: Missing XML comment for publicly visible type or member
+# GenerateDocumentationFile is enabled to activate IDE0005 (unused usings) on build,
+# not because we require docs on every public member.
+dotnet_diagnostic.CS1591.severity = none
+
+# CA1848: Use LoggerMessage delegates - we prefer simple logging for readability
+dotnet_diagnostic.CA1848.severity = none
+
+# CA1852: Type can be sealed - we decide when to seal classes
+dotnet_diagnostic.CA1852.severity = none
 
 # IDE0058: Expression value is never used
 dotnet_diagnostic.IDE0058.severity = none
