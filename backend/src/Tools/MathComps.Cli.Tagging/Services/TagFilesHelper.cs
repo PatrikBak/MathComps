@@ -14,7 +14,6 @@ public record TagData(string Slug, TagType Type, string Description);
 
 /// <summary>
 /// Static methods for loading tag-related files with support for categorized tag vocabulary.
-/// Delegates to <see cref="TagLoadingService"/> for the actual JSON parsing.
 /// </summary>
 public static class TagFilesHelper
 {

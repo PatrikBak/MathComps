@@ -10,15 +10,15 @@ namespace MathComps.Shared.Cli;
 public static class CliRunner
 {
     /// <summary>
-    /// Runs the CLI application with <see cref="IConfigurator.PropagateExceptions"/>
+    /// Runs the CLI application with <c>PropagateExceptions</c>
     /// enabled and a top-level catch that formats unhandled exceptions via
-    /// <see cref="AnsiConsole.WriteException"/>.
+    /// <see cref="AnsiConsole.WriteException(Exception, ExceptionFormats)"/>.
     /// </summary>
     /// <param name="app">The Spectre.Console command app to run.</param>
     /// <param name="args">Command-line arguments forwarded from <c>Program.cs</c>.</param>
     /// <param name="configure">
     /// Optional configuration callback for registering commands and other settings.
-    /// <see cref="IConfigurator.PropagateExceptions"/> is always appended automatically.
+    /// <c>PropagateExceptions</c> is always appended automatically.
     /// </param>
     /// <returns>The process exit code: 0 on success, 1 on unhandled exception.</returns>
     public static async Task<int> RunAsync(

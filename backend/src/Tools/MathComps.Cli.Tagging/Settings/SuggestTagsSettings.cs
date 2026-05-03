@@ -3,7 +3,7 @@ using MathComps.Infrastructure.Options;
 namespace MathComps.Cli.Tagging.Settings;
 
 /// <summary>
-/// Unified settings for the <see cref="SuggestTagsCommand"/> command.
+/// Unified settings for the <see cref="Commands.SuggestTagsCommand"/> command.
 /// </summary>
 public class SuggestTagsSettings
 {

@@ -76,6 +76,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
     /// Contains all unique metadata entities extracted from the problems dataset.
     /// </summary>
     /// <param name="CompetitionRounds">All unique competitions found in the dataset.</param>
+    /// <param name="Categories">All unique category slugs found in the dataset.</param>
     /// <param name="Seasons">All unique seasons (start years) found in the dataset.</param>
     /// <param name="RoundInstances">All unique competition-season combinations found in the dataset.</param>
     private record MetadataExtractionResult(
@@ -99,7 +100,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
     #region Public Methods
 
-    /// </<inheritdoc/>
+    /// <inheritdoc/>
     public async Task SeedAsync(bool skipExistingProblems, int[] years)
     {
         // Log start

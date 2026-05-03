@@ -2,6 +2,7 @@ using MathComps.Cli.SkmoParser.Rendering;
 using MathComps.Cli.Translation.Dtos;
 using MathComps.Cli.Translation.Enums;
 using MathComps.Cli.Translation.Services;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services;
 using MathComps.Shared;
 using MathComps.Shared.Cli;

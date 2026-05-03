@@ -17,7 +17,7 @@ namespace MathComps.Cli.SkmoParser.Rendering;
 
 /// <summary>
 /// A static class responsible for parsing raw SKMO TeX problem statements and rendering them into
-/// <see cref="Text"/> objects. It can also render these parsed problems into HTML pages for a quick preview.
+/// <see cref="TexText"/> objects. It can also render these parsed problems into HTML pages for a quick preview.
 /// </summary>
 public static class ProblemRenderer
 {
@@ -500,7 +500,7 @@ public static class ProblemRenderer
     /// <summary>
     /// Renders the parsed content of a single problem statement into an HTML snippet.
     /// </summary>
-    /// <param name="parsedStatement">The parsed problem statement, represented as a <see cref="Text"/> object.</param>
+    /// <param name="parsedStatement">The parsed problem statement, represented as a <see cref="TexText"/> object.</param>
     /// <param name="svgProvider">A delegate used to load SVG content for images.</param>
     /// <returns>An HTML string representing the problem statement.</returns>
     private static string RenderProblemHtml(TexText parsedStatement, SvgImageLoader svgProvider)

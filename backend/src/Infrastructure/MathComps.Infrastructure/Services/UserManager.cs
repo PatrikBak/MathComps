@@ -9,6 +9,7 @@ namespace MathComps.Infrastructure.Services;
 /// Service for managing users in the database.
 /// </summary>
 /// <param name="dbContext">The database context.</param>
+/// <param name="clerkClient">The Clerk Backend API client used for upstream user lookups.</param>
 /// <param name="logger">The logger.</param>
 public class UserManager(
     MathCompsDbContext dbContext,

@@ -9,6 +9,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <AnalysisMode>Default</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- This UserSecretsId is shared by all projects in the solution -->
     <UserSecretsId>MathComps-5e6a7c60-3b41-4c8d-9e7f-9ad5b3c2a8e9</UserSecretsId>
@@ -22,7 +23,8 @@
   <PropertyGroup>
     <!-- CA1848: Use LoggerMessage delegates - we prefer simple logging for readability -->
     <!-- CA1852: Type can be sealed - we decide when to seal classes -->
-    <NoWarn>$(NoWarn);CA1848;CA1852</NoWarn>
+    <!-- CS1591: Missing XML comment - GenerateDocumentationFile is on so IDE0005 runs at build, not because we require docs on every public member -->
+    <NoWarn>$(NoWarn);CA1848;CA1852;CS1591</NoWarn>
   </PropertyGroup>
 
 </Project>

@@ -9,6 +9,7 @@ namespace MathComps.Cli.Tagging.Dtos;
 /// <param name="Slug">The unique slug identifier of the problem for file tracking.</param>
 /// <param name="Statement">The full text of the problem statement.</param>
 /// <param name="Solution">The full text of the problem's solution, if available.</param>
+/// <param name="TagsData">All tags currently associated with the problem (including unapproved ones), keyed by tag slug.</param>
 public record ProblemDetailsDto(
     Guid Id,
     string Slug,

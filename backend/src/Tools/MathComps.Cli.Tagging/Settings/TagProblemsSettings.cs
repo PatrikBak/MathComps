@@ -3,7 +3,7 @@ using MathComps.Infrastructure.Options;
 namespace MathComps.Cli.Tagging.Settings;
 
 /// <summary>
-/// Unified settings for the <see cref="TagProblemsCommand"/> command.
+/// Unified settings for the <see cref="Commands.TagProblemsCommand"/> command.
 /// </summary>
 public class TagProblemsSettings
 {

@@ -13,8 +13,8 @@ namespace MathComps.Domain.ApiDtos.Helpers;
 public record PagedList<T>(ImmutableList<T> Items, int Page, int PageSize, int TotalCount)
 {
     /// <summary>
-    /// Total number of available pages derived from <paramref name="TotalCount"/> and <paramref name="PageSize"/>.
-    /// Returns 0 when <paramref name="PageSize"/> is not positive.
+    /// Total number of available pages derived from <see cref="TotalCount"/> and <see cref="PageSize"/>.
+    /// Returns 0 when <see cref="PageSize"/> is not positive.
     /// </summary>
     public int TotalPages => PageSize > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 0;
 }

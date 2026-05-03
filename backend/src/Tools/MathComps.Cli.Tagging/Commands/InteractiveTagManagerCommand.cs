@@ -128,7 +128,7 @@ public class InteractiveTagManagerCommand(
     /// <summary>
     /// Handles the 'add' command to associate a new tag with one or more problems.
     /// The tag type is automatically derived from the approved tags file.
-    /// Expected format: add "<tag-name>" <problem-slug1> [<problem-slug2> ...]
+    /// Expected format: <c>add "&lt;tag-name&gt;" &lt;problem-slug1&gt; [&lt;problem-slug2&gt; ...]</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleAdd(string[] parts)
@@ -185,7 +185,7 @@ public class InteractiveTagManagerCommand(
     /// <summary>
     /// Handles the 'remove' command to disassociate a specific tag from one or more problems.
     /// Removes only the association; the tag remains available for other problems.
-    /// Expected format: remove "<tag-name>" <problem-slug1> [<problem-slug2> ...]
+    /// Expected format: <c>remove "&lt;tag-name&gt;" &lt;problem-slug1&gt; [&lt;problem-slug2&gt; ...]</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleRemove(string[] parts)
@@ -239,7 +239,7 @@ public class InteractiveTagManagerCommand(
 
     /// <summary>
     /// Handles the 'clearTag' command to disassociate a specific tag from all problems.
-    /// Expected format: clearTag "<tag-name>"
+    /// Expected format: <c>clearTag "&lt;tag-name&gt;"</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleClearTag(string[] parts)
@@ -270,7 +270,7 @@ public class InteractiveTagManagerCommand(
     /// <summary>
     /// Handles the 'clear' command to remove all tags from a specified problem.
     /// This is a bulk operation that removes all tag associations for the problem.
-    /// Expected format: clear <problem-slug>
+    /// Expected format: <c>clear &lt;problem-slug&gt;</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleClear(string[] parts)
@@ -302,7 +302,7 @@ public class InteractiveTagManagerCommand(
     /// <summary>
     /// Handles the 'merge' command to merge two tags by replacing all occurrences of one tag with another.
     /// For each problem that has tagToDelete, assigns tagToReplace, then removes tagToDelete.
-    /// Expected format: merge "<tagToDelete>" "<tagToReplace>"
+    /// Expected format: <c>merge "&lt;tagToDelete&gt;" "&lt;tagToReplace&gt;"</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleMerge(string[] parts)
@@ -346,7 +346,7 @@ public class InteractiveTagManagerCommand(
     /// <summary>
     /// Handles the 'list' command to display all current tags for a specified problem.
     /// Provides visibility into the current tagging state for verification and planning.
-    /// Expected format: list <problem-slug>
+    /// Expected format: <c>list &lt;problem-slug&gt;</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleList(string[] parts)

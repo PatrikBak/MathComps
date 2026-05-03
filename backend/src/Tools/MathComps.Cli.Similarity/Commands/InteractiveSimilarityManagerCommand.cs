@@ -61,7 +61,7 @@ public class InteractiveSimilarityManagerCommand(
     /// <summary>
     /// Handles the 'remove' command to delete a similarity relationship between two problems.
     /// Removes only the relationship in the specified direction.
-    /// Expected format: remove <source-problem-slug> <target-problem-slug>
+    /// Expected format: <c>remove &lt;source-problem-slug&gt; &lt;target-problem-slug&gt;</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleRemove(string[] parts)
@@ -123,7 +123,7 @@ public class InteractiveSimilarityManagerCommand(
     /// <summary>
     /// Handles the 'clear' command to remove all similarity relationships for a problem.
     /// This removes all outgoing similarity links from the specified problem.
-    /// Expected format: clear <problem-slug>
+    /// Expected format: <c>clear &lt;problem-slug&gt;</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleClear(string[] parts)
@@ -168,7 +168,7 @@ public class InteractiveSimilarityManagerCommand(
     /// Handles the 'list' command to display all similarity relationships for a problem.
     /// Shows both outgoing similarities (problems this problem is similar to) and
     /// incoming similarities (problems that consider this problem similar).
-    /// Expected format: list <problem-slug>
+    /// Expected format: <c>list &lt;problem-slug&gt;</c>
     /// </summary>
     /// <param name="parts">Parsed command components from user input.</param>
     private async Task HandleList(string[] parts)

@@ -557,7 +557,7 @@ public static class TexEmitter
 
     /// <summary>
     /// Converts parsed math back to plain TeX format, reversing the LaTeX normalizations
-    /// applied by <see cref="TeXCleanerRules"/>.
+    /// applied by <see cref="TexCleaner.TeXCleanerRules"/>.
     /// </summary>
     /// <param name="math">The parsed math content with LaTeX-style commands.</param>
     /// <returns>The math content with plain TeX commands restored.</returns>

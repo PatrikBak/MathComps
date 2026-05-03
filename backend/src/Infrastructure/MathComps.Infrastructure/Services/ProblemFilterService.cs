@@ -556,6 +556,7 @@ public class ProblemFilterService(
     /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
     /// <param name="markStatus">Optional mark status filter</param>
     /// <param name="userId">The ID of the current user (nullable)</param>
+    /// <param name="language">The language to use for facet labels and search options</param>
     /// <returns>Complete search bar options with facet counts and metadata</returns>
     private async Task<SearchBarOptions> BuildSearchOptionsAsync(
         IQueryable<Problem> baseQuery,

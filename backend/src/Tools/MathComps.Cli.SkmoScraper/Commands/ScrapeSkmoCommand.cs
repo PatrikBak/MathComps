@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace MathComps.Cli.SkmoScraper.Commands;
 
-/// <summary/>
+/// <summary>
 /// The command for scraping the SKMO website for solution PDFs
 /// </summary>
 /// <param name="scraperService">The service used to perform the scraping operations.</param>

@@ -74,8 +74,8 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             // Make sure any
             ?? throw new InvalidOperationException($"No problem with id = {problemId}");
 
-        /// Load statement embeddings. Using <see cref="EmbeddingConstants.Types.RetrievalQuery"/>
-        /// for we will be using this problem as a query asking 'is this problem similar to source'?
+        // Load statement embeddings. Using EmbeddingConstants.Types.RetrievalQuery
+        // since we will be using this problem as a query asking 'is this problem similar to source'?
         var statementEmbedding = await databaseContext.ProblemEmbeddings
             .Where(embedding => embedding.ProblemText.ProblemId == problemId
                 && embedding.ProblemText.DocumentType == DocumentType.Statement

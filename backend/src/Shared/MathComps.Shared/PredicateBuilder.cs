@@ -38,7 +38,7 @@ public static class PredicateBuilder
     /// <typeparam name="T">The type of the lambda argument.</typeparam>
     /// <param name="expression1">The first expression.</param>
     /// <param name="expression2">The second expression.</param>
-    /// <returns>If the two expressions are 'x => c1' and 'x => c2', then the result is 'x => c1 && c2'</returns>
+    /// <returns>If the two expressions are <c>x => c1</c> and <c>x => c2</c>, then the result is <c>x => c1 &amp;&amp; c2</c>.</returns>
     public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> expression1, Expression<Func<T, bool>> expression2)
         // This code just works, I've used it for years
         => Expression.Lambda<Func<T, bool>>(Expression.AndAlso(expression1.Body, Expression.Invoke(expression2, expression1.Parameters.Cast<Expression>())), expression1.Parameters);

@@ -3,7 +3,7 @@ using MathComps.Infrastructure.Options;
 namespace MathComps.Cli.Tagging.Settings;
 
 /// <summary>
-/// Unified settings for the <see cref="VetoProblemTagsCommand"/> command.
+/// Unified settings for the <see cref="Commands.VetoProblemTagsCommand"/> command.
 /// </summary>
 public class VetoProblemTagsSettings
 {

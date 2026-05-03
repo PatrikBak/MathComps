@@ -41,7 +41,7 @@ public static class TexStringParser
     #region Private Static Fields
 
     /// <summary>
-    /// Maps OpMac list style codes to our <see cref="ListItemStyle"> enum.
+    /// Maps OpMac list style codes to our <see cref="ListItemStyle"/> enum.
     /// </summary>
     private static readonly IReadOnlyDictionary<string, ListItemStyle> _texListStyleMap = new Dictionary<string, ListItemStyle>
     {
