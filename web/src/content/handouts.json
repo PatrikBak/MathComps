@@ -1,263 +1,302 @@
-[
-  {
-    "category": {
-      "sk": "Všeobecné",
-      "cs": "Obecné",
-      "en": "General"
+{
+  "events": [
+    {
+      "id": "emo2026camp",
+      "name": {
+        "sk": "EMO 2026 Camp",
+        "cs": "EMO 2026 Camp",
+        "en": "EMO 2026 Camp"
+      },
+      "description": {
+        "sk": "Prípravné sústredenie pre organizačné tímy súťaže EMO 2026 (European Mathematical Olympiad)",
+        "cs": "Přípravné soustředění pro organizační týmy soutěže EMO 2026 (European Mathematical Olympiad)",
+        "en": "Preparatory camp for the organizing teams of EMO 2026 (European Mathematical Olympiad)"
+      },
+      "link": "https://emo2026.lt/"
+    }
+  ],
+  "sections": [
+    {
+      "categoryKey": "general",
+      "category": {
+        "sk": "Všeobecné",
+        "cs": "Obecné",
+        "en": "General"
+      },
+      "handouts": [
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "Kp2vR8mLqX3nYwTfJc6Db",
+          "slug": {
+            "sk": "zaklady-dokazov",
+            "cs": "zaklady-dukazu",
+            "en": "proofs-basics"
+          },
+          "title": {
+            "sk": "Základy dôkazov",
+            "cs": "Základy důkazů",
+            "en": "Proofs Basics"
+          },
+          "description": {
+            "sk": "Základný prehľad o tom, ako vyzerajú dôkazy v matematike. Predstavíme priamy dôkaz a dôkaz sporom na príkladoch z teórie čísel.",
+            "cs": "Základní přehled o tom, jak vypadají důkazy v matematice. Představíme přímý důkaz a důkaz sporem na příkladech z teorie čísel.",
+            "en": "A fundamental overview of mathematical proofs. Covers direct proofs and proofs by contradiction with examples from number theory."
+          },
+          "authors": ["Patrik Bak"]
+        },
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "Wn4tLx7KqRm2YvPsJc8Fb",
+          "slug": {
+            "sk": "indukcia",
+            "cs": "indukce",
+            "en": "induction"
+          },
+          "title": {
+            "sk": "Matematická indukcia",
+            "cs": "Matematická indukce",
+            "en": "Mathematical Induction"
+          },
+          "description": {
+            "sk": "Matematická indukcia od základov po úplnú indukciu a Cauchyho dôkaz AG nerovnosti. Aplikácie na identity, nerovnosti, deliteľnosť a číselné sústavy.",
+            "cs": "Matematická indukce od základů po úplnou indukci a Cauchyho důkaz AG nerovnosti. Aplikace na identity, nerovnosti, dělitelnost a číselné soustavy.",
+            "en": "Mathematical induction from the basics to strong induction and Cauchy's proof of the AM-GM inequality. Applications to identities, inequalities, divisibility, and numeral systems."
+          },
+          "authors": ["Patrik Bak"]
+        }
+      ]
     },
-    "handouts": [
-      {
-        "status": "ready",
-        "id": "Kp2vR8mLqX3nYwTfJc6Db",
-        "slug": {
-          "sk": "zaklady-dokazov",
-          "cs": "zaklady-dukazu",
-          "en": "proofs-basics"
-        },
-        "title": {
-          "sk": "Základy dôkazov",
-          "cs": "Základy důkazů",
-          "en": "Proofs Basics"
-        },
-        "description": {
-          "sk": "Základný prehľad o tom, ako vyzerajú dôkazy v matematike. Predstavíme priamy dôkaz a dôkaz sporom na príkladoch z teórie čísel.",
-          "cs": "Základní přehled o tom, jak vypadají důkazy v matematice. Představíme přímý důkaz a důkaz sporem na příkladech z teorie čísel.",
-          "en": "A fundamental overview of mathematical proofs. Covers direct proofs and proofs by contradiction with examples from number theory."
-        },
-        "authors": ["Patrik Bak"]
+    {
+      "categoryKey": "algebra",
+      "category": {
+        "sk": "Algebra",
+        "cs": "Algebra",
+        "en": "Algebra"
       },
-      {
-        "status": "ready",
-        "id": "Wn4tLx7KqRm2YvPsJc8Fb",
-        "slug": {
-          "sk": "indukcia",
-          "cs": "indukce",
-          "en": "induction"
+      "handouts": [
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "RFj3E98fbinTsPJNbfBMm",
+          "slug": {
+            "sk": "rozklady-na-sucin",
+            "cs": "rozklady-na-soucin",
+            "en": "factorization"
+          },
+          "title": {
+            "sk": "Rozklady na súčin",
+            "cs": "Rozklady na součin",
+            "en": "Factorization"
+          },
+          "description": {
+            "sk": "Systematický úvod do rozkladania algebraických výrazov na súčin. Pokrýva základné vzorce, postupné vynímanie a dopĺňanie na štvorec s praktickými aplikáciami.",
+            "cs": "Systematický úvod do rozkládání algebraických výrazů na součin. Pokrývá základní vzorce, postupné vytýkání a doplňování na čtverec s praktickými aplikacemi.",
+            "en": "A systematic introduction to factoring algebraic expressions. Covers basic formulas, step-by-step extraction, and completing the square with practical applications."
+          },
+          "authors": ["Patrik Bak"]
         },
-        "title": {
-          "sk": "Matematická indukcia",
-          "cs": "Matematická indukce",
-          "en": "Mathematical Induction"
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "_bNdll2TEiNb6fuho76K3",
+          "slug": {
+            "sk": "sustavy-rovnic",
+            "cs": "soustavy-rovnic",
+            "en": "systems-of-equations"
+          },
+          "title": {
+            "sk": "Sústavy rovníc",
+            "cs": "Soustavy rovnic",
+            "en": "Systems of Equations"
+          },
+          "description": {
+            "sk": "Základné techniky riešenia súťažných sústav rovníc. Pokrýva odčítanie, sčítanie a usporiadanie premenných.",
+            "cs": "Základní techniky řešení soutěžních soustav rovnic. Pokrývá odčítání, sčítání a uspořádání proměnných.",
+            "en": "Basic techniques for solving competition-level systems of equations. Covers subtraction, addition, and variable ordering."
+          },
+          "authors": ["Patrik Bak"]
         },
-        "description": {
-          "sk": "Matematická indukcia od základov po úplnú indukciu a Cauchyho dôkaz AG nerovnosti. Aplikácie na identity, nerovnosti, deliteľnosť a číselné sústavy.",
-          "cs": "Matematická indukce od základů po úplnou indukci a Cauchyho důkaz AG nerovnosti. Aplikace na identity, nerovnosti, dělitelnost a číselné soustavy.",
-          "en": "Mathematical induction from the basics to strong induction and Cauchy's proof of the AM-GM inequality. Applications to identities, inequalities, divisibility, and numeral systems."
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "u15f7GlQS2wKSsuIKCz0c",
+          "slug": {
+            "sk": "uvod-do-nerovnosti",
+            "cs": "uvod-do-nerovnosti",
+            "en": "introduction-to-inequalities"
+          },
+          "title": {
+            "sk": "Úvod do nerovností",
+            "cs": "Úvod do nerovností",
+            "en": "Introduction to Inequalities"
+          },
+          "description": {
+            "sk": "Základné techniky riešenia súťažných nerovností. Pokrýva ekvivalentné úpravy, kladné štvorce, AG nerovnosť.",
+            "cs": "Základní techniky řešení soutěžních nerovností. Pokrývá ekvivalentní úpravy, kladné čtverce, AM-GM nerovnost.",
+            "en": "Basic techniques for solving competition-level inequalities. Covers equivalent transformations, positive squares, AM-GM inequality."
+          },
+          "authors": ["Patrik Bak"]
         },
-        "authors": ["Patrik Bak"]
-      }
-    ]
-  },
-  {
-    "category": {
-      "sk": "Algebra",
-      "cs": "Algebra",
-      "en": "Algebra"
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "dafdGYRouX2XuyrXK-5Xf",
+          "slug": {
+            "sk": "vtipna-algebra",
+            "cs": "vtipna-algebra",
+            "en": "fun-algebra"
+          },
+          "title": {
+            "sk": "Vtipná algebra",
+            "cs": "Vtipná algebra",
+            "en": "Fun Algebra"
+          },
+          "description": {
+            "sk": "Zbierka úloh, ktoré využívajú šikovné algebraické úpravy.",
+            "cs": "Sbírka úloh, které využívají šikovné algebraické úpravy.",
+            "en": "A collection of problems that use clever algebraic manipulations."
+          },
+          "authors": ["Patrik Bak"]
+        },
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "public": false,
+          "id": "g1UHlmQc6GrEp0db0lGHs",
+          "languages": ["cs"],
+          "fileSlug": "means",
+          "slug": {
+            "cs": "prumery"
+          },
+          "title": {
+            "cs": "Průměry"
+          },
+          "description": {
+            "cs": "Úvod do aritmetického, geometrického a harmonického průměru s důkazy nerovností mezi nimi."
+          },
+          "authors": ["Káťa Danilina"]
+        }
+      ]
     },
-    "handouts": [
-      {
-        "status": "ready",
-        "id": "RFj3E98fbinTsPJNbfBMm",
-        "slug": {
-          "sk": "rozklady-na-sucin",
-          "cs": "rozklady-na-soucin",
-          "en": "factorization"
-        },
-        "title": {
-          "sk": "Rozklady na súčin",
-          "cs": "Rozklady na součin",
-          "en": "Factorization"
-        },
-        "description": {
-          "sk": "Systematický úvod do rozkladania algebraických výrazov na súčin. Pokrýva základné vzorce, postupné vynímanie a dopĺňanie na štvorec s praktickými aplikáciami.",
-          "cs": "Systematický úvod do rozkládání algebraických výrazů na součin. Pokrývá základní vzorce, postupné vytýkání a doplňování na čtverec s praktickými aplikacemi.",
-          "en": "A systematic introduction to factoring algebraic expressions. Covers basic formulas, step-by-step extraction, and completing the square with practical applications."
-        },
-        "authors": ["Patrik Bak"]
+    {
+      "categoryKey": "geometry",
+      "category": {
+        "sk": "Geometria",
+        "cs": "Geometrie",
+        "en": "Geometry"
       },
-      {
-        "status": "ready",
-        "id": "_bNdll2TEiNb6fuho76K3",
-        "slug": {
-          "sk": "sustavy-rovnic",
-          "cs": "soustavy-rovnic",
-          "en": "systems-of-equations"
+      "handouts": [
+        {
+          "status": "planned",
+          "source": "matikaCesku",
+          "title": {
+            "sk": "Uhly bez kružníc",
+            "cs": "Úhly bez kružnic",
+            "en": "Angles Without Circles"
+          }
         },
-        "title": {
-          "sk": "Sústavy rovníc",
-          "cs": "Soustavy rovnic",
-          "en": "Systems of Equations"
+        {
+          "status": "planned",
+          "source": "matikaCesku",
+          "title": {
+            "sk": "Uhly na kružnici",
+            "cs": "Úhly na kružnici",
+            "en": "Angles on Circles"
+          }
         },
-        "description": {
-          "sk": "Základné techniky riešenia súťažných sústav rovníc. Pokrýva odčítanie, sčítanie a usporiadanie premenných.",
-          "cs": "Základní techniky řešení soutěžních soustav rovnic. Pokrývá odčítání, sčítání a uspořádání proměnných.",
-          "en": "Basic techniques for solving competition-level systems of equations. Covers subtraction, addition, and variable ordering."
-        },
-        "authors": ["Patrik Bak"]
-      },
-      {
-        "status": "ready",
-        "id": "u15f7GlQS2wKSsuIKCz0c",
-        "slug": {
-          "sk": "uvod-do-nerovnosti",
-          "cs": "uvod-do-nerovnosti",
-          "en": "introduction-to-inequalities"
-        },
-        "title": {
-          "sk": "Úvod do nerovností",
-          "cs": "Úvod do nerovností",
-          "en": "Introduction to Inequalities"
-        },
-        "description": {
-          "sk": "Základné techniky riešenia súťažných nerovností. Pokrýva ekvivalentné úpravy, kladné štvorce, AG nerovnosť.",
-          "cs": "Základní techniky řešení soutěžních nerovností. Pokrývá ekvivalentní úpravy, kladné čtverce, AM-GM nerovnost.",
-          "en": "Basic techniques for solving competition-level inequalities. Covers equivalent transformations, positive squares, AM-GM inequality."
-        },
-        "authors": ["Patrik Bak"]
-      },
-      {
-        "status": "ready",
-        "id": "dafdGYRouX2XuyrXK-5Xf",
-        "slug": {
-          "sk": "vtipna-algebra",
-          "cs": "vtipna-algebra",
-          "en": "fun-algebra"
-        },
-        "title": {
-          "sk": "Vtipná algebra",
-          "cs": "Vtipná algebra",
-          "en": "Fun Algebra"
-        },
-        "description": {
-          "sk": "Zbierka úloh, ktoré využívajú šikovné algebraické úpravy.",
-          "cs": "Sbírka úloh, které využívají šikovné algebraické úpravy.",
-          "en": "A collection of problems that use clever algebraic manipulations."
-        },
-        "authors": ["Patrik Bak"]
-      },
-      {
-        "status": "ready",
-        "public": false,
-        "id": "g1UHlmQc6GrEp0db0lGHs",
-        "languages": ["cs"],
-        "fileSlug": "means",
-        "slug": {
-          "cs": "prumery"
-        },
-        "title": {
-          "cs": "Průměry"
-        },
-        "description": {
-          "cs": "Úvod do aritmetického, geometrického a harmonického průměru s důkazy nerovností mezi nimi."
-        },
-        "authors": ["Káťa Danilina"]
-      }
-    ]
-  },
-  {
-    "category": {
-      "sk": "Geometria",
-      "cs": "Geometrie",
-      "en": "Geometry"
+        {
+          "status": "ready",
+          "source": "events",
+          "id": "RZtGbqo7HslApJ1qgkOOB",
+          "languages": ["en"],
+          "eventId": "emo2026camp",
+          "slug": {
+            "en": "adding-points"
+          },
+          "title": {
+            "en": "Adding Points to the Picture"
+          },
+          "description": {
+            "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by 24 problems from national olympiads, MEMO, ISL, and IMO."
+          },
+          "authors": ["Patrik Bak"]
+        }
+      ]
     },
-    "handouts": [
-      {
-        "status": "planned",
-        "title": {
-          "sk": "Uhly bez kružníc",
-          "cs": "Úhly bez kružnic",
-          "en": "Angles Without Circles"
-        }
+    {
+      "categoryKey": "number-theory",
+      "category": {
+        "sk": "Teória čísel",
+        "cs": "Teorie čísel",
+        "en": "Number Theory"
       },
-      {
-        "status": "planned",
-        "title": {
-          "sk": "Uhly na kružnici",
-          "cs": "Úhly na kružnici",
-          "en": "Angles on Circles"
+      "handouts": [
+        {
+          "status": "planned",
+          "source": "matikaCesku",
+          "title": {
+            "sk": "Deliteľnosť",
+            "cs": "Dělitelnost",
+            "en": "Divisibility"
+          }
+        },
+        {
+          "status": "planned",
+          "source": "matikaCesku",
+          "title": {
+            "sk": "Diofantické rovnice",
+            "cs": "Diofantické rovnice",
+            "en": "Diophantine Equations"
+          }
+        },
+        {
+          "status": "ready",
+          "source": "events",
+          "id": "FWv-ivSDvsiD7HuULfBmT",
+          "languages": ["en"],
+          "eventId": "emo2026camp",
+          "slug": {
+            "en": "inverses-mod-p"
+          },
+          "title": {
+            "en": "Inverses Modulo $p$"
+          },
+          "description": {
+            "en": "A small theory of multiplicative inverses modulo a prime — existence, addition, and multiplication rules — applied to olympiad problems including Wilson's theorem, Wolstenholme, and IMO 2005."
+          },
+          "authors": ["Patrik Bak"]
         }
-      },
-      {
-        "status": "ready",
-        "id": "RZtGbqo7HslApJ1qgkOOB",
-        "languages": ["en"],
-        "public": false,
-        "slug": {
-          "en": "adding-points"
-        },
-        "title": {
-          "en": "Adding Points to the Picture"
-        },
-        "description": {
-          "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by 24 problems from national olympiads, MEMO, ISL, and IMO."
-        },
-        "authors": ["Patrik Bak"]
-      }
-    ]
-  },
-  {
-    "category": {
-      "sk": "Teória čísel",
-      "cs": "Teorie čísel",
-      "en": "Number Theory"
+      ]
     },
-    "handouts": [
-      {
-        "status": "planned",
-        "title": {
-          "sk": "Deliteľnosť",
-          "cs": "Dělitelnost",
-          "en": "Divisibility"
-        }
+    {
+      "categoryKey": "combinatorics",
+      "category": {
+        "sk": "Kombinatorika",
+        "cs": "Kombinatorika",
+        "en": "Combinatorics"
       },
-      {
-        "status": "planned",
-        "title": {
-          "sk": "Diofantické rovnice",
-          "cs": "Diofantické rovnice",
-          "en": "Diophantine Equations"
-        }
-      },
-      {
-        "status": "ready",
-        "id": "FWv-ivSDvsiD7HuULfBmT",
-        "languages": ["en"],
-        "slug": {
-          "en": "inverses-mod-p"
+      "handouts": [
+        {
+          "status": "planned",
+          "source": "matikaCesku",
+          "title": {
+            "sk": "Ofarbovanie",
+            "cs": "Obarbování",
+            "en": "Coloring"
+          }
         },
-        "title": {
-          "en": "Inverses Modulo $p$"
-        },
-        "description": {
-          "en": "A small theory of multiplicative inverses modulo a prime — existence, addition, and multiplication rules — applied to olympiad problems including Wilson's theorem, Wolstenholme, and IMO 2005."
-        },
-        "authors": ["Patrik Bak"]
-      }
-    ]
-  },
-  {
-    "category": {
-      "sk": "Kombinatorika",
-      "cs": "Kombinatorika",
-      "en": "Combinatorics"
-    },
-    "handouts": [
-      {
-        "status": "planned",
-        "title": {
-          "sk": "Ofarbovanie",
-          "cs": "Obarbování",
-          "en": "Coloring"
+        {
+          "status": "planned",
+          "source": "matikaCesku",
+          "title": {
+            "sk": "Invarianty",
+            "cs": "Invarianty",
+            "en": "Invariants"
+          }
         }
-      },
-      {
-        "status": "planned",
-        "title": {
-          "sk": "Invarianty",
-          "cs": "Invarianty",
-          "en": "Invariants"
-        }
-      }
-    ]
-  }
-]
+      ]
+    }
+  ]
+}
