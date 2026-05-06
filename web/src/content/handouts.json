@@ -1,6 +1,20 @@
 {
   "events": [
     {
+      "id": "okolo-naboje-2026",
+      "name": {
+        "sk": "Okolo Náboje s PraSátkem 2026",
+        "cs": "Okolo Náboje s PraSátkem 2026",
+        "en": "Okolo Náboje s PraSátkem 2026"
+      },
+      "description": {
+        "sk": "Trojdňový matematický mimoškolský program pre stredoškolských študentov zúčastňujúcich sa súťaže Náboj v Prahe s návštevou Matfyzu, hrou po meste, výletom a prednáškami.",
+        "cs": "Třídenní matematický mimoškolský program pro středoškolské studenty účastnící se soutěže Náboj v Praze s návštěvou Matfyzu, hrou po městě, výletem a přednáškami.",
+        "en": "Three-day mathematical extracurricular program for secondary students competing in the Prague Náboj competition, featuring a campus visit, city game, excursion, and lectures."
+      },
+      "link": "https://prase.cz/okolo_naboje/"
+    },
+    {
       "id": "emo2026camp",
       "name": {
         "sk": "EMO 2026 Camp",
@@ -250,6 +264,29 @@
             "cs": "Diofantické rovnice",
             "en": "Diophantine Equations"
           }
+        },
+        {
+          "status": "ready",
+          "source": "events",
+          "id": "xT7kWqNv3Lm8RpYfHs2Jg",
+          "languages": ["sk", "cs"],
+          "eventId": "okolo-naboje-2026",
+          "slug": {
+            "sk": "cifrovanie",
+            "cs": "cifrovani",
+            "en": "digits"
+          },
+          "title": {
+            "sk": "Cifrovanie",
+            "cs": "Číslování",
+            "en": "Digits"
+          },
+          "description": {
+            "sk": "Základné triky pri práci s ciframi čísiel. Pokrýva dekadický zápis, ciferné súčty, kritériá deliteľnosti a ich aplikácie v súťažných úlohách.",
+            "cs": "Základní triky při práci s číslicemi. Pokrývá dekadický zápis, ciferné součty, kritéria dělitelnosti a jejich aplikace v soutěžních úlohách.",
+            "en": "Basic techniques for working with digits. Covers decimal representation, digit sums, divisibility criteria, and their applications in competition problems."
+          },
+          "authors": ["Patrik Bak"]
         },
         {
           "status": "ready",
