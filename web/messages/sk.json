@@ -510,9 +510,17 @@
       },
       "theorem": "Tvrdenie"
     },
+    "filters": {
+      "empty": "Žiadne materiály nezodpovedajú aktuálnym filtrom.",
+      "sourceLabel": "Zdroj",
+      "topicLabel": "Téma"
+    },
     "hero": {
-      "description": "Zoznam priebežne pripravovaných študijných materiálov určených pre všetkých záujemcov o riešenie zaujímavých matematických úloh. Cieľom je postupne pokryť všetky témy stredoškolskej Matematickej olympiády. Materiály sú tvorené pre začiatočníkov, ale sú vhodné aj pre pre skúsenejších riešiteľov vďaka postupne gradujúcim úlohám.",
-      "title": "Študijné materiály"
+      "eventsItem": "Materiály s označením <events></events> sú rôzne náhodné materiály použité na akciách, kde som prednášal. Postupne by som ich rád rozšíril na plnohodnotné materiály so sprievodnými textami a riešeniami. Taktiež by som tu rád doplnil materiály a zbierky úloh z minulosti, mám ich vcelku dosť 😇",
+      "intro": "Zoznam študijných materiálov, ktoré ja (<author>Patrik Bak</author>) priebežne pripravujem. Momentálne sa tu nachádzajú materiály dvoch typov:",
+      "matikaCeskuItem": "Materiály s označením <matikaCesku></matikaCesku> sú pripravované pre krúžky, ktoré sa konajú naprieč Českou republikou, a taktiež online (jeden z nich vediem). Ak máte záujem, prehliadnite si ich <link>zoznam</link> a prihláste sa na niektorý z nich 🙂",
+      "outro": "Snáď sa vám budú páčiť a prídu vám užitočné. Určite mi napíšte komentár alebo <feedback>pošlite feedback</feedback>, ak nájdete chybu alebo máte návrhy na zlepšenie.",
+      "title": "Moje študijné materiály"
     },
     "labels": {
       "author": "Autor",
@@ -525,6 +533,11 @@
       "proof": "Dôkaz",
       "sectionLabel": "Materiály",
       "solution": "Riešenie"
+    },
+    "plannedHeading": "Pripravujeme",
+    "styles": {
+      "events": "Z akcií",
+      "matikaCesku": "Matika Česku"
     }
   },
   "home": {

@@ -510,9 +510,17 @@
       },
       "theorem": "Theorem"
     },
+    "filters": {
+      "empty": "No handouts match the current filters.",
+      "sourceLabel": "Source",
+      "topicLabel": "Topic"
+    },
     "hero": {
-      "description": "A list of continuously prepared study materials for anyone interested in solving interesting mathematical problems. The goal is to gradually cover all topics of the high school Mathematical Olympiad. Materials are created for beginners, but are also suitable for more experienced solvers thanks to progressively challenging problems.",
-      "title": "Study Materials"
+      "eventsItem": "Materials labeled <events></events> are assorted handouts used at events where I've lectured. I'd gradually like to expand them into fully-fledged materials with accompanying texts and solutions. I'd also like to add materials and problem collections from the past — I have quite a few 😇",
+      "intro": "A list of study materials I (<author>Patrik Bak</author>) am preparing on an ongoing basis. There are currently two types of materials here:",
+      "matikaCeskuItem": "Materials labeled <matikaCesku></matikaCesku> are prepared for math circles taking place across the Czech Republic, as well as online (I lead one of them). If you're interested, browse the <link>list</link> and sign up for one 🙂",
+      "outro": "I hope you'll find them useful. Please leave a comment or <feedback>send feedback</feedback> if you find a mistake or have suggestions for improvement.",
+      "title": "My Study Materials"
     },
     "labels": {
       "author": "Author",
@@ -525,6 +533,11 @@
       "proof": "Proof",
       "sectionLabel": "Handouts",
       "solution": "Solution"
+    },
+    "plannedHeading": "Coming soon",
+    "styles": {
+      "events": "From events",
+      "matikaCesku": "Matika Česku"
     }
   },
   "home": {

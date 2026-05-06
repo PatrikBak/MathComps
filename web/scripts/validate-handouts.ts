@@ -12,7 +12,9 @@ import path from 'path'
 
 import {
   getContentFileBasename,
-  type HandoutSection,
+  HANDOUT_SOURCES,
+  type HandoutEvent,
+  type HandoutIndex,
   isReadyHandout,
   type ReadyHandoutMetadata,
   supportsLocale,
@@ -67,7 +69,19 @@ function validate(): boolean {
   }
 
   // Parse handouts.json
-  const sections: HandoutSection[] = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'))
+  const { sections, events }: HandoutIndex = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'))
+
+  // Build a set of known event IDs for cross-reference validation
+  const knownEventIds = new Set(events.map((event: HandoutEvent) => event.id))
+
+  // Validate each event entry
+  for (const event of events) {
+    const eventContext = `event "${event.id}"`
+    errors.push(...validateRequiredField(event.id, 'id', eventContext))
+    errors.push(
+      ...validatePartialLocalizedString(event.name, 'name', eventContext, SUPPORTED_LOCALES)
+    )
+  }
 
   // Collect all ready handouts for uniqueness checks
   const readyHandouts = sections
@@ -109,10 +123,18 @@ function validate(): boolean {
     )
   }
 
+  // Allowed source values
+  const allowedSources = new Set(HANDOUT_SOURCES)
+
   // Validate each section
   for (const section of sections) {
     // A string for logging
     const sectionContext = `section "${section.category[DEFAULT_LOCALE] || 'unknown'}"`
+
+    // Validate that the section has a stable locale-independent key
+    if (!section.categoryKey || typeof section.categoryKey !== 'string') {
+      errors.push(`${sectionContext}: missing required "categoryKey" field`)
+    }
 
     // Validate category (always required for all locales)
     errors.push(
@@ -169,6 +191,20 @@ function validate(): boolean {
 
         // Validate authors
         errors.push(...validateRequiredArray(readyHandout.authors, 'authors', handoutContext))
+
+        // Validate source is one of the known values
+        if (!allowedSources.has(readyHandout.source)) {
+          errors.push(
+            `${handoutContext}: unknown source "${readyHandout.source}" (expected one of: ${[...allowedSources].join(', ')})`
+          )
+        }
+
+        // Validate eventId references a known event
+        if (readyHandout.eventId !== undefined && !knownEventIds.has(readyHandout.eventId)) {
+          errors.push(
+            `${handoutContext}: eventId "${readyHandout.eventId}" does not match any entry in the events array`
+          )
+        }
 
         // Validate content files exist for declared languages
         const slug = getContentFileBasename(readyHandout)

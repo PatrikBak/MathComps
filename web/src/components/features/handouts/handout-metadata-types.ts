@@ -6,19 +6,55 @@ import type { Locale, LocalizedString } from '@/i18n/i18n'
  */
 
 /**
- * A handout that is planned but not yet available.
+ * All handout sources in their canonical display order.
+ *
+ * - `matikaCesku` — written for Matika Česku math circles and online course.
+ * - `events` — originally used at events/camps; carries an `eventId` on ready handouts.
  */
-type PlannedHandoutMetadata = {
-  /** Discriminator */
-  status: 'planned'
+export const HANDOUT_SOURCES = ['matikaCesku', 'events'] as const
+
+/**
+ * Origin/source of a handout. Drives the source badge on each card and the
+ * source filter chip row on the listing page.
+ */
+export type HandoutSource = (typeof HANDOUT_SOURCES)[number]
+
+/**
+ * A named event (camp, competition, etc.) that handouts can reference.
+ */
+export type HandoutEvent = {
+  /** Stable identifier used as a foreign key from handouts */
+  id: string
+  /** Localized display name of the event */
+  name: LocalizedString
+  /** Optional localized longer-form description of the event */
+  description?: LocalizedString
+  /** Optional external URL for the event homepage */
+  link?: string
+}
+
+/**
+ * Fields common to all handout statuses.
+ */
+type HandoutMetadataBase = {
+  /** Origin of the handout (drives the source badge and filter row) */
+  source: HandoutSource
   /** Localized display title shown in the handouts list */
   title: LocalizedString
 }
 
 /**
+ * A handout that is planned but not yet available.
+ */
+type PlannedHandoutMetadata = HandoutMetadataBase & {
+  /** Discriminator */
+  status: 'planned'
+}
+
+/**
  * A handout that is fully available with content.
  */
-export type ReadyHandoutMetadata = {
+export type ReadyHandoutMetadata = HandoutMetadataBase & {
   /** Discriminator */
   status: 'ready'
   /** Permanent unique identifier (nanoid) for comments and references */
@@ -38,6 +74,11 @@ export type ReadyHandoutMetadata = {
   description: LocalizedString
   /** List of author names (not localized - names stay as-is) */
   authors: string[]
+  /**
+   * ID of the {@link HandoutEvent} this handout was used at.
+   * Only meaningful for `source === 'events'` handouts; omitted otherwise.
+   */
+  eventId?: string
   /** Whether the handout appears in the public listing (defaults to true when absent) */
   public?: boolean
 }
@@ -46,6 +87,28 @@ export type ReadyHandoutMetadata = {
  * Union type representing any handout metadata.
  */
 export type HandoutMetadata = PlannedHandoutMetadata | ReadyHandoutMetadata
+
+/**
+ * Groups handouts by a high-level category (e.g., Algebra, Geometry, etc.)
+ */
+export type HandoutSection = {
+  /** Stable locale-independent identifier for the section (e.g., "number-theory") */
+  categoryKey: string
+  /** Localized category name */
+  category: LocalizedString
+  /** Array of handout entries in this category (planned or ready) */
+  handouts: HandoutMetadata[]
+}
+
+/**
+ * Root structure of the handouts.json index file.
+ */
+export type HandoutIndex = {
+  /** Named events that handouts can reference via `eventId` */
+  events: HandoutEvent[]
+  /** Handouts grouped by category */
+  sections: HandoutSection[]
+}
 
 /**
  * Type guard to check if a handout is ready (has content).
@@ -97,11 +160,21 @@ export function getContentFileBasename(handout: ReadyHandoutMetadata): string {
 }
 
 /**
- * Groups handouts by a high-level category (e.g., Algebra, Geometria).
+ * Looks up a {@link HandoutEvent} by its id from an events array.
+ * Returns undefined when the handout has no eventId or the id is not found.
+ *
+ * @param handout - The ready handout metadata.
+ * @param events - The full events array from the index.
+ *
+ * @returns The matching event, or undefined.
  */
-export type HandoutSection = {
-  /** Localized category name */
-  category: LocalizedString
-  /** Array of handout entries in this category (planned or ready) */
-  handouts: HandoutMetadata[]
+export function resolveHandoutEvent(
+  handout: ReadyHandoutMetadata,
+  events: HandoutEvent[]
+): HandoutEvent | undefined {
+  // We need handouts with an event id
+  if (!handout.eventId) return undefined
+
+  // Look up the event from the event index
+  return events.find((event) => event.id === handout.eventId)
 }

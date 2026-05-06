@@ -4,13 +4,11 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
 import type { HandoutData } from '@/components/features/handouts/handout-content-types'
-import type {
-  HandoutSection,
-  ReadyHandoutMetadata,
-} from '@/components/features/handouts/handout-metadata-types'
+import type { HandoutIndex } from '@/components/features/handouts/handout-metadata-types'
 import {
   getContentFileBasename,
   isReadyHandout,
+  resolveHandoutEvent,
   supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
@@ -22,67 +20,19 @@ import { ANCHORS, getLocalizedAnchor, type Locale, ROUTES, SUPPORTED_LOCALES } f
 import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { generatePageMetadata } from '@/lib/metadata'
 
-/**
- * Finds a ready handout by its localized slug.
- *
- * @param slug - The localized slug to search for
- * @param locale - The locale to match the slug against
- *
- * @returns The matching ready handout entry, or undefined if not found
- */
-function findHandoutBySlug(slug: string, locale: Locale): ReadyHandoutMetadata | undefined {
-  // Parse the handout index
-  return (
-    (handoutIndex as unknown as HandoutSection[])
-      // Get all handouts
-      .flatMap((section) => section.handouts)
-      // That are ready
-      .filter(isReadyHandout)
-      // And find the one with the matching slug in the current locale (only if it supports this locale)
-      .find((handout) => supportsLocale(handout, locale) && handout.slug[locale] === slug)
-  )
-}
-
-/**
- * Loads the requested handout document by its localized slug.
- *
- * @param slug - The URL-friendly identifier for the handout (locale-specific)
- * @param locale - The current locale
- *
- * @returns An object containing the loaded document and its metadata entry
- */
-async function loadDocumentBySlug(
-  slug: string,
-  locale: Locale
-): Promise<{ data: HandoutData; metadata: ReadyHandoutMetadata } | undefined> {
-  // Find the handout entry
-  const handoutData = findHandoutBySlug(slug, locale)
-
-  // Return undefined if the handout doesn't exist
-  if (!handoutData) return undefined
-
-  // Dynamically import the handout's JSON file for the current locale
-  // Content files use the handout slug as the base filename (e.g., "factorization.sk.json")
-  const handoutSlug = getContentFileBasename(handoutData)
-  const handoutModule = await import(`@/content/handouts/${handoutSlug}.${locale}.json`)
-
-  // Return the handout and its metadata entry
-  return { data: handoutModule.default as HandoutData, metadata: handoutData }
-}
+/** Typed access to the handout index */
+const index = handoutIndex as unknown as HandoutIndex
 
 /**
  * Provides static params for pre-rendering available handouts.
  *
  * @returns Array of param objects containing locale and slug combinations
  */
-export async function generateStaticParams(): Promise<Array<{ locale: Locale; slug: string }>> {
-  // Parse the handout index
-  const sections = handoutIndex as unknown as HandoutSection[]
+export async function generateStaticParams() {
+  // Collect all ready handouts across every section
+  const readyHandouts = index.sections.flatMap((section) => section.handouts).filter(isReadyHandout)
 
-  // Get all ready handouts
-  const readyHandouts = sections.flatMap((section) => section.handouts).filter(isReadyHandout)
-
-  // Generate params only for locale + slug combinations where the handout supports the locale
+  // Emit one param object per valid locale + slug combination
   return SUPPORTED_LOCALES.flatMap((locale) =>
     readyHandouts
       .filter((handout) => supportsLocale(handout, locale))
@@ -105,20 +55,16 @@ export async function generateMetadata({
   // Extract the slug and locale from URL parameters
   const { slug, locale } = await params
 
-  // Find the handout and its category
-  const sections = handoutIndex as unknown as HandoutSection[]
-
   // Search each section for the requested handout
-  for (const section of sections) {
-    // Search each handout in the section
+  for (const section of index.sections) {
     for (const handout of section.handouts) {
-      // Look for ready handouts with the matching slug in the current locale
+      // Check for a ready handout with a matching slug in the current locale
       if (
         isReadyHandout(handout) &&
         supportsLocale(handout, locale) &&
         handout.slug[locale] === slug
       ) {
-        // Get translations for handouts
+        // Load translations for the section label
         const tHandouts = await getTranslations({ locale, namespace: 'handouts.labels' })
 
         // Return locale-specific metadata for the handout
@@ -135,7 +81,7 @@ export async function generateMetadata({
     }
   }
 
-  // If we got here, the handout doesn't exist
+  // No matching handout found for this slug + locale
   notFound()
 }
 
@@ -149,19 +95,28 @@ export default withLocale(async function RenderPage({
   // Extract the slug from the async params object
   const { slug } = await params
 
-  // Attempt to load the handout document and its metadata
-  const handoutData = await loadDocumentBySlug(slug, locale)
+  // Find the handout metadata by matching slug and locale
+  const handoutMeta = index.sections
+    .flatMap((section) => section.handouts)
+    .filter(isReadyHandout)
+    .find((handout) => supportsLocale(handout, locale) && handout.slug[locale] === slug)
+  if (!handoutMeta) notFound()
 
-  // If the handout doesn't exist, show Next.js's 404 page
-  if (!handoutData) notFound()
+  // Load the handout content file for this locale
+  const fileBasename = getContentFileBasename(handoutMeta)
+  const handoutModule = await import(`@/content/handouts/${fileBasename}.${locale}.json`)
+  const handoutData = handoutModule.default as HandoutData
 
-  // Compute section metadata once for both TOC and rendering
-  const sectionMetadata = computeSectionMetadata(handoutData.data.document)
+  // Resolve the event this handout was used at, if any
+  const resolvedEvent = resolveHandoutEvent(handoutMeta, index.events)
 
-  // Get translations for TOC
+  // Compute section metadata once for both the TOC and the renderer
+  const sectionMetadata = computeSectionMetadata(handoutData.document)
+
+  // Load translations for TOC labels
   const tHandouts = await getTranslations({ locale, namespace: 'handouts.labels' })
 
-  // Extract TOC items (subset of metadata) and add comments link
+  // Build TOC items from document sections, then append the comments anchor
   const tableOfContentsItems = [
     ...sectionMetadata.map(({ id, label, title, level }) => ({
       id,
@@ -169,7 +124,6 @@ export default withLocale(async function RenderPage({
       title,
       level,
     })),
-    // Add comments section link at the bottom
     {
       id: getLocalizedAnchor(ANCHORS.COMMENTS, locale),
       label: '',
@@ -179,20 +133,21 @@ export default withLocale(async function RenderPage({
     },
   ]
 
-  // Render the handout detail component
   return (
-    // The provider ensures we have access to the slug in all languages
-    // (which is useful for language switching)
-    <LocalizedRouteProvider slugTranslations={handoutData.metadata.slug}>
+    // The provider exposes slug translations for the language switcher
+    <LocalizedRouteProvider slugTranslations={handoutMeta.slug}>
       <Layout tocItems={tableOfContentsItems}>
         <HandoutDetail
-          handout={handoutData.data}
-          authors={handoutData.metadata.authors}
+          handout={handoutData}
+          authors={handoutMeta.authors}
           sectionMetadata={sectionMetadata}
           slug={slug}
-          contentId={handoutData.metadata.id}
-          pdfFilenameStem={`${getContentFileBasename(handoutData.metadata)}.${locale}`}
+          contentId={handoutMeta.id}
+          pdfFilenameStem={`${fileBasename}.${locale}`}
           locale={locale}
+          event={resolvedEvent?.name[locale]}
+          eventDescription={resolvedEvent?.description?.[locale]}
+          eventLink={resolvedEvent?.link}
         />
       </Layout>
     </LocalizedRouteProvider>

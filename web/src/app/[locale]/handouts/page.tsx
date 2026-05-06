@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 
-import type { HandoutSection } from '@/components/features/handouts/handout-metadata-types'
+import type { HandoutIndex } from '@/components/features/handouts/handout-metadata-types'
 import {
   isPublicHandout,
   isReadyHandout,
   supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
-import { HandoutSectionList } from '@/components/features/handouts/HandoutSectionList'
+import { HandoutBrowser } from '@/components/features/handouts/HandoutBrowser'
 import { HandoutsHero } from '@/components/features/handouts/HandoutsHero'
 import Layout from '@/components/layout/Layout'
 import handoutIndex from '@/content/handouts.json'
@@ -41,7 +41,7 @@ export async function generateMetadata({
  */
 export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   // Load the handout data JSON
-  const sections = handoutIndex as unknown as HandoutSection[]
+  const { sections, events } = handoutIndex as unknown as HandoutIndex
 
   // Check for duplicate ids (only for ready handouts that have ids)
   validateUniqueIds(
@@ -64,8 +64,8 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   // Render the page with filtered handout data
   return (
     <Layout>
-      <HandoutsHero />
-      <HandoutSectionList sections={publicSections} locale={locale} />
+      <HandoutsHero locale={locale} />
+      <HandoutBrowser sections={publicSections} events={events} locale={locale} />
     </Layout>
   )
 })
