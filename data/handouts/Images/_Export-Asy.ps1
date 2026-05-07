@@ -1,0 +1,120 @@
+# The script below batch-renders Asymptote .asy files to PDF and SVG sitting next to each .asy.
+# It is meant for the handout-figure workflow: author a .asy file (typically importing _common.asy)
+# and let this script produce both a vector PDF and a plain SVG without ever opening a viewer.
+#
+# Per .asy file the pipeline is:
+#   1. Run asy with -noView to render the .asy to a PDF next to the source. asy is run with
+#      -cd <dir> so `import _common;` and other relative imports resolve next to the source file.
+#   2. Convert the PDF to SVG via Inkscape (matches the conversion path used by _Export-Ggb.ps1
+#      so handout figures coming from either source render identically downstream).
+param(
+  # One or more directories, .asy files, or PowerShell wildcards (e.g. 'angles-*.asy'). Default
+  # is the folder this script lives in, which matches the typical handout-figures layout.
+  [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
+  [string[]]$Path = @(Split-Path -Parent $MyInvocation.MyCommand.Definition),
+
+  # Path to the Asymptote executable.
+  [string]$AsyExe = 'C:\Program Files\Asymptote\asy.exe'
+)
+
+# Ensure errors stop the script and suppress progress output
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+
+# Validate the Asymptote executable up front so we fail fast with a clear message
+if (-not (Test-Path -LiteralPath $AsyExe)) {
+  Write-Error "Asymptote executable not found at $AsyExe"
+  exit 1
+}
+
+# Validate Inkscape is on PATH (used for converting the PDF to SVG). Prefer inkscape.exe
+# (GUI subsystem) over inkscape.com (console launcher) so it doesn't attach to our terminal.
+$inkscape = Get-Command inkscape -ErrorAction SilentlyContinue
+if (-not $inkscape) {
+  Write-Error "Inkscape not found on PATH (needed for PDF -> SVG conversion)"
+  exit 1
+}
+$inkscape = $inkscape.Source
+$inkscapeExe = [System.IO.Path]::ChangeExtension($inkscape, '.exe')
+if (Test-Path -LiteralPath $inkscapeExe) { $inkscape = $inkscapeExe }
+
+# Pipeline for one .asy file: asy PDF -> Inkscape SVG. Both outputs are written next to the
+# input as <stem>.pdf / <stem>.svg.
+function Convert-OneAsy {
+  param(
+    [Parameter(Mandatory = $true)][string]$AsyPath
+  )
+
+  # Determine output paths
+  $stem     = [System.IO.Path]::GetFileNameWithoutExtension($AsyPath)
+  $dir      = [System.IO.Path]::GetDirectoryName($AsyPath)
+  $finalPdf = Join-Path $dir "$stem.pdf"
+  $finalSvg = Join-Path $dir "$stem.svg"
+
+  # 1. Render the .asy to PDF. -noView suppresses asy's auto-opening of the system PDF viewer.
+  #    -f pdf forces PDF output (asy otherwise picks based on settings.eps / settings.outformat).
+  #    -o <stem> sets the output filename stem (asy appends the format extension).
+  #    -cd <dir> changes asy's working directory so `import _common;` resolves next to the file.
+  if (Test-Path -LiteralPath $finalPdf) { Remove-Item -LiteralPath $finalPdf -Force }
+  $asyArgs = @('-noView', '-f', 'pdf', '-o', $stem, '-cd', $dir, $AsyPath)
+  $proc = Start-Process -FilePath $AsyExe -ArgumentList $asyArgs -Wait -PassThru -NoNewWindow
+  if ($proc.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $finalPdf)) {
+    throw "asy failed (exit $($proc.ExitCode))"
+  }
+
+  # 2. Convert the PDF to plain SVG via Inkscape. The .com launcher on PATH is the console
+  #    launcher that waits for inkscape.exe, so -Wait is enough.
+  if (Test-Path -LiteralPath $finalSvg) { Remove-Item -LiteralPath $finalSvg -Force }
+  $proc = Start-Process -FilePath $inkscape -ArgumentList @($finalPdf, '--pdf-poppler', '--export-type=svg', '--export-plain-svg', "--export-filename=$finalSvg") -Wait -PassThru
+  if ($proc.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $finalSvg)) {
+    throw "Inkscape SVG conversion failed (exit $($proc.ExitCode))"
+  }
+}
+
+# Resolve each entry in $Path into .asy files: a directory expands to *.asy in it, a single
+# file is used as-is, anything else is treated as a glob (Get-ChildItem handles wildcards).
+$asyFiles = @()
+foreach ($p in $Path) {
+  if (-not (Test-Path -LiteralPath $p -PathType Container) -and $p -notmatch '\.asy$') {
+    $p = $p + '.asy'
+  }
+  if (Test-Path -LiteralPath $p -PathType Container) {
+    $asyFiles += Get-ChildItem -LiteralPath $p -Filter '*.asy' -File
+  } elseif (Test-Path -LiteralPath $p -PathType Leaf) {
+    $asyFiles += @(Get-Item -LiteralPath $p)
+  } else {
+    $asyFiles += Get-ChildItem -Path $p -File -ErrorAction SilentlyContinue |
+                 Where-Object { $_.Extension -ieq '.asy' }
+  }
+}
+
+# Skip files whose name starts with '_' (convention for shared modules like _common.asy)
+$asyFiles = @($asyFiles | Where-Object { -not $_.Name.StartsWith('_') })
+
+if ($asyFiles.Count -eq 0) {
+  Write-Error "No .asy files found for path: $Path"
+  exit 1
+}
+
+# Process each .asy, accumulate per-file status so one failure doesn't stop the batch
+$total = $asyFiles.Count
+Write-Host "Processing $total file$(if ($total -ne 1) { 's' })..." -ForegroundColor Cyan
+$ok = 0; $fail = 0; $i = 0
+foreach ($asyFile in $asyFiles) {
+  $i++
+  $prefix = "[$i/$total]"
+  try {
+    Convert-OneAsy -AsyPath $asyFile.FullName
+    Write-Host "$prefix [OK]   $($asyFile.Name)" -ForegroundColor Green
+    $ok++
+  }
+  catch {
+    Write-Host "$prefix [FAIL] $($asyFile.Name): $_" -ForegroundColor Yellow
+    $fail++
+  }
+}
+
+# Final report
+Write-Host ""; Write-Host "Done. Success: $ok, Failed: $fail" -ForegroundColor Cyan; Write-Host ""
+
+if ($fail -gt 0) { exit 1 } else { exit 0 }
