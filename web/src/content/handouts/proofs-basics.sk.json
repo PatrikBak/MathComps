@@ -4030,7 +4030,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka 1."
+                          "text": "Poznámka (1)."
                         }
                       ]
                     },
@@ -4076,7 +4076,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka 2."
+                          "text": "Poznámka (2)."
                         }
                       ]
                     },
