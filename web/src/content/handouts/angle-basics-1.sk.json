@@ -1,0 +1,4965 @@
+{
+  "document": {
+    "title": "Základy počítania uhlov",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Geometria je najvizuálnejšia časť matematiky – vieme si ju kresliť na papier, v\u00A0softwari ako "
+                },
+                {
+                  "type": "link",
+                  "url": "https://www.geogebra.org/",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "GeoGebra"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " a\u00A0môžeme sa tešiť, keď na vlastné oči vidíme, že veci v\u00A0nej fungujú. Prečo tomu tak je však vie byť záhadou. Aby sme tieto tajomstvá pochopili, potrebujeme kúsok po kúsky budovať základňu znalostí a\u00A0vizuálnu intuíciu."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Jedna z\u00A0najzákladnejších techník je rozumieť svetu uhlov a\u00A0vedieť ich vlastnosti s\u00A0úspechom používať v\u00A0rôznych typoch úloh. Len málo zaujímavých príkladov uhly nepoužíva. Teória okolo uhlov pritom nie je zložitá, je však dôležité budovať ju pomaly a detailne. Začneme s\u00A0najjednoduchšími vlastnosťami, ktoré ani nevyžadujú prácu s kružnicami. Už tieto sa však dajú s\u00A0úspechom využiť vo veľa úlohách."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0tomto materiáli sa budeme venovať uhlom, ale zámerne vynecháme uhly na kružniciach, ktoré si zaslúžia separátnu pozornosť. Na chvíľu zabudnime, že kružnice existujú."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Na záver úvodu jedna menšia poznámka o konvencii. V\u00A0tomto materiáli uvidíme veľa obrázkov trojuholníkov, v\u00A0ktorých je bod\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " nakreslený hore. Ukazuje sa, že tento spôsob kreslenia je medzinárodný štandard, najmä na poli matematickej olympiády a podobných súťaží sa to tak zvykne robiť. V\u00A0Česku a na\u00A0Slovensku je však v\u00A0školách stále zvykom kresliť\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "C",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " hore. V\u00A0niektorých krajinách možno vidieť aj\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " hore, napr. na Ukrajine. Z\u00A0hľadiska riešenia úloh je vždy dobré nakresliť si hore ten bod, pri ktorom obrázok vyzerá čo najsymetrickejšie, ľahšie v\u00A0ňom vidieť ďalšie symetrické veci. V\u00A0tomto materiáli budú úlohy zadávané tak, že tá symetria bude vidieť viac pri\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " hore \uD83D\uDE42."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Základy sveta uhlov",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0tejto sekcii si odvodíme tie najjednoduchšie vlastnosti súvisiace s uhlami. Pevne verím, že kľúčom k\u00A0zvládnutiu geometrie je porozumenie vecí od základov a do hĺbky, preto sa týmto jednoduchým vlastnostiam budeme venovať viac."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Základné vlastnosti uhlov, ktoré bežne používame skoro bez rozmýšľania pri riešení úloh:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Vrcholové uhly sú zhodné: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.sk-1.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Súhlasné uhly sú zhodné: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.sk-2.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Striedavé uhly sú zhodné: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.sk-3.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Vedľajšie uhly majú súčet "
+                          },
+                          {
+                            "type": "math",
+                            "text": "180^\\circ",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.sk-4.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "highligted": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Tieto vlastnosti spolu veľmi prirodzene súvisia, menšie cvičenie na rozmyslenie:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Uvedomte si, že:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "z\u00A0vlastnosti o\u00A0vedľajších uhloch vyplýva vlastnosť vrcholových uhlov (a\u00A0naopak)"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "z\u00A0ktorejkoľvek dvojice vlastností o\u00A0vrcholových, súhlasných, striedavých uhloch vyplýva tá tretia vlastnosť"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerAlphaParens"
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "(a)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Vedľajší uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0danému uhlu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má veľkosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Uhol vedľajší k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má zasa veľkosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - (180^\\circ - \\alpha) = \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ten je však zároveň vrcholový uhol k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda sú vrcholové uhly zhodné."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-5.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Naopak, predpokladajme vlastnosť o\u00A0vrcholových uhloch a\u00A0označme po sebe idúce uhly v\u00A0priesečníku dvoch priamok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zo zhodnosti vrcholových uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Súčet všetkých štyroch je plný uhol, teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta + \\gamma + \\delta = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po dosadení dostávame "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\alpha + 2\\beta = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – to je práve vlastnosť vedľajších uhlov."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-6.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "(b)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Všetky tri vlastnosti hovoria, že istá dvojica uhlov má rovnakú veľkosť."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pozrime sa na trojicu uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z\u00A0obrázka a\u00A0na to, čo o\u00A0ich vzťahoch tvrdia jednotlivé vlastnosti. Pre dvojicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri hornom priesečníku tvrdí vlastnosť vrcholových uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pre dvojicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvrdí vlastnosť súhlasných uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Konečne pre dvojicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvrdí vlastnosť striedavých uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-7.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tri vlastnosti teda tvrdia tri rovnosti medzi tými istými troma uhlami, len cez rôzne dvojice. Akonáhle platia ľubovoľné dve, tretia plynie tranzitivitou: napr. ak vieme (V) a\u00A0(S), tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže (St). Ostatné dvojice analogicky."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Nasledujúce tvrdenie všetci poznáme, viete ho však dokázať?"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Súčet uhlov v\u00A0trojuholníku je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Veďme cez vrchol\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " priamku rovnobežnú s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pretože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je priečka rovnobežiek, uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú striedavé, teda rovnaké. Analogicky cez priečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú uhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " striedavé. Uhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia vedľa seba pozdĺž priamky cez\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta + \\gamma = 180^\\circ.",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-8.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Toto tvrdenie sa rozhodne dá zovšeobecniť. Vieme napríklad, že súčet uhlov v\u00A0štvoruholníku je "
+                },
+                {
+                  "type": "math",
+                  "text": "360^\\circ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Ako je to v 5-uholníku? A ako v\u00A067-uholníku? Odpoveďou je nasledujúce tvrdenie:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n \\ge 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prirodzené číslo. Súčet uhlov v\u00A0konvexnom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníku je rovný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2) \\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dôkaz 1 (matematická indukcia)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Základ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": súčet uhlov trojuholníka je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ = (3-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Indukčný krok: nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_2 \\ldots A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je konvexný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholník. Uhlopriečkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ho rozdelíme na trojuholník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_n A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0konvexný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_2 \\ldots A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": uhly pri vrcholoch "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_2, \\ldots, A_{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " patria celé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníku, uhol pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " patrí celý trojuholníku a\u00A0uhly pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa rozdelia medzi oba útvary tak, aby ich časti dali pôvodné vnútorné uhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka. Súčet uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka je teda"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\underbrace{180^\\circ}_{\\text{trojuholník}} + \\underbrace{(n-2) \\cdot 180^\\circ}_{n\\text{-uholník}} = (n-1) \\cdot 180^\\circ = \\bigl((n+1) - 2\\bigr) \\cdot 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-9.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dôkaz 2 (vejárová triangulácia)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Veďme z\u00A0vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhlopriečky do každého nepriliehajúceho vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_3, A_4, \\ldots, A_{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vznikne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojuholníkov pokrývajúcich vnútro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka bez prekrytia. Pri každom vrchole "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa uhly susedných trojuholníkov pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " presne poskladajú na vnútorný uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže súčet uhlov všetkých trojuholníkov sa rovná súčtu vnútorných uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka, čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-10.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Dôkaz\u00A02 je "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "rozbalený"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " dôkaz\u00A01: indukcia odrezáva trojuholníky jeden po druhom, tu ich vidíme všetky naraz."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dôkaz 3 (vnútorný bod)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Zvoľme bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vo vnútri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka a\u00A0spojme ho s\u00A0každým vrcholom. Vznikne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojuholníkov s\u00A0celkovým súčtom uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Uhly trojuholníkov pri každom vrchole "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spolu tvoria vnútorný uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; uhly trojuholníkov pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spolu tvoria plný uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Teda súčet vnútorných uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n\\cdot 180^\\circ - 360^\\circ = (n-2)\\cdot 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-11.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (nekonvexné mnohouholníky)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Vzorec "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí aj pre navzájom sa nepretínajúce nekonvexné mnohouholníky, ak všetky vnútorné uhly meriame smerom dovnútra – teda aj uhly väčšie než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " rátame ako také."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vejárová triangulácia z\u00A0jedného vrcholu nemusí fungovať ani z\u00A0konvexného vrcholu – niektoré uhlopriečky môžu prechádzať mimo mnohouholníka. Platí však, že každý jednoduchý "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholník sa dá rozdeliť na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojuholníkov (nie nutne vejárovo), čo dôkaz zachráni. Dôvod je indukcia cez trojuholník tvorený nejakým vrcholom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0jeho susedmi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "U",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "W",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorý leží celý vo vnútri nášho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholníka. Odrezaním "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhlopriečkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "UW",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-uholník; opakovaním teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojuholníkov. Dá sa dokázať, že takýto trojuholník vždy existuje (dokonca dva), viď "
+                    },
+                    {
+                      "type": "link",
+                      "url": "https://en.wikipedia.org/wiki/Two_ears_theorem",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "veta o\u00A0dvoch ušiach"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "K\u00A0dôkazu\u00A03: funguje len ak existuje vnútorný bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " viditeľný zo všetkých vrcholov (t.\u00A0j. úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OA_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia celé vo vnútri). Pre niektoré nekonvexné mnohouholníky taký "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nemusí existovať (skúste taký nakresliť) – v\u00A0takom prípade sa dôkaz\u00A03 nedá priamo zachrániť a\u00A0treba siahnuť po triangulácii z\u00A0dôkazu\u00A02."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Teraz uveďme ešte dve jednoduché ale užitočné pomocné tvrdenia:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že súčet uhlov na obrázku je rovný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-12.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhol zvieraný priečkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0rovnobežkami na strane "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (ako na obrázku). Súhlasné uhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zhodné. Pri vrchole "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vedľajšie, teda"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta + \\alpha = 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-13.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že uhol s\u00A0otázníkom na obrázku je rovný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha+\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-14.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zo súčtu uhlov v\u00A0trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ACB| = 180^\\circ - \\alpha - \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vonkajší uhol pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vedľajší k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "180^\\circ - |\\angle ACB| = \\alpha + \\beta.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-14.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Posledné dve cvičenia možno vyzerali veľmi triviálne. Realita však je, že v\u00A0praktických úlohách sú veľmi užitočné – keď máme obrovský netriviálny obrázok a\u00A0máme previesť za sebou veľký počet uhlových operácií, tak je naozaj veľmi výhodné si čo i len kúsok tej práce zjednodušiť – v\u00A0prípade rovnobežiek nemusíme uvažovať pomocný súhlasný uhol a\u00A0v\u00A0prípade trojuholníka nemusíme pracovať s\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "180^\\circ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Základy sveta dĺžok",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Zatiaľ sme fungovali iba vo svete uhlov a\u00A0vôbec sme neriešili dĺžky. Geometria však začne byť zaujímavá, keď tieto svety začneme prepájať. Základom pre nás bude "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "zhodnosť trojuholníkov"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Pripomeňme si kritériá."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vety o\u00A0zhodnosti trojuholníkov:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Veta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "sss",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú vo všetkých troch stranách."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Veta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "sus",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú v\u00A0dvoch stranách a\u00A0uhle, ktorý tieto strany zvierajú."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Veta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "usu",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú v\u00A0jednej strane a\u00A0nejakých dvoch uhloch."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Veta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "Ssu",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú v\u00A0dvoch stranách a\u00A0uhle oproti dlhšej z\u00A0týchto strán."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "highligted": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Zdôraznime, že pri vete "
+                },
+                {
+                  "type": "math",
+                  "text": "sus",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " je naozaj dôležité, že zhodný uhol je ten zvieraný dvoma stranami – bez tohto predpokladu zhodnosť nemusí fungovať, viď obrázok. Na ňom máme dva trojuholníky "
+                },
+                {
+                  "type": "math",
+                  "text": "ABC",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " a "
+                },
+                {
+                  "type": "math",
+                  "text": "A'B'C'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", pre ktoré platí "
+                },
+                {
+                  "type": "math",
+                  "text": "|BC|=|B'C'|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "|AC|=|A'C'|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", a "
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta=\\beta'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", avšak zjavne nie sú zhodné."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "image",
+                  "id": "angle-basics-1.sk-15.svg",
+                  "scale": 1.0,
+                  "isInline": false
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Veta "
+                },
+                {
+                  "type": "math",
+                  "text": "Ssu",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " by bola naša záchrana – tu ju však aplikovať nevieme, lebo strana, oproti ktorej je uhol "
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", teda "
+                },
+                {
+                  "type": "math",
+                  "text": "|AC|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", nie je najdlhšia, keďže je zjavne kratšia než "
+                },
+                {
+                  "type": "math",
+                  "text": "|BC|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " \uD83E\uDD72."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Než pôjdeme ďalej, uvedomme si, čo tieto vety znamenajú. Za mňa dobrý pohľad na zhodnosť je takýto: chceme zostrojiť trojuholník, keď máme dané nejaké tri jeho elementy – budú všetky zostrojiteľné trojuholníky zhodné?"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0zhodnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predstavme si, že máme dané tri úsečky dĺžok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z\u00A0ktorých vieme zostrojiť trojuholník. Začneme napr. úsečkou\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dĺžky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0následne zostrojíme dve kružnice: (a) kružnicu so stredom v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0polomerom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; (b) kružnicu so stredom v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0polomerom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tie sa buď nepretnú (keď napr. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c < a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), alebo sa pretnú v\u00A0jedinom bode na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c=a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), alebo sa pretnú v\u00A0dvoch bodoch "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-16.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na konci si uvedomme, že trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú však zrejme vzájomné zrkadlové obrazy podľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Taktiež ak by sme začali inou úsečkou, tak vytvoríme iba posunutie/otočenie tejto konfigurácie."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Uvedomme si, že sme vlastne po ceste dokázali\u00A0trojuholníkovú nerovnosť: súčet dvoch strán trojuholníka je väčší než tretia – náš trojuholník je zostrojiteľný a\u00A0nedegenerovaný\u00A0"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "nemá uhol rovný "
+                        },
+                        {
+                          "type": "math",
+                          "text": "180^\\circ",
+                          "isDisplay": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c>a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Podobne vieme zdôvodniť ďalšie kritériá:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0zhodnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech sú dané strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " medzi nimi. Zostrojme vrchol\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dĺžky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – tá je daná až na zhodné zobrazenie. Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí ležať na polopriamke z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zvierajúcej s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhol\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň vo vzdialenosti\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopriamky zvierajúce s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú dve (po jednej na každej strane "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "): na každej leží práve jeden bod vo vzdialenosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda dostaneme body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zrkadlové obrazy podľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda zhodné."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-17.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0zhodnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0prvom rade si uvedomme, že nezáleží na tom, ktoré dva uhly sú zhodné – ak sa dva trojuholníky zhodujú v\u00A0dvoch uhloch, tak tretí je určený jednoznačne, keďže všetky tri majú súčet uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre účely nášho dôkazu uvážme teda, že sú zhodné práve uhly prihliehajúce zhodnej strane. Nech je to uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri vrchole "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pri vrchole "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0strana "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = |BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " medzi nimi. Zostrojme úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dĺžky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – tá je daná až na zhodné zobrazenie. Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí ležať na polopriamke z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zvierajúcej s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň na polopriamke z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zvierajúcej s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "CB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Súčet vnútorných uhlov pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0trojuholníku je menší než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta + \\gamma < 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0preto nie sú obe polopriamky rovnobežné – pretnú sa v\u00A0jedinom bode\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojuholník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je teda určený jednoznačne (až na zhodné zobrazenia)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-18.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Menej známe tvrdenie "
+                },
+                {
+                  "type": "math",
+                  "text": "Ssu",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " je už máličko ťažšie, preto k\u00A0nemu budú aj návody \uD83D\uDE42."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "zhodnosť "
+                  },
+                  {
+                    "type": "math",
+                    "text": "Ssu",
+                    "isDisplay": false
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0zhodnosti. Navyše, uvedomte si, kde by sa konštrukcia pokazila, keby uhol nebol voči väčšej zo strán – čo by sa stalo, keby boli obe strany rovnako dlhé?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Začnite konštrukciu konštrukciou kratšej úsečky. Ako pokračuje konštrukcia po jej zostrojení?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po zostrojení kratšej úsečky zostrojíme polpriamku pod našim daným zhodným uhlom. Zostáva posledný krok konštrukcie. Rozmyslite, kedy dostaneme žiaden, kedy jeden a\u00A0kedy dva vyhovujúce trojuholníky."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech sú dané strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = |BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " oproti dlhšej strane "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Začneme zostrojením kratšej úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dĺžky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí ležať na polopriamke z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zvierajúcej s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň vo vzdialenosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže na kružnici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " so stredom\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0polomerom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vzdialenosť bodu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od stredu kružnice je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pretože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "vnútri"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopriamka z\u00A0bodu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak začína vnútri kružnice a\u00A0pokračuje smerom von, takže kružnicu pretne práve raz. Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je teda určený jednoznačne, a\u00A0trojuholník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je takisto jednoznačný (až na zhodné zobrazenie)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-19.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pozrime sa, prečo je podmienka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b > a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " podstatná. Ak by bolo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ležal priamo "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "na"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnici\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopriamka z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ju pretínala v\u00A0bode\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " samotnom (čo nedáva trojuholník) a\u00A0v\u00A0práve jednom ďalšom bode – ten je hľadaným\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Konštrukcia teda stále vedie k\u00A0jednoznačnému (rovnoramennému) trojuholníku, takže veta "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " formálne platí aj v\u00A0tomto hraničnom prípade. Pod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ho však samostatne nezaraďujeme: ak vieme, že trojuholník je rovnoramenný so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0poznáme jeden uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak ostatné dva uhly sú už vďaka rovnoramennosti určené (oba pri základni majú veľkosť\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Tá istá konfigurácia je preto pokrytá vetami "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " či "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0nej nepridáva žiadnu novú informáciu."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-20.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ak by bolo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b < a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ležal "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "vonku"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopriamka by ju mohla pretnúť v\u00A0dvoch bodoch – vznikli by tak dva rôzne (nezhodné) trojuholníky – alebo by ju minula celkom, čo nevedie k\u00A0žiadnemu trojuholníku."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-21.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Dôkaz je možné spraviť aj tak, že najprv zostrojíme dlhšiu úsečku. To však vyžaduje znalosť množiny bodov nad pevnou úsečkou majúcich pevný uhol – k\u00A0tomuto sa dostaneme v\u00A0inom materiáli."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V našej geometrickej ceste sa priebežne stretneme so všetkými týmito tvrdeniami. Nateraz si však ukážme nejaké konkrétne aplikácie. Začneme tým najzrejmejším tvrdením, ktoré sa ale tiež sluší a patrí dokázať:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "rovnoramenný trojuholník"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že ak pre trojuholník\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC|=|\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokážte tiež opačnú implikáciu (teda že z\u00A0rovnosti uhlov vyplýva rovnosť dĺžok)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Priama implikácia."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Predpokladajme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je stred "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zhodné podľa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z\u00A0predpokladu, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BM|=|CM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zo\u00A0stredu, spoločná strana "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), odkiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-22.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Opačná implikácia."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Predpokladajme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB| = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je päta kolmice z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABM \\cong \\triangle ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", keďže máme dva zhodné uhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABM| = |\\angle ACM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle AMB| = |\\angle AMC| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0spoločnú stranu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Iný vtipný dôkaz je založený na tom, že dokážeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (všimnite si rôzne poradie vrcholov). V\u00A0prípade, že poznáme rovnaké strany, tak použijeme vetu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " alebo dokonca "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – tá nám následne dá zhodné uhly. V\u00A0prípade, že poznáme rovnaké uhly, to zas bude veta "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0zhodnosť nám dá rovnaké strany."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Vyskúšajte si exaktne dokázať tieto jednoduché poznatky, to už bude jednoduchšie:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnostranný trojuholník má tri zhodné uhly rovné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC| = |BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dáva veta o\u00A0rovnoramennom trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "); analogicky z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = |\\angle BCA|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Všetky tri uhly sú teda zhodné, a\u00A0zo súčtu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je každý "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-23.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnoramenný pravouhlý trojuholník má tri uhly rovné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech je pravý uhol pri vrchole\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0odvesny sú zhodné, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa vety o\u00A0rovnoramennom trojuholníku platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Označme túto spoločnú veľkosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zo súčtu uhlov v\u00A0trojuholníku"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "90^\\circ + \\beta + \\beta = 180^\\circ,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "odkiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\beta = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = 45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-24.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Veľmi šikovná vec použiteľná v\u00A0neľahkých úlohách je nasledovná úloha. Jeden možný dôkaz je cez trigonometriu."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pravouhlý trojuholník má zvyšné dva uhly rovné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď je jeho prepona dvakrát dlhšia než kratšia odvesna."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Povedzme, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je prepona a\u00A0je dvakrát dlhšia než odvesna "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Trikom je uvážiť bod "
+                      },
+                      {
+                        "type": "math",
+                        "text": "B'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " taký, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je stred úsečky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BB'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech náš trojuholník má pravý uhol pri vrchole\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Rightarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Predpokladajme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = 2|AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je taký bod, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je stredom úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB'| = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží medzi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle B'AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vedľajší k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže tiež "
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z\u00A0vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", keďže uhly pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú oba pravé, strana\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je spoločná, a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AB'|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.sk-25.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pretože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BB'| = 2|AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0zo zadania "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = 2|AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Spolu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|BB'| = |BC| = |B'C|,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je rovnostranný a\u00A0všetky jeho uhly sú "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Špeciálne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle B'BC| = 60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zo súčtu uhlov v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dopočítame "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BCA| = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Leftarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Nie je ťažké rozmyslieť si, že úvahy z\u00A0predošlého odstavca vieme ľahko obrátiť – kľúčovú zhodnosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tentokrát dostaneme z\u00A0vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Iné riešenie je uvážiť, že podľa Tálesovej vety je stred\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice opísanej trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zároveň stredom prepony "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". K\u00A0tomuto riešeniu sa podrobnejšie vrátime, keď sa budeme baviť o\u00A0kružniciach."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Čo si zapamätať",
+        "level": 1,
+        "text": {
+          "content": []
+        }
+      },
+      {
+        "title": "Techniky",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pri rovnobežkách hľadáme zhodné striedavé a súhlasné uhly, prípadne uhly so súčtom\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Je užitočné nahliadať na vonkajší uhol trojuholníka ako na súčet dvoch uhlov."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Na prepojenie sveta dĺžok a\u00A0uhlov sa hodí zhodnosť dvoch trojuholníkov."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pomocné body (stred úsečky, zrkadlový obraz, predĺženie) často odhalia zhodnosť alebo špeciálny trojuholník."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Užitočné fakty",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Súčet uhlov v\u00A0trojuholníku je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", všeobecne v\u00A0konvexnom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-uholníku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(n-2) \\cdot 180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Vety o\u00A0zhodnosti trojuholníkov: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "sss",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "sus",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "usu",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "Ssu",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V trojuholníku sú dve strany zhodné práve keď sú zhodné im priľahlé uhly."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pravouhlý trojuholník má preponu dvakrát dlhšiu než odvesnu práve keď má uhly "
+                      },
+                      {
+                        "type": "math",
+                        "text": "90^\\circ, 60^\\circ, 30^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": [
+    {
+      "contentId": "angle-basics-1.sk-1.svg",
+      "originalId": "angles-vertical.pdf",
+      "width": "82.61pt",
+      "height": "65.04pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-2.svg",
+      "originalId": "angles-corresponding.pdf",
+      "width": "106.36pt",
+      "height": "66.59pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-3.svg",
+      "originalId": "angles-alternate.pdf",
+      "width": "100.63pt",
+      "height": "58.17pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-4.svg",
+      "originalId": "angles-supplementary.pdf",
+      "width": "85.68pt",
+      "height": "47.81pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-5.svg",
+      "originalId": "angles-supplementary-derive-vertical.pdf",
+      "width": "95.91pt",
+      "height": "78.49pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-6.svg",
+      "originalId": "angles-vertical-derive-supplementary.pdf",
+      "width": "95.91pt",
+      "height": "78.49pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-7.svg",
+      "originalId": "angles-corresponding-alternate-supplementary-connection.pdf",
+      "width": "98.31pt",
+      "height": "65.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-8.svg",
+      "originalId": "angles-triangle.pdf",
+      "width": "182.63pt",
+      "height": "128.67pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-9.svg",
+      "originalId": "angles-polygon.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-10.svg",
+      "originalId": "angles-polygon-fan.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-11.svg",
+      "originalId": "angles-polygon-interior.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-12.svg",
+      "originalId": "angles-complementary-parallel-statement.pdf",
+      "width": "91.52pt",
+      "height": "72.46pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-13.svg",
+      "originalId": "angles-complementary-parallel-solution.pdf",
+      "width": "85.7pt",
+      "height": "92.24pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-14.svg",
+      "originalId": "angles-complementary-in-triangle.pdf",
+      "width": "153.73pt",
+      "height": "123.67pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-15.svg",
+      "originalId": "angles-sas-warning.pdf",
+      "width": "240.45pt",
+      "height": "68.01pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-16.svg",
+      "originalId": "angles-sss-proof.pdf",
+      "width": "180.33pt",
+      "height": "129.76pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-17.svg",
+      "originalId": "angles-sas-proof.pdf",
+      "width": "190.6pt",
+      "height": "165.53pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-18.svg",
+      "originalId": "angles-asa-proof.pdf",
+      "width": "156.76pt",
+      "height": "165.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-19.svg",
+      "originalId": "angles-Ssa-proof-one-solution.pdf",
+      "width": "116.57pt",
+      "height": "129.18pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-20.svg",
+      "originalId": "angles-Ssa-proof-isosceles.pdf",
+      "width": "116.86pt",
+      "height": "122.28pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-21.svg",
+      "originalId": "angles-Ssa-proof-two-solutions.pdf",
+      "width": "191.58pt",
+      "height": "154.75pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-22.svg",
+      "originalId": "angles-isosceles-triangle.pdf",
+      "width": "117.87pt",
+      "height": "114.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-23.svg",
+      "originalId": "angles-equilateral.pdf",
+      "width": "107.91pt",
+      "height": "97.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-24.svg",
+      "originalId": "angles-isosceles-right-triangle.pdf",
+      "width": "97.95pt",
+      "height": "95.36pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.sk-25.svg",
+      "originalId": "angles-90-60-30.pdf",
+      "width": "146.09pt",
+      "height": "131.24pt",
+      "scale": 1.0
+    }
+  ]
+}

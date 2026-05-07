@@ -236,6 +236,28 @@
             "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by 24 problems from national olympiads, MEMO, ISL, and IMO."
           },
           "authors": ["Patrik Bak"]
+        },
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "ZgFNhI74gQeJl7cEMggw7",
+          "languages": ["sk", "cs", "en"],
+          "slug": {
+            "sk": "zaklady-pocitania-uhlov-1",
+            "cs": "zaklady-pocitani-uhlu-1",
+            "en": "angle-basics-1"
+          },
+          "title": {
+            "sk": "Základy počítania uhlov",
+            "cs": "Základy počítání úhlů",
+            "en": "Angle Chasing Basics"
+          },
+          "description": {
+            "sk": "Základy sveta uhlov bez použitia kružníc. Pokrýva vrcholové, súhlasné, striedavé a vedľajšie uhly, súčet uhlov v mnohouholníku a vety o zhodnosti trojuholníkov.",
+            "cs": "Základy světa úhlů bez použití kružnic. Pokrývá vrcholové, souhlasné, střídavé a vedlejší úhly, součet úhlů v mnohoúhelníku a věty o shodnosti trojúhelníků.",
+            "en": "Foundations of the world of angles without circles. Covers vertical, corresponding, alternate, and supplementary angles, the angle sum in polygons, and the triangle congruence theorems."
+          },
+          "authors": ["Patrik Bak"]
         }
       ]
     },

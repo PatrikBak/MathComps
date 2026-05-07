@@ -1,0 +1,4965 @@
+{
+  "document": {
+    "title": "Základy počítání úhlů",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Geometrie je nejvizuálnější část matematiky – umíme si ji kreslit na papír, v\u00A0softwaru jako "
+                },
+                {
+                  "type": "link",
+                  "url": "https://www.geogebra.org/",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "GeoGebra"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " a\u00A0můžeme se těšit, když na vlastní oči vidíme, že věci v\u00A0ní fungují. Proč tomu tak je však může být záhadou. Abychom tato tajemství pochopili, potřebujeme kousek po kousku budovat základnu znalostí a\u00A0vizuální intuici."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Jedna z\u00A0nejzákladnějších technik je rozumět světu úhlů a\u00A0umět jejich vlastnosti s\u00A0úspěchem používat v\u00A0různých typech úloh. Jen málo zajímavých příkladů úhly nepoužívá. Teorie kolem úhlů přitom není složitá, je však důležité ji budovat pomalu a\u00A0detailně. Začneme s\u00A0nejjednoduššími vlastnostmi, které ani nevyžadují práci s\u00A0kružnicemi. Už ty se však dají s\u00A0úspěchem využít v\u00A0mnoha úlohách."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0tomto materiálu se budeme věnovat úhlům, ale záměrně vynecháme úhly na kružnicích, kterým se patří věnovat samostatnou pozornost. Na chvíli zapomeňme, že kružnice existují."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Na závěr úvodu jedna menší poznámka o\u00A0konvenci. V\u00A0tomto materiálu uvidíme mnoho obrázků trojúhelníků, ve kterých je bod\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " nakreslen nahoře. Ukazuje se, že tento způsob kreslení je mezinárodní standard, zejména na poli matematické olympiády a\u00A0podobných soutěží se to tak zvykne dělat. V\u00A0Česku a\u00A0na\u00A0Slovensku je však ve školách stále zvykem kreslit\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "C",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " nahoře. V\u00A0některých zemích lze vidět i\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " nahoře, např. na Ukrajině. Z\u00A0hlediska řešení úloh je vždy dobré nakreslit si nahoru ten bod, u\u00A0kterého obrázek vypadá co nejsymetričtěji, snadněji v\u00A0něm jdou vidět další symetrické věci. V\u00A0tomto materiálu budou úlohy zadávány tak, že ta symetrie půjde vidět více při\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " nahoře \uD83D\uDE42."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Základy světa úhlů",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0této sekci si odvodíme ty nejjednodušší vlastnosti související s\u00A0úhly. Pevně věřím, že klíčem ke\u00A0zvládnutí geometrie je porozumění věcem od základů a\u00A0do hloubky, proto se těmto jednoduchým vlastnostem budeme věnovat více."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Základní vlastnosti úhlů, které běžně používáme skoro bez přemýšlení při řešení úloh:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Vrcholové úhly jsou shodné: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.cs-1.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Souhlasné úhly jsou shodné: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.cs-2.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Střídavé úhly jsou shodné: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.cs-3.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Vedlejší úhly mají součet "
+                          },
+                          {
+                            "type": "math",
+                            "text": "180^\\circ",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.cs-4.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "highligted": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Tyto vlastnosti spolu velmi přirozeně souvisí, menší cvičení k\u00A0zamyšlení:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Uvědomte si, že:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "z\u00A0vlastnosti o\u00A0vedlejších úhlech vyplývá vlastnost vrcholových úhlů (a\u00A0naopak)"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "z\u00A0kterékoli dvojice vlastností o\u00A0vrcholových, souhlasných, střídavých úhlech vyplývá ta třetí vlastnost"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerAlphaParens"
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "(a)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Vedlejší úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0danému úhlu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má velikost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Úhel vedlejší k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má zase velikost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - (180^\\circ - \\alpha) = \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ten je však zároveň vrcholový úhel k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy jsou vrcholové úhly shodné."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-5.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Naopak, předpokládejme vlastnost o\u00A0vrcholových úhlech a\u00A0označme po sobě jdoucí úhly v\u00A0průsečíku dvou přímek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ze shodnosti vrcholových úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Součet všech čtyř je plný úhel, tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta + \\gamma + \\delta = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po dosazení dostáváme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\alpha + 2\\beta = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – to je právě vlastnost vedlejších úhlů."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-6.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "(b)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Všechny tři vlastnosti říkají, že jistá dvojice úhlů má stejnou velikost."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podívejme se na trojici úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z\u00A0obrázku a\u00A0na to, co o\u00A0jejich vztazích tvrdí jednotlivé vlastnosti. Pro dvojici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při horním průsečíku tvrdí vlastnost vrcholových úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro dvojici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvrdí vlastnost souhlasných úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Konečně pro dvojici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvrdí vlastnost střídavých úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-7.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tři vlastnosti tedy tvrdí tři rovnosti mezi týmiž třemi úhly, jen přes různé dvojice. Jakmile platí libovolné dvě, třetí plyne tranzitivitou: např. pokud víme (V) a\u00A0(S), tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili (St). Ostatní dvojice analogicky."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Následující tvrzení všichni známe, umíte ho však dokázat?"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Součet úhlů v\u00A0trojúhelníku je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Veďme přes vrchol\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přímku rovnoběžnou s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je příčka rovnoběžek, úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou střídavé, tedy stejné. Analogicky přes příčku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou úhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " střídavé. Úhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží vedle sebe podél přímky přes\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta + \\gamma = 180^\\circ.",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-8.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Toto tvrzení se rozhodně dá zobecnit. Víme například, že součet úhlů ve\u00A0čtyřúhelníku je "
+                },
+                {
+                  "type": "math",
+                  "text": "360^\\circ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Jak je to v\u00A05-úhelníku? A\u00A0jak v\u00A067-úhelníku? Odpovědí je následující tvrzení:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n \\ge 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je přirozené číslo. Součet úhlů v\u00A0konvexním "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku je roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2) \\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Důkaz 1 (matematická indukce)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Základ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": součet úhlů trojúhelníku je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ = (3-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Indukční krok: nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_2 \\ldots A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je konvexní "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelník. Úhlopříčkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jej rozdělíme na trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_n A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0konvexní "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_2 \\ldots A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": úhly při vrcholech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_2, \\ldots, A_{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " patří celé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku, úhel při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " patří celý trojúhelníku a\u00A0úhly při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se rozdělí mezi oba útvary tak, aby jejich části daly původní vnitřní úhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku. Součet úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku je tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\underbrace{180^\\circ}_{\\text{trojúhelník}} + \\underbrace{(n-2) \\cdot 180^\\circ}_{n\\text{-úhelník}} = (n-1) \\cdot 180^\\circ = \\bigl((n+1) - 2\\bigr) \\cdot 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-9.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Důkaz 2 (vějířová triangulace)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Veďme z\u00A0vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhlopříčky do každého nesousedního vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_3, A_4, \\ldots, A_{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vznikne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojúhelníků pokrývajících vnitřek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku bez překrytí. Při každém vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se úhly sousedních trojúhelníků při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přesně poskládají na vnitřní úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže součet úhlů všech trojúhelníků se rovná součtu vnitřních úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku, čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-10.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Důkaz\u00A02 je "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "rozbalený"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " důkaz\u00A01: indukce odřezává trojúhelníky jeden po druhém, zde je vidíme všechny najednou."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Důkaz 3 (vnitřní bod)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Zvolme bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " uvnitř "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku a\u00A0spojme ho s\u00A0každým vrcholem. Vznikne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojúhelníků s\u00A0celkovým součtem úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Úhly trojúhelníků při každém vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spolu tvoří vnitřní úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; úhly trojúhelníků při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spolu tvoří plný úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tedy součet vnitřních úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n\\cdot 180^\\circ - 360^\\circ = (n-2)\\cdot 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-11.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (nekonvexní mnohoúhelníky)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Vzorec "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí i\u00A0pro navzájem se neprotínající nekonvexní mnohoúhelníky, pokud všechny vnitřní úhly měříme směrem dovnitř – tedy i\u00A0úhly větší než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " počítáme jako takové."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vějířová triangulace z\u00A0jednoho vrcholu nemusí fungovat ani z\u00A0konvexního vrcholu – některé úhlopříčky mohou procházet mimo mnohoúhelník. Platí však, že každý jednoduchý "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelník se dá rozdělit na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojúhelníků (ne nutně vějířovitě), což důkaz zachrání. Důvodem je indukce přes trojúhelník tvořený nějakým vrcholem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0jeho sousedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "U",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "W",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", který leží celý uvnitř našeho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelníku. Odříznutím "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhlopříčkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "UW",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-úhelník; opakováním tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojúhelníků. Dá se dokázat, že takový trojúhelník vždy existuje (dokonce dva), viz "
+                    },
+                    {
+                      "type": "link",
+                      "url": "https://en.wikipedia.org/wiki/Two_ears_theorem",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "věta o\u00A0dvou uších"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "K\u00A0důkazu\u00A03: funguje jen pokud existuje vnitřní bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " viditelný ze všech vrcholů (tj. úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OA_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží celé uvnitř). Pro některé nekonvexní mnohoúhelníky takový "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nemusí existovat (zkuste takový nakreslit) – v\u00A0takovém případě se důkaz\u00A03 nedá přímo zachránit a\u00A0je třeba sáhnout po triangulaci z\u00A0důkazu\u00A02."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Teď uveďme ještě dvě jednoduchá, ale užitečná pomocná tvrzení:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že součet úhlů na obrázku je roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-12.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhel svíraný příčkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0rovnoběžkami na straně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (jako na obrázku). Souhlasné úhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou shodné. Při vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vedlejší, tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta + \\alpha = 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-13.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že úhel s\u00A0otazníkem na obrázku je roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha+\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-14.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ze součtu úhlů v\u00A0trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ACB| = 180^\\circ - \\alpha - \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vnější úhel při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vedlejší k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "180^\\circ - |\\angle ACB| = \\alpha + \\beta.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-14.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Poslední dvě cvičení možná vypadala velmi triviálně. Realita však je, že v\u00A0praktických úlohách jsou velmi užitečná – když máme obrovský netriviální obrázek a\u00A0máme provést za sebou velký počet úhlových operací, tak je opravdu velmi výhodné si i\u00A0jen kousek té práce zjednodušit – v\u00A0případě rovnoběžek nemusíme uvažovat pomocný souhlasný úhel a\u00A0v\u00A0případě trojúhelníku nemusíme pracovat s\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "180^\\circ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Základy světa délek",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Zatím jsme fungovali pouze ve světě úhlů a\u00A0vůbec jsme neřešili délky. Geometrie však začne být zajímavá, když tyto světy začneme propojovat. Základem pro nás bude "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "shodnost trojúhelníků"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Připomeňme si kritéria."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Věty o\u00A0shodnosti trojúhelníků:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Věta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "sss",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojúhelníky jsou shodné, pokud se shodují ve všech třech stranách."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Věta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "sus",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojúhelníky jsou shodné, pokud se shodují ve dvou stranách a\u00A0úhlu, který tyto strany svírají."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Věta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "usu",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojúhelníky jsou shodné, pokud se shodují v\u00A0jedné straně a\u00A0nějakých dvou úhlech."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Věta "
+                          },
+                          {
+                            "type": "math",
+                            "text": "Ssu",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": dva trojúhelníky jsou shodné, pokud se shodují ve dvou stranách a\u00A0úhlu naproti delší z\u00A0těchto stran."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "highligted": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Zdůrazněme, že u\u00A0věty "
+                },
+                {
+                  "type": "math",
+                  "text": "sus",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " je opravdu důležité, že shodný úhel je ten svíraný oběma stranami – bez tohoto předpokladu shodnost nemusí fungovat, viz obrázek. Na něm máme dva trojúhelníky "
+                },
+                {
+                  "type": "math",
+                  "text": "ABC",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " a\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A'B'C'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", pro které platí "
+                },
+                {
+                  "type": "math",
+                  "text": "|BC|=|B'C'|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "|AC|=|A'C'|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", a\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta=\\beta'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", avšak zjevně nejsou shodné."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "image",
+                  "id": "angle-basics-1.cs-15.svg",
+                  "scale": 1.0,
+                  "isInline": false
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Věta "
+                },
+                {
+                  "type": "math",
+                  "text": "Ssu",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " by byla naše záchrana – zde ji však aplikovat neumíme, protože strana, naproti které leží úhel "
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", tedy "
+                },
+                {
+                  "type": "math",
+                  "text": "|AC|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", není nejdelší, neboť je zjevně kratší než "
+                },
+                {
+                  "type": "math",
+                  "text": "|BC|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " \uD83E\uDD72."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Než půjdeme dál, uvědomme si, co tyto věty znamenají. Z\u00A0mého pohledu je dobrý pohled na shodnost takový: chceme sestrojit trojúhelník, když máme dány nějaké tři jeho elementy – budou všechny sestrojitelné trojúhelníky shodné?"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Přesvědčte se o\u00A0platnosti věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0shodnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Představme si, že máme dány tři úsečky délek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ze kterých umíme sestrojit trojúhelník. Začneme např. úsečkou\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " délky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0následně sestrojíme dvě kružnice: (a) kružnici se středem v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0poloměrem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; (b) kružnici se středem v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0poloměrem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ty se buď neprotnou (když např. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c < a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), nebo se protnou v\u00A0jediném bodě na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c=a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), nebo se protnou ve dvou bodech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-16.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na konci si uvědomme, že trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou však zřejmě vzájemně zrcadlovými obrazy podle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Také pokud bychom začali jinou úsečkou, tak vytvoříme pouze posunutí/otočení této konfigurace."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Uvědomme si, že jsme vlastně po cestě dokázali\u00A0trojúhelníkovou nerovnost: součet dvou stran trojúhelníku je větší než třetí – náš trojúhelník je sestrojitelný a\u00A0nedegenerovaný\u00A0"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "nemá úhel rovný "
+                        },
+                        {
+                          "type": "math",
+                          "text": "180^\\circ",
+                          "isDisplay": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě tehdy, když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c>a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Podobně umíme zdůvodnit další kritéria:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Přesvědčte se o\u00A0platnosti věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0shodnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť jsou dány strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " mezi nimi. Sestrojme vrchol\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " délky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – ta je dána až na shodné zobrazení. Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí ležet na polopřímce z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " svírající s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhel\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň ve vzdálenosti\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopřímky svírající s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou dvě (po jedné na každé straně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "): na každé leží právě jeden bod ve vzdálenosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy dostaneme body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou zrcadlovými obrazy podle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy shodné."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-17.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Přesvědčte se o\u00A0platnosti věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0shodnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0prvé řadě si uvědomme, že nezáleží na tom, které dva úhly jsou shodné – pokud se dva trojúhelníky shodují ve dvou úhlech, tak třetí je určen jednoznačně, neboť všechny tři mají součet úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro účely našeho důkazu uvažme tedy, že jsou shodné právě úhly přiléhající ke shodné straně. Nechť je to úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0strana "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = |BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " mezi nimi. Sestrojme úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " délky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – ta je dána až na shodné zobrazení. Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí ležet na polopřímce z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " svírající s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň na polopřímce z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " svírající s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "CB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Součet vnitřních úhlů při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0trojúhelníku je menší než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta + \\gamma < 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0proto nejsou obě polopřímky rovnoběžné – protnou se v\u00A0jediném bodě\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy určen jednoznačně (až na shodná zobrazení)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-18.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Méně známé tvrzení "
+                },
+                {
+                  "type": "math",
+                  "text": "Ssu",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " je už trošičku těžší, proto k\u00A0němu budou i\u00A0návody \uD83D\uDE42."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "shodnost "
+                  },
+                  {
+                    "type": "math",
+                    "text": "Ssu",
+                    "isDisplay": false
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Přesvědčte se o\u00A0platnosti věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " o\u00A0shodnosti. Navíc si uvědomte, kde by se konstrukce pokazila, kdyby úhel nebyl naproti větší ze stran – co by se stalo, kdyby byly obě strany stejně dlouhé?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Začněte konstrukci konstrukcí kratší úsečky. Jak pokračuje konstrukce po jejím sestrojení?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po sestrojení kratší úsečky sestrojíme polopřímku pod naším daným shodným úhlem. Zbývá poslední krok konstrukce. Rozmyslete, kdy dostaneme žádný, kdy jeden a\u00A0kdy dva vyhovující trojúhelníky."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť jsou dány strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = |BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " naproti delší straně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Začneme sestrojením kratší úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " délky\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí ležet na polopřímce z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " svírající s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň ve vzdálenosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili na kružnici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se středem\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0poloměrem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vzdálenost bodu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od středu kružnice je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "uvnitř"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopřímka z\u00A0bodu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak začíná uvnitř kružnice a\u00A0pokračuje směrem ven, takže kružnici protne právě jednou. Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy určen jednoznačně, a\u00A0trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je rovněž jednoznačný (až na shodné zobrazení)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-19.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podívejme se, proč je podmínka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b > a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " podstatná. Pokud by bylo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ležel přímo "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "na"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnici\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopřímka z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ji protínala v\u00A0bodě\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " samotném (což nedává trojúhelník) a\u00A0v\u00A0právě jednom dalším bodě – ten je hledaným\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Konstrukce tedy stále vede k\u00A0jednoznačnému (rovnoramennému) trojúhelníku, takže věta "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " formálně platí i\u00A0v\u00A0tomto hraničním případě. Pod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ji však samostatně nezařazujeme: pokud víme, že trojúhelník je rovnoramenný se "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0známe jeden úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak ostatní dva úhly jsou už díky rovnoramennosti určeny (oba při základně mají velikost\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Tatáž konfigurace je proto pokryta větami "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " či "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0ní nepřidává žádnou novou informaci."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-20.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pokud by bylo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b < a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ležel "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "vně"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Polopřímka by ji mohla protnout ve dvou bodech – vznikly by tak dva různé (neshodné) trojúhelníky – nebo by ji minula úplně, což nevede k\u00A0žádnému trojúhelníku."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-21.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Důkaz je možné provést i\u00A0tak, že nejprve sestrojíme delší úsečku. To však vyžaduje znalost množiny bodů nad pevnou úsečkou majících pevný úhel – k\u00A0tomu se dostaneme v\u00A0jiném materiálu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Na naší geometrické cestě se průběžně setkáme se všemi těmito tvrzeními. Prozatím si však ukažme nějaké konkrétní aplikace. Začneme tím nejzřejmějším tvrzením, které se ale také sluší a\u00A0patří dokázat:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "rovnoramenný trojúhelník"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokažte, že pokud pro trojúhelník\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC|=|\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokažte také opačnou implikaci (tedy že z\u00A0rovnosti úhlů vyplývá rovnost délek)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Přímá implikace."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Předpokládejme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je střed "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou shodné podle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z\u00A0předpokladu, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BM|=|CM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ze\u00A0středu, společná strana "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), odkud "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-22.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Opačná implikace."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Předpokládejme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB| = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je pata kolmice z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podle věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABM \\cong \\triangle ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", neboť máme dva shodné úhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABM| = |\\angle ACM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle AMB| = |\\angle AMC| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0společnou stranu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Jiný vtipný důkaz je založen na tom, že dokážeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (všimněte si různého pořadí vrcholů). V\u00A0případě, že známe stejné strany, použijeme větu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo dokonce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sss",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – ta nám následně dá shodné úhly. V\u00A0případě, že známe stejné úhly, to zase bude věta "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0shodnost nám dá stejné strany."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Vyzkoušejte si exaktně dokázat tyto jednoduché poznatky, to už bude jednodušší:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnostranný trojúhelník má tři shodné úhly rovny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC| = |BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dává věta o\u00A0rovnoramenném trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "); analogicky z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|BC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = |\\angle BCA|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Všechny tři úhly jsou tedy shodné, a\u00A0ze součtu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je každý "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-23.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnoramenný pravoúhlý trojúhelník má tři úhly rovny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť je pravý úhel při vrcholu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0odvěsny jsou shodné, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podle věty o\u00A0rovnoramenném trojúhelníku platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Označme tuto společnou velikost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ze součtu úhlů v\u00A0trojúhelníku"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "90^\\circ + \\beta + \\beta = 180^\\circ,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "odkud "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\beta = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = 45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-24.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Velmi šikovná věc použitelná v\u00A0nelehkých úlohách je následující úloha. Jeden možný důkaz je přes trigonometrii."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pravoúhlý trojúhelník má zbývající dva úhly rovny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě tehdy, když je jeho přepona dvakrát delší než kratší odvěsna."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Řekněme, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je přepona a\u00A0je dvakrát delší než odvěsna "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Trikem je uvážit bod "
+                      },
+                      {
+                        "type": "math",
+                        "text": "B'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " takový, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je střed úsečky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BB'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť náš trojúhelník má pravý úhel při vrcholu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Rightarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Předpokládejme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = 2|AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je takový bod, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je středem úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB'| = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží mezi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle B'AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vedlejší k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAC| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili také "
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z\u00A0věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", neboť úhly při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou oba pravé, strana\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je společná, a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AB'|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.cs-25.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je středem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BB'| = 2|AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0ze zadání "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = 2|AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Spolu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|BB'| = |BC| = |B'C|,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je rovnostranný a\u00A0všechny jeho úhly jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Speciálně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABC| = |\\angle B'BC| = 60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ze součtu úhlů v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dopočítáme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BCA| = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Leftarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Není těžké rozmyslet si, že úvahy z\u00A0předchozího odstavce umíme snadno obrátit – klíčovou shodnost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tentokrát dostaneme z\u00A0věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Jiné řešení je uvážit, že podle Thaletovy věty je střed\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice opsané trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zároveň středem přepony "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". K\u00A0tomuto řešení se podrobněji vrátíme, až se budeme bavit o\u00A0kružnicích."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Co si zapamatovat",
+        "level": 1,
+        "text": {
+          "content": []
+        }
+      },
+      {
+        "title": "Techniky",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Při rovnoběžkách hledáme shodné střídavé a\u00A0souhlasné úhly, případně úhly se součtem\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Je užitečné nahlížet na vnější úhel trojúhelníku jako na součet dvou úhlů."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pro propojení světa délek a\u00A0úhlů se hodí shodnost dvou trojúhelníků."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pomocné body (střed úsečky, zrcadlový obraz, prodloužení) často odhalí shodnost nebo speciální trojúhelník."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Užitečná fakta",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Součet úhlů v\u00A0trojúhelníku je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", obecně v\u00A0konvexním "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-úhelníku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(n-2) \\cdot 180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Věty o\u00A0shodnosti trojúhelníků: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "sss",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "sus",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "usu",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "Ssu",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V\u00A0trojúhelníku jsou dvě strany shodné právě když jsou shodné jim přilehlé úhly."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pravoúhlý trojúhelník má přeponu dvakrát delší než odvěsnu právě když má úhly "
+                      },
+                      {
+                        "type": "math",
+                        "text": "90^\\circ, 60^\\circ, 30^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": [
+    {
+      "contentId": "angle-basics-1.cs-1.svg",
+      "originalId": "angles-vertical.pdf",
+      "width": "82.61pt",
+      "height": "65.04pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-2.svg",
+      "originalId": "angles-corresponding.pdf",
+      "width": "106.36pt",
+      "height": "66.59pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-3.svg",
+      "originalId": "angles-alternate.pdf",
+      "width": "100.63pt",
+      "height": "58.17pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-4.svg",
+      "originalId": "angles-supplementary.pdf",
+      "width": "85.68pt",
+      "height": "47.81pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-5.svg",
+      "originalId": "angles-supplementary-derive-vertical.pdf",
+      "width": "95.91pt",
+      "height": "78.49pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-6.svg",
+      "originalId": "angles-vertical-derive-supplementary.pdf",
+      "width": "95.91pt",
+      "height": "78.49pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-7.svg",
+      "originalId": "angles-corresponding-alternate-supplementary-connection.pdf",
+      "width": "98.31pt",
+      "height": "65.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-8.svg",
+      "originalId": "angles-triangle.pdf",
+      "width": "182.63pt",
+      "height": "128.67pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-9.svg",
+      "originalId": "angles-polygon.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-10.svg",
+      "originalId": "angles-polygon-fan.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-11.svg",
+      "originalId": "angles-polygon-interior.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-12.svg",
+      "originalId": "angles-complementary-parallel-statement.pdf",
+      "width": "91.52pt",
+      "height": "72.46pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-13.svg",
+      "originalId": "angles-complementary-parallel-solution.pdf",
+      "width": "85.7pt",
+      "height": "92.24pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-14.svg",
+      "originalId": "angles-complementary-in-triangle.pdf",
+      "width": "153.73pt",
+      "height": "123.67pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-15.svg",
+      "originalId": "angles-sas-warning.pdf",
+      "width": "240.45pt",
+      "height": "68.01pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-16.svg",
+      "originalId": "angles-sss-proof.pdf",
+      "width": "180.33pt",
+      "height": "129.76pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-17.svg",
+      "originalId": "angles-sas-proof.pdf",
+      "width": "190.6pt",
+      "height": "165.53pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-18.svg",
+      "originalId": "angles-asa-proof.pdf",
+      "width": "156.76pt",
+      "height": "165.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-19.svg",
+      "originalId": "angles-Ssa-proof-one-solution.pdf",
+      "width": "116.57pt",
+      "height": "129.18pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-20.svg",
+      "originalId": "angles-Ssa-proof-isosceles.pdf",
+      "width": "116.86pt",
+      "height": "122.28pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-21.svg",
+      "originalId": "angles-Ssa-proof-two-solutions.pdf",
+      "width": "191.58pt",
+      "height": "154.75pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-22.svg",
+      "originalId": "angles-isosceles-triangle.pdf",
+      "width": "117.87pt",
+      "height": "114.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-23.svg",
+      "originalId": "angles-equilateral.pdf",
+      "width": "107.91pt",
+      "height": "97.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-24.svg",
+      "originalId": "angles-isosceles-right-triangle.pdf",
+      "width": "97.95pt",
+      "height": "95.36pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.cs-25.svg",
+      "originalId": "angles-90-60-30.pdf",
+      "width": "146.09pt",
+      "height": "131.24pt",
+      "scale": 1.0
+    }
+  ]
+}

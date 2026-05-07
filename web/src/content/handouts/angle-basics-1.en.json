@@ -1,0 +1,4971 @@
+{
+  "document": {
+    "title": "Angle Chasing Basics",
+    "sections": [
+      {
+        "title": "Introduction",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Geometry is the most visual part of mathematics – we can draw it on paper, in software like "
+                },
+                {
+                  "type": "link",
+                  "url": "https://www.geogebra.org/",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "GeoGebra"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ", and we can enjoy seeing with our own eyes that things in it work. Why this is so, however, can be a mystery. To uncover these secrets, we need to build up a foundation of knowledge and visual intuition piece by piece."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "One of the most fundamental techniques is to understand the world of angles and to know how to use their properties successfully in various types of problems. Only a few interesting examples don't use angles. The theory around angles is not complicated, but it is important to build it up slowly and in detail. We will start with the simplest properties, which don't even require working with circles. Even these can already be used successfully in many problems."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In this handout we will focus on angles, but we will deliberately leave out angles in circles, which deserve separate attention. For a moment, let's forget that circles exist."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "To close the introduction, a small note about convention. In this handout we will see many diagrams of triangles in which vertex\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " is drawn at the top. It turns out that this way of drawing is the international standard, especially in the world of the Mathematical Olympiad and similar competitions. In Czechia and Slovakia, however, schools still customarily draw\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "C",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " at the top. In some countries one can also see\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "B",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " at the top, e.g. in Ukraine. From the point of view of solving problems, it is always a good idea to put at the top the vertex that makes the diagram look as symmetric as possible – it is then easier to spot further symmetric things in it. In this handout the problems will be posed so that the symmetry is more visible with\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " at the top \uD83D\uDE42."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Basics of the World of Angles",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In this section we will derive the simplest properties related to angles. I firmly believe that the key to mastering geometry is understanding things from the ground up and in depth, so we will spend more time on these simple properties."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Basic properties of angles, which we commonly use almost without thinking when solving problems:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Vertical angles are equal: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.en-1.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Corresponding angles are equal: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.en-2.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Alternate angles are equal: "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.en-3.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Angles in a linear pair sum to "
+                          },
+                          {
+                            "type": "math",
+                            "text": "180^\\circ",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": "
+                          },
+                          {
+                            "type": "image",
+                            "id": "angle-basics-1.en-4.svg",
+                            "scale": 1.0,
+                            "isInline": false
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "highligted": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "These properties are very naturally related to one another; a small exercise to ponder:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Convince yourself that:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "the linear-pair property implies the vertical-angles property (and vice versa)"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "any two of the three properties about vertical, corresponding, and alternate angles imply the third"
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerAlphaParens"
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "(a)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in a linear pair with a given angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The angle in a linear pair with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in turn has measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - (180^\\circ - \\alpha) = \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". But this last angle is also vertical to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so vertical angles are equal."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-5.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Conversely, assume the vertical-angles property and label the consecutive angles at the intersection of two lines "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By the equality of vertical angles, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\delta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The sum of all four is a full angle, i.e. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta + \\gamma + \\delta = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Substituting, we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\alpha + 2\\beta = 360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – which is exactly the linear-pair property."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-6.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "(b)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " All three properties say that a certain pair of angles has the same measure."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Look at the three angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in the figure and at what each property says about their relationships. For the pair "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at the upper intersection, the vertical-angles property gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". For the pair "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the corresponding-angles property gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Finally, for the pair "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the alternate-angles property gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-7.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The three properties therefore assert three equalities among the same three angles, just via different pairs. As soon as any two of them hold, the third follows by transitivity: e.g. if (V) and (C) hold, then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is (A). The other pairs are analogous."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The following statement is familiar to all of us, but can you prove it?"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The sum of the angles in a triangle is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Through vertex\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " draw a line parallel to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a transversal of the parallel lines, the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are alternate, hence equal. Similarly, via the transversal "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are alternate. The angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie next to each other along the line through\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha + \\beta + \\gamma = 180^\\circ.",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-8.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "This statement can certainly be generalized. We know, for example, that the sum of the angles in a quadrilateral is "
+                },
+                {
+                  "type": "math",
+                  "text": "360^\\circ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". What about a pentagon? And a 67-gon? The answer is the following statement:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n \\ge 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a natural number. The sum of the angles in a convex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon equals "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2) \\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Proof 1 (mathematical induction)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Base case "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": the sum of the angles of a triangle is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ = (3-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Inductive step: let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_2 \\ldots A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a convex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon. The diagonal "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splits it into a triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_n A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and a convex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1 A_2 \\ldots A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": the angles at vertices "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_2, \\ldots, A_{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " belong entirely to the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon, the angle at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " belongs entirely to the triangle, and the angles at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are split between the two figures so that their parts add up to the original interior angles of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon. The angle sum of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon is therefore"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\underbrace{180^\\circ}_{\\text{triangle}} + \\underbrace{(n-2) \\cdot 180^\\circ}_{n\\text{-gon}} = (n-1) \\cdot 180^\\circ = \\bigl((n+1) - 2\\bigr) \\cdot 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-9.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Proof 2 (fan triangulation)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " From vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " draw diagonals to every non-adjacent vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_3, A_4, \\ldots, A_{n-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This produces "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " triangles that cover the interior of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon without overlap. At each vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the angles of the adjacent triangles at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " assemble exactly into the interior angle of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so the sum of the angles of all triangles equals the sum of the interior angles of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon, i.e. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-10.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Proof\u00A02 is an "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "unrolled"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " version of Proof\u00A01: induction cuts off triangles one by one, and here we see them all at once."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Proof 3 (interior point)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Choose a point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in the interior of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon and connect it to every vertex. This produces "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " triangles with a total angle sum of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". At each vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon, the triangle angles at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " together form the entire interior angle of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon there; the triangle angles at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " together form a full angle of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "360^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". So the sum of the interior angles of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon is"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n\\cdot 180^\\circ - 360^\\circ = (n-2)\\cdot 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-11.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (non-convex polygons)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The formula "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-2)\\cdot 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside – so we count angles greater than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " as such."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A fan triangulation from a single vertex may fail even from a convex vertex – some diagonals can pass outside the polygon. It is still true, however, that every simple "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon can be split into "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and its neighbors "
+                    },
+                    {
+                      "type": "math",
+                      "text": "U",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "W",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " that lies entirely inside our "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon. Cutting "
+                    },
+                    {
+                      "type": "math",
+                      "text": "V",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " off along the diagonal "
+                    },
+                    {
+                      "type": "math",
+                      "text": "UW",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " gives an "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon; iterating yields "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n-2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " triangles. One can prove that such a triangle always exists (in fact, two of them); see the "
+                    },
+                    {
+                      "type": "link",
+                      "url": "https://en.wikipedia.org/wiki/Two_ears_theorem",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "two ears theorem"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As for Proof\u00A03: it works only if there is an interior point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " visible from every vertex (i.e., the segments "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OA_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie entirely inside). For some non-convex polygons no such "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " exists (try drawing one) – in that case Proof\u00A03 cannot be salvaged directly and one must fall back on the triangulation from Proof\u00A02."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Now let's state two more simple but useful auxiliary claims:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the sum of the angles in the figure equals "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-12.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " denote the angle that the transversal "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " makes with the parallel lines on the side of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (as in the figure). The corresponding angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are equal. At vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " the angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " form a linear pair, so"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta + \\alpha = 180^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-13.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that the angle marked with a question mark in the figure equals "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha+\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-14.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "From the angle sum in the triangle, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ACB = 180^\\circ - \\alpha - \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The exterior angle at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is in a linear pair with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "180^\\circ - \\angle ACB = \\alpha + \\beta.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-14.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The last two exercises may have looked very trivial. The reality, however, is that in practical problems they are very useful – when we have a huge non-trivial diagram and have to chain together a large number of angle operations, it is genuinely advantageous to simplify even a small piece of that work. In the parallel-lines case we don't have to introduce an auxiliary corresponding angle, and in the triangle case we don't have to work with\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "180^\\circ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Basics of the World of Lengths",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "So far we have only operated in the world of angles and have not dealt with lengths at all. Geometry, however, becomes interesting once we start connecting these worlds. Our foundation will be "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "triangle congruence"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Let us recall the criteria."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Triangle congruence theorems:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "SSS",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": two triangles are congruent if they agree on all three sides."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "SAS",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": two triangles are congruent if they agree on two sides and the angle between them."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "ASA",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": two triangles are congruent if they agree on one side and any two angles."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "math",
+                            "text": "SsA",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": two triangles are congruent if they agree on two sides and the angle opposite the longer of these sides."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                }
+              ],
+              "highligted": true
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Let us emphasize that in "
+                },
+                {
+                  "type": "math",
+                  "text": "SAS",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " it really is important that the equal angle be the one between the two sides – without this assumption, congruence may fail; see the figure. There we have two triangles "
+                },
+                {
+                  "type": "math",
+                  "text": "ABC",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " and "
+                },
+                {
+                  "type": "math",
+                  "text": "A'B'C'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " for which "
+                },
+                {
+                  "type": "math",
+                  "text": "BC = B'C'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "AC = A'C'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", and "
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta = \\beta'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", yet they are clearly not congruent."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "image",
+                  "id": "angle-basics-1.en-15.svg",
+                  "scale": 1.0,
+                  "isInline": false
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The "
+                },
+                {
+                  "type": "math",
+                  "text": "SsA",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " theorem would be our rescue – but here we cannot apply it, because the side opposite the angle "
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", namely "
+                },
+                {
+                  "type": "math",
+                  "text": "AC",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", is not the longest, since it is clearly shorter than "
+                },
+                {
+                  "type": "math",
+                  "text": "BC",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " \uD83E\uDD72."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Before we go further, let us understand what these theorems mean. In my view, a good way to look at congruence is the following: we want to construct a triangle when given some three of its elements – will all the constructible triangles be congruent?"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "example",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Convince yourself of the validity of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SSS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " congruence theorem."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Imagine we are given three segments of lengths "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " from which a triangle can be built. Start, say, with the segment\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of length\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and then construct two circles: (a) the circle centered at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with radius "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; (b) the circle centered at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with radius "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". They either fail to meet (when e.g. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c < a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), or they meet at a single point on "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (when "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c=a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), or they meet at two points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-16.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Finally, observe that the triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are clearly mirror images of each other across "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Likewise, had we started from a different segment, we would only produce a translation/rotation of this configuration."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Note that along the way we essentially proved the triangle inequality: the sum of two sides of a triangle is greater than the third – our triangle is constructible and non-degenerate\u00A0"
+                    },
+                    {
+                      "type": "footnote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "has no angle equal to "
+                        },
+                        {
+                          "type": "math",
+                          "text": "180^\\circ",
+                          "isDisplay": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " if and only if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b+c>a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "We can justify the other criteria similarly:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Convince yourself of the validity of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " congruence theorem."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Suppose the sides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c = AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAC = \\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " between them are given. Construct vertex\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of length\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – this is determined up to congruence. Point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must lie on a ray from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " making angle\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and at distance\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". There are two rays from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " making angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (one on each side of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "): on each there is exactly one point at distance "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", giving points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are mirror images across "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", hence congruent."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-17.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Convince yourself of the validity of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ASA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " congruence theorem."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "First, note that it doesn't matter which two angles are equal – if two triangles agree on two angles, then the third is determined uniquely, since all three angles sum to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For the purposes of our proof, suppose the equal angles are exactly the ones adjacent to the equal side. Let them be the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " between them. Construct the segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of length\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – this is determined up to congruence. Point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must lie on the ray from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " making angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and on the ray from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " making angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The sum of the interior angles at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " in a triangle is less than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta + \\gamma < 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so the two rays are not parallel – they meet at a single point\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is therefore determined uniquely (up to congruences)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-18.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The less well-known "
+                },
+                {
+                  "type": "math",
+                  "text": "SsA",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " theorem is a touch harder, so we will provide hints \uD83D\uDE42."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "math",
+                    "text": "SsA",
+                    "isDisplay": false
+                  },
+                  {
+                    "type": "text",
+                    "text": " congruence"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Convince yourself of the validity of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " congruence theorem. In addition, figure out where the construction would break down if the angle were not opposite the longer of the two sides – what would happen if both sides were equal?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Begin the construction with the shorter segment. How does the construction proceed once it is built?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "After constructing the shorter segment, draw a ray at our given equal angle. One last step of the construction remains. Think about when we get no triangle, when one, and when two satisfying triangles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Suppose the sides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " opposite the longer side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are given. We begin by constructing the shorter segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of length\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " must lie on the ray from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " making angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and at distance "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e. on the circle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " centered at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with radius "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The distance from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to the center of the circle is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC = a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a < b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the point\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "inside"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " the circle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The ray from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " thus starts inside the circle and continues outward, so it crosses the circle exactly once. Point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is therefore determined uniquely, and the triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is also unique (up to congruence)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-19.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let's see why the condition "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b > a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is essential. If "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the point\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " would lie directly "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "on"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " the circle\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The ray from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " would meet it at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " itself (which does not give a triangle) and at exactly one further point – which is the desired\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The construction therefore still leads to a unique (isosceles) triangle, so the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " theorem formally holds even in this borderline case. We do not, however, list it under "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " as a separate case: if we know that the triangle is isosceles with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and we know one angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the other two angles are already determined by the isosceles property (both base angles equal\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). The same configuration is therefore covered by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SSS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " adds no new information."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-20.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b < a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " would lie "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "outside"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " the circle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The ray could meet it at two points – giving two different (non-congruent) triangles – or miss it entirely, which gives no triangle at all."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-21.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The proof can also be done by first constructing the longer segment. That, however, requires knowing the locus of points subtending a fixed angle from a fixed segment – we will get to this in another handout."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Throughout our geometric journey we will encounter all of these statements. For now, however, let us show some concrete applications. We start with the most obvious statement, which still deserves to be proved:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "isosceles triangle"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prove that if a triangle\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " satisfies "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC=\\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove also the converse implication (i.e., that equality of angles implies equality of lengths)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Forward implication."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Assume "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be the midpoint of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are congruent by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SSS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by assumption, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BM=CM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by definition of the midpoint, common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), from which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC = \\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-22.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Converse implication."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Assume "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC = \\angle ACB = \\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be the foot of the perpendicular from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ASA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABM \\cong \\triangle ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", since we have two equal angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABM = \\angle ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AMB = \\angle AMC = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the common side\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Another cute proof is based on showing that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (note the different order of vertices). In the case where we know the equal sides, we use "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SSS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – which then gives equal angles. In the case where we know the equal angles, it will instead be "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ASA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the congruence gives equal sides."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Try proving these simple facts rigorously – it will be easier this time:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "An equilateral triangle has three equal angles of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = AC = BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the isosceles triangle theorem gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC = \\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (from "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "); analogously, from "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAC = \\angle BCA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". All three angles are therefore equal, and from the angle sum of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " each is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-23.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "An isosceles right triangle has angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Suppose the right angle is at vertex\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAC = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the legs are equal, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By the isosceles triangle theorem, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC = \\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Denote this common measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From the angle sum in the triangle,"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "90^\\circ + \\beta + \\beta = 180^\\circ,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\beta = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", i.e. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta = 45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-24.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "A very handy fact useful in non-trivial problems is the following. One possible proof goes via trigonometry."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A right triangle has its other two angles equal to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " if and only if its hypotenuse is twice as long as the shorter leg."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Say "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is the hypotenuse and is twice as long as the leg "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". The trick is to introduce a point "
+                      },
+                      {
+                        "type": "math",
+                        "text": "B'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " such that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is the midpoint of segment "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BB'",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let our triangle have its right angle at vertex\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Rightarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Assume "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC = 2\\cdot AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be the point such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the midpoint of segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB' = AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies between "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle B'AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is in a linear pair with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAC = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", hence also equals "
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", since the angles at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are both right, the side\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is common, and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1.en-25.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the midpoint of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB' = 2\\cdot AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and from the assumption "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC = 2\\cdot AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Together,"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "BB' = BC = B'C,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is equilateral and all its angles are "
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". In particular, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABC = \\angle B'BC = 60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From the angle sum in "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we compute "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BCA = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Leftarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " It is not hard to see that the reasoning of the previous paragraph can easily be reversed – this time the key congruence "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " comes from "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ASA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Another solution is to note that by Thales' theorem, the circumcenter\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is also the midpoint of the hypotenuse "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We will return to this solution in more detail when we discuss circles."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "What to Remember",
+        "level": 1,
+        "text": {
+          "content": []
+        }
+      },
+      {
+        "title": "Techniques",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "With parallel lines, look for equal alternate and corresponding angles, or angles summing to\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "It is useful to view the exterior angle of a triangle as the sum of the two non-adjacent interior angles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "To bridge the worlds of lengths and angles, congruence of two triangles is the right tool."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Auxiliary points (midpoint of a segment, mirror image, extension) often reveal a congruence or a special triangle."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Useful Facts",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The angle sum in a triangle is "
+                      },
+                      {
+                        "type": "math",
+                        "text": "180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", in general in a convex "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-gon "
+                      },
+                      {
+                        "type": "math",
+                        "text": "(n-2) \\cdot 180^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Triangle congruence theorems: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "SSS",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "SAS",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ASA",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "SsA",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "In a triangle, two sides are equal if and only if the angles opposite them are equal."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A right triangle has its hypotenuse twice as long as a leg if and only if its angles are "
+                      },
+                      {
+                        "type": "math",
+                        "text": "90^\\circ, 60^\\circ, 30^\\circ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "NumberParens"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": [
+    {
+      "contentId": "angle-basics-1.en-1.svg",
+      "originalId": "angles-vertical.pdf",
+      "width": "82.61pt",
+      "height": "65.04pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-2.svg",
+      "originalId": "angles-corresponding.pdf",
+      "width": "106.36pt",
+      "height": "66.59pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-3.svg",
+      "originalId": "angles-alternate.pdf",
+      "width": "100.63pt",
+      "height": "58.17pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-4.svg",
+      "originalId": "angles-supplementary.pdf",
+      "width": "85.68pt",
+      "height": "47.81pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-5.svg",
+      "originalId": "angles-supplementary-derive-vertical.pdf",
+      "width": "95.91pt",
+      "height": "78.49pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-6.svg",
+      "originalId": "angles-vertical-derive-supplementary.pdf",
+      "width": "95.91pt",
+      "height": "78.49pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-7.svg",
+      "originalId": "angles-corresponding-alternate-supplementary-connection.pdf",
+      "width": "98.31pt",
+      "height": "65.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-8.svg",
+      "originalId": "angles-triangle.pdf",
+      "width": "182.63pt",
+      "height": "128.67pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-9.svg",
+      "originalId": "angles-polygon.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-10.svg",
+      "originalId": "angles-polygon-fan.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-11.svg",
+      "originalId": "angles-polygon-interior.pdf",
+      "width": "146.67pt",
+      "height": "106.43pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-12.svg",
+      "originalId": "angles-complementary-parallel-statement.pdf",
+      "width": "91.52pt",
+      "height": "72.46pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-13.svg",
+      "originalId": "angles-complementary-parallel-solution.pdf",
+      "width": "85.7pt",
+      "height": "92.24pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-14.svg",
+      "originalId": "angles-complementary-in-triangle.pdf",
+      "width": "153.73pt",
+      "height": "123.67pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-15.svg",
+      "originalId": "angles-sas-warning.pdf",
+      "width": "240.45pt",
+      "height": "68.01pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-16.svg",
+      "originalId": "angles-sss-proof.pdf",
+      "width": "180.33pt",
+      "height": "129.76pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-17.svg",
+      "originalId": "angles-sas-proof.pdf",
+      "width": "190.6pt",
+      "height": "165.53pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-18.svg",
+      "originalId": "angles-asa-proof.pdf",
+      "width": "156.76pt",
+      "height": "165.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-19.svg",
+      "originalId": "angles-Ssa-proof-one-solution.pdf",
+      "width": "116.57pt",
+      "height": "129.18pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-20.svg",
+      "originalId": "angles-Ssa-proof-isosceles.pdf",
+      "width": "116.86pt",
+      "height": "122.28pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-21.svg",
+      "originalId": "angles-Ssa-proof-two-solutions.pdf",
+      "width": "191.58pt",
+      "height": "154.75pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-22.svg",
+      "originalId": "angles-isosceles-triangle.pdf",
+      "width": "117.87pt",
+      "height": "114.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-23.svg",
+      "originalId": "angles-equilateral.pdf",
+      "width": "107.91pt",
+      "height": "97.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-24.svg",
+      "originalId": "angles-isosceles-right-triangle.pdf",
+      "width": "97.95pt",
+      "height": "95.36pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1.en-25.svg",
+      "originalId": "angles-90-60-30.pdf",
+      "width": "146.09pt",
+      "height": "131.24pt",
+      "scale": 1.0
+    }
+  ]
+}

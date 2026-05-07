@@ -1,0 +1,304 @@
+\input _template
+
+\setlanguage{CS}
+
+\Title{Základy počítání úhlů}
+
+\MathcompsLink{zaklady-pocitani-uhlu-1}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Geometrie je nejvizuálnější část matematiky -- umíme si ji kreslit na papír, v~softwaru jako \Link[https://www.geogebra.org/]{GeoGebra} a~můžeme se těšit, když na vlastní oči vidíme, že věci v~ní fungují. Proč tomu tak je však může být záhadou. Abychom tato tajemství pochopili, potřebujeme kousek po kousku budovat základnu znalostí a~vizuální intuici.
+
+Jedna z~nejzákladnějších technik je rozumět světu úhlů a~umět jejich vlastnosti s~úspěchem používat v~různých typech úloh. Jen málo zajímavých příkladů úhly nepoužívá. Teorie kolem úhlů přitom není složitá, je však důležité ji budovat pomalu a~detailně. Začneme s~nejjednoduššími vlastnostmi, které ani nevyžadují práci s~kružnicemi. Už ty se však dají s~úspěchem využít v~mnoha úlohách.
+
+V~tomto materiálu se budeme věnovat úhlům, ale záměrně vynecháme úhly na kružnicích, kterým se patří věnovat samostatnou pozornost. Na chvíli zapomeňme, že kružnice existují.
+
+Na závěr úvodu jedna menší poznámka o~konvenci. V~tomto materiálu uvidíme mnoho obrázků trojúhelníků, ve kterých je bod~$A$ nakreslen nahoře. Ukazuje se, že tento způsob kreslení je mezinárodní standard, zejména na poli matematické olympiády a~podobných soutěží se to tak zvykne dělat. V~Česku a~na~Slovensku je však ve školách stále zvykem kreslit~$C$ nahoře. V~některých zemích lze vidět i~$B$ nahoře, např. na Ukrajině. Z~hlediska řešení úloh je vždy dobré nakreslit si nahoru ten bod, u~kterého obrázek vypadá co nejsymetričtěji, snadněji v~něm jdou vidět další symetrické věci. V~tomto materiálu budou úlohy zadávány tak, že ta symetrie půjde vidět více při~$A$ nahoře \SlightSmile.
+
+\sec Základy světa úhlů
+
+V~této sekci si odvodíme ty nejjednodušší vlastnosti související s~úhly. Pevně věřím, že klíčem ke~zvládnutí geometrie je porozumění věcem od základů a~do hloubky, proto se těmto jednoduchým vlastnostem budeme věnovat více.
+
+Základní vlastnosti úhlů, které běžně používáme skoro bez přemýšlení při řešení úloh:
+
+\Highlight{
+    \begitems \style i
+    \i Vrcholové úhly jsou shodné:
+       \Image{angles-vertical.pdf}
+    \i Souhlasné úhly jsou shodné:
+       \Image{angles-corresponding.pdf}
+    \i Střídavé úhly jsou shodné:
+       \Image{angles-alternate.pdf}
+    \i Vedlejší úhly mají součet $180^\circ$:
+       \Image{angles-supplementary.pdf}
+   \enditems
+}
+
+Tyto vlastnosti spolu velmi přirozeně souvisí, menší cvičení k~zamyšlení:
+
+\Exercise{}{
+    Uvědomte si, že:
+    \begitems \style a
+    \i z~vlastnosti o~vedlejších úhlech vyplývá vlastnost vrcholových úhlů (a~naopak)
+    \i z~kterékoli dvojice vlastností o~vrcholových, souhlasných, střídavých úhlech vyplývá ta třetí vlastnost
+    \enditems
+}{
+    \textbf{(a)} Vedlejší úhel $\alpha'$ k~danému úhlu $\alpha$ má velikost $180^\circ - \alpha$. Úhel vedlejší k~$\alpha'$ má zase velikost $180^\circ - (180^\circ - \alpha) = \alpha$. Ten je však zároveň vrcholový úhel k~$\alpha$, tedy jsou vrcholové úhly shodné.
+
+    \Image{angles-supplementary-derive-vertical.pdf}
+
+    Naopak, předpokládejme vlastnost o~vrcholových úhlech a~označme po sobě jdoucí úhly v~průsečíku dvou přímek $\alpha$, $\beta$, $\gamma$, $\delta$. Ze shodnosti vrcholových úhlů $\alpha = \gamma$ a~$\beta = \delta$. Součet všech čtyř je plný úhel, tedy $\alpha + \beta + \gamma + \delta = 360^\circ$. Po dosazení dostáváme $2\alpha + 2\beta = 360^\circ$, čili $\alpha + \beta = 180^\circ$ -- to je právě vlastnost vedlejších úhlů.
+
+    \Image{angles-vertical-derive-supplementary.pdf}
+
+    \textbf{(b)} Všechny tři vlastnosti říkají, že jistá dvojice úhlů má stejnou velikost.
+
+    Podívejme se na trojici úhlů $\alpha$, $\beta$, $\gamma$ z~obrázku a~na to, co o~jejich vztazích tvrdí jednotlivé vlastnosti. Pro dvojici $\alpha$, $\beta$ při horním průsečíku tvrdí vlastnost vrcholových úhlů $\alpha = \beta$. Pro dvojici $\alpha$, $\gamma$ tvrdí vlastnost souhlasných úhlů $\alpha = \gamma$. Konečně pro dvojici $\beta$, $\gamma$ tvrdí vlastnost střídavých úhlů $\beta = \gamma$.
+
+    \Image{angles-corresponding-alternate-supplementary-connection.pdf}
+
+    Tři vlastnosti tedy tvrdí tři rovnosti mezi týmiž třemi úhly, jen přes různé dvojice. Jakmile platí libovolné dvě, třetí plyne tranzitivitou: např. pokud víme (V) a~(S), tak $\alpha = \beta$ a~$\alpha = \gamma$, takže $\beta = \gamma$, čili (St). Ostatní dvojice analogicky.
+}
+
+Následující tvrzení všichni známe, umíte ho však dokázat?
+
+\Theorem{}{
+    Součet úhlů v~trojúhelníku je $180^\circ$.
+}{
+    Veďme přes vrchol~$A$ přímku rovnoběžnou s~$BC$. Protože $AB$ je příčka rovnoběžek, úhel $\beta$ při~$A$ a~úhel $\beta$ při~$B$ jsou střídavé, tedy stejné. Analogicky přes příčku $AC$ jsou úhly $\gamma$ při~$A$ a~při~$C$ střídavé. Úhly $\beta$, $\alpha$, $\gamma$ leží vedle sebe podél přímky přes~$A$, tedy $\alpha + \beta + \gamma = 180^\circ.$
+
+    \Image{angles-triangle.pdf}
+}
+
+Toto tvrzení se rozhodně dá zobecnit. Víme například, že součet úhlů ve~čtyřúhelníku je $360^\circ$. Jak je to v~5-úhelníku? A~jak v~67-úhelníku? Odpovědí je následující tvrzení:
+
+\Theorem{}{
+    Nechť $n \ge 3$ je přirozené číslo. Součet úhlů v~konvexním $n$-úhelníku je roven $(n-2) \cdot 180^\circ$.
+}{
+    \NamedProof{Důkaz 1 (matematická indukce).} Základ $n=3$: součet úhlů trojúhelníku je $180^\circ = (3-2)\cdot 180^\circ$. Indukční krok: nechť $A_1 A_2 \ldots A_{n+1}$ je konvexní $(n+1)$-úhelník. Úhlopříčkou $A_1 A_n$ jej rozdělíme na trojúhelník $A_1 A_n A_{n+1}$ a~konvexní $n$-úhelník $A_1 A_2 \ldots A_n$: úhly při vrcholech $A_2, \ldots, A_{n-1}$ patří celé $n$-úhelníku, úhel při $A_{n+1}$ patří celý trojúhelníku a~úhly při $A_1$, $A_n$ se rozdělí mezi oba útvary tak, aby jejich části daly původní vnitřní úhly $(n+1)$-úhelníku. Součet úhlů $(n+1)$-úhelníku je tedy
+    $$
+    \underbrace{180^\circ}_{\text{trojúhelník}} + \underbrace{(n-2) \cdot 180^\circ}_{n\text{-úhelník}} = (n-1) \cdot 180^\circ = \bigl((n+1) - 2\bigr) \cdot 180^\circ.
+    $$
+
+    \Image{angles-polygon.pdf}
+
+    \NamedProof{Důkaz 2 (vějířová triangulace).} Veďme z~vrcholu $A_1$ úhlopříčky do každého nesousedního vrcholu $A_3, A_4, \ldots, A_{n-1}$. Vznikne $n-2$ trojúhelníků pokrývajících vnitřek $n$-úhelníku bez překrytí. Při každém vrcholu $A_k$ se úhly sousedních trojúhelníků při $A_k$ přesně poskládají na vnitřní úhel $n$-úhelníku při $A_k$, takže součet úhlů všech trojúhelníků se rovná součtu vnitřních úhlů $n$-úhelníku, čili $(n-2)\cdot 180^\circ$.
+
+    \Image{angles-polygon-fan.pdf}
+
+    \Remark Důkaz~2 je \uv{rozbalený} důkaz~1: indukce odřezává trojúhelníky jeden po druhém, zde je vidíme všechny najednou.
+
+    \NamedProof{Důkaz 3 (vnitřní bod).} Zvolme bod $O$ uvnitř $n$-úhelníku a~spojme ho s~každým vrcholem. Vznikne $n$ trojúhelníků s~celkovým součtem úhlů $n\cdot 180^\circ$. Úhly trojúhelníků při každém vrcholu $A_k$ spolu tvoří vnitřní úhel $n$-úhelníku při~$A_k$; úhly trojúhelníků při~$O$ spolu tvoří plný úhel $360^\circ$. Tedy součet vnitřních úhlů $n$-úhelníku je
+    $$
+    n\cdot 180^\circ - 360^\circ = (n-2)\cdot 180^\circ.
+    $$
+
+    \Image{angles-polygon-interior.pdf}
+
+    \Remark{nekonvexní mnohoúhelníky} Vzorec $(n-2)\cdot 180^\circ$ platí i~pro navzájem se neprotínající nekonvexní mnohoúhelníky, pokud všechny vnitřní úhly měříme směrem dovnitř -- tedy i~úhly větší než $180^\circ$ počítáme jako takové.
+
+    Vějířová triangulace z~jednoho vrcholu nemusí fungovat ani z~konvexního vrcholu -- některé úhlopříčky mohou procházet mimo mnohoúhelník. Platí však, že každý jednoduchý $n$-úhelník se dá rozdělit na $n-2$ trojúhelníků (ne nutně vějířovitě), což důkaz zachrání. Důvodem je indukce přes trojúhelník tvořený nějakým vrcholem $V$ a~jeho sousedy $U$, $W$, který leží celý uvnitř našeho $n$-úhelníku. Odříznutím $V$ úhlopříčkou $UW$ dostaneme $(n-1)$-úhelník; opakováním tedy $n-2$ trojúhelníků. Dá se dokázat, že takový trojúhelník vždy existuje (dokonce dva), viz \Link[https://en.wikipedia.org/wiki/Two_ears_theorem]{věta o~dvou uších}.
+
+    K~důkazu~3: funguje jen pokud existuje vnitřní bod $O$ viditelný ze všech vrcholů (tj. úsečky $OA_i$ leží celé uvnitř). Pro některé nekonvexní mnohoúhelníky takový $O$ nemusí existovat (zkuste takový nakreslit) -- v~takovém případě se důkaz~3 nedá přímo zachránit a~je třeba sáhnout po triangulaci z~důkazu~2.
+}
+
+Teď uveďme ještě dvě jednoduchá, ale užitečná pomocná tvrzení:
+
+\Exercise{}{
+    Dokažte, že součet úhlů na obrázku je roven $180^\circ$.
+
+    \Image{angles-complementary-parallel-statement.pdf}
+}{
+    Označme $\alpha$ úhel svíraný příčkou $AD$ s~rovnoběžkami na straně $B$ (jako na obrázku). Souhlasné úhly $\alpha$ při~$A$ a~$\alpha$ při~$D$ jsou shodné. Při vrcholu $A$ jsou $\alpha$ a~$\beta$ vedlejší, tedy
+    $$
+    \beta + \alpha = 180^\circ.
+    $$
+
+    \Image{angles-complementary-parallel-solution.pdf}
+}
+
+\Exercise{}{
+    Dokažte, že úhel s~otazníkem na obrázku je roven $\alpha+\beta$.
+
+    \Image{angles-complementary-in-triangle.pdf}
+}{
+    Ze součtu úhlů v~trojúhelníku $|\angle ACB| = 180^\circ - \alpha - \beta$. Vnější úhel při $C$ je vedlejší k~$|\angle ACB|$:
+    $$
+    180^\circ - |\angle ACB| = \alpha + \beta.
+    $$
+
+    \Image{angles-complementary-in-triangle.pdf}
+}
+
+Poslední dvě cvičení možná vypadala velmi triviálně. Realita však je, že v~praktických úlohách jsou velmi užitečná -- když máme obrovský netriviální obrázek a~máme provést za sebou velký počet úhlových operací, tak je opravdu velmi výhodné si i~jen kousek té práce zjednodušit -- v~případě rovnoběžek nemusíme uvažovat pomocný souhlasný úhel a~v~případě trojúhelníku nemusíme pracovat s~$180^\circ$.
+
+\sec Základy světa délek
+
+Zatím jsme fungovali pouze ve světě úhlů a~vůbec jsme neřešili délky. Geometrie však začne být zajímavá, když tyto světy začneme propojovat. Základem pro nás bude {\em shodnost trojúhelníků}. Připomeňme si kritéria.
+
+\Highlight{
+    Věty o~shodnosti trojúhelníků:
+    \begitems \style i
+    \i Věta $sss$: dva trojúhelníky jsou shodné, pokud se shodují ve všech třech stranách.
+    \i Věta $sus$: dva trojúhelníky jsou shodné, pokud se shodují ve dvou stranách a~úhlu, který tyto strany svírají.
+    \i Věta $usu$: dva trojúhelníky jsou shodné, pokud se shodují v~jedné straně a~nějakých dvou úhlech.
+    \i Věta $Ssu$: dva trojúhelníky jsou shodné, pokud se shodují ve dvou stranách a~úhlu naproti delší z~těchto stran.
+    \enditems
+}
+
+Zdůrazněme, že u~věty $sus$ je opravdu důležité, že shodný úhel je ten svíraný oběma stranami -- bez tohoto předpokladu shodnost nemusí fungovat, viz obrázek. Na něm máme dva trojúhelníky $ABC$ a~$A'B'C'$, pro které platí $|BC|=|B'C'|$, $|AC|=|A'C'|$, a~$\beta=\beta'$, avšak zjevně nejsou shodné.
+
+\Image{angles-sas-warning.pdf}
+
+Věta $Ssu$ by byla naše záchrana -- zde ji však aplikovat neumíme, protože strana, naproti které leží úhel $\beta$, tedy $|AC|$, není nejdelší, neboť je zjevně kratší než $|BC|$ \SmileWithTear.
+
+Než půjdeme dál, uvědomme si, co tyto věty znamenají. Z~mého pohledu je dobrý pohled na shodnost takový: chceme sestrojit trojúhelník, když máme dány nějaké tři jeho elementy -- budou všechny sestrojitelné trojúhelníky shodné?
+
+\Example{}{
+    Přesvědčte se o~platnosti věty $sss$ o~shodnosti.
+}{
+    Představme si, že máme dány tři úsečky délek $a$, $b$, $c$, ze kterých umíme sestrojit trojúhelník. Začneme např. úsečkou~$BC$ délky~$a$, a~následně sestrojíme dvě kružnice: (a) kružnici se středem v~$B$ a~poloměrem $c$; (b) kružnici se středem v~$C$ a~poloměrem $b$. Ty se buď neprotnou (když např. $b+c < a$), nebo se protnou v~jediném bodě na $BC$ (když $b+c=a$), nebo se protnou ve dvou bodech $A$ a~$A'$.
+
+    \Image{angles-sss-proof.pdf}
+
+    Na konci si uvědomme, že trojúhelníky $ABC$ a~$A'BC$ jsou však zřejmě vzájemně zrcadlovými obrazy podle $BC$. Také pokud bychom začali jinou úsečkou, tak vytvoříme pouze posunutí/otočení této konfigurace.
+
+    \Remark Uvědomme si, že jsme vlastně po cestě dokázali~trojúhelníkovou nerovnost: součet dvou stran trojúhelníku je větší než třetí -- náš trojúhelník je sestrojitelný a~nedegenerovaný~\fnote{nemá úhel rovný $180^\circ$} právě tehdy, když $b+c>a$.
+}
+
+Podobně umíme zdůvodnit další kritéria:
+
+\Exercise{}{
+    Přesvědčte se o~platnosti věty $sus$ o~shodnosti.
+}{
+    Nechť jsou dány strany $b = |AC|$, $c = |AB|$ a~úhel $|\angle BAC| = \alpha$ mezi nimi. Sestrojme vrchol~$A$ a~úsečku $AB$ délky~$c$ -- ta je dána až na shodné zobrazení. Bod $C$ musí ležet na polopřímce z~$A$ svírající s~$AB$ úhel~$\alpha$ a~zároveň ve vzdálenosti~$b$ od~$A$. Polopřímky svírající s~$AB$ úhel $\alpha$ jsou dvě (po jedné na každé straně $AB$): na každé leží právě jeden bod ve vzdálenosti $b$ od~$A$, tedy dostaneme body $C$ a~$C'$. Trojúhelníky $ABC$ a~$ABC'$ jsou zrcadlovými obrazy podle $AB$, tedy shodné.
+
+    \Image{angles-sas-proof.pdf}
+}
+
+\Exercise{}{
+    Přesvědčte se o~platnosti věty $usu$ o~shodnosti.
+}{
+    V~prvé řadě si uvědomme, že nezáleží na tom, které dva úhly jsou shodné -- pokud se dva trojúhelníky shodují ve dvou úhlech, tak třetí je určen jednoznačně, neboť všechny tři mají součet úhlů $180^\circ$.
+
+    Pro účely našeho důkazu uvažme tedy, že jsou shodné právě úhly přiléhající ke shodné straně. Nechť je to úhel $\beta$ při vrcholu $B$, $\gamma$ při vrcholu $C$ a~strana $a = |BC|$ mezi nimi. Sestrojme úsečku $BC$ délky~$a$ -- ta je dána až na shodné zobrazení. Bod $A$ musí ležet na polopřímce z~$B$ svírající s~$BC$ úhel $\beta$ a~zároveň na polopřímce z~$C$ svírající s~$CB$ úhel $\gamma$. Součet vnitřních úhlů při $B$ a~$C$ v~trojúhelníku je menší než $180^\circ$, čili $\beta + \gamma < 180^\circ$, a~proto nejsou obě polopřímky rovnoběžné -- protnou se v~jediném bodě~$A$. Trojúhelník $ABC$ je tedy určen jednoznačně (až na shodná zobrazení).
+
+    \Image{angles-asa-proof.pdf}
+}
+
+Méně známé tvrzení $Ssu$ je už trošičku těžší, proto k~němu budou i~návody \SlightSmile.
+
+\Problem{0}{shodnost $Ssu$}{
+    Přesvědčte se o~platnosti věty $Ssu$ o~shodnosti. Navíc si uvědomte, kde by se konstrukce pokazila, kdyby úhel nebyl naproti větší ze stran -- co by se stalo, kdyby byly obě strany stejně dlouhé?
+}{
+    Začněte konstrukci konstrukcí kratší úsečky. Jak pokračuje konstrukce po jejím sestrojení?
+}{
+    Po sestrojení kratší úsečky sestrojíme polopřímku pod naším daným shodným úhlem. Zbývá poslední krok konstrukce. Rozmyslete, kdy dostaneme žádný, kdy jeden a~kdy dva vyhovující trojúhelníky.
+}{
+    Nechť jsou dány strany $a = |BC|$, $b = |AC|$ a~úhel $|\angle ABC| = \beta$ naproti delší straně $b$. Začneme sestrojením kratší úsečky $BC$ délky~$a$. Bod $A$ musí ležet na polopřímce z~$B$ svírající s~$BC$ úhel $\beta$ a~zároveň ve vzdálenosti $b$ od~$C$, čili na kružnici $k$ se středem~$C$ a~poloměrem $b$.
+
+    Vzdálenost bodu~$B$ od středu kružnice je $|BC| = a$. Protože $a < b$, bod~$B$ leží \textit{uvnitř} kružnice $k$. Polopřímka z~bodu~$B$ tak začíná uvnitř kružnice a~pokračuje směrem ven, takže kružnici protne právě jednou. Bod $A$ je tedy určen jednoznačně, a~trojúhelník $ABC$ je rovněž jednoznačný (až na shodné zobrazení).
+
+    \Image{angles-Ssa-proof-one-solution.pdf}
+
+    Podívejme se, proč je podmínka $b > a$ podstatná. Pokud by bylo $a = b$, bod~$B$ by ležel přímo \textit{na} kružnici~$k$. Polopřímka z~$B$ by ji protínala v~bodě~$B$ samotném (což nedává trojúhelník) a~v~právě jednom dalším bodě -- ten je hledaným~$A$. Konstrukce tedy stále vede k~jednoznačnému (rovnoramennému) trojúhelníku, takže věta $Ssu$ formálně platí i~v~tomto hraničním případě. Pod $Ssu$ ji však samostatně nezařazujeme: pokud víme, že trojúhelník je rovnoramenný se $|BC|=|AC|$ a~známe jeden úhel $\beta$, tak ostatní dva úhly jsou už díky rovnoramennosti určeny (oba při základně mají velikost~$\beta$). Tatáž konfigurace je proto pokryta větami $sus$ či $sss$ a~$Ssu$ k~ní nepřidává žádnou novou informaci.
+
+    \Image{angles-Ssa-proof-isosceles.pdf}
+
+    Pokud by bylo $b < a$, bod $B$ by ležel \textit{vně} kružnice $k$. Polopřímka by ji mohla protnout ve dvou bodech -- vznikly by tak dva různé (neshodné) trojúhelníky -- nebo by ji minula úplně, což nevede k~žádnému trojúhelníku.
+
+    \Image{angles-Ssa-proof-two-solutions.pdf}
+
+    \Remark Důkaz je možné provést i~tak, že nejprve sestrojíme delší úsečku. To však vyžaduje znalost množiny bodů nad pevnou úsečkou majících pevný úhel -- k~tomu se dostaneme v~jiném materiálu.
+}
+
+Na naší geometrické cestě se průběžně setkáme se všemi těmito tvrzeními. Prozatím si však ukažme nějaké konkrétní aplikace. Začneme tím nejzřejmějším tvrzením, které se ale také sluší a~patří dokázat:
+
+\Theorem{rovnoramenný trojúhelník}{
+    Dokažte, že pokud pro trojúhelník~$ABC$ platí $|AB|=|AC|$, tak $|\angle ABC|=|\angle ACB|$. Dokažte také opačnou implikaci (tedy že z~rovnosti úhlů vyplývá rovnost délek).
+}{
+    \textit{Přímá implikace.} Předpokládejme $|AB| = |AC|$. Nechť $M$ je střed $BC$. Trojúhelníky $ABM$ a~$ACM$ jsou shodné podle $sss$ ($|AB|=|AC|$ z~předpokladu, $|BM|=|CM|$ ze~středu, společná strana $AM$), odkud $|\angle ABC| = |\angle ACB|$.
+
+    \Image{angles-isosceles-triangle.pdf}
+
+    \textit{Opačná implikace.} Předpokládejme $|\angle ABC| = |\angle ACB| = \beta$. Nechť $M$ je pata kolmice z~$A$ na $BC$. Podle věty $usu$ je $\triangle ABM \cong \triangle ACM$, neboť máme dva shodné úhly $|\angle ABM| = |\angle ACM|$ a~$|\angle AMB| = |\angle AMC| = 90^\circ$ a~společnou stranu~$AM$, tedy $|AB| = |AC|$.
+
+    \Remark Jiný vtipný důkaz je založen na tom, že dokážeme $\triangle ABC \cong \triangle ACB$ (všimněte si různého pořadí vrcholů). V~případě, že známe stejné strany, použijeme větu $sus$ nebo dokonce $sss$ -- ta nám následně dá shodné úhly. V~případě, že známe stejné úhly, to zase bude věta $usu$, a~shodnost nám dá stejné strany.
+}
+
+Vyzkoušejte si exaktně dokázat tyto jednoduché poznatky, to už bude jednodušší:
+
+\Exercise{}{
+    Rovnostranný trojúhelník má tři shodné úhly rovny $60^\circ$
+}{
+    V~$\triangle ABC$ s~$|AB| = |AC| = |BC|$ dává věta o~rovnoramenném trojúhelníku $|\angle ABC| = |\angle ACB|$ (z~$|AB|=|AC|$); analogicky z~$|AB|=|BC|$ je $|\angle BAC| = |\angle BCA|$. Všechny tři úhly jsou tedy shodné, a~ze součtu $180^\circ$ je každý $60^\circ$.
+
+    \Image{angles-equilateral.pdf}
+}
+
+\Exercise{}{
+    Rovnoramenný pravoúhlý trojúhelník má tři úhly rovny $90^\circ$, $45^\circ$, $45^\circ$.
+}{
+    Nechť je pravý úhel při vrcholu~$A$, tedy $|\angle BAC| = 90^\circ$, a~odvěsny jsou shodné, $|AB| = |AC|$. Podle věty o~rovnoramenném trojúhelníku platí $|\angle ABC| = |\angle ACB|$. Označme tuto společnou velikost $\beta$. Ze součtu úhlů v~trojúhelníku
+    $$
+    90^\circ + \beta + \beta = 180^\circ,
+    $$
+    odkud $2\beta = 90^\circ$, čili $\beta = 45^\circ$.
+
+    \Image{angles-isosceles-right-triangle.pdf}
+}
+
+Velmi šikovná věc použitelná v~nelehkých úlohách je následující úloha. Jeden možný důkaz je přes trigonometrii.
+
+\Problem{0}{}{
+    Pravoúhlý trojúhelník má zbývající dva úhly rovny $60^\circ$ a~$30^\circ$ právě tehdy, když je jeho přepona dvakrát delší než kratší odvěsna.
+}{
+    Řekněme, že $BC$ je přepona a~je dvakrát delší než odvěsna $AB$. Trikem je uvážit bod $B'$ takový, že $A$ je střed úsečky $BB'$.
+}{
+    Nechť náš trojúhelník má pravý úhel při vrcholu~$A$.
+
+    \textit{($\Rightarrow$)} Předpokládejme $|BC| = 2|AB|$. Nechť $B'$ je takový bod, že $A$ je středem úsečky $BB'$. Potom $|AB'| = |AB|$ a~$A$ leží mezi $B$, $B'$, takže $|\angle B'AC|$ je vedlejší k~$|\angle BAC| = 90^\circ$, čili také $90^\circ$. Platí $\triangle ABC \cong \triangle AB'C$ z~věty $sus$, neboť úhly při~$A$ jsou oba pravé, strana~$AC$ je společná, a~$|AB|=|AB'|$.
+
+    \Image{angles-90-60-30.pdf}
+
+    Protože $A$ je středem $BB'$, je $|BB'| = 2|AB|$, a~ze zadání $|BC| = 2|AB|$. Spolu
+    $$
+    |BB'| = |BC| = |B'C|,
+    $$
+    takže $\triangle BB'C$ je rovnostranný a~všechny jeho úhly jsou $60^\circ$. Speciálně $|\angle ABC| = |\angle B'BC| = 60^\circ$. Ze součtu úhlů v~$\triangle ABC$ dopočítáme $|\angle BCA| = 180^\circ - 90^\circ - 60^\circ = 30^\circ$.
+
+    \textit{($\Leftarrow$)} Není těžké rozmyslet si, že úvahy z~předchozího odstavce umíme snadno obrátit -- klíčovou shodnost $\triangle ABC \cong \triangle AB'C$ tentokrát dostaneme z~věty $usu$.
+
+    \Remark Jiné řešení je uvážit, že podle Thaletovy věty je střed~$O$ kružnice opsané trojúhelníku $ABC$ zároveň středem přepony $BC$. K~tomuto řešení se podrobněji vrátíme, až se budeme bavit o~kružnicích.
+}
+
+\sec Co si zapamatovat
+
+\secc Techniky
+
+\begitems \style N
+\i Při rovnoběžkách hledáme shodné střídavé a~souhlasné úhly, případně úhly se součtem~$180^\circ$.
+\i Je užitečné nahlížet na vnější úhel trojúhelníku jako na součet dvou úhlů.
+\i Pro propojení světa délek a~úhlů se hodí shodnost dvou trojúhelníků.
+\i Pomocné body (střed úsečky, zrcadlový obraz, prodloužení) často odhalí shodnost nebo speciální trojúhelník.
+\enditems
+
+\secc Užitečná fakta
+
+\begitems \style N
+\i Součet úhlů v~trojúhelníku je $180^\circ$, obecně v~konvexním $n$-úhelníku $(n-2) \cdot 180^\circ$.
+\i Věty o~shodnosti trojúhelníků: $sss$, $sus$, $usu$, $Ssu$.
+\i V~trojúhelníku jsou dvě strany shodné právě když jsou shodné jim přilehlé úhly.
+\i Pravoúhlý trojúhelník má přeponu dvakrát delší než odvěsnu právě když má úhly $90^\circ, 60^\circ, 30^\circ$.
+\enditems
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

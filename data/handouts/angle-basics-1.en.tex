@@ -1,0 +1,304 @@
+\input _template
+
+\setlanguage{EN}
+
+\Title{Angle Chasing Basics}
+
+\MathcompsLink{angle-basics-1}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+Geometry is the most visual part of mathematics -- we can draw it on paper, in software like \Link[https://www.geogebra.org/]{GeoGebra}, and we can enjoy seeing with our own eyes that things in it work. Why this is so, however, can be a mystery. To uncover these secrets, we need to build up a foundation of knowledge and visual intuition piece by piece.
+
+One of the most fundamental techniques is to understand the world of angles and to know how to use their properties successfully in various types of problems. Only a few interesting examples don't use angles. The theory around angles is not complicated, but it is important to build it up slowly and in detail. We will start with the simplest properties, which don't even require working with circles. Even these can already be used successfully in many problems.
+
+In this handout we will focus on angles, but we will deliberately leave out angles in circles, which deserve separate attention. For a moment, let's forget that circles exist.
+
+To close the introduction, a small note about convention. In this handout we will see many diagrams of triangles in which vertex~$A$ is drawn at the top. It turns out that this way of drawing is the international standard, especially in the world of the Mathematical Olympiad and similar competitions. In Czechia and Slovakia, however, schools still customarily draw~$C$ at the top. In some countries one can also see~$B$ at the top, e.g. in Ukraine. From the point of view of solving problems, it is always a good idea to put at the top the vertex that makes the diagram look as symmetric as possible -- it is then easier to spot further symmetric things in it. In this handout the problems will be posed so that the symmetry is more visible with~$A$ at the top \SlightSmile.
+
+\sec Basics of the World of Angles
+
+In this section we will derive the simplest properties related to angles. I firmly believe that the key to mastering geometry is understanding things from the ground up and in depth, so we will spend more time on these simple properties.
+
+Basic properties of angles, which we commonly use almost without thinking when solving problems:
+
+\Highlight{
+    \begitems \style i
+    \i Vertical angles are equal:
+       \Image{angles-vertical.pdf}
+    \i Corresponding angles are equal:
+       \Image{angles-corresponding.pdf}
+    \i Alternate angles are equal:
+       \Image{angles-alternate.pdf}
+    \i Angles in a linear pair sum to $180^\circ$:
+       \Image{angles-supplementary.pdf}
+   \enditems
+}
+
+These properties are very naturally related to one another; a small exercise to ponder:
+
+\Exercise{}{
+    Convince yourself that:
+    \begitems \style a
+    \i the linear-pair property implies the vertical-angles property (and vice versa)
+    \i any two of the three properties about vertical, corresponding, and alternate angles imply the third
+    \enditems
+}{
+    \textbf{(a)} The angle $\alpha'$ in a linear pair with a given angle $\alpha$ has measure $180^\circ - \alpha$. The angle in a linear pair with $\alpha'$ in turn has measure $180^\circ - (180^\circ - \alpha) = \alpha$. But this last angle is also vertical to $\alpha$, so vertical angles are equal.
+
+    \Image{angles-supplementary-derive-vertical.pdf}
+
+    Conversely, assume the vertical-angles property and label the consecutive angles at the intersection of two lines $\alpha$, $\beta$, $\gamma$, $\delta$. By the equality of vertical angles, $\alpha = \gamma$ and $\beta = \delta$. The sum of all four is a full angle, i.e. $\alpha + \beta + \gamma + \delta = 360^\circ$. Substituting, we get $2\alpha + 2\beta = 360^\circ$, so $\alpha + \beta = 180^\circ$ -- which is exactly the linear-pair property.
+
+    \Image{angles-vertical-derive-supplementary.pdf}
+
+    \textbf{(b)} All three properties say that a certain pair of angles has the same measure.
+
+    Look at the three angles $\alpha$, $\beta$, $\gamma$ in the figure and at what each property says about their relationships. For the pair $\alpha$, $\beta$ at the upper intersection, the vertical-angles property gives $\alpha = \beta$. For the pair $\alpha$, $\gamma$, the corresponding-angles property gives $\alpha = \gamma$. Finally, for the pair $\beta$, $\gamma$, the alternate-angles property gives $\beta = \gamma$.
+
+    \Image{angles-corresponding-alternate-supplementary-connection.pdf}
+
+    The three properties therefore assert three equalities among the same three angles, just via different pairs. As soon as any two of them hold, the third follows by transitivity: e.g. if (V) and (C) hold, then $\alpha = \beta$ and $\alpha = \gamma$, so $\beta = \gamma$, which is (A). The other pairs are analogous.
+}
+
+The following statement is familiar to all of us, but can you prove it?
+
+\Theorem{}{
+    The sum of the angles in a triangle is $180^\circ$.
+}{
+    Through vertex~$A$ draw a line parallel to $BC$. Since $AB$ is a transversal of the parallel lines, the angle $\beta$ at~$A$ and the angle $\beta$ at~$B$ are alternate, hence equal. Similarly, via the transversal $AC$, the angles $\gamma$ at~$A$ and at~$C$ are alternate. The angles $\beta$, $\alpha$, $\gamma$ lie next to each other along the line through~$A$, so $\alpha + \beta + \gamma = 180^\circ.$
+
+    \Image{angles-triangle.pdf}
+}
+
+This statement can certainly be generalized. We know, for example, that the sum of the angles in a quadrilateral is $360^\circ$. What about a pentagon? And a 67-gon? The answer is the following statement:
+
+\Theorem{}{
+    Let $n \ge 3$ be a natural number. The sum of the angles in a convex $n$-gon equals $(n-2) \cdot 180^\circ$.
+}{
+    \NamedProof{Proof 1 (mathematical induction).} Base case $n=3$: the sum of the angles of a triangle is $180^\circ = (3-2)\cdot 180^\circ$. Inductive step: let $A_1 A_2 \ldots A_{n+1}$ be a convex $(n+1)$-gon. The diagonal $A_1 A_n$ splits it into a triangle $A_1 A_n A_{n+1}$ and a convex $n$-gon $A_1 A_2 \ldots A_n$: the angles at vertices $A_2, \ldots, A_{n-1}$ belong entirely to the $n$-gon, the angle at $A_{n+1}$ belongs entirely to the triangle, and the angles at $A_1$, $A_n$ are split between the two figures so that their parts add up to the original interior angles of the $(n+1)$-gon. The angle sum of the $(n+1)$-gon is therefore
+    $$
+    \underbrace{180^\circ}_{\text{triangle}} + \underbrace{(n-2) \cdot 180^\circ}_{n\text{-gon}} = (n-1) \cdot 180^\circ = \bigl((n+1) - 2\bigr) \cdot 180^\circ.
+    $$
+
+    \Image{angles-polygon.pdf}
+
+    \NamedProof{Proof 2 (fan triangulation).} From vertex $A_1$ draw diagonals to every non-adjacent vertex $A_3, A_4, \ldots, A_{n-1}$. This produces $n-2$ triangles that cover the interior of the $n$-gon without overlap. At each vertex $A_k$, the angles of the adjacent triangles at $A_k$ assemble exactly into the interior angle of the $n$-gon at $A_k$, so the sum of the angles of all triangles equals the sum of the interior angles of the $n$-gon, i.e. $(n-2)\cdot 180^\circ$.
+
+    \Image{angles-polygon-fan.pdf}
+
+    \Remark Proof~2 is an \uv{unrolled} version of Proof~1: induction cuts off triangles one by one, and here we see them all at once.
+
+    \NamedProof{Proof 3 (interior point).} Choose a point $O$ in the interior of the $n$-gon and connect it to every vertex. This produces $n$ triangles with a total angle sum of $n\cdot 180^\circ$. At each vertex $A_k$ of the $n$-gon, the triangle angles at $A_k$ together form the entire interior angle of the $n$-gon there; the triangle angles at~$O$ together form a full angle of $360^\circ$. So the sum of the interior angles of the $n$-gon is
+    $$
+    n\cdot 180^\circ - 360^\circ = (n-2)\cdot 180^\circ.
+    $$
+
+    \Image{angles-polygon-interior.pdf}
+
+    \Remark{non-convex polygons} The formula $(n-2)\cdot 180^\circ$ also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside -- so we count angles greater than $180^\circ$ as such.
+
+    A fan triangulation from a single vertex may fail even from a convex vertex -- some diagonals can pass outside the polygon. It is still true, however, that every simple $n$-gon can be split into $n-2$ triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex $V$ and its neighbors $U$, $W$ that lies entirely inside our $n$-gon. Cutting $V$ off along the diagonal $UW$ gives an $(n-1)$-gon; iterating yields $n-2$ triangles. One can prove that such a triangle always exists (in fact, two of them); see the \Link[https://en.wikipedia.org/wiki/Two_ears_theorem]{two ears theorem}.
+
+    As for Proof~3: it works only if there is an interior point $O$ visible from every vertex (i.e., the segments $OA_i$ lie entirely inside). For some non-convex polygons no such $O$ exists (try drawing one) -- in that case Proof~3 cannot be salvaged directly and one must fall back on the triangulation from Proof~2.
+}
+
+Now let's state two more simple but useful auxiliary claims:
+
+\Exercise{}{
+    Prove that the sum of the angles in the figure equals $180^\circ$.
+
+    \Image{angles-complementary-parallel-statement.pdf}
+}{
+    Let $\alpha$ denote the angle that the transversal $AD$ makes with the parallel lines on the side of $B$ (as in the figure). The corresponding angles $\alpha$ at~$A$ and $\alpha$ at~$D$ are equal. At vertex $A$ the angles $\alpha$ and $\beta$ form a linear pair, so
+    $$
+    \beta + \alpha = 180^\circ.
+    $$
+
+    \Image{angles-complementary-parallel-solution.pdf}
+}
+
+\Exercise{}{
+    Prove that the angle marked with a question mark in the figure equals $\alpha+\beta$.
+
+    \Image{angles-complementary-in-triangle.pdf}
+}{
+    From the angle sum in the triangle, $\angle ACB = 180^\circ - \alpha - \beta$. The exterior angle at $C$ is in a linear pair with $\angle ACB$:
+    $$
+    180^\circ - \angle ACB = \alpha + \beta.
+    $$
+
+    \Image{angles-complementary-in-triangle.pdf}
+}
+
+The last two exercises may have looked very trivial. The reality, however, is that in practical problems they are very useful -- when we have a huge non-trivial diagram and have to chain together a large number of angle operations, it is genuinely advantageous to simplify even a small piece of that work. In the parallel-lines case we don't have to introduce an auxiliary corresponding angle, and in the triangle case we don't have to work with~$180^\circ$.
+
+\sec Basics of the World of Lengths
+
+So far we have only operated in the world of angles and have not dealt with lengths at all. Geometry, however, becomes interesting once we start connecting these worlds. Our foundation will be \textit{triangle congruence}. Let us recall the criteria.
+
+\Highlight{
+    Triangle congruence theorems:
+    \begitems \style i
+    \i $SSS$: two triangles are congruent if they agree on all three sides.
+    \i $SAS$: two triangles are congruent if they agree on two sides and the angle between them.
+    \i $ASA$: two triangles are congruent if they agree on one side and any two angles.
+    \i $SsA$: two triangles are congruent if they agree on two sides and the angle opposite the longer of these sides.
+    \enditems
+}
+
+Let us emphasize that in $SAS$ it really is important that the equal angle be the one between the two sides -- without this assumption, congruence may fail; see the figure. There we have two triangles $ABC$ and $A'B'C'$ for which $BC = B'C'$, $AC = A'C'$, and $\beta = \beta'$, yet they are clearly not congruent.
+
+\Image{angles-sas-warning.pdf}
+
+The $SsA$ theorem would be our rescue -- but here we cannot apply it, because the side opposite the angle $\beta$, namely $AC$, is not the longest, since it is clearly shorter than $BC$ \SmileWithTear.
+
+Before we go further, let us understand what these theorems mean. In my view, a good way to look at congruence is the following: we want to construct a triangle when given some three of its elements -- will all the constructible triangles be congruent?
+
+\Example{}{
+    Convince yourself of the validity of the $SSS$ congruence theorem.
+}{
+    Imagine we are given three segments of lengths $a$, $b$, $c$ from which a triangle can be built. Start, say, with the segment~$BC$ of length~$a$, and then construct two circles: (a) the circle centered at~$B$ with radius $c$; (b) the circle centered at~$C$ with radius $b$. They either fail to meet (when e.g. $b+c < a$), or they meet at a single point on $BC$ (when $b+c=a$), or they meet at two points $A$ and $A'$.
+
+    \Image{angles-sss-proof.pdf}
+
+    Finally, observe that the triangles $ABC$ and $A'BC$ are clearly mirror images of each other across $BC$. Likewise, had we started from a different segment, we would only produce a translation/rotation of this configuration.
+
+    \Remark Note that along the way we essentially proved the triangle inequality: the sum of two sides of a triangle is greater than the third -- our triangle is constructible and non-degenerate~\fnote{has no angle equal to $180^\circ$} if and only if $b+c>a$.
+}
+
+We can justify the other criteria similarly:
+
+\Exercise{}{
+    Convince yourself of the validity of the $SAS$ congruence theorem.
+}{
+    Suppose the sides $b = AC$, $c = AB$ and the angle $\angle BAC = \alpha$ between them are given. Construct vertex~$A$ and the segment $AB$ of length~$c$ -- this is determined up to congruence. Point $C$ must lie on a ray from~$A$ making angle~$\alpha$ with $AB$ and at distance~$b$ from~$A$. There are two rays from~$A$ making angle $\alpha$ with $AB$ (one on each side of $AB$): on each there is exactly one point at distance $b$ from~$A$, giving points $C$ and $C'$. The triangles $ABC$ and $ABC'$ are mirror images across $AB$, hence congruent.
+
+    \Image{angles-sas-proof.pdf}
+}
+
+\Exercise{}{
+    Convince yourself of the validity of the $ASA$ congruence theorem.
+}{
+    First, note that it doesn't matter which two angles are equal -- if two triangles agree on two angles, then the third is determined uniquely, since all three angles sum to $180^\circ$.
+
+    For the purposes of our proof, suppose the equal angles are exactly the ones adjacent to the equal side. Let them be the angle $\beta$ at vertex $B$, $\gamma$ at vertex $C$, and the side $a = BC$ between them. Construct the segment $BC$ of length~$a$ -- this is determined up to congruence. Point $A$ must lie on the ray from~$B$ making angle $\beta$ with $BC$ and on the ray from~$C$ making angle $\gamma$ with $CB$. The sum of the interior angles at $B$ and $C$ in a triangle is less than $180^\circ$, i.e. $\beta + \gamma < 180^\circ$, so the two rays are not parallel -- they meet at a single point~$A$. The triangle $ABC$ is therefore determined uniquely (up to congruences).
+
+    \Image{angles-asa-proof.pdf}
+}
+
+The less well-known $SsA$ theorem is a touch harder, so we will provide hints \SlightSmile.
+
+\Problem{0}{$SsA$ congruence}{
+    Convince yourself of the validity of the $SsA$ congruence theorem. In addition, figure out where the construction would break down if the angle were not opposite the longer of the two sides -- what would happen if both sides were equal?
+}{
+    Begin the construction with the shorter segment. How does the construction proceed once it is built?
+}{
+    After constructing the shorter segment, draw a ray at our given equal angle. One last step of the construction remains. Think about when we get no triangle, when one, and when two satisfying triangles.
+}{
+    Suppose the sides $a = BC$, $b = AC$ and the angle $\angle ABC = \beta$ opposite the longer side $b$ are given. We begin by constructing the shorter segment $BC$ of length~$a$. Point $A$ must lie on the ray from~$B$ making angle $\beta$ with $BC$ and at distance $b$ from~$C$, i.e. on the circle $k$ centered at~$C$ with radius $b$.
+
+    The distance from~$B$ to the center of the circle is $BC = a$. Since $a < b$, the point~$B$ lies \textit{inside} the circle $k$. The ray from~$B$ thus starts inside the circle and continues outward, so it crosses the circle exactly once. Point $A$ is therefore determined uniquely, and the triangle $ABC$ is also unique (up to congruence).
+
+    \Image{angles-Ssa-proof-one-solution.pdf}
+
+    Let's see why the condition $b > a$ is essential. If $a = b$, the point~$B$ would lie directly \textit{on} the circle~$k$. The ray from~$B$ would meet it at $B$ itself (which does not give a triangle) and at exactly one further point -- which is the desired~$A$. The construction therefore still leads to a unique (isosceles) triangle, so the $SsA$ theorem formally holds even in this borderline case. We do not, however, list it under $SsA$ as a separate case: if we know that the triangle is isosceles with $BC=AC$ and we know one angle $\beta$, the other two angles are already determined by the isosceles property (both base angles equal~$\beta$). The same configuration is therefore covered by $SAS$ or $SSS$, and $SsA$ adds no new information.
+
+    \Image{angles-Ssa-proof-isosceles.pdf}
+
+    If $b < a$, the point $B$ would lie \textit{outside} the circle $k$. The ray could meet it at two points -- giving two different (non-congruent) triangles -- or miss it entirely, which gives no triangle at all.
+
+    \Image{angles-Ssa-proof-two-solutions.pdf}
+
+    \Remark The proof can also be done by first constructing the longer segment. That, however, requires knowing the locus of points subtending a fixed angle from a fixed segment -- we will get to this in another handout.
+}
+
+Throughout our geometric journey we will encounter all of these statements. For now, however, let us show some concrete applications. We start with the most obvious statement, which still deserves to be proved:
+
+\Theorem{isosceles triangle}{
+    Prove that if a triangle~$ABC$ satisfies $AB=AC$, then $\angle ABC=\angle ACB$. Prove also the converse implication (i.e., that equality of angles implies equality of lengths).
+}{
+    \textit{Forward implication.} Assume $AB = AC$. Let $M$ be the midpoint of $BC$. The triangles $ABM$ and $ACM$ are congruent by $SSS$ ($AB=AC$ by assumption, $BM=CM$ by definition of the midpoint, common side $AM$), from which $\angle ABC = \angle ACB$.
+
+    \Image{angles-isosceles-triangle.pdf}
+
+    \textit{Converse implication.} Assume $\angle ABC = \angle ACB = \beta$. Let $M$ be the foot of the perpendicular from~$A$ to $BC$. By $ASA$, $\triangle ABM \cong \triangle ACM$, since we have two equal angles $\angle ABM = \angle ACM$ and $\angle AMB = \angle AMC = 90^\circ$ and the common side~$AM$, so $AB = AC$.
+
+    \Remark Another cute proof is based on showing that $\triangle ABC \cong \triangle ACB$ (note the different order of vertices). In the case where we know the equal sides, we use $SAS$ or even $SSS$ -- which then gives equal angles. In the case where we know the equal angles, it will instead be $ASA$, and the congruence gives equal sides.
+}
+
+Try proving these simple facts rigorously -- it will be easier this time:
+
+\Exercise{}{
+    An equilateral triangle has three equal angles of $60^\circ$.
+}{
+    In $\triangle ABC$ with $AB = AC = BC$, the isosceles triangle theorem gives $\angle ABC = \angle ACB$ (from $AB=AC$); analogously, from $AB=BC$ we get $\angle BAC = \angle BCA$. All three angles are therefore equal, and from the angle sum of $180^\circ$ each is $60^\circ$.
+
+    \Image{angles-equilateral.pdf}
+}
+
+\Exercise{}{
+    An isosceles right triangle has angles $90^\circ$, $45^\circ$, $45^\circ$.
+}{
+    Suppose the right angle is at vertex~$A$, i.e. $\angle BAC = 90^\circ$, and the legs are equal, $AB = AC$. By the isosceles triangle theorem, $\angle ABC = \angle ACB$. Denote this common measure $\beta$. From the angle sum in the triangle,
+    $$
+    90^\circ + \beta + \beta = 180^\circ,
+    $$
+    so $2\beta = 90^\circ$, i.e. $\beta = 45^\circ$.
+
+    \Image{angles-isosceles-right-triangle.pdf}
+}
+
+A very handy fact useful in non-trivial problems is the following. One possible proof goes via trigonometry.
+
+\Problem{0}{}{
+    A right triangle has its other two angles equal to $60^\circ$ and $30^\circ$ if and only if its hypotenuse is twice as long as the shorter leg.
+}{
+    Say $BC$ is the hypotenuse and is twice as long as the leg $AB$. The trick is to introduce a point $B'$ such that $A$ is the midpoint of segment $BB'$.
+}{
+    Let our triangle have its right angle at vertex~$A$.
+
+    \textit{($\Rightarrow$)} Assume $BC = 2\cdot AB$. Let $B'$ be the point such that $A$ is the midpoint of segment $BB'$. Then $AB' = AB$ and $A$ lies between $B$ and $B'$, so $\angle B'AC$ is in a linear pair with $\angle BAC = 90^\circ$, hence also equals $90^\circ$. We have $\triangle ABC \cong \triangle AB'C$ by $SAS$, since the angles at~$A$ are both right, the side~$AC$ is common, and $AB=AB'$.
+
+    \Image{angles-90-60-30.pdf}
+
+    Since $A$ is the midpoint of $BB'$, we have $BB' = 2\cdot AB$, and from the assumption $BC = 2\cdot AB$. Together,
+    $$
+    BB' = BC = B'C,
+    $$
+    so $\triangle BB'C$ is equilateral and all its angles are $60^\circ$. In particular, $\angle ABC = \angle B'BC = 60^\circ$. From the angle sum in $\triangle ABC$ we compute $\angle BCA = 180^\circ - 90^\circ - 60^\circ = 30^\circ$.
+
+    \textit{($\Leftarrow$)} It is not hard to see that the reasoning of the previous paragraph can easily be reversed -- this time the key congruence $\triangle ABC \cong \triangle AB'C$ comes from $ASA$.
+
+    \Remark Another solution is to note that by Thales' theorem, the circumcenter~$O$ of triangle $ABC$ is also the midpoint of the hypotenuse $BC$. We will return to this solution in more detail when we discuss circles.
+}
+
+\sec What to Remember
+
+\secc Techniques
+
+\begitems \style N
+\i With parallel lines, look for equal alternate and corresponding angles, or angles summing to~$180^\circ$.
+\i It is useful to view the exterior angle of a triangle as the sum of the two non-adjacent interior angles.
+\i To bridge the worlds of lengths and angles, congruence of two triangles is the right tool.
+\i Auxiliary points (midpoint of a segment, mirror image, extension) often reveal a congruence or a special triangle.
+\enditems
+
+\secc Useful Facts
+
+\begitems \style N
+\i The angle sum in a triangle is $180^\circ$, in general in a convex $n$-gon $(n-2) \cdot 180^\circ$.
+\i Triangle congruence theorems: $SSS$, $SAS$, $ASA$, $SsA$.
+\i In a triangle, two sides are equal if and only if the angles opposite them are equal.
+\i A right triangle has its hypotenuse twice as long as a leg if and only if its angles are $90^\circ, 60^\circ, 30^\circ$.
+\enditems
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye
