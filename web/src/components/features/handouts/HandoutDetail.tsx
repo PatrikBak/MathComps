@@ -9,12 +9,9 @@ import type {
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
 import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
-import {
-  renderBlocks,
-  renderInlineContent,
-  renderRawContentBlock,
-} from '@/components/math/ContentRenderer'
+import { renderBlocks, renderRawContentBlock } from '@/components/math/ContentRenderer'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
+import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { HelpTooltip } from '@/components/shared/components/HelpTooltip'
@@ -71,33 +68,22 @@ const imageType = 'handouts'
 
 /**
  * Renders the optional title of an environment block (e.g. theorem name,
- * definition concept) into a React node.
+ * definition concept) as a single math-aware string, matching how the
+ * document title and subtitle are rendered.
  *
  * @param title The optional inline title block, or null/undefined if absent.
- * @param imagesById Lookup map of {@link HandoutImage}s keyed by content ID.
- * @param imageMissingText Fallback text to display when an image is not found.
  * @returns The rendered React node, or null if no title was provided.
  */
-function renderTitle(
-  title: RawContentBlock | null | undefined,
-  imagesById: Record<string, HandoutImage>,
-  imageMissingText: string
-): React.ReactNode {
+function renderTitle(title: RawContentBlock | null | undefined): React.ReactNode {
   // No title
   if (!title) return null
 
-  // Plain text
-  if (title.type === 'text') {
-    return title.text
-  }
+  // Reconstruct the raw source string so KaTeX sees the whole title at once
+  const rawString = inlineBlockToMathSource(title)
+  if (!rawString) return null
 
-  // For complex titles, render as React elements to preserve formatting.
-  if (title.type === 'paragraph' || title.type === 'bold' || title.type === 'italic') {
-    return renderInlineContent(title.content, imagesById, imageType, imageMissingText)
-  }
-
-  // Fallback for unexpected types, though paragraph should cover most cases.
-  return renderRawContentBlock(title, imagesById, imageType, imageMissingText)
+  // Single MathRendererClient pass keeps text and math on the same baseline
+  return <MathRendererClient content={rawString} />
 }
 
 /**
@@ -134,7 +120,7 @@ function renderDocumentSections(
   imagesById: Record<string, HandoutImage>,
   t: HandoutsTranslator,
   imageMissingText: string
-) {
+): React.ReactNode {
   // Translate the environment labels
   const localizedEnvironmentLabelByType: Record<HandoutEnvironmentType, string> = {
     theorem: t('environments.theorem'),
@@ -175,7 +161,7 @@ function renderDocumentSections(
         id={metadata.id}
         number={metadata.label}
         title={section.title}
-        titleContent={section.title}
+        titleContent={<MathRendererClient content={section.title} />}
       >
         {section.text.content.map((contentBlock, contentBlockIndex) => {
           if (
@@ -196,7 +182,7 @@ function renderDocumentSections(
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
 
             // The optional inline name authored in TeX (e.g. \Definition{Aritmetický průměr}).
-            const userProvidedTitle = renderTitle(contentBlock.title, imagesById, imageMissingText)
+            const userProvidedTitle = renderTitle(contentBlock.title)
 
             // Difficulty asterisks are problem-only (e.g. "Úloha 4**").
             const difficultyStars =
