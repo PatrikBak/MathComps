@@ -32,6 +32,7 @@
 % Emoji macros: render as ASCII in the PDF, replaced with UTF-8 emoji on the web
 \def\SlightSmile{:-)}
 \def\Laugh{:D}
+\def\SmileWithTear{:'-)}
 
 % Prints a link to the MathComps website to the handout
 \def\MathcompsLink#1{%
@@ -54,6 +55,7 @@
     \def\captionExample{Příklad}%
     \def\captionSolution{Řešení}%
     \def\captionProblem{Úloha}%
+    \def\captionRemark{Poznámka}%
     \def\captionProblemSolutions{Řešení k úlohám}
     \def\captionExerciseSolutions{Řešení ke cvičením}
     \def\captionHints##1{%
@@ -90,6 +92,7 @@
     \def\captionExample{Príklad}%
     \def\captionSolution{Riešenie}%
     \def\captionProblem{Úloha}%
+    \def\captionRemark{Poznámka}%
     \def\captionProblemSolutions{Riešenia k úlohám}
     \def\captionExerciseSolutions{Riešenia k cvičeniam}
     \def\captionHints##1{%
@@ -126,6 +129,7 @@
     \def\captionExample{Example}%
     \def\captionSolution{Solution}%
     \def\captionProblem{Problem}%
+    \def\captionRemark{Remark}%
     \def\captionProblemSolutions{Solutions to problems}
     \def\captionExerciseSolutions{Solutions to exercises}
     \def\captionHints##1{%
@@ -195,6 +199,11 @@
 \long\def\saferead#1{\ignorespaces#1}
 \long\def\safepar{\par\removelastskip}
 
+% Remark: \Remark text  or  \Remark{label} text
+\def\Remark{\safepar\isnextchar\bgroup{\remarkwitharg}{\remarknoarg}}
+\long\def\remarkwitharg#1{\textit{\captionRemark\ (#1).}\enskip}
+\def\remarknoarg{\textit{\captionRemark.}\enskip}
+
 % Prints the end of a block (exercise, theorem, example, definition)
 \def\endblock{%
   \safepar\medskip%
@@ -256,9 +265,27 @@
 		\enskip\saferead{#2}\safepar%
 	}%
   \def\temp{#3}\ifx\temp\empty\else%
-    \safepar{\em \captionProof.}\enskip\saferead{#3}\qedsquare\endblock%
+    \safepar%
+    \theoremDispatchProof#3\theoremDispatchEnd%
+    \qedsquare\endblock%
   \fi%
 }
+
+% Peeks at the first token of the proof body. If it is \NamedProof, the body
+% supplies its own labelled proof headers, so emit the body verbatim. Otherwise
+% prepend the standard "\captionProof." italic header.
+\long\def\theoremDispatchProof#1#2\theoremDispatchEnd{%
+  \ifx#1\NamedProof%
+    #1#2%
+  \else%
+    {\em \captionProof.}\enskip\saferead{#1#2}%
+  \fi%
+}
+
+% Named proof header inside a multi-proof \Theorem body. The argument is
+% rendered in italics, matching the standard \captionProof style. Acts as a
+% sentinel for \theoremDispatchProof to suppress the auto "\captionProof." prefix.
+\def\NamedProof#1{\textit{#1}}
 
 % #1 - Source (might be empty)
 % #2 - Statement
