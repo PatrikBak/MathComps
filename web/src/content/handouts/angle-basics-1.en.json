@@ -1,9 +1,9 @@
 {
   "document": {
-    "title": "Základy počítania uhlov",
+    "title": "Angle Chasing Basics",
     "sections": [
       {
-        "title": "Úvod",
+        "title": "Introduction",
         "level": 1,
         "text": {
           "content": [
@@ -12,7 +12,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Geometria je najvizuálnejšia časť matematiky – vieme si ju kresliť na papier, v\u00A0softwari ako "
+                  "text": "Geometry is the most visual part of mathematics – we can draw it on paper, in software like "
                 },
                 {
                   "type": "link",
@@ -26,7 +26,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " a\u00A0môžeme sa tešiť, keď na vlastné oči vidíme, že veci v\u00A0nej fungujú. Prečo tomu tak je však vie byť záhadou. Aby sme tieto tajomstvá pochopili, potrebujeme kúsok po kúsky budovať základňu znalostí a\u00A0vizuálnu intuíciu."
+                  "text": ", and we can enjoy seeing with our own eyes that things in it work. Why this is so, however, can be a mystery. To uncover these secrets, we need to build up a foundation of knowledge and visual intuition piece by piece."
                 }
               ],
               "highligted": false
@@ -36,7 +36,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Jedna z\u00A0najzákladnejších techník je rozumieť svetu uhlov a\u00A0vedieť ich vlastnosti s\u00A0úspechom používať v\u00A0rôznych typoch úloh. Len málo zaujímavých príkladov uhly nepoužíva. Teória okolo uhlov pritom nie je zložitá, je však dôležité budovať ju pomaly a detailne. Začneme s\u00A0najjednoduchšími vlastnosťami, ktoré ani nevyžadujú prácu s kružnicami. Už tieto sa však dajú s\u00A0úspechom využiť vo veľa úlohách."
+                  "text": "One of the most fundamental techniques is to understand the world of angles and to know how to use their properties successfully in various types of problems. Only a few interesting examples don't use angles. The theory around angles is not complicated, but it is important to build it up slowly and in detail. We will start with the simplest properties, which don't even require working with circles. Even these can already be used successfully in many problems."
                 }
               ],
               "highligted": false
@@ -46,7 +46,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V\u00A0tomto materiáli sa budeme venovať uhlom, ale zámerne vynecháme uhly na kružniciach, ktoré si zaslúžia separátnu pozornosť. Na chvíľu zabudnime, že kružnice existujú."
+                  "text": "In this handout we will focus on angles, but we will deliberately leave out angles in circles, which deserve separate attention. For a moment, let's forget that circles exist."
                 }
               ],
               "highligted": false
@@ -56,7 +56,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Na záver úvodu jedna menšia poznámka o konvencii. V\u00A0tomto materiáli uvidíme veľa obrázkov trojuholníkov, v\u00A0ktorých je bod\u00A0"
+                  "text": "To close the introduction, a small note about convention. In this handout we will see many diagrams of triangles in which vertex\u00A0"
                 },
                 {
                   "type": "math",
@@ -65,7 +65,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " nakreslený hore. Ukazuje sa, že tento spôsob kreslenia je medzinárodný štandard, najmä na poli matematickej olympiády a podobných súťaží sa to tak zvykne robiť. V\u00A0Česku a na\u00A0Slovensku je však v\u00A0školách stále zvykom kresliť\u00A0"
+                  "text": " is drawn at the top. It turns out that this way of drawing is the international standard, especially in the world of the Mathematical Olympiad and similar competitions. In Czechia and Slovakia, however, schools still customarily draw\u00A0"
                 },
                 {
                   "type": "math",
@@ -74,7 +74,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " hore. V\u00A0niektorých krajinách možno vidieť aj\u00A0"
+                  "text": " at the top. In some countries one can also see\u00A0"
                 },
                 {
                   "type": "math",
@@ -83,7 +83,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " hore, napr. na Ukrajine. Z\u00A0hľadiska riešenia úloh je vždy dobré nakresliť si hore ten bod, pri ktorom obrázok vyzerá čo najsymetrickejšie, ľahšie v\u00A0ňom vidieť ďalšie symetrické veci. V\u00A0tomto materiáli budú úlohy zadávané tak, že tá symetria bude vidieť viac pri\u00A0"
+                  "text": " at the top, e.g. in Ukraine. From the point of view of solving problems, it is always a good idea to put at the top the vertex that makes the diagram look as symmetric as possible – it is then easier to spot further symmetric things in it. In this handout the problems will be posed so that the symmetry is more visible with\u00A0"
                 },
                 {
                   "type": "math",
@@ -92,7 +92,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " hore \uD83D\uDE42."
+                  "text": " at the top \uD83D\uDE42."
                 }
               ],
               "highligted": false
@@ -101,7 +101,7 @@
         }
       },
       {
-        "title": "Základy sveta uhlov",
+        "title": "Basics of the World of Angles",
         "level": 1,
         "text": {
           "content": [
@@ -110,7 +110,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V\u00A0tejto sekcii si odvodíme tie najjednoduchšie vlastnosti súvisiace s uhlami. Pevne verím, že kľúčom k\u00A0zvládnutiu geometrie je porozumenie vecí od základov a do hĺbky, preto sa týmto jednoduchým vlastnostiam budeme venovať viac."
+                  "text": "In this section we will derive the simplest properties related to angles. I firmly believe that the key to mastering geometry is understanding things from the ground up and in depth, so we will spend more time on these simple properties."
                 }
               ],
               "highligted": false
@@ -120,7 +120,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Základné vlastnosti uhlov, ktoré bežne používame skoro bez rozmýšľania pri riešení úloh:"
+                  "text": "Basic properties of angles, which we commonly use almost without thinking when solving problems:"
                 }
               ],
               "highligted": false
@@ -137,11 +137,11 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "Vrcholové uhly sú zhodné: "
+                            "text": "Vertical angles are equal: "
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.sk-1.svg",
+                            "id": "angle-basics-1.en-1.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -155,11 +155,11 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "Súhlasné uhly sú zhodné: "
+                            "text": "Corresponding angles are equal: "
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.sk-2.svg",
+                            "id": "angle-basics-1.en-2.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -173,11 +173,11 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "Striedavé uhly sú zhodné: "
+                            "text": "Alternate angles are equal: "
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.sk-3.svg",
+                            "id": "angle-basics-1.en-3.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -191,7 +191,7 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "Vedľajšie uhly majú súčet "
+                            "text": "Angles in a linear pair sum to "
                           },
                           {
                             "type": "math",
@@ -204,7 +204,7 @@
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.sk-4.svg",
+                            "id": "angle-basics-1.en-4.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -223,7 +223,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Tieto vlastnosti spolu veľmi prirodzene súvisia, menšie cvičenie na rozmyslenie:"
+                  "text": "These properties are very naturally related to one another; a small exercise to ponder:"
                 }
               ],
               "highligted": false
@@ -236,7 +236,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Uvedomte si, že:"
+                      "text": "Convince yourself that:"
                     }
                   ],
                   "highligted": false
@@ -250,7 +250,7 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "z\u00A0vlastnosti o\u00A0vedľajších uhloch vyplýva vlastnosť vrcholových uhlov (a\u00A0naopak)"
+                            "text": "the linear-pair property implies the vertical-angles property (and vice versa)"
                           }
                         ],
                         "highligted": false
@@ -262,7 +262,7 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "z\u00A0ktorejkoľvek dvojice vlastností o\u00A0vrcholových, súhlasných, striedavých uhloch vyplýva tá tretia vlastnosť"
+                            "text": "any two of the three properties about vertical, corresponding, and alternate angles imply the third"
                           }
                         ],
                         "highligted": false
@@ -287,7 +287,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Vedľajší uhol "
+                      "text": " The angle "
                     },
                     {
                       "type": "math",
@@ -296,7 +296,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " k\u00A0danému uhlu "
+                      "text": " in a linear pair with a given angle "
                     },
                     {
                       "type": "math",
@@ -305,7 +305,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " má veľkosť "
+                      "text": " has measure "
                     },
                     {
                       "type": "math",
@@ -314,7 +314,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Uhol vedľajší k\u00A0"
+                      "text": ". The angle in a linear pair with "
                     },
                     {
                       "type": "math",
@@ -323,7 +323,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " má zasa veľkosť "
+                      "text": " in turn has measure "
                     },
                     {
                       "type": "math",
@@ -332,7 +332,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Ten je však zároveň vrcholový uhol k\u00A0"
+                      "text": ". But this last angle is also vertical to "
                     },
                     {
                       "type": "math",
@@ -341,7 +341,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", teda sú vrcholové uhly zhodné."
+                      "text": ", so vertical angles are equal."
                     }
                   ],
                   "highligted": false
@@ -351,7 +351,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-5.svg",
+                      "id": "angle-basics-1.en-5.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -363,7 +363,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Naopak, predpokladajme vlastnosť o\u00A0vrcholových uhloch a\u00A0označme po sebe idúce uhly v\u00A0priesečníku dvoch priamok "
+                      "text": "Conversely, assume the vertical-angles property and label the consecutive angles at the intersection of two lines "
                     },
                     {
                       "type": "math",
@@ -399,7 +399,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Zo zhodnosti vrcholových uhlov "
+                      "text": ". By the equality of vertical angles, "
                     },
                     {
                       "type": "math",
@@ -408,7 +408,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -417,7 +417,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Súčet všetkých štyroch je plný uhol, teda "
+                      "text": ". The sum of all four is a full angle, i.e. "
                     },
                     {
                       "type": "math",
@@ -426,7 +426,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Po dosadení dostávame "
+                      "text": ". Substituting, we get "
                     },
                     {
                       "type": "math",
@@ -435,7 +435,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", čiže "
+                      "text": ", so "
                     },
                     {
                       "type": "math",
@@ -444,7 +444,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " – to je práve vlastnosť vedľajších uhlov."
+                      "text": " – which is exactly the linear-pair property."
                     }
                   ],
                   "highligted": false
@@ -454,7 +454,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-6.svg",
+                      "id": "angle-basics-1.en-6.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -475,7 +475,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Všetky tri vlastnosti hovoria, že istá dvojica uhlov má rovnakú veľkosť."
+                      "text": " All three properties say that a certain pair of angles has the same measure."
                     }
                   ],
                   "highligted": false
@@ -485,7 +485,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Pozrime sa na trojicu uhlov "
+                      "text": "Look at the three angles "
                     },
                     {
                       "type": "math",
@@ -512,7 +512,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " z\u00A0obrázka a\u00A0na to, čo o\u00A0ich vzťahoch tvrdia jednotlivé vlastnosti. Pre dvojicu "
+                      "text": " in the figure and at what each property says about their relationships. For the pair "
                     },
                     {
                       "type": "math",
@@ -530,7 +530,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri hornom priesečníku tvrdí vlastnosť vrcholových uhlov "
+                      "text": " at the upper intersection, the vertical-angles property gives "
                     },
                     {
                       "type": "math",
@@ -539,7 +539,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Pre dvojicu "
+                      "text": ". For the pair "
                     },
                     {
                       "type": "math",
@@ -557,7 +557,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " tvrdí vlastnosť súhlasných uhlov "
+                      "text": ", the corresponding-angles property gives "
                     },
                     {
                       "type": "math",
@@ -566,7 +566,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Konečne pre dvojicu "
+                      "text": ". Finally, for the pair "
                     },
                     {
                       "type": "math",
@@ -584,7 +584,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " tvrdí vlastnosť striedavých uhlov "
+                      "text": ", the alternate-angles property gives "
                     },
                     {
                       "type": "math",
@@ -603,7 +603,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-7.svg",
+                      "id": "angle-basics-1.en-7.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -615,7 +615,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Tri vlastnosti teda tvrdia tri rovnosti medzi tými istými troma uhlami, len cez rôzne dvojice. Akonáhle platia ľubovoľné dve, tretia plynie tranzitivitou: napr. ak vieme (V) a\u00A0(S), tak "
+                      "text": "The three properties therefore assert three equalities among the same three angles, just via different pairs. As soon as any two of them hold, the third follows by transitivity: e.g. if (V) and (C) hold, then "
                     },
                     {
                       "type": "math",
@@ -624,7 +624,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -633,7 +633,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", takže "
+                      "text": ", so "
                     },
                     {
                       "type": "math",
@@ -642,7 +642,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", čiže (St). Ostatné dvojice analogicky."
+                      "text": ", which is (A). The other pairs are analogous."
                     }
                   ],
                   "highligted": false
@@ -654,7 +654,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Nasledujúce tvrdenie všetci poznáme, viete ho však dokázať?"
+                  "text": "The following statement is familiar to all of us, but can you prove it?"
                 }
               ],
               "highligted": false
@@ -667,7 +667,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Súčet uhlov v\u00A0trojuholníku je "
+                      "text": "The sum of the angles in a triangle is "
                     },
                     {
                       "type": "math",
@@ -688,7 +688,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Veďme cez vrchol\u00A0"
+                      "text": "Through vertex\u00A0"
                     },
                     {
                       "type": "math",
@@ -697,7 +697,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " priamku rovnobežnú s\u00A0"
+                      "text": " draw a line parallel to "
                     },
                     {
                       "type": "math",
@@ -706,7 +706,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Pretože "
+                      "text": ". Since "
                     },
                     {
                       "type": "math",
@@ -715,7 +715,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je priečka rovnobežiek, uhol "
+                      "text": " is a transversal of the parallel lines, the angle "
                     },
                     {
                       "type": "math",
@@ -724,7 +724,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri\u00A0"
+                      "text": " at\u00A0"
                     },
                     {
                       "type": "math",
@@ -733,7 +733,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0uhol "
+                      "text": " and the angle "
                     },
                     {
                       "type": "math",
@@ -742,7 +742,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri\u00A0"
+                      "text": " at\u00A0"
                     },
                     {
                       "type": "math",
@@ -751,7 +751,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú striedavé, teda rovnaké. Analogicky cez priečku "
+                      "text": " are alternate, hence equal. Similarly, via the transversal "
                     },
                     {
                       "type": "math",
@@ -760,7 +760,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú uhly "
+                      "text": ", the angles "
                     },
                     {
                       "type": "math",
@@ -769,7 +769,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri\u00A0"
+                      "text": " at\u00A0"
                     },
                     {
                       "type": "math",
@@ -778,7 +778,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0pri\u00A0"
+                      "text": " and at\u00A0"
                     },
                     {
                       "type": "math",
@@ -787,7 +787,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " striedavé. Uhly "
+                      "text": " are alternate. The angles "
                     },
                     {
                       "type": "math",
@@ -814,7 +814,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ležia vedľa seba pozdĺž priamky cez\u00A0"
+                      "text": " lie next to each other along the line through\u00A0"
                     },
                     {
                       "type": "math",
@@ -823,7 +823,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", teda "
+                      "text": ", so "
                     },
                     {
                       "type": "math",
@@ -838,7 +838,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-8.svg",
+                      "id": "angle-basics-1.en-8.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -852,7 +852,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Toto tvrdenie sa rozhodne dá zovšeobecniť. Vieme napríklad, že súčet uhlov v\u00A0štvoruholníku je "
+                  "text": "This statement can certainly be generalized. We know, for example, that the sum of the angles in a quadrilateral is "
                 },
                 {
                   "type": "math",
@@ -861,7 +861,7 @@
                 },
                 {
                   "type": "text",
-                  "text": ". Ako je to v 5-uholníku? A ako v\u00A067-uholníku? Odpoveďou je nasledujúce tvrdenie:"
+                  "text": ". What about a pentagon? And a 67-gon? The answer is the following statement:"
                 }
               ],
               "highligted": false
@@ -874,7 +874,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Nech "
+                      "text": "Let "
                     },
                     {
                       "type": "math",
@@ -883,7 +883,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je prirodzené číslo. Súčet uhlov v\u00A0konvexnom "
+                      "text": " be a natural number. The sum of the angles in a convex "
                     },
                     {
                       "type": "math",
@@ -892,7 +892,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníku je rovný "
+                      "text": "-gon equals "
                     },
                     {
                       "type": "math",
@@ -916,13 +916,13 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Dôkaz 1 (matematická indukcia)."
+                          "text": "Proof 1 (mathematical induction)."
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " Základ "
+                      "text": " Base case "
                     },
                     {
                       "type": "math",
@@ -931,7 +931,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ": súčet uhlov trojuholníka je "
+                      "text": ": the sum of the angles of a triangle is "
                     },
                     {
                       "type": "math",
@@ -940,7 +940,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Indukčný krok: nech "
+                      "text": ". Inductive step: let "
                     },
                     {
                       "type": "math",
@@ -949,7 +949,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je konvexný "
+                      "text": " be a convex "
                     },
                     {
                       "type": "math",
@@ -958,7 +958,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholník. Uhlopriečkou "
+                      "text": "-gon. The diagonal "
                     },
                     {
                       "type": "math",
@@ -967,7 +967,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ho rozdelíme na trojuholník "
+                      "text": " splits it into a triangle "
                     },
                     {
                       "type": "math",
@@ -976,7 +976,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0konvexný "
+                      "text": " and a convex "
                     },
                     {
                       "type": "math",
@@ -985,7 +985,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholník "
+                      "text": "-gon "
                     },
                     {
                       "type": "math",
@@ -994,7 +994,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ": uhly pri vrcholoch "
+                      "text": ": the angles at vertices "
                     },
                     {
                       "type": "math",
@@ -1003,7 +1003,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " patria celé "
+                      "text": " belong entirely to the "
                     },
                     {
                       "type": "math",
@@ -1012,7 +1012,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníku, uhol pri "
+                      "text": "-gon, the angle at "
                     },
                     {
                       "type": "math",
@@ -1021,7 +1021,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " patrí celý trojuholníku a\u00A0uhly pri "
+                      "text": " belongs entirely to the triangle, and the angles at "
                     },
                     {
                       "type": "math",
@@ -1039,7 +1039,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sa rozdelia medzi oba útvary tak, aby ich časti dali pôvodné vnútorné uhly "
+                      "text": " are split between the two figures so that their parts add up to the original interior angles of the "
                     },
                     {
                       "type": "math",
@@ -1048,7 +1048,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka. Súčet uhlov "
+                      "text": "-gon. The angle sum of the "
                     },
                     {
                       "type": "math",
@@ -1057,14 +1057,14 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka je teda"
+                      "text": "-gon is therefore"
                     }
                   ],
                   "highligted": false
                 },
                 {
                   "type": "math",
-                  "text": "\\underbrace{180^\\circ}_{\\text{trojuholník}} + \\underbrace{(n-2) \\cdot 180^\\circ}_{n\\text{-uholník}} = (n-1) \\cdot 180^\\circ = \\bigl((n+1) - 2\\bigr) \\cdot 180^\\circ.",
+                  "text": "\\underbrace{180^\\circ}_{\\text{triangle}} + \\underbrace{(n-2) \\cdot 180^\\circ}_{n\\text{-gon}} = (n-1) \\cdot 180^\\circ = \\bigl((n+1) - 2\\bigr) \\cdot 180^\\circ.",
                   "isDisplay": true
                 },
                 {
@@ -1072,7 +1072,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-9.svg",
+                      "id": "angle-basics-1.en-9.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1087,13 +1087,13 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Dôkaz 2 (vejárová triangulácia)."
+                          "text": "Proof 2 (fan triangulation)."
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " Veďme z\u00A0vrcholu "
+                      "text": " From vertex "
                     },
                     {
                       "type": "math",
@@ -1102,7 +1102,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " uhlopriečky do každého nepriliehajúceho vrcholu "
+                      "text": " draw diagonals to every non-adjacent vertex "
                     },
                     {
                       "type": "math",
@@ -1111,7 +1111,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Vznikne "
+                      "text": ". This produces "
                     },
                     {
                       "type": "math",
@@ -1120,7 +1120,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " trojuholníkov pokrývajúcich vnútro "
+                      "text": " triangles that cover the interior of the "
                     },
                     {
                       "type": "math",
@@ -1129,7 +1129,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka bez prekrytia. Pri každom vrchole "
+                      "text": "-gon without overlap. At each vertex "
                     },
                     {
                       "type": "math",
@@ -1138,7 +1138,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sa uhly susedných trojuholníkov pri "
+                      "text": ", the angles of the adjacent triangles at "
                     },
                     {
                       "type": "math",
@@ -1147,7 +1147,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " presne poskladajú na vnútorný uhol "
+                      "text": " assemble exactly into the interior angle of the "
                     },
                     {
                       "type": "math",
@@ -1156,7 +1156,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka pri "
+                      "text": "-gon at "
                     },
                     {
                       "type": "math",
@@ -1165,7 +1165,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", takže súčet uhlov všetkých trojuholníkov sa rovná súčtu vnútorných uhlov "
+                      "text": ", so the sum of the angles of all triangles equals the sum of the interior angles of the "
                     },
                     {
                       "type": "math",
@@ -1174,7 +1174,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka, čiže "
+                      "text": "-gon, i.e. "
                     },
                     {
                       "type": "math",
@@ -1193,7 +1193,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-10.svg",
+                      "id": "angle-basics-1.en-10.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1214,20 +1214,20 @@
                     },
                     {
                       "type": "text",
-                      "text": " Dôkaz\u00A02 je "
+                      "text": " Proof\u00A02 is an "
                     },
                     {
                       "type": "quote",
                       "content": [
                         {
                           "type": "text",
-                          "text": "rozbalený"
+                          "text": "unrolled"
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " dôkaz\u00A01: indukcia odrezáva trojuholníky jeden po druhom, tu ich vidíme všetky naraz."
+                      "text": " version of Proof\u00A01: induction cuts off triangles one by one, and here we see them all at once."
                     }
                   ],
                   "highligted": false
@@ -1240,13 +1240,13 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Dôkaz 3 (vnútorný bod)."
+                          "text": "Proof 3 (interior point)."
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " Zvoľme bod "
+                      "text": " Choose a point "
                     },
                     {
                       "type": "math",
@@ -1255,7 +1255,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " vo vnútri "
+                      "text": " in the interior of the "
                     },
                     {
                       "type": "math",
@@ -1264,7 +1264,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka a\u00A0spojme ho s\u00A0každým vrcholom. Vznikne "
+                      "text": "-gon and connect it to every vertex. This produces "
                     },
                     {
                       "type": "math",
@@ -1273,7 +1273,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " trojuholníkov s\u00A0celkovým súčtom uhlov "
+                      "text": " triangles with a total angle sum of "
                     },
                     {
                       "type": "math",
@@ -1282,7 +1282,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Uhly trojuholníkov pri každom vrchole "
+                      "text": ". At each vertex "
                     },
                     {
                       "type": "math",
@@ -1291,7 +1291,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " spolu tvoria vnútorný uhol "
+                      "text": " of the "
                     },
                     {
                       "type": "math",
@@ -1300,7 +1300,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka pri\u00A0"
+                      "text": "-gon, the triangle angles at "
                     },
                     {
                       "type": "math",
@@ -1309,7 +1309,16 @@
                     },
                     {
                       "type": "text",
-                      "text": "; uhly trojuholníkov pri\u00A0"
+                      "text": " together form the entire interior angle of the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-gon there; the triangle angles at\u00A0"
                     },
                     {
                       "type": "math",
@@ -1318,7 +1327,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " spolu tvoria plný uhol "
+                      "text": " together form a full angle of "
                     },
                     {
                       "type": "math",
@@ -1327,7 +1336,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Teda súčet vnútorných uhlov "
+                      "text": ". So the sum of the interior angles of the "
                     },
                     {
                       "type": "math",
@@ -1336,7 +1345,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka je"
+                      "text": "-gon is"
                     }
                   ],
                   "highligted": false
@@ -1351,7 +1360,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-11.svg",
+                      "id": "angle-basics-1.en-11.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1366,13 +1375,13 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (nekonvexné mnohouholníky)."
+                          "text": "Poznámka (non-convex polygons)."
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " Vzorec "
+                      "text": " The formula "
                     },
                     {
                       "type": "math",
@@ -1381,7 +1390,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " platí aj pre navzájom sa nepretínajúce nekonvexné mnohouholníky, ak všetky vnútorné uhly meriame smerom dovnútra – teda aj uhly väčšie než "
+                      "text": " also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside – so we count angles greater than "
                     },
                     {
                       "type": "math",
@@ -1390,7 +1399,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " rátame ako také."
+                      "text": " as such."
                     }
                   ],
                   "highligted": false
@@ -1400,7 +1409,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vejárová triangulácia z\u00A0jedného vrcholu nemusí fungovať ani z\u00A0konvexného vrcholu – niektoré uhlopriečky môžu prechádzať mimo mnohouholníka. Platí však, že každý jednoduchý "
+                      "text": "A fan triangulation from a single vertex may fail even from a convex vertex – some diagonals can pass outside the polygon. It is still true, however, that every simple "
                     },
                     {
                       "type": "math",
@@ -1409,7 +1418,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholník sa dá rozdeliť na "
+                      "text": "-gon can be split into "
                     },
                     {
                       "type": "math",
@@ -1418,7 +1427,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " trojuholníkov (nie nutne vejárovo), čo dôkaz zachráni. Dôvod je indukcia cez trojuholník tvorený nejakým vrcholom "
+                      "text": " triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex "
                     },
                     {
                       "type": "math",
@@ -1427,7 +1436,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0jeho susedmi "
+                      "text": " and its neighbors "
                     },
                     {
                       "type": "math",
@@ -1445,7 +1454,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", ktorý leží celý vo vnútri nášho "
+                      "text": " that lies entirely inside our "
                     },
                     {
                       "type": "math",
@@ -1454,7 +1463,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholníka. Odrezaním "
+                      "text": "-gon. Cutting "
                     },
                     {
                       "type": "math",
@@ -1463,7 +1472,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " uhlopriečkou "
+                      "text": " off along the diagonal "
                     },
                     {
                       "type": "math",
@@ -1472,7 +1481,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " dostaneme "
+                      "text": " gives an "
                     },
                     {
                       "type": "math",
@@ -1481,7 +1490,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "-uholník; opakovaním teda "
+                      "text": "-gon; iterating yields "
                     },
                     {
                       "type": "math",
@@ -1490,7 +1499,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " trojuholníkov. Dá sa dokázať, že takýto trojuholník vždy existuje (dokonca dva), viď "
+                      "text": " triangles. One can prove that such a triangle always exists (in fact, two of them); see the "
                     },
                     {
                       "type": "link",
@@ -1498,7 +1507,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "veta o\u00A0dvoch ušiach"
+                          "text": "two ears theorem"
                         }
                       ]
                     },
@@ -1514,7 +1523,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "K\u00A0dôkazu\u00A03: funguje len ak existuje vnútorný bod "
+                      "text": "As for Proof\u00A03: it works only if there is an interior point "
                     },
                     {
                       "type": "math",
@@ -1523,7 +1532,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " viditeľný zo všetkých vrcholov (t.\u00A0j. úsečky "
+                      "text": " visible from every vertex (i.e., the segments "
                     },
                     {
                       "type": "math",
@@ -1532,7 +1541,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ležia celé vo vnútri). Pre niektoré nekonvexné mnohouholníky taký "
+                      "text": " lie entirely inside). For some non-convex polygons no such "
                     },
                     {
                       "type": "math",
@@ -1541,7 +1550,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nemusí existovať (skúste taký nakresliť) – v\u00A0takom prípade sa dôkaz\u00A03 nedá priamo zachrániť a\u00A0treba siahnuť po triangulácii z\u00A0dôkazu\u00A02."
+                      "text": " exists (try drawing one) – in that case Proof\u00A03 cannot be salvaged directly and one must fall back on the triangulation from Proof\u00A02."
                     }
                   ],
                   "highligted": false
@@ -1553,7 +1562,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Teraz uveďme ešte dve jednoduché ale užitočné pomocné tvrdenia:"
+                  "text": "Now let's state two more simple but useful auxiliary claims:"
                 }
               ],
               "highligted": false
@@ -1566,7 +1575,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Dokážte, že súčet uhlov na obrázku je rovný "
+                      "text": "Prove that the sum of the angles in the figure equals "
                     },
                     {
                       "type": "math",
@@ -1585,7 +1594,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-12.svg",
+                      "id": "angle-basics-1.en-12.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1599,7 +1608,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Označme "
+                      "text": "Let "
                     },
                     {
                       "type": "math",
@@ -1608,7 +1617,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " uhol zvieraný priečkou "
+                      "text": " denote the angle that the transversal "
                     },
                     {
                       "type": "math",
@@ -1617,7 +1626,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " s\u00A0rovnobežkami na strane "
+                      "text": " makes with the parallel lines on the side of "
                     },
                     {
                       "type": "math",
@@ -1626,7 +1635,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " (ako na obrázku). Súhlasné uhly "
+                      "text": " (as in the figure). The corresponding angles "
                     },
                     {
                       "type": "math",
@@ -1635,7 +1644,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri\u00A0"
+                      "text": " at\u00A0"
                     },
                     {
                       "type": "math",
@@ -1644,7 +1653,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -1653,7 +1662,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri\u00A0"
+                      "text": " at\u00A0"
                     },
                     {
                       "type": "math",
@@ -1662,7 +1671,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú zhodné. Pri vrchole "
+                      "text": " are equal. At vertex "
                     },
                     {
                       "type": "math",
@@ -1671,7 +1680,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú "
+                      "text": " the angles "
                     },
                     {
                       "type": "math",
@@ -1680,7 +1689,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -1689,7 +1698,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " vedľajšie, teda"
+                      "text": " form a linear pair, so"
                     }
                   ],
                   "highligted": false
@@ -1704,7 +1713,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-13.svg",
+                      "id": "angle-basics-1.en-13.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1721,7 +1730,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Dokážte, že uhol s\u00A0otázníkom na obrázku je rovný "
+                      "text": "Prove that the angle marked with a question mark in the figure equals "
                     },
                     {
                       "type": "math",
@@ -1740,7 +1749,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-14.svg",
+                      "id": "angle-basics-1.en-14.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1754,16 +1763,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Zo súčtu uhlov v\u00A0trojuholníku "
+                      "text": "From the angle sum in the triangle, "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ACB| = 180^\\circ - \\alpha - \\beta",
+                      "text": "\\angle ACB = 180^\\circ - \\alpha - \\beta",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Vonkajší uhol pri "
+                      "text": ". The exterior angle at "
                     },
                     {
                       "type": "math",
@@ -1772,11 +1781,11 @@
                     },
                     {
                       "type": "text",
-                      "text": " je vedľajší k\u00A0"
+                      "text": " is in a linear pair with "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ACB|",
+                      "text": "\\angle ACB",
                       "isDisplay": false
                     },
                     {
@@ -1788,7 +1797,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "180^\\circ - |\\angle ACB| = \\alpha + \\beta.",
+                  "text": "180^\\circ - \\angle ACB = \\alpha + \\beta.",
                   "isDisplay": true
                 },
                 {
@@ -1796,7 +1805,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-14.svg",
+                      "id": "angle-basics-1.en-14.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1810,7 +1819,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Posledné dve cvičenia možno vyzerali veľmi triviálne. Realita však je, že v\u00A0praktických úlohách sú veľmi užitočné – keď máme obrovský netriviálny obrázok a\u00A0máme previesť za sebou veľký počet uhlových operácií, tak je naozaj veľmi výhodné si čo i len kúsok tej práce zjednodušiť – v\u00A0prípade rovnobežiek nemusíme uvažovať pomocný súhlasný uhol a\u00A0v\u00A0prípade trojuholníka nemusíme pracovať s\u00A0"
+                  "text": "The last two exercises may have looked very trivial. The reality, however, is that in practical problems they are very useful – when we have a huge non-trivial diagram and have to chain together a large number of angle operations, it is genuinely advantageous to simplify even a small piece of that work. In the parallel-lines case we don't have to introduce an auxiliary corresponding angle, and in the triangle case we don't have to work with\u00A0"
                 },
                 {
                   "type": "math",
@@ -1828,7 +1837,7 @@
         }
       },
       {
-        "title": "Základy sveta dĺžok",
+        "title": "Basics of the World of Lengths",
         "level": 1,
         "text": {
           "content": [
@@ -1837,20 +1846,20 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Zatiaľ sme fungovali iba vo svete uhlov a\u00A0vôbec sme neriešili dĺžky. Geometria však začne byť zaujímavá, keď tieto svety začneme prepájať. Základom pre nás bude "
+                  "text": "So far we have only operated in the world of angles and have not dealt with lengths at all. Geometry, however, becomes interesting once we start connecting these worlds. Our foundation will be "
                 },
                 {
                   "type": "italic",
                   "content": [
                     {
                       "type": "text",
-                      "text": "zhodnosť trojuholníkov"
+                      "text": "triangle congruence"
                     }
                   ]
                 },
                 {
                   "type": "text",
-                  "text": ". Pripomeňme si kritériá."
+                  "text": ". Let us recall the criteria."
                 }
               ],
               "highligted": false
@@ -1863,7 +1872,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vety o\u00A0zhodnosti trojuholníkov:"
+                      "text": "Triangle congruence theorems:"
                     }
                   ],
                   "highligted": false
@@ -1876,17 +1885,13 @@
                         "type": "paragraph",
                         "content": [
                           {
-                            "type": "text",
-                            "text": "Veta "
-                          },
-                          {
                             "type": "math",
-                            "text": "sss",
+                            "text": "SSS",
                             "isDisplay": false
                           },
                           {
                             "type": "text",
-                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú vo všetkých troch stranách."
+                            "text": ": two triangles are congruent if they agree on all three sides."
                           }
                         ],
                         "highligted": false
@@ -1897,17 +1902,13 @@
                         "type": "paragraph",
                         "content": [
                           {
-                            "type": "text",
-                            "text": "Veta "
-                          },
-                          {
                             "type": "math",
-                            "text": "sus",
+                            "text": "SAS",
                             "isDisplay": false
                           },
                           {
                             "type": "text",
-                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú v\u00A0dvoch stranách a\u00A0uhle, ktorý tieto strany zvierajú."
+                            "text": ": two triangles are congruent if they agree on two sides and the angle between them."
                           }
                         ],
                         "highligted": false
@@ -1918,17 +1919,13 @@
                         "type": "paragraph",
                         "content": [
                           {
-                            "type": "text",
-                            "text": "Veta "
-                          },
-                          {
                             "type": "math",
-                            "text": "usu",
+                            "text": "ASA",
                             "isDisplay": false
                           },
                           {
                             "type": "text",
-                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú v\u00A0jednej strane a\u00A0nejakých dvoch uhloch."
+                            "text": ": two triangles are congruent if they agree on one side and any two angles."
                           }
                         ],
                         "highligted": false
@@ -1939,17 +1936,13 @@
                         "type": "paragraph",
                         "content": [
                           {
-                            "type": "text",
-                            "text": "Veta "
-                          },
-                          {
                             "type": "math",
-                            "text": "Ssu",
+                            "text": "SsA",
                             "isDisplay": false
                           },
                           {
                             "type": "text",
-                            "text": ": dva trojuholníky sú zhodné, ak sa zhodujú v\u00A0dvoch stranách a\u00A0uhle oproti dlhšej z\u00A0týchto strán."
+                            "text": ": two triangles are congruent if they agree on two sides and the angle opposite the longer of these sides."
                           }
                         ],
                         "highligted": false
@@ -1966,16 +1959,16 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Zdôraznime, že pri vete "
+                  "text": "Let us emphasize that in "
                 },
                 {
                   "type": "math",
-                  "text": "sus",
+                  "text": "SAS",
                   "isDisplay": false
                 },
                 {
                   "type": "text",
-                  "text": " je naozaj dôležité, že zhodný uhol je ten zvieraný dvoma stranami – bez tohto predpokladu zhodnosť nemusí fungovať, viď obrázok. Na ňom máme dva trojuholníky "
+                  "text": " it really is important that the equal angle be the one between the two sides – without this assumption, congruence may fail; see the figure. There we have two triangles "
                 },
                 {
                   "type": "math",
@@ -1984,7 +1977,7 @@
                 },
                 {
                   "type": "text",
-                  "text": " a "
+                  "text": " and "
                 },
                 {
                   "type": "math",
@@ -1993,11 +1986,11 @@
                 },
                 {
                   "type": "text",
-                  "text": ", pre ktoré platí "
+                  "text": " for which "
                 },
                 {
                   "type": "math",
-                  "text": "|BC|=|B'C'|",
+                  "text": "BC = B'C'",
                   "isDisplay": false
                 },
                 {
@@ -2006,21 +1999,21 @@
                 },
                 {
                   "type": "math",
-                  "text": "|AC|=|A'C'|",
+                  "text": "AC = A'C'",
                   "isDisplay": false
                 },
                 {
                   "type": "text",
-                  "text": ", a "
+                  "text": ", and "
                 },
                 {
                   "type": "math",
-                  "text": "\\beta=\\beta'",
+                  "text": "\\beta = \\beta'",
                   "isDisplay": false
                 },
                 {
                   "type": "text",
-                  "text": ", avšak zjavne nie sú zhodné."
+                  "text": ", yet they are clearly not congruent."
                 }
               ],
               "highligted": false
@@ -2030,7 +2023,7 @@
               "content": [
                 {
                   "type": "image",
-                  "id": "angle-basics-1.sk-15.svg",
+                  "id": "angle-basics-1.en-15.svg",
                   "scale": 1.0,
                   "isInline": false
                 }
@@ -2042,16 +2035,16 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Veta "
+                  "text": "The "
                 },
                 {
                   "type": "math",
-                  "text": "Ssu",
+                  "text": "SsA",
                   "isDisplay": false
                 },
                 {
                   "type": "text",
-                  "text": " by bola naša záchrana – tu ju však aplikovať nevieme, lebo strana, oproti ktorej je uhol "
+                  "text": " theorem would be our rescue – but here we cannot apply it, because the side opposite the angle "
                 },
                 {
                   "type": "math",
@@ -2060,20 +2053,20 @@
                 },
                 {
                   "type": "text",
-                  "text": ", teda "
+                  "text": ", namely "
                 },
                 {
                   "type": "math",
-                  "text": "|AC|",
+                  "text": "AC",
                   "isDisplay": false
                 },
                 {
                   "type": "text",
-                  "text": ", nie je najdlhšia, keďže je zjavne kratšia než "
+                  "text": ", is not the longest, since it is clearly shorter than "
                 },
                 {
                   "type": "math",
-                  "text": "|BC|",
+                  "text": "BC",
                   "isDisplay": false
                 },
                 {
@@ -2088,7 +2081,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Než pôjdeme ďalej, uvedomme si, čo tieto vety znamenajú. Za mňa dobrý pohľad na zhodnosť je takýto: chceme zostrojiť trojuholník, keď máme dané nejaké tri jeho elementy – budú všetky zostrojiteľné trojuholníky zhodné?"
+                  "text": "Before we go further, let us understand what these theorems mean. In my view, a good way to look at congruence is the following: we want to construct a triangle when given some three of its elements – will all the constructible triangles be congruent?"
                 }
               ],
               "highligted": false
@@ -2101,16 +2094,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                      "text": "Convince yourself of the validity of the "
                     },
                     {
                       "type": "math",
-                      "text": "sss",
+                      "text": "SSS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " o\u00A0zhodnosti."
+                      "text": " congruence theorem."
                     }
                   ],
                   "highligted": false
@@ -2122,7 +2115,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Predstavme si, že máme dané tri úsečky dĺžok "
+                      "text": "Imagine we are given three segments of lengths "
                     },
                     {
                       "type": "math",
@@ -2149,7 +2142,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", z\u00A0ktorých vieme zostrojiť trojuholník. Začneme napr. úsečkou\u00A0"
+                      "text": " from which a triangle can be built. Start, say, with the segment\u00A0"
                     },
                     {
                       "type": "math",
@@ -2158,7 +2151,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " dĺžky\u00A0"
+                      "text": " of length\u00A0"
                     },
                     {
                       "type": "math",
@@ -2167,7 +2160,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0následne zostrojíme dve kružnice: (a) kružnicu so stredom v\u00A0"
+                      "text": ", and then construct two circles: (a) the circle centered at\u00A0"
                     },
                     {
                       "type": "math",
@@ -2176,7 +2169,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0polomerom "
+                      "text": " with radius "
                     },
                     {
                       "type": "math",
@@ -2185,7 +2178,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "; (b) kružnicu so stredom v\u00A0"
+                      "text": "; (b) the circle centered at\u00A0"
                     },
                     {
                       "type": "math",
@@ -2194,7 +2187,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0polomerom "
+                      "text": " with radius "
                     },
                     {
                       "type": "math",
@@ -2203,7 +2196,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Tie sa buď nepretnú (keď napr. "
+                      "text": ". They either fail to meet (when e.g. "
                     },
                     {
                       "type": "math",
@@ -2212,7 +2205,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "), alebo sa pretnú v\u00A0jedinom bode na "
+                      "text": "), or they meet at a single point on "
                     },
                     {
                       "type": "math",
@@ -2221,7 +2214,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " (keď "
+                      "text": " (when "
                     },
                     {
                       "type": "math",
@@ -2230,7 +2223,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "), alebo sa pretnú v\u00A0dvoch bodoch "
+                      "text": "), or they meet at two points "
                     },
                     {
                       "type": "math",
@@ -2239,7 +2232,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -2258,7 +2251,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-16.svg",
+                      "id": "angle-basics-1.en-16.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -2270,7 +2263,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Na konci si uvedomme, že trojuholníky "
+                      "text": "Finally, observe that the triangles "
                     },
                     {
                       "type": "math",
@@ -2279,7 +2272,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -2288,7 +2281,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú však zrejme vzájomné zrkadlové obrazy podľa "
+                      "text": " are clearly mirror images of each other across "
                     },
                     {
                       "type": "math",
@@ -2297,7 +2290,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Taktiež ak by sme začali inou úsečkou, tak vytvoríme iba posunutie/otočenie tejto konfigurácie."
+                      "text": ". Likewise, had we started from a different segment, we would only produce a translation/rotation of this configuration."
                     }
                   ],
                   "highligted": false
@@ -2316,14 +2309,14 @@
                     },
                     {
                       "type": "text",
-                      "text": " Uvedomme si, že sme vlastne po ceste dokázali\u00A0trojuholníkovú nerovnosť: súčet dvoch strán trojuholníka je väčší než tretia – náš trojuholník je zostrojiteľný a\u00A0nedegenerovaný\u00A0"
+                      "text": " Note that along the way we essentially proved the triangle inequality: the sum of two sides of a triangle is greater than the third – our triangle is constructible and non-degenerate\u00A0"
                     },
                     {
                       "type": "footnote",
                       "content": [
                         {
                           "type": "text",
-                          "text": "nemá uhol rovný "
+                          "text": "has no angle equal to "
                         },
                         {
                           "type": "math",
@@ -2334,7 +2327,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " práve vtedy, keď "
+                      "text": " if and only if "
                     },
                     {
                       "type": "math",
@@ -2355,7 +2348,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Podobne vieme zdôvodniť ďalšie kritériá:"
+                  "text": "We can justify the other criteria similarly:"
                 }
               ],
               "highligted": false
@@ -2368,16 +2361,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                      "text": "Convince yourself of the validity of the "
                     },
                     {
                       "type": "math",
-                      "text": "sus",
+                      "text": "SAS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " o\u00A0zhodnosti."
+                      "text": " congruence theorem."
                     }
                   ],
                   "highligted": false
@@ -2389,11 +2382,11 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Nech sú dané strany "
+                      "text": "Suppose the sides "
                     },
                     {
                       "type": "math",
-                      "text": "b = |AC|",
+                      "text": "b = AC",
                       "isDisplay": false
                     },
                     {
@@ -2402,21 +2395,21 @@
                     },
                     {
                       "type": "math",
-                      "text": "c = |AB|",
+                      "text": "c = AB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0uhol "
+                      "text": " and the angle "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BAC| = \\alpha",
+                      "text": "\\angle BAC = \\alpha",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " medzi nimi. Zostrojme vrchol\u00A0"
+                      "text": " between them are given. Construct vertex\u00A0"
                     },
                     {
                       "type": "math",
@@ -2425,7 +2418,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0úsečku "
+                      "text": " and the segment "
                     },
                     {
                       "type": "math",
@@ -2434,7 +2427,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " dĺžky\u00A0"
+                      "text": " of length\u00A0"
                     },
                     {
                       "type": "math",
@@ -2443,7 +2436,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " – tá je daná až na zhodné zobrazenie. Bod "
+                      "text": " – this is determined up to congruence. Point "
                     },
                     {
                       "type": "math",
@@ -2452,7 +2445,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " musí ležať na polopriamke z\u00A0"
+                      "text": " must lie on a ray from\u00A0"
                     },
                     {
                       "type": "math",
@@ -2461,16 +2454,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zvierajúcej s\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " uhol\u00A0"
+                      "text": " making angle\u00A0"
                     },
                     {
                       "type": "math",
@@ -2479,25 +2463,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0zároveň vo vzdialenosti\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "b",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " od\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "A",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Polopriamky zvierajúce s\u00A0"
+                      "text": " with "
                     },
                     {
                       "type": "math",
@@ -2506,7 +2472,34 @@
                     },
                     {
                       "type": "text",
-                      "text": " uhol "
+                      "text": " and at distance\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". There are two rays from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " making angle "
                     },
                     {
                       "type": "math",
@@ -2515,7 +2508,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú dve (po jednej na každej strane "
+                      "text": " with "
                     },
                     {
                       "type": "math",
@@ -2524,7 +2517,16 @@
                     },
                     {
                       "type": "text",
-                      "text": "): na každej leží práve jeden bod vo vzdialenosti "
+                      "text": " (one on each side of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "): on each there is exactly one point at distance "
                     },
                     {
                       "type": "math",
@@ -2533,7 +2535,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " od\u00A0"
+                      "text": " from\u00A0"
                     },
                     {
                       "type": "math",
@@ -2542,7 +2544,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", teda dostaneme body "
+                      "text": ", giving points "
                     },
                     {
                       "type": "math",
@@ -2551,7 +2553,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -2560,7 +2562,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Trojuholníky "
+                      "text": ". The triangles "
                     },
                     {
                       "type": "math",
@@ -2569,7 +2571,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -2578,7 +2580,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú zrkadlové obrazy podľa "
+                      "text": " are mirror images across "
                     },
                     {
                       "type": "math",
@@ -2587,7 +2589,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", teda zhodné."
+                      "text": ", hence congruent."
                     }
                   ],
                   "highligted": false
@@ -2597,7 +2599,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-17.svg",
+                      "id": "angle-basics-1.en-17.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -2614,16 +2616,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                      "text": "Convince yourself of the validity of the "
                     },
                     {
                       "type": "math",
-                      "text": "usu",
+                      "text": "ASA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " o\u00A0zhodnosti."
+                      "text": " congruence theorem."
                     }
                   ],
                   "highligted": false
@@ -2635,7 +2637,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "V\u00A0prvom rade si uvedomme, že nezáleží na tom, ktoré dva uhly sú zhodné – ak sa dva trojuholníky zhodujú v\u00A0dvoch uhloch, tak tretí je určený jednoznačne, keďže všetky tri majú súčet uhlov "
+                      "text": "First, note that it doesn't matter which two angles are equal – if two triangles agree on two angles, then the third is determined uniquely, since all three angles sum to "
                     },
                     {
                       "type": "math",
@@ -2654,7 +2656,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Pre účely nášho dôkazu uvážme teda, že sú zhodné práve uhly prihliehajúce zhodnej strane. Nech je to uhol "
+                      "text": "For the purposes of our proof, suppose the equal angles are exactly the ones adjacent to the equal side. Let them be the angle "
                     },
                     {
                       "type": "math",
@@ -2663,7 +2665,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri vrchole "
+                      "text": " at vertex "
                     },
                     {
                       "type": "math",
@@ -2681,7 +2683,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " pri vrchole "
+                      "text": " at vertex "
                     },
                     {
                       "type": "math",
@@ -2690,16 +2692,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0strana "
+                      "text": ", and the side "
                     },
                     {
                       "type": "math",
-                      "text": "a = |BC|",
+                      "text": "a = BC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " medzi nimi. Zostrojme úsečku "
+                      "text": " between them. Construct the segment "
                     },
                     {
                       "type": "math",
@@ -2708,7 +2710,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " dĺžky\u00A0"
+                      "text": " of length\u00A0"
                     },
                     {
                       "type": "math",
@@ -2717,7 +2719,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " – tá je daná až na zhodné zobrazenie. Bod "
+                      "text": " – this is determined up to congruence. Point "
                     },
                     {
                       "type": "math",
@@ -2726,7 +2728,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " musí ležať na polopriamke z\u00A0"
+                      "text": " must lie on the ray from\u00A0"
                     },
                     {
                       "type": "math",
@@ -2735,16 +2737,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zvierajúcej s\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "BC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " uhol "
+                      "text": " making angle "
                     },
                     {
                       "type": "math",
@@ -2753,7 +2746,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0zároveň na polopriamke z\u00A0"
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and on the ray from\u00A0"
                     },
                     {
                       "type": "math",
@@ -2762,16 +2764,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zvierajúcej s\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "CB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " uhol "
+                      "text": " making angle "
                     },
                     {
                       "type": "math",
@@ -2780,7 +2773,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Súčet vnútorných uhlov pri "
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The sum of the interior angles at "
                     },
                     {
                       "type": "math",
@@ -2789,7 +2791,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -2798,7 +2800,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " v\u00A0trojuholníku je menší než "
+                      "text": " in a triangle is less than "
                     },
                     {
                       "type": "math",
@@ -2807,7 +2809,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", čiže "
+                      "text": ", i.e. "
                     },
                     {
                       "type": "math",
@@ -2816,7 +2818,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0preto nie sú obe polopriamky rovnobežné – pretnú sa v\u00A0jedinom bode\u00A0"
+                      "text": ", so the two rays are not parallel – they meet at a single point\u00A0"
                     },
                     {
                       "type": "math",
@@ -2825,7 +2827,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Trojuholník "
+                      "text": ". The triangle "
                     },
                     {
                       "type": "math",
@@ -2834,7 +2836,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je teda určený jednoznačne (až na zhodné zobrazenia)."
+                      "text": " is therefore determined uniquely (up to congruences)."
                     }
                   ],
                   "highligted": false
@@ -2844,7 +2846,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-18.svg",
+                      "id": "angle-basics-1.en-18.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -2858,16 +2860,16 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Menej známe tvrdenie "
+                  "text": "The less well-known "
                 },
                 {
                   "type": "math",
-                  "text": "Ssu",
+                  "text": "SsA",
                   "isDisplay": false
                 },
                 {
                   "type": "text",
-                  "text": " je už máličko ťažšie, preto k\u00A0nemu budú aj návody \uD83D\uDE42."
+                  "text": " theorem is a touch harder, so we will provide hints \uD83D\uDE42."
                 }
               ],
               "highligted": false
@@ -2879,13 +2881,13 @@
                 "type": "paragraph",
                 "content": [
                   {
-                    "type": "text",
-                    "text": "zhodnosť "
+                    "type": "math",
+                    "text": "SsA",
+                    "isDisplay": false
                   },
                   {
-                    "type": "math",
-                    "text": "Ssu",
-                    "isDisplay": false
+                    "type": "text",
+                    "text": " congruence"
                   }
                 ],
                 "highligted": false
@@ -2896,16 +2898,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Presvedčte sa o\u00A0platnosti vety "
+                      "text": "Convince yourself of the validity of the "
                     },
                     {
                       "type": "math",
-                      "text": "Ssu",
+                      "text": "SsA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " o\u00A0zhodnosti. Navyše, uvedomte si, kde by sa konštrukcia pokazila, keby uhol nebol voči väčšej zo strán – čo by sa stalo, keby boli obe strany rovnako dlhé?"
+                      "text": " congruence theorem. In addition, figure out where the construction would break down if the angle were not opposite the longer of the two sides – what would happen if both sides were equal?"
                     }
                   ],
                   "highligted": false
@@ -2918,7 +2920,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Začnite konštrukciu konštrukciou kratšej úsečky. Ako pokračuje konštrukcia po jej zostrojení?"
+                        "text": "Begin the construction with the shorter segment. How does the construction proceed once it is built?"
                       }
                     ],
                     "highligted": false
@@ -2930,7 +2932,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Po zostrojení kratšej úsečky zostrojíme polpriamku pod našim daným zhodným uhlom. Zostáva posledný krok konštrukcie. Rozmyslite, kedy dostaneme žiaden, kedy jeden a\u00A0kedy dva vyhovujúce trojuholníky."
+                        "text": "After constructing the shorter segment, draw a ray at our given equal angle. One last step of the construction remains. Think about when we get no triangle, when one, and when two satisfying triangles."
                       }
                     ],
                     "highligted": false
@@ -2943,11 +2945,11 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Nech sú dané strany "
+                      "text": "Suppose the sides "
                     },
                     {
                       "type": "math",
-                      "text": "a = |BC|",
+                      "text": "a = BC",
                       "isDisplay": false
                     },
                     {
@@ -2956,21 +2958,21 @@
                     },
                     {
                       "type": "math",
-                      "text": "b = |AC|",
+                      "text": "b = AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0uhol "
+                      "text": " and the angle "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = \\beta",
+                      "text": "\\angle ABC = \\beta",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " oproti dlhšej strane "
+                      "text": " opposite the longer side "
                     },
                     {
                       "type": "math",
@@ -2979,7 +2981,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Začneme zostrojením kratšej úsečky "
+                      "text": " are given. We begin by constructing the shorter segment "
                     },
                     {
                       "type": "math",
@@ -2988,7 +2990,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " dĺžky\u00A0"
+                      "text": " of length\u00A0"
                     },
                     {
                       "type": "math",
@@ -2997,7 +2999,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Bod "
+                      "text": ". Point "
                     },
                     {
                       "type": "math",
@@ -3006,7 +3008,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " musí ležať na polopriamke z\u00A0"
+                      "text": " must lie on the ray from\u00A0"
                     },
                     {
                       "type": "math",
@@ -3015,16 +3017,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zvierajúcej s\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "BC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " uhol "
+                      "text": " making angle "
                     },
                     {
                       "type": "math",
@@ -3033,7 +3026,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0zároveň vo vzdialenosti "
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and at distance "
                     },
                     {
                       "type": "math",
@@ -3042,7 +3044,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " od\u00A0"
+                      "text": " from\u00A0"
                     },
                     {
                       "type": "math",
@@ -3051,7 +3053,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", čiže na kružnici "
+                      "text": ", i.e. on the circle "
                     },
                     {
                       "type": "math",
@@ -3060,7 +3062,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " so stredom\u00A0"
+                      "text": " centered at\u00A0"
                     },
                     {
                       "type": "math",
@@ -3069,7 +3071,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0polomerom "
+                      "text": " with radius "
                     },
                     {
                       "type": "math",
@@ -3088,7 +3090,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vzdialenosť bodu\u00A0"
+                      "text": "The distance from\u00A0"
                     },
                     {
                       "type": "math",
@@ -3097,16 +3099,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " od stredu kružnice je "
+                      "text": " to the center of the circle is "
                     },
                     {
                       "type": "math",
-                      "text": "|BC| = a",
+                      "text": "BC = a",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Pretože "
+                      "text": ". Since "
                     },
                     {
                       "type": "math",
@@ -3115,7 +3117,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", bod\u00A0"
+                      "text": ", the point\u00A0"
                     },
                     {
                       "type": "math",
@@ -3124,20 +3126,20 @@
                     },
                     {
                       "type": "text",
-                      "text": " leží "
+                      "text": " lies "
                     },
                     {
                       "type": "italic",
                       "content": [
                         {
                           "type": "text",
-                          "text": "vnútri"
+                          "text": "inside"
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " kružnice "
+                      "text": " the circle "
                     },
                     {
                       "type": "math",
@@ -3146,7 +3148,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamka z\u00A0bodu\u00A0"
+                      "text": ". The ray from\u00A0"
                     },
                     {
                       "type": "math",
@@ -3155,7 +3157,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " tak začína vnútri kružnice a\u00A0pokračuje smerom von, takže kružnicu pretne práve raz. Bod "
+                      "text": " thus starts inside the circle and continues outward, so it crosses the circle exactly once. Point "
                     },
                     {
                       "type": "math",
@@ -3164,7 +3166,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je teda určený jednoznačne, a\u00A0trojuholník "
+                      "text": " is therefore determined uniquely, and the triangle "
                     },
                     {
                       "type": "math",
@@ -3173,7 +3175,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je takisto jednoznačný (až na zhodné zobrazenie)."
+                      "text": " is also unique (up to congruence)."
                     }
                   ],
                   "highligted": false
@@ -3183,7 +3185,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-19.svg",
+                      "id": "angle-basics-1.en-19.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3195,7 +3197,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Pozrime sa, prečo je podmienka "
+                      "text": "Let's see why the condition "
                     },
                     {
                       "type": "math",
@@ -3204,7 +3206,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " podstatná. Ak by bolo "
+                      "text": " is essential. If "
                     },
                     {
                       "type": "math",
@@ -3213,7 +3215,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", bod\u00A0"
+                      "text": ", the point\u00A0"
                     },
                     {
                       "type": "math",
@@ -3222,20 +3224,20 @@
                     },
                     {
                       "type": "text",
-                      "text": " by ležal priamo "
+                      "text": " would lie directly "
                     },
                     {
                       "type": "italic",
                       "content": [
                         {
                           "type": "text",
-                          "text": "na"
+                          "text": "on"
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " kružnici\u00A0"
+                      "text": " the circle\u00A0"
                     },
                     {
                       "type": "math",
@@ -3244,7 +3246,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamka z\u00A0"
+                      "text": ". The ray from\u00A0"
                     },
                     {
                       "type": "math",
@@ -3253,7 +3255,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " by ju pretínala v\u00A0bode\u00A0"
+                      "text": " would meet it at "
                     },
                     {
                       "type": "math",
@@ -3262,7 +3264,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " samotnom (čo nedáva trojuholník) a\u00A0v\u00A0práve jednom ďalšom bode – ten je hľadaným\u00A0"
+                      "text": " itself (which does not give a triangle) and at exactly one further point – which is the desired\u00A0"
                     },
                     {
                       "type": "math",
@@ -3271,43 +3273,34 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Konštrukcia teda stále vedie k\u00A0jednoznačnému (rovnoramennému) trojuholníku, takže veta "
+                      "text": ". The construction therefore still leads to a unique (isosceles) triangle, so the "
                     },
                     {
                       "type": "math",
-                      "text": "Ssu",
+                      "text": "SsA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " formálne platí aj v\u00A0tomto hraničnom prípade. Pod "
+                      "text": " theorem formally holds even in this borderline case. We do not, however, list it under "
                     },
                     {
                       "type": "math",
-                      "text": "Ssu",
+                      "text": "SsA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " ho však samostatne nezaraďujeme: ak vieme, že trojuholník je rovnoramenný so "
+                      "text": " as a separate case: if we know that the triangle is isosceles with "
                     },
                     {
                       "type": "math",
-                      "text": "|BC|=|AC|",
+                      "text": "BC=AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0poznáme jeden uhol "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\beta",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", tak ostatné dva uhly sú už vďaka rovnoramennosti určené (oba pri základni majú veľkosť\u00A0"
+                      "text": " and we know one angle "
                     },
                     {
                       "type": "math",
@@ -3316,34 +3309,43 @@
                     },
                     {
                       "type": "text",
-                      "text": "). Tá istá konfigurácia je preto pokrytá vetami "
+                      "text": ", the other two angles are already determined by the isosceles property (both base angles equal\u00A0"
                     },
                     {
                       "type": "math",
-                      "text": "sus",
+                      "text": "\\beta",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " či "
+                      "text": "). The same configuration is therefore covered by "
                     },
                     {
                       "type": "math",
-                      "text": "sss",
+                      "text": "SAS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " or "
                     },
                     {
                       "type": "math",
-                      "text": "Ssu",
+                      "text": "SSS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " k\u00A0nej nepridáva žiadnu novú informáciu."
+                      "text": ", and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " adds no new information."
                     }
                   ],
                   "highligted": false
@@ -3353,7 +3355,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-20.svg",
+                      "id": "angle-basics-1.en-20.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3365,7 +3367,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Ak by bolo "
+                      "text": "If "
                     },
                     {
                       "type": "math",
@@ -3374,7 +3376,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", bod "
+                      "text": ", the point "
                     },
                     {
                       "type": "math",
@@ -3383,20 +3385,20 @@
                     },
                     {
                       "type": "text",
-                      "text": " by ležal "
+                      "text": " would lie "
                     },
                     {
                       "type": "italic",
                       "content": [
                         {
                           "type": "text",
-                          "text": "vonku"
+                          "text": "outside"
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " kružnice "
+                      "text": " the circle "
                     },
                     {
                       "type": "math",
@@ -3405,7 +3407,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamka by ju mohla pretnúť v\u00A0dvoch bodoch – vznikli by tak dva rôzne (nezhodné) trojuholníky – alebo by ju minula celkom, čo nevedie k\u00A0žiadnemu trojuholníku."
+                      "text": ". The ray could meet it at two points – giving two different (non-congruent) triangles – or miss it entirely, which gives no triangle at all."
                     }
                   ],
                   "highligted": false
@@ -3415,7 +3417,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-21.svg",
+                      "id": "angle-basics-1.en-21.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3436,7 +3438,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Dôkaz je možné spraviť aj tak, že najprv zostrojíme dlhšiu úsečku. To však vyžaduje znalosť množiny bodov nad pevnou úsečkou majúcich pevný uhol – k\u00A0tomuto sa dostaneme v\u00A0inom materiáli."
+                      "text": " The proof can also be done by first constructing the longer segment. That, however, requires knowing the locus of points subtending a fixed angle from a fixed segment – we will get to this in another handout."
                     }
                   ],
                   "highligted": false
@@ -3448,7 +3450,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V našej geometrickej ceste sa priebežne stretneme so všetkými týmito tvrdeniami. Nateraz si však ukážme nejaké konkrétne aplikácie. Začneme tým najzrejmejším tvrdením, ktoré sa ale tiež sluší a patrí dokázať:"
+                  "text": "Throughout our geometric journey we will encounter all of these statements. For now, however, let us show some concrete applications. We start with the most obvious statement, which still deserves to be proved:"
                 }
               ],
               "highligted": false
@@ -3460,7 +3462,7 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "rovnoramenný trojuholník"
+                    "text": "isosceles triangle"
                   }
                 ],
                 "highligted": false
@@ -3471,7 +3473,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Dokážte, že ak pre trojuholník\u00A0"
+                      "text": "Prove that if a triangle\u00A0"
                     },
                     {
                       "type": "math",
@@ -3480,25 +3482,25 @@
                     },
                     {
                       "type": "text",
-                      "text": " platí "
+                      "text": " satisfies "
                     },
                     {
                       "type": "math",
-                      "text": "|AB|=|AC|",
+                      "text": "AB=AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", tak "
+                      "text": ", then "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC|=|\\angle ACB|",
+                      "text": "\\angle ABC=\\angle ACB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Dokážte tiež opačnú implikáciu (teda že z\u00A0rovnosti uhlov vyplýva rovnosť dĺžok)."
+                      "text": ". Prove also the converse implication (i.e., that equality of angles implies equality of lengths)."
                     }
                   ],
                   "highligted": false
@@ -3513,22 +3515,22 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Priama implikácia."
+                          "text": "Forward implication."
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " Predpokladajme "
+                      "text": " Assume "
                     },
                     {
                       "type": "math",
-                      "text": "|AB| = |AC|",
+                      "text": "AB = AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Nech "
+                      "text": ". Let "
                     },
                     {
                       "type": "math",
@@ -3537,7 +3539,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je stred "
+                      "text": " be the midpoint of "
                     },
                     {
                       "type": "math",
@@ -3546,7 +3548,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Trojuholníky "
+                      "text": ". The triangles "
                     },
                     {
                       "type": "math",
@@ -3555,7 +3557,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -3564,11 +3566,11 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú zhodné podľa "
+                      "text": " are congruent by "
                     },
                     {
                       "type": "math",
-                      "text": "sss",
+                      "text": "SSS",
                       "isDisplay": false
                     },
                     {
@@ -3577,21 +3579,21 @@
                     },
                     {
                       "type": "math",
-                      "text": "|AB|=|AC|",
+                      "text": "AB=AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " z\u00A0predpokladu, "
+                      "text": " by assumption, "
                     },
                     {
                       "type": "math",
-                      "text": "|BM|=|CM|",
+                      "text": "BM=CM",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " zo\u00A0stredu, spoločná strana "
+                      "text": " by definition of the midpoint, common side "
                     },
                     {
                       "type": "math",
@@ -3600,11 +3602,11 @@
                     },
                     {
                       "type": "text",
-                      "text": "), odkiaľ "
+                      "text": "), from which "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "text": "\\angle ABC = \\angle ACB",
                       "isDisplay": false
                     },
                     {
@@ -3619,7 +3621,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-22.svg",
+                      "id": "angle-basics-1.en-22.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3634,22 +3636,22 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Opačná implikácia."
+                          "text": "Converse implication."
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "text": " Predpokladajme "
+                      "text": " Assume "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = |\\angle ACB| = \\beta",
+                      "text": "\\angle ABC = \\angle ACB = \\beta",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Nech "
+                      "text": ". Let "
                     },
                     {
                       "type": "math",
@@ -3658,7 +3660,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je päta kolmice z\u00A0"
+                      "text": " be the foot of the perpendicular from\u00A0"
                     },
                     {
                       "type": "math",
@@ -3667,7 +3669,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " na "
+                      "text": " to "
                     },
                     {
                       "type": "math",
@@ -3676,16 +3678,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Podľa vety "
+                      "text": ". By "
                     },
                     {
                       "type": "math",
-                      "text": "usu",
+                      "text": "ASA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " je "
+                      "text": ", "
                     },
                     {
                       "type": "math",
@@ -3694,25 +3696,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ", keďže máme dva zhodné uhly "
+                      "text": ", since we have two equal angles "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABM| = |\\angle ACM|",
+                      "text": "\\angle ABM = \\angle ACM",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a "
+                      "text": " and "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle AMB| = |\\angle AMC| = 90^\\circ",
+                      "text": "\\angle AMB = \\angle AMC = 90^\\circ",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0spoločnú stranu\u00A0"
+                      "text": " and the common side\u00A0"
                     },
                     {
                       "type": "math",
@@ -3721,11 +3723,11 @@
                     },
                     {
                       "type": "text",
-                      "text": ", teda "
+                      "text": ", so "
                     },
                     {
                       "type": "math",
-                      "text": "|AB| = |AC|",
+                      "text": "AB = AC",
                       "isDisplay": false
                     },
                     {
@@ -3749,7 +3751,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Iný vtipný dôkaz je založený na tom, že dokážeme "
+                      "text": " Another cute proof is based on showing that "
                     },
                     {
                       "type": "math",
@@ -3758,34 +3760,34 @@
                     },
                     {
                       "type": "text",
-                      "text": " (všimnite si rôzne poradie vrcholov). V\u00A0prípade, že poznáme rovnaké strany, tak použijeme vetu "
+                      "text": " (note the different order of vertices). In the case where we know the equal sides, we use "
                     },
                     {
                       "type": "math",
-                      "text": "sus",
+                      "text": "SAS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " alebo dokonca "
+                      "text": " or even "
                     },
                     {
                       "type": "math",
-                      "text": "sss",
+                      "text": "SSS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " – tá nám následne dá zhodné uhly. V\u00A0prípade, že poznáme rovnaké uhly, to zas bude veta "
+                      "text": " – which then gives equal angles. In the case where we know the equal angles, it will instead be "
                     },
                     {
                       "type": "math",
-                      "text": "usu",
+                      "text": "ASA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0zhodnosť nám dá rovnaké strany."
+                      "text": ", and the congruence gives equal sides."
                     }
                   ],
                   "highligted": false
@@ -3797,7 +3799,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Vyskúšajte si exaktne dokázať tieto jednoduché poznatky, to už bude jednoduchšie:"
+                  "text": "Try proving these simple facts rigorously – it will be easier this time:"
                 }
               ],
               "highligted": false
@@ -3810,12 +3812,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Rovnostranný trojuholník má tri zhodné uhly rovné "
+                      "text": "An equilateral triangle has three equal angles of "
                     },
                     {
                       "type": "math",
                       "text": "60^\\circ",
                       "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -3827,7 +3833,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "V\u00A0"
+                      "text": "In "
                     },
                     {
                       "type": "math",
@@ -3836,52 +3842,52 @@
                     },
                     {
                       "type": "text",
-                      "text": " s\u00A0"
+                      "text": " with "
                     },
                     {
                       "type": "math",
-                      "text": "|AB| = |AC| = |BC|",
+                      "text": "AB = AC = BC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " dáva veta o\u00A0rovnoramennom trojuholníku "
+                      "text": ", the isosceles triangle theorem gives "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "text": "\\angle ABC = \\angle ACB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " (z\u00A0"
+                      "text": " (from "
                     },
                     {
                       "type": "math",
-                      "text": "|AB|=|AC|",
+                      "text": "AB=AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "); analogicky z\u00A0"
+                      "text": "); analogously, from "
                     },
                     {
                       "type": "math",
-                      "text": "|AB|=|BC|",
+                      "text": "AB=BC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " je "
+                      "text": " we get "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BAC| = |\\angle BCA|",
+                      "text": "\\angle BAC = \\angle BCA",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Všetky tri uhly sú teda zhodné, a\u00A0zo súčtu "
+                      "text": ". All three angles are therefore equal, and from the angle sum of "
                     },
                     {
                       "type": "math",
@@ -3890,7 +3896,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je každý "
+                      "text": " each is "
                     },
                     {
                       "type": "math",
@@ -3909,7 +3915,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-23.svg",
+                      "id": "angle-basics-1.en-23.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3926,7 +3932,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Rovnoramenný pravouhlý trojuholník má tri uhly rovné "
+                      "text": "An isosceles right triangle has angles "
                     },
                     {
                       "type": "math",
@@ -3965,7 +3971,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Nech je pravý uhol pri vrchole\u00A0"
+                      "text": "Suppose the right angle is at vertex\u00A0"
                     },
                     {
                       "type": "math",
@@ -3974,34 +3980,34 @@
                     },
                     {
                       "type": "text",
-                      "text": ", teda "
+                      "text": ", i.e. "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BAC| = 90^\\circ",
+                      "text": "\\angle BAC = 90^\\circ",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0odvesny sú zhodné, "
+                      "text": ", and the legs are equal, "
                     },
                     {
                       "type": "math",
-                      "text": "|AB| = |AC|",
+                      "text": "AB = AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Podľa vety o\u00A0rovnoramennom trojuholníku platí "
+                      "text": ". By the isosceles triangle theorem, "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = |\\angle ACB|",
+                      "text": "\\angle ABC = \\angle ACB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Označme túto spoločnú veľkosť "
+                      "text": ". Denote this common measure "
                     },
                     {
                       "type": "math",
@@ -4010,7 +4016,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Zo súčtu uhlov v\u00A0trojuholníku"
+                      "text": ". From the angle sum in the triangle,"
                     }
                   ],
                   "highligted": false
@@ -4025,7 +4031,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "odkiaľ "
+                      "text": "so "
                     },
                     {
                       "type": "math",
@@ -4034,7 +4040,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", čiže "
+                      "text": ", i.e. "
                     },
                     {
                       "type": "math",
@@ -4053,7 +4059,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-24.svg",
+                      "id": "angle-basics-1.en-24.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -4067,7 +4073,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Veľmi šikovná vec použiteľná v\u00A0neľahkých úlohách je nasledovná úloha. Jeden možný dôkaz je cez trigonometriu."
+                  "text": "A very handy fact useful in non-trivial problems is the following. One possible proof goes via trigonometry."
                 }
               ],
               "highligted": false
@@ -4081,7 +4087,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Pravouhlý trojuholník má zvyšné dva uhly rovné "
+                      "text": "A right triangle has its other two angles equal to "
                     },
                     {
                       "type": "math",
@@ -4090,7 +4096,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -4099,7 +4105,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " práve vtedy, keď je jeho prepona dvakrát dlhšia než kratšia odvesna."
+                      "text": " if and only if its hypotenuse is twice as long as the shorter leg."
                     }
                   ],
                   "highligted": false
@@ -4112,7 +4118,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Povedzme, že "
+                        "text": "Say "
                       },
                       {
                         "type": "math",
@@ -4121,7 +4127,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " je prepona a\u00A0je dvakrát dlhšia než odvesna "
+                        "text": " is the hypotenuse and is twice as long as the leg "
                       },
                       {
                         "type": "math",
@@ -4130,7 +4136,7 @@
                       },
                       {
                         "type": "text",
-                        "text": ". Trikom je uvážiť bod "
+                        "text": ". The trick is to introduce a point "
                       },
                       {
                         "type": "math",
@@ -4139,7 +4145,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " taký, že "
+                        "text": " such that "
                       },
                       {
                         "type": "math",
@@ -4148,7 +4154,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " je stred úsečky "
+                        "text": " is the midpoint of segment "
                       },
                       {
                         "type": "math",
@@ -4170,7 +4176,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Nech náš trojuholník má pravý uhol pri vrchole\u00A0"
+                      "text": "Let our triangle have its right angle at vertex\u00A0"
                     },
                     {
                       "type": "math",
@@ -4207,16 +4213,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " Predpokladajme "
+                      "text": " Assume "
                     },
                     {
                       "type": "math",
-                      "text": "|BC| = 2|AB|",
+                      "text": "BC = 2\\cdot AB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Nech "
+                      "text": ". Let "
                     },
                     {
                       "type": "math",
@@ -4225,7 +4231,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je taký bod, že "
+                      "text": " be the point such that "
                     },
                     {
                       "type": "math",
@@ -4234,7 +4240,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je stredom úsečky "
+                      "text": " is the midpoint of segment "
                     },
                     {
                       "type": "math",
@@ -4243,16 +4249,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Potom "
+                      "text": ". Then "
                     },
                     {
                       "type": "math",
-                      "text": "|AB'| = |AB|",
+                      "text": "AB' = AB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -4261,7 +4267,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " leží medzi "
+                      "text": " lies between "
                     },
                     {
                       "type": "math",
@@ -4270,7 +4276,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", "
+                      "text": " and "
                     },
                     {
                       "type": "math",
@@ -4279,25 +4285,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ", takže "
+                      "text": ", so "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle B'AC|",
+                      "text": "\\angle B'AC",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " je vedľajší k\u00A0"
+                      "text": " is in a linear pair with "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BAC| = 90^\\circ",
+                      "text": "\\angle BAC = 90^\\circ",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", čiže tiež "
+                      "text": ", hence also equals "
                     },
                     {
                       "type": "math",
@@ -4306,7 +4312,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Platí "
+                      "text": ". We have "
                     },
                     {
                       "type": "math",
@@ -4315,16 +4321,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " z\u00A0vety "
+                      "text": " by "
                     },
                     {
                       "type": "math",
-                      "text": "sus",
+                      "text": "SAS",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", keďže uhly pri\u00A0"
+                      "text": ", since the angles at\u00A0"
                     },
                     {
                       "type": "math",
@@ -4333,7 +4339,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú oba pravé, strana\u00A0"
+                      "text": " are both right, the side\u00A0"
                     },
                     {
                       "type": "math",
@@ -4342,11 +4348,11 @@
                     },
                     {
                       "type": "text",
-                      "text": " je spoločná, a "
+                      "text": " is common, and "
                     },
                     {
                       "type": "math",
-                      "text": "|AB|=|AB'|",
+                      "text": "AB=AB'",
                       "isDisplay": false
                     },
                     {
@@ -4361,7 +4367,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.sk-25.svg",
+                      "id": "angle-basics-1.en-25.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -4373,7 +4379,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Pretože "
+                      "text": "Since "
                     },
                     {
                       "type": "math",
@@ -4382,7 +4388,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je stredom "
+                      "text": " is the midpoint of "
                     },
                     {
                       "type": "math",
@@ -4391,32 +4397,32 @@
                     },
                     {
                       "type": "text",
-                      "text": ", je "
+                      "text": ", we have "
                     },
                     {
                       "type": "math",
-                      "text": "|BB'| = 2|AB|",
+                      "text": "BB' = 2\\cdot AB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0zo zadania "
+                      "text": ", and from the assumption "
                     },
                     {
                       "type": "math",
-                      "text": "|BC| = 2|AB|",
+                      "text": "BC = 2\\cdot AB",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Spolu"
+                      "text": ". Together,"
                     }
                   ],
                   "highligted": false
                 },
                 {
                   "type": "math",
-                  "text": "|BB'| = |BC| = |B'C|,",
+                  "text": "BB' = BC = B'C,",
                   "isDisplay": true
                 },
                 {
@@ -4424,7 +4430,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "takže "
+                      "text": "so "
                     },
                     {
                       "type": "math",
@@ -4433,7 +4439,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je rovnostranný a\u00A0všetky jeho uhly sú "
+                      "text": " is equilateral and all its angles are "
                     },
                     {
                       "type": "math",
@@ -4442,16 +4448,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Špeciálne "
+                      "text": ". In particular, "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = |\\angle B'BC| = 60^\\circ",
+                      "text": "\\angle ABC = \\angle B'BC = 60^\\circ",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ". Zo súčtu uhlov v\u00A0"
+                      "text": ". From the angle sum in "
                     },
                     {
                       "type": "math",
@@ -4460,11 +4466,11 @@
                     },
                     {
                       "type": "text",
-                      "text": " dopočítame "
+                      "text": " we compute "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BCA| = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "text": "\\angle BCA = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4497,7 +4503,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Nie je ťažké rozmyslieť si, že úvahy z\u00A0predošlého odstavca vieme ľahko obrátiť – kľúčovú zhodnosť "
+                      "text": " It is not hard to see that the reasoning of the previous paragraph can easily be reversed – this time the key congruence "
                     },
                     {
                       "type": "math",
@@ -4506,11 +4512,11 @@
                     },
                     {
                       "type": "text",
-                      "text": " tentokrát dostaneme z\u00A0vety "
+                      "text": " comes from "
                     },
                     {
                       "type": "math",
-                      "text": "usu",
+                      "text": "ASA",
                       "isDisplay": false
                     },
                     {
@@ -4534,7 +4540,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Iné riešenie je uvážiť, že podľa Tálesovej vety je stred\u00A0"
+                      "text": " Another solution is to note that by Thales' theorem, the circumcenter\u00A0"
                     },
                     {
                       "type": "math",
@@ -4543,7 +4549,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " kružnice opísanej trojuholníku "
+                      "text": " of triangle "
                     },
                     {
                       "type": "math",
@@ -4552,7 +4558,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zároveň stredom prepony "
+                      "text": " is also the midpoint of the hypotenuse "
                     },
                     {
                       "type": "math",
@@ -4561,7 +4567,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". K\u00A0tomuto riešeniu sa podrobnejšie vrátime, keď sa budeme baviť o\u00A0kružniciach."
+                      "text": ". We will return to this solution in more detail when we discuss circles."
                     }
                   ],
                   "highligted": false
@@ -4572,14 +4578,14 @@
         }
       },
       {
-        "title": "Čo si zapamätať",
+        "title": "What to Remember",
         "level": 1,
         "text": {
           "content": []
         }
       },
       {
-        "title": "Techniky",
+        "title": "Techniques",
         "level": 2,
         "text": {
           "content": [
@@ -4592,7 +4598,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Pri rovnobežkách hľadáme zhodné striedavé a súhlasné uhly, prípadne uhly so súčtom\u00A0"
+                        "text": "With parallel lines, look for equal alternate and corresponding angles, or angles summing to\u00A0"
                       },
                       {
                         "type": "math",
@@ -4613,7 +4619,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Je užitočné nahliadať na vonkajší uhol trojuholníka ako na súčet dvoch uhlov."
+                        "text": "It is useful to view the exterior angle of a triangle as the sum of the two non-adjacent interior angles."
                       }
                     ],
                     "highligted": false
@@ -4625,7 +4631,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Na prepojenie sveta dĺžok a\u00A0uhlov sa hodí zhodnosť dvoch trojuholníkov."
+                        "text": "To bridge the worlds of lengths and angles, congruence of two triangles is the right tool."
                       }
                     ],
                     "highligted": false
@@ -4637,7 +4643,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Pomocné body (stred úsečky, zrkadlový obraz, predĺženie) často odhalia zhodnosť alebo špeciálny trojuholník."
+                        "text": "Auxiliary points (midpoint of a segment, mirror image, extension) often reveal a congruence or a special triangle."
                       }
                     ],
                     "highligted": false
@@ -4650,7 +4656,7 @@
         }
       },
       {
-        "title": "Užitočné fakty",
+        "title": "Useful Facts",
         "level": 2,
         "text": {
           "content": [
@@ -4663,7 +4669,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Súčet uhlov v\u00A0trojuholníku je "
+                        "text": "The angle sum in a triangle is "
                       },
                       {
                         "type": "math",
@@ -4672,7 +4678,7 @@
                       },
                       {
                         "type": "text",
-                        "text": ", všeobecne v\u00A0konvexnom "
+                        "text": ", in general in a convex "
                       },
                       {
                         "type": "math",
@@ -4681,7 +4687,7 @@
                       },
                       {
                         "type": "text",
-                        "text": "-uholníku "
+                        "text": "-gon "
                       },
                       {
                         "type": "math",
@@ -4702,11 +4708,11 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Vety o\u00A0zhodnosti trojuholníkov: "
+                        "text": "Triangle congruence theorems: "
                       },
                       {
                         "type": "math",
-                        "text": "sss",
+                        "text": "SSS",
                         "isDisplay": false
                       },
                       {
@@ -4715,7 +4721,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "sus",
+                        "text": "SAS",
                         "isDisplay": false
                       },
                       {
@@ -4724,7 +4730,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "usu",
+                        "text": "ASA",
                         "isDisplay": false
                       },
                       {
@@ -4733,7 +4739,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "Ssu",
+                        "text": "SsA",
                         "isDisplay": false
                       },
                       {
@@ -4750,7 +4756,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "V trojuholníku sú dve strany zhodné práve keď sú zhodné im priľahlé uhly."
+                        "text": "In a triangle, two sides are equal if and only if the angles opposite them are equal."
                       }
                     ],
                     "highligted": false
@@ -4762,7 +4768,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Pravouhlý trojuholník má preponu dvakrát dlhšiu než odvesnu práve keď má uhly "
+                        "text": "A right triangle has its hypotenuse twice as long as a leg if and only if its angles are "
                       },
                       {
                         "type": "math",
@@ -4787,175 +4793,175 @@
   },
   "images": [
     {
-      "contentId": "angle-basics-1.sk-1.svg",
+      "contentId": "angle-basics-1.en-1.svg",
       "originalId": "angles-vertical.pdf",
       "width": "82.61pt",
       "height": "65.04pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-2.svg",
+      "contentId": "angle-basics-1.en-2.svg",
       "originalId": "angles-corresponding.pdf",
       "width": "106.36pt",
       "height": "66.59pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-3.svg",
+      "contentId": "angle-basics-1.en-3.svg",
       "originalId": "angles-alternate.pdf",
       "width": "100.63pt",
       "height": "58.17pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-4.svg",
+      "contentId": "angle-basics-1.en-4.svg",
       "originalId": "angles-supplementary.pdf",
       "width": "85.68pt",
       "height": "47.81pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-5.svg",
+      "contentId": "angle-basics-1.en-5.svg",
       "originalId": "angles-supplementary-derive-vertical.pdf",
       "width": "95.91pt",
       "height": "78.49pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-6.svg",
+      "contentId": "angle-basics-1.en-6.svg",
       "originalId": "angles-vertical-derive-supplementary.pdf",
       "width": "95.91pt",
       "height": "78.49pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-7.svg",
+      "contentId": "angle-basics-1.en-7.svg",
       "originalId": "angles-corresponding-alternate-supplementary-connection.pdf",
       "width": "98.31pt",
       "height": "65.02pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-8.svg",
+      "contentId": "angle-basics-1.en-8.svg",
       "originalId": "angles-triangle.pdf",
       "width": "182.63pt",
       "height": "128.67pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-9.svg",
+      "contentId": "angle-basics-1.en-9.svg",
       "originalId": "angles-polygon.pdf",
       "width": "146.67pt",
       "height": "106.43pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-10.svg",
+      "contentId": "angle-basics-1.en-10.svg",
       "originalId": "angles-polygon-fan.pdf",
       "width": "146.67pt",
       "height": "106.43pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-11.svg",
+      "contentId": "angle-basics-1.en-11.svg",
       "originalId": "angles-polygon-interior.pdf",
       "width": "146.67pt",
       "height": "106.43pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-12.svg",
+      "contentId": "angle-basics-1.en-12.svg",
       "originalId": "angles-complementary-parallel-statement.pdf",
       "width": "91.52pt",
       "height": "72.46pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-13.svg",
+      "contentId": "angle-basics-1.en-13.svg",
       "originalId": "angles-complementary-parallel-solution.pdf",
       "width": "85.7pt",
       "height": "92.24pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-14.svg",
+      "contentId": "angle-basics-1.en-14.svg",
       "originalId": "angles-complementary-in-triangle.pdf",
       "width": "153.73pt",
       "height": "123.67pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-15.svg",
+      "contentId": "angle-basics-1.en-15.svg",
       "originalId": "angles-sas-warning.pdf",
       "width": "240.45pt",
       "height": "68.01pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-16.svg",
+      "contentId": "angle-basics-1.en-16.svg",
       "originalId": "angles-sss-proof.pdf",
       "width": "180.33pt",
       "height": "129.76pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-17.svg",
+      "contentId": "angle-basics-1.en-17.svg",
       "originalId": "angles-sas-proof.pdf",
       "width": "190.6pt",
       "height": "165.53pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-18.svg",
+      "contentId": "angle-basics-1.en-18.svg",
       "originalId": "angles-asa-proof.pdf",
       "width": "156.76pt",
       "height": "165.02pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-19.svg",
+      "contentId": "angle-basics-1.en-19.svg",
       "originalId": "angles-Ssa-proof-one-solution.pdf",
       "width": "116.57pt",
       "height": "129.18pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-20.svg",
+      "contentId": "angle-basics-1.en-20.svg",
       "originalId": "angles-Ssa-proof-isosceles.pdf",
       "width": "116.86pt",
       "height": "122.28pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-21.svg",
+      "contentId": "angle-basics-1.en-21.svg",
       "originalId": "angles-Ssa-proof-two-solutions.pdf",
       "width": "191.58pt",
       "height": "154.75pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-22.svg",
+      "contentId": "angle-basics-1.en-22.svg",
       "originalId": "angles-isosceles-triangle.pdf",
       "width": "117.87pt",
       "height": "114.32pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-23.svg",
+      "contentId": "angle-basics-1.en-23.svg",
       "originalId": "angles-equilateral.pdf",
       "width": "107.91pt",
       "height": "97.32pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-24.svg",
+      "contentId": "angle-basics-1.en-24.svg",
       "originalId": "angles-isosceles-right-triangle.pdf",
       "width": "97.95pt",
       "height": "95.36pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.sk-25.svg",
+      "contentId": "angle-basics-1.en-25.svg",
       "originalId": "angles-90-60-30.pdf",
       "width": "146.09pt",
       "height": "131.24pt",
