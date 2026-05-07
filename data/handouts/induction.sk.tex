@@ -495,7 +495,7 @@ V~doterajších úlohách sme sa stretli s~dvoma typmi indukčných predpokladov
 	
 	Predpokladajme, že tvrdenie platí pre dané $n \ge 2$, teda $n = 2a+3b$. Potom $n+2 = 2(a+1)+3b$, takže tvrdenie platí aj pre $n+2$.
 	
-	\textit{Poznámka.} Pre zaujímavosť dodajme, ako je všeobecne: Pre dve nesúdeliteľné kladné celé čísla $p$ a $q$ sa dá dokázať, že každé celé číslo $n \ge pq-p-q+1$ sa dá zapísať ako $n=pa+qb$ pre nezáporné $a,b$. Číslo $pq-p-q$ sa volá Frobeniovo číslo a~je to najväčšie celé číslo, ktoré sa takto zapísať nedá. V~našom prípade je $2\cdot 3-2-3=1$.
+	\Remark Pre zaujímavosť dodajme, ako je všeobecne: Pre dve nesúdeliteľné kladné celé čísla $p$ a $q$ sa dá dokázať, že každé celé číslo $n \ge pq-p-q+1$ sa dá zapísať ako $n=pa+qb$ pre nezáporné $a,b$. Číslo $pq-p-q$ sa volá Frobeniovo číslo a~je to najväčšie celé číslo, ktoré sa takto zapísať nedá. V~našom prípade je $2\cdot 3-2-3=1$.
 }
 
 Ďalšia fascinujúca forma indukcie je vidieť v Cauchyho dôkaze AG nerovnosti, kedy najprv ideme hore a~potom dole.
@@ -509,7 +509,7 @@ V~doterajších úlohách sme sa stretli s~dvoma typmi indukčných predpokladov
 }{
 	Dôkaz pozostáva z~dvoch krokov: najprv dokážeme nerovnosť pre všetky mocniny dvojky $n = 2^k$ a~potom ukážeme, že z~platnosti pre $n$ premenných vyplýva platnosť pre $n-1$ premenných. Tieto dva kroky dokopy pokryjú všetky prirodzené čísla.
 	
-	{\it Krok nahor (z~$n$ na $2n$):} Pre $n=2$ máme dokázať, že $\frac{a_1+a_2}{2} \ge \sqrt{a_1 a_2}$, čo je ekvivalentné $(\sqrt{a_1}-\sqrt{a_2})^2 \ge 0$, a~to platí vždy.
+	\NamedProof{Krok nahor (z~$n$ na $2n$).} Pre $n=2$ máme dokázať, že $\frac{a_1+a_2}{2} \ge \sqrt{a_1 a_2}$, čo je ekvivalentné $(\sqrt{a_1}-\sqrt{a_2})^2 \ge 0$, a~to platí vždy.
 	
 	Predpokladajme, že nerovnosť platí pre $n$ premenných.	Pre $2n$ premenných rozdelíme čísla na dve skupiny po~$n$. Označme
 	$$
@@ -527,7 +527,7 @@ V~doterajších úlohách sme sa stretli s~dvoma typmi indukčných predpokladov
 	\endgather
 	$$
 
-	{\it Krok nadol (z~$n$ na $n-1$):} Predpokladajme, že nerovnosť platí pre $n$ premenných, a~vezmime si $n-1$ nezáporných reálnych čísel $a_1,\dots,a_{n-1}$. Položme 
+	\NamedProof{Krok nadol (z~$n$ na $n-1$).} Predpokladajme, že nerovnosť platí pre $n$ premenných, a~vezmime si $n-1$ nezáporných reálnych čísel $a_1,\dots,a_{n-1}$. Položme 
 	$$
 	a_n = \frac{a_1+\cdots+a_{n-1}}{n-1}
 	$$
@@ -681,7 +681,7 @@ Príkladov na indukciu je naozaj veľa a ako sme videli, dá sa použiť v~prakt
 	$$
 	Výraz $(n+1)(n+2)\cdots(n+k-1)$ je súčin $k-1$ po sebe idúcich čísel, takže podľa indukčného predpokladu pre $k-1$ je deliteľný $(k-1)!$. Teda $P(n+1)-P(n)$ je deliteľné $k\cdot(k-1)! = k!$. Keďže $P(n)$ je deliteľné $k!$, je deliteľné aj $P(n+1)$.
 	
-	\textit{Poznámka.} Existuje jednoduchý kombinatorický dôkaz tejto úlohy -- tvrdenie vyplýva z~toho, že kombinačné číslo
+	\Remark Existuje jednoduchý kombinatorický dôkaz tejto úlohy -- tvrdenie vyplýva z~toho, že kombinačné číslo
 	$$
 	{n+k-1 \choose k} = \frac{n(n+1)(n+2)\cdots(n+k-1)}{k!}
 	$$

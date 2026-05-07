@@ -495,7 +495,7 @@ V~dosavadních úlohách jsme se setkali se~dvěma typy indukčních předpoklad
     
     Předpokládejme, že tvrzení platí pro dané $n \ge 2$, tedy $n = 2a+3b$. Pak $n+2 = 2(a+1)+3b$, takže tvrzení platí i~pro $n+2$.
     
-    \textit{Poznámka.} Pro zajímavost dodejme, jak je to obecně: Pro dvě nesoudělná kladná celá čísla $p$ a $q$ se dá dokázat, že každé celé číslo $n \ge pq-p-q+1$ se dá zapsat jako $n=pa+qb$ pro nezáporná $a,b$. Číslo $pq-p-q$ se jmenuje Frobeniovo číslo a~je to největší celé číslo, které se takto zapsat nedá. V~našem případě je $2\cdot 3-2-3=1$.
+    \Remark Pro zajímavost dodejme, jak je to obecně: Pro dvě nesoudělná kladná celá čísla $p$ a $q$ se dá dokázat, že každé celé číslo $n \ge pq-p-q+1$ se dá zapsat jako $n=pa+qb$ pro nezáporná $a,b$. Číslo $pq-p-q$ se jmenuje Frobeniovo číslo a~je to největší celé číslo, které se takto zapsat nedá. V~našem případě je $2\cdot 3-2-3=1$.
 }
 
 Další fascinující forma indukce je k vidění v Cauchyho důkazu AG nerovnosti, kdy nejprve jdeme nahoru a~potom dolů.
@@ -509,7 +509,7 @@ Další fascinující forma indukce je k vidění v Cauchyho důkazu AG nerovnos
 }{
     Důkaz sestává ze~dvou kroků: nejprve dokážeme nerovnost pro všechny mocniny dvojky $n = 2^k$ a~pak ukážeme, že z~platnosti pro $n$ proměnných vyplývá platnost pro $n-1$ proměnných. Tyto dva kroky dohromady pokryjí všechna přirozená čísla.
     
-    {\it Krok nahoru (z~$n$ na $2n$):} Pro $n=2$ máme dokázat, že $\frac{a_1+a_2}{2} \ge \sqrt{a_1 a_2}$, což je ekvivalentní $(\sqrt{a_1}-\sqrt{a_2})^2 \ge 0$, a~to platí vždy.
+    \NamedProof{Krok nahoru (z~$n$ na $2n$).} Pro $n=2$ máme dokázat, že $\frac{a_1+a_2}{2} \ge \sqrt{a_1 a_2}$, což je ekvivalentní $(\sqrt{a_1}-\sqrt{a_2})^2 \ge 0$, a~to platí vždy.
     
     Předpokládejme, že nerovnost platí pro $n$ proměnných.    Pro $2n$ proměnných rozdělíme čísla na dvě skupiny po~$n$. Označme
     $$
@@ -527,7 +527,7 @@ Další fascinující forma indukce je k vidění v Cauchyho důkazu AG nerovnos
     \endgather
     $$
 
-    {\it Krok dolů (z~$n$ na $n-1$):} Předpokládejme, že nerovnost platí pro $n$ proměnných, a~vezměme si $n-1$ nezáporných reálných čísel $a_1,\dots,a_{n-1}$. Položme 
+    \NamedProof{Krok dolů (z~$n$ na $n-1$).} Předpokládejme, že nerovnost platí pro $n$ proměnných, a~vezměme si $n-1$ nezáporných reálných čísel $a_1,\dots,a_{n-1}$. Položme 
     $$
     a_n = \frac{a_1+\cdots+a_{n-1}}{n-1}
     $$
@@ -681,7 +681,7 @@ Příkladů na indukci je opravdu mnoho a jak jsme viděli, dá se použít v~pr
 	$$
 	Výraz $(n+1)(n+2)\cdots(n+k-1)$ je součin $k-1$ po sobě jdoucích čísel, takže podle indukčního předpokladu pro $k-1$ je dělitelný $(k-1)!$. Tedy $P(n+1)-P(n)$ je dělitelné $k\cdot(k-1)! = k!$. Jelikož $P(n)$ je dělitelné $k!$, je dělitelné i~$P(n+1)$.
 	
-	\textit{Poznámka.} Existuje jednoduchý kombinatorický důkaz této úlohy -- tvrzení vyplývá z~toho, že kombinační číslo
+	\Remark Existuje jednoduchý kombinatorický důkaz této úlohy -- tvrzení vyplývá z~toho, že kombinační číslo
 	$$
 	{n+k-1 \choose k} = \frac{n(n+1)(n+2)\cdots(n+k-1)}{k!}
 	$$

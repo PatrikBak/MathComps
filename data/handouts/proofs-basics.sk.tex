@@ -89,7 +89,7 @@ V~ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania v
 
     Kedy sa ale stane, že toto párovanie páruje deliteľ so sebou samým? Práve keď $d=n/d$, teda keď $d^2=n$. A to je presne náš predpoklad! Tým pádom sa všetky delitele až na deliteľa $\sqrt{n}$ s~nejakým spárujú, dokopy teda budeme mať nepárny počet deliteľov, čo bolo treba dokázať.
 
-    \textit{Poznámka.} Tento príklad v~skutočnosti platí ako ekvivalencia. V~skutočnosti by bol ľahší, ak by bola zadaná obrátená implikácia, lebo fakt, že je štvorec, sa v~úvahovom reťazci používa až na konci. V~súťažných úlohách je ale bežné, že autori sa snažia tieto kľúčové kroky zamaskovať.
+    \Remark Tento príklad v~skutočnosti platí ako ekvivalencia. V~skutočnosti by bol ľahší, ak by bola zadaná obrátená implikácia, lebo fakt, že je štvorec, sa v~úvahovom reťazci používa až na konci. V~súťažných úlohách je ale bežné, že autori sa snažia tieto kľúčové kroky zamaskovať.
 }
 
 Predošlý príklad sa dá vyriešiť aj pomocou všeobecne užitočného vzorca pre počet deliteľov:
@@ -210,7 +210,7 @@ Takýto typ dôkazu je obzvlášť užitočný v~prípade, kedy je dokazované �
     Keďže $r$ je racionálne, je racionálna aj pravá strana.
     To by znamenalo, že $\sqrt{6}$ je racionálne číslo, čo je spor (dôkaz je analogický ako pre $\sqrt{2}$).
 
-    \textit{Poznámka.} Typicky chybný dôkaz môže spočívať v~argumente, že súčet dvoch iracionálnych čísel je vždy iracionálny. Presvedčte sa ale, že to nie je pravda.
+    \Remark Typicky chybný dôkaz môže spočívať v~argumente, že súčet dvoch iracionálnych čísel je vždy iracionálny. Presvedčte sa ale, že to nie je pravda.
 }
 
 Nasledovné príklady ukazujú, že dôkaz sporom je \uv{technicky} aj vtedy, ak dokazujeme, že niečo \textit{neplatí}. 
@@ -241,9 +241,9 @@ Nasledovné príklady ukazujú, že dôkaz sporom je \uv{technicky} aj vtedy, ak
 	Tvrdenie úlohy dokážeme sporom. Pripusťme teda, že čísla $a$, $b$ nie sú rozmiestnené striedavo. To zrejme znamená, že sa v kruhu vedľa seba nachádzajú niekde dve $a$ a súčasne niekde dve $b$\fnote{V kruhu s rovnakým počtom prvkov $a$ a $b$ sa tvoria striedavé skupiny, takže počet skupín zložených z $a$ sa vždy musí rovnať počtu skupín z $b$. Ak umiestnime dve $a$ vedľa seba, znížime celkový počet skupín s $a$, čím sa nutne zníži aj počet dostupných skupín s $b$. Aby sme všetky existujúce $b$ rozdelili do tohto menšieho počtu skupín, matematicky to vynucuje, že aspoň dve $b$ musia byť umiestnené vedľa seba.}. Vyberme dve susedné $a$. Ak začneme od tejto dvojice $aa$ putovať po kruhu jedným smerom, narazíme na číslo $b$ (inak by v kruhu boli samé $a$). Akonáhle sa to stane, budeme
 	mať susednú trojicu $aab$. Podľa zadania potom platí $a \mid a+b$, odkiaľ $a \mid b$. Analogickou úvahou nájdeme trojicu $bba$, z ktorej dostaneme $b \mid a$. Pre prirodzené čísla $a$, $b$ tak platí $a \mid b$ aj $b \mid a$, a teda $a = b$, čo je v spore s tým, že čísla $a$, $b$ sú rôzne. Tým je celé riešenie úlohy hotové.
 	
-	\textit{Poznámka 1.} Bez ujmy na všeobecnosti sme od začiatku dôkazu sporom mohli predpokladať, že platí napríklad $a < b$. Potom by sme vystačili len s úvahou o trojici $bba$ vedúcej k spornému záveru $b \mid a$.
+	\Remark{1} Bez ujmy na všeobecnosti sme od začiatku dôkazu sporom mohli predpokladať, že platí napríklad $a < b$. Potom by sme vystačili len s úvahou o trojici $bba$ vedúcej k spornému záveru $b \mid a$.
 	
-	\textit{Poznámka 2.} Ukážme navyše, že pre čísla $a$, $b$ spĺňajúce zadanie úlohy musí platiť buď $b = 2a$, alebo
+	\Remark{2} Ukážme navyše, že pre čísla $a$, $b$ spĺňajúce zadanie úlohy musí platiť buď $b = 2a$, alebo
 	$a = 2b$. S ohľadom na symetriu stačí v prípade $a < b$ dokázať rovnosť $b = 2a$. Pri striedavom rozmiestnení čísel z trojice $aba$ máme $b \mid 2a$, takže $2a = kb$ pre vhodné prirodzené číslo $k$. Z predpokladu $a < b$ však vyplýva $kb = 2a < 2b$, odkiaľ $k < 2$ čiže $k = 1$, a preto $2a = kb = b$, ako sme chceli dokázať.
 }
 

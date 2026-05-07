@@ -47,7 +47,9 @@
 \\itemvar\{(.*)\} => \item{$1}
 
 \{\s*\\it\s(.*?)(?:\\\/)?\} => \textit{$1}
+\{\s*\\em\s(.*?)(?:\\\/)?\} => \textit{$1}
 \\emph\{(.*?)\} => \textit{$1}
+\\NamedProof\{(.*?)\} => \textit{$1}
 
 \\geqq(?![A-Za-z]) => \ge
 \\leqq(?![A-Za-z]) => \le
@@ -58,6 +60,8 @@
 \\pozn[aá]mka(?![A-Za-z]) => \textit{Poznámka.}
 \\note(?![A-Za-z]) => \textit{Remark.}
 \\remark(?![A-Za-z]) => \textit{Remark.}
+\\Remark\{([^}]*)\}(?![A-Za-z]) => \textit{Poznámka ($1).}
+\\Remark(?![A-Za-z]) => \textit{Poznámka.}
 
 \\align(?![A-Za-z]) => \begin{align*}
 \\endalign(?![A-Za-z]) => \end{align*}
@@ -92,6 +96,7 @@
 
 \\SlightSmile(?![A-Za-z]) => 🙂
 \\Laugh(?![A-Za-z]) => 😄
+\\SmileWithTear(?![A-Za-z]) => 🥲
 
 [remove]
 
@@ -147,6 +152,7 @@ choose
 circ
 clubsuit
 colon
+cong
 cos
 cotg
 cr
@@ -184,6 +190,7 @@ lceil
 ldots
 le
 left
+Leftarrow
 leq
 leqslant
 lfloor
