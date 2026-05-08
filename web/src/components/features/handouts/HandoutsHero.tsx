@@ -2,7 +2,6 @@ import { useTranslations } from 'next-intl'
 
 import ContactButton from '@/components/features/contact/ContactButton'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { ANCHORS, getLocalizedAnchor, type Locale, ROUTES } from '@/i18n/i18n'
 
 import { HandoutStyleBadge } from './HandoutStyleBadge'
 
@@ -14,7 +13,7 @@ const KROUZKY_URL = 'https://www.matikacesku.cz/matematicke-krouzky-prihlaseni'
  * the two-bullet explanation of the source types (with inline badges and
  * external link to the math circles), and a closing feedback paragraph.
  */
-export function HandoutsHero({ locale }: { locale: Locale }) {
+export function HandoutsHero() {
   // Translations for the handouts hero section and source badge labels
   const t = useTranslations('handouts.hero')
   const tStyles = useTranslations('handouts.styles')
@@ -26,16 +25,7 @@ export function HandoutsHero({ locale }: { locale: Locale }) {
       </h1>
 
       <p className="mt-2.5 sm:mt-4 text-sm sm:text-base text-foreground/70 leading-relaxed">
-        {t.rich('intro', {
-          author: (chunks) => (
-            <AppLink
-              href={`${ROUTES.ABOUT}#${getLocalizedAnchor(ANCHORS.ABOUT_AUTHOR, locale)}`}
-              className="text-link hover:text-link-hover"
-            >
-              {chunks}
-            </AppLink>
-          ),
-        })}
+        {t('intro')}
       </p>
 
       <ul className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 text-sm sm:text-base text-foreground/70 leading-relaxed list-disc pl-5 marker:text-foreground/40">

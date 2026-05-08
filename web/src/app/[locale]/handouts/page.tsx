@@ -64,7 +64,7 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   // Render the page with filtered handout data
   return (
     <Layout>
-      <HandoutsHero locale={locale} />
+      <HandoutsHero />
       <HandoutBrowser sections={publicSections} events={events} locale={locale} />
     </Layout>
   )
