@@ -328,7 +328,7 @@ export function renderRawContentBlock(
  * no block-level elements like <p> are created. This is suitable for rendering
  * content inside elements that expect inline content, such as badges or titles.
  */
-export function renderInlineContent(
+function renderInlineContent(
   content: RawContentBlock[],
   imagesById: Record<string, ProblemImage>,
   imageType: ImageType,

@@ -1,5 +1,40 @@
 import katex from 'katex'
 
+import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
+
+/**
+ * Flattens a parsed inline content block back to its raw source string, wrapping
+ * math nodes in `$...$` / `$$...$$` and recursing through paragraph/bold/italic
+ * containers. The result can be fed straight into {@link renderMathContentToHtml}
+ * (or a `MathRendererClient`) so text and math render on the same baseline as a
+ * single KaTeX-aware string.
+ *
+ * @param block The inline content block to flatten, or null/undefined if absent.
+ *
+ * @returns The reconstructed source string, or `''` if the block is absent or unsupported.
+ */
+export function inlineBlockToMathSource(block: RawContentBlock | null | undefined): string {
+  // No block
+  if (!block) return ''
+
+  switch (block.type) {
+    // Plain text passes through verbatim
+    case 'text':
+      return block.text
+    // Math is wrapped back in delimiters matching its display mode
+    case 'math':
+      return block.isDisplay ? `$$${block.text}$$` : `$${block.text}$`
+    // Container blocks recurse into their children
+    case 'paragraph':
+    case 'bold':
+    case 'italic':
+      return block.content.map(inlineBlockToMathSource).join('')
+    // Other block types (links, lists, images, ...) are not expected in inline titles
+    default:
+      return ''
+  }
+}
+
 /**
  * Renders a string containing inline ($...$) and display ($$...$$) LaTeX to HTML using KaTeX.
  *
