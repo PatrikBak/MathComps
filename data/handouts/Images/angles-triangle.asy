@@ -27,4 +27,3 @@ ParallelMark(A, Hright, placement=0.7);
 LabeledDot(A, "A", N);
 LabeledDot(B, "B", SW);
 LabeledDot(C, "C", SE);
-LabeledDot(O, "O", S);
