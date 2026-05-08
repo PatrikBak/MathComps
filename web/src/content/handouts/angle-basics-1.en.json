@@ -2142,7 +2142,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " from which a triangle can be built. Start, say, with the segment\u00A0"
+                      "text": " from which a triangle can be built. Without loss of generality, assume that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=\\max\\{a,b,c\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Begin constructing the triangle from the segment\u00A0"
                     },
                     {
                       "type": "math",
@@ -2160,7 +2169,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", and then construct two circles: (a) the circle centered at\u00A0"
+                      "text": ". Then construct two circles: (a) the circle centered at\u00A0"
                     },
                     {
                       "type": "math",
@@ -2196,16 +2205,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ". They either fail to meet (when e.g. "
+                      "text": ". Thanks to "
                     },
                     {
                       "type": "math",
-                      "text": "b+c < a",
+                      "text": "a \\ge b",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "), or they meet at a single point on "
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\ge c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", both of these circles cross the segment\u00A0"
                     },
                     {
                       "type": "math",
@@ -2214,16 +2232,34 @@
                     },
                     {
                       "type": "text",
-                      "text": " (when "
+                      "text": ". If "
                     },
                     {
                       "type": "math",
-                      "text": "b+c=a",
+                      "text": "a=b+c",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "), or they meet at two points "
+                      "text": ", they meet at exactly one point on it (which does not correspond to a triangle); if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a>b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", they fail to meet at all; and if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a<b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", they meet at two points "
                     },
                     {
                       "type": "math",
@@ -2309,34 +2345,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Note that along the way we essentially proved the triangle inequality: the sum of two sides of a triangle is greater than the third – our triangle is constructible and non-degenerate\u00A0"
-                    },
-                    {
-                      "type": "footnote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "has no angle equal to "
-                        },
-                        {
-                          "type": "math",
-                          "text": "180^\\circ",
-                          "isDisplay": false
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " if and only if "
-                    },
-                    {
-                      "type": "math",
-                      "text": "b+c>a",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
+                      "text": " Note that along the way we essentially proved the triangle inequality. It is usually formulated as: the sum of any two sides of a triangle is greater than the third. We proved that the sum of the two shortest is greater than the longest. That clearly suffices, since the sum of the longest and any other is greater than the remaining one."
                     }
                   ],
                   "highligted": false
@@ -4879,8 +4888,8 @@
     {
       "contentId": "angle-basics-1.en-13.svg",
       "originalId": "angles-complementary-parallel-solution.pdf",
-      "width": "85.7pt",
-      "height": "92.24pt",
+      "width": "120.78pt",
+      "height": "103.36pt",
       "scale": 1.0
     },
     {
@@ -4894,7 +4903,7 @@
       "contentId": "angle-basics-1.en-15.svg",
       "originalId": "angles-sas-warning.pdf",
       "width": "240.45pt",
-      "height": "68.01pt",
+      "height": "77.45pt",
       "scale": 1.0
     },
     {

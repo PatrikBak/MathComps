@@ -2149,7 +2149,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ", z\u00A0ktorých vieme zostrojiť trojuholník. Začneme napr. úsečkou\u00A0"
+                      "text": ", z\u00A0ktorých vieme zostrojiť trojuholník. Bez ujmy na všeobecnosti predpokladajme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=\\max\\{a,b,c\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Začnime konštruovať trojuholník úsečkou\u00A0"
                     },
                     {
                       "type": "math",
@@ -2167,7 +2176,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0následne zostrojíme dve kružnice: (a) kružnicu so stredom v\u00A0"
+                      "text": ". Následne zostrojíme dve kružnice: (a) kružnicu so stredom v\u00A0"
                     },
                     {
                       "type": "math",
@@ -2203,16 +2212,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Tie sa buď nepretnú (keď napr. "
+                      "text": ". Vďaka "
                     },
                     {
                       "type": "math",
-                      "text": "b+c < a",
+                      "text": "a \\ge b",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "), alebo sa pretnú v\u00A0jedinom bode na "
+                      "text": " resp. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\ge c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obe tieto kružnice pretínajú úsečku\u00A0"
                     },
                     {
                       "type": "math",
@@ -2221,16 +2239,34 @@
                     },
                     {
                       "type": "text",
-                      "text": " (keď "
+                      "text": ". V\u00A0prípade "
                     },
                     {
                       "type": "math",
-                      "text": "b+c=a",
+                      "text": "a=b+c",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "), alebo sa pretnú v\u00A0dvoch bodoch "
+                      "text": " sa pretínajú práve v\u00A0jednom bode na nej (čo nezodpovedá trojuholníku), v\u00A0prípade "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a>b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa nepretínajú vôbec, a\u00A0v\u00A0prípade "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a<b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú v\u00A0dvoch bodoch "
                     },
                     {
                       "type": "math",
@@ -2316,34 +2352,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Uvedomme si, že sme vlastne po ceste dokázali\u00A0trojuholníkovú nerovnosť: súčet dvoch strán trojuholníka je väčší než tretia – náš trojuholník je zostrojiteľný a\u00A0nedegenerovaný\u00A0"
-                    },
-                    {
-                      "type": "footnote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "nemá uhol rovný "
-                        },
-                        {
-                          "type": "math",
-                          "text": "180^\\circ",
-                          "isDisplay": false
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " práve vtedy, keď "
-                    },
-                    {
-                      "type": "math",
-                      "text": "b+c>a",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
+                      "text": " Uvedomme si, že sme vlastne po ceste dokázali\u00A0trojuholníkovú nerovnosť. Tá sa zvyčajne formuluje ako: súčet ktorýchkoľvek dvoch strán trojuholníka je väčší než tretia. My sme dokázali, že súčet dvoch najkratších je väčší než najdlhšia. To zrejme stačí, keďže súčet najdlhšej a\u00A0ktorejkoľvek inej je väčší než tá posledná."
                     }
                   ],
                   "highligted": false
@@ -4873,8 +4882,8 @@
     {
       "contentId": "angle-basics-1.sk-13.svg",
       "originalId": "angles-complementary-parallel-solution.pdf",
-      "width": "85.7pt",
-      "height": "92.24pt",
+      "width": "120.78pt",
+      "height": "103.36pt",
       "scale": 1.0
     },
     {
@@ -4888,7 +4897,7 @@
       "contentId": "angle-basics-1.sk-15.svg",
       "originalId": "angles-sas-warning.pdf",
       "width": "240.45pt",
-      "height": "68.01pt",
+      "height": "77.45pt",
       "scale": 1.0
     },
     {

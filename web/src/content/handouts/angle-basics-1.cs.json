@@ -2149,7 +2149,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ", ze kterých umíme sestrojit trojúhelník. Začneme např. úsečkou\u00A0"
+                      "text": ", ze kterých umíme sestrojit trojúhelník. Bez újmy na obecnosti předpokládejme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=\\max\\{a,b,c\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Začněme konstruovat trojúhelník úsečkou\u00A0"
                     },
                     {
                       "type": "math",
@@ -2167,7 +2176,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0následně sestrojíme dvě kružnice: (a) kružnici se středem v\u00A0"
+                      "text": ". Následně sestrojíme dvě kružnice: (a) kružnici se středem v\u00A0"
                     },
                     {
                       "type": "math",
@@ -2203,16 +2212,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Ty se buď neprotnou (když např. "
+                      "text": ". Díky "
                     },
                     {
                       "type": "math",
-                      "text": "b+c < a",
+                      "text": "a \\ge b",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "), nebo se protnou v\u00A0jediném bodě na "
+                      "text": " resp. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\ge c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obě tyto kružnice protínají úsečku\u00A0"
                     },
                     {
                       "type": "math",
@@ -2221,16 +2239,34 @@
                     },
                     {
                       "type": "text",
-                      "text": " (když "
+                      "text": ". V\u00A0případě "
                     },
                     {
                       "type": "math",
-                      "text": "b+c=a",
+                      "text": "a=b+c",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "), nebo se protnou ve dvou bodech "
+                      "text": " se protínají právě v\u00A0jednom bodě na ní (což neodpovídá trojúhelníku), v\u00A0případě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a>b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se neprotínají vůbec, a\u00A0v\u00A0případě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a<b+c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se protínají ve dvou bodech "
                     },
                     {
                       "type": "math",
@@ -2316,34 +2352,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " Uvědomme si, že jsme vlastně po cestě dokázali\u00A0trojúhelníkovou nerovnost: součet dvou stran trojúhelníku je větší než třetí – náš trojúhelník je sestrojitelný a\u00A0nedegenerovaný\u00A0"
-                    },
-                    {
-                      "type": "footnote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "nemá úhel rovný "
-                        },
-                        {
-                          "type": "math",
-                          "text": "180^\\circ",
-                          "isDisplay": false
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " právě tehdy, když "
-                    },
-                    {
-                      "type": "math",
-                      "text": "b+c>a",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
+                      "text": " Uvědomme si, že jsme vlastně po cestě dokázali\u00A0trojúhelníkovou nerovnost. Ta se obvykle formuluje jako: součet kterýchkoli dvou stran trojúhelníku je větší než třetí. My jsme dokázali, že součet dvou nejkratších je větší než nejdelší. To zřejmě stačí, protože součet nejdelší a\u00A0kterékoli další je větší než ta poslední."
                     }
                   ],
                   "highligted": false
@@ -4873,8 +4882,8 @@
     {
       "contentId": "angle-basics-1.cs-13.svg",
       "originalId": "angles-complementary-parallel-solution.pdf",
-      "width": "85.7pt",
-      "height": "92.24pt",
+      "width": "120.78pt",
+      "height": "103.36pt",
       "scale": 1.0
     },
     {
@@ -4888,7 +4897,7 @@
       "contentId": "angle-basics-1.cs-15.svg",
       "originalId": "angles-sas-warning.pdf",
       "width": "240.45pt",
-      "height": "68.01pt",
+      "height": "77.45pt",
       "scale": 1.0
     },
     {
