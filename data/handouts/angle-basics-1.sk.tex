@@ -160,13 +160,13 @@ Než pôjdeme ďalej, uvedomme si, čo tieto vety znamenajú. Za mňa dobrý poh
 \Example{}{
     Presvedčte sa o~platnosti vety $sss$ o~zhodnosti. 
 }{
-    Predstavme si, že máme dané tri úsečky dĺžok $a$, $b$, $c$, z~ktorých vieme zostrojiť trojuholník. Začneme napr. úsečkou~$BC$ dĺžky~$a$, a~následne zostrojíme dve kružnice: (a) kružnicu so stredom v~$B$ a~polomerom $c$; (b) kružnicu so stredom v~$C$ a~polomerom $b$. Tie sa buď nepretnú (keď napr. $b+c < a$), alebo sa pretnú v~jedinom bode na $BC$ (keď $b+c=a$), alebo sa pretnú v~dvoch bodoch $A$ a~$A'$.
+    Predstavme si, že máme dané tri úsečky dĺžok $a$, $b$, $c$, z~ktorých vieme zostrojiť trojuholník. Bez ujmy na všeobecnosti predpokladajme, že $a=\max\{a,b,c\}$. Začnime konštruovať trojuholník úsečkou~$BC$ dĺžky~$a$. Následne  zostrojíme dve kružnice: (a) kružnicu so stredom v~$B$ a~polomerom $c$; (b) kružnicu so stredom v~$C$ a~polomerom $b$. Vďaka $a \ge b$ resp. $a \ge c$ obe tieto kružnice pretínajú úsečku~$BC$. V~prípade $a=b+c$ sa pretínajú práve v~jednom bode na nej (čo nezodpovedá trojuholníku), v~prípade $a>b+c$ sa nepretínajú vôbec, a~v~prípade $a<b+c$ sa pretínajú v~dvoch bodoch $A$ a~$A'$.
 
     \Image{angles-sss-proof.pdf}
 
     Na konci si uvedomme, že trojuholníky $ABC$ a~$A'BC$ sú však zrejme vzájomné zrkadlové obrazy podľa $BC$. Taktiež ak by sme začali inou úsečkou, tak vytvoríme iba posunutie/otočenie tejto konfigurácie.   
 
-    \Remark Uvedomme si, že sme vlastne po ceste dokázali~trojuholníkovú nerovnosť: súčet dvoch strán trojuholníka je väčší než tretia -- náš trojuholník je zostrojiteľný a~nedegenerovaný~\fnote{nemá uhol rovný $180^\circ$} práve vtedy, keď $b+c>a$.
+    \Remark Uvedomme si, že sme vlastne po ceste dokázali~trojuholníkovú nerovnosť. Tá sa zvyčajne formuluje ako: súčet ktorýchkoľvek dvoch strán trojuholníka je väčší než tretia. My sme dokázali, že súčet dvoch najkratších je väčší než najdlhšia. To zrejme stačí, keďže súčet najdlhšej a~ktorejkoľvek inej je väčší než tá posledná. 
 }
 
 Podobne vieme zdôvodniť ďalšie kritériá: 

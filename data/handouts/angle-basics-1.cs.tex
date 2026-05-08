@@ -160,13 +160,13 @@ Než půjdeme dál, uvědomme si, co tyto věty znamenají. Z~mého pohledu je d
 \Example{}{
     Přesvědčte se o~platnosti věty $sss$ o~shodnosti.
 }{
-    Představme si, že máme dány tři úsečky délek $a$, $b$, $c$, ze kterých umíme sestrojit trojúhelník. Začneme např. úsečkou~$BC$ délky~$a$, a~následně sestrojíme dvě kružnice: (a) kružnici se středem v~$B$ a~poloměrem $c$; (b) kružnici se středem v~$C$ a~poloměrem $b$. Ty se buď neprotnou (když např. $b+c < a$), nebo se protnou v~jediném bodě na $BC$ (když $b+c=a$), nebo se protnou ve dvou bodech $A$ a~$A'$.
+    Představme si, že máme dány tři úsečky délek $a$, $b$, $c$, ze kterých umíme sestrojit trojúhelník. Bez újmy na obecnosti předpokládejme, že $a=\max\{a,b,c\}$. Začněme konstruovat trojúhelník úsečkou~$BC$ délky~$a$. Následně  sestrojíme dvě kružnice: (a) kružnici se středem v~$B$ a~poloměrem $c$; (b) kružnici se středem v~$C$ a~poloměrem $b$. Díky $a \ge b$ resp. $a \ge c$ obě tyto kružnice protínají úsečku~$BC$. V~případě $a=b+c$ se protínají právě v~jednom bodě na ní (což neodpovídá trojúhelníku), v~případě $a>b+c$ se neprotínají vůbec, a~v~případě $a<b+c$ se protínají ve dvou bodech $A$ a~$A'$.
 
     \Image{angles-sss-proof.pdf}
 
     Na konci si uvědomme, že trojúhelníky $ABC$ a~$A'BC$ jsou však zřejmě vzájemně zrcadlovými obrazy podle $BC$. Také pokud bychom začali jinou úsečkou, tak vytvoříme pouze posunutí/otočení této konfigurace.
 
-    \Remark Uvědomme si, že jsme vlastně po cestě dokázali~trojúhelníkovou nerovnost: součet dvou stran trojúhelníku je větší než třetí -- náš trojúhelník je sestrojitelný a~nedegenerovaný~\fnote{nemá úhel rovný $180^\circ$} právě tehdy, když $b+c>a$.
+    \Remark Uvědomme si, že jsme vlastně po cestě dokázali~trojúhelníkovou nerovnost. Ta se obvykle formuluje jako: součet kterýchkoli dvou stran trojúhelníku je větší než třetí. My jsme dokázali, že součet dvou nejkratších je větší než nejdelší. To zřejmě stačí, protože součet nejdelší a~kterékoli další je větší než ta poslední.
 }
 
 Podobně umíme zdůvodnit další kritéria:

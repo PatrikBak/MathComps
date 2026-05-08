@@ -21,5 +21,6 @@ LabeledDot(B, "B", E, Red);
 LabeledDot(C, "C", N, Green);
 LabeledDot(Cp, "C'", S, Green);
 
-EdgeLabel(A, C, "c", W, color = Blue, distanceOffset = 8);
-EdgeLabel(A, Cp, "c", W, color = Blue, distanceOffset = 8);
+EdgeLabel(A, B, "c", S, color = Green, distanceOffset = 8);
+EdgeLabel(A, C, "b", W, color = Blue, distanceOffset = 8);
+EdgeLabel(A, Cp, "b", W, color = Blue, distanceOffset = 8);
