@@ -925,7 +925,7 @@
     "editor": {
       "attachment": "Príloha (PDF, TXT, MD)",
       "blockMath": "Bloková matematika ($$)",
-      "bold": "Tučné (Ctrl+B)",
+      "bold": "Tučné ({modifier}+B)",
       "bulletList": "Odrážkový zoznam",
       "cancelEsc": "Zrušiť (Esc)",
       "dropToUpload": "Pusť súbor pre nahranie",
@@ -954,9 +954,9 @@
       "hiddenText": "Skrytý text",
       "image": "Obrázok (vložiť diagram/graf, nie snímky textu)",
       "imageAlt": "Obrázok",
-      "inlineMath": "Inline matematika ($)",
+      "inlineMath": "Inline matematika ($, {modifier}+M)",
       "invalidFileType": "Nepovolený typ súboru",
-      "italic": "Kurzíva (Ctrl+I)",
+      "italic": "Kurzíva ({modifier}+I)",
       "latexPicker": {
         "categories": {
           "geometry": "Geometria",
@@ -968,7 +968,7 @@
         },
         "title": "LaTeX symboly"
       },
-      "link": "Odkaz",
+      "link": "Odkaz ({modifier}+K)",
       "maxAttachments": "Maximálny počet príloh: {max}",
       "maxAttachmentsPerComment": "Maximálny počet príloh: {max}",
       "maxAttachmentsReached": "Maximálne {max} prílohy na komentár",
@@ -986,7 +986,7 @@
       "sectionLinkCopied": "Odkaz na sekciu bol skopírovaný do schránky",
       "shrink": "Zmenšiť",
       "shrinkEditor": "Zmenšiť editor",
-      "spoiler": "Skrytý text (||[Názov]obsah||)",
+      "spoiler": "Skrytý text",
       "submit": "Odoslať",
       "submitShortcut": "Odoslať ({modifier} + Enter)",
       "unsupportedFileType": "Nepodporovaný typ súboru. Povolené: obrázky (PNG, JPEG, WebP, GIF) alebo prílohy (PDF, TXT, MD)",

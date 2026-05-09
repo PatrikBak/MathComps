@@ -13,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 
 import {
   applyBold,
@@ -68,6 +69,10 @@ export function RichMathEditorToolbar({
   // Translations for editor
   const tEditor = useTranslations('ui.editor')
 
+  // Modifier key for keyboard-shortcut tooltips (⌘ on Mac, Ctrl elsewhere)
+  const { isMac } = useDeviceCapabilities()
+  const modifier = isMac ? '⌘' : 'Ctrl'
+
   // Build localized labels for transforms that insert text into the editor
   const transformLabels: TransformLabels = {
     spoilerLabel: tEditor('hiddenText'),
@@ -89,14 +94,22 @@ export function RichMathEditorToolbar({
       )}
     >
       {/* Core formatting: Bold, Italic */}
-      <ToolbarButton onClick={() => onEdit(applyBold)} icon={Bold} title={tEditor('bold')} />
-      <ToolbarButton onClick={() => onEdit(applyItalic)} icon={Italic} title={tEditor('italic')} />
+      <ToolbarButton
+        onClick={() => onEdit(applyBold)}
+        icon={Bold}
+        title={tEditor('bold', { modifier })}
+      />
+      <ToolbarButton
+        onClick={() => onEdit(applyItalic)}
+        icon={Italic}
+        title={tEditor('italic', { modifier })}
+      />
 
       {/* Math: $, $$, and symbol picker */}
       <ToolbarButton
         onClick={() => onEdit(applyInlineMath)}
         text="$"
-        title={tEditor('inlineMath')}
+        title={tEditor('inlineMath', { modifier })}
       />
       <ToolbarButton
         onClick={() => onEdit(insertBlockMath)}
@@ -131,7 +144,11 @@ export function RichMathEditorToolbar({
           icon={Heading3}
           title={tEditor('heading')}
         />
-        <ToolbarButton onClick={() => onEdit(insertLink)} icon={Link} title={tEditor('link')} />
+        <ToolbarButton
+          onClick={() => onEdit(insertLink)}
+          icon={Link}
+          title={tEditor('link', { modifier })}
+        />
         <ToolbarButton
           onClick={() => onEdit((context) => insertSpoiler(context, transformLabels))}
           icon={SquareSlash}
@@ -170,7 +187,7 @@ export function RichMathEditorToolbar({
             },
             {
               icon: Link,
-              label: tEditor('link'),
+              label: tEditor('link', { modifier }),
               onClick: () => onEdit(insertLink),
             },
             {

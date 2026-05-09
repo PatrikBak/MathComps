@@ -61,8 +61,9 @@ export function processKeyboardShortcut(
   event: React.KeyboardEvent<HTMLTextAreaElement>,
   context: EditContext
 ): KeyboardAction {
-  // Extract keyboard state
-  const { key, ctrlKey, shiftKey, altKey } = event
+  // Extract keyboard state. metaKey covers Cmd on Mac so that Mac users get the
+  // platform-native modifier alongside Ctrl on Windows/Linux.
+  const { key, ctrlKey, metaKey, shiftKey, altKey } = event
 
   // Handle Enter key for smart list continuation
   if (key === 'Enter' && !shiftKey && !ctrlKey && !altKey) {
@@ -79,26 +80,26 @@ export function processKeyboardShortcut(
     return { type: 'passthrough' }
   }
 
-  // Handle Ctrl+Z (Undo)
-  if (ctrlKey && key === 'z' && !shiftKey) {
+  // Handle Ctrl/Cmd+Z (Undo)
+  if ((ctrlKey || metaKey) && key === 'z' && !shiftKey) {
     return { type: 'undo' }
   }
 
-  // Handle Ctrl+Y or Ctrl+Shift+Z (Redo)
-  if ((ctrlKey && key === 'y') || (ctrlKey && shiftKey && key === 'z')) {
+  // Handle Ctrl/Cmd+Y or Ctrl/Cmd+Shift+Z (Redo)
+  if (((ctrlKey || metaKey) && key === 'y') || ((ctrlKey || metaKey) && shiftKey && key === 'z')) {
     return { type: 'redo' }
   }
 
-  // Keyboard shortcuts for formatting (Ctrl+Shift combos)
-  if (ctrlKey && shiftKey && !altKey) {
+  // Keyboard shortcuts for formatting (Ctrl/Cmd+Shift combos)
+  if ((ctrlKey || metaKey) && shiftKey && !altKey) {
     switch (key.toLowerCase()) {
       case 'c': // Inline Code (Ctrl+Shift+C)
         return { type: 'handled', result: applyInlineCode(context) }
     }
   }
 
-  // Keyboard shortcuts for formatting (Ctrl only)
-  if (ctrlKey && !shiftKey && !altKey) {
+  // Keyboard shortcuts for formatting (Ctrl/Cmd only)
+  if ((ctrlKey || metaKey) && !shiftKey && !altKey) {
     switch (key.toLowerCase()) {
       case 'b': // Bold
         return { type: 'handled', result: applyBold(context) }

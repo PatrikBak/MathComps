@@ -925,7 +925,7 @@
     "editor": {
       "attachment": "Attachment (PDF, TXT, MD)",
       "blockMath": "Block math ($$)",
-      "bold": "Bold (Ctrl+B)",
+      "bold": "Bold ({modifier}+B)",
       "bulletList": "Bullet list",
       "cancelEsc": "Cancel (Esc)",
       "dropToUpload": "Drop file to upload",
@@ -954,9 +954,9 @@
       "hiddenText": "Hidden text",
       "image": "Image (insert diagram/graph, not text screenshots)",
       "imageAlt": "Image",
-      "inlineMath": "Inline math ($)",
+      "inlineMath": "Inline math ($, {modifier}+M)",
       "invalidFileType": "Invalid file type",
-      "italic": "Italic (Ctrl+I)",
+      "italic": "Italic ({modifier}+I)",
       "latexPicker": {
         "categories": {
           "geometry": "Geometry",
@@ -968,7 +968,7 @@
         },
         "title": "LaTeX symbols"
       },
-      "link": "Link",
+      "link": "Link ({modifier}+K)",
       "maxAttachments": "Maximum attachments: {max}",
       "maxAttachmentsPerComment": "Maximum attachments: {max}",
       "maxAttachmentsReached": "Maximum {max} attachments per comment",
@@ -986,7 +986,7 @@
       "sectionLinkCopied": "Section link copied to clipboard",
       "shrink": "Shrink",
       "shrinkEditor": "Shrink editor",
-      "spoiler": "Hidden text (||[Title]content||)",
+      "spoiler": "Hidden text",
       "submit": "Submit",
       "submitShortcut": "Submit ({modifier} + Enter)",
       "unsupportedFileType": "Unsupported file type. Allowed: images (PNG, JPEG, WebP, GIF) or attachments (PDF, TXT, MD)",
