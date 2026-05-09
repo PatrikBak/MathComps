@@ -69,7 +69,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
       {/* Backdrop overlay - only visible when menu is open */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-surface/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-background/30 lg:hidden"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
@@ -77,7 +77,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
 
       {/* Bottom navigation bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
-        <div className="bg-surface/95 backdrop-blur-md border-t border-foreground/10">
+        <div className="bg-surface/40 backdrop-blur-xl border-t border-foreground/10">
           <div className="px-4 py-3">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -126,7 +126,7 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
                         key={item.id}
                         ref={activeIndex === index ? activeItemReference : null}
                         onClick={() => handleNavigationClick(item.id)}
-                        style={{ marginLeft: `${indentPx}px` }}
+                        style={{ paddingLeft: `calc(0.75rem + ${indentPx}px)` }}
                         className={cn(
                           TOC_LINK_BASE_STYLES,
                           'w-full py-1.5 px-3 text-left flex items-start gap-2',
