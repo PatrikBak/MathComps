@@ -15,7 +15,7 @@ Inequalities are one of the fundamental topics not only in algebra but in mathem
 \Highlight{
     We have a square piece of paper with a side length of 12 cm. We want to create an open box by cutting identical squares from each of the four corners and folding up the sides. What is the largest possible volume of the box?
 
-    \Image{box.pdf}{0.4}
+    \Image{box.pdf}
 }
 
 This problem is not very simple, but we will learn its most elegant solution. We will continuously build upon generally useful techniques from previous posts, such as factorization, completing the square, ordering, etc.
@@ -375,7 +375,7 @@ This will help us in the proof of the general AM-GM inequality:
 
     According to the claim from the previous exercise, if we bring these two variables closer to each other while preserving their sum, we increase their product, and thus increase the product of all variables. We do this increase by replacing the variable closer to $p$ with $p$ and replacing the other variable so that the sum is preserved (see figure). By this, we have achieved that we preserved the sum, increased the product, and also decreased the number of variables different from $p$. By finite repetition of this algorithm, we reach a state where we have at least $n-1$ variables equal to $p$.
 
-    \Image{ag-proof.pdf}{8}
+    \Image{ag-proof.pdf}
 
     If exactly $n-1$ of them are equal to $p$, then we obtain the value of the last one by subtracting the sum of the others from the sum of all variables. The sum of all is $np$ (since $p$ is the mean and $n$ is their count), while the sum of the others is $(n-1)p$ (since they are all equal to $p$). We see that the last variable must also be equal to $p$, which is a contradiction.
 
@@ -417,7 +417,7 @@ Finally, it is time to reveal the solution to the motivational problem from the 
 \Example{The Box Problem}{
     We have a square piece of paper with a side length of 12 cm. We want to create an open box by cutting identical squares from each of the four corners and folding up the sides. What is the largest possible volume of the box?
 
-    \Image{box.pdf}{0.4}
+    \Image{box.pdf}
 }{
     Let $x$ denote the side of the square we cut from the corner. Then our box has a base in the shape of a square with side $12-2x$ and height $x$. Its volume is therefore $(12-2x)^2x$, and our goal is to maximize this expression. We have the product of three things: $12-2x$, $12-2x$, $x$. If we estimated them directly, the sum of these things would be in the estimate -- that won't help us much, and in fact, we won't solve the problem with it (equality won't occur in the correct case). However, if we used AM-GM on $12-2x$, $12-2x$, $4x$, then the $x$'s cancel out. We can artificially create this~4:
     $$

@@ -15,7 +15,7 @@ Nerovnosti jsou jedním ze základních témat nejen v~algebře, ale v~matematic
 \Highlight{
     Máme čtvercový kus papíru s délkou strany 12 cm. Chceme vytvořit otevřenou krabici tak, že z každého ze čtyř rohů vystřihneme identické čtverce a boky zahneme nahoru. Jaký je největší možný objem krabice?
 
-    \Image{box.pdf}{0.4}
+    \Image{box.pdf}
 }
 
 Tato úloha není příliš jednoduchá, ale my se naučíme její nejelegantnější řešení. Průběžně budeme stavět na obecně užitečných technikách z~minulých příspěvků jako rozklad na součin, doplňování na čtverec, uspořádání atd.
@@ -375,7 +375,7 @@ Toto nám pomůže při důkazu obecné AG nerovnosti:
 
     Podle tvrzení z~předešlého cvičení platí, že pokud tyto dvě proměnné přiblížíme k~sobě a zachováváme přitom jejich součet, tak zvětšíme jejich součin, takže zvětšíme i součin všech proměnných. Toto zvětšení provedeme tak, že proměnnou bližší k~$p$ nahradíme $p$ a druhou proměnnou nahradíme tak, aby se součet zachoval (viz obrázek). Tímto jsme dosáhli, že jsme zachovali součet, zvětšili součin a také zmenšili počet proměnných různých od $p$. Konečným opakováním tohoto algoritmu dojdeme do stavu, kdy máme alespoň $n-1$ proměnných rovných $p$. 
 
-    \Image{ag-proof.pdf}{8}
+    \Image{ag-proof.pdf}
 
     Pokud je právě $n-1$ z~nich rovných $p$, tak hodnotu poslední získáme, když od součtu všech proměnných odečteme součet zbývajících. Součet všech je $np$ (jelikož $p$ je průměr a $n$ je jejich počet), zatímco součet zbývajících je $(n-1)p$ (jelikož jsou všechna rovna $p$). Vidíme, že i poslední proměnná musí být rovna $p$, což je spor.
 
@@ -417,7 +417,7 @@ Konečně je čas prozradit řešení motivační úlohy z~úvodu:
 \Example{Problém krabice}{
     Máme čtvercový kus papíru s délkou strany 12 cm. Chceme vytvořit otevřenou krabici tak, že z každého ze čtyř rohů vystřihneme identické čtverce a boky zahneme nahoru. Jaký je největší možný objem krabice?
 
-    \Image{box.pdf}{0.4}
+    \Image{box.pdf}
 }{
     Nechť $x$ označuje stranu čtverce, který vystřihujeme z~rohu. Potom naše krabice má podstavu ve tvaru čtverce se stranou $12-2x$ a výšku $x$. Její objem je tedy $(12-2x)^2x$ a náš cíl je tento výraz maximalizovat. Máme součin tří věcí: $12-2x$, $12-2x$, $x$. Pokud bychom je odhadli přímo, tak v~odhadu bude součet těchto věcí -- tím si moc nepomůžeme a ve skutečnosti tím úlohu nedořešíme (rovnost nebude nastávat ve správném případě). Kdybychom však použili AG na $12-2x$, $12-2x$, $4x$, tak se $x$ odečtou. Tuto~4 si však umíme uměle vyrobit:
     $$
