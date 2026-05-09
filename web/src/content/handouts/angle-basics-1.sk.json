@@ -2461,7 +2461,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " musí ležať na polopriamke z\u00A0"
+                      "text": " musí ležať na polpriamke z\u00A0"
                     },
                     {
                       "type": "math",
@@ -2506,7 +2506,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamky zvierajúce s\u00A0"
+                      "text": ". Polpriamky zvierajúce s\u00A0"
                     },
                     {
                       "type": "math",
@@ -2735,7 +2735,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " musí ležať na polopriamke z\u00A0"
+                      "text": " musí ležať na polpriamke z\u00A0"
                     },
                     {
                       "type": "math",
@@ -2762,7 +2762,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0zároveň na polopriamke z\u00A0"
+                      "text": " a\u00A0zároveň na polpriamke z\u00A0"
                     },
                     {
                       "type": "math",
@@ -2825,7 +2825,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0preto nie sú obe polopriamky rovnobežné – pretnú sa v\u00A0jedinom bode\u00A0"
+                      "text": ", a\u00A0preto nie sú obe polpriamky rovnobežné – pretnú sa v\u00A0jedinom bode\u00A0"
                     },
                     {
                       "type": "math",
@@ -2939,7 +2939,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Po zostrojení kratšej úsečky zostrojíme polpriamku pod našim daným zhodným uhlom. Zostáva posledný krok konštrukcie. Rozmyslite, kedy dostaneme žiaden, kedy jeden a\u00A0kedy dva vyhovujúce trojuholníky."
+                        "text": "Po zostrojení kratšej úsečky zostrojíme polpriamku pod naším daným zhodným uhlom. Zostáva posledný krok konštrukcie. Rozmyslite si, kedy dostaneme žiaden, kedy jeden a\u00A0kedy dva vyhovujúce trojuholníky."
                       }
                     ],
                     "highligted": false
@@ -3015,7 +3015,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " musí ležať na polopriamke z\u00A0"
+                      "text": " musí ležať na polpriamke z\u00A0"
                     },
                     {
                       "type": "math",
@@ -3155,7 +3155,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamka z\u00A0bodu\u00A0"
+                      "text": ". Polpriamka z\u00A0bodu\u00A0"
                     },
                     {
                       "type": "math",
@@ -3253,7 +3253,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamka z\u00A0"
+                      "text": ". Polpriamka z\u00A0"
                     },
                     {
                       "type": "math",
@@ -3399,7 +3399,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "vonku"
+                          "text": "zvonku"
                         }
                       ]
                     },
@@ -3414,7 +3414,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polopriamka by ju mohla pretnúť v\u00A0dvoch bodoch – vznikli by tak dva rôzne (nezhodné) trojuholníky – alebo by ju minula celkom, čo nevedie k\u00A0žiadnemu trojuholníku."
+                      "text": ". Polpriamka by ju mohla pretnúť v\u00A0dvoch bodoch – vznikli by tak dva rôzne (nezhodné) trojuholníky – alebo by ju minula celkom, čo nevedie k\u00A0žiadnemu trojuholníku."
                     }
                   ],
                   "highligted": false
@@ -3457,7 +3457,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "V našej geometrickej ceste sa priebežne stretneme so všetkými týmito tvrdeniami. Nateraz si však ukážme nejaké konkrétne aplikácie. Začneme tým najzrejmejším tvrdením, ktoré sa ale tiež sluší a patrí dokázať:"
+                  "text": "Na našej geometrickej ceste sa priebežne stretneme so všetkými týmito tvrdeniami. Nateraz si však ukážme nejaké konkrétne aplikácie. Začneme tým najzrejmejším tvrdením, ktoré sa ale tiež sluší a patrí dokázať:"
                 }
               ],
               "highligted": false
@@ -3507,7 +3507,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Dokážte tiež opačnú implikáciu (teda že z\u00A0rovnosti uhlov vyplýva rovnosť dĺžok)."
+                      "text": ". Dokážte tiež obrátenú implikáciu (teda že z\u00A0rovnosti uhlov vyplýva rovnosť dĺžok)."
                     }
                   ],
                   "highligted": false
@@ -3643,7 +3643,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Opačná implikácia."
+                          "text": "Obrátená implikácia."
                         }
                       ]
                     },

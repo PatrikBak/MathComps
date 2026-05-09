@@ -2939,7 +2939,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Po sestrojení kratší úsečky sestrojíme polopřímku pod naším daným shodným úhlem. Zbývá poslední krok konstrukce. Rozmyslete, kdy dostaneme žádný, kdy jeden a\u00A0kdy dva vyhovující trojúhelníky."
+                        "text": "Po sestrojení kratší úsečky sestrojíme polopřímku pod naším daným shodným úhlem. Zbývá poslední krok konstrukce. Rozmyslete si, kdy dostaneme žádný, kdy jeden a\u00A0kdy dva vyhovující trojúhelníky."
                       }
                     ],
                     "highligted": false
@@ -3507,7 +3507,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Dokažte také opačnou implikaci (tedy že z\u00A0rovnosti úhlů vyplývá rovnost délek)."
+                      "text": ". Dokažte také obrácenou implikaci (tedy že z\u00A0rovnosti úhlů vyplývá rovnost délek)."
                     }
                   ],
                   "highligted": false
@@ -3643,7 +3643,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Opačná implikace."
+                          "text": "Obrácená implikace."
                         }
                       ]
                     },
