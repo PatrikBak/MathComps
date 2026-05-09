@@ -74,7 +74,7 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-background/80" aria-hidden="true" />
+          <div className="fixed inset-0 bg-background/30" aria-hidden="true" />
         </TransitionChild>
 
         {/* Drawer Panel */}
@@ -87,9 +87,9 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
           leaveFrom="translate-y-0"
           leaveTo="-translate-y-full"
         >
-          <DialogPanel className="fixed inset-x-0 top-0 h-[100dvh] w-full bg-surface shadow-2xl flex flex-col">
+          <DialogPanel className="fixed inset-x-0 top-0 max-h-[100dvh] w-full bg-surface/40 backdrop-blur-xl shadow-2xl rounded-b-2xl flex flex-col">
             {/* Header with logo and close button */}
-            <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 border-b border-foreground/10 bg-surface">
+            <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 border-b border-foreground/10">
               <MathCompsLogo />
               <button
                 onClick={onClose}
@@ -130,9 +130,9 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
                         <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
                       </div>
                     ) : (
-                      <div className="pb-4">
+                      <div className="pb-4 flex justify-center">
                         <LoginNavItem
-                          className="flex items-center justify-center w-full py-3 px-4 rounded-lg text-sm font-semibold text-brand-foreground bg-brand/70 hover:bg-brand/80 active:bg-brand/60 transition-colors shadow-lg shadow-brand/20"
+                          className="flex items-center justify-center w-full max-w-xs py-3 px-6 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:from-indigo-700 active:to-violet-700 transition-all shadow-lg shadow-violet-500/30"
                           onClick={onClose}
                         />
                       </div>
