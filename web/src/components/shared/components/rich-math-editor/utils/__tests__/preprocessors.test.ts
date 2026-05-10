@@ -55,6 +55,52 @@ describe('preprocessDisplayMath', () => {
       expect(result).toBe('\n$$\n\n$$\n')
     })
   })
+
+  describe('indentation preservation — own-line $$', () => {
+    it('preserves 2-space indent (matches a `- ` marker depth)', () => {
+      const result = preprocessDisplayMath('  $$x = 1$$')
+      expect(result).toBe('  \n  $$\n  x = 1\n  $$\n')
+    })
+
+    it('preserves 3-space indent (deeper than `- ` continuation)', () => {
+      const result = preprocessDisplayMath('   $$x = 1$$')
+      expect(result).toBe('   \n   $$\n   x = 1\n   $$\n')
+    })
+
+    it('preserves 4-space indent (matches a nested list-item depth)', () => {
+      const result = preprocessDisplayMath('    $$x = 1$$')
+      expect(result).toBe('    \n    $$\n    x = 1\n    $$\n')
+    })
+
+    it('preserves indent across multi-line math content (and avoids double-indenting continuation lines)', () => {
+      const result = preprocessDisplayMath('  $$a + b\n  = c$$')
+      expect(result).toBe('  \n  $$\n  a + b\n  = c\n  $$\n')
+    })
+  })
+
+  describe('indentation preservation — mid-line $$ inside a list item', () => {
+    it('indents the math block to the `- ` marker depth (2 columns)', () => {
+      // Math people sometimes write display math glued to the item's prose; the math block must stay in the item
+      const result = preprocessDisplayMath('- the relation $$xy$$')
+      expect(result).toBe('- the relation \n  $$\n  xy\n  $$\n')
+    })
+
+    it('indents the math block to the `1. ` marker depth (3 columns)', () => {
+      const result = preprocessDisplayMath('1. the relation $$xy$$')
+      expect(result).toBe('1. the relation \n   $$\n   xy\n   $$\n')
+    })
+
+    it('indents the math block to a nested `  - ` marker depth (4 columns)', () => {
+      const result = preprocessDisplayMath('  - the relation $$xy$$')
+      expect(result).toBe('  - the relation \n    $$\n    xy\n    $$\n')
+    })
+
+    it('does not propagate indent when $$ is mid-line outside any list', () => {
+      // The two leading spaces are part of running prose, not of the $$ line itself
+      const result = preprocessDisplayMath('  text $$x$$')
+      expect(result).toBe('  text \n$$\nx\n$$\n')
+    })
+  })
 })
 
 describe('collapseExcessiveBreaks', () => {
