@@ -1,0 +1,203 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`validate-md fixtures > invalid-katex-bad-environment.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: No such environment: notathing at position 7: \\begin{̲n̲o̲t̲a̲t̲h̲i̲n̲g̲}̲ x = 1 \\end{not…",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-empty-subscript.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Expected group after '_' at position 2: x_̲",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-in-list.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Unexpected end of input in a macro argument, expected '}' at end of input: \\frac{a}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-in-spoiler.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Undefined control sequence: \\foo at position 1: \\̲f̲o̲o̲{u}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-in-table.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Undefined control sequence: \\unknowncmd at position 1: \\̲u̲n̲k̲n̲o̲w̲n̲c̲m̲d̲",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-mismatched-env.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Mismatch: \\begin{aligned} matched by \\end{cases} at position 24: …ligned} x &= 1 \\̲e̲n̲d̲{cases}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-missing-arg.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Unexpected end of input in a macro argument, expected '}' at end of input: \\frac{a}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-nested.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Undefined control sequence: \\foo at position 7: \\sqrt{\\̲f̲o̲o̲{x}}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-stray-amp.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Expected 'EOF', got '&' at position 3: x &̲ y",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-unbalanced-braces.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Unexpected end of input in a macro argument, expected '}' at end of input: \\frac{a{b}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-unclosed-brace.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Expected '}', got 'EOF' at end of input: x{",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-unclosed-env.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Expected & or \\\\ or \\cr or \\end at end of input: …aligned} x &= 1",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-unknown-cmd.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Undefined control sequence: \\foo at position 1: \\̲f̲o̲o̲{bar}",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-katex-unmatched-left.md 1`] = `
+{
+  "errorFirstLine": "KaTeX parse error: Expected '\\right', got 'EOF' at end of input: \\left( x + y",
+  "stage": "katex",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > valid-blockquote.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-code.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-display-math.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-image.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-inline-math.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-link.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-bullet.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-nested.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-numbered.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-math-align.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-math-mixed-flow.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-prose.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-realistic-problem.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-spoiler.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-table.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;

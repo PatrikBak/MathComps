@@ -4,3 +4,7 @@ out
 dist
 coverage
 public
+
+# Validator fixtures contain intentionally malformed markdown; Prettier would
+# auto-correct unclosed bold, angle-bracket dangerous URLs, etc.
+scripts/__fixtures__/validate-md
