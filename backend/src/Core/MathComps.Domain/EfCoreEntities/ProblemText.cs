@@ -42,6 +42,12 @@ public class ProblemText
     public string? ParsedText { get; set; }
 
     /// <summary>
+    /// The text content rendered to Markdown+TeX. Null on rows not yet migrated from the JSON AST.
+    /// </summary>
+    [Column(TypeName = "text")]
+    public string? MarkdownText { get; set; }
+
+    /// <summary>
     /// The language of this text.
     /// </summary>
     public required Language Language { get; set; }
