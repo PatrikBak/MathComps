@@ -218,6 +218,30 @@ exports[`validate-md fixtures > valid-display-math.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > valid-display-math-mid-line-in-directive-list.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-display-math-mid-line-in-native-list.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-display-math-own-line-in-directive-list.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-display-math-own-line-in-native-list.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
 exports[`validate-md fixtures > valid-image.md 1`] = `
 {
   "verdict": "ok",
