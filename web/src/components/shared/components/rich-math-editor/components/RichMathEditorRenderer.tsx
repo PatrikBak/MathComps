@@ -4,61 +4,15 @@ import type { ReactNode } from 'react'
 import Markdown, { type Components } from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
-import rehypeKatex from 'rehype-katex'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
-import remarkBreaks from 'remark-breaks'
-import remarkDirective from 'remark-directive'
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
 
 import { resolveMediaUrl } from '@/components/shared/utils/media-utils'
 
-import { remarkSpoiler } from '../plugins/remark-spoiler'
+import {
+  rehypePlugins as sharedRehypePlugins,
+  remarkPlugins as sharedRemarkPlugins,
+} from '../utils/markdown-pipeline'
 import { preprocessDisplayMath } from '../utils/preprocessors'
 import { RichMathEditorSpoiler } from './RichMathEditorSpoiler'
-
-/**
- * Custom sanitization schema that extends the default GitHub schema.
- *
- * This allows our custom `<spoiler>` element while blocking XSS vectors
- * like `<script>`, `<iframe>`, event handlers, and CSS defacement via `style`.
- *
- * The sanitizer runs BEFORE KaTeX, so KaTeX-generated styles are unaffected.
- * We only need to whitelist what users can type, not what plugins generate.
- */
-const sanitizeSchema = {
-  ...defaultSchema,
-  tagNames: [
-    ...(defaultSchema.tagNames ?? []),
-    // Custom element for spoilers
-    'spoiler',
-    // MathML tags for accessibility (KaTeX can output these)
-    'math',
-    'mi',
-    'mn',
-    'mo',
-    'ms',
-    'mtext',
-  ],
-  attributes: {
-    ...defaultSchema.attributes,
-    spoiler: ['label'],
-    // Only allow "language-*" classes (syntax highlighting)
-    code: [['className', /^language-/]],
-    // Only allow "math-*" classes (remark-math generates "math-inline" and "math-display")
-    span: [['className', /^math-/]],
-    // MathML attributes
-    math: ['xmlns', 'display'],
-    annotation: ['encoding'],
-  },
-  // Allow media: protocol for user's R2-hosted images
-  protocols: {
-    ...defaultSchema.protocols,
-    src: [...(defaultSchema.protocols?.src ?? []), 'media'],
-    href: [...(defaultSchema.protocols?.href ?? []), 'media'],
-  },
-}
 
 /**
  * Props for the {@link RichMathEditorRenderer} component.
@@ -78,10 +32,6 @@ type CustomComponents = Components & {
 
 /**
  * Renders markdown content with LaTeX math support and spoiler support.
- *
- * Uses react-markdown with remark-math and rehype-katex plugins
- * to render full markdown (bold, italic, lists, quotes, code, etc.)
- * alongside inline ($...$) and display ($$...$$) math.
  */
 export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps) {
   // Get translations
@@ -93,9 +43,9 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
   return (
     <Markdown
       // Pipeline: GFM -> directive (parses :::) -> spoiler (transforms directive) -> math -> breaks
-      remarkPlugins={[remarkGfm, remarkDirective, remarkSpoiler, remarkMath, remarkBreaks]}
+      remarkPlugins={[...sharedRemarkPlugins]}
       // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math
-      rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema], rehypeKatex]}
+      rehypePlugins={[...sharedRehypePlugins]}
       // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
       urlTransform={(url) => {
         // Normalize URL to lowercase for case-insensitive comparison
