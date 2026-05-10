@@ -11,6 +11,9 @@ import remarkRehype from 'remark-rehype'
 import type { PluggableList } from 'unified'
 import { unified } from 'unified'
 
+import { remarkImageParams } from '../plugins/remark-image-params'
+import { remarkInlineQuote } from '../plugins/remark-inline-quote'
+import { remarkListStyle } from '../plugins/remark-list-style'
 import { remarkSpoiler } from '../plugins/remark-spoiler'
 import { preprocessDisplayMath } from './preprocessors'
 
@@ -43,6 +46,9 @@ const sanitizeSchema: SanitizeOptions = {
     code: [['className', /^language-/]],
     // Only allow "math-*" classes (remark-math generates "math-inline" and "math-display")
     span: [['className', /^math-/]],
+    // Only allow "list-style-*" classes (remark-list-style sets these for custom marker styles)
+    ol: [['className', /^list-style-/]],
+    ul: [['className', /^list-style-/]],
     // MathML attributes
     math: ['xmlns', 'display'],
     annotation: ['encoding'],
@@ -57,13 +63,17 @@ const sanitizeSchema: SanitizeOptions = {
 
 /**
  * Remark plugins shared by `<Markdown>` (react-markdown) and the headless
- * validator. Order is significant: directive must run before spoiler so the
- * `:::spoiler[...]` syntax has its directive node ready to transform.
+ * validator. Order is significant: directive must run before the directive-
+ * consuming plugins (spoiler, list-style, inline-quote) so each `:::name` and
+ * `:name[…]` shape has its directive node ready to transform.
  */
 export const remarkPlugins: PluggableList = [
   remarkGfm,
   remarkDirective,
   remarkSpoiler,
+  remarkListStyle,
+  remarkInlineQuote,
+  remarkImageParams,
   remarkMath,
   remarkBreaks,
 ]
@@ -99,6 +109,9 @@ function createValidationProcessor() {
     .use(remarkGfm)
     .use(remarkDirective)
     .use(remarkSpoiler)
+    .use(remarkListStyle)
+    .use(remarkInlineQuote)
+    .use(remarkImageParams)
     .use(remarkMath)
     .use(remarkBreaks)
     .use(remarkRehype, { allowDangerousHtml: true })

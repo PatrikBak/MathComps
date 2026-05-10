@@ -1,5 +1,53 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`validate-md fixtures > invalid-image-bad-inline.md 1`] = `
+{
+  "errorFirstLine": "Image URL has invalid inline="yes" (expected "true" or "false")",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-image-non-numeric-dim.md 1`] = `
+{
+  "errorFirstLine": "Image URL has invalid width="abc" (expected a positive integer)",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-image-only-height.md 1`] = `
+{
+  "errorFirstLine": "Image URL has only one of width/height — both must be specified together",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-image-only-width.md 1`] = `
+{
+  "errorFirstLine": "Image URL has only one of width/height — both must be specified together",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-image-unknown-param.md 1`] = `
+{
+  "errorFirstLine": "Image URL has unknown parameter "widht"",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-image-zero-dim.md 1`] = `
+{
+  "errorFirstLine": "Image URL has invalid width="0" (expected a positive integer)",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
 exports[`validate-md fixtures > invalid-katex-bad-environment.md 1`] = `
 {
   "errorFirstLine": "KaTeX parse error: No such environment: notathing at position 7: \\begin{̲n̲o̲t̲a̲t̲h̲i̲n̲g̲}̲ x = 1 \\end{not…",
@@ -112,6 +160,46 @@ exports[`validate-md fixtures > invalid-katex-unmatched-left.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > invalid-list-bad-style.md 1`] = `
+{
+  "errorFirstLine": "Unknown list style "mystery" on :::list directive (expected one of: bullet, number-dot, number-parens, lower-roman-parens, upper-roman, lower-alpha-parens, upper-alpha-parens)",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-list-extra-attr.md 1`] = `
+{
+  "errorFirstLine": "Unknown attribute(s) on :::list directive: foo",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-list-no-style.md 1`] = `
+{
+  "errorFirstLine": "Missing \`style\` attribute on :::list directive (expected one of: bullet, number-dot, number-parens, lower-roman-parens, upper-roman, lower-alpha-parens, upper-alpha-parens)",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-quote-empty.md 1`] = `
+{
+  "errorFirstLine": ":quote directive has empty content",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-quote-with-attrs.md 1`] = `
+{
+  "errorFirstLine": ":quote directive does not accept attributes",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
 exports[`validate-md fixtures > valid-blockquote.md 1`] = `
 {
   "verdict": "ok",
@@ -136,6 +224,24 @@ exports[`validate-md fixtures > valid-image.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > valid-image-dimensions.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-image-inline.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-image-inline-with-dimensions.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
 exports[`validate-md fixtures > valid-inline-math.md 1`] = `
 {
   "verdict": "ok",
@@ -154,13 +260,49 @@ exports[`validate-md fixtures > valid-list-bullet.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > valid-list-bullet-explicit.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-lower-alpha-parens.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-lower-roman-parens.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
 exports[`validate-md fixtures > valid-list-nested.md 1`] = `
 {
   "verdict": "ok",
 }
 `;
 
+exports[`validate-md fixtures > valid-list-number-parens.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
 exports[`validate-md fixtures > valid-list-numbered.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-upper-alpha-parens.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-upper-roman.md 1`] = `
 {
   "verdict": "ok",
 }
@@ -179,6 +321,18 @@ exports[`validate-md fixtures > valid-math-mixed-flow.md 1`] = `
 `;
 
 exports[`validate-md fixtures > valid-prose.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-quote-in-list.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-quote-inline.md 1`] = `
 {
   "verdict": "ok",
 }
