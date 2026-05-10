@@ -254,6 +254,46 @@ input[type='checkbox']:focus:not(:focus-visible) {
   content: '(' counter(list-item, lower-alpha) ')\00a0\00a0';
 }
 
+/*
+  Custom list marker styles emitted by the :::list{style=...} directive.
+  Class names match the kebab-case AST style identifiers verbatim.
+  bullet and number-dot get no override — they use the default <ul>/<ol> markers.
+*/
+.list-style-number-parens {
+  list-style-type: decimal;
+}
+.list-style-number-parens > li::marker {
+  content: '(' counter(list-item, decimal) ')\00a0\00a0';
+}
+
+.list-style-lower-roman-parens {
+  list-style-type: lower-roman;
+}
+.list-style-lower-roman-parens > li::marker {
+  content: '(' counter(list-item, lower-roman) ')\00a0\00a0';
+}
+
+.list-style-upper-roman {
+  list-style-type: upper-roman;
+}
+.list-style-upper-roman > li::marker {
+  content: counter(list-item, upper-roman) ':\00a0\00a0';
+}
+
+.list-style-lower-alpha-parens {
+  list-style-type: lower-alpha;
+}
+.list-style-lower-alpha-parens > li::marker {
+  content: '(' counter(list-item, lower-alpha) ')\00a0\00a0';
+}
+
+.list-style-upper-alpha-parens {
+  list-style-type: upper-alpha;
+}
+.list-style-upper-alpha-parens > li::marker {
+  content: '(' counter(list-item, upper-alpha) ')\00a0\00a0';
+}
+
 /* Body of math handouts: serif for TeX-like feel, with fluid size */
 .article--math {
   font-family: Georgia, 'Times New Roman', ui-serif, serif;
@@ -400,6 +440,23 @@ input[type='checkbox']:focus:not(:focus-visible) {
 }
 .article--math .card-content p:first-child {
   margin-top: 0.2em;
+}
+
+/* Tables — math style: full grid, bold header, no row fills */
+.article--math table {
+  margin: 0.9em 0;
+  border-collapse: collapse;
+  font-size: 0.96em;
+}
+.article--math th,
+.article--math td {
+  padding: 6px 13px;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid var(--color-surface-hover);
+}
+.article--math thead th {
+  font-weight: 600;
 }
 
 /* Display math on small screens: avoid overflow clipping */

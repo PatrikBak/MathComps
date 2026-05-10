@@ -7,6 +7,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 import { resolveMediaUrl } from '@/components/shared/utils/media-utils'
 
+import { parseImageUrl } from '../utils/image-url-params'
 import {
   rehypePlugins as sharedRehypePlugins,
   remarkPlugins as sharedRemarkPlugins,
@@ -28,6 +29,25 @@ type RichMathEditorRendererProps = {
 type CustomComponents = Components & {
   /** Custom component for spoilers */
   spoiler?: ({ children }: { children: ReactNode }) => ReactNode
+}
+
+/**
+ * Resolves the className for a list element, honoring custom marker styles
+ * passed via the `list-style-<style>` className convention.
+ *
+ * @param className - Optional className forwarded from react-markdown
+ * @param defaultMarker - Default Tailwind marker class applied when no custom style is set
+ * @returns Resolved className string for the list element
+ */
+function resolveListClassName(className: string | undefined, defaultMarker: string): string {
+  // Custom marker styles arrive as className="list-style-<style>"
+  const isCustomStyle = typeof className === 'string' && className.startsWith('list-style-')
+
+  // Use the custom marker class when present, otherwise fall back to the default
+  const markerClass = isCustomStyle ? className : defaultMarker
+
+  // Combine the marker class with the shared list layout classes
+  return `${markerClass} list-inside my-2 space-y-1`
 }
 
 /**
@@ -85,11 +105,23 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
           p: ({ children, node }) => {
             // Check if paragraph contains block-level elements (like spoiler)
             // to avoid invalid HTML nesting (div inside p)
-            const hasBlockElement = node?.children?.some(
-              (child) =>
-                child.type === 'element' &&
-                (child.tagName === 'spoiler' || child.tagName === 'div' || child.tagName === 'img')
-            )
+            const hasBlockElement = node?.children?.some((child) => {
+              // Non-element children never trigger a wrapper change
+              if (child.type !== 'element') return false
+
+              // Spoilers and explicit divs are always block-level
+              if (child.tagName === 'spoiler' || child.tagName === 'div') return true
+
+              // Images count as block-level UNLESS they carry ?inline=true
+              if (child.tagName === 'img') {
+                const src = child.properties?.src
+                if (typeof src !== 'string') return true
+                return !parseImageUrl(src).params.inline
+              }
+
+              // Everything else stays inside <p>
+              return false
+            })
 
             // If paragraph contains block-level elements, wrap in div
             if (hasBlockElement) {
@@ -139,11 +171,11 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
               {children}
             </blockquote>
           ),
-          ul: ({ children }) => (
-            <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>
+          ul: ({ children, className }) => (
+            <ul className={resolveListClassName(className, 'list-disc')}>{children}</ul>
           ),
-          ol: ({ children }) => (
-            <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
+          ol: ({ children, className }) => (
+            <ol className={resolveListClassName(className, 'list-decimal')}>{children}</ol>
           ),
           li: ({ children }) => <li className="text-muted-foreground">{children}</li>,
           del: ({ children }) => <del className="line-through text-muted">{children}</del>,
@@ -204,50 +236,48 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
               )
             }
 
-            // We'll parse scale parameter from URL (e.g., ?scale=50 for 50%)
-            let scale: number | undefined
+            // Parse the recognised query parameters (width/height/inline/scale)
+            const { params, cleanUrl } = parseImageUrl(resolvedSrc)
 
-            // We'll store the URL with scale parameter removed here
-            let finalUrl = resolvedSrc
+            // Concrete intrinsic dimensions reserve layout (no CLS); when missing,
+            // fall back to the legacy width=0/height=0/unoptimized shape so untyped
+            // comment images still render
+            const hasIntrinsicSize = params.width !== undefined && params.height !== undefined
+            const intrinsicWidth = hasIntrinsicSize ? params.width! : 0
+            const intrinsicHeight = hasIntrinsicSize ? params.height! : 0
 
-            try {
-              // Extract the scale parameter
-              const url = new URL(resolvedSrc)
-              const scaleParam = url.searchParams.get('scale')
-
-              // If it's present
-              if (scaleParam) {
-                // Parse it as an integer
-                const parsed = parseFloat(scaleParam)
-
-                // If it's a valid percentage, retrieve it
-                if (!isNaN(parsed) && parsed > 0) {
-                  scale = parsed / 100
-                }
-
-                // Remove scale param from URL for clean image src
-                url.searchParams.delete('scale')
-
-                // Update final URL
-                finalUrl = url.toString()
-              }
-            } catch {
-              // URL parsing failed, use original src
+            // Inline images flow with the surrounding text inside a <span> wrapper;
+            // block images keep the centred max-height wrapper for layout containment
+            if (params.inline) {
+              return (
+                <span className="inline-block align-middle">
+                  <Image
+                    src={cleanUrl}
+                    alt={alt ?? ''}
+                    width={intrinsicWidth}
+                    height={intrinsicHeight}
+                    sizes={hasIntrinsicSize ? undefined : '100vw'}
+                    unoptimized={!hasIntrinsicSize}
+                    className="inline-block max-w-full h-auto object-contain"
+                    style={{ width: 'auto', height: 'auto', zoom: params.scale }}
+                  />
+                </span>
+              )
             }
 
-            // Render correct images wrapped in a container that enforces max-height
+            // Render block images wrapped in a container that enforces max-height
             // even when zoom is applied (zoom happens after max-height on the image)
             return (
               <div className="max-h-[400px] overflow-hidden rounded-md my-2 mx-auto w-fit">
                 <Image
-                  src={finalUrl}
+                  src={cleanUrl}
                   alt={alt ?? ''}
-                  width={0}
-                  height={0}
-                  sizes="100vw"
-                  unoptimized
+                  width={intrinsicWidth}
+                  height={intrinsicHeight}
+                  sizes={hasIntrinsicSize ? undefined : '100vw'}
+                  unoptimized={!hasIntrinsicSize}
                   className="block max-w-full h-auto object-contain"
-                  style={{ width: 'auto', height: 'auto', zoom: scale }}
+                  style={{ width: 'auto', height: 'auto', zoom: params.scale }}
                 />
               </div>
             )
