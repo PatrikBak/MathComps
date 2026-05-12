@@ -6,7 +6,11 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { cn } from '@/components/shared/utils/css-utils'
-import { resolveMediaUrl } from '@/components/shared/utils/media-utils'
+import {
+  type ImageContext,
+  resolveMarkdownImageUrl,
+  resolveUserUploadMediaUrl,
+} from '@/components/shared/utils/media-utils'
 
 import { parseImageUrl } from '../utils/image-url-params'
 import {
@@ -27,6 +31,12 @@ type RichMathEditorRendererProps = {
    * Suited to diagrams whose strokes assume a light backdrop.
    */
   lightImageBackground: boolean
+  /**
+   * Which markdown surface owns this content — picks the host that bare
+   * `media:<id>` image keys resolve against. Omit when the content has no
+   * `media:` URLs to dispatch (e.g. a dev catalog).
+   */
+  imageContext?: ImageContext
 }
 
 /**
@@ -62,6 +72,7 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
 export function RichMathEditorRenderer({
   content,
   lightImageBackground,
+  imageContext,
 }: RichMathEditorRendererProps) {
   // Get translations
   const t = useTranslations('ui.editor')
@@ -190,7 +201,7 @@ export function RichMathEditorRenderer({
           del: ({ children }) => <del className="line-through text-muted">{children}</del>,
           a: ({ href, children }) => {
             // Resolve media: URLs to full R2 URLs
-            let normalizedHref = href ? resolveMediaUrl(href) : '#'
+            let normalizedHref = href ? resolveUserUploadMediaUrl(href) : '#'
 
             // Normalize URLs: add protocol if missing
             // Matches: www.example.com, example.com, sub.example.co.uk, etc.
@@ -233,8 +244,9 @@ export function RichMathEditorRenderer({
             )
           },
           img: ({ src, alt }) => {
-            // Resolve media: URLs to full R2 URLs (only for string sources)
-            const resolvedSrc = typeof src === 'string' ? resolveMediaUrl(src) : src
+            // Resolve the image src in this renderer's context
+            const resolvedSrc =
+              typeof src === 'string' ? resolveMarkdownImageUrl(src, imageContext) : src
 
             // Bail to a labelled error placeholder when the src is missing
             if (!resolvedSrc || typeof resolvedSrc !== 'string') {
