@@ -1,4 +1,9 @@
+'use client'
+
+import { useState } from 'react'
+
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { cn } from '@/components/shared/utils/css-utils'
 
 /**
  * One large markdown document that exercises every shape the renderer handles.
@@ -106,17 +111,17 @@ def fibonacci(n):
 
 ## Images
 
-A block image without parameters — sized at runtime, no layout reservation:
+A block image with no dimension params — sized from the source at runtime, no layout reservation:
 
 ![Block placeholder](/dev-placeholders/block.svg)
 
-A block image carrying intrinsic dimensions on the URL — \`next/image\` reserves layout up front so there is no CLS jump while the asset loads:
+A block image carrying \`?width=&height=\` — the dimensions reserve layout up front so there's no CLS while loading:
 
 ![Block with dimensions](/dev-placeholders/block.svg?width=800&height=400)
 
-An inline image flowing with surrounding text via \`?inline=true\` — the angle marked ![angle](/dev-placeholders/inline-A.svg?inline=true) appears mid-sentence without breaking onto its own line.
+An inline image via \`?inline=true\` only — flows inside this sentence ![A](/dev-placeholders/inline-A.svg?inline=true) at its intrinsic SVG size.
 
-An inline image carrying both inline and dimension flags — we use the symbol ![equiv](/dev-placeholders/inline-equiv.svg?inline=true&width=32&height=32) to denote equivalence in the rest of the proof.
+An inline image via \`?inline=true&width=&height=\` — flows inside this sentence ![equiv](/dev-placeholders/inline-equiv.svg?inline=true&width=32&height=32) at the requested 32×32 size.
 
 ## Compositions
 
@@ -138,12 +143,47 @@ Inline images inside a custom-marker list:
 `
 
 /**
- * Dev-only visual catalog of the markdown renderer.
+ * Dev-only visual catalog of the markdown renderer. The toggle at the top
+ * flips the {@link RichMathEditorRenderer} `lightImageBackground` prop so the
+ * two image-wrap modes can be inspected in place.
  */
 export default function RendererPreviewPage() {
+  // Selected value for the lightImageBackground prop
+  const [lightImageBackground, setLightImageBackground] = useState(false)
+
+  // Trimmed markdown body for the renderer
+  const trimmedSample = SAMPLE_MARKDOWN.trim()
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 article--math">
-      <RichMathEditorRenderer content={SAMPLE_MARKDOWN.trim()} />
+      {/* Segmented toggle for the lightImageBackground prop */}
+      <div className="mb-6 inline-flex rounded-md border border-foreground/10 bg-surface overflow-hidden">
+        <button
+          onClick={() => setLightImageBackground(false)}
+          className={cn(
+            'px-3 py-1.5 text-sm transition-colors',
+            !lightImageBackground
+              ? 'bg-foreground/10 text-foreground font-medium'
+              : 'text-muted hover:text-foreground'
+          )}
+        >
+          lightImageBackground = false
+        </button>
+        <button
+          onClick={() => setLightImageBackground(true)}
+          className={cn(
+            'px-3 py-1.5 text-sm transition-colors',
+            lightImageBackground
+              ? 'bg-foreground/10 text-foreground font-medium'
+              : 'text-muted hover:text-foreground'
+          )}
+        >
+          lightImageBackground = true
+        </button>
+      </div>
+
+      {/* Single renderer instance driven by the toggle state */}
+      <RichMathEditorRenderer content={trimmedSample} lightImageBackground={lightImageBackground} />
     </div>
   )
 }

@@ -341,7 +341,7 @@ export function CommentItem({
             <div className="text-sm text-muted italic mb-1.5">[{tComments('deleted')}]</div>
           ) : (
             <div className="text-sm text-muted-foreground leading-relaxed mb-1.5">
-              <RichMathEditorRenderer content={content} />
+              <RichMathEditorRenderer content={content} lightImageBackground={false} />
             </div>
           )}
         </div>

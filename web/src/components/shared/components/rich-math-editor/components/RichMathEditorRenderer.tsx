@@ -1,10 +1,11 @@
-import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import Markdown, { type Components } from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
+import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
+import { cn } from '@/components/shared/utils/css-utils'
 import { resolveMediaUrl } from '@/components/shared/utils/media-utils'
 
 import { parseImageUrl } from '../utils/image-url-params'
@@ -21,6 +22,11 @@ import { RichMathEditorSpoiler } from './RichMathEditorSpoiler'
 type RichMathEditorRendererProps = {
   /** The markdown content to render */
   content: string
+  /**
+   * Whether rendered images are wrapped in a white-background container.
+   * Suited to diagrams whose strokes assume a light backdrop.
+   */
+  lightImageBackground: boolean
 }
 
 /**
@@ -53,7 +59,10 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
 /**
  * Renders markdown content with LaTeX math support and spoiler support.
  */
-export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps) {
+export function RichMathEditorRenderer({
+  content,
+  lightImageBackground,
+}: RichMathEditorRendererProps) {
   // Get translations
   const t = useTranslations('ui.editor')
 
@@ -227,7 +236,7 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             // Resolve media: URLs to full R2 URLs (only for string sources)
             const resolvedSrc = typeof src === 'string' ? resolveMediaUrl(src) : src
 
-            // Don't render image if src is empty or not a string
+            // Bail to a labelled error placeholder when the src is missing
             if (!resolvedSrc || typeof resolvedSrc !== 'string') {
               return (
                 <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-foreground/5 rounded text-xs text-muted italic">
@@ -239,45 +248,49 @@ export function RichMathEditorRenderer({ content }: RichMathEditorRendererProps)
             // Parse the recognised query parameters (width/height/inline/scale)
             const { params, cleanUrl } = parseImageUrl(resolvedSrc)
 
-            // Concrete intrinsic dimensions reserve layout (no CLS); when missing,
-            // fall back to the legacy width=0/height=0/unoptimized shape so untyped
-            // comment images still render
-            const hasIntrinsicSize = params.width !== undefined && params.height !== undefined
-            const intrinsicWidth = hasIntrinsicSize ? params.width! : 0
-            const intrinsicHeight = hasIntrinsicSize ? params.height! : 0
+            // Intrinsic dimensions when present; zero is ImageWithLoader's
+            // sentinel for fluid mode (runtime sizing, no layout reservation)
+            const intrinsicWidth = params.width ?? 0
+            const intrinsicHeight = params.height ?? 0
 
-            // Inline images flow with the surrounding text inside a <span> wrapper;
-            // block images keep the centred max-height wrapper for layout containment
+            // Optional white wrap so diagrams with dark strokes stay readable;
+            // inline gets a tighter rounding, block gets a card-style rounding
+            const inlineLightWrap = lightImageBackground && 'bg-white rounded p-1'
+            const blockLightWrap = lightImageBackground && 'bg-white rounded-lg p-1'
+
+            // Inline images route through ImageWithLoader's native inline mode
+            // — handles vertical alignment, zero leading and (when dimensioned)
+            // exact reserved dimensions on its own, no wrapping span needed
             if (params.inline) {
               return (
-                <span className="inline-block align-middle">
-                  <Image
-                    src={cleanUrl}
-                    alt={alt ?? ''}
-                    width={intrinsicWidth}
-                    height={intrinsicHeight}
-                    sizes={hasIntrinsicSize ? undefined : '100vw'}
-                    unoptimized={!hasIntrinsicSize}
-                    className="inline-block max-w-full h-auto object-contain"
-                    style={{ width: 'auto', height: 'auto', zoom: params.scale }}
-                  />
-                </span>
-              )
-            }
-
-            // Render block images wrapped in a container that enforces max-height
-            // even when zoom is applied (zoom happens after max-height on the image)
-            return (
-              <div className="max-h-[400px] overflow-hidden rounded-md my-2 mx-auto w-fit">
-                <Image
+                <ImageWithLoader
+                  inline
                   src={cleanUrl}
                   alt={alt ?? ''}
                   width={intrinsicWidth}
                   height={intrinsicHeight}
-                  sizes={hasIntrinsicSize ? undefined : '100vw'}
-                  unoptimized={!hasIntrinsicSize}
-                  className="block max-w-full h-auto object-contain"
-                  style={{ width: 'auto', height: 'auto', zoom: params.scale }}
+                  scale={params.scale}
+                  spinnerSize={16}
+                  className="inline-block align-middle"
+                  containerClassName={cn(inlineLightWrap)}
+                />
+              )
+            }
+
+            // Block images route through ImageWithLoader inside a centred wrapper
+            // — the container's explicit dimensions make the optional white bg
+            // fill the whole card (and we get a free loading spinner) when
+            // dimensions are present; fluid mode shrink-wraps the image
+            return (
+              <div className="my-2 flex justify-center">
+                <ImageWithLoader
+                  src={cleanUrl}
+                  alt={alt ?? ''}
+                  width={intrinsicWidth}
+                  height={intrinsicHeight}
+                  scale={params.scale}
+                  className="block"
+                  containerClassName={cn(blockLightWrap)}
                 />
               </div>
             )
