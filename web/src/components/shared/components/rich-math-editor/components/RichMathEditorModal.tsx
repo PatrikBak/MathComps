@@ -158,7 +158,11 @@ export function RichMathEditorExpandedModal({
                 {/* Content */}
                 <div className="flex-1 px-4 py-3 text-sm text-muted-foreground leading-relaxed min-h-[200px] bg-surface-inset/50">
                   {state.hasContent && (
-                    <RichMathEditorRenderer content={state.text} lightImageBackground={false} />
+                    <RichMathEditorRenderer
+                      content={state.text}
+                      lightImageBackground={false}
+                      imageContext="comments"
+                    />
                   )}
                 </div>
               </div>
