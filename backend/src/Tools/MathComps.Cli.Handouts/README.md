@@ -10,7 +10,7 @@ For each matched `.tex` file, the tool runs these steps in order:
 2. **Compile TeX** — runs the configured compiler (2 passes) on both main + skeleton files
 3. **Parse to JSON** — converts the TeX document structure into `RawContentBlock[]` JSON (saved locally to `web/src/content/handouts/`)
 4. **Upload images** — processes SVG images and uploads them to R2 under `handouts/<slug>/<image>.svg`, where `<slug>` is the language-stripped handout id (so all language variants share one image set)
-5. **Upload PDFs** — uploads compiled main + skeleton PDFs to R2 under `handouts/<slug>/<file>.pdf` (same folder as the images)
+5. **Upload PDFs** — uploads compiled main + skeleton PDFs to R2 under `handouts/pdfs/<file>.pdf` (flat layout; every handout's PDFs share one folder)
 
 ## Prerequisites
 

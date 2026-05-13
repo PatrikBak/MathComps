@@ -451,8 +451,8 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     }
 
     /// <summary>
-    /// Uploads a compiled handout PDF (main or skeleton) to remote storage, nesting it
-    /// under the handout's slug folder so every artefact for one handout sits together.
+    /// Uploads a compiled handout PDF (main or skeleton) to remote storage under
+    /// the flat <c>handouts/pdfs/</c> folder shared by every handout.
     /// </summary>
     /// <param name="texFile">The .tex file whose corresponding PDF should be uploaded.</param>
     /// <param name="sourceDirectory">The directory containing the compiled PDFs.</param>
@@ -471,8 +471,8 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
             return;
         }
 
-        // Build the R2 key so every artefact for one handout lands in the same folder
-        var r2Key = ToHandoutR2Key($"{ToHandoutSlug(texFile.Name)}/{pdfFileName}");
+        // All handout PDFs share the flat handouts/pdfs/ folder
+        var r2Key = ToHandoutR2Key($"pdfs/{pdfFileName}");
         await fileUploader.UploadAsync(sourcePdfPath, r2Key);
         AnsiConsole.MarkupLine($"  [green]✓ PDF uploaded:[/] {Markup.Escape(pdfFileName)}");
     }
