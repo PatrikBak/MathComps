@@ -98,11 +98,11 @@ This statement can certainly be generalized. We know, for example, that the sum 
 
     \Image{angles-polygon-interior.pdf}
 
-    \Remark{non-convex polygons} The formula $(n-2)\cdot 180^\circ$ also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside -- so we count angles greater than $180^\circ$ as such.
+    \Remark{non-convex polygons} The formula $(n-2)\cdot 180^\circ$ also holds for non-convex polygons, provided we measure all interior angles toward the inside -- so we count angles greater than $180^\circ$ as such.
 
-    A fan triangulation from a single vertex may fail even from a convex vertex -- some diagonals can pass outside the polygon. It is still true, however, that every simple $n$-gon can be split into $n-2$ triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex $V$ and its neighbors $U$, $W$ that lies entirely inside our $n$-gon. Cutting $V$ off along the diagonal $UW$ gives an $(n-1)$-gon; iterating yields $n-2$ triangles. One can prove that such a triangle always exists (in fact, two of them); see the \Link[https://en.wikipedia.org/wiki/Two_ears_theorem]{two ears theorem}.
+    A fan triangulation from a single vertex may fail -- some diagonals can pass outside the polygon. It is still true, however, that every simple $n$-gon can be split into $n-2$ triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex $V$ and its neighbors $U$, $W$ that lies entirely inside our $n$-gon. Cutting $V$ off along the diagonal $UW$ gives an $(n-1)$-gon; iterating yields $n-2$ triangles. One can prove that such a triangle always exists (in fact, two of them); see the \Link[https://en.wikipedia.org/wiki/Two_ears_theorem]{two ears theorem}.
 
-    As for Proof~3: it works only if there is an interior point $O$ visible from every vertex (i.e., the segments $OA_i$ lie entirely inside). For some non-convex polygons no such $O$ exists (try drawing one) -- in that case Proof~3 cannot be salvaged directly and one must fall back on the triangulation from Proof~2.
+    As for Proof~3: it works only if there is an interior point $O$ visible from every vertex (i.e., the segments $OA_i$ lie entirely inside). For some non-convex polygons no such $O$ exists (try drawing one) -- in that case Proof~3 cannot be salvaged directly and one must fall back on the triangulation described in the previous paragraph.
 }
 
 Now let's state two more simple but useful auxiliary claims:
@@ -208,7 +208,7 @@ The less well-known $SsA$ theorem is a touch harder, so we will provide hints \S
 
     \Image{angles-Ssa-proof-isosceles.pdf}
 
-    If $b < a$, the point $B$ would lie \textit{outside} the circle $k$. The ray could meet it at two points -- giving two different (non-congruent) triangles -- or miss it entirely, which gives no triangle at all.
+    If $b < a$, the point $B$ would lie \textit{outside} the circle $k$. The ray could meet it at two points -- giving two different (non-congruent) triangles.
 
     \Image{angles-Ssa-proof-two-solutions.pdf}
 
@@ -220,11 +220,11 @@ Throughout our geometric journey we will encounter all of these statements. For 
 \Theorem{isosceles triangle}{
     Prove that if a triangle~$ABC$ satisfies $AB=AC$, then $\angle ABC=\angle ACB$. Prove also the converse implication (i.e., that equality of angles implies equality of lengths).
 }{
-    \textit{Forward implication.} Assume $AB = AC$. Let $M$ be the midpoint of $BC$. The triangles $ABM$ and $ACM$ are congruent by $SSS$ ($AB=AC$ by assumption, $BM=CM$ by definition of the midpoint, common side $AM$), from which $\angle ABC = \angle ACB$.
+    \textit{Forward implication.} Assume $AB = AC$. Let $M$ be the midpoint of $BC$. The triangles $ABM$ and $ACM$ are congruent by $SSS$ ($AB=AC$ by assumption, $BM=CM$ by definition of the midpoint, common side $AM$), from which $\angle ABC = \angle ACB$. This proof also works with other choices of $M$. If we take $M$ to be the foot of the perpendicular from~$A$ to $BC$, we obtain the common side $AM$, $AB=AC$ and a right angle at~$M$, which lies opposite the longest side (the hypotenuse) $AB$, resp.~$AC$ -- we apply $SsA$. If we take $M$ to be the foot of the bisector of the interior angle at~$A$, we have $AB=AC$, the equal angle $\angle BAM=\angle CAM$, and the common side $AM$ between them -- we apply $SAS$.
 
     \Image{angles-isosceles-triangle.pdf}
 
-    \textit{Converse implication.} Assume $\angle ABC = \angle ACB = \beta$. Let $M$ be the foot of the perpendicular from~$A$ to $BC$. By $ASA$, $\triangle ABM \cong \triangle ACM$, since we have two equal angles $\angle ABM = \angle ACM$ and $\angle AMB = \angle AMC = 90^\circ$ and the common side~$AM$, so $AB = AC$.
+    \textit{Converse implication.} Assume $\angle ABC = \angle ACB = \beta$. Let $M$ be the foot of the perpendicular from~$A$ to $BC$. By $ASA$, $\triangle ABM \cong \triangle ACM$, since we have two equal angles $\angle ABM = \angle ACM$ and $\angle AMB = \angle AMC = 90^\circ$ and the common side~$AM$, so $AB = AC$. Similarly, we could take $M$ to be the foot of the bisector of the interior angle at~$A$ -- from the equal angles $\angle BAM=\angle CAM$ and $\angle ABM=\angle ACM$ and the common side $AM$ we again apply $ASA$. Taking $M$ to be the midpoint of $BC$, however, doesn't help here: we get $BM=CM$, $AM$ common, and $\angle ABM=\angle ACM=\beta$, but the angle $\beta$ lies opposite $AM$, which may be shorter than $BM$ (when the angle at~$A$ is obtuse), so even $SsA$ cannot be applied in general -- the lesson is that even with the right point, its precise definition matters (we will see this many more times).
 
     \Remark Another cute proof is based on showing that $\triangle ABC \cong \triangle ACB$ (note the different order of vertices). In the case where we know the equal sides, we use $SAS$ or even $SSS$ -- which then gives equal angles. In the case where we know the equal angles, it will instead be $ASA$, and the congruence gives equal sides.
 }
@@ -256,23 +256,23 @@ A very handy fact useful in non-trivial problems is the following. One possible 
 \Problem{0}{}{
     A right triangle has its other two angles equal to $60^\circ$ and $30^\circ$ if and only if its hypotenuse is twice as long as the shorter leg.
 }{
-    Say $BC$ is the hypotenuse and is twice as long as the leg $AB$. The trick is to introduce a point $B'$ such that $A$ is the midpoint of segment $BB'$.
+    Say $AB$ is the hypotenuse and is twice as long as the leg $BC$. The trick is to introduce a point $B'$ such that $C$ is the midpoint of segment $BB'$.
 }{
-    Let our triangle have its right angle at vertex~$A$.
+    Let our triangle have its right angle at vertex~$C$.
 
-    \textit{($\Rightarrow$)} Assume $BC = 2\cdot AB$. Let $B'$ be the point such that $A$ is the midpoint of segment $BB'$. Then $AB' = AB$ and $A$ lies between $B$ and $B'$, so $\angle B'AC$ is in a linear pair with $\angle BAC = 90^\circ$, hence also equals $90^\circ$. We have $\triangle ABC \cong \triangle AB'C$ by $SAS$, since the angles at~$A$ are both right, the side~$AC$ is common, and $AB=AB'$.
+    \textit{($\Rightarrow$)} Assume $AB = 2\cdot BC$. Let $B'$ be the point such that $C$ is the midpoint of segment $BB'$. Then $B'C = BC$ and $C$ lies between $B$ and $B'$, so $\angle B'CA$ is in a linear pair with $\angle BCA = 90^\circ$, hence also equals $90^\circ$. We have $\triangle CBA \cong \triangle CB'A$ by $SAS$, since the angles at~$C$ are both right, the side~$AC$ is common, and $BC=B'C$.
 
     \Image{angles-90-60-30.pdf}
 
-    Since $A$ is the midpoint of $BB'$, we have $BB' = 2\cdot AB$, and from the assumption $BC = 2\cdot AB$. Together,
+    Since $C$ is the midpoint of $BB'$, we have $BB' = 2\cdot BC$, and from the assumption $AB = 2\cdot BC$. Together,
     $$
-    BB' = BC = B'C,
+    BB' = AB = AB',
     $$
-    so $\triangle BB'C$ is equilateral and all its angles are $60^\circ$. In particular, $\angle ABC = \angle B'BC = 60^\circ$. From the angle sum in $\triangle ABC$ we compute $\angle BCA = 180^\circ - 90^\circ - 60^\circ = 30^\circ$.
+    so $\triangle ABB'$ is equilateral and all its angles are $60^\circ$. In particular, $\angle ABC = \angle ABB' = 60^\circ$. From the angle sum in $\triangle ABC$ we compute $\angle BAC = 180^\circ - 90^\circ - 60^\circ = 30^\circ$.
 
-    \textit{($\Leftarrow$)} It is not hard to see that the reasoning of the previous paragraph can easily be reversed -- this time the key congruence $\triangle ABC \cong \triangle AB'C$ comes from $ASA$.
+    \textit{($\Leftarrow$)} It is not hard to see that the reasoning of the previous paragraph can easily be reversed -- this time the key congruence $\triangle CBA \cong \triangle CB'A$ comes from $ASA$.
 
-    \Remark Another solution is to note that by Thales' theorem, the circumcenter~$O$ of triangle $ABC$ is also the midpoint of the hypotenuse $BC$. We will return to this solution in more detail when we discuss circles.
+    \Remark Another solution is to note that by Thales' theorem, the circumcenter~$O$ of triangle $ABC$ is also the midpoint of the hypotenuse $AB$. We will return to this solution in more detail when we discuss circles.
 }
 
 \sec What to Remember

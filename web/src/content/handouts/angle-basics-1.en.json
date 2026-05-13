@@ -1390,7 +1390,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside – so we count angles greater than "
+                      "text": " also holds for non-convex polygons, provided we measure all interior angles toward the inside – so we count angles greater than "
                     },
                     {
                       "type": "math",
@@ -1409,7 +1409,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "A fan triangulation from a single vertex may fail even from a convex vertex – some diagonals can pass outside the polygon. It is still true, however, that every simple "
+                      "text": "A fan triangulation from a single vertex may fail – some diagonals can pass outside the polygon. It is still true, however, that every simple "
                     },
                     {
                       "type": "math",
@@ -1550,7 +1550,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " exists (try drawing one) – in that case Proof\u00A03 cannot be salvaged directly and one must fall back on the triangulation from Proof\u00A02."
+                      "text": " exists (try drawing one) – in that case Proof\u00A03 cannot be salvaged directly and one must fall back on the triangulation described in the previous paragraph."
                     }
                   ],
                   "highligted": false
@@ -3416,7 +3416,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". The ray could meet it at two points – giving two different (non-congruent) triangles – or miss it entirely, which gives no triangle at all."
+                      "text": ". The ray could meet it at two points – giving two different (non-congruent) triangles."
                     }
                   ],
                   "highligted": false
@@ -3620,6 +3620,150 @@
                     },
                     {
                       "type": "text",
+                      "text": ". This proof also works with other choices of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". If we take "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the foot of the perpendicular from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we obtain the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and a right angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which lies opposite the longest side (the hypotenuse) "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", resp.\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – we apply "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". If we take "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the foot of the bisector of the interior angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the equal angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAM=\\angle CAM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " between them – we apply "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
                       "text": "."
                     }
                   ],
@@ -3741,7 +3885,151 @@
                     },
                     {
                       "type": "text",
-                      "text": "."
+                      "text": ". Similarly, we could take "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the foot of the bisector of the interior angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – from the equal angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAM=\\angle CAM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABM=\\angle ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we again apply "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ASA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Taking "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the midpoint of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", however, doesn't help here: we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BM=CM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " common, and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABM=\\angle ACM=\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", but the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies opposite "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which may be shorter than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (when the angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is obtuse), so even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cannot be applied in general – the lesson is that even with the right point, its precise definition matters (we will see this many more times)."
                     }
                   ],
                   "highligted": false
@@ -4131,7 +4419,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "BC",
+                        "text": "AB",
                         "isDisplay": false
                       },
                       {
@@ -4140,7 +4428,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "AB",
+                        "text": "BC",
                         "isDisplay": false
                       },
                       {
@@ -4158,7 +4446,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "A",
+                        "text": "C",
                         "isDisplay": false
                       },
                       {
@@ -4189,7 +4477,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4226,7 +4514,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC = 2\\cdot AB",
+                      "text": "AB = 2\\cdot BC",
                       "isDisplay": false
                     },
                     {
@@ -4244,7 +4532,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4262,7 +4550,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "AB' = AB",
+                      "text": "B'C = BC",
                       "isDisplay": false
                     },
                     {
@@ -4271,7 +4559,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4298,7 +4586,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle B'AC",
+                      "text": "\\angle B'CA",
                       "isDisplay": false
                     },
                     {
@@ -4307,7 +4595,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle BAC = 90^\\circ",
+                      "text": "\\angle BCA = 90^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4325,7 +4613,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "text": "\\triangle CBA \\cong \\triangle CB'A",
                       "isDisplay": false
                     },
                     {
@@ -4343,7 +4631,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4361,7 +4649,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "AB=AB'",
+                      "text": "BC=B'C",
                       "isDisplay": false
                     },
                     {
@@ -4392,7 +4680,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4410,7 +4698,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BB' = 2\\cdot AB",
+                      "text": "BB' = 2\\cdot BC",
                       "isDisplay": false
                     },
                     {
@@ -4419,7 +4707,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC = 2\\cdot AB",
+                      "text": "AB = 2\\cdot BC",
                       "isDisplay": false
                     },
                     {
@@ -4431,7 +4719,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "BB' = BC = B'C,",
+                  "text": "BB' = AB = AB',",
                   "isDisplay": true
                 },
                 {
@@ -4443,7 +4731,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle BB'C",
+                      "text": "\\triangle ABB'",
                       "isDisplay": false
                     },
                     {
@@ -4461,7 +4749,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle ABC = \\angle B'BC = 60^\\circ",
+                      "text": "\\angle ABC = \\angle ABB' = 60^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4479,7 +4767,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle BCA = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "text": "\\angle BAC = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4516,7 +4804,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "text": "\\triangle CBA \\cong \\triangle CB'A",
                       "isDisplay": false
                     },
                     {
@@ -4571,7 +4859,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC",
+                      "text": "AB",
                       "isDisplay": false
                     },
                     {
@@ -4965,8 +5253,8 @@
     {
       "contentId": "angle-basics-1/angles-isosceles-right-triangle.svg",
       "originalId": "angles-isosceles-right-triangle.pdf",
-      "width": "97.95pt",
-      "height": "95.36pt",
+      "width": "124.77pt",
+      "height": "78.4pt",
       "scale": 1.0
     },
     {

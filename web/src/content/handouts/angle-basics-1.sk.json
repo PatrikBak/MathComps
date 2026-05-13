@@ -1381,7 +1381,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " platí aj pre navzájom sa nepretínajúce nekonvexné mnohouholníky, ak všetky vnútorné uhly meriame smerom dovnútra – teda aj uhly väčšie než "
+                      "text": " platí aj pre nekonvexné mnohouholníky, ak všetky vnútorné uhly meriame smerom dovnútra – teda aj uhly väčšie než "
                     },
                     {
                       "type": "math",
@@ -1400,7 +1400,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vejárová triangulácia z\u00A0jedného vrcholu nemusí fungovať ani z\u00A0konvexného vrcholu – niektoré uhlopriečky môžu prechádzať mimo mnohouholníka. Platí však, že každý jednoduchý "
+                      "text": "Vejárová triangulácia z\u00A0jedného vrcholu fungovať nemusí – niektoré uhlopriečky môžu prechádzať mimo mnohouholníka. Platí však, že každý jednoduchý "
                     },
                     {
                       "type": "math",
@@ -1523,7 +1523,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " viditeľný zo všetkých vrcholov (t.\u00A0j. úsečky "
+                      "text": " viditeľný zo všetkých vrcholov (t. j. úsečky "
                     },
                     {
                       "type": "math",
@@ -1532,7 +1532,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ležia celé vo vnútri). Pre niektoré nekonvexné mnohouholníky taký "
+                      "text": " ležia celé vo vnútri). Pre niektoré nekonvexné mnohouholníky taký bod "
                     },
                     {
                       "type": "math",
@@ -1541,7 +1541,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nemusí existovať (skúste taký nakresliť) – v\u00A0takom prípade sa dôkaz\u00A03 nedá priamo zachrániť a\u00A0treba siahnuť po triangulácii z\u00A0dôkazu\u00A02."
+                      "text": " nemusí existovať (skúste taký nakresliť) – v\u00A0takom prípade sa dôkaz\u00A03 nedá priamo zachrániť a\u00A0treba siahnuť po triangulácii popísanej v\u00A0predošlom odstavci."
                     }
                   ],
                   "highligted": false
@@ -3414,7 +3414,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Polpriamka by ju mohla pretnúť v\u00A0dvoch bodoch – vznikli by tak dva rôzne (nezhodné) trojuholníky – alebo by ju minula celkom, čo nevedie k\u00A0žiadnemu trojuholníku."
+                      "text": ". Polpriamka by ju mohla pretnúť v\u00A0dvoch bodoch – vznikli by tak dva rôzne (nezhodné) trojuholníky."
                     }
                   ],
                   "highligted": false
@@ -3618,6 +3618,150 @@
                     },
                     {
                       "type": "text",
+                      "text": ". Tento dôkaz funguje aj s\u00A0inými voľbami bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ak za "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vezmeme pätu kolmice z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", dostaneme spoločnú stranu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0pravý uhol pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorý leží oproti najdlhšej strane (prepone) "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " resp.\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – aplikujeme vetu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ak za "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vezmeme pätu osi vnútorného uhla pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB|=|AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", zhodný uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAM|=|\\angle CAM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0spoločnú stranu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " medzi nimi – aplikujeme vetu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
                       "text": "."
                     }
                   ],
@@ -3739,7 +3883,151 @@
                     },
                     {
                       "type": "text",
-                      "text": "."
+                      "text": ". Podobne by sme za "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " mohli zvoliť pätu osi vnútorného uhla pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – zo zhodných uhlov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAM|=|\\angle CAM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABM|=|\\angle ACM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zo spoločnej strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " znova aplikujeme vetu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Voľba "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ako stredu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " však tu nepomáha: dostaneme síce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BM|=|CM|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spoločnú a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABM|=|\\angle ACM|=\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", no uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží oproti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorá môže byť kratšia než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (pri tupom uhle pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), takže ani vetu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vo všeobecnosti nevieme použiť – poučenie je, že aj keď máme správny bod, tak na jeho presnej definícii záleží (to ešte veľakrát uvidíme)."
                     }
                   ],
                   "highligted": false
@@ -4125,7 +4413,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "BC",
+                        "text": "AB",
                         "isDisplay": false
                       },
                       {
@@ -4134,7 +4422,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "AB",
+                        "text": "BC",
                         "isDisplay": false
                       },
                       {
@@ -4152,7 +4440,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "A",
+                        "text": "C",
                         "isDisplay": false
                       },
                       {
@@ -4183,7 +4471,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4220,7 +4508,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|BC| = 2|AB|",
+                      "text": "|AB| = 2|BC|",
                       "isDisplay": false
                     },
                     {
@@ -4238,7 +4526,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4256,7 +4544,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|AB'| = |AB|",
+                      "text": "|B'C| = |BC|",
                       "isDisplay": false
                     },
                     {
@@ -4265,7 +4553,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4292,7 +4580,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle B'AC|",
+                      "text": "|\\angle B'CA|",
                       "isDisplay": false
                     },
                     {
@@ -4301,7 +4589,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BAC| = 90^\\circ",
+                      "text": "|\\angle BCA| = 90^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4319,7 +4607,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "text": "\\triangle CBA \\cong \\triangle CB'A",
                       "isDisplay": false
                     },
                     {
@@ -4337,7 +4625,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4355,7 +4643,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|AB|=|AB'|",
+                      "text": "|BC|=|B'C|",
                       "isDisplay": false
                     },
                     {
@@ -4386,7 +4674,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4404,7 +4692,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|BB'| = 2|AB|",
+                      "text": "|BB'| = 2|BC|",
                       "isDisplay": false
                     },
                     {
@@ -4413,7 +4701,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|BC| = 2|AB|",
+                      "text": "|AB| = 2|BC|",
                       "isDisplay": false
                     },
                     {
@@ -4425,7 +4713,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "|BB'| = |BC| = |B'C|,",
+                  "text": "|BB'| = |AB| = |AB'|,",
                   "isDisplay": true
                 },
                 {
@@ -4437,7 +4725,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle BB'C",
+                      "text": "\\triangle ABB'",
                       "isDisplay": false
                     },
                     {
@@ -4455,7 +4743,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle ABC| = |\\angle B'BC| = 60^\\circ",
+                      "text": "|\\angle ABC| = |\\angle ABB'| = 60^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4473,7 +4761,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BCA| = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "text": "|\\angle BAC| = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4510,7 +4798,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "text": "\\triangle CBA \\cong \\triangle CB'A",
                       "isDisplay": false
                     },
                     {
@@ -4565,7 +4853,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC",
+                      "text": "AB",
                       "isDisplay": false
                     },
                     {
@@ -4959,8 +5247,8 @@
     {
       "contentId": "angle-basics-1/angles-isosceles-right-triangle.svg",
       "originalId": "angles-isosceles-right-triangle.pdf",
-      "width": "97.95pt",
-      "height": "95.36pt",
+      "width": "124.77pt",
+      "height": "78.4pt",
       "scale": 1.0
     },
     {
