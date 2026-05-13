@@ -148,13 +148,11 @@ export function ImageWithLoader({
               : 'block max-w-full h-auto object-contain'),
           className
         )}
-        style={
-          hasIntrinsicSize
-            ? scale !== 1
-              ? { zoom: scale }
-              : undefined
-            : { width: 'auto', height: 'auto', zoom: scale }
-        }
+        style={{
+          width: 'auto',
+          height: 'auto',
+          ...(scale !== 1 && { zoom: scale }),
+        }}
         onLoad={() => setLoadState('loaded')}
         onError={() => setLoadState('error')}
       />

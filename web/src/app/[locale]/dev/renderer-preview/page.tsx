@@ -153,6 +153,12 @@ An inline image via \`?inline=true\` only — flows inside this sentence ![A](/d
 
 An inline image via \`?inline=true&width=&height=\` — flows inside this sentence ![equiv](/dev-placeholders/inline-equiv.svg?inline=true&width=32&height=32) at the requested 32×32 size.
 
+A block image with \`?scale=50\` — the wrapper and the rendered image both shrink to half the declared size:
+
+![Block scaled](/dev-placeholders/block.svg?width=800&height=400&scale=50)
+
+An inline image with \`?scale=150\` — flows inside this sentence ![scaled inline](/dev-placeholders/inline-1.svg?inline=true&width=24&height=24&scale=150) at 1.5× the declared 24×24.
+
 ## Compositions
 
 Inline quote inside a custom-marker list:
