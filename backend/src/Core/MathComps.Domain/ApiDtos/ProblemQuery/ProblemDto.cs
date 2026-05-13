@@ -8,8 +8,8 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// A single problem presented to the UI.
 /// </summary>
 /// <param name="Slug">URL-safe unique identifier for the problem.</param>
-/// <param name="StatementParsed">Problem statement as structured JSON content blocks.</param>
-/// <param name="StatementLanguage">Language of the returned statement 
+/// <param name="StatementMarkdown">Problem statement as a Markdown+TeX string.</param>
+/// <param name="StatementLanguage">Language of the returned statement
 /// (may differ from requested language when fallback to original occurs).</param>
 /// <param name="Source">Competition/season/round/category metadata.</param>
 /// <param name="Tags">Associated tags with type categorization.</param>
@@ -24,7 +24,7 @@ namespace MathComps.Domain.ApiDtos.ProblemQuery;
 /// <param name="ListContentIds">Content IDs of the user's lists that contain this problem. Empty for anonymous users.</param>
 public record ProblemDto(
     string Slug,
-    string? StatementParsed,
+    string StatementMarkdown,
     Language StatementLanguage,
     ProblemSource Source,
     ImmutableList<TagDto> Tags,

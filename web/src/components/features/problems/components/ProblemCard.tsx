@@ -15,10 +15,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
-import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
-import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { CountBadge } from '@/components/shared/components/CountBadge'
+import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 import { useProblem } from '@/stores/problem-store'
@@ -310,29 +309,14 @@ export function ProblemCard({
       </div>
 
       {/* Problem statement content with math rendering */}
-      <div className="px-2.5 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 leading-relaxed text-foreground text-[14px] sm:text-base">
-        {problem.statementParsed ? (
-          (() => {
-            try {
-              const parsedStatementContent = JSON.parse(problem.statementParsed) as {
-                content: RawContentBlock[]
-              }
-              return (
-                <div className="problem-card-math">
-                  <ProblemContentRenderer
-                    content={parsedStatementContent.content}
-                    images={problem.images}
-                  />
-                </div>
-              )
-            } catch (parsingError) {
-              console.warn('Failed to parse statement content:', parsingError)
-              return <span>{tProblems('errorLoadingStatement')}</span>
-            }
-          })()
-        ) : (
-          <span>{tProblems('noStatementAvailable')}</span>
-        )}
+      <div className="px-2.5 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 leading-relaxed text-muted-foreground text-[14px] sm:text-base">
+        <div className="problem-card-math">
+          <RichMathEditorRenderer
+            content={problem.statementMarkdown}
+            imageContext="problems"
+            lightImageBackground
+          />
+        </div>
       </div>
 
       {/* Footer row — authors left, solution link right */}

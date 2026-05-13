@@ -730,7 +730,6 @@
       "description": "Zkuste upravit filtry a vyhledat znovu.",
       "title": "Nic se nenašlo"
     },
-    "errorLoadingStatement": "Nepodařilo se načíst znění úlohy",
     "errors": {
       "connectionProblem": "Problém s připojením. Zkouším znovu...",
       "invalidParameters": "Neplatné parametry požadavku",
@@ -863,7 +862,6 @@
     "moreActions": "Další akce",
     "noContests": "Žádné soutěže",
     "noSimilarProblems": "Nenašly se žádné podobné úlohy s dostatečnou relevancí.",
-    "noStatementAvailable": "Znění úlohy není k dispozici",
     "relevance": "Relevance: {percentage}%",
     "relevanceNote": "Relevance je orientační",
     "removedFromList": "Úloha byla odstraněna ze seznamu",

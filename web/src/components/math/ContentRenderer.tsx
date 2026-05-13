@@ -1,5 +1,4 @@
 import { ImageOff } from 'lucide-react'
-import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import type {
@@ -19,13 +18,6 @@ import { cn } from '@/components/shared/utils/css-utils'
 import type { ImageType } from '../features/problems/services/problem-api-urls'
 import type { ProblemImage } from '../features/problems/types/problem-api-types'
 import { MathRendererClient } from './MathRendererClient'
-
-type ContentRendererProps = {
-  content: RawContentBlock[]
-  imagesById: Record<string, ProblemImage>
-  imageType: ImageType
-  className?: string
-}
 
 /**
  * Renders an image for math content - handles both inline and block images.
@@ -381,20 +373,5 @@ export function renderBlocks(
         </React.Fragment>
       ))}
     </>
-  )
-}
-
-export function ContentRenderer({
-  content,
-  className,
-  imagesById,
-  imageType,
-}: ContentRendererProps) {
-  const t = useTranslations('ui.content')
-
-  return (
-    <div className={cn('content-renderer', className)}>
-      {renderBlocks(content, imagesById, imageType, t('imageMissing'))}
-    </div>
   )
 }

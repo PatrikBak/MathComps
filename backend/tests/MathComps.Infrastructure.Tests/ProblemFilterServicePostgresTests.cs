@@ -903,7 +903,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal("75-a-i-1", problem.Slug);
         Assert.Equal(Language.EN, problem.StatementLanguage);
         // Verify we got the English content (parsed as JSON, just check it's there)
-        Assert.NotNull(problem.StatementParsed);
+        Assert.NotEmpty(problem.StatementMarkdown);
     });
 
     /// <summary>
@@ -1565,7 +1565,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p1.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Ostrov je rozdelený na niekoľko kráľovstiev.",
-            ParsedText = "{}",
+            MarkdownText = "Ostrov je rozdelený na niekoľko kráľovstiev.",
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
@@ -1577,7 +1577,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p1.Id,
             DocumentType = DocumentType.Statement,
             RawText = "The island is divided into several kingdoms.",
-            ParsedText = /*lang=json,strict*/ """{"en": true}""",
+            MarkdownText = "The island is divided into several kingdoms.",
             Language = Language.EN,
             DateModified = DateTime.UtcNow,
             IsOriginal = false
@@ -1604,7 +1604,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p2.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Každej hrane štvorstena priradíme jedno reálne číslo.",
-            ParsedText = "{}",
+            MarkdownText = "Každej hrane štvorstena priradíme jedno reálne číslo.",
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
@@ -1630,7 +1630,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p3.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Prirodzené číslo zapísané navzájom rôznymi ciframi nazveme pitoreskné.",
-            ParsedText = "{}",
+            MarkdownText = "Prirodzené číslo zapísané navzájom rôznymi ciframi nazveme pitoreskné.",
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
@@ -1656,7 +1656,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p4.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Nech p, q sú reálne čísla také, že rovnici |x^2-1|=px+q...",
-            ParsedText = "{}",
+            MarkdownText = "Nech p, q sú reálne čísla také, že rovnici |x^2-1|=px+q...",
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
@@ -1683,7 +1683,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p5.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Nájdite všetky dvojice celých čísel x a y takých, že x+y je prvočíslo a 3x+5y je 16.",
-            ParsedText = "{}",
+            MarkdownText = "Nájdite všetky dvojice celých čísel x a y takých, že x+y je prvočíslo a 3x+5y je 16.",
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
@@ -1710,7 +1710,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p6.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Do divadla dorazili diváci buď peši, autami alebo autobusmi.",
-            ParsedText = "{}",
+            MarkdownText = "Do divadla dorazili diváci buď peši, autami alebo autobusmi.",
             Language = Language.SK,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
@@ -1736,7 +1736,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ProblemId = p7.Id,
             DocumentType = DocumentType.Statement,
             RawText = "Some IMO problem",
-            ParsedText = "{}",
+            MarkdownText = "Some IMO problem",
             Language = Language.EN,
             DateModified = DateTime.UtcNow,
             IsOriginal = true
