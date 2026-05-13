@@ -1381,7 +1381,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " platí aj pre navzájom sa nepretínajúce nekonvexné mnohouholníky, ak všetky vnútorné uhly meriame smerom dovnútra – teda aj uhly väčšie než "
+                      "text": " platí aj pre nekonvexné mnohouholníky, ak všetky vnútorné uhly meriame smerom dovnútra – teda aj uhly väčšie než "
                     },
                     {
                       "type": "math",
@@ -1400,7 +1400,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vejárová triangulácia z\u00A0jedného vrcholu nemusí fungovať ani z\u00A0konvexného vrcholu – niektoré uhlopriečky môžu prechádzať mimo mnohouholníka. Platí však, že každý jednoduchý "
+                      "text": "Vejárová triangulácia z\u00A0jedného vrcholu fungovať nemusí – niektoré uhlopriečky môžu prechádzať mimo mnohouholníka. Platí však, že každý jednoduchý "
                     },
                     {
                       "type": "math",
@@ -1523,7 +1523,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " viditeľný zo všetkých vrcholov (t.\u00A0j. úsečky "
+                      "text": " viditeľný zo všetkých vrcholov (t. j. úsečky "
                     },
                     {
                       "type": "math",
@@ -1532,7 +1532,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ležia celé vo vnútri). Pre niektoré nekonvexné mnohouholníky taký "
+                      "text": " ležia celé vo vnútri). Pre niektoré nekonvexné mnohouholníky taký bod "
                     },
                     {
                       "type": "math",
@@ -1541,7 +1541,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nemusí existovať (skúste taký nakresliť) – v\u00A0takom prípade sa dôkaz\u00A03 nedá priamo zachrániť a\u00A0treba siahnuť po triangulácii z\u00A0dôkazu\u00A02."
+                      "text": " nemusí existovať (skúste taký nakresliť) – v\u00A0takom prípade sa dôkaz\u00A03 nedá priamo zachrániť a\u00A0treba siahnuť po triangulácii popísanej v\u00A0predošlom odstavci."
                     }
                   ],
                   "highligted": false

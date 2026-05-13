@@ -98,11 +98,11 @@ This statement can certainly be generalized. We know, for example, that the sum 
 
     \Image{angles-polygon-interior.pdf}
 
-    \Remark{non-convex polygons} The formula $(n-2)\cdot 180^\circ$ also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside -- so we count angles greater than $180^\circ$ as such.
+    \Remark{non-convex polygons} The formula $(n-2)\cdot 180^\circ$ also holds for non-convex polygons, provided we measure all interior angles toward the inside -- so we count angles greater than $180^\circ$ as such.
 
-    A fan triangulation from a single vertex may fail even from a convex vertex -- some diagonals can pass outside the polygon. It is still true, however, that every simple $n$-gon can be split into $n-2$ triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex $V$ and its neighbors $U$, $W$ that lies entirely inside our $n$-gon. Cutting $V$ off along the diagonal $UW$ gives an $(n-1)$-gon; iterating yields $n-2$ triangles. One can prove that such a triangle always exists (in fact, two of them); see the \Link[https://en.wikipedia.org/wiki/Two_ears_theorem]{two ears theorem}.
+    A fan triangulation from a single vertex may fail -- some diagonals can pass outside the polygon. It is still true, however, that every simple $n$-gon can be split into $n-2$ triangles (not necessarily as a fan), which rescues the proof. The reason is induction via a triangle formed by some vertex $V$ and its neighbors $U$, $W$ that lies entirely inside our $n$-gon. Cutting $V$ off along the diagonal $UW$ gives an $(n-1)$-gon; iterating yields $n-2$ triangles. One can prove that such a triangle always exists (in fact, two of them); see the \Link[https://en.wikipedia.org/wiki/Two_ears_theorem]{two ears theorem}.
 
-    As for Proof~3: it works only if there is an interior point $O$ visible from every vertex (i.e., the segments $OA_i$ lie entirely inside). For some non-convex polygons no such $O$ exists (try drawing one) -- in that case Proof~3 cannot be salvaged directly and one must fall back on the triangulation from Proof~2.
+    As for Proof~3: it works only if there is an interior point $O$ visible from every vertex (i.e., the segments $OA_i$ lie entirely inside). For some non-convex polygons no such $O$ exists (try drawing one) -- in that case Proof~3 cannot be salvaged directly and one must fall back on the triangulation described in the previous paragraph.
 }
 
 Now let's state two more simple but useful auxiliary claims:

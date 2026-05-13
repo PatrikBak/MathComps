@@ -1390,7 +1390,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " also holds for non-self-intersecting non-convex polygons, provided we measure all interior angles toward the inside – so we count angles greater than "
+                      "text": " also holds for non-convex polygons, provided we measure all interior angles toward the inside – so we count angles greater than "
                     },
                     {
                       "type": "math",
@@ -1409,7 +1409,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "A fan triangulation from a single vertex may fail even from a convex vertex – some diagonals can pass outside the polygon. It is still true, however, that every simple "
+                      "text": "A fan triangulation from a single vertex may fail – some diagonals can pass outside the polygon. It is still true, however, that every simple "
                     },
                     {
                       "type": "math",
@@ -1550,7 +1550,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " exists (try drawing one) – in that case Proof\u00A03 cannot be salvaged directly and one must fall back on the triangulation from Proof\u00A02."
+                      "text": " exists (try drawing one) – in that case Proof\u00A03 cannot be salvaged directly and one must fall back on the triangulation described in the previous paragraph."
                     }
                   ],
                   "highligted": false

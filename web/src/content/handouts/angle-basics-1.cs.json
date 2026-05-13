@@ -1381,7 +1381,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " platí i\u00A0pro navzájem se neprotínající nekonvexní mnohoúhelníky, pokud všechny vnitřní úhly měříme směrem dovnitř – tedy i\u00A0úhly větší než "
+                      "text": " platí i\u00A0pro nekonvexní mnohoúhelníky, pokud všechny vnitřní úhly měříme směrem dovnitř – tedy i\u00A0úhly větší než "
                     },
                     {
                       "type": "math",
@@ -1400,7 +1400,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vějířová triangulace z\u00A0jednoho vrcholu nemusí fungovat ani z\u00A0konvexního vrcholu – některé úhlopříčky mohou procházet mimo mnohoúhelník. Platí však, že každý jednoduchý "
+                      "text": "Vějířová triangulace z\u00A0jednoho vrcholu nemusí fungovat – některé úhlopříčky mohou procházet mimo mnohoúhelník. Platí však, že každý jednoduchý "
                     },
                     {
                       "type": "math",
@@ -1532,7 +1532,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " leží celé uvnitř). Pro některé nekonvexní mnohoúhelníky takový "
+                      "text": " leží celé uvnitř). Pro některé nekonvexní mnohoúhelníky takový bod\u00A0"
                     },
                     {
                       "type": "math",
@@ -1541,7 +1541,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nemusí existovat (zkuste takový nakreslit) – v\u00A0takovém případě se důkaz\u00A03 nedá přímo zachránit a\u00A0je třeba sáhnout po triangulaci z\u00A0důkazu\u00A02."
+                      "text": " nemusí existovat (zkuste takový nakreslit) – v\u00A0takovém případě se důkaz\u00A03 nedá přímo zachránit a\u00A0je třeba sáhnout po triangulaci popsané v\u00A0předchozím odstavci."
                     }
                   ],
                   "highligted": false
