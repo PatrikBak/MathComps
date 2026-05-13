@@ -64,6 +64,10 @@ public sealed class R2Uploader : IFileUploader, IDisposable
             DisablePayloadSigning = true,
         };
 
+        // Short fresh window + long stale-while-revalidate so edits propagate within
+        // a minute while keeping the cache useful for steady-state reads.
+        request.Headers.CacheControl = "public, max-age=60, stale-while-revalidate=86400";
+
         // Determine the content type based on file extension
         var extension = Path.GetExtension(localFilePath).ToLowerInvariant();
         request.ContentType = extension switch
