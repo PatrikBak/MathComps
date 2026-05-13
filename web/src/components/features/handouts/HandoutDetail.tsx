@@ -1,5 +1,6 @@
 import { MessageSquare, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { preload } from 'react-dom'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import type {
@@ -9,6 +10,7 @@ import type {
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
 import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
+import { getProblemImageUrl } from '@/components/features/problems/services/problem-api-urls'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -303,6 +305,17 @@ export default function HandoutDetail({
   // Create images lookup map by their id
   const imagesById: Record<string, HandoutImage> = {}
   for (const image of images) imagesById[image.contentId] = image
+
+  // Warm the browser cache for every handout image. Many figures live inside
+  // collapsed proofs / solutions / hints and would otherwise only start fetching
+  // the moment the user expands a card. preload() hoists <link rel="preload">
+  // tags into <head>; running it here in the Server Component ships the hints
+  // in the initial HTML so the browser fetches in parallel with rendering.
+  images.forEach((image) => {
+    preload(getProblemImageUrl(image.contentId, 'handouts'), {
+      as: 'image',
+    })
+  })
 
   return (
     <>
