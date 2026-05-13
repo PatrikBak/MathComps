@@ -9,7 +9,6 @@ import type {
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
 import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
-import { renderBlocks, renderRawContentBlock } from '@/components/math/ContentRenderer'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -27,6 +26,7 @@ import {
   HINT_BADGE,
   HINT_TEXT_COLOR,
 } from './handout-colors'
+import { renderBlocks, renderRawContentBlock } from './handout-content-renderer'
 import { HandoutActions } from './HandoutActions'
 
 /**
@@ -59,12 +59,6 @@ type HandoutDetailProps = {
   /** Optional external URL — when set, makes the event chip a clickable link */
   eventLink?: string
 }
-
-/**
- * All images are of type 'handouts', obviously. This is passed to the
- * render functions to ensure fetching images from a correct endpoint.
- */
-const imageType = 'handouts'
 
 /**
  * Renders the optional title of an environment block (e.g. theorem name,
@@ -216,12 +210,7 @@ function renderDocumentSections(
                     badgeContent: (
                       <span className="w-[8px] h-[8px] bg-current rounded-[2px]"></span>
                     ),
-                    children: renderBlocks(
-                      contentBlock.proof,
-                      imagesById,
-                      imageType,
-                      imageMissingText
-                    ),
+                    children: renderBlocks(contentBlock.proof, imagesById, imageMissingText),
                   })
                 }
                 break
@@ -233,12 +222,7 @@ function renderDocumentSections(
                     textColorClass: ENVIRONMENT_TEXT_COLOR[contentBlock.type],
                     badge: ENVIRONMENT_BADGE[contentBlock.type],
                     badgeContent: '✓',
-                    children: renderBlocks(
-                      contentBlock.solution,
-                      imagesById,
-                      imageType,
-                      imageMissingText
-                    ),
+                    children: renderBlocks(contentBlock.solution, imagesById, imageMissingText),
                   })
                 }
                 break
@@ -249,7 +233,7 @@ function renderDocumentSections(
                     textColorClass: HINT_TEXT_COLOR,
                     badge: HINT_BADGE,
                     badgeContent: hintIndex + 1,
-                    children: renderBlocks(hint, imagesById, imageType, imageMissingText),
+                    children: renderBlocks(hint, imagesById, imageMissingText),
                   })
                 })
                 if (contentBlock.solution.length > 0) {
@@ -258,12 +242,7 @@ function renderDocumentSections(
                     textColorClass: ENVIRONMENT_TEXT_COLOR.problem,
                     badge: ENVIRONMENT_BADGE.problem,
                     badgeContent: '✓',
-                    children: renderBlocks(
-                      contentBlock.solution,
-                      imagesById,
-                      imageType,
-                      imageMissingText
-                    ),
+                    children: renderBlocks(contentBlock.solution, imagesById, imageMissingText),
                   })
                 }
                 break
@@ -278,7 +257,7 @@ function renderDocumentSections(
                   id={environmentId}
                   disclosures={disclosures}
                 >
-                  {renderBlocks(contentBlock.body, imagesById, imageType, imageMissingText)}
+                  {renderBlocks(contentBlock.body, imagesById, imageMissingText)}
                 </CollapsibleCard>
               </div>
             )
@@ -286,12 +265,7 @@ function renderDocumentSections(
 
           return (
             <div key={`${metadata.label}-block-${contentBlockIndex}`}>
-              {renderRawContentBlock(
-                contentBlock as RawContentBlock,
-                imagesById,
-                imageType,
-                imageMissingText
-              )}
+              {renderRawContentBlock(contentBlock as RawContentBlock, imagesById, imageMissingText)}
             </div>
           )
         })}

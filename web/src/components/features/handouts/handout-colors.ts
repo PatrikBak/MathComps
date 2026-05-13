@@ -105,6 +105,13 @@ export const ENVIRONMENT_BADGE: Record<HandoutEnvironmentType, BadgePaletteEntry
 }
 
 /**
+ * Tailwind color classes for the surround applied to a highlighted paragraph
+ * — gradient tint plus border accent.
+ */
+export const HIGHLIGHTED_PARAGRAPH_CLASSES =
+  'border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10'
+
+/**
  * Text color for hint headings in the detail view.
  */
 export const HINT_TEXT_COLOR = 'text-yellow-300'
