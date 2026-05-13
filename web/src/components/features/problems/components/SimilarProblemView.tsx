@@ -3,8 +3,7 @@
 import { Link } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
-import { ProblemContentRenderer } from '@/components/math/ProblemContentRenderer'
+import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
@@ -49,7 +48,6 @@ const SimilarProblemCard = ({
 }) => {
   const copyPermalink = useProblemPermalink()
   const tActions = useTranslations('ui.actions')
-  const tProblems = useTranslations('problems')
 
   const handlePermalinkCopy = () => {
     copyPermalink(problem.slug)
@@ -78,26 +76,13 @@ const SimilarProblemCard = ({
       </div>
 
       <div className="p-4 text-sm text-muted-foreground">
-        {problem.statement ? (
-          (() => {
-            try {
-              const parsedText = JSON.parse(problem.statement) as {
-                content: RawContentBlock[]
-              }
-              // Include images from similar problem metadata
-              return (
-                <div className="problem-card-math">
-                  <ProblemContentRenderer content={parsedText.content} images={problem.images} />
-                </div>
-              )
-            } catch (error) {
-              console.warn('Failed to parse statement content:', error)
-              return <span>{tProblems('errorLoadingStatement')}</span>
-            }
-          })()
-        ) : (
-          <span>{tProblems('noStatementAvailable')}</span>
-        )}
+        <div className="problem-card-math">
+          <RichMathEditorRenderer
+            content={problem.statementMarkdown}
+            imageContext="problems"
+            lightImageBackground
+          />
+        </div>
       </div>
     </div>
   )

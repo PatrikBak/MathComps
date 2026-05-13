@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl'
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import Markdown, { type Components } from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
@@ -68,8 +68,14 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
 
 /**
  * Renders markdown content with LaTeX math support and spoiler support.
+ *
+ * Wrapped in {@link memo} so a parent re-render with unchanged props is a no-op.
+ * Without this guard, every parent re-render rebuilds the inline `components` /
+ * `urlTransform` props, which gives `react-markdown`'s element types fresh
+ * referential identity and causes React to unmount the entire output subtree —
+ * including the `<img>` elements, which then trigger a fresh network request.
  */
-export function RichMathEditorRenderer({
+export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   content,
   lightImageBackground,
   imageContext,
@@ -318,4 +324,4 @@ export function RichMathEditorRenderer({
       {processedContent}
     </Markdown>
   )
-}
+})

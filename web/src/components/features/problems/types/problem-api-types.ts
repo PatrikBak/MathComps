@@ -36,7 +36,7 @@ type ProblemSource = {
 export type SimilarProblem = {
   slug: string
   source: ProblemSource
-  statement: string
+  statementMarkdown: string
   similarityScore: number
   images: ProblemImage[]
 }
@@ -50,7 +50,7 @@ export type ProblemImage = {
 
 export type Problem = {
   slug: string
-  statementParsed?: string
+  statementMarkdown: string
   solutionLink?: string | null
   source: ProblemSource
   tags: TagDto[]

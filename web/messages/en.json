@@ -730,7 +730,6 @@
       "description": "Try adjusting the filters and searching again.",
       "title": "Nothing found"
     },
-    "errorLoadingStatement": "Error loading problem statement",
     "errors": {
       "connectionProblem": "Connection problem. Retrying...",
       "invalidParameters": "Invalid request parameters",
@@ -863,7 +862,6 @@
     "moreActions": "More actions",
     "noContests": "No contests",
     "noSimilarProblems": "No similar problems with sufficient relevance were found.",
-    "noStatementAvailable": "No problem statement available",
     "relevance": "Relevance: {percentage}%",
     "relevanceNote": "Relevance is approximate",
     "removedFromList": "Problem was removed from the list",

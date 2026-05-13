@@ -87,7 +87,7 @@ public class ProblemFilterService(
                 Statement = problem.Texts
                     .Where(text =>
                         text.DocumentType == DocumentType.Statement &&
-                        text.ParsedText != null)
+                        text.MarkdownText != null)
                     .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
                     .First()
             })
@@ -95,7 +95,7 @@ public class ProblemFilterService(
             .Select(data => new ProblemDto(
                 // Simple properties
                 data.problem.Slug,
-                data.Statement.ParsedText,
+                data.Statement.MarkdownText!,
                 data.Statement.Language,
 
                 // Problem Source
@@ -245,16 +245,16 @@ public class ProblemFilterService(
                         similarProblem.SimilarProblem.Texts
                             .Where(text =>
                                 text.DocumentType == DocumentType.Statement &&
-                                text.ParsedText != null)
+                                text.MarkdownText != null)
                             .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
-                            .Select(text => text.ParsedText!)
+                            .Select(text => text.MarkdownText!)
                             .First(),
 
                         // Language of the similar problem statement
                         similarProblem.SimilarProblem.Texts
                             .Where(text =>
                                 text.DocumentType == DocumentType.Statement &&
-                                text.ParsedText != null)
+                                text.MarkdownText != null)
                             .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
                             .Select(text => text.Language)
                             .First(),
