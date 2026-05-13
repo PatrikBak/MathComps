@@ -1,9 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
+
+/**
+ * Props for the {@link ToggleButton} component.
+ */
+type ToggleButtonProps = {
+  /** Whether this button represents the currently selected option */
+  active: boolean
+  /** Handler invoked when the button is clicked */
+  onClick: () => void
+  /** Button label content */
+  children: ReactNode
+}
+
+/**
+ * A single segmented-toggle button. Combines a stable base className with
+ * active/inactive variants chosen by {@link ToggleButtonProps.active}.
+ */
+function ToggleButton({ active, onClick, children }: ToggleButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'px-3 py-1.5 text-sm transition-colors',
+        active ? 'bg-foreground/10 text-foreground font-medium' : 'text-muted hover:text-foreground'
+      )}
+    >
+      {children}
+    </button>
+  )
+}
 
 /**
  * One large markdown document that exercises every shape the renderer handles.
@@ -156,30 +186,14 @@ export default function RendererPreviewPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 math-typography math-prose">
-      {/* Segmented toggle for the lightImageBackground prop */}
-      <div className="mb-6 inline-flex rounded-md border border-foreground/10 bg-surface overflow-hidden">
-        <button
-          onClick={() => setLightImageBackground(false)}
-          className={cn(
-            'px-3 py-1.5 text-sm transition-colors',
-            !lightImageBackground
-              ? 'bg-foreground/10 text-foreground font-medium'
-              : 'text-muted hover:text-foreground'
-          )}
-        >
+      {/* Segmented toggle for the lightImageBackground prop, sticky at the top */}
+      <div className="sticky top-0 z-10 mb-6 inline-flex rounded-md border border-foreground/10 bg-surface overflow-hidden">
+        <ToggleButton active={!lightImageBackground} onClick={() => setLightImageBackground(false)}>
           lightImageBackground = false
-        </button>
-        <button
-          onClick={() => setLightImageBackground(true)}
-          className={cn(
-            'px-3 py-1.5 text-sm transition-colors',
-            lightImageBackground
-              ? 'bg-foreground/10 text-foreground font-medium'
-              : 'text-muted hover:text-foreground'
-          )}
-        >
+        </ToggleButton>
+        <ToggleButton active={lightImageBackground} onClick={() => setLightImageBackground(true)}>
           lightImageBackground = true
-        </button>
+        </ToggleButton>
       </div>
 
       {/* Single renderer instance driven by the toggle state */}
