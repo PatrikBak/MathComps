@@ -88,11 +88,28 @@ export function ImageWithLoader({
   // auto-close and visibly breaks the surrounding text
   const Wrapper = inline ? 'span' : 'div'
 
+  // Block mode uses width: 100% + max-width + aspect-ratio so the wrapper
+  // shrinks proportionally in both axes when its parent is narrower than the
+  // declared width — fixing width + height alone leaves flex-shrink trimming
+  // the width while the height stays locked, opening asymmetric whitespace
+  // when the image hits Tailwind preflight's max-width: 100% / height: auto.
+  // Inline mode keeps explicit dimensions because the wrapper sits inside a
+  // line of text and we want exact reserved space, not responsive scaling.
+  const sizeStyle =
+    hasIntrinsicSize &&
+    (inline
+      ? { width: scaledWidth, height: scaledHeight }
+      : {
+          width: '100%',
+          maxWidth: scaledWidth,
+          aspectRatio: `${scaledWidth} / ${scaledHeight}`,
+        })
+
   return (
     <Wrapper
       className={cn(baseContainerClass, containerClassName)}
       style={{
-        ...(hasIntrinsicSize && { width: scaledWidth, height: scaledHeight }),
+        ...sizeStyle,
         // Collapse the inherited text line-height so the inline wrapper hugs
         // the image vertically — otherwise inherited leading adds space above
         ...(inline && { lineHeight: 0 }),
