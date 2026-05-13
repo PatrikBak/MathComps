@@ -76,7 +76,7 @@ const SimilarProblemCard = ({
       </div>
 
       <div className="p-4 text-sm text-muted-foreground">
-        <div className="problem-card-math">
+        <div className="math-typography">
           <RichMathEditorRenderer
             content={problem.statementMarkdown}
             imageContext="problems"

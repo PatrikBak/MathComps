@@ -299,7 +299,7 @@ function renderDocumentSections(
     )
   })
 
-  return <div className="article--math">{renderedSections}</div>
+  return <div className="math-typography math-prose">{renderedSections}</div>
 }
 
 /**
