@@ -155,7 +155,7 @@ export default function RendererPreviewPage() {
   const trimmedSample = SAMPLE_MARKDOWN.trim()
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 article--math">
+    <div className="mx-auto max-w-3xl px-4 py-8 math-typography math-prose">
       {/* Segmented toggle for the lightImageBackground prop */}
       <div className="mb-6 inline-flex rounded-md border border-foreground/10 bg-surface overflow-hidden">
         <button

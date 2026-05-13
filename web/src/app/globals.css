@@ -232,32 +232,10 @@ input[type='checkbox']:focus:not(:focus-visible) {
   }
 }
 
-/* Custom list marker styles with parentheses and extra spacing */
-.marker-roman-paren {
-  list-style-type: lower-roman;
-}
-.marker-roman-paren > li::marker {
-  content: '(' counter(list-item, lower-roman) ')\00a0\00a0';
-}
-
-.marker-decimal-paren {
-  list-style-type: decimal;
-}
-.marker-decimal-paren > li::marker {
-  content: '(' counter(list-item, decimal) ')\00a0\00a0';
-}
-
-.marker-alpha-paren {
-  list-style-type: lower-alpha;
-}
-.marker-alpha-paren > li::marker {
-  content: '(' counter(list-item, lower-alpha) ')\00a0\00a0';
-}
-
 /*
-  Custom list marker styles emitted by the :::list{style=...} directive.
-  Class names match the kebab-case AST style identifiers verbatim.
-  bullet and number-dot get no override — they use the default <ul>/<ol> markers.
+  Custom list marker styles. Class names match the kebab-case AST style
+  identifiers verbatim. bullet and number-dot get no override — they use
+  the default <ul>/<ol> markers.
 */
 .list-style-number-parens {
   list-style-type: decimal;
@@ -294,19 +272,27 @@ input[type='checkbox']:focus:not(:focus-visible) {
   content: '(' counter(list-item, upper-alpha) ')\00a0\00a0';
 }
 
-/* Body of math handouts: serif for TeX-like feel, with fluid size */
-.article--math {
+/*
+  Math/serif typography. Compact base size; the .math-prose modifier opts
+  into the larger fluid size and prose-width cap for long-form reading.
+*/
+.math-typography {
   font-family: Georgia, 'Times New Roman', ui-serif, serif;
-  font-size: clamp(1.0625rem, 0.95rem + 0.35vw, 1.15625rem);
+  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.05rem);
   line-height: 1.7;
-  max-width: 85ch;
   text-rendering: optimizeLegibility;
 }
 
-/* Keep the default font even inside math articles */
-.article--math h1,
-.article--math h2,
-.article--math h3 {
+/* Larger fluid serif with capped width */
+.math-typography.math-prose {
+  font-size: clamp(1.0625rem, 0.95rem + 0.35vw, 1.15625rem);
+  max-width: 85ch;
+}
+
+/* Headings reset to the sans-serif UI font with tight spacing and lined nums */
+.math-typography h1,
+.math-typography h2,
+.math-typography h3 {
   font-family:
     'Inter',
     ui-sans-serif,
@@ -318,26 +304,33 @@ input[type='checkbox']:focus:not(:focus-visible) {
     Arial,
     'Noto Sans',
     sans-serif;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   line-height: 1.2;
   margin-top: 1.6em;
   margin-bottom: 0.6em;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 /* Paragraph & list rhythm */
-.article--math p {
+.math-typography p {
   margin: 0.7em 0;
 }
-.article--math ol,
-.article--math ul {
+.math-typography ol,
+.math-typography ul {
   margin: 0.8em 0 0.8em 1.25em;
 }
 
-/* Gentle inline math balance */
-.article--math p .katex,
-.article--math p math {
-  font-size: 0.98em;
+/* Inline math runs slightly larger than body text for legibility */
+.math-typography .katex,
+.math-typography math {
+  font-size: 1.04em;
   line-height: 1;
+}
+
+/* At the larger prose size, paragraph-context inline math scales back down */
+.math-typography.math-prose p .katex,
+.math-typography.math-prose p math {
+  font-size: 0.98em;
 }
 
 /* Inline math overflow handling for mobile */
@@ -358,15 +351,15 @@ input[type='checkbox']:focus:not(:focus-visible) {
     padding-inline: 2px;
   }
 
-  /* Reduce inline math size in article context */
-  .article--math .katex,
-  .article--math p math {
+  /* At the larger prose size, inline math reduces further on small screens */
+  .math-typography.math-prose .katex,
+  .math-typography.math-prose p math {
     font-size: 0.96em;
   }
 }
 
 /* Compact footnote popovers */
-.article--math.footnote-popover {
+.math-typography.footnote-popover {
   font-size: 0.92em;
   line-height: 1.55;
   max-width: 60ch;
@@ -387,15 +380,25 @@ input[type='checkbox']:focus:not(:focus-visible) {
   line-height: 1;
 }
 
-/* Display math slightly larger with breathing room */
-.katex-display > .katex,
-.article--math .math-display {
+/* Display math runs slightly larger than surrounding text */
+.katex-display > .katex {
   font-size: 1.05em;
   /* This is to prevent some weird random not-needed scrollbars */
   padding-block: 2px;
 }
 .katex-display {
   margin-block: 1.2rem;
+}
+
+/* Display-math wrapper adds its own bump on top of the global rule */
+.math-typography .math-display {
+  font-size: 1.08em;
+  padding-block: 2px;
+}
+
+/* At the larger prose size, display math wrapper returns to the base bump */
+.math-typography.math-prose .math-display {
+  font-size: 1.05em;
 }
 
 /* Class to force the neutral font */
@@ -421,41 +424,33 @@ input[type='checkbox']:focus:not(:focus-visible) {
 
 /* Slightly comfier paragraph wrapping (Chrome/Safari support) */
 @supports (text-wrap: pretty) {
-  .article--math p {
+  .math-typography p {
     text-wrap: pretty;
   }
 }
 
-/* Tighten letter spacing in headings */
-.article--math h1,
-.article--math h2,
-.article--math h3 {
-  letter-spacing: -0.012em;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
 /* Nicer lists */
-.article--math li {
+.math-typography li {
   margin-block: 0.35em;
 }
-.article--math .card-content p:first-child {
+.math-typography .card-content p:first-child {
   margin-top: 0.2em;
 }
 
 /* Tables — math style: full grid, bold header, no row fills */
-.article--math table {
+.math-typography table {
   margin: 0.9em 0;
   border-collapse: collapse;
   font-size: 0.96em;
 }
-.article--math th,
-.article--math td {
+.math-typography th,
+.math-typography td {
   padding: 6px 13px;
   text-align: left;
   vertical-align: top;
   border: 1px solid var(--color-surface-hover);
 }
-.article--math thead th {
+.math-typography thead th {
   font-weight: 600;
 }
 
@@ -469,8 +464,8 @@ input[type='checkbox']:focus:not(:focus-visible) {
 }
 
 /* Footnote refs don’t stretch line height */
-.article--math sup,
-.article--math sub {
+.math-typography sup,
+.math-typography sub {
   line-height: 0;
 }
 
@@ -480,7 +475,7 @@ input[type='checkbox']:focus:not(:focus-visible) {
 }
 
 /* Set the default color for all footnotes within the article context. */
-.article--math .footnote-ref {
+.math-typography .footnote-ref {
   color: var(--color-link);
 }
 
@@ -489,7 +484,7 @@ input[type='checkbox']:focus:not(:focus-visible) {
   that is also inside a .ui-text element (like a badge). This rule wins
   due to higher specificity, and forces the color to be inherited from the parent.
 */
-.article--math .ui-text .footnote-ref {
+.math-typography .ui-text .footnote-ref {
   color: inherit;
 }
 
@@ -508,25 +503,6 @@ input[type='checkbox']:focus:not(:focus-visible) {
   box-shadow: none !important;
   /* Ensure smooth transitions */
   transition: none !important;
-}
-
-/* Problem card math rendering - fluid font with larger math symbols */
-.problem-card-math {
-  font-family: Georgia, 'Times New Roman', ui-serif, serif;
-  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.05rem);
-  line-height: 1.7;
-  text-rendering: optimizeLegibility;
-}
-.problem-card-math p {
-  margin: 0.7em 0;
-}
-.problem-card-math .katex,
-.problem-card-math math {
-  font-size: 1.04em;
-  line-height: 1;
-}
-.problem-card-math .math-display {
-  font-size: 1.08em;
 }
 
 /*  Sonner Toast Customization */

@@ -103,13 +103,13 @@ function getOrderedListStyleClass({ style }: { style?: ListStyleType | null }) {
     case 'NumberDot':
       return { className: 'list-decimal' } as const
     case 'NumberParens':
-      return { className: 'marker-decimal-paren' } as const
+      return { className: 'list-style-number-parens' } as const
     case 'LowerRomanParens':
-      return { className: 'marker-roman-paren' } as const
+      return { className: 'list-style-lower-roman-parens' } as const
     case 'UpperRoman':
       return { className: 'list-[upper-roman]' } as const
     case 'LowerAlphaParens':
-      return { className: 'marker-alpha-paren' } as const
+      return { className: 'list-style-lower-alpha-parens' } as const
     case 'UpperAlphaParens':
       return { className: 'list-[upper-alpha]' } as const
     case 'Bullet':
