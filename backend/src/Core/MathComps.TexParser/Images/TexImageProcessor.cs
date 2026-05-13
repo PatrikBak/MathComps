@@ -88,8 +88,8 @@ public static class TexImageProcessor
             return new(image with { Id = existingContentId }, state);
         }
 
-        // Build a deterministic file name for stable URLs.
-        var newFileName = $"{config.FileNamePrefix}-{state.Counter}.svg";
+        // Build a file name for using the caller's strategy.
+        var newFileName = config.OutputFileName(image.Id, state.Counter);
 
         // Persist the image using the configured strategy (local copy, R2 upload, etc.)
         config.PersistImage(sourcePath, newFileName);

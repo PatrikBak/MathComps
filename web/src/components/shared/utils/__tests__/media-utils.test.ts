@@ -133,13 +133,13 @@ describe('resolveMarkdownImageUrl', () => {
     // Handouts use a different host than problems but the same contentId shape
     it('routes a bare contentId to the R2 handouts endpoint', () => {
       expect(resolveMarkdownImageUrl('media:fig-7', 'handouts')).toBe(
-        'https://r2.example.test/handouts/images/fig-7'
+        'https://r2.example.test/handouts/fig-7'
       )
     })
 
     it('preserves a trailing query string after resolution', () => {
       expect(resolveMarkdownImageUrl('media:fig-7?width=400&height=300', 'handouts')).toBe(
-        'https://r2.example.test/handouts/images/fig-7?width=400&height=300'
+        'https://r2.example.test/handouts/fig-7?width=400&height=300'
       )
     })
   })

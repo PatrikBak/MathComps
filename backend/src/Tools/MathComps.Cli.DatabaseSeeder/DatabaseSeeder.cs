@@ -247,7 +247,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 // Configure image processing for this problem
                 var imageConfig = new ImageProcessingConfig(
                     ImageSourceResolver: imageId => SkmoImageHelper.FindImageSourcePath(imageId, parsedProblem.RawProblem.OlympiadYear),
-                    FileNamePrefix: problemSlug,
+                    OutputFileName: (_, counter) => $"{problemSlug}-{counter}.svg",
                     PersistImage: (sourcePath, destinationFileName) =>
                     {
                         // Ensure the output directory exists

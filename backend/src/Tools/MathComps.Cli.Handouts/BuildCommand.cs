@@ -82,6 +82,30 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     /// <param name="DiscoveredImages">All image metadata discovered during processing.</param>
     private record HandoutImageResult(Document ProcessedDocument, ImmutableList<ImageData> DiscoveredImages);
 
+    /// <summary>
+    /// The R2 prefix under which every handout artefact (PDFs, images) lives.
+    /// </summary>
+    private const string HandoutsR2Prefix = "handouts";
+
+    /// <summary>
+    /// Derives the language-stripped handout slug from a .tex filename. Handles both
+    /// main handouts (e.g. "factorization.cs.tex" -> "factorization") and their
+    /// skeleton variants (e.g. "factorization.cs-skeleton.tex" -> "factorization").
+    /// </summary>
+    /// <param name="texFileName">The .tex filename (with extension).</param>
+    /// <returns>The language-stripped handout slug.</returns>
+    private static string ToHandoutSlug(string texFileName)
+        => Regex.Replace(texFileName, @"\.([a-z]{2})(-skeleton)?\.tex$", "", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Builds the full R2 key for a handout asset by prefixing its slug-relative path
+    /// with <see cref="HandoutsR2Prefix"/>. Centralises the prefix so PDF and image
+    /// upload paths stay in sync.
+    /// </summary>
+    /// <param name="slugRelativeKey">The slug-prefixed asset path (e.g. "factorization/box.svg").</param>
+    /// <returns>The full R2 key (e.g. "handouts/factorization/box.svg").</returns>
+    private static string ToHandoutR2Key(string slugRelativeKey) => $"{HandoutsR2Prefix}/{slugRelativeKey}";
+
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
@@ -205,10 +229,10 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                         await uploader.UploadAsync(upload.SourcePath, upload.R2Key);
 
                     // Upload PDFs
-                    await UploadPdfToR2Async(inputFile, inputDirectory, uploader);
+                    await UploadHandoutPdfAsync(inputFile, inputDirectory, uploader);
 
                     // Upload the skeleton PDF
-                    await UploadPdfToR2Async(skeletonFile, inputDirectory, uploader);
+                    await UploadHandoutPdfAsync(skeletonFile, inputDirectory, uploader);
                 }
             }
             catch (Exception exception)
@@ -427,13 +451,14 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     }
 
     /// <summary>
-    /// Uploads a compiled PDF from the source directory to Cloudflare R2.
+    /// Uploads a compiled handout PDF (main or skeleton) to remote storage, nesting it
+    /// under the handout's slug folder so every artefact for one handout sits together.
     /// </summary>
     /// <param name="texFile">The .tex file whose corresponding PDF should be uploaded.</param>
     /// <param name="sourceDirectory">The directory containing the compiled PDFs.</param>
     /// <param name="fileUploader">The file uploader instance.</param>
     /// <returns>A task representing the asynchronous upload operation.</returns>
-    private static async Task UploadPdfToR2Async(FileInfo texFile, DirectoryInfo sourceDirectory, IFileUploader fileUploader)
+    private static async Task UploadHandoutPdfAsync(FileInfo texFile, DirectoryInfo sourceDirectory, IFileUploader fileUploader)
     {
         // Determine the PDF filename from the TeX filename
         var pdfFileName = Path.ChangeExtension(texFile.Name, ".pdf");
@@ -446,8 +471,8 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
             return;
         }
 
-        // Upload the PDF to R2 under the handouts/pdfs/ prefix
-        var r2Key = $"handouts/pdfs/{pdfFileName}";
+        // Build the R2 key so every artefact for one handout lands in the same folder
+        var r2Key = ToHandoutR2Key($"{ToHandoutSlug(texFile.Name)}/{pdfFileName}");
         await fileUploader.UploadAsync(sourcePdfPath, r2Key);
         AnsiConsole.MarkupLine($"  [green]✓ PDF uploaded:[/] {Markup.Escape(pdfFileName)}");
     }
@@ -457,27 +482,32 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     /// Discovered images are queued for async upload after processing completes.
     /// </summary>
     /// <param name="document">The parsed <see cref="Document"/>.</param>
-    /// <param name="sourceFileName">The source .tex file name (e.g., "algebra-1-rozklady-sk.tex").</param>
+    /// <param name="sourceFileName">The source .tex file name (e.g., "factorization.cs.tex").</param>
     /// <param name="pendingUploads">List to collect image uploads for async execution. Null when uploads are skipped.</param>
     /// <returns>An <see cref="HandoutImageResult"/> containing the processed document and discovered images.</returns>
     private static HandoutImageResult ProcessHandoutImages(Document document, string sourceFileName, List<PendingUpload>? pendingUploads)
     {
-        // Extract the handout identifier from the filename (e.g., "algebra-1-rozklady-sk.tex" -> "algebra-1-rozklady-sk")
-        var handoutId = Path.GetFileNameWithoutExtension(sourceFileName);
+        // Language-stripped handout slug shared by every language variant of this handout.
+        var handoutSlug = ToHandoutSlug(sourceFileName);
 
         // Source directory for handout images
         var handoutsDirectory = "../../../../data/handouts/Images";
 
+        // In .tex sources images are referenced as "<name>.pdf" because pdfcsplain embeds
+        // PDFs. The web frontend wants SVGs, which sit alongside the PDFs on disk
+        // This swaps the extension so callers can read it as "the SVG counterpart of <pdfId>".
+        static string ToSvgName(string pdfImageId) => $"{pdfImageId.RemoveEnd(".pdf")}.svg";
+
         // Configure the image processor for this handout
         var config = new ImageProcessingConfig(
-            ImageSourceResolver: imageId => Path.Combine(handoutsDirectory, $"{imageId.RemoveEnd(".pdf")}.svg"),
-            FileNamePrefix: handoutId,
-            PersistImage: (sourcePath, destinationFileName) =>
+            ImageSourceResolver: imageId => Path.Combine(handoutsDirectory, ToSvgName(imageId)),
+            OutputFileName: (imageId, _) => $"{handoutSlug}/{ToSvgName(imageId)}",
+            PersistImage: (sourcePath, contentId) =>
             {
                 // Queue the image upload for async execution after processing completes
-                pendingUploads?.Add(new PendingUpload(sourcePath, $"handouts/images/{destinationFileName}"));
+                pendingUploads?.Add(new PendingUpload(sourcePath, ToHandoutR2Key(contentId)));
             },
-            OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutId}[/] has a missing image: {imageId}")
+            OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutSlug}[/] has a missing image: {imageId}")
         );
 
         // Collect all discovered images from all sections

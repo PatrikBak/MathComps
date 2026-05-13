@@ -141,7 +141,7 @@
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.cs-1.svg",
+                            "id": "angle-basics-1/angles-vertical.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -159,7 +159,7 @@
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.cs-2.svg",
+                            "id": "angle-basics-1/angles-corresponding.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -177,7 +177,7 @@
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.cs-3.svg",
+                            "id": "angle-basics-1/angles-alternate.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -204,7 +204,7 @@
                           },
                           {
                             "type": "image",
-                            "id": "angle-basics-1.cs-4.svg",
+                            "id": "angle-basics-1/angles-supplementary.svg",
                             "scale": 1.0,
                             "isInline": false
                           }
@@ -351,7 +351,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-5.svg",
+                      "id": "angle-basics-1/angles-supplementary-derive-vertical.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -454,7 +454,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-6.svg",
+                      "id": "angle-basics-1/angles-vertical-derive-supplementary.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -603,7 +603,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-7.svg",
+                      "id": "angle-basics-1/angles-corresponding-alternate-supplementary-connection.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -838,7 +838,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-8.svg",
+                      "id": "angle-basics-1/angles-triangle.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1072,7 +1072,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-9.svg",
+                      "id": "angle-basics-1/angles-polygon.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1193,7 +1193,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-10.svg",
+                      "id": "angle-basics-1/angles-polygon-fan.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1351,7 +1351,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-11.svg",
+                      "id": "angle-basics-1/angles-polygon-interior.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1585,7 +1585,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-12.svg",
+                      "id": "angle-basics-1/angles-complementary-parallel-statement.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1704,7 +1704,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-13.svg",
+                      "id": "angle-basics-1/angles-complementary-parallel-solution.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1740,7 +1740,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-14.svg",
+                      "id": "angle-basics-1/angles-complementary-in-triangle.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -1796,7 +1796,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-14.svg",
+                      "id": "angle-basics-1/angles-complementary-in-triangle.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -2030,7 +2030,7 @@
               "content": [
                 {
                   "type": "image",
-                  "id": "angle-basics-1.cs-15.svg",
+                  "id": "angle-basics-1/angles-sas-warning.svg",
                   "scale": 1.0,
                   "isInline": false
                 }
@@ -2294,7 +2294,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-16.svg",
+                      "id": "angle-basics-1/angles-sss-proof.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -2606,7 +2606,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-17.svg",
+                      "id": "angle-basics-1/angles-sas-proof.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -2853,7 +2853,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-18.svg",
+                      "id": "angle-basics-1/angles-asa-proof.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3192,7 +3192,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-19.svg",
+                      "id": "angle-basics-1/angles-Ssa-proof-one-solution.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3362,7 +3362,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-20.svg",
+                      "id": "angle-basics-1/angles-Ssa-proof-isosceles.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3424,7 +3424,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-21.svg",
+                      "id": "angle-basics-1/angles-Ssa-proof-two-solutions.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3628,7 +3628,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-22.svg",
+                      "id": "angle-basics-1/angles-isosceles-triangle.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3918,7 +3918,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-23.svg",
+                      "id": "angle-basics-1/angles-equilateral.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -4062,7 +4062,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-24.svg",
+                      "id": "angle-basics-1/angles-isosceles-right-triangle.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -4370,7 +4370,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "angle-basics-1.cs-25.svg",
+                      "id": "angle-basics-1/angles-90-60-30.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -4796,175 +4796,175 @@
   },
   "images": [
     {
-      "contentId": "angle-basics-1.cs-1.svg",
+      "contentId": "angle-basics-1/angles-vertical.svg",
       "originalId": "angles-vertical.pdf",
       "width": "82.61pt",
       "height": "65.04pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-2.svg",
+      "contentId": "angle-basics-1/angles-corresponding.svg",
       "originalId": "angles-corresponding.pdf",
       "width": "106.36pt",
       "height": "66.59pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-3.svg",
+      "contentId": "angle-basics-1/angles-alternate.svg",
       "originalId": "angles-alternate.pdf",
       "width": "100.63pt",
       "height": "58.17pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-4.svg",
+      "contentId": "angle-basics-1/angles-supplementary.svg",
       "originalId": "angles-supplementary.pdf",
       "width": "85.68pt",
       "height": "47.81pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-5.svg",
+      "contentId": "angle-basics-1/angles-supplementary-derive-vertical.svg",
       "originalId": "angles-supplementary-derive-vertical.pdf",
       "width": "95.91pt",
       "height": "78.49pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-6.svg",
+      "contentId": "angle-basics-1/angles-vertical-derive-supplementary.svg",
       "originalId": "angles-vertical-derive-supplementary.pdf",
       "width": "95.91pt",
       "height": "78.49pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-7.svg",
+      "contentId": "angle-basics-1/angles-corresponding-alternate-supplementary-connection.svg",
       "originalId": "angles-corresponding-alternate-supplementary-connection.pdf",
       "width": "98.31pt",
       "height": "65.02pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-8.svg",
+      "contentId": "angle-basics-1/angles-triangle.svg",
       "originalId": "angles-triangle.pdf",
       "width": "182.63pt",
       "height": "128.67pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-9.svg",
+      "contentId": "angle-basics-1/angles-polygon.svg",
       "originalId": "angles-polygon.pdf",
       "width": "146.67pt",
       "height": "106.43pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-10.svg",
+      "contentId": "angle-basics-1/angles-polygon-fan.svg",
       "originalId": "angles-polygon-fan.pdf",
       "width": "146.67pt",
       "height": "106.43pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-11.svg",
+      "contentId": "angle-basics-1/angles-polygon-interior.svg",
       "originalId": "angles-polygon-interior.pdf",
       "width": "146.67pt",
       "height": "106.43pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-12.svg",
+      "contentId": "angle-basics-1/angles-complementary-parallel-statement.svg",
       "originalId": "angles-complementary-parallel-statement.pdf",
       "width": "91.52pt",
       "height": "72.46pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-13.svg",
+      "contentId": "angle-basics-1/angles-complementary-parallel-solution.svg",
       "originalId": "angles-complementary-parallel-solution.pdf",
       "width": "120.78pt",
       "height": "103.36pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-14.svg",
+      "contentId": "angle-basics-1/angles-complementary-in-triangle.svg",
       "originalId": "angles-complementary-in-triangle.pdf",
       "width": "153.73pt",
       "height": "123.67pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-15.svg",
+      "contentId": "angle-basics-1/angles-sas-warning.svg",
       "originalId": "angles-sas-warning.pdf",
       "width": "240.45pt",
       "height": "77.45pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-16.svg",
+      "contentId": "angle-basics-1/angles-sss-proof.svg",
       "originalId": "angles-sss-proof.pdf",
       "width": "180.33pt",
       "height": "129.76pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-17.svg",
+      "contentId": "angle-basics-1/angles-sas-proof.svg",
       "originalId": "angles-sas-proof.pdf",
       "width": "190.6pt",
       "height": "165.53pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-18.svg",
+      "contentId": "angle-basics-1/angles-asa-proof.svg",
       "originalId": "angles-asa-proof.pdf",
       "width": "156.76pt",
       "height": "165.02pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-19.svg",
+      "contentId": "angle-basics-1/angles-Ssa-proof-one-solution.svg",
       "originalId": "angles-Ssa-proof-one-solution.pdf",
       "width": "116.57pt",
       "height": "129.18pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-20.svg",
+      "contentId": "angle-basics-1/angles-Ssa-proof-isosceles.svg",
       "originalId": "angles-Ssa-proof-isosceles.pdf",
       "width": "116.86pt",
       "height": "122.28pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-21.svg",
+      "contentId": "angle-basics-1/angles-Ssa-proof-two-solutions.svg",
       "originalId": "angles-Ssa-proof-two-solutions.pdf",
       "width": "191.58pt",
       "height": "154.75pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-22.svg",
+      "contentId": "angle-basics-1/angles-isosceles-triangle.svg",
       "originalId": "angles-isosceles-triangle.pdf",
       "width": "117.87pt",
       "height": "114.32pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-23.svg",
+      "contentId": "angle-basics-1/angles-equilateral.svg",
       "originalId": "angles-equilateral.pdf",
       "width": "107.91pt",
       "height": "97.32pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-24.svg",
+      "contentId": "angle-basics-1/angles-isosceles-right-triangle.svg",
       "originalId": "angles-isosceles-right-triangle.pdf",
       "width": "97.95pt",
       "height": "95.36pt",
       "scale": 1.0
     },
     {
-      "contentId": "angle-basics-1.cs-25.svg",
+      "contentId": "angle-basics-1/angles-90-60-30.svg",
       "originalId": "angles-90-60-30.pdf",
       "width": "146.09pt",
       "height": "131.24pt",
