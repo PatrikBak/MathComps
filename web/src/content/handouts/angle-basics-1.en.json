@@ -3620,6 +3620,150 @@
                     },
                     {
                       "type": "text",
+                      "text": ". This proof also works with other choices of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". If we take "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the foot of the perpendicular from\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we obtain the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and a right angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which lies opposite the longest side (the hypotenuse) "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", resp.\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – we apply "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". If we take "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the foot of the bisector of the interior angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB=AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the equal angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAM=\\angle CAM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " between them – we apply "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
                       "text": "."
                     }
                   ],
@@ -3741,7 +3885,151 @@
                     },
                     {
                       "type": "text",
-                      "text": "."
+                      "text": ". Similarly, we could take "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the foot of the bisector of the interior angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " – from the equal angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAM=\\angle CAM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABM=\\angle ACM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we again apply "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ASA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Taking "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be the midpoint of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", however, doesn't help here: we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BM=CM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " common, and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ABM=\\angle ACM=\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", but the angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies opposite "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which may be shorter than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (when the angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is obtuse), so even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SsA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cannot be applied in general – the lesson is that even with the right point, its precise definition matters (we will see this many more times)."
                     }
                   ],
                   "highligted": false
