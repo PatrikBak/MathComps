@@ -17,21 +17,24 @@ export type ImageType = 'problems' | 'handouts'
 export function getProblemImageUrl(contentId: string, type: ImageType): string {
   switch (type) {
     case 'handouts':
-      return `${getR2BaseUrl()}/handouts/images/${contentId}`
+      return `${getR2BaseUrl()}/handouts/${contentId}`
     case 'problems':
       return `${getApiBaseUrl()}/images/${type}/${contentId}`
   }
 }
 
 /**
- * Builds a public URL to a handout PDF by its filename.
- * PDFs are served from Cloudflare R2.
+ * Builds a public URL to a handout PDF by its filename. The handout's
+ * language-stripped slug is derived from the filename — both `<slug>.<lang>.pdf`
+ * and `<slug>.<lang>-skeleton.pdf` collapse to the same slug so every artefact
+ * lives in one folder on R2.
  *
  * @param filename - The PDF filename (e.g., "factorization.sk.pdf")
  * @returns The public URL to the PDF on R2
  */
 export function getHandoutPdfUrl(filename: string): string {
-  return `${getR2BaseUrl()}/handouts/pdfs/${filename}`
+  const slug = filename.replace(/\.[a-z]{2}(-skeleton)?\.pdf$/i, '')
+  return `${getR2BaseUrl()}/handouts/${slug}/${filename}`
 }
 
 /**

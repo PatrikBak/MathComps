@@ -35,7 +35,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "introduction-to-inequalities.sk-1.svg",
+                      "id": "introduction-to-inequalities/box.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3243,7 +3243,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "introduction-to-inequalities.sk-2.svg",
+                      "id": "introduction-to-inequalities/ag-proof.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -3588,7 +3588,7 @@
                   "content": [
                     {
                       "type": "image",
-                      "id": "introduction-to-inequalities.sk-1.svg",
+                      "id": "introduction-to-inequalities/box.svg",
                       "scale": 1.0,
                       "isInline": false
                     }
@@ -7616,14 +7616,14 @@
   },
   "images": [
     {
-      "contentId": "introduction-to-inequalities.sk-1.svg",
+      "contentId": "introduction-to-inequalities/box.svg",
       "originalId": "box.pdf",
       "width": "187.88pt",
       "height": "116.3pt",
       "scale": 1.0
     },
     {
-      "contentId": "introduction-to-inequalities.sk-2.svg",
+      "contentId": "introduction-to-inequalities/ag-proof.svg",
       "originalId": "ag-proof.pdf",
       "width": "210.76pt",
       "height": "64.28pt",
