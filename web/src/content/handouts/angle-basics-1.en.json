@@ -4419,7 +4419,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "BC",
+                        "text": "AB",
                         "isDisplay": false
                       },
                       {
@@ -4428,7 +4428,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "AB",
+                        "text": "BC",
                         "isDisplay": false
                       },
                       {
@@ -4446,7 +4446,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "A",
+                        "text": "C",
                         "isDisplay": false
                       },
                       {
@@ -4477,7 +4477,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4514,7 +4514,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC = 2\\cdot AB",
+                      "text": "AB = 2\\cdot BC",
                       "isDisplay": false
                     },
                     {
@@ -4532,7 +4532,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4550,7 +4550,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "AB' = AB",
+                      "text": "B'C = BC",
                       "isDisplay": false
                     },
                     {
@@ -4559,7 +4559,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4586,7 +4586,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle B'AC",
+                      "text": "\\angle B'CA",
                       "isDisplay": false
                     },
                     {
@@ -4595,7 +4595,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle BAC = 90^\\circ",
+                      "text": "\\angle BCA = 90^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4613,7 +4613,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "text": "\\triangle CBA \\cong \\triangle CB'A",
                       "isDisplay": false
                     },
                     {
@@ -4631,7 +4631,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4649,7 +4649,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "AB=AB'",
+                      "text": "BC=B'C",
                       "isDisplay": false
                     },
                     {
@@ -4680,7 +4680,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "A",
+                      "text": "C",
                       "isDisplay": false
                     },
                     {
@@ -4698,7 +4698,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BB' = 2\\cdot AB",
+                      "text": "BB' = 2\\cdot BC",
                       "isDisplay": false
                     },
                     {
@@ -4707,7 +4707,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC = 2\\cdot AB",
+                      "text": "AB = 2\\cdot BC",
                       "isDisplay": false
                     },
                     {
@@ -4719,7 +4719,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "BB' = BC = B'C,",
+                  "text": "BB' = AB = AB',",
                   "isDisplay": true
                 },
                 {
@@ -4731,7 +4731,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle BB'C",
+                      "text": "\\triangle ABB'",
                       "isDisplay": false
                     },
                     {
@@ -4749,7 +4749,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle ABC = \\angle B'BC = 60^\\circ",
+                      "text": "\\angle ABC = \\angle ABB' = 60^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4767,7 +4767,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\angle BCA = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
+                      "text": "\\angle BAC = 180^\\circ - 90^\\circ - 60^\\circ = 30^\\circ",
                       "isDisplay": false
                     },
                     {
@@ -4804,7 +4804,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\triangle ABC \\cong \\triangle AB'C",
+                      "text": "\\triangle CBA \\cong \\triangle CB'A",
                       "isDisplay": false
                     },
                     {
@@ -4859,7 +4859,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "BC",
+                      "text": "AB",
                       "isDisplay": false
                     },
                     {
@@ -5253,8 +5253,8 @@
     {
       "contentId": "angle-basics-1/angles-isosceles-right-triangle.svg",
       "originalId": "angles-isosceles-right-triangle.pdf",
-      "width": "97.95pt",
-      "height": "95.36pt",
+      "width": "124.77pt",
+      "height": "78.4pt",
       "scale": 1.0
     },
     {

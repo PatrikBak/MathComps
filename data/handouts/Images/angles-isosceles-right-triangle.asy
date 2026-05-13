@@ -1,9 +1,10 @@
 import _common;
 
 real leg = 65;
-pair A = (0, 0);
-pair B = (leg, 0);
-pair C = (0, leg);
+real half = leg / sqrt(2);
+pair A = (0, half);
+pair B = (-half, 0);
+pair C = ( half, 0);
 
 RightAngleMark(B, A, C);
 
@@ -14,6 +15,6 @@ Draw(A, B);
 Draw(C, B);
 Draw(C, A);
 
-LabeledDot(A, "A", SW);
-LabeledDot(B, "B", SE);
-LabeledDot(C, "C", NW);
+LabeledDot(A, "A", N);
+LabeledDot(B, "B", SW);
+LabeledDot(C, "C", SE);

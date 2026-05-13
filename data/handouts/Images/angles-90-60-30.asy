@@ -1,26 +1,26 @@
 import _common;
 
 real a = 55;
-pair B = (0, 0);
-pair A = (a, 0);
+pair B  = (0, 0);
+pair C  = (a, 0);
 pair Bp = (2 * a, 0);
-pair C = (a, a * sqrt(3));
+pair A  = (a, a * sqrt(3));
 
-AngleMark(A, B, C, LightBlue);
-RightAngleMark(B, A, C);
+AngleMark(C, B, A, LightBlue);
+RightAngleMark(A, C, B);
 
-Draw(B, A);
 Draw(B, C);
-Draw(C, A);
-Draw(A, Bp);
-Draw(Bp, C);
+Draw(B, A);
+Draw(A, C);
+Draw(C, Bp);
+Draw(Bp, A);
 
-LabeledDot(B, "B", SW);
-LabeledDot(C, "C", N);
+LabeledDot(B,  "B",  SW);
+LabeledDot(A,  "A",  N);
 LabeledDot(Bp, "B'", SE);
-LabeledDot(A, "A", S);
+LabeledDot(C,  "C",  S);
 
-EdgeLabel(B, C, "2a", W, distanceOffset = 8);
-EdgeLabel(C, Bp, "2a", E, distanceOffset = 8);
-EdgeLabel(B, A, "a", S, distanceOffset = 8);
-EdgeLabel(A, Bp, "a", S, distanceOffset = 8);
+EdgeLabel(B, A, "2a", W, distanceOffset = 8);
+EdgeLabel(A, Bp, "2a", E, distanceOffset = 8);
+EdgeLabel(B, C, "a",  S, distanceOffset = 8);
+EdgeLabel(C, Bp, "a", S, distanceOffset = 8);

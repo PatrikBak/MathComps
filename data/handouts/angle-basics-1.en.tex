@@ -256,23 +256,23 @@ A very handy fact useful in non-trivial problems is the following. One possible 
 \Problem{0}{}{
     A right triangle has its other two angles equal to $60^\circ$ and $30^\circ$ if and only if its hypotenuse is twice as long as the shorter leg.
 }{
-    Say $BC$ is the hypotenuse and is twice as long as the leg $AB$. The trick is to introduce a point $B'$ such that $A$ is the midpoint of segment $BB'$.
+    Say $AB$ is the hypotenuse and is twice as long as the leg $BC$. The trick is to introduce a point $B'$ such that $C$ is the midpoint of segment $BB'$.
 }{
-    Let our triangle have its right angle at vertex~$A$.
+    Let our triangle have its right angle at vertex~$C$.
 
-    \textit{($\Rightarrow$)} Assume $BC = 2\cdot AB$. Let $B'$ be the point such that $A$ is the midpoint of segment $BB'$. Then $AB' = AB$ and $A$ lies between $B$ and $B'$, so $\angle B'AC$ is in a linear pair with $\angle BAC = 90^\circ$, hence also equals $90^\circ$. We have $\triangle ABC \cong \triangle AB'C$ by $SAS$, since the angles at~$A$ are both right, the side~$AC$ is common, and $AB=AB'$.
+    \textit{($\Rightarrow$)} Assume $AB = 2\cdot BC$. Let $B'$ be the point such that $C$ is the midpoint of segment $BB'$. Then $B'C = BC$ and $C$ lies between $B$ and $B'$, so $\angle B'CA$ is in a linear pair with $\angle BCA = 90^\circ$, hence also equals $90^\circ$. We have $\triangle CBA \cong \triangle CB'A$ by $SAS$, since the angles at~$C$ are both right, the side~$AC$ is common, and $BC=B'C$.
 
     \Image{angles-90-60-30.pdf}
 
-    Since $A$ is the midpoint of $BB'$, we have $BB' = 2\cdot AB$, and from the assumption $BC = 2\cdot AB$. Together,
+    Since $C$ is the midpoint of $BB'$, we have $BB' = 2\cdot BC$, and from the assumption $AB = 2\cdot BC$. Together,
     $$
-    BB' = BC = B'C,
+    BB' = AB = AB',
     $$
-    so $\triangle BB'C$ is equilateral and all its angles are $60^\circ$. In particular, $\angle ABC = \angle B'BC = 60^\circ$. From the angle sum in $\triangle ABC$ we compute $\angle BCA = 180^\circ - 90^\circ - 60^\circ = 30^\circ$.
+    so $\triangle ABB'$ is equilateral and all its angles are $60^\circ$. In particular, $\angle ABC = \angle ABB' = 60^\circ$. From the angle sum in $\triangle ABC$ we compute $\angle BAC = 180^\circ - 90^\circ - 60^\circ = 30^\circ$.
 
-    \textit{($\Leftarrow$)} It is not hard to see that the reasoning of the previous paragraph can easily be reversed -- this time the key congruence $\triangle ABC \cong \triangle AB'C$ comes from $ASA$.
+    \textit{($\Leftarrow$)} It is not hard to see that the reasoning of the previous paragraph can easily be reversed -- this time the key congruence $\triangle CBA \cong \triangle CB'A$ comes from $ASA$.
 
-    \Remark Another solution is to note that by Thales' theorem, the circumcenter~$O$ of triangle $ABC$ is also the midpoint of the hypotenuse $BC$. We will return to this solution in more detail when we discuss circles.
+    \Remark Another solution is to note that by Thales' theorem, the circumcenter~$O$ of triangle $ABC$ is also the midpoint of the hypotenuse $AB$. We will return to this solution in more detail when we discuss circles.
 }
 
 \sec What to Remember
