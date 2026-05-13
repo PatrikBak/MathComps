@@ -24,17 +24,14 @@ export function getProblemImageUrl(contentId: string, type: ImageType): string {
 }
 
 /**
- * Builds a public URL to a handout PDF by its filename. The handout's
- * language-stripped slug is derived from the filename — both `<slug>.<lang>.pdf`
- * and `<slug>.<lang>-skeleton.pdf` collapse to the same slug so every artefact
- * lives in one folder on R2.
+ * Builds a public URL to a handout PDF by its filename. All handout PDFs live
+ * together in the flat `handouts/pdfs/` folder on R2.
  *
  * @param filename - The PDF filename (e.g., "factorization.sk.pdf")
  * @returns The public URL to the PDF on R2
  */
 export function getHandoutPdfUrl(filename: string): string {
-  const slug = filename.replace(/\.[a-z]{2}(-skeleton)?\.pdf$/i, '')
-  return `${getR2BaseUrl()}/handouts/${slug}/${filename}`
+  return `${getR2BaseUrl()}/handouts/pdfs/${filename}`
 }
 
 /**
