@@ -5,7 +5,10 @@
 # Per .asy file the pipeline is:
 #   1. Run asy with -noView to render the .asy to a PDF next to the source. asy is run with
 #      -cd <dir> so `import _common;` and other relative imports resolve next to the source file.
-#   2. Convert the PDF to SVG via Inkscape (matches the conversion path used by _Export-Ggb.ps1
+#   2. Patch the PDF's non-deterministic metadata (timestamps and IDs that the bundled Ghostscript
+#      stamps with wall-clock values) so re-rendering an unchanged .asy produces a byte-identical
+#      PDF and stops creating spurious git diffs.
+#   3. Convert the PDF to SVG via Inkscape (matches the conversion path used by _Export-Ggb.ps1
 #      so handout figures coming from either source render identically downstream).
 param(
   # One or more directories, .asy files, or PowerShell wildcards (e.g. 'angles-*.asy'). Default
@@ -62,7 +65,40 @@ function Convert-OneAsy {
     throw "asy failed (exit $($proc.ExitCode))"
   }
 
-  # 2. Convert the PDF to plain SVG via Inkscape. The .com launcher on PATH is the console
+  # 2. Replace the non-deterministic metadata that asy's bundled Ghostscript stamps with wall-clock
+  #    values (/CreationDate, /ModDate, /ID in the trailer plus a second copy of the dates and a
+  #    DocumentID UUID inside the XMP stream). With those derived from the .asy source instead,
+  #    re-rendering an unchanged .asy yields a byte-identical PDF and stops producing spurious git
+  #    diffs. The Windows builds of GS we have access to (asy's bundled 10.x and MiKTeX's 9.25)
+  #    ignore SOURCE_DATE_EPOCH and the -dOmit* flags, so we patch the bytes ourselves.
+  $mtimeUtc = (Get-Item -LiteralPath $AsyPath).LastWriteTimeUtc
+  # Date timestamps for the two formats Ghostscript emits: PDF date string in the trailer /Info,
+  # ISO 8601 in the XMP stream. UTC normalised so the field length doesn't depend on local TZ.
+  $pdfDate = "D:{0:yyyyMMddHHmmss}+00'00'" -f $mtimeUtc
+  $xmpDate = "{0:yyyy-MM-ddTHH:mm:ss}+00:00" -f $mtimeUtc
+  # Identifiers: SHA-256 of the .asy content gives 64 hex chars. First 32 supply the /ID halves
+  # (PDF spec calls for 16-byte values); next 32 fill the DocumentID UUID positions.
+  $hash = (Get-FileHash -LiteralPath $AsyPath -Algorithm SHA256).Hash
+  $idHex = $hash.Substring(0, 32)
+  $uuidHex = $hash.Substring(32, 32)
+  $uuid = '{0}-{1}-{2}-{3}-{4}' -f $uuidHex.Substring(0, 8), $uuidHex.Substring(8, 4), $uuidHex.Substring(12, 4), $uuidHex.Substring(16, 4), $uuidHex.Substring(20, 12)
+  # Read the PDF as Latin1 so each byte round-trips losslessly through a string (PDFs are mostly
+  # ASCII outside of stream contents, and our regexes never match inside binary streams).
+  $pdfBytes = [System.IO.File]::ReadAllBytes($finalPdf)
+  $pdfText = [System.Text.Encoding]::Latin1.GetString($pdfBytes)
+  # Trailer /Info dict.
+  $pdfText = [regex]::Replace($pdfText, "/CreationDate\(D:\d{14}[+\-]\d{2}'\d{2}'\)", "/CreationDate($pdfDate)")
+  $pdfText = [regex]::Replace($pdfText, "/ModDate\(D:\d{14}[+\-]\d{2}'\d{2}'\)", "/ModDate($pdfDate)")
+  $pdfText = [regex]::Replace($pdfText, "/ID \[<[0-9A-Fa-f]{32}><[0-9A-Fa-f]{32}>\]", "/ID [<$idHex><$idHex>]")
+  # XMP metadata stream (uncompressed in asy's output).
+  $pdfText = [regex]::Replace($pdfText, "<xmp:CreateDate>[^<]+</xmp:CreateDate>", "<xmp:CreateDate>$xmpDate</xmp:CreateDate>")
+  $pdfText = [regex]::Replace($pdfText, "<xmp:ModifyDate>[^<]+</xmp:ModifyDate>", "<xmp:ModifyDate>$xmpDate</xmp:ModifyDate>")
+  $pdfText = [regex]::Replace($pdfText, "xapMM:DocumentID='uuid:[0-9a-fA-F-]+'", "xapMM:DocumentID='uuid:$uuid'")
+  # Every replacement above is the same length as the value it replaced, so the PDF's xref byte
+  # offsets stay valid without rebuilding the table.
+  [System.IO.File]::WriteAllBytes($finalPdf, [System.Text.Encoding]::Latin1.GetBytes($pdfText))
+
+  # 3. Convert the PDF to plain SVG via Inkscape. The .com launcher on PATH is the console
   #    launcher that waits for inkscape.exe, so -Wait is enough.
   if (Test-Path -LiteralPath $finalSvg) { Remove-Item -LiteralPath $finalSvg -Force }
   $proc = Start-Process -FilePath $inkscape -ArgumentList @($finalPdf, '--pdf-poppler', '--export-type=svg', '--export-plain-svg', "--export-filename=$finalSvg") -Wait -PassThru
