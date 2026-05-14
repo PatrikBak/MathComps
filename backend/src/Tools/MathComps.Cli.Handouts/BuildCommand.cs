@@ -8,7 +8,6 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -60,6 +59,26 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         public bool SkipUpload { get; set; }
 
         /// <summary>
+        /// Whether to skip the Asymptote staleness check and recompilation.
+        /// Useful when the author is confident images are up to date and wants
+        /// to shave the per-handout dependency scan / or in CI where no Asymptote
+        /// </summary>
+        [CommandOption("--skip-asy")]
+        [Description("Skip Asymptote staleness check and recompilation")]
+        public bool SkipAsy { get; set; }
+
+        /// <summary>
+        /// Whether to unconditionally recompile every Asymptote-backed image, bypassing
+        /// the staleness check. Use after a change to <c>_common.asy</c> that alters
+        /// rendering of existing figures (e.g. palette tweak, modified helper function) —
+        /// such edits are intentionally NOT tracked by the dep graph since most
+        /// <c>_common.asy</c> edits are additive and harmless.
+        /// </summary>
+        [CommandOption("--force-asy")]
+        [Description("Recompile every Asymptote-backed image regardless of staleness")]
+        public bool ForceAsy { get; set; }
+
+        /// <summary>
         /// Path to the error log file for compiler output on failure.
         /// </summary>
         [CommandOption("--error-log")]
@@ -88,6 +107,17 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     private const string HandoutsR2Prefix = "handouts";
 
     /// <summary>
+    /// File name of the global Asymptote helper module imported by every figure.
+    /// Deliberately excluded from the dep graph used by staleness checks: edits to
+    /// <c>_common.asy</c> are almost always additive helpers that cannot affect
+    /// existing figures, so cascading invalidation across all ~30 figures every time
+    /// a helper is added is pure waste. When a change to <c>_common.asy</c> DOES
+    /// alter rendering of existing figures (palette tweak, modified function), the
+    /// author opts in via <c>--force-asy</c> to recompile everything.
+    /// </summary>
+    private const string GlobalAsyDepFileName = "_common.asy";
+
+    /// <summary>
     /// Derives the language-stripped handout slug from a .tex filename. Handles both
     /// main handouts (e.g. "factorization.cs.tex" -> "factorization") and their
     /// skeleton variants (e.g. "factorization.cs-skeleton.tex" -> "factorization").
@@ -109,22 +139,16 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Fixed paths relative to the tool's project directory.
+        // We take handout .tex sources from here
         var inputDirectory = new DirectoryInfo("../../../../data/handouts");
+
+        // ..And their images from here
+        var imagesDirectory = new DirectoryInfo(Path.Combine(inputDirectory.FullName, "Images"));
+
+        // ..And output jsons for the web rendered here
         var jsonOutputDirectory = new DirectoryInfo("../../../../web/src/content/handouts");
 
-        // Validate the input directory exists.
-        if (!inputDirectory.Exists)
-        {
-            AnsiConsole.MarkupLine($"[red]Error:[/] Input directory not found at '[yellow]{Markup.Escape(inputDirectory.FullName)}[/]'");
-            return 1;
-        }
-
-        // Ensure the JSON output directory exists.
-        if (!jsonOutputDirectory.Exists)
-            jsonOutputDirectory.Create();
-
-        // Resolve the uploader
+        // Resolve the uploader...We don't need it if we're skipping uploads.
         IFileUploader? uploader = null;
         if (!settings.SkipUpload)
         {
@@ -140,7 +164,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         List<FileInfo> inputFiles = [..
             settings.Patterns
                 .SelectMany(pattern => inputDirectory.GetFiles(pattern, SearchOption.TopDirectoryOnly))
-                .Where(file => !file.Name.Contains("-skeleton", StringComparison.OrdinalIgnoreCase))
+                .Where(file => !file.Name.Contains("-skeleton"))
         ];
 
         // Check if any files were found.
@@ -163,19 +187,40 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // Track which files failed for the final report.
         var failedFiles = new List<string>();
 
+        // .asy filenames already recompiled by an earlier handout in this run — language
+        // variants of the same handout reference the same figures, so without this every
+        // variant would re-run the same asy+inkscape pipeline.
+        var asyAlreadyRecompiled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         // Process each discovered handout file.
         foreach (var inputFile in inputFiles)
         {
+            // Log file
             AnsiConsole.MarkupLine($"[aqua]━━━ {Markup.Escape(inputFile.Name)} ━━━[/]");
 
             try
             {
-                // Step 1: Generate skeleton TeX
-                var skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules);
+                // Read the entire content of the .tex file into a string.
+                var texContent = File.ReadAllText(inputFile.FullName);
 
-                // Step 2: Compile TeX files (main + skeleton)
+                // Parse the TeX content into the structured Document object model.
+                var (document, unknownCommands) = TexStringParser.ParseDocument(texContent, rules);
+
+                // Ensure every .asy-backed image is fresh on disk before anything downstream
+                // reads the compiled PDF or SVG. --force-asy bypasses the staleness check and
+                // recompiles every figure unconditionally.
+                if (!settings.SkipAsy)
+                    EnsureAsyImagesFresh(document, imagesDirectory, settings.ForceAsy, asyAlreadyRecompiled);
+                else
+                    AnsiConsole.MarkupLine("  [yellow]⚠ Asy compile skipped (--skip-asy)[/]");
+
+                // Generate the skeleton and compile both TeX files.
+                FileInfo? skeletonFile = null;
                 if (!settings.SkipCompile)
                 {
+                    // Generate the skeleton .tex
+                    skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules);
+
                     // Compile the main handout
                     CompileTexFile(inputFile, inputDirectory, settings.Compiler, settings.ErrorLog);
 
@@ -183,27 +228,19 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                     CompileTexFile(skeletonFile, inputDirectory, settings.Compiler, settings.ErrorLog);
                 }
 
-                // Step 3: Parse TeX to JSON and process images
+                // Process images and prepare uploads
                 var pendingImageUploads = new List<PendingUpload>();
-
-                // Read the entire content of the .tex file into a string.
-                var texContent = File.ReadAllText(inputFile.FullName);
-
-                // Parse the TeX content into the structured Document object model.
-                var (document, unknownCommands) = TexStringParser.ParseDocument(texContent, rules);
 
                 // Process images in the document content and collect their metadata
                 var imageResult = ProcessHandoutImages(document, inputFile.Name, settings.SkipUpload ? null : pendingImageUploads);
 
-                // Create a wrapper object containing both document and images
-                var handoutData = new
+                // Serialize the handout data (document + images) to an indented JSON string
+                var jsonString = new
                 {
                     Document = imageResult.ProcessedDocument,
                     Images = imageResult.DiscoveredImages
-                };
-
-                // Serialize the handout data (document + images) to an indented JSON string
-                var jsonString = handoutData.ToJson();
+                }
+                .ToJson();
 
                 // Normalize line endings to LF (Unix-style) for Git compatibility
                 var normalizedContent = jsonString.Replace("\r\n", "\n") + "\n";
@@ -215,24 +252,33 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                 // Write the JSON output
                 File.WriteAllText(outputFilePath, normalizedContent);
 
+                // Report success
                 AnsiConsole.MarkupLine($"  [green]✓ Parsed:[/] {Markup.Escape(outputFileName)}");
 
                 // If unknown commands were found, add them to our report dictionary.
                 if (!unknownCommands.IsEmpty)
                     allUnknownCommands[inputFile.Name] = unknownCommands;
 
-                // Step 4: Upload images and PDFs to R2 (unless skipped)
+                // Upload images and PDFs to R2 (unless skipped)
                 if (uploader is not null)
                 {
-                    // Upload queued images asynchronously
+                    // Upload queued images, logging each so the publish run shows what landed in R2
                     foreach (var upload in pendingImageUploads)
+                    {
                         await uploader.UploadAsync(upload.SourcePath, upload.R2Key);
+                        AnsiConsole.MarkupLine($"  [green]✓ Image uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
+                    }
 
-                    // Upload PDFs
-                    await UploadHandoutPdfAsync(inputFile, inputDirectory, uploader);
+                    // PDFs only when we actually compiled them; otherwise the on-disk copies are
+                    // from an earlier run and we'd risk publishing binaries that don't match the source.
+                    if (skeletonFile is not null)
+                    {
+                        // Upload the main handout PDF
+                        await UploadHandoutPdfAsync(inputFile, inputDirectory, uploader);
 
-                    // Upload the skeleton PDF
-                    await UploadHandoutPdfAsync(skeletonFile, inputDirectory, uploader);
+                        // Upload the skeleton PDF
+                        await UploadHandoutPdfAsync(skeletonFile, inputDirectory, uploader);
+                    }
                 }
             }
             catch (Exception exception)
@@ -382,6 +428,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         var skeletonPath = Path.Combine(outputDirectory.FullName, skeletonName);
         File.WriteAllText(skeletonPath, builder.ToString());
 
+        // Success message
         AnsiConsole.MarkupLine($"  [green]✓ Skeleton:[/] {Markup.Escape(skeletonName)} ({allStatements.Count} statements)");
 
         // Return the generated skeleton file
@@ -405,48 +452,32 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // Run two passes as required by TeX for cross-references
         for (var pass = 1; pass <= 2; pass++)
         {
+            // Status message
             AnsiConsole.MarkupLine($"  [dim]Compiling {Markup.Escape(texFile.Name)} (pass {pass}/2)...[/]");
 
-            // Split the compiler string into executable and any extra flags
-            var compilerParts = compiler.Split(' ', 2);
+            // Split the configured compiler string into executable + flags (whitespace-separated, no quoted args)
+            var compilerParts = compiler.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var compilerExecutable = compilerParts[0];
-            var compilerFlags = compilerParts.Length > 1 ? $"{compilerParts[1]} " : "";
 
-            // Configure the compiler process
-            var processInfo = new ProcessStartInfo
-            {
-                FileName = compilerExecutable,
-                Arguments = $"{compilerFlags}{texFile.Name}",
-                WorkingDirectory = workingDirectory.FullName,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+            // Pass each flag as its own argv entry plus the input .tex filename at the end
+            string[] arguments = [.. compilerParts.Skip(1), texFile.Name];
 
-            // Start the compiler process
-            using var process = Process.Start(processInfo)
-                ?? throw new InvalidOperationException($"Failed to start '{compiler}'");
-
-            // Read output to prevent deadlocks on redirected streams
-            var standardOutput = process.StandardOutput.ReadToEnd();
-            var standardError = process.StandardError.ReadToEnd();
-
-            // Wait for the process to finish
-            process.WaitForExit();
+            // Run the compiler; ProcessRunner drains stdout/stderr and reports the exit code
+            var result = ProcessRunner.Run(compilerExecutable, arguments, workingDirectory.FullName);
 
             // Check if compilation failed
-            if (process.ExitCode != 0)
+            if (result.ExitCode != 0)
             {
                 // Append the full compiler output to the error log for debugging
-                File.AppendAllText(errorLog, $"=== {texFile.Name} (pass {pass}) ===\n{standardOutput}\n{standardError}\n");
+                File.AppendAllText(errorLog, $"=== {texFile.Name} (pass {pass}) ===\n{result.Stdout}\n{result.Stderr}\n");
 
                 // Throw with context about which file and pass failed
                 throw new InvalidOperationException(
-                    $"Compilation of '{texFile.Name}' failed on pass {pass} (exit code {process.ExitCode}). See errors.log for details.");
+                    $"Compilation of '{texFile.Name}' failed on pass {pass} (exit code {result.ExitCode}). See errors.log for details.");
             }
         }
 
+        // Success message
         AnsiConsole.MarkupLine($"  [green]✓ Compiled:[/] {Markup.Escape(Path.ChangeExtension(texFile.Name, ".pdf"))}");
     }
 
@@ -473,7 +504,11 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
 
         // All handout PDFs share the flat handouts/pdfs/ folder
         var r2Key = ToHandoutR2Key($"pdfs/{pdfFileName}");
+
+        // Do the upload
         await fileUploader.UploadAsync(sourcePdfPath, r2Key);
+
+        // Log success
         AnsiConsole.MarkupLine($"  [green]✓ PDF uploaded:[/] {Markup.Escape(pdfFileName)}");
     }
 
@@ -540,5 +575,249 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         );
     }
 
+    /// <summary>
+    /// Walks the parsed <see cref="Document"/> and returns the set of distinct
+    /// image identifiers it references. For handouts these are <c>&lt;name&gt;.pdf</c>
+    /// strings — the same ids that <see cref="ProcessHandoutImages"/> would later
+    /// resolve to SVGs.
+    /// </summary>
+    /// <param name="document">The parsed document to scan.</param>
+    /// <returns>The distinct image ids referenced anywhere in the document.</returns>
+    private static ImmutableHashSet<string> CollectImageIds(Document document)
+    {
+        // Accumulator for image ids discovered during the traversal
+        var idsBuilder = ImmutableHashSet.CreateBuilder<string>();
 
+        // Walk every section's content tree; the side-effecting closure captures image ids
+        foreach (var section in document.Sections)
+        {
+            // ContentTree.Map recurses into every nested container (paragraphs, exercises,
+            // problem hints, theorem proofs, list items, etc.) — same coverage as the image processor
+            ContentTree.Map(section.Text.Content, node =>
+            {
+                // Image nodes are the only nodes we care about; everything else passes through
+                if (node is Image image)
+                    idsBuilder.Add(image.Id);
+
+                // Return the same reference to signal "no transformation"
+                return node;
+            });
+        }
+
+        // Frozen result for staleness lookups
+        return idsBuilder.ToImmutable();
+    }
+
+    /// <summary>
+    /// Resolves the transitive set of source files that a given <c>.asy</c> figure
+    /// depends on. Walks <c>import &lt;name&gt;;</c> and <c>include "&lt;name.asy&gt;";</c>
+    /// directives, resolving each to a sibling file in <paramref name="imagesDir"/>.
+    /// Built-in Asymptote modules (e.g. <c>three</c>) resolve to no file and are ignored.
+    /// </summary>
+    /// <param name="asyPath">Absolute path to the <c>.asy</c> file to scan.</param>
+    /// <param name="imagesDir">Directory containing handout figure sources.</param>
+    /// <param name="memo">Shared cache across the batch so shared files (<c>_common.asy</c>, family-shared files) are scanned once.</param>
+    /// <returns>The <c>.asy</c> file itself plus every transitively resolved dependency.</returns>
+    private static ImmutableHashSet<string> ResolveAsyDeps(
+        string asyPath,
+        DirectoryInfo imagesDir,
+        Dictionary<string, ImmutableHashSet<string>> memo)
+    {
+        // Memo hit — shared file already scanned by a sibling figure
+        if (memo.TryGetValue(asyPath, out var cached))
+            return cached;
+
+        // Seed with the file itself; transitive deps grow the set below
+        var depsBuilder = ImmutableHashSet.CreateBuilder<string>();
+        depsBuilder.Add(asyPath);
+
+        // Read once for both import and include scans
+        var content = File.ReadAllText(asyPath);
+
+        // Resolve a candidate dependency: relative to imagesDir and only if the file exists.
+        // Unresolved candidates (built-in asy modules like `three`) are silently dropped.
+        void TryAddDep(string fileName)
+        {
+            // Exclude the global helper module from the dep graph (see GlobalAsyDepFileName remarks)
+            if (string.Equals(fileName, GlobalAsyDepFileName, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // Combine with the figures directory; absolute path keeps the memo key stable
+            var candidate = Path.Combine(imagesDir.FullName, fileName);
+
+            // Skip anything that doesn't map to a real .asy in our figures dir
+            if (!File.Exists(candidate))
+                return;
+
+            // Recursively pull in the candidate's own deps and union them in
+            foreach (var dep in ResolveAsyDeps(candidate, imagesDir, memo))
+                depsBuilder.Add(dep);
+        }
+
+        // `import <name>;` — bare module name, treat as `<name>.asy` in the figures dir
+        foreach (Match match in Regex.Matches(content, @"^\s*import\s+([A-Za-z_][A-Za-z0-9_]*)\s*;", RegexOptions.Multiline))
+            TryAddDep(match.Groups[1].Value + ".asy");
+
+        // `include "<path>";` — quoted file path; the extension is optional in Asymptote so normalise it
+        foreach (Match match in Regex.Matches(content, @"^\s*include\s+""([^""]+)""\s*;", RegexOptions.Multiline))
+        {
+            // Preserve caller-supplied extension; otherwise normalise to .asy
+            var raw = match.Groups[1].Value;
+            var fileName = raw.EndsWith(".asy", StringComparison.OrdinalIgnoreCase) ? raw : raw + ".asy";
+            TryAddDep(fileName);
+        }
+
+        // `include <name>;` — unquoted module form, same resolution as the bare `import`
+        foreach (Match match in Regex.Matches(content, @"^\s*include\s+([A-Za-z_][A-Za-z0-9_]*)\s*;", RegexOptions.Multiline))
+            TryAddDep(match.Groups[1].Value + ".asy");
+
+        // Freeze and memoize for future lookups
+        var result = depsBuilder.ToImmutable();
+        memo[asyPath] = result;
+        return result;
+    }
+
+    /// <summary>
+    /// Determines whether a figure's compiled outputs are stale relative to its source(s).
+    /// A figure is stale when either output (PDF or SVG) is missing, or when any source
+    /// in <paramref name="sources"/> has a newer mtime than the OLDER of the two outputs.
+    /// </summary>
+    /// <param name="sources">The source files that contribute to the compiled outputs (the .asy plus its transitive includes/imports).</param>
+    /// <param name="pdfPath">Absolute path to the figure's compiled PDF.</param>
+    /// <param name="svgPath">Absolute path to the figure's compiled SVG.</param>
+    /// <returns><c>true</c> if a recompile is required; <c>false</c> if both outputs are up to date.</returns>
+    private static bool IsImageStale(ImmutableHashSet<string> sources, string pdfPath, string svgPath)
+    {
+        // A missing output unambiguously means the figure must be (re)compiled
+        if (!File.Exists(pdfPath) || !File.Exists(svgPath))
+            return true;
+
+        // Compare against the OLDER output — if either is behind the source, we need to rebuild
+        var pdfMtime = File.GetLastWriteTimeUtc(pdfPath);
+        var svgMtime = File.GetLastWriteTimeUtc(svgPath);
+        var oldestOutput = pdfMtime < svgMtime ? pdfMtime : svgMtime;
+
+        // Any source newer than the older output means the outputs are out of sync with the source
+        return sources.Any(source => File.GetLastWriteTimeUtc(source) > oldestOutput);
+    }
+
+    /// <summary>
+    /// Invokes <c>_Export-Asy.ps1</c> via PowerShell 7+ (<c>pwsh</c>) with an explicit list
+    /// of stale <c>.asy</c> files. The script handles both the asy→PDF render and the
+    /// Inkscape PDF→SVG conversion.
+    /// </summary>
+    /// <param name="staleAsyFileNames">Filenames (not absolute paths) of stale <c>.asy</c> files inside <paramref name="imagesDir"/>.</param>
+    /// <param name="imagesDir">Directory containing the <c>.asy</c> files and the export script.</param>
+    private static void RunAsyExportScript(IReadOnlyList<string> staleAsyFileNames, DirectoryInfo imagesDir)
+    {
+        // Locate the export script next to the .asy sources
+        var scriptPath = Path.Combine(imagesDir.FullName, "_Export-Asy.ps1");
+
+        // Build the pwsh argv: hardening flags, then the script path, then the script's $Path varargs.
+        // -NoProfile skips $PROFILE (faster, deterministic); -ExecutionPolicy Bypass avoids signing issues.
+        string[] arguments = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath, .. staleAsyFileNames];
+
+        // Run the export script under PowerShell 7+
+        var result = ProcessRunner.Run("pwsh", arguments, imagesDir.FullName);
+
+        // Non-zero exit means at least one .asy failed — surface everything for debugging
+        if (result.ExitCode != 0)
+            throw new InvalidOperationException(
+                $"Asymptote export script failed (exit {result.ExitCode}).\n--- stdout ---\n{result.Stdout}\n--- stderr ---\n{result.Stderr}");
+    }
+
+    /// <summary>
+    /// Checks every <c>.asy</c>-backed image referenced by the document for staleness
+    /// (against its own source plus its transitive <c>include</c>/<c>import</c> deps,
+    /// excluding the global <c>_common.asy</c>) and batch-recompiles only the stale
+    /// ones via <c>_Export-Asy.ps1</c>. Images that have no sibling <c>.asy</c> (raster
+    /// or externally-authored PDFs) are silently skipped — those are not produced by
+    /// the asy pipeline.
+    /// </summary>
+    /// <param name="document">The parsed handout document whose images should be ensured fresh.</param>
+    /// <param name="imagesDir">Directory containing the <c>.asy</c> sources, compiled PDFs/SVGs, and the export script.</param>
+    /// <param name="forceRecompile">When true, every <c>.asy</c>-backed image is recompiled regardless of staleness — used after a semantic <c>_common.asy</c> edit.</param>
+    /// <param name="alreadyRecompiled">Cross-handout set of <c>.asy</c> filenames already recompiled in this CLI run; entries here are treated as fresh and not requeued. Updated with each batch.</param>
+    private static void EnsureAsyImagesFresh(Document document, DirectoryInfo imagesDir, bool forceRecompile, HashSet<string> alreadyRecompiled)
+    {
+        // Collect the set of image ids referenced anywhere in the document
+        var imageIds = CollectImageIds(document);
+
+        // Shared dep memo across this handout — family-shared files are scanned once even if every figure in the family imports them
+        var depMemo = new Dictionary<string, ImmutableHashSet<string>>();
+
+        // Stale .asy filenames to batch-compile; populated as we walk the image set
+        var staleFileNames = new List<string>();
+
+        // Count of asy-backed images that turned out to already be fresh — purely for the summary line
+        var freshCount = 0;
+
+        // Walk every distinct image id; partition into asy-backed-fresh, asy-backed-stale, or non-asy (skipped)
+        foreach (var imageId in imageIds)
+        {
+            // Image.Id is "<name>.pdf" for handouts; the backing source has the same stem with a .asy extension
+            var asyFileName = Path.ChangeExtension(imageId, ".asy");
+            var asyPath = Path.Combine(imagesDir.FullName, asyFileName);
+
+            // No sibling .asy means this image is externally authored (raster, hand-drawn PDF, etc.) — leave it alone
+            if (!File.Exists(asyPath))
+                continue;
+
+            // An earlier handout in this run already recompiled this figure — count it as fresh, don't requeue
+            if (alreadyRecompiled.Contains(asyFileName))
+            {
+                freshCount++;
+                continue;
+            }
+
+            // Outputs live next to the source under the same stem
+            var pdfPath = Path.Combine(imagesDir.FullName, imageId);
+            var svgPath = Path.Combine(imagesDir.FullName, Path.ChangeExtension(imageId, ".svg"));
+
+            // Is this stale?
+            bool stale;
+
+            // Force flag short-circuits the dep walk entirely; 
+            if (forceRecompile)
+            {
+                stale = true;
+            }
+            else
+            {
+                // Otherwise compare source mtimes against output mtimes for the file and its deps
+                var deps = ResolveAsyDeps(asyPath, imagesDir, depMemo);
+                stale = IsImageStale(deps, pdfPath, svgPath);
+            }
+
+            // Stale ⇒ queue for batch compile; 
+            if (stale)
+            {
+                AnsiConsole.MarkupLine($"  [yellow]↻ Asy:[/] recompiling {Markup.Escape(asyFileName)}");
+                staleFileNames.Add(asyFileName);
+            }
+            // fresh ⇒ bump the count for the summary
+            else
+            {
+                freshCount++;
+            }
+        }
+
+        // Nothing to recompile...
+        if (staleFileNames.Count == 0)
+        {
+            // Emit a summary if any asy-backed images were inspected
+            if (freshCount > 0)
+                AnsiConsole.MarkupLine($"  [green]✓ Asy:[/] all {freshCount} image(s) fresh");
+
+            return;
+        }
+
+        // One pwsh invocation for the whole batch — _Export-Asy.ps1 iterates internally
+        RunAsyExportScript(staleFileNames, imagesDir);
+        AnsiConsole.MarkupLine($"  [green]✓ Asy:[/] {staleFileNames.Count} image(s) recompiled");
+
+        // Record what we just compiled so later handouts in this run don't redo the same work
+        foreach (var fileName in staleFileNames)
+            alreadyRecompiled.Add(fileName);
+    }
 }
