@@ -24,6 +24,13 @@
 \newif\ifDisplayTexts
 \DisplayTextstrue
 
+% Toggle to inline hints/solutions under each Problem and Exercise (review mode)
+\newif\ifReviewMode
+\ReviewModefalse
+
+% Render #1 if solutions should be inline (review mode OR display-texts), else #2
+\long\def\IfShowingTexts#1#2{\ifReviewMode#1\else\ifDisplayTexts#1\else#2\fi\fi}
+
 % Prints the title of the handout
 \def\Title#1{\centerline{\typosize[18/]\bf #1}\medskip}
 % Prints the author of the handout
@@ -56,6 +63,7 @@
     \def\captionSolution{Řešení}%
     \def\captionProblem{Úloha}%
     \def\captionRemark{Poznámka}%
+    \def\captionHint{Návod}%
     \def\captionProblemSolutions{Řešení k úlohám}
     \def\captionExerciseSolutions{Řešení ke cvičením}
     \def\captionHints##1{%
@@ -93,6 +101,7 @@
     \def\captionSolution{Riešenie}%
     \def\captionProblem{Úloha}%
     \def\captionRemark{Poznámka}%
+    \def\captionHint{Návod}%
     \def\captionProblemSolutions{Riešenia k úlohám}
     \def\captionExerciseSolutions{Riešenia k cvičeniam}
     \def\captionHints##1{%
@@ -130,6 +139,7 @@
     \def\captionSolution{Solution}%
     \def\captionProblem{Problem}%
     \def\captionRemark{Remark}%
+    \def\captionHint{Hint}%
     \def\captionProblemSolutions{Solutions to problems}
     \def\captionExerciseSolutions{Solutions to exercises}
     \def\captionHints##1{%
@@ -252,6 +262,9 @@
 		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
 		\enskip\saferead{#2}\safepar%
 	}%
+	\ifReviewMode%
+		\safepar{\em \captionSolution.}\enskip\saferead{#3}\endblock%
+	\fi%
 }
 
 % #1 - Source (might be empty)
@@ -297,11 +310,9 @@
 		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
 		\enskip\saferead{#2}%
 	}%
-	\ifDisplayTexts%
-		\safepar{\em \captionSolution.}\enskip\saferead{#3}\endblock%
-	\else%
-		\safepar\medskip%	
-	\fi%
+	\IfShowingTexts%
+    {\safepar{\em \captionSolution.}\enskip\saferead{#3}\endblock}%
+    {\safepar\medskip}%
 }
 
 % A helper macro which prints the given number of stars
@@ -417,6 +428,19 @@
     %
     % Update max hints
     \UpdateMaxHints{\the\numexpr\problemArgsCount-1\relax}%
+    %
+    % In review mode, print each hint and the solution inline below the problem
+    \ifReviewMode%
+      \currentArgIndex=1\relax%
+      \loop\ifnum\currentArgIndex<\problemArgsCount%
+        \safepar{\em \captionHint\ \the\currentArgIndex.}\enskip%
+        \csname p\the\problems-hint\the\currentArgIndex\endcsname%
+        \advance\currentArgIndex by 1\relax%
+      \repeat%
+      \safepar{\em \captionSolution.}\enskip%
+      \csname p\the\problems-solution\endcsname%
+      \endblock%
+    \fi%
   \fi%
 }
 
@@ -425,15 +449,19 @@
 
 % Displays the section with all problem solutions
 \def\DisplayProblemSolutions{%
-  % Use Opmac \sec for the header
-  \csname\string\sec:M\endcsname{\captionProblemSolutions}
-  %
-  % Display each solution
-	\loop\ifnum\displayedProblemSolutions<\problems%
-		\advance\displayedProblemSolutions by 1\relax%
-		{\bf \captionProblem\ \the\displayedProblemSolutions.} %
-		\csname p\the\displayedProblemSolutions-solution\endcsname\endgraf%
-	\repeat%	
+  % In review mode, solutions already appear inline under each problem
+  \ifReviewMode\else%
+    % Here we are in the non-review mode
+    % Use Opmac \sec for the header
+    \csname\string\sec:M\endcsname{\captionProblemSolutions}
+    %
+    % Display each solution
+  	\loop\ifnum\displayedProblemSolutions<\problems%
+  		\advance\displayedProblemSolutions by 1\relax%
+  		{\bf \captionProblem\ \the\displayedProblemSolutions.} %
+  		\csname p\the\displayedProblemSolutions-solution\endcsname\endgraf%
+  	\repeat%
+  \fi%
 }
 
 % The counter for displayed exercise solutions 
@@ -441,15 +469,19 @@
 
 % Displays the section with all exercise solutions
 \def\DisplayExerciseSolutions{%
-  % Use Opmac \sec for the header
-  \csname\string\sec:M\endcsname{\captionExerciseSolutions}
-  % 
-  % Display each solution
-	\loop\ifnum\displayedExerciseSolutions<\exercises%
-		\advance\displayedExerciseSolutions by 1\relax%
-		{\bf \captionExercise\ \the\displayedExerciseSolutions.}\enskip%
-		\csname e\the\displayedExerciseSolutions-solution\endcsname\endgraf%
-	\repeat%	
+  % In review mode, solutions already appear inline under each exercise
+  \ifReviewMode\else%
+    % Here we are in the non-review mode
+    % Use Opmac \sec for the header
+    \csname\string\sec:M\endcsname{\captionExerciseSolutions}
+    %
+    % Display each solution
+  	\loop\ifnum\displayedExerciseSolutions<\exercises%
+  		\advance\displayedExerciseSolutions by 1\relax%
+  		{\bf \captionExercise\ \the\displayedExerciseSolutions.}\enskip%
+  		\csname e\the\displayedExerciseSolutions-solution\endcsname\endgraf%
+  	\repeat%
+  \fi%
 }
 
 
@@ -458,7 +490,11 @@
 
 % Entry point for displaying all hints recursively
 \def\DisplayHints{%
-  \DisplayHintsLoop%
+  % In review mode, hints already appear inline under each problem
+  \ifReviewMode\else%
+    % Here we are in the non-review mode
+    \DisplayHintsLoop%
+  \fi%
 }
 
 % Recursive Loop
