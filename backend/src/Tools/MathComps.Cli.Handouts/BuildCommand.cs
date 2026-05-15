@@ -192,6 +192,20 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // variant would re-run the same asy+inkscape pipeline.
         var asyAlreadyRecompiled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        // R2 keys already pushed in this run — language variants share image keys, so the
+        // second variant of a handout skips re-uploading what the first variant just sent.
+        var uploadedR2Keys = new HashSet<string>(StringComparer.Ordinal);
+
+        // Persistent ledger mapping each R2 key to the SVG mtime that was last pushed under it.
+        // An image is fresh on R2 exactly when its current mtime is not newer than the value
+        // recorded here, regardless of how/when it was generated (asy pipeline inside the build,
+        // manual `asy` compile beforehand, AI invoking the export script directly, partial runs
+        // that only touched a subset of handouts). Missing entry ⇒ never uploaded ⇒ must push.
+        var uploadStatePath = Path.Combine(inputDirectory.FullName, ".r2-uploads.json");
+        var uploadState = File.Exists(uploadStatePath)
+            ? File.ReadAllText(uploadStatePath).FromJson<Dictionary<string, DateTime>>()
+            : [];
+
         // Process each discovered handout file.
         foreach (var inputFile in inputFiles)
         {
@@ -214,8 +228,10 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                 else
                     AnsiConsole.MarkupLine("  [yellow]⚠ Asy compile skipped (--skip-asy)[/]");
 
-                // Generate the skeleton and compile both TeX files.
+                // Prepare the skeleton file info, should we generate it
                 FileInfo? skeletonFile = null;
+
+                // If we're actuallly compiling
                 if (!settings.SkipCompile)
                 {
                     // Generate the skeleton .tex
@@ -262,12 +278,44 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                 // Upload images and PDFs to R2 (unless skipped)
                 if (uploader is not null)
                 {
-                    // Upload queued images, logging each so the publish run shows what landed in R2
-                    foreach (var upload in pendingImageUploads)
+                    // Partition the queued image uploads: drop ones already pushed in this run
+                    // (a sibling language variant covered the same R2 key) and ones whose current
+                    // on-disk SVG mtime matches the value recorded the last time we uploaded under
+                    // that key (⇒ same bytes already on R2). What remains is the set of SVGs that
+                    // are either brand-new (no ledger entry) or have been rewritten on disk since
+                    // their last successful push.
+                    var uploadsToSend = pendingImageUploads
+                        .Where(upload => !uploadedR2Keys.Contains(upload.R2Key))
+                        .Where(upload => !uploadState.TryGetValue(upload.R2Key, out var lastMtime)
+                            || File.GetLastWriteTimeUtc(upload.SourcePath) > lastMtime)
+                        .ToList();
+
+                    // How many we filtered out — surfaced in the summary line below.
+                    var skippedUploadCount = pendingImageUploads.Count - uploadsToSend.Count;
+
+                    // Handle the uploads sequentially
+                    foreach (var upload in uploadsToSend)
                     {
+                        // Capture the SVG mtime up front — this is the version we're about to push
+                        // and want to record as "the bytes R2 has now" once the upload succeeds.
+                        var svgMtime = File.GetLastWriteTimeUtc(upload.SourcePath);
+
+                        // Push the image
                         await uploader.UploadAsync(upload.SourcePath, upload.R2Key);
+
+                        // Mark this R2 key as handled so language variants later in this run skip it...
+                        uploadedR2Keys.Add(upload.R2Key);
+
+                        // ..And persist the mtime we just pushed so the NEXT run knows R2 has this version
+                        uploadState[upload.R2Key] = svgMtime;
+
+                        // Per-image success log
                         AnsiConsole.MarkupLine($"  [green]✓ Image uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
                     }
+
+                    // Summary line so the publish run shows that unchanged images were intentionally skipped.
+                    if (skippedUploadCount > 0)
+                        AnsiConsole.MarkupLine($"  [dim]· {skippedUploadCount} image(s) unchanged, skipped upload[/]");
 
                     // PDFs only when we actually compiled them; otherwise the on-disk copies are
                     // from an earlier run and we'd risk publishing binaries that don't match the source.
@@ -292,6 +340,18 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         }
 
         // All handout files processed
+
+        // If we did any uploads, update the upload state file
+        if (uploader is not null)
+        {
+            // Prepare the sorted ledges, sorted so the file is human-readable for the occasional manual inspection.
+            var sortedState = uploadState
+                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
+                .ToDictionary(entry => entry.Key, entry => entry.Value);
+
+            // Persist the upload ledger
+            File.WriteAllText(uploadStatePath, sortedState.ToJson());
+        }
 
         // Report unknown commands if any were found.
         if (allUnknownCommands.Count != 0)
