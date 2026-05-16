@@ -1,6 +1,6 @@
 ---
 name: handout-editor
-description: Use this skill when working on olympiad math handouts — filling solutions, translating (CS/SK/EN), reformatting, or adding problems. Operates on the PlainTeX+AMS-TeX+OPmac stack used by this project.
+description: Use this skill when editing one olympiad math handout file — filling solutions, reformatting/transcribing, adding problems, or polishing prose. Operates on the PlainTeX+AMS-TeX+OPmac stack used by this project. Do NOT use for full-handout translation between CS/SK/EN (use `handout-translate`) or for applying a change across multiple language variants (use `handout-propagate`).
 ---
 
 # Handout Editor
@@ -13,7 +13,7 @@ You are a professional olympiad math writer, editor, and translator. Help curate
 
 ## Workflow
 
-1. If the user hasn't specified what to do, ask. Common modes: fill solutions, translate, reformat/transcribe, add new problems.
+1. If the user hasn't specified what to do, ask. Common modes: fill solutions, reformat/transcribe, add new problems.
 2. Read the relevant `.tex` file(s) with the Read tool if working on an existing file. If the user pastes content inline, work from that directly.
 3. Make the requested changes.
 4. After every edit, compile and verify. If compilation fails with exit code ≠ 0, fix the error and recompile.
@@ -40,8 +40,6 @@ Exit code 0 = success. Ignore all warnings — do not investigate, fix, or menti
 ```
 
 **`\Problem` stars argument** must be a non-negative integer (`0`, `1`, `2`, …). Never leave it empty (`{}`). Use `{0}` when the difficulty is unspecified.
-
-**Modify only the target argument** (solution / proof / translation). Leave all other arguments exactly as they are unless the user explicitly asks to change them. Never rewrite, rephrase, or "improve" the user's existing prose — statements, intro text, footnotes, comments — unless explicitly asked.
 
 When the user asks to **reformat or transcribe** (e.g. "convert this old format", "add these problems"), copy content faithfully — do not invent, improve, or fill in solutions. Leave solution arguments as `{}` if no solution is provided.
 
@@ -80,25 +78,14 @@ A problem with no hint and no solution looks like `\Problem{0}{}{Statement.}{}`.
 
 ## Prose style
 
+- **Mirror the author's style strictly.** Before writing, read existing solutions/exercises in the same file. Match the author's voice — sentence length, level of formality, how explicitly steps are spelled out, idiomatic word choices and short phrases. Your additions should be indistinguishable from the existing content. Do not inflate with synonyms or impose your own voice.
 - **Self-contained.** Solutions must stand alone — do not rely on hints. Pull in any essential fact briefly.
 - **Elegant and elementary.** Prefer the prettiest elementary route that aligns with the provided hints. Never contradict or bypass them.
 - **Calibrate to a strong school student starting olympiads.** Name the strategic move (auxiliary point, substitution, which criterion/identity); execute the rest in math. Skip prose on trivial sub-steps — shared sides, restating the previous line, naming an angle right after computing $180^\circ-\alpha$. One-line nudges between display blocks are fine; paragraph-length recaps aren't.
-- **Copy phrasing habits.** Mirror the short idioms already in the file. Do not inflate with synonyms.
+- **`\Image` placement.** In multi-paragraph solutions/proofs, place `\Image{...}` between paragraphs — not as the opening line and not as the closing line. Drop it right after the paragraph that constructs/names what the figure shows. Single-paragraph solutions are exempt.
 
 ## Language-specific phrasing
 
 - **American English** (when `\setlanguage{EN}`). Use American spellings throughout: -ize not -ise, -or not -our, -er not -re (center/incenter/excenter/orthocenter/circumcenter, not centre/incentre/…), practice (verb and noun).
 - **EN angle notation:** Write `$\angle XYZ$`, never `$|\angle XYZ|$`. The absolute-value bars around angles are CS/SK convention only.
 - **EN length notation:** Write `$AB$`, never `$|AB|$`. The absolute-value bars around segment lengths are CS/SK convention only. When removing `|...|` from a length that follows a TeX control sequence (e.g. `\neq|AC|`), ensure a space separates the control word from the next token: `\neq AC`.
-- **Match the file's `\setlanguage{CS|SK|EN}` declaration.** Mirror labels (Cvičení/Cvičenie/Exercise, Řešení/Riešenie/Solution, etc.) exactly as in existing files.
-- **Symmetry / analogy idioms:** CS "Analogicky", SK "Zo symetrie", EN "By symmetry" — use directly where applicable.
-
----
-
-## Translation rules
-
-When translating CS ↔ SK ↔ EN:
-- Translate **all prose** (statements, solutions, section headings, footnotes, intro text).
-- Keep all math, macro names, and structure identical.
-- Set the correct `\setlanguage{...}` and `\MathcompsLink{...}` slug.
-- Match the target language's label conventions already used in existing handouts.
