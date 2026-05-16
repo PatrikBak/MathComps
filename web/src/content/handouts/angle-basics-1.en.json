@@ -5085,6 +5085,2490 @@
             }
           ]
         }
+      },
+      {
+        "title": "Problems",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In this section you will find various problems for which the knowledge from this handout is sufficient – no advanced topics like "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "inscribed and central angles"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " are needed (we will look at those problems later)."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "MO district round Z8 2025"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In a triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies on side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " on side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB = BE = EC = CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD = DE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Determine the measures of the angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Set "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma = \\angle ACB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and try to express every angle in the figure in terms of\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". We have plenty of isosceles triangles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "One possible path is to express the angles "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\angle CBE",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\angle BED",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\angle CDE",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\angle CED",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in terms of "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " in turn. Can we now write down an equation somewhere from which "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " can be computed?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Look at the angle sum in triangle\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "BEC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". It should let us compute "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Computing\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\angle BAD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " takes more steps. The first is to compute as many angles as possible and notice something."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Once we compute the angles in "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ABC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", we see that "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ABC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is isosceles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Now we can exploit symmetry; one option is to prove the congruence of the triangles "
+                      },
+                      {
+                        "type": "math",
+                        "text": "EAD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DBE",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Set "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma = \\angle ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In the isosceles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BEC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "BE=EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle EBC = \\angle ECB = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies on "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DBE = \\angle EBC = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and by the isosceles property of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD=DE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") also "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DEB = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The exterior-angle theorem in "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " gives"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\angle EDC = \\angle DBE + \\angle DEB = 2\\gamma,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "and in the isosceles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle CDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD=CE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CED = \\angle CDE = 2\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From its angle sum "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma + 4\\gamma = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma = 36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-isosceles-chain.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Now note that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AEB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is in a linear pair with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BEC = 3\\gamma = 108^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so it equals "
+                    },
+                    {
+                      "type": "math",
+                      "text": "72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By the isosceles property of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BAE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we also get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAE = 72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where the angles at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are "
+                    },
+                    {
+                      "type": "math",
+                      "text": "36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " respectively, we compute "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CBA = 72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is isosceles."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Now observe that from "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CA = CB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CE = CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we get "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EA = DB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Consider the triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EAD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DBE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": they are isosceles with equal apex angle (equal to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ - 2\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") and equal legs, so by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " they are congruent. This gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DAE = \\angle DBE = 36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Finally,"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\angle BAD = \\angle BAE - \\angle DAE = 2\\gamma - \\gamma = \\gamma = 36^\\circ.",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "DuoGeo 2025"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Inside the square "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", equilateral triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CDY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " have been drawn. Determine the sum of the marked angles."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-square-equilateral-statement.svg",
+                      "scale": 0.7,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Try first to compute as many angles as possible in the figure."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key to computing the final angle is to find a suitable isosceles triangle using equal lengths."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By symmetry, all four marked angles are equal. So it suffices to find the measure of one of them – we focus on "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle YDX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "First, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle XAD = \\angle BAD - \\angle BAX = 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; analogously "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ADY = \\angle ADC - \\angle YDC = 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DA = AB = AX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (the first is a side of the square, the second a side of the equilateral triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle AXD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is isosceles with base "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". From "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle XAD = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the angle sum of the triangle,"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\angle ADX = \\tfrac{1}{2}\\bigl(180^\\circ - 30^\\circ\\bigr) = 75^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The desired angle is the difference of the two already computed:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\angle YDX = \\angle ADX - \\angle ADY = 75^\\circ - 30^\\circ = 45^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The sum of all four marked angles is therefore "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4 \\cdot 45^\\circ = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-square-equilateral-solution.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "MO school round C 2024"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In a trapezoid "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB \\parallel CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the interior angle bisectors at vertices "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " meet on segment\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD + BC = AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Let\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "P",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " be the common intersection. We have parallel lines and angle bisectors, which gives plenty of equal angles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The goal is to find isosceles triangles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be the common intersection of the bisectors; by hypothesis it lies on segment\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". We will show that"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "AD = AP \\quad \\hbox{and} \\quad BC = BP,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "from which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD + BC = AP + BP = AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " directly."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the bisector of the interior angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ADP = \\angle CDP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". By "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB \\parallel CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CDP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle APD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are alternate angles cut by the transversal\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\angle APD = \\angle CDP = \\angle ADP.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ADP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " the angles at vertices "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are equal, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD = AP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". An analogous argument at vertex\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " yields "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC = BP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-trapezoid-bisectors.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "MO school round A 2023"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In a convex pentagon "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CBA = \\angle BAE = \\angle AED",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". On the sides "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " there exist points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " respectively such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AP = BC = QE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AQ = BP = DE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD \\parallel PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We have plenty of equal angles and sides; try to find congruent triangles."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key congruences are among triangles "
+                      },
+                      {
+                        "type": "math",
+                        "text": "PBC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "QAP",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DEQ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". They yield useful equal pieces. Keep looking for more congruences."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The final congruence to prove is between "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CPQ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " and "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DQP",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Why does that suffice?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC = AP = EQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BP = AQ = ED",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle CBP = \\angle PAQ = \\angle QED",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "PBC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QAP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DEQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are mutually congruent by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-pentagon.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "From this "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CP = PQ = QD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and also"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n\\angle CPQ = 180^\\circ - \\angle BPC - \\angle APQ = \\\\ = 180^\\circ - \\angle PQA - \\angle EQD = \\angle PQD.\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hence, by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SAS",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the isosceles triangles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CPQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DQP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are also congruent. From this, the altitudes from vertices "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to the common side "
+                    },
+                    {
+                      "type": "math",
+                      "text": "PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " are equal; these altitudes are also parallel (both perpendicular to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD \\parallel PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "DuoGeo 2025"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A quadrilateral "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is given, with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "T",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " the intersection of its diagonals. Assume that the angles "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DBA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " respectively. On segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " there is a point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " such that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CZ \\perp BT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Assume that line "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " meets segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at point "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be the intersection of segments "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Suppose that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM = AR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MR + TD = 14",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Determine the length of segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Keep computing angles until we find an isosceles triangle."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Patient angle chasing leads to "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DTR",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " being isosceles. That should shed light on the condition "
+                      },
+                      {
+                        "type": "math",
+                        "text": "MR + TD = 14",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Once the isosceles relations are proved, the condition translates to "
+                      },
+                      {
+                        "type": "math",
+                        "text": "MD = 14",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". That will help later – for now we cannot compute more angles and must find something from the world of lengths. The key is to find a nice right triangle."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "One can show that the angles of triangle "
+                      },
+                      {
+                        "type": "math",
+                        "text": "MDZ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " are "
+                      },
+                      {
+                        "type": "math",
+                        "text": "90",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-"
+                      },
+                      {
+                        "type": "math",
+                        "text": "60",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "-"
+                      },
+                      {
+                        "type": "math",
+                        "text": "30",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". We know its hypotenuse "
+                      },
+                      {
+                        "type": "math",
+                        "text": "MD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Our nicely proved auxiliary statement now gives another length. From there it is one step to the solution."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ATB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " we know the angles at vertices "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", namely "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Hence the exterior angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "T",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " equals the sum of these angles; concretely"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\angle DTR = \\angle TAB = \\angle TBA = 30^\\circ + 45^\\circ = 75^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In the isosceles triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AMR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AM = AR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the angle at vertex "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " equals "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so both angles at the base "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " have measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\tfrac{1}{2}(180^\\circ - 30^\\circ) = 75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". In particular "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle ARM = 75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and so its vertical angle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle DRT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " also has measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-quad-30-45.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DTR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " therefore has two angles of measure "
+                    },
+                    {
+                      "type": "math",
+                      "text": "75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so it is isosceles with base "
+                    },
+                    {
+                      "type": "math",
+                      "text": "TR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DT = DR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Hence"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "MD = MR + RD = MR + TD = 14.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Moreover, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle TDR = 180^\\circ - 2 \\cdot 75^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Now consider triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MDZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "T",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie on segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lies on segment "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", we have "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle MDZ = \\angle RDT = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MDZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is therefore right-angled (at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") with hypotenuse "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and an angle of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so by the earlier statement about the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-"
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-"
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " triangle"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "MZ = \\tfrac{1}{2} MD = 7.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Finally, triangle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MZB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has a right angle at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and an angle of "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " at\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle BMZ = 45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". It is therefore an isosceles right triangle and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BZ = MZ = 7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
       }
     ]
   },
@@ -5263,6 +7747,48 @@
       "width": "146.09pt",
       "height": "131.24pt",
       "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-isosceles-chain.svg",
+      "originalId": "angles-isosceles-chain.pdf",
+      "width": "142.28pt",
+      "height": "201.25pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-square-equilateral-statement.svg",
+      "originalId": "angles-square-equilateral-statement.pdf",
+      "width": "193.47pt",
+      "height": "190pt",
+      "scale": 0.7
+    },
+    {
+      "contentId": "angle-basics-1/angles-square-equilateral-solution.svg",
+      "originalId": "angles-square-equilateral-solution.pdf",
+      "width": "193.47pt",
+      "height": "190pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-trapezoid-bisectors.svg",
+      "originalId": "angles-trapezoid-bisectors.pdf",
+      "width": "241.91pt",
+      "height": "104.34pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-pentagon.svg",
+      "originalId": "angles-pentagon.pdf",
+      "width": "189.99pt",
+      "height": "139.79pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-quad-30-45.svg",
+      "originalId": "angles-quad-30-45.pdf",
+      "width": "335.58pt",
+      "height": "207.65pt",
+      "scale": 0.8
     }
   ]
 }
