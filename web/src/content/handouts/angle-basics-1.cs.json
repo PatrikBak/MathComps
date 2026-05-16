@@ -4113,6 +4113,10 @@
                       "type": "math",
                       "text": "60^\\circ",
                       "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -5047,7 +5051,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "V\u00A0trojúhelníku jsou dvě strany shodné právě když jsou shodné jim přilehlé úhly."
+                        "text": "V\u00A0trojúhelníku jsou dvě strany shodné právě když jsou shodné jim protilehlé úhly."
                       }
                     ],
                     "highligted": false
@@ -5076,6 +5080,2472 @@
                 ]
               ],
               "styleType": "NumberParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Úlohy",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0této sekci najdete různé úlohy, na které vám stačí poznatky z\u00A0tohoto materiálu, žádné pokročilé věci jako "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "obvodové a\u00A0středové úhly"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " potřeba nejsou (na tyto úlohy se podíváme později)."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "MO okresní kolo Z8 2025"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na straně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na straně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", přičemž "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |BE| = |EC| = |CD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BD| = |DE|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Určete velikosti úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Označte "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma = |\\angle ACB|",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0snažte se všechny úhly v\u00A0obrázku vyjádřit pomocí\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Máme spoustu rovnoramenností."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jedna možná cesta je postupně pomocí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " vyjádřit úhly "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CBE",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "BED",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CDE",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CED",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Neumíme teď někde napsat rovnici, ze které se dá vypočítat "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Podívejte se na součet úhlů v\u00A0trojúhelníku\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "BEC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Z\u00A0něj by mělo jít spočítat "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\gamma",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "K\u00A0dopočítání\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "BAD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " potřebujeme více kroků. První je spočítat co nejvíce úhlů a\u00A0něčeho si všimnout."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Když spočítáme úhly v\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "ABC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", dostaneme, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ABC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je rovnoramenný."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Teď už umíme použít symetrii, jedna možnost je dokázat shodnost trojúhelníků "
+                      },
+                      {
+                        "type": "math",
+                        "text": "EAD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "DBE",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0rovnoramenném "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BEC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BE|=|EC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle EBC| = |\\angle ECB| = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle DBE| = |\\angle EBC| = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0z\u00A0rovnoramennosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BD|=|DE|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") také "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle DEB| = \\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Věta o\u00A0vnějším úhlu v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dává"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle EDC| = |\\angle DBE| + |\\angle DEB| = 2\\gamma,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "a\u00A0v\u00A0rovnoramenném "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle CDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|CD|=|CE|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle CED| = |\\angle CDE| = 2\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ze součtu úhlů v\u00A0něm "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma + 4\\gamma = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gamma = 36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-isosceles-chain.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nyní si vezměme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle AEB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vedlejší úhel k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BEC|=3\\gamma=108^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže je roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0rovnoramennosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle BAE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak také "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAE|=72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ve kterém už máme při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po řadě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", dopočítáme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle CBA|=72^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je rovnoramenný."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dále z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|CA|=|CB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|CE|=|CD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vlastně máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|EA|=|DB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vezměme trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EAD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DBE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; ty jsou rovnoramenné se shodným úhlem při vrcholu (rovným "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ-2\\gamma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0shodnými rameny, takže podle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou shodné. To dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle DAE|=|\\angle DBE|=36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na závěr tedy máme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle BAD| = |\\angle BAE| - |\\angle DAE| = 2\\gamma - \\gamma = \\gamma = 36^\\circ.",
+                  "isDisplay": true
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "DuoGeo 2025"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do čtverce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " byly nakresleny rovnostranné trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "CDY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Určete součet vyznačených úhlů."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-square-equilateral-statement.svg",
+                      "scale": 0.7,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zkuste nejprve spočítat co nejvíce úhlů na obrázku."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčem k\u00A0dopočítání finálního úhlu je najít vhodný rovnoramenný trojúhelník přes stejné délky."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podle symetrie jsou všechny čtyři vyznačené úhly shodné. Stačí tedy najít velikost jednoho z\u00A0nich – zaměříme se na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle YDX|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejprve "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle XAD| = |\\angle BAD| - |\\angle BAX| = 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; analogicky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ADY| = |\\angle ADC| - |\\angle YDC| = 90^\\circ - 60^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dále "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|DA| = |AB| = |AX|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (první je strana čtverce, druhé strana rovnostranného trojúhelníka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle AXD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je rovnoramenný se základnou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle XAD| = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0ze součtu úhlů v\u00A0trojúhelníku"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle ADX| = \\tfrac{1}{2}\\bigl(180^\\circ - 30^\\circ\\bigr) = 75^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hledaný úhel je rozdílem dvou již vypočítaných:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle YDX| = |\\angle ADX| - |\\angle ADY| = 75^\\circ - 30^\\circ = 45^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Součet všech čtyř vyznačených úhlů je tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4 \\cdot 45^\\circ = 180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-square-equilateral-solution.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "MO školní kolo C 2024"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0lichoběžníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB \\parallel CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", se osy vnitřních úhlů při vrcholech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " protínají na úsečce\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokažte, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AD| + |BC| = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Nechť\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "P",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je náš společný průsečík. Máme rovnoběžnost, máme osu úhlu, to dává dost stejných úhlů."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Cílem je najít rovnoramenné trojúhelníky."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " společný průsečík os; podle zadání leží na úsečce\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ukážeme, že"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|AD| = |AP| \\quad \\hbox{a} \\quad |BC| = |BP|,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "odkud přímo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AD| + |BC| = |AP| + |BP| = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je osa vnitřního úhlu při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ADP| = |\\angle CDP|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0rovnoběžnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB \\parallel CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle CDP|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle APD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " střídavé úhly při příčce\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle APD| = |\\angle CDP| = |\\angle ADP|.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ADP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou tedy úhly při vrcholech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " shodné, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AD| = |AP|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Analogickou úvahou při vrcholu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = |BP|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-trapezoid-bisectors.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "MO školní kolo A 2023"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0konvexním pětiúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCDE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle CBA| = |\\angle BAE| = |\\angle AED|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Na stranách "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existují po řadě body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AP| = |BC| = |QE|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AQ| = |BP| = |DE|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokažte, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD \\parallel PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Máme spoustu stejných úhlů a\u00A0stran, zkuste najít shodné trojúhelníky."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčové jsou shodné trojúhelníky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "PBC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "QAP",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "DEQ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Z\u00A0nich dostaneme užitečné shodné vlastnosti. Pokračujte v\u00A0hledání shodností."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Finální shodnost k\u00A0dokázání je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "CPQ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DQP",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Proč to stačí?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BC| = |AP| = |EQ|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BP| = |AQ| = |ED|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle CBP| = |\\angle PAQ| = |\\angle QED|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jsou podle věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "PBC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QAP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DEQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " navzájem shodné."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-pentagon.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Odtud plyne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|CP| = |PQ| = |QD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0také"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n|\\angle CPQ| = 180^\\circ - |\\angle BPC| - |\\angle APQ| = \\\\ = 180^\\circ - |\\angle PQA| - |\\angle EQD| = |\\angle PQD|.\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podle věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou tedy shodné i\u00A0rovnoramenné trojúhelníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CPQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DQP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0toho vyplývá shodnost jejich výšek z\u00A0vrcholů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na společnou stranu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; tyto výšky jsou navíc rovnoběžné (obě kolmé na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD \\parallel PQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "DuoGeo 2025"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Je dán čtyřúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0průsečíkem úhlopříček "
+                    },
+                    {
+                      "type": "math",
+                      "text": "T",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Předpokládejme, že velikosti úhlů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DBA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou po řadě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Na úsečce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " takový, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CZ \\perp BT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Předpokládejme, že přímka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " protne úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0bodě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je průsečík úseček "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AT",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "MD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Předpokládejme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AM| = |AR|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|MR| + |TD| = 14",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Určete velikost úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BZ|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dopočítávejte úhly, dokud nenajdeme rovnoramenný trojúhelník."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trpělivým počítáním úhlů se dá dojít k\u00A0tomu, že "
+                      },
+                      {
+                        "type": "math",
+                        "text": "DTR",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je rovnoramenný. To by mělo vnést světlo do podmínky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "|MR|+|TD|=14",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Podmínka se po dokázání rovnoramenností přeloží jako "
+                      },
+                      {
+                        "type": "math",
+                        "text": "|MD|=14",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To pomůže později – aktuálně už víc úhlů nespočítáme a\u00A0musíme ještě něco najít ze světa délek. Klíčem je najít pěkný pravoúhlý trojúhelník."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Dá se spočítat, že úhly trojúhelníku "
+                      },
+                      {
+                        "type": "math",
+                        "text": "MDZ",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " jsou "
+                      },
+                      {
+                        "type": "math",
+                        "text": "90-60-30",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Známe jeho přeponu "
+                      },
+                      {
+                        "type": "math",
+                        "text": "MD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Naše skvěle dokázané pomocné tvrzení nám teď dává další délku. Pak je to krok od řešení."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ATB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " známe úhly při vrcholech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0sice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tím pádem je vnější úhel při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "T",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " roven součtu těchto úhlů, konkrétně"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle DTR|=|\\angle TAB|=|\\angle TBA|=30^\\circ+45^\\circ=75^\\circ.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0rovnoramenném trojúhelníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AMR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AM| = |AR|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je úhel při vrcholu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže oba úhly při základně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " mají velikost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\tfrac{1}{2}(180^\\circ - 30^\\circ) = 75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Speciálně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ARM| = 75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0tedy i\u00A0jeho vrcholový úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle DRT|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má velikost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-quad-30-45.svg",
+                      "scale": 0.8,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DTR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má tedy dva úhly velikosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "75^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili je rovnoramenný se\u00A0základnou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "TR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|DT| = |DR|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Odtud"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|MD| = |MR| + |RD| = |MR| + |TD| = 14.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Navíc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle TDR| = 180^\\circ - 2 \\cdot 75^\\circ = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podívejme se nyní na trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MDZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "T",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na úsečce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na úsečce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle MDZ| = |\\angle RDT| = 30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MDZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy pravoúhlý (při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") s\u00A0přeponou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úhlem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže podle dřívějšího tvrzení o\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "30^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-"
+                    },
+                    {
+                      "type": "math",
+                      "text": "60^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-"
+                    },
+                    {
+                      "type": "math",
+                      "text": "90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " trojúhelníku"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|MZ| = \\tfrac{1}{2} |MD| = 7.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Konečně trojúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MZB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má pravý úhel při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0úhel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže i\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BMZ| = 45^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Je tedy rovnoramenný pravoúhlý a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BZ| = |MZ| = 7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
@@ -5257,6 +7727,48 @@
       "width": "146.09pt",
       "height": "131.24pt",
       "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-isosceles-chain.svg",
+      "originalId": "angles-isosceles-chain.pdf",
+      "width": "142.28pt",
+      "height": "201.25pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-square-equilateral-statement.svg",
+      "originalId": "angles-square-equilateral-statement.pdf",
+      "width": "193.47pt",
+      "height": "190pt",
+      "scale": 0.7
+    },
+    {
+      "contentId": "angle-basics-1/angles-square-equilateral-solution.svg",
+      "originalId": "angles-square-equilateral-solution.pdf",
+      "width": "193.47pt",
+      "height": "190pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-trapezoid-bisectors.svg",
+      "originalId": "angles-trapezoid-bisectors.pdf",
+      "width": "241.91pt",
+      "height": "104.34pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-pentagon.svg",
+      "originalId": "angles-pentagon.pdf",
+      "width": "189.99pt",
+      "height": "139.79pt",
+      "scale": 0.8
+    },
+    {
+      "contentId": "angle-basics-1/angles-quad-30-45.svg",
+      "originalId": "angles-quad-30-45.pdf",
+      "width": "335.58pt",
+      "height": "207.65pt",
+      "scale": 0.8
     }
   ]
 }

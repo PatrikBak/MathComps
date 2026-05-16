@@ -295,6 +295,149 @@ A very handy fact useful in non-trivial problems is the following. One possible 
 \i A right triangle has its hypotenuse twice as long as a leg if and only if its angles are $90^\circ, 60^\circ, 30^\circ$.
 \enditems
 
+\sec Problems
+
+In this section you will find various problems for which the knowledge from this handout is sufficient -- no advanced topics like \textit{inscribed and central angles} are needed (we will look at those problems later).
+
+
+\Problem{0}{MO district round Z8 2025}{
+    In a triangle $ABC$, point $D$ lies on side $BC$ and point $E$ on side $AC$, with $AB = BE = EC = CD$ and $BD = DE$. Determine the measures of the angles $\angle ACB$ and $\angle BAD$.
+}{
+    Set $\gamma = \angle ACB$ and try to express every angle in the figure in terms of~$\gamma$. We have plenty of isosceles triangles.
+}{
+    One possible path is to express the angles $\angle CBE$, $\angle BED$, $\angle CDE$, $\angle CED$ in terms of $\gamma$ in turn. Can we now write down an equation somewhere from which $\gamma$ can be computed?
+}{
+    Look at the angle sum in triangle~$BEC$. It should let us compute $\gamma$.
+}{
+    Computing~$\angle BAD$ takes more steps. The first is to compute as many angles as possible and notice something.
+}{
+    Once we compute the angles in $ABC$, we see that $ABC$ is isosceles.
+}{
+    Now we can exploit symmetry; one option is to prove the congruence of the triangles $EAD$ and $DBE$.
+}{
+    Set $\gamma = \angle ACB$.
+
+    In the isosceles $\triangle BEC$ ($BE=EC$) we have $\angle EBC = \angle ECB = \gamma$. Since $D$ lies on $BC$, $\angle DBE = \angle EBC = \gamma$, and by the isosceles property of $\triangle BDE$ ($BD=DE$) also $\angle DEB = \gamma$. The exterior-angle theorem in $\triangle BDE$ at~$D$ gives
+    $$
+    \angle EDC = \angle DBE + \angle DEB = 2\gamma,
+    $$
+    and in the isosceles $\triangle CDE$ ($CD=CE$) we have $\angle CED = \angle CDE = 2\gamma$. From its angle sum $\gamma + 4\gamma = 180^\circ$, so $\gamma = 36^\circ$.
+
+    \Image{angles-isosceles-chain.pdf}{0.8}
+
+    Now note that $\angle AEB$ is in a linear pair with $\angle BEC = 3\gamma = 108^\circ$, so it equals $72^\circ$. By the isosceles property of $\triangle BAE$ we also get $\angle BAE = 72^\circ$. From $\triangle ABC$, where the angles at $C$ and $A$ are $36^\circ$ and $72^\circ$ respectively, we compute $\angle CBA = 72^\circ$, so triangle $ABC$ is isosceles.
+
+    Now observe that from $CA = CB$ and $CE = CD$ we get $EA = DB$. Consider the triangles $EAD$ and $DBE$: they are isosceles with equal apex angle (equal to $180^\circ - 2\gamma$) and equal legs, so by $SAS$ they are congruent. This gives $\angle DAE = \angle DBE = 36^\circ$.
+
+    Finally,
+    $$
+    \angle BAD = \angle BAE - \angle DAE = 2\gamma - \gamma = \gamma = 36^\circ.
+    $$
+}
+
+\Problem{0}{DuoGeo 2025}{
+    Inside the square $ABCD$, equilateral triangles $ABX$ and $CDY$ have been drawn. Determine the sum of the marked angles.
+
+    \Image{angles-square-equilateral-statement.pdf}{0.7}
+}{
+    Try first to compute as many angles as possible in the figure.
+}{
+    The key to computing the final angle is to find a suitable isosceles triangle using equal lengths.
+}{
+    By symmetry, all four marked angles are equal. So it suffices to find the measure of one of them -- we focus on $\angle YDX$.
+
+    First, $\angle XAD = \angle BAD - \angle BAX = 90^\circ - 60^\circ = 30^\circ$; analogously $\angle ADY = \angle ADC - \angle YDC = 90^\circ - 60^\circ = 30^\circ$.
+
+    Next, $DA = AB = AX$ (the first is a side of the square, the second a side of the equilateral triangle $ABX$), so $\triangle AXD$ is isosceles with base $DX$. From $\angle XAD = 30^\circ$ and the angle sum of the triangle,
+    $$
+    \angle ADX = \tfrac{1}{2}\bigl(180^\circ - 30^\circ\bigr) = 75^\circ.
+    $$
+    The desired angle is the difference of the two already computed:
+    $$
+    \angle YDX = \angle ADX - \angle ADY = 75^\circ - 30^\circ = 45^\circ.
+    $$
+    The sum of all four marked angles is therefore $4 \cdot 45^\circ = 180^\circ$.
+
+    \Image{angles-square-equilateral-solution.pdf}{0.8}
+}
+
+\Problem{0}{MO school round C 2024}{
+    In a trapezoid $ABCD$ with $AB \parallel CD$, the interior angle bisectors at vertices $C$ and $D$ meet on segment~$AB$. Prove that $AD + BC = AB$.
+}{
+    Let~$P$ be the common intersection. We have parallel lines and angle bisectors, which gives plenty of equal angles.
+}{
+    The goal is to find isosceles triangles.
+}{
+    Let $P$ be the common intersection of the bisectors; by hypothesis it lies on segment~$AB$. We will show that
+    $$
+    AD = AP \quad \hbox{and} \quad BC = BP,
+    $$
+    from which $AD + BC = AP + BP = AB$ directly.
+
+    Since $DP$ is the bisector of the interior angle at~$D$, we have $\angle ADP = \angle CDP$. By $AB \parallel CD$, $\angle CDP$ and $\angle APD$ are alternate angles cut by the transversal~$DP$, so
+    $$
+    \angle APD = \angle CDP = \angle ADP.
+    $$
+    In triangle $ADP$ the angles at vertices $D$ and $P$ are equal, so $AD = AP$. An analogous argument at vertex~$C$ yields $BC = BP$.
+
+    \Image{angles-trapezoid-bisectors.pdf}{0.8}
+}
+
+\Problem{0}{MO school round A 2023}{
+    In a convex pentagon $ABCDE$ we have $\angle CBA = \angle BAE = \angle AED$. On the sides $AB$ and $AE$ there exist points $P$ and $Q$ respectively such that $AP = BC = QE$ and $AQ = BP = DE$. Prove that $CD \parallel PQ$.
+}{
+    We have plenty of equal angles and sides; try to find congruent triangles.
+}{
+    The key congruences are among triangles $PBC$, $QAP$, and $DEQ$. They yield useful equal pieces. Keep looking for more congruences.
+}{
+    The final congruence to prove is between $CPQ$ and $DQP$. Why does that suffice?
+}{
+    Since $BC = AP = EQ$, $BP = AQ = ED$, and $\angle CBP = \angle PAQ = \angle QED$, the triangles $PBC$, $QAP$, and $DEQ$ are mutually congruent by $SAS$.
+
+    \Image{angles-pentagon.pdf}{0.8}
+
+    From this $CP = PQ = QD$, and also
+    $$
+    \gather
+    \angle CPQ = 180^\circ - \angle BPC - \angle APQ = \\ = 180^\circ - \angle PQA - \angle EQD = \angle PQD.
+    \endgather
+    $$
+    Hence, by $SAS$, the isosceles triangles $CPQ$ and $DQP$ are also congruent. From this, the altitudes from vertices $C$ and $D$ to the common side $PQ$ are equal; these altitudes are also parallel (both perpendicular to $PQ$), so $CD \parallel PQ$.
+}
+
+\Problem{0}{DuoGeo 2025}{
+    A quadrilateral $ABCD$ is given, with $T$ the intersection of its diagonals. Assume that the angles $\angle BAC$ and $\angle DBA$ measure $30^\circ$ and $45^\circ$ respectively. On segment $BT$ there is a point $Z$ such that $CZ \perp BT$. Assume that line $CZ$ meets segment $AB$ at point $M$. Let $R$ be the intersection of segments $AT$ and $MD$. Suppose that $AM = AR$ and $MR + TD = 14$. Determine the length of segment $BZ$.
+}{
+    Keep computing angles until we find an isosceles triangle.
+}{
+    Patient angle chasing leads to $DTR$ being isosceles. That should shed light on the condition $MR + TD = 14$.
+}{
+    Once the isosceles relations are proved, the condition translates to $MD = 14$. That will help later -- for now we cannot compute more angles and must find something from the world of lengths. The key is to find a nice right triangle.
+}{
+    One can show that the angles of triangle $MDZ$ are $90$-$60$-$30$. We know its hypotenuse $MD$. Our nicely proved auxiliary statement now gives another length. From there it is one step to the solution.
+}{
+    In triangle $ATB$ we know the angles at vertices $A$ and $B$, namely $30^\circ$ and $45^\circ$. Hence the exterior angle at~$T$ equals the sum of these angles; concretely
+    $$
+    \angle DTR = \angle TAB = \angle TBA = 30^\circ + 45^\circ = 75^\circ.
+    $$
+    In the isosceles triangle $AMR$ with $AM = AR$, the angle at vertex $A$ equals $30^\circ$, so both angles at the base $MR$ have measure $\tfrac{1}{2}(180^\circ - 30^\circ) = 75^\circ$. In particular $\angle ARM = 75^\circ$, and so its vertical angle $\angle DRT$ also has measure $75^\circ$.
+
+    \Image{angles-quad-30-45.pdf}{0.8}
+
+    Triangle $DTR$ therefore has two angles of measure $75^\circ$, so it is isosceles with base $TR$ and $DT = DR$. Hence
+    $$
+    MD = MR + RD = MR + TD = 14.
+    $$
+    Moreover, $\angle TDR = 180^\circ - 2 \cdot 75^\circ = 30^\circ$.
+
+    Now consider triangle $MDZ$. Since $T$, $Z$ lie on segment $BD$ and $R$ lies on segment $MD$, we have $\angle MDZ = \angle RDT = 30^\circ$. Triangle $MDZ$ is therefore right-angled (at~$Z$) with hypotenuse $MD$ and an angle of $30^\circ$ at~$D$, so by the earlier statement about the $30^\circ$-$60^\circ$-$90^\circ$ triangle
+    $$
+    MZ = \tfrac{1}{2} MD = 7.
+    $$
+
+    Finally, triangle $MZB$ has a right angle at~$Z$ and an angle of $45^\circ$ at~$B$, so $\angle BMZ = 45^\circ$. It is therefore an isosceles right triangle and $BZ = MZ = 7$.
+}
+
 \DisplayExerciseSolutions
 
 \DisplayHints

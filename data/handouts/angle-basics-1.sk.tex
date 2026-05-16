@@ -2,6 +2,8 @@
 
 \setlanguage{SK}
 
+\ReviewModetrue
+
 \Title{Základy počítania uhlov}
 
 \MathcompsLink{zaklady-pocitania-uhlov-1}
@@ -184,7 +186,7 @@ Podobne vieme zdôvodniť ďalšie kritériá:
 }{
     V~prvom rade si uvedomme, že nezáleží na tom, ktoré dva uhly sú zhodné -- ak sa dva trojuholníky zhodujú v~dvoch uhloch, tak tretí je určený jednoznačne, keďže všetky tri majú súčet uhlov $180^\circ$.
 
-    Pre účely nášho dôkazu uvážme teda, že sú zhodné práve uhly prihliehajúce zhodnej strane. Nech je to uhol $\beta$ pri vrchole $B$, $\gamma$ pri vrchole $C$ a~strana $a = |BC|$ medzi nimi. Zostrojme úsečku $BC$ dĺžky~$a$ -- tá je daná až na zhodné zobrazenie. Bod $A$ musí ležať na polpriamke z~$B$ zvierajúcej s~$BC$ uhol $\beta$ a~zároveň na polpriamke z~$C$ zvierajúcej s~$CB$ uhol $\gamma$. Súčet vnútorných uhlov pri $B$ a~$C$ v~trojuholníku je menší než $180^\circ$, čiže $\beta + \gamma < 180^\circ$, a~preto nie sú obe polpriamky rovnobežné -- pretnú sa v~jedinom bode~$A$. Trojuholník $ABC$ je teda určený jednoznačne (až na zhodné zobrazenia).
+    Pre účely nášho dôkazu uvážme teda, že sú zhodné práve uhly priliehajúce zhodnej strane. Nech je to uhol $\beta$ pri vrchole $B$, $\gamma$ pri vrchole $C$ a~strana $a = |BC|$ medzi nimi. Zostrojme úsečku $BC$ dĺžky~$a$ -- tá je daná až na zhodné zobrazenie. Bod $A$ musí ležať na polpriamke z~$B$ zvierajúcej s~$BC$ uhol $\beta$ a~zároveň na polpriamke z~$C$ zvierajúcej s~$CB$ uhol $\gamma$. Súčet vnútorných uhlov pri $B$ a~$C$ v~trojuholníku je menší než $180^\circ$, čiže $\beta + \gamma < 180^\circ$, a~preto nie sú obe polpriamky rovnobežné -- pretnú sa v~jedinom bode~$A$. Trojuholník $ABC$ je teda určený jednoznačne (až na zhodné zobrazenia).
 
     \Image{angles-asa-proof.pdf}
 }
@@ -232,7 +234,7 @@ Na našej geometrickej ceste sa priebežne stretneme so všetkými týmito tvrde
 Vyskúšajte si exaktne dokázať tieto jednoduché poznatky, to už bude jednoduchšie: 
 
 \Exercise{}{
-    Rovnostranný trojuholník má tri zhodné uhly rovné $60^\circ$
+    Rovnostranný trojuholník má tri zhodné uhly rovné $60^\circ$.
 }{
     V~$\triangle ABC$ s~$|AB| = |AC| = |BC|$ dáva veta o~rovnoramennom trojuholníku $|\angle ABC| = |\angle ACB|$ (z~$|AB|=|AC|$); analogicky z~$|AB|=|BC|$ je $|\angle BAC| = |\angle BCA|$. Všetky tri uhly sú teda zhodné, a~zo súčtu $180^\circ$ je každý $60^\circ$.
 
@@ -291,9 +293,152 @@ Veľmi šikovná vec použiteľná v~neľahkých úlohách je nasledovná úloha
 \begitems \style N
 \i Súčet uhlov v~trojuholníku je $180^\circ$, všeobecne v~konvexnom $n$-uholníku $(n-2) \cdot 180^\circ$.
 \i Vety o~zhodnosti trojuholníkov: $sss$, $sus$, $usu$, $Ssu$.
-\i V trojuholníku sú dve strany zhodné práve keď sú zhodné im priľahlé uhly.
+\i V trojuholníku sú dve strany zhodné práve keď sú zhodné im protiľahlé uhly.
 \i Pravouhlý trojuholník má preponu dvakrát dlhšiu než odvesnu práve keď má uhly $90^\circ, 60^\circ, 30^\circ$.
 \enditems
+
+\sec Úlohy
+
+V~tejto sekcii nájdete rôzne úlohy, na ktoré vám stačia poznatky z~tohto materiálu, žiadne pokročilé veci ako \textit{obvodové a~stredové uhly} potrebné nie sú (na tieto úlohy sa pozrieme neskôr).
+
+
+\Problem{0}{MO okresné kolo Z8 2025}{
+    V~trojuholníku $ABC$ leží bod $D$ na strane $BC$, bod $E$ na strane $AC$, pričom $|AB| = |BE| = |EC| = |CD|$ a~$|BD| = |DE|$. Určte veľkosti uhlov $ACB$ a~$BAD$.
+}{
+    Označte $\gamma = |\angle ACB|$ a~snažte sa všetky uhly v~obrázku vyjadriť cez~$\gamma$. Máme veľa rovnoramenností.
+}{
+    Jedna možná cesta je postupne pomocou $\gamma$ vyjadriť uhly $CBE$, $BED$, $CDE$, $CED$. Nevieme teraz niekde napísať rovnicu, z~ktorej sa dá vypočítať $\gamma$?
+}{
+    Pozrite sa na súčet uhlov v~trojuholníku~$BEC$. Z~neho by malo ísť spočítať $\gamma$.
+}{
+    K~dopočítaniu~$BAD$ potrebujeme viac krokov. Prvý je spočítať čo najviac uhlov a~niečo si všimnúť.
+}{
+    Keď spočítame uhly v~$ABC$, tak dostaneme, že $ABC$ je rovnoramenný. 
+}{
+    Teraz už vieme použiť symetriu, jedna možnosť je dokázať zhodnosť trojuholníkov $EAD$ a~$DBE$.
+}{
+    Označme $\gamma = |\angle ACB|$.
+
+    V~rovnoramennom $\triangle BEC$ ($|BE|=|EC|$) je $|\angle EBC| = |\angle ECB| = \gamma$. Keďže $D$ leží na $BC$, je $|\angle DBE| = |\angle EBC| = \gamma$, a~z~rovnoramennosti $\triangle BDE$ ($|BD|=|DE|$) aj $|\angle DEB| = \gamma$. Veta o~vonkajšom uhle v~$\triangle BDE$ pri~$D$ dáva
+    $$
+    |\angle EDC| = |\angle DBE| + |\angle DEB| = 2\gamma,
+    $$
+    a~v~rovnoramennom $\triangle CDE$ ($|CD|=|CE|$) tak $|\angle CED| = |\angle CDE| = 2\gamma$. Zo súčtu uhlov v~ňom $\gamma + 4\gamma = 180^\circ$, čiže $\gamma = 36^\circ$.
+
+    \Image{angles-isosceles-chain.pdf}{0.8}
+
+    Teraz si vezmime, že $|\angle AEB|$ je vedľajší uhol k~$|\angle BEC|=3\gamma=108^\circ$, takže je rovný $72^\circ$. Z~rovnoramennosti $\triangle BAE$ tak aj $|\angle BAE|=72^\circ$. Z~$\triangle ABC$, v~ktorom už máme pri $C$ a~$A$ rovné postupne $36^\circ$ a~$72^\circ$ dopočítame $|\angle CBA|=72^\circ$, takže trojuholník $ABC$ je rovnoramenný.
+
+    Teraz si vezmime, že z~$|CA|=|CB|$ a $|CE|=|CD|$ vlastne máme $|EA|=|DB|$. Vezmime si trojuholníky $EAD$ a $DBE$, tie sú rovnoramenné so zhodným uhlom pri vrchole (rovným $180^\circ-2\gamma$) a~zhodnými ramenami, takže podľa $sus$ sú zhodné. To dáva $|\angle DAE|=|\angle DBE|=36^\circ$. 
+
+    Na záver teda máme
+    $$
+    |\angle BAD| = |\angle BAE| - |\angle DAE| = 2\gamma - \gamma = \gamma = 36^\circ.
+    $$
+}
+
+\Problem{0}{DuoGeo 2025}{
+    Do štvorca $ABCD$ boli nakreslené rovnostranné trojuholníky $ABX$ a~$CDY$. Určte súčet vyznačených uhlov.
+
+    \Image{angles-square-equilateral-statement.pdf}{0.7}
+}{
+    Skúste najprv spočítať čo najviac uhlov na obrázku.
+}{
+    Kľúčom k~dopočítaniu finálneho uhla je nájsť vhodný rovnoramenný trojuholník cez rovnaké dĺžky.
+}{
+    Podľa symetrie sú všetky štyri vyznačené uhly zhodné. Stačí teda nájsť veľkosť jedného z~nich -- zameriame sa na $|\angle YDX|$.
+
+    Najprv $|\angle XAD| = |\angle BAD| - |\angle BAX| = 90^\circ - 60^\circ = 30^\circ$; analogicky $|\angle ADY| = |\angle ADC| - |\angle YDC| = 90^\circ - 60^\circ = 30^\circ$.
+
+    Ďalej $|DA| = |AB| = |AX|$ (prvé je strana štvorca, druhé strana rovnostranného trojuholníka $ABX$), takže $\triangle AXD$ je rovnoramenný so základňou $DX$. Z~rovnosti $|\angle XAD| = 30^\circ$ a~zo súčtu uhlov v~trojuholníku
+    $$
+    |\angle ADX| = \tfrac{1}{2}\bigl(180^\circ - 30^\circ\bigr) = 75^\circ.
+    $$
+    Hľadaný uhol je rozdielom dvoch už vypočítaných:
+    $$
+    |\angle YDX| = |\angle ADX| - |\angle ADY| = 75^\circ - 30^\circ = 45^\circ.
+    $$
+    Súčet všetkých štyroch vyznačených uhlov je teda $4 \cdot 45^\circ = 180^\circ$.
+
+    \Image{angles-square-equilateral-solution.pdf}{0.8}
+}
+
+\Problem{0}{MO školské kolo C 2024}{
+    V~lichobežníku $ABCD$, kde $AB \parallel CD$, sa osi vnútorných uhlov pri vrcholoch $C$ a~$D$ pretínajú na úsečke~$AB$. Dokážte, že $|AD| + |BC| = |AB|$.
+}{
+    Nech~$P$ je náš spoločný priesečník. Máme rovnobežnosť, máme os uhla, to dáva dosť rovnakých uhlov.
+}{
+    Cieľ je nájsť rovnoramenné trojuholníky.
+}{
+    Označme $P$ spoločný priesečník osí; podľa zadania leží na úsečke~$AB$. Ukážeme, že
+    $$
+    |AD| = |AP| \quad \hbox{a} \quad |BC| = |BP|,
+    $$
+    odkiaľ priamo $|AD| + |BC| = |AP| + |BP| = |AB|$.
+
+    Pretože $DP$ je os vnútorného uhla pri~$D$, máme $|\angle ADP| = |\angle CDP|$. Z~rovnobežnosti $AB \parallel CD$ sú $|\angle CDP|$ a~$|\angle APD|$ striedavé uhly pri priečke~$DP$, takže
+    $$
+    |\angle APD| = |\angle CDP| = |\angle ADP|.
+    $$
+    V~trojuholníku $ADP$ sú teda uhly pri vrcholoch $D$ a~$P$ zhodné, takže $|AD| = |AP|$. Analogickou úvahou pri vrchole~$C$ dostaneme $|BC| = |BP|$.
+
+    \Image{angles-trapezoid-bisectors.pdf}{0.8}
+}
+
+\Problem{0}{MO školské kolo A 2023}{
+    V~konvexnom päťuholníku $ABCDE$ platí $|\angle CBA| = |\angle BAE| = |\angle AED|$. Na stranách $AB$ a~$AE$ existujú po rade body $P$ a~$Q$ tak, že $|AP| = |BC| = |QE|$ a~$|AQ| = |BP| = |DE|$. Dokážte, že $CD \parallel PQ$.
+}{
+    Máme veľa rovnakých uhlov a~strán, skúste nájsť zhodné trojuholníky.
+}{
+    Kľúčové sú zhodné trojuholníky $PBC$, $QAP$ a~$DEQ$. Z~nich dostaneme užitočné zhodné vecičky. Pokračujte v~hľadaní zhodnosti.
+}{
+    Finálna zhodnosť na dokázanie je $CPQ$ a $DQP$. Prečo to stačí? 
+}{
+    Keďže $|BC| = |AP| = |EQ|$, $|BP| = |AQ| = |ED|$ a~$|\angle CBP| = |\angle PAQ| = |\angle QED|$, sú podľa vety $sus$ trojuholníky $PBC$, $QAP$ a~$DEQ$ navzájom zhodné.
+
+    \Image{angles-pentagon.pdf}{0.8}
+
+    Odtiaľ plynie $|CP| = |PQ| = |QD|$ a~tiež
+    $$
+    \gather
+    |\angle CPQ| = 180^\circ - |\angle BPC| - |\angle APQ| = \\ = 180^\circ - |\angle PQA| - |\angle EQD| = |\angle PQD|.
+    \endgather
+    $$
+    Podľa vety $sus$ sú teda zhodné aj rovnoramenné trojuholníky $CPQ$ a~$DQP$. Z~toho vyplýva zhodnosť ich výšok z~vrcholov $C$ a~$D$ na spoločnú stranu $PQ$; tieto výšky sú zároveň rovnobežné (obe kolmé na $PQ$), takže $CD \parallel PQ$.    
+}
+
+\Problem{0}{DuoGeo 2025}{
+    Je daný štvoruholník $ABCD$ s~priesečníkom uhlopriečok $T$. Predpokladajme, že veľkosti uhlov $BAC$ a~$DBA$ sú postupne $30^\circ$ a~$45^\circ$. Na úsečke $BT$ leží bod $Z$ taký, že $CZ \perp BT$. Predpokladajme, že priamka $CZ$ pretne úsečku $AB$ v~bode $M$. Nech $R$ je priesečník úsečiek $AT$ a~$MD$. Predpokladajme, že $|AM| = |AR|$ a~$|MR| + |TD| = 14$. Určte veľkosť úsečky $|BZ|$.
+}{
+    Dopočítavajte uhly, až kým nenájdeme rovnoramenný trojuholník. 
+}{
+    Trpezlivým počítaním uhlov sa dá dôjsť k~tomu, že $DTR$ je rovnoramenný. To by malo vniesť svetlo do podmienky $|MR|+|TD|=14$.
+}{
+    Podmienka sa po dokázaní rovnoramenností preloží ako $|MD|=14$. To pomôže neskôr -- aktuálne už viac uhlov nespočítame a~musíme ešte niečo nájsť zo sveta dĺžok. Kľúčom je nájsť pekný pravouhlý trojuholník.
+}{
+    Dá sa spočítať, že uhly trojuholníka $MDZ$ sú $90-60-30$. Poznáme jeho preponu $MD$. Naše skvelé dokázané pomocné tvrdenie nám teraz dáva ďalšiu dĺžku. Potom je to krok od riešenia.
+}{
+    V~trojuholníku $ATB$ poznáme uhly pri vrcholoch $A$ a~$B$, a~síce $30^\circ$ a~$45^\circ$. Tým pádom je vonkajší uhol pri~$T$ rovný súčtu týchto uhlov, konkrétne
+    $$
+    |\angle DTR|=|\angle TAB|=|\angle TBA|=30^\circ+45^\circ=75^\circ.
+    $$
+    V~rovnoramennom trojuholníku $AMR$ s~$|AM| = |AR|$ je uhol pri vrchole $A$ rovný $30^\circ$, takže oba uhly pri základni $MR$ majú veľkosť $\tfrac{1}{2}(180^\circ - 30^\circ) = 75^\circ$. Špeciálne $|\angle ARM| = 75^\circ$, a~teda aj jeho vrcholový uhol $|\angle DRT|$ má veľkosť $75^\circ$.
+
+    \Image{angles-quad-30-45.pdf}{0.8}
+
+    Trojuholník $DTR$ má teda dva uhly veľkosti $75^\circ$, čiže je rovnoramenný so~základňou $TR$ a~$|DT| = |DR|$. Odtiaľ
+    $$
+    |MD| = |MR| + |RD| = |MR| + |TD| = 14.
+    $$
+    Navyše $|\angle TDR| = 180^\circ - 2 \cdot 75^\circ = 30^\circ$.
+
+    Pozrime sa teraz na trojuholník $MDZ$. Pretože $T$, $Z$ ležia na úsečke $BD$ a~$R$ leží na úsečke $MD$, je $|\angle MDZ| = |\angle RDT| = 30^\circ$. Trojuholník $MDZ$ je teda pravouhlý (pri~$Z$) s~preponou $MD$ a~uhlom $30^\circ$ pri~$D$, takže podľa skoršieho tvrdenia o~$30^\circ$-$60^\circ$-$90^\circ$ trojuholníku
+    $$
+    |MZ| = \tfrac{1}{2} |MD| = 7.
+    $$
+
+    Konečne trojuholník $MZB$ má pravý uhol pri~$Z$ a~uhol $45^\circ$ pri~$B$, takže aj $|\angle BMZ| = 45^\circ$. Je teda rovnoramenný pravouhlý a~$|BZ| = |MZ| = 7$.
+}
 
 \DisplayExerciseSolutions
 
