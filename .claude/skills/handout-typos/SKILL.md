@@ -18,6 +18,7 @@ You proofread one olympiad math handout `.tex` file (PlainTeX + AMS-TeX + OPmac)
 - **Operate on one `.tex` file at a time** in `data/handouts/`. If the user names several, process them one by one.
 - **Edit prose only.** Math, macro names, commands, labels, URLs, and verbatim content are off-limits.
 - **Language** is set by `\setlanguage{CS|SK|EN}` in the file (and mirrored in the filename suffix `.cs.tex` / `.sk.tex` / `.en.tex`). Apply CS/SK/EN rules accordingly.
+- **Two input shapes.** Default is one whole file. If the user asks to check only recent changes (a diff), identify the changed passages via `git diff` or recent in-session edits — and operate on those passages **plus their surrounding sentence or paragraph**, since agreement, case, and punctuation errors need context to detect. Passes 1–2 run over that scope, not the whole file.
 
 ---
 
@@ -26,20 +27,25 @@ You proofread one olympiad math handout `.tex` file (PlainTeX + AMS-TeX + OPmac)
 1. **Identify the target file.** If the user hasn't named one, ask.
 2. **Read** the file and note the language.
 3. **Pass 1 — collect candidates** across prose only. Include only *serious*, *objective* errors:
-   - Misspellings and missing/wrong diacritics.
-   - Broken agreement (gender/number/case), clearly wrong verb forms, a missing or doubled word that breaks the sentence.
-   - Unequivocal punctuation mistakes that change parsing or are clearly wrong (not stylistic comma choices).
-   - Casing errors: sentence-initial uppercase; proper names capitalized. Don't over-capitalize — in CS/SK, days, months, and language names stay lowercase unless sentence-initial.
-   - Repeated words (case-insensitive): immediate duplicates separated only by whitespace, `~`, or trivial punctuation (`token token → token`).
+   - **Misspellings** and missing/wrong diacritics.
+   - **Broken agreement** (gender/number/case), clearly wrong verb forms, a missing or doubled word that breaks the sentence.
+   - **Unequivocal punctuation mistakes** that change parsing or are clearly wrong (not stylistic comma choices).
+   - **Casing errors:** sentence-initial uppercase; proper names capitalized. Don't over-capitalize — in CS/SK, days, months, and language names stay lowercase unless sentence-initial.
+   - **Repeated words** (case-insensitive): immediate duplicates separated only by whitespace, `~`, or trivial punctuation (`token token → token`).
    - **Genuinely ungrammatical sentences** — word salad, missing essential particle, mangled construction that no native speaker would produce. Merely awkward, stiff, clunky, or non-idiomatic phrasing does **not** qualify. If a native speaker could read the sentence and say "that's an unusual way to put it, but it's fine," it stays.
 4. **Pass 2 — classify each candidate** into one of three buckets:
    - **Fix directly**: objective mistake (typo, diacritic, agreement error, obvious duplicate word, sentence-initial case) where the correction is unambiguous and cosmetic.
    - **Uncertain**: proper noun you can't verify, a clearly ungrammatical sentence where the minimal fix is non-obvious, or a spelling/case-ending choice that hinges on meaning you can't infer. Be stingy with this list — if you're about to flag something because it "could be smoother," drop it.
    - **Leave alone**: author's voice / idiom / rhythm / clunkiness — not a mistake, just not how you'd write it. This is the default; when in doubt, here.
 5. **Apply the "fix directly" items with Edit.** One fix per Edit call; include 2–3 words of surrounding context so `old_string` is unique. Use `replace_all` only when the replacement is safe in every occurrence. Batch independent Edit calls in a single message.
-6. **Report.** One short sentence summarizing what was fixed (e.g. "Fixed 3 diacritics, 1 repeated word, 1 agreement."), then — only if any exist — a plain bulleted list of **Uncertain** items. For each entry, quote the problematic clause with a short context snippet, then **propose a minimal concrete fix** that repairs the grammar without rewriting the sentence. Keep suggestions minimal — change only what's broken, preserve the author's voice, and explain in a few words *why* it's wrong (e.g. "missing verb", "wrong case ending", "doubled preposition"). If you truly have no idea what the author meant, say so and ask rather than guessing. If nothing is uncertain, say so in a few words. The diff shows the fixes — don't re-list them.
+6. **Report and resolve Uncertain.** Start with a one-sentence summary of directly-applied fixes (e.g. "Fixed 3 diacritics, 1 repeated word, 1 agreement."). If nothing is Uncertain, say so in a few words and stop.
 
-Do not compile. Typo fixes in prose cannot break TeX. If the user wants a compile check afterwards, they will ask (or use the `handout` skill).
+   Otherwise, for each Uncertain item print a short paragraph with: a line-number anchor (e.g. `L296`), the problematic clause with surrounding context, a minimal proposed fix, and a few-word reason (e.g. "missing verb", "wrong case ending", "doubled preposition"). Deduplicate — each distinct item once.
+
+   Then call `AskUserQuestion` (batched up to 4 per call) with options per item: **Apply suggested fix** / **Leave alone**. Apply approved fixes via Edit and emit a final one-liner with what was applied. If you genuinely have no idea what the author meant for an item, leave it out of `AskUserQuestion` and ask in plain text instead.
+7. **Fan out by section** for multi-problem handouts. Dispatch 3–5 parallel subagents to run **passes 1–2** (steps 3–4) over contiguous, non-overlapping slices. Each subagent returns its **Fix directly** and **Uncertain** lists as text — it does not call Edit. The main session then applies all fixes (step 5) and produces the merged report (step 6). Trust your judgment to skip fan-out on trivially small inputs.
+
+Do not compile. Typo fixes in prose cannot break TeX. If the user wants a compile check afterwards, they will ask.
 
 ---
 
@@ -90,12 +96,3 @@ When in doubt: leave unchanged, and do **not** list under Uncertain.
 - Stiffness, stuffiness, repetition, or a sentence that could be "smoother."
 
 If in doubt whether something is a mistake or a voice choice, it's voice. Leave it. The bar for flagging anything at all is: *a native speaker would read this and say it's wrong*, not *a native speaker could improve it*.
-
----
-
-## Rules
-
-- Never change math, macros, labels, URLs, or structure.
-- Never "improve" style, tone, or word choice.
-- Never touch `\Problem` stars, source argument, or any structural argument — only prose inside statements / solutions / proofs.
-- Deduplicate the Uncertain list: each distinct item once.
