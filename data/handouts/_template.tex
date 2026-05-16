@@ -214,9 +214,11 @@
 \long\def\remarkwitharg#1{\textit{\captionRemark\ (#1).}\enskip}
 \def\remarknoarg{\textit{\captionRemark.}\enskip}
 
-% Prints the end of a block (exercise, theorem, example, definition)
+% Prints the end of a block (exercise, theorem, example, definition).
+% The \nobreak forbids a page break right before the diamond so it stays
+% glued to the last line of the block above.
 \def\endblock{%
-  \safepar\medskip%
+  \safepar\nobreak\medskip%
   \centerline{%
     \hbox{%
       \vrule width 2em height 0.4pt depth 0pt
@@ -229,8 +231,18 @@
   \safepar\medskip%
 }
 
-% Prints a left-aligned bar with the given text
-\long\def\leftbar#1{% 
+% Set TRUE just before \leftbar when inline content (proof, hints, inline
+% solution) follows in the same logical block. \leftbar consults the flag
+% to pick its trailing glue and resets it, so subsequent \leftbar calls
+% default back to self-closing.
+\newif\ifLeftbarOpen
+
+% Prints a left-aligned bar with the given text.
+% Default tail: two breakable medskips (page break allowed between blocks).
+% When \LeftbarOpentrue was set first: a non-breakable kern of the same
+% size, so the closing \endblock diamond cannot land on a fresh page away
+% from its content.
+\long\def\leftbar#1{%
   \safepar\medskip\medskip%
   \hbox{%
     \vrule width 2pt
@@ -241,7 +253,13 @@
       \noindent #1\par
     }%
   }%
-  \safepar\medskip\medskip%
+  \safepar%
+  \ifLeftbarOpen%
+    \nobreak\kern\medskipamount\nobreak%
+    \LeftbarOpenfalse%
+  \else%
+    \medskip\medskip%
+  \fi%
 }
 
 % Counters for already defined exercises, theorems etc
@@ -257,13 +275,14 @@
 \long\def\Exercise#1#2#3{%
 	\advance\exercises by 1\relax%
 	\expandafter\long\expandafter\def\csname e\the\exercises-solution\endcsname{#3}%
+	\ifReviewMode\LeftbarOpentrue\fi%
 	\leftbar{%
 		{\bf \captionExercise\ \the\exercises}%
 		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
 		\enskip\saferead{#2}\safepar%
 	}%
 	\ifReviewMode%
-		\safepar{\em \captionSolution.}\enskip\saferead{#3}\endblock%
+		{\em \captionSolution.}\enskip\saferead{#3}\endblock%
 	\fi%
 }
 
@@ -272,16 +291,16 @@
 % #3 - Solution
 \long\def\Theorem#1#2#3{%
 	\advance\theorems by 1\relax%
+	\def\temp{#3}\ifx\temp\empty\else\LeftbarOpentrue\fi%
 	\leftbar{%
 		{\bf \captionTheorem\ \the\theorems}%
 		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
 		\enskip\saferead{#2}\safepar%
 	}%
-  \def\temp{#3}\ifx\temp\empty\else%
-    \safepar%
-    \theoremDispatchProof#3\theoremDispatchEnd%
-    \qedsquare\endblock%
-  \fi%
+	\def\temp{#3}\ifx\temp\empty\else%
+		\theoremDispatchProof#3\theoremDispatchEnd%
+		\qedsquare\endblock%
+	\fi%
 }
 
 % Peeks at the first token of the proof body. If it is \NamedProof, the body
@@ -305,14 +324,15 @@
 % #3 - Solution
 \long\def\Example#1#2#3{%
 	\advance\examples by 1\relax%
+	\IfShowingTexts{\LeftbarOpentrue}{}%
 	\leftbar{%
 		{\bf \captionExample\ \the\examples}%
 		\def\temp{#1}\ifx\temp\empty\else\ (\temp)\fi.%
 		\enskip\saferead{#2}%
 	}%
 	\IfShowingTexts%
-    {\safepar{\em \captionSolution.}\enskip\saferead{#3}\endblock}%
-    {\safepar\medskip}%
+    {{\em \captionSolution.}\enskip\saferead{#3}\endblock}%
+    {}%
 }
 
 % A helper macro which prints the given number of stars
@@ -354,6 +374,7 @@
   \advance\problems by 1\relax%
   \expandafter\def\csname p\the\problems-difficulty\endcsname{#1}%
   \problemArgsCount=0\relax%
+  \ifReviewMode\LeftbarOpentrue\fi%
   \leftbar{%
     {\bf \captionProblem\ \the\problems\Stars{#1}}%
     \def\temp{#2}\ifx\temp\empty\else\ (\temp)\fi.%
