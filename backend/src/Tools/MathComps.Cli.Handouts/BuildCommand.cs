@@ -519,8 +519,11 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
             var compilerParts = compiler.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var compilerExecutable = compilerParts[0];
 
-            // Pass each flag as its own argv entry plus the input .tex filename at the end
-            string[] arguments = [.. compilerParts.Skip(1), texFile.Name];
+            // Pass each flag as its own argv entry, then inject \def\PUBLISH{} before \input
+            // reads the .tex. The template defaults \ReviewModetrue so manual local compiles
+            // render inline review content; the \PUBLISH sentinel flips it off, producing
+            // the publish form (where hints and solutions are not below statements but at the end)
+            string[] arguments = [.. compilerParts.Skip(1), $@"\def\PUBLISH{{}}\input {texFile.Name}"];
 
             // Run the compiler; ProcessRunner drains stdout/stderr and reports the exit code
             var result = ProcessRunner.Run(compilerExecutable, arguments, workingDirectory.FullName);

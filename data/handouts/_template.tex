@@ -24,9 +24,13 @@
 \newif\ifDisplayTexts
 \DisplayTextstrue
 
-% Toggle to inline hints/solutions under each Problem and Exercise (review mode)
+% Toggle to inline hints/solutions under each Problem and Exercise (review mode).
+% Defaults to TRUE so manual local compiles render the inline review form; the
+% Handouts CLI defines \PUBLISH before it reads the handout via \input, which
+% flips this off and produces the publish form.
 \newif\ifReviewMode
-\ReviewModefalse
+\ReviewModetrue
+\ifdefined\PUBLISH\ReviewModefalse\fi
 
 % Render #1 if solutions should be inline (review mode OR display-texts), else #2
 \long\def\IfShowingTexts#1#2{\ifReviewMode#1\else\ifDisplayTexts#1\else#2\fi\fi}
