@@ -124,8 +124,11 @@ foreach ($p in $Path) {
   }
 }
 
-# Skip files whose name starts with '_' (convention for shared modules like _common.asy)
-$asyFiles = @($asyFiles | Where-Object { -not $_.Name.StartsWith('_') })
+# Skip shared modules: '_' prefix (handout-wide, e.g. _common.asy) and '-shared' suffix
+# (per-figure-family, e.g. angles-square-equilateral-shared.asy — sorts next to its siblings).
+$asyFiles = @($asyFiles | Where-Object {
+    -not $_.Name.StartsWith('_') -and -not $_.BaseName.EndsWith('-shared')
+})
 
 if ($asyFiles.Count -eq 0) {
   Write-Error "No .asy files found for path: $Path"

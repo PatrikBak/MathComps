@@ -31,6 +31,10 @@ pen LightPink = rgb(1, 0.75, 0.85);
 pen Pink = rgb(1, 0.5, 0.75);
 pen DarkPink = rgb(0.75, 0.25, 0.5);
 
+pen LightYellow = rgb(1, 1, 0.5);
+pen Yellow = rgb(0.5, 0.5, 0);
+pen DarkYellow = rgb(0.25, 0.25, 0);
+
 //
 // Line-width tiers. NormalWidth is the default for edges and circles.
 //
@@ -59,6 +63,18 @@ real Radius2 = 15;
 real Radius3 = 20;
 real Radius4 = 25;
 real Radius5 = 30;
+
+//
+// Font-size tiers for figure text, paralleling Radius1..Radius5. Font3 matches
+// the 13pt default set by defaultpen; pick lower for dense figures or narrow
+// angle sectors, higher for emphasis. Pass as `labelPen` to AngleMark /
+// RightAngleMark, or directly to label().
+//
+pen Font1 = fontsize(8pt);
+pen Font2 = fontsize(10pt);
+pen Font3 = fontsize(13pt);
+pen Font4 = fontsize(16pt);
+pen Font5 = fontsize(20pt);
 
 //
 // Default vertex dot radius
@@ -154,6 +170,18 @@ pair ReflectAcross(
     pair B)
 {
     return 2 * Foot(P, A, B) - P;
+}
+
+//
+// Returns the apex C of the equilateral triangle ABC, placed "above" AB —
+// i.e. on the left of the directed segment A → B (CCW rotation by 60°).
+// For the apex on the other side, pass the points in reverse order.
+//
+pair EquilateralTriangle(
+    pair A,
+    pair B)
+{
+    return A + rotate(60) * (B - A);
 }
 
 //
