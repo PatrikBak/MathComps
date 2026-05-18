@@ -21,10 +21,10 @@ Draw(A, B, Blue);
 Draw(B, D, Red);
 Draw(D, C, Blue);
 Draw(C, E, Blue);
-Draw(E, A, Red + dashedPen);
+DashedDraw(E, A, Red);
 Draw(B, E, Blue);
 Draw(D, E, Red);
-Draw(A, D, Blue + dashedPen);
+DashedDraw(A, D, Blue);
 
 LabeledDot(A, "A", SW);
 LabeledDot(B, "B", SE);

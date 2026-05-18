@@ -17,10 +17,10 @@ AngleMark(Y, A, Z, LightGreen, radius = Radius2Nudged);
 
 Draw(A, X);
 Draw(A, Y);
-Draw(A, Z, black + dashedPen);
+DashDotDraw(A, Z);
 Draw(A, Xp, vertexPen);
 Draw(A, Yp, vertexPen);
-Draw(A, Zp, vertexPen + dashedPen);
+DashDotDraw(A, Zp, vertexPen);
 
 LabeledDot(A, "A", E);
 LabeledDot(X, "X", NW);

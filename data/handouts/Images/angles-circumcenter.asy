@@ -20,9 +20,9 @@ Draw(A, B);
 Draw(B, C);
 Draw(C, A);
 
-Draw(ExtendPast(O, Mab, pastMidpoint), ExtendPast(Mab, O, pastO), Green + dashedPen);
-Draw(ExtendPast(O, Mac, pastMidpoint), ExtendPast(Mac, O, pastO), Green + dashedPen);
-Draw(ExtendPast(O, Mbc, pastMidpoint), ExtendPast(Mbc, O, pastO), Red + dashedPen);
+DashedDraw(ExtendPast(O, Mab, pastMidpoint), ExtendPast(Mab, O, pastO), Green);
+DashedDraw(ExtendPast(O, Mac, pastMidpoint), ExtendPast(Mac, O, pastO), Green);
+DashedDraw(ExtendPast(O, Mbc, pastMidpoint), ExtendPast(Mbc, O, pastO), Red);
 
 Draw(O, A, Green);
 Draw(O, B, Green);

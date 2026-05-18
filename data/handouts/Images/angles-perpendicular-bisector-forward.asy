@@ -12,8 +12,8 @@ RightAngleMark(B, M, X, color = LightBlue);
 
 Draw(A, B);
 Draw(X, M);
-Draw(X, A, Red + dashedPen);
-Draw(X, B, Red + dashedPen);
+DashedDraw(X, A, Red);
+DashedDraw(X, B, Red);
 
 LabeledDot(A, "A", SW);
 LabeledDot(B, "B", SE);

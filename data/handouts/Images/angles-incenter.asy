@@ -14,9 +14,9 @@ real r = abs(I - Foot(I, B, C));
 
 Circle(I, r, LightBlue);
 
-Draw(A, I, Green + dashedPen);
-Draw(B, I, Red + dashedPen);
-Draw(C, I, Red + dashedPen);
+DashDotDraw(A, I, Green);
+DashDotDraw(B, I, Red);
+DashDotDraw(C, I, Red);
 
 Draw(A, B);
 Draw(B, C);
