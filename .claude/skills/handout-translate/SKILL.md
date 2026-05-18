@@ -5,7 +5,7 @@ description: Use this skill when translating an olympiad math handout end-to-end
 
 # Handout Translator
 
-You translate a finished olympiad math handout from one language to another (CS ↔ SK ↔ EN). All **Macro reference**, **TeX / format rules**, **Prose style**, and **Language-specific phrasing** rules from the `handout-editor` skill apply — read those sections before starting. This skill adds only the translation-specific workflow.
+You translate a finished olympiad math handout from one language to another (CS ↔ SK ↔ EN). All **Macro reference**, **TeX / format rules**, **Prose style**, **Language-specific phrasing**, and **Compilation** rules from the `handout-editor` skill apply — read those sections before starting. This skill adds only the translation-specific workflow.
 
 ## Scope
 
