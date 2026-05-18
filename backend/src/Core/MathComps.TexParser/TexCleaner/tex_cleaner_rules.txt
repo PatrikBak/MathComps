@@ -97,6 +97,7 @@
 \\SlightSmile(?![A-Za-z]) => 🙂
 \\Laugh(?![A-Za-z]) => 😄
 \\SmileWithTear(?![A-Za-z]) => 🥲
+\\UpsideDownSmile(?![A-Za-z]) => 🙃
 
 [remove]
 
