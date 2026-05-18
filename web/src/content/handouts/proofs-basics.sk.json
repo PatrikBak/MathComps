@@ -4708,7 +4708,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Predpokladajme, že existuje konečne veľa prvočísel tvaru "
+                      "text": "Postupujeme sporom. Predpokladajme, že existuje konečne veľa prvočísel tvaru "
                     },
                     {
                       "type": "math",
@@ -4717,7 +4717,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Označme "
+                      "text": ", a\u00A0označme "
                     },
                     {
                       "type": "math",
@@ -4739,7 +4739,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " prvočísla tohto tvaru (číslo 2 vynechávame). Uvažujme číslo"
+                      "text": " z\u00A0nich (číslo 2 vynechávame). Uvažujme číslo"
                     }
                   ],
                   "highligted": false

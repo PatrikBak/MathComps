@@ -3519,7 +3519,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Zkouškou se přesvědčíme, že nalezená řešení "
+                      "text": "Zkouškou ověříme, že nalezená řešení "
                     },
                     {
                       "type": "math",
@@ -7009,7 +7009,7 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "To už povede ke sporu: Soustava je cyklická, takže stačí vyřešit "
+                            "text": "To už povede ke sporu: Soustava je cyklická, stačí tedy vyřešit "
                           },
                           {
                             "type": "math",

@@ -4708,7 +4708,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Předpokládejme, že existuje konečně mnoho prvočísel tvaru "
+                      "text": "Předpokládejme, že prvočísel tvaru "
                     },
                     {
                       "type": "math",
@@ -4717,7 +4717,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Označme "
+                      "text": " je jen konečně mnoho. Označme "
                     },
                     {
                       "type": "math",
