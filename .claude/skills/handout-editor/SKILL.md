@@ -5,7 +5,7 @@ description: Use this skill when editing one olympiad math handout file — fill
 
 # Handout Editor
 
-You are a professional olympiad math writer, editor, and translator. Help curate, write, translate, and compile handouts in the PlainTeX+AMS-TeX+OPmac stack used by this project.
+You are a professional olympiad math writer and editor. Help curate, write, and compile the handouts in this project.
 
 ## Scope
 
@@ -19,13 +19,25 @@ You are a professional olympiad math writer, editor, and translator. Help curate
 4. After every edit, compile and verify. If compilation fails with exit code ≠ 0, fix the error and recompile.
 5. Report what changed (one sentence).
 
+## When the changes introduce new figures
+
+If the edit adds brand-new `\Image{...}` references to figures that don't yet exist, do the work in this order:
+
+1. Write the new `.asy` files in `data/handouts/Images/` and render them via `_Export-Asy.ps1` (produces `.pdf` + `.svg`) — the `handout-figure` skill is the appropriate context for this step.
+2. Edit the `.tex` to add the `\Image{...}` lines and any surrounding prose.
+3. Compile `pdfcsplain` once as the final verification step.
+
+**Why:** editing the `.tex` first means the intermediate compile fails with "cannot find image file …" — a noisy, distracting failure that signals nothing useful. Doing figures first means the only compile run is real end-to-end verification, and a non-zero exit is then a real problem worth investigating.
+
+If figures already exist (only `.tex` is changing), the order doesn't matter and compile-as-you-go is fine.
+
 ## Compilation
 
 Run from the handouts directory (`data/handouts/`):
 ```
 pdfcsplain -interaction=nonstopmode -halt-on-error "filename.tex"
 ```
-Exit code 0 = success. Ignore all warnings — do not investigate, fix, or mention them.
+Ignore all warnings — do not investigate, fix, or mention them — with one exception: **`Overfull \hbox` warnings must be fixed**. Find the offending line from the snippet TeX prints below the warning (the reported line number usually points at the enclosing macro's closing brace, not the prose). Prefer relaxing a `~` (→ space) on that line, but never one tying a one-letter word (CS/SK `a, i, k, o, s, u, v, z`; EN `a, I`) — that strands the letter at line end. If no safe `~` exists or relaxation doesn't shift TeX's break, do a small prose rewrite (drop a particle, tighten a phrase). Recompile after each attempt.
 
 ---
 
@@ -40,6 +52,8 @@ Exit code 0 = success. Ignore all warnings — do not investigate, fix, or menti
 ```
 
 **`\Problem` stars argument** must be a non-negative integer (`0`, `1`, `2`, …). Never leave it empty (`{}`). Use `{0}` when the difficulty is unspecified.
+
+**`\NamedProof{caption}`** — `\Theorem` auto-prepends an italic `Dôkaz.` (or `Důkaz.` / `Proof.`) caption to its proof argument. `\NamedProof` at the START of the proof body REPLACES that caption with `caption` italicized. Use ONLY when `caption` already plays the role of "Dôkaz." — i.e. it contains/replaces the word, as in `\NamedProof{Dôkaz 1 (matematická indukcia).}` to label one of several alternative proofs. Do NOT use it for sub-case markers like `(⇒)`, `(⇐)`, `Priama implikácia.`, `Obrátená implikácia.` — those are case headers WITHIN one proof, and the default `Dôkaz.` must remain. For those, write plain `\textit{($\Rightarrow$)}` at the start of the case; the rendered output is `Dôkaz. (⇒) ...`, which is the intended look.
 
 When the user asks to **reformat or transcribe** (e.g. "convert this old format", "add these problems"), copy content faithfully — do not invent, improve, or fill in solutions. Leave solution arguments as `{}` if no solution is provided.
 
@@ -79,13 +93,15 @@ A problem with no hint and no solution looks like `\Problem{0}{}{Statement.}{}`.
 ## Prose style
 
 - **Mirror the author's style strictly.** Before writing, read existing solutions/exercises in the same file. Match the author's voice — sentence length, level of formality, how explicitly steps are spelled out, idiomatic word choices and short phrases. Your additions should be indistinguishable from the existing content. Do not inflate with synonyms or impose your own voice.
-- **Self-contained.** Solutions must stand alone — do not rely on hints. Pull in any essential fact briefly.
+- **Self-contained.** Solutions must stand alone — every named object, auxiliary point (`$B'$`, `$M$`, `$O$`, …), or construction used by the reasoning must be (re)introduced inside the solution body, even if it also appears in a hint. The reader may skip hints entirely.
 - **Elegant and elementary.** Prefer the prettiest elementary route that aligns with the provided hints. Never contradict or bypass them.
 - **Calibrate to a strong school student starting olympiads.** Name the strategic move (auxiliary point, substitution, which criterion/identity); execute the rest in math. Skip prose on trivial sub-steps — shared sides, restating the previous line, naming an angle right after computing $180^\circ-\alpha$. One-line nudges between display blocks are fine; paragraph-length recaps aren't.
 - **`\Image` placement.** In multi-paragraph solutions/proofs, place `\Image{...}` between paragraphs — not as the opening line and not as the closing line. Drop it right after the paragraph that constructs/names what the figure shows. Single-paragraph solutions are exempt.
+- **`\Image` scale.** Default to no scale argument — write `\Image{<file>.pdf}`, not `\Image{<file>.pdf}{0.8}`. 
 
 ## Language-specific phrasing
 
+- **SK/CS quotes.** Use `\uv{text}` for quoted words, never the `,,text''` double-comma style.
 - **American English** (when `\setlanguage{EN}`). Use American spellings throughout: -ize not -ise, -or not -our, -er not -re (center/incenter/excenter/orthocenter/circumcenter, not centre/incentre/…), practice (verb and noun).
 - **EN angle notation:** Write `$\angle XYZ$`, never `$|\angle XYZ|$`. The absolute-value bars around angles are CS/SK convention only.
 - **EN length notation:** Write `$AB$`, never `$|AB|$`. The absolute-value bars around segment lengths are CS/SK convention only. When removing `|...|` from a length that follows a TeX control sequence (e.g. `\neq|AC|`), ensure a space separates the control word from the next token: `\neq AC`.

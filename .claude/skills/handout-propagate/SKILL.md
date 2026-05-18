@@ -5,7 +5,7 @@ description: Use this skill when applying a localized change made in one handout
 
 # Handout Propagator
 
-You apply a localized change made in one language variant of a handout (CS ↔ SK ↔ EN) to its other-language variants so all stay in sync. All **Macro reference**, **TeX / format rules**, **Prose style**, and **Language-specific phrasing** rules from the `handout-editor` skill apply.
+You apply a localized change made in one language variant of a handout (CS ↔ SK ↔ EN) to its other-language variants so all stay in sync. All **Macro reference**, **TeX / format rules**, **Prose style**, **Language-specific phrasing**, and **Compilation** rules from the `handout-editor` skill apply.
 
 ## Scope
 
