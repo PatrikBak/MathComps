@@ -4873,6 +4873,2525 @@
         }
       },
       {
+        "title": "Osi",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Zo školy iste poznáme dve osi: os úsečky a os uhla. V\u00A0tejto sekcii si uzrejmíme známe veci a\u00A0dôležité vlastnosti, ktoré budeme priebežne používať."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Os strany",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Os strany vieme definovať ako priamku, ktorá je kolmá na danú úsečku a\u00A0prechádza jej stredom. Iná definícia je, že je to množina bodov, ktoré majú rovnakú vzdialenosť od krajných bodov našej úsečky. Sú tieto definície ale ekvivalentné? Nuž, to nie je evidentné, zdôvodníme si to."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "os úsečky"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Množina bodov, ktoré majú rovnakú vzdialenosť od krajných bodov úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je kolmica prechádzajúca jej stredom\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Rightarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Nech bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na kolmici na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vedenej stredom\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AMX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BMX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zhodné podľa vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|MA|=|MB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (stred), spoločná strana "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zhodné pravé uhly pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Odtiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|XA|=|XB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-perpendicular-bisector-forward.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Leftarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Predpokladajme, že bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spĺňa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|XA|=|XB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ale neleží na kolmici na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " cez\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na priamke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je zrejmé, že jediný bod tejto priamky rovnako vzdialený od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je práve stred\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predpokladajme teda, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na priamke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " neleží. Bez ujmy na všeobecnosti nech je naša kolmica zvislá a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží naľavo od nej. Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " priesečník úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0touto kolmicou. Podľa už dokázanej implikácie platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|YA|=|YB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-perpendicular-bisector-converse.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0rovnoramennom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle XAB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|XA|=|XB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle XAB|=|\\angle XBA|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na úsečke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", polpriamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splývajú, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle XBA|=|\\angle YBA|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Avšak v\u00A0rovnoramennom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\triangle YAB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "|YA|=|YB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle YBA|=|\\angle YAB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Spolu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle XAB|=|\\angle XBA|=|\\angle YBA|=|\\angle YAB|.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To je však nezmysel: bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží vnútri úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", preto polpriamka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " smeruje do vnútra trojuholníka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XAB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0leží striktne vnútri uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle XAB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle YAB|<|\\angle XAB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Najzákladnejšia veta zahŕňajúca osi strán je samozrejme nasledovné tvrdenie:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "existencia\u00A0"
+                  },
+                  {
+                    "type": "math",
+                    "text": "O",
+                    "isDisplay": false
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Osi strán ľubovoľného trojuholníka sa pretínajú v\u00A0jednom bode. Tento je stredom kružnice opísanej danému trojuholníku."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je trojuholník. Os úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je kolmá na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0os úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je kolmá na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; tieto dve kolmice sú rovnobežné iba v\u00A0prípade "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB \\parallel AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo zrejme neplatí. Preto sa osi úsečiek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pretínajú v\u00A0jednom bode – označme ho\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podľa predošlej vety platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OA|=|OB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (lebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na osi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OA|=|OC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (lebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na osi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Dokopy to dáva "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OB|=|OC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo nám zasa spätne dáva, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží aj na osi úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Všetky tri osi teda prechádzajú bodom\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-circumcenter.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (1)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " spĺňa "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OA|=|OB|=|OC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže je stredom kružnice prechádzajúcej cez všetky tri vrcholy – teda kružnice opísanej trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (2)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Označenie "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pre stred opísanej kružnice je medzinárodný štandard. V\u00A0Česku a na Slovensku sa zvykne používať aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (zo slova "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "stred"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ")."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "title": "Os uhla",
+        "level": 2,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Podobne ako pri osi strany sa najprv zamyslíme nad definíciou. Majme uhol "
+                },
+                {
+                  "type": "math",
+                  "text": "XAY",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Pod jeho "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "osou"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " (presnejšie "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "vnútornou osou"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ") rozumieme polpriamku\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "AZ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " takú, že "
+                },
+                {
+                  "type": "math",
+                  "text": "|\\angle XAZ|=|\\angle ZAY|",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Bod\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "Z",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " je teda zvolený tak, že polpriamka\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "AZ",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " rozdelí uhol "
+                },
+                {
+                  "type": "math",
+                  "text": "XAY",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " na dva zhodné uhly. Voľne sa za os uhla pokladá aj\u00A0celá priamka určená touto polpriamkou."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "image",
+                  "id": "angle-basics-1/angles-bisector-definition.svg",
+                  "scale": 1.0,
+                  "isInline": false
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Rovnako ako pri osi strany sa táto definícia často zamieňa s\u00A0tvrdením, že os uhla je množina vnútorných bodov uhla, ktoré majú rovnakú vzdialenosť od jeho ramien. Aj\u00A0tu si to zaslúži dôkaz."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "os uhla"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vnútri uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XAY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má rovnakú vzdialenosť od priamok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle XAZ|=|\\angle ZAY|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Rightarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Nech polpriamka\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " delí uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XAY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na dva zhodné uhly. Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " päty kolmíc spustených z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pravouhlé trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AX'Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY'Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zhodné podľa vety\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "usu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": spoločná prepona "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", zhodné uhly pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zhodné pravé uhly pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Odtiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|ZX'|=|ZY'|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo sú práve vzdialenosti bodu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " od priamok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-bisector-equidistant.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "("
+                        },
+                        {
+                          "type": "math",
+                          "text": "\\Leftarrow",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Nech naopak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|ZX'|=|ZY'|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú opäť päty kolmíc z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pravouhlé trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AX'Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY'Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zhodné podľa vety\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Ssu",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": spoločná prepona "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", zhodné odvesny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|ZX'|=|ZY'|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zhodné pravé uhly pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " oproti tejto prepone (najdlhšej strane). Odtiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle X'AZ|=|\\angle Y'AZ|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je presne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle XAZ|=|\\angle ZAY|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Než si túto vetu naplno užijeme, zaveďme ešte pojem "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "vonkajšej osi uhla"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": ". Vonkajšou osou uhla "
+                },
+                {
+                  "type": "math",
+                  "text": "XAY",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " rozumieme zjednotenie osí dvoch uhlov vedľajších k\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "XAY",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " – označme si ich "
+                },
+                {
+                  "type": "math",
+                  "text": "XAY'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " a\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "X'AY",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", kde "
+                },
+                {
+                  "type": "math",
+                  "text": "X'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "Y'",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": " ležia na opačných polpriamkach k\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "AX",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "math",
+                  "text": "AY",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": ". Osi týchto dvoch vedľajších uhlov sú opačné polpriamky vychádzajúce z\u00A0bodu "
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "; ich zjednotenie je teda priamka prechádzajúca\u00A0"
+                },
+                {
+                  "type": "math",
+                  "text": "A",
+                  "isDisplay": false
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "image",
+                  "id": "angle-basics-1/angles-bisector-external-definition.svg",
+                  "scale": 1.0,
+                  "isInline": false
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Než pôjdeme ďalej, dokážme si túto základnú vlastnosť:"
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "exercise",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážte, že vnútorná os uhla je kolmá na jeho vonkajšiu os."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " veľkosť polovice uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XAY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " veľkosť polovice uhla vedľajšieho k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "XAY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ako na obrázku. Súčet všetkých štyroch uhlov na priamke\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\beta+\\beta+\\alpha+\\alpha=180^\\circ,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "z\u00A0čoho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha+\\beta=90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Lenže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\alpha+\\beta",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je práve uhol medzi vnútornou a\u00A0vonkajšou osou, takže sú kolmé."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-bisectors-perpendicular.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Vonkajšie osi majú prirodzene tiež vlastnosť, že ich body sú rovnako vzdialené od oboch ramien – veď sú to stále len osi nejakých uhlov. Ak teda hľadáme množinu všetkých bodov, ktoré majú rovnakú vzdialenosť od dvoch nerovnobežných "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "priamok"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " (t.j. nie len polpriamok), dostaneme "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "zjednotenie"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " vnútornej a\u00A0vonkajšej osi uhla, ktorý tieto priamky zvierajú."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "image",
+                  "id": "angle-basics-1/angles-two-lines-bisectors.svg",
+                  "scale": 1.0,
+                  "isInline": false
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Teraz prejdime na najznámejší dôsledok súvisiaci s\u00A0osami uhlov. Týka sa trojuholníka a\u00A0musíme v\u00A0ňom dať pozor na to, ktorá os je vnútorná a\u00A0ktorá vonkajšia."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "existencia\u00A0"
+                  },
+                  {
+                    "type": "math",
+                    "text": "I",
+                    "isDisplay": false
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vnútorné osi uhlov ľubovoľného trojuholníka sa pretínajú v\u00A0jednom bode. Tento je stredom kružnice vpísanej danému trojuholníku."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je trojuholník. Nech\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je priesečník osí vnútorných uhlov pri vrcholoch\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorý zrejme existuje a\u00A0zrejme leží vnútri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podľa predošlej vety platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d(I, AB) = d(I, BC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (lebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na osi uhla pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "d(I, BC) = d(I, AC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (lebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na osi uhla pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Odtiaľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d(I, AB) = d(I, AC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží vnútri uhla\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak to znamená, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na jeho osi. Všetky tri vnútorné osi teda prechádzajú bodom\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-incenter.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (1)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má rovnakú vzdialenosť od všetkých troch strán, takže je stredom kružnice, ktorá sa dotýka všetkých troch strán zvnútra – teda kružnice vpísanej trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (2)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Označenie\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pochádza z\u00A0anglického slova "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "incentrum"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V\u00A0česko-slovenskej olympiáde sa často používa proste\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (ako stred)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0úlohách sa veľmi často objavia aj "
+                },
+                {
+                  "type": "italic",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "kružnice pripísané"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "theorem",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "existencia\u00A0"
+                  },
+                  {
+                    "type": "math",
+                    "text": "I_a",
+                    "isDisplay": false
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa vnútorná os uhla pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vonkajšie osi uhlov pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pretínajú v\u00A0jednom bode. Tento je stredom kružnice pripísanej trojuholníku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " oproti vrcholu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pre prehľadnosť zápisu označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " body na polpriamkach opačných k\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "CA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vonkajšia os uhla pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je práve vnútorná os uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "YBC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vonkajšia os pri\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vnútorná os uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XCB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Označme\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I_a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " priesečník týchto osí."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0vety o\u00A0osi uhla aplikovanej na uhly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "YBC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "XCB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme rovnosti"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "d(I_a, AB) = d(I_a, BC) = d(I_a, AC).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I_a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má teda rovnakú vzdialenosť od priamok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže leží na vnútornej alebo vonkajšej osi uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zjavne však leží vnútri uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže ide o jeho vnútornú os – tá teda prechádza bodom\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I_a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "angle-basics-1/angles-excenter.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (1)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Bod\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I_a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má rovnakú vzdialenosť od priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj\u00A0od priamok obsahujúcich strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže je stredom kružnice dotýkajúcej sa strany "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zvonku a\u00A0zvyšných dvoch strán (presnejšie ich predĺžení) zvnútra – kružnice pripísanej trojuholníku oproti vrcholu\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka (2)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Označenie\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "I_a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je bežné medzinárodné značenie. Kružnici pripísanej sa hovorí "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "excircle"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže možno logickejšie by mohlo byť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E_a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ale to sa skôr nepoužíva. Kružnice vpísané ale súvisia s\u00A0incentrom, takže možno preto \uD83D\uDE43."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Osi uhlov, vnútorné i\u00A0vonkajšie, sú v\u00A0súťažných úlohách mimoriadne užitočný a\u00A0obľúbený koncept. Často sa skrývajú za iné podmienky a\u00A0kľúčový krok riešenia býva uvedomiť si, že nejaký bod leží na dvoch osiach, a\u00A0teda aj na tretej. Niekedy ide o\u00A0osi vnútorné, inokedy vonkajšie. Tie vonkajšie je často vidieť ťažšie. Určite sa s\u00A0osami oplatí kamarátiť."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
         "title": "Čo si zapamätať",
         "level": 1,
         "text": {
@@ -7726,6 +10245,76 @@
       "originalId": "angles-90-60-30.pdf",
       "width": "146.09pt",
       "height": "131.24pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-perpendicular-bisector-forward.svg",
+      "originalId": "angles-perpendicular-bisector-forward.pdf",
+      "width": "122.36pt",
+      "height": "114.32pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-perpendicular-bisector-converse.svg",
+      "originalId": "angles-perpendicular-bisector-converse.pdf",
+      "width": "154.28pt",
+      "height": "125.53pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-circumcenter.svg",
+      "originalId": "angles-circumcenter.pdf",
+      "width": "155.6pt",
+      "height": "166.12pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-bisector-definition.svg",
+      "originalId": "angles-bisector-definition.pdf",
+      "width": "162.7pt",
+      "height": "162.02pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-bisector-equidistant.svg",
+      "originalId": "angles-bisector-equidistant.pdf",
+      "width": "162.7pt",
+      "height": "124.29pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-bisector-external-definition.svg",
+      "originalId": "angles-bisector-external-definition.pdf",
+      "width": "150.85pt",
+      "height": "122.39pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-bisectors-perpendicular.svg",
+      "originalId": "angles-bisectors-perpendicular.pdf",
+      "width": "154.46pt",
+      "height": "122.39pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-two-lines-bisectors.svg",
+      "originalId": "angles-two-lines-bisectors.pdf",
+      "width": "156.3pt",
+      "height": "150.44pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-incenter.svg",
+      "originalId": "angles-incenter.pdf",
+      "width": "163.76pt",
+      "height": "156.82pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "angle-basics-1/angles-excenter.svg",
+      "originalId": "angles-excenter.pdf",
+      "width": "134.58pt",
+      "height": "202.72pt",
       "scale": 1.0
     },
     {

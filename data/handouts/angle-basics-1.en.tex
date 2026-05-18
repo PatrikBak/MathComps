@@ -42,7 +42,7 @@ These properties are very naturally related to one another; a small exercise to 
 \Exercise{}{
     Convince yourself that:
     \begitems \style a
-    \i the linear-pair property implies the vertical-angles property (and vice versa)
+    \i the linear-pair property is equivalent to the vertical-angles property
     \i any two of the three properties about vertical, corresponding, and alternate angles imply the third
     \enditems
 }{
@@ -274,6 +274,128 @@ A very handy fact useful in non-trivial problems is the following. One possible 
 
     \Remark Another solution is to note that by Thales' theorem, the circumcenter~$O$ of triangle $ABC$ is also the midpoint of the hypotenuse $AB$. We will return to this solution in more detail when we discuss circles.
 }
+
+\sec Bisectors
+
+In school we have surely encountered two kinds of bisectors: the perpendicular bisector of a segment and the bisector of an angle. In this section we will clarify familiar notions and important properties that we will use throughout.
+
+\secc Perpendicular Bisector
+
+We can define the perpendicular bisector of a segment as the line perpendicular to the given segment that passes through its midpoint. Another definition is that it is the set of points that are equidistant from the endpoints of our segment. But are these definitions equivalent? Well, it is not evident, so let us justify it.
+
+\Theorem{perpendicular bisector}{
+    The set of points equidistant from the endpoints of a segment $AB$ is the line perpendicular to $AB$ passing through its midpoint~$M$.
+}{
+    \textit{($\Rightarrow$)} Let point~$X$ lie on the perpendicular to $AB$ through the midpoint~$M$. The triangles $AMX$ and $BMX$ are congruent by $SAS$: $MA=MB$ (midpoint), common side $MX$, and equal right angles at~$M$. Hence $XA=XB$.
+
+    \Image{angles-perpendicular-bisector-forward.pdf}
+
+    \textit{($\Leftarrow$)} Suppose point~$X$ satisfies $XA=XB$ but does not lie on the perpendicular to $AB$ through~$M$. If $X$ lies on the line $AB$, it is clear that the only point of this line equidistant from~$A$ and~$B$ is precisely the midpoint~$M$.
+
+    Suppose then that $X$ does not lie on the line $AB$. Without loss of generality, let our perpendicular be vertical and let~$X$ lie to its left. Denote by $Y$ the intersection of segment $XB$ with this perpendicular. By the already proved implication, $YA=YB$.
+
+    \Image{angles-perpendicular-bisector-converse.pdf}
+
+    In the isosceles $\triangle XAB$ ($XA=XB$) we have $\angle XAB=\angle XBA$. Since $Y$ lies on segment $XB$, the rays $BX$ and $BY$ coincide, so $\angle XBA=\angle YBA$. But in the isosceles $\triangle YAB$ ($YA=YB$) we have $\angle YBA=\angle YAB$. Altogether,
+    $$
+    \angle XAB=\angle XBA=\angle YBA=\angle YAB.
+    $$
+    This, however, is nonsense: point~$Y$ lies inside segment $XB$, so the ray $AY$ points into the interior of triangle $XAB$ and lies strictly inside the angle $\angle XAB$, i.e. $\angle YAB<\angle XAB$.
+}
+
+The most fundamental theorem involving perpendicular bisectors of the sides is, of course, the following statement:
+
+\Theorem{existence of~$O$}{
+    The perpendicular bisectors of the sides of any triangle meet at a single point. This point is the circumcenter of the triangle.
+}{
+    Let $ABC$ be a triangle. The perpendicular bisector of segment $AB$ is perpendicular to $AB$, and the perpendicular bisector of segment $AC$ is perpendicular to $AC$; these two perpendiculars are parallel only when $AB \parallel AC$, which clearly does not hold. Hence the perpendicular bisectors of segments $AB$ and $AC$ meet at a single point -- call it~$O$.
+
+    By the previous theorem, $OA=OB$ (since $O$ lies on the perpendicular bisector of $AB$) and $OA=OC$ (since $O$ lies on the perpendicular bisector of $AC$). Together this gives $OB=OC$, which in turn tells us that $O$ also lies on the perpendicular bisector of segment $BC$. All three perpendicular bisectors therefore pass through~$O$.
+
+    \Image{angles-circumcenter.pdf}
+
+    \Remark{1} The point $O$ satisfies $OA=OB=OC$, so it is the center of a circle passing through all three vertices -- that is, the circumscribed circle (circumcircle) of triangle $ABC$.
+
+    \Remark{2} The notation $O$ for the circumcenter is the international standard. In Czechia and Slovakia, the notation $S$ is also used (from the word \uv{střed}, meaning \uv{center}).
+}
+
+\secc Angle Bisector
+
+As with the perpendicular bisector, let us first reflect on the definition. Take an angle $XAY$. By its \textit{bisector} (more precisely the \textit{internal bisector}) we mean a ray~$AZ$ such that $\angle XAZ=\angle ZAY$. The point~$Z$ is thus chosen so that the ray~$AZ$ splits the angle $XAY$ into two equal angles. Loosely, the entire line determined by this ray is also called the angle bisector.
+
+\Image{angles-bisector-definition.pdf}
+
+Just as with the perpendicular bisector, this definition is often confused with the claim that the angle bisector is the set of interior points of the angle that are equidistant from its two sides. Here too this deserves a proof.
+
+\Theorem{angle bisector}{
+    A point~$Z$ inside the angle $XAY$ is equidistant from the lines $AX$ and $AY$ if and only if $\angle XAZ=\angle ZAY$.
+}{
+    \textit{($\Rightarrow$)} Let the ray~$AZ$ split the angle $XAY$ into two equal angles. Let $X'$, $Y'$ be the feet of the perpendiculars dropped from~$Z$ to the lines $AX$, $AY$. The right triangles $AX'Z$ and $AY'Z$ are congruent by~$ASA$: common hypotenuse $AZ$, equal angles at~$A$, and equal right angles at~$X'$, $Y'$. Hence $ZX'=ZY'$, which are precisely the distances from~$Z$ to the lines $AX$ and $AY$.
+
+    \Image{angles-bisector-equidistant.pdf}
+
+    \textit{($\Leftarrow$)} Conversely, suppose $ZX'=ZY'$, where $X'$, $Y'$ are again the feet of the perpendiculars from~$Z$ to the lines $AX$, $AY$. The right triangles $AX'Z$ and $AY'Z$ are congruent by~$SsA$: common hypotenuse $AZ$, equal legs $ZX'=ZY'$, and equal right angles at~$X'$, $Y'$ opposite this hypotenuse (the longest side). Hence $\angle X'AZ=\angle Y'AZ$, which is precisely $\angle XAZ=\angle ZAY$.
+}
+
+Before we fully enjoy this theorem, let us also introduce the notion of the \textit{external bisector of an angle}. By the external bisector of an angle $XAY$ we mean the union of the bisectors of the two angles adjacent (in a linear pair) to~$XAY$ -- call them $XAY'$ and $X'AY$, where $X'$, $Y'$ lie on the rays opposite to $AX$, $AY$. The bisectors of these two adjacent angles are opposite rays issuing from~$A$; their union is therefore a line through~$A$.
+
+\Image{angles-bisector-external-definition.pdf}
+
+Before going further, let us prove this basic property:
+
+\Exercise{}{
+    Prove that the internal bisector of an angle is perpendicular to its external bisector.
+}{
+    Let $\beta$ denote half the angle $XAY$ and $\alpha$ half the angle adjacent to~$XAY$, as in the figure. The sum of all four angles along the line~$AY$ is
+    $$
+    \beta+\beta+\alpha+\alpha=180^\circ,
+    $$
+    from which $\alpha+\beta=90^\circ$. But $\alpha+\beta$ is precisely the angle between the internal and external bisectors, so they are perpendicular.
+
+    \Image{angles-bisectors-perpendicular.pdf}
+}
+
+The external bisectors naturally also have the property that their points are equidistant from both sides of the angle -- after all, they are still bisectors of some angles. So if we look for the set of all points equidistant from two non-parallel \textit{lines} (i.e., not merely rays), we obtain the \textit{union} of the internal and external bisectors of the angle these lines form.
+
+\Image{angles-two-lines-bisectors.pdf}
+
+Let us now turn to the most famous consequence concerning angle bisectors. It is about the triangle, and we must pay attention to which bisector is internal and which is external.
+
+\Theorem{existence of~$I$}{
+    The internal angle bisectors of any triangle meet at a single point. This point is the incenter of the triangle.
+}{
+    Let $ABC$ be a triangle. Let~$I$ be the intersection of the internal angle bisectors at vertices~$B$ and~$C$, which clearly exists and clearly lies inside $ABC$.
+
+    By the previous theorem, $d(I, AB) = d(I, BC)$ (since $I$ lies on the bisector of the angle at~$B$) and $d(I, BC) = d(I, AC)$ (since $I$ lies on the bisector of the angle at~$C$). Hence $d(I, AB) = d(I, AC)$. Since~$I$ lies inside the angle~$BAC$, this means that $I$ lies on its bisector. All three internal bisectors therefore pass through~$I$.
+
+    \Image{angles-incenter.pdf}
+
+    \Remark{1} The point~$I$ is equidistant from all three sides, so it is the center of a circle tangent to all three sides from the inside -- the incircle of triangle $ABC$.
+
+    \Remark{2} The notation~$I$ comes from the word \uv{incenter}. In the Czech-Slovak olympiad the letter~$S$ is often used instead (for \uv{střed}, meaning \uv{center}).
+}
+
+In problems, the \textit{excircles} appear very often as well.
+
+\Theorem{existence of~$I_a$}{
+    In a triangle $ABC$, the internal bisector of the angle at~$A$ and the external bisectors of the angles at~$B$, $C$ meet at a single point. This point is the center of the excircle of triangle $ABC$ opposite vertex~$A$.
+}{
+    For clarity of notation, denote by $X$, $Y$ points on the rays opposite to $CA$, $BA$. The external bisector of the angle at~$B$ is exactly the internal bisector of the angle $YBC$, and the external bisector at~$C$ is the internal bisector of the angle $XCB$. Let~$I_a$ be the intersection of these bisectors.
+
+    From the angle bisector theorem applied to the angles $YBC$ and $XCB$ we obtain the equalities
+    $$
+    d(I_a, AB) = d(I_a, BC) = d(I_a, AC).
+    $$
+    The point~$I_a$ is therefore equidistant from the lines $AB$ and $AC$, so it lies on either the internal or the external bisector of the angle $BAC$. But it clearly lies inside the angle $BAC$, so it is on the internal bisector -- which therefore passes through~$I_a$.
+
+    \Image{angles-excenter.pdf}
+
+    \Remark{1} The point~$I_a$ is equidistant from the line $BC$ and from the lines containing the sides $AB$, $AC$, so it is the center of a circle tangent to the side $BC$ externally and to the other two sides (more precisely their extensions) internally -- the excircle of the triangle opposite vertex~$A$.
+
+    \Remark{2} The notation~$I_a$ is the common international notation. The escribed circle is called the \uv{excircle}, so perhaps $E_a$ would have been more logical, but it is rarely used. Then again, the inscribed circle is associated with the incenter, so perhaps that's why \UpsideDownSmile.
+}
+
+Angle bisectors, both internal and external, are an extremely useful and beloved concept in competition problems. They often hide behind other conditions, and the key step in a solution is often to realize that some point lies on two bisectors, and therefore also on the third. Sometimes the bisectors are internal, sometimes external. The external ones are often harder to spot. Making friends with bisectors definitely pays off.
 
 \sec What to Remember
 

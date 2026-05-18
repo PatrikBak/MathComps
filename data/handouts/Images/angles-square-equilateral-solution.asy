@@ -8,7 +8,7 @@ pen p = Font2;
 AngleMark(X, A, D, LightGreen, "30^\circ", radius = r, labelFraction = 1.5, labelPen = p);
 AngleMark(B, A, X, LightPurple, "60^\circ", radius = r, labelFraction = 1.5, labelPen = p);
 AngleMark(A, D, Y, LightGreen, "30^\circ", radius = r, labelFraction = 1.5, labelPen = p);
-AngleMark(Y, D, X, LightPink, "45^\circ", radius = r, labelFraction = 1.4, labelPen = p);
+AngleMark(Y, D, X, LightPink, radius = r);
 AngleMark(D, X, A, LightBlue, "75^\circ", radius = r, labelFraction = 1.5, labelPen = p);
 
 BaseEdges();

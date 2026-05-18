@@ -218,7 +218,7 @@ Méně známé tvrzení $Ssu$ je už trošičku těžší, proto k~němu budou i
 Na naší geometrické cestě se průběžně setkáme se všemi těmito tvrzeními. Prozatím si však ukažme nějaké konkrétní aplikace. Začneme tím nejzřejmějším tvrzením, které se ale také sluší a~patří dokázat:
 
 \Theorem{rovnoramenný trojúhelník}{
-    Dokažte, že pokud pro trojúhelník~$ABC$ platí $|AB|=|AC|$, tak $|\angle ABC|=|\angle ACB|$. Dokažte také obrácenou implikaci (tedy že z~rovnosti úhlů vyplývá rovnost délek).
+    Dokažte, že pokud pro trojúhelník $ABC$ platí $|AB|=|AC|$, tak $|\angle ABC|=|\angle ACB|$. Dokažte také obrácenou implikaci (tedy že z~rovnosti úhlů vyplývá rovnost délek).
 }{
     \textit{Přímá implikace.} Předpokládejme $|AB| = |AC|$. Nechť $M$ je střed $BC$. Trojúhelníky $ABM$ a~$ACM$ jsou shodné podle $sss$ ($|AB|=|AC|$ z~předpokladu, $|BM|=|CM|$ ze~středu, společná strana $AM$), odkud $|\angle ABC| = |\angle ACB|$. Tento důkaz funguje i s~jinými volbami bodu $M$. Pokud za $M$ vezmeme patu kolmice z~$A$ na $BC$, dostaneme společnou stranu $AM$, $|AB|=|AC|$ a~pravý úhel při~$M$, který leží naproti nejdelší straně (přeponě) $AB$ resp.~$AC$ -- aplikujeme větu $Ssu$. Pokud za $M$ vezmeme patu osy vnitřního úhlu při~$A$, máme $|AB|=|AC|$, shodný úhel $|\angle BAM|=|\angle CAM|$ a~společnou stranu $AM$ mezi nimi -- aplikujeme větu $sus$.
 
@@ -274,6 +274,128 @@ Velmi šikovná věc použitelná v~nelehkých úlohách je následující úloh
 
     \Remark Jiné řešení je uvážit, že podle Thaletovy věty je střed~$O$ kružnice opsané trojúhelníku $ABC$ zároveň středem přepony $AB$. K~tomuto řešení se podrobněji vrátíme, až se budeme bavit o~kružnicích.
 }
+
+\sec Osy
+
+Ze školy jistě známe dvě osy: osu úsečky a~osu úhlu. V~této sekci si ujasníme známé věci a~důležité vlastnosti, které budeme průběžně používat.
+
+\secc Osa strany
+
+Osu strany umíme definovat jako přímku, která je kolmá na danou úsečku a~prochází jejím středem. Jiná definice je, že je to množina bodů, které mají stejnou vzdálenost od krajních bodů naší úsečky. Jsou ale tyto definice ekvivalentní? Inu, to není evidentní, zdůvodníme si to.
+
+\Theorem{osa úsečky}{
+    Množina bodů, které mají stejnou vzdálenost od krajních bodů úsečky $AB$, je kolmice procházející jejím středem~$M$.
+}{
+    \textit{($\Rightarrow$)} Nechť bod~$X$ leží na kolmici na $AB$ vedené středem~$M$. Trojúhelníky $AMX$ a~$BMX$ jsou shodné podle věty $sus$: $|MA|=|MB|$ (střed), společná strana $MX$ a~shodné pravé úhly při~$M$. Odtud $|XA|=|XB|$.
+
+    \Image{angles-perpendicular-bisector-forward.pdf}
+
+    \textit{($\Leftarrow$)} Předpokládejme, že bod~$X$ splňuje $|XA|=|XB|$, ale neleží na kolmici na $AB$ procházející~$M$. Pokud $X$ leží na přímce $AB$, je zřejmé, že jediný bod této přímky stejně vzdálený od~$A$ i~$B$ je právě střed~$M$.
+
+    Předpokládejme tedy, že $X$ na přímce $AB$ neleží. Bez újmy na obecnosti nechť je naše kolmice svislá a~$X$ leží nalevo od ní. Označme $Y$ průsečík úsečky $XB$ s~touto kolmicí. Podle již dokázané implikace platí $|YA|=|YB|$.
+
+    \Image{angles-perpendicular-bisector-converse.pdf}
+
+    V~rovnoramenném $\triangle XAB$ ($|XA|=|XB|$) je $|\angle XAB|=|\angle XBA|$. Jelikož $Y$ leží na úsečce $XB$, polopřímky $BX$ a~$BY$ splývají, takže $|\angle XBA|=|\angle YBA|$. Avšak v~rovnoramenném $\triangle YAB$ ($|YA|=|YB|$) je $|\angle YBA|=|\angle YAB|$. Dohromady
+    $$
+    |\angle XAB|=|\angle XBA|=|\angle YBA|=|\angle YAB|.
+    $$
+    To je ale nesmysl: bod~$Y$ leží uvnitř úsečky $XB$, proto polopřímka $AY$ směřuje dovnitř trojúhelníku $XAB$ a~leží striktně uvnitř úhlu $\angle XAB$, čili $|\angle YAB|<|\angle XAB|$.
+}
+
+Nejzákladnější věta zahrnující osy stran je samozřejmě následující tvrzení:
+
+\Theorem{existence~$O$}{
+    Osy stran libovolného trojúhelníku se protínají v~jednom bodě. Ten je středem kružnice opsané danému trojúhelníku.
+}{
+    Nechť $ABC$ je trojúhelník. Osa úsečky $AB$ je kolmá na $AB$ a~osa úsečky $AC$ je kolmá na $AC$; tyto dvě kolmice jsou rovnoběžné jen v~případě $AB \parallel AC$, což zjevně neplatí. Proto se osy úseček $AB$ a~$AC$ protínají v~jednom bodě -- označme jej~$O$.
+
+    Podle předchozí věty platí $|OA|=|OB|$ (neboť $O$ leží na ose $AB$) a~$|OA|=|OC|$ (neboť $O$ leží na ose $AC$). Dohromady to dává $|OB|=|OC|$, což nám zase zpětně dává, že $O$ leží také na ose úsečky $BC$. Všechny tři osy tedy procházejí bodem~$O$.
+
+    \Image{angles-circumcenter.pdf}
+
+    \Remark{1} Bod $O$ splňuje $|OA|=|OB|=|OC|$, takže je středem kružnice procházející všemi třemi vrcholy -- tedy kružnice opsané trojúhelníku $ABC$.
+
+    \Remark{2} Označení $O$ pro střed opsané kružnice je mezinárodní standard. V~Česku a~na Slovensku se rovněž používá~$S$ (ze slova \uv{střed}).
+}
+
+\secc Osa úhlu
+
+Podobně jako u~osy strany se nejprve zamyslíme nad definicí. Mějme úhel $XAY$. Pod jeho \textit{osou} (přesněji \textit{vnitřní osou}) rozumíme polopřímku~$AZ$ takovou, že platí $|\angle XAZ|=|\angle ZAY|$. Bod~$Z$ je tedy zvolen tak, že polopřímka~$AZ$ rozdělí úhel $XAY$ na dva shodné úhly. Volně se za osu úhlu pokládá i~celá přímka určená touto polopřímkou.
+
+\Image{angles-bisector-definition.pdf}
+
+Stejně jako u~osy strany se tato definice často zaměňuje s~tvrzením, že osa úhlu je množina vnitřních bodů úhlu, které mají stejnou vzdálenost od jeho ramen. I~zde si to zaslouží důkaz.
+
+\Theorem{osa úhlu}{
+    Bod~$Z$ uvnitř úhlu $XAY$ má stejnou vzdálenost od přímek $AX$ a~$AY$ právě tehdy, když $|\angle XAZ|=|\angle ZAY|$.
+}{
+    \textit{($\Rightarrow$)} Nechť polopřímka~$AZ$ dělí úhel $XAY$ na dva shodné úhly. Označme $X'$, $Y'$ paty kolmic spuštěných z~$Z$ na přímky $AX$, $AY$. Pravoúhlé trojúhelníky $AX'Z$ a~$AY'Z$ jsou shodné podle věty~$usu$: společná přepona $AZ$, shodné úhly při~$A$ a~shodné pravé úhly při~$X'$, $Y'$. Odtud $|ZX'|=|ZY'|$, což jsou právě vzdálenosti bodu~$Z$ od přímek $AX$ a~$AY$.
+
+    \Image{angles-bisector-equidistant.pdf}
+
+    \textit{($\Leftarrow$)} Nechť naopak $|ZX'|=|ZY'|$, kde $X'$, $Y'$ jsou opět paty kolmic z~$Z$ na přímky $AX$, $AY$. Pravoúhlé trojúhelníky $AX'Z$ a~$AY'Z$ jsou shodné podle věty~$Ssu$: společná přepona $AZ$, shodné odvěsny $|ZX'|=|ZY'|$ a~shodné pravé úhly při~$X'$, $Y'$ naproti této přeponě (nejdelší straně). Odtud $|\angle X'AZ|=|\angle Y'AZ|$, což je přesně $|\angle XAZ|=|\angle ZAY|$.
+}
+
+Než si tuto větu naplno užijeme, zaveďme ještě pojem \textit{vnější osy úhlu}. Vnější osou úhlu $XAY$ rozumíme sjednocení os dvou úhlů vedlejších k~$XAY$ -- označme si je $XAY'$ a~$X'AY$, kde $X'$, $Y'$ leží na opačných polopřímkách k~$AX$, $AY$. Osy těchto dvou vedlejších úhlů jsou opačné polopřímky vycházející z~bodu $A$; jejich sjednocení je tedy přímka procházející~$A$.
+
+\Image{angles-bisector-external-definition.pdf}
+
+Než půjdeme dál, dokažme si tuto základní vlastnost:
+
+\Exercise{}{
+    Dokažte, že vnitřní osa úhlu je kolmá na jeho vnější osu.
+}{
+    Označme $\beta$ velikost poloviny úhlu $XAY$ a~$\alpha$ velikost poloviny úhlu vedlejšího k~$XAY$, jako na obrázku. Součet všech čtyř úhlů na přímce~$AY$ je
+    $$
+    \beta+\beta+\alpha+\alpha=180^\circ,
+    $$
+    odkud $\alpha+\beta=90^\circ$. Jenže $\alpha+\beta$ je právě úhel mezi vnitřní a~vnější osou, takže jsou kolmé.
+
+    \Image{angles-bisectors-perpendicular.pdf}
+}
+
+Vnější osy mají přirozeně rovněž vlastnost, že jejich body mají stejnou vzdálenost od obou ramen -- vždyť jsou to stále jen osy nějakých úhlů. Pokud tedy hledáme množinu všech bodů, které mají stejnou vzdálenost od dvou různoběžných \textit{přímek} (tj. nikoli pouze polopřímek), dostaneme \textit{sjednocení} vnitřní a~vnější osy úhlu, který tyto přímky svírají.
+
+\Image{angles-two-lines-bisectors.pdf}
+
+Nyní přejděme k~nejznámějšímu důsledku souvisejícímu s~osami úhlů. Týká se trojúhelníku a~musíme v~něm dát pozor na to, která osa je vnitřní a~která vnější.
+
+\Theorem{existence~$I$}{
+    Vnitřní osy úhlů libovolného trojúhelníku se protínají v~jednom bodě. Ten je středem kružnice vepsané danému trojúhelníku.
+}{
+    Nechť $ABC$ je trojúhelník. Nechť~$I$ je průsečík os vnitřních úhlů při vrcholech~$B$ a~$C$, který zjevně existuje a~zjevně leží uvnitř $ABC$.
+
+    Podle předchozí věty platí $d(I, AB) = d(I, BC)$ (neboť $I$ leží na ose úhlu při~$B$) a~$d(I, BC) = d(I, AC)$ (neboť $I$ leží na ose úhlu při~$C$). Odtud $d(I, AB) = d(I, AC)$. Jelikož~$I$ leží uvnitř úhlu~$BAC$, znamená to, že leží na jeho ose. Všechny tři vnitřní osy tedy procházejí bodem~$I$.
+
+    \Image{angles-incenter.pdf}
+
+    \Remark{1} Bod~$I$ má stejnou vzdálenost od všech tří stran, takže je středem kružnice, která se dotýká všech tří stran zevnitř -- tedy kružnice vepsané trojúhelníku $ABC$.
+
+    \Remark{2} Označení~$I$ pochází z~anglického slova \uv{incentrum}. V~česko-slovenské olympiádě se často používá prostě~$S$ (jako střed).
+}
+
+V~úlohách se velmi často objeví i~\textit{kružnice připsané}.
+
+\Theorem{existence~$I_a$}{
+    V~trojúhelníku $ABC$ se vnitřní osa úhlu při~$A$ a~vnější osy úhlů při~$B$, $C$ protínají v~jednom bodě. Ten je středem kružnice připsané trojúhelníku $ABC$ proti vrcholu~$A$.
+}{
+    Pro přehlednost zápisu označme $X$, $Y$ body na polopřímkách opačných k~$CA$, $BA$. Vnější osa úhlu při~$B$ je právě vnitřní osa úhlu $YBC$ a~vnější osa při~$C$ je vnitřní osa úhlu $XCB$. Označme~$I_a$ průsečík těchto os.
+
+    Z~věty o~ose úhlu aplikované na úhly $YBC$ a~$XCB$ dostaneme rovnosti
+    $$
+    d(I_a, AB) = d(I_a, BC) = d(I_a, AC).
+    $$
+    Bod~$I_a$ má tedy stejnou vzdálenost od přímek $AB$ a~$AC$, takže leží na vnitřní nebo vnější ose úhlu $BAC$. Zjevně však leží uvnitř úhlu $BAC$, takže jde o~jeho vnitřní osu -- ta tedy prochází bodem~$I_a$.
+
+    \Image{angles-excenter.pdf}
+
+    \Remark{1} Bod~$I_a$ má stejnou vzdálenost od přímky $BC$ i~od přímek obsahujících strany $AB$, $AC$, takže je středem kružnice dotýkající se strany $BC$ zvenku a~zbylých dvou stran (přesněji jejich prodloužení) zevnitř -- kružnice připsané trojúhelníku proti vrcholu~$A$.
+
+    \Remark{2} Označení~$I_a$ je běžné mezinárodní značení. Kružnici připsané se říká \uv{excircle}, takže možná logičtější by bylo $E_a$, ale to se spíše nepoužívá. Kružnice vepsané ale souvisí s~incentrem, takže možná proto \UpsideDownSmile.
+}
+
+Osy úhlů, vnitřní i~vnější, jsou v~soutěžních úlohách mimořádně užitečný a~oblíbený koncept. Často se skrývají za jiné podmínky a~klíčový krok řešení bývá uvědomit si, že nějaký bod leží na dvou osách, a~tedy i~na třetí. Někdy jde o~osy vnitřní, jindy vnější. Ty vnější je často vidět hůře. S~osami se rozhodně vyplatí kamarádit.
 
 \sec Co si zapamatovat
 
@@ -435,7 +557,7 @@ V~této sekci najdete různé úlohy, na které vám stačí poznatky z~tohoto m
     |MZ| = \tfrac{1}{2} |MD| = 7.
     $$
 
-    Konečně trojúhelník $MZB$ má pravý úhel při~$Z$ a~úhel $45^\circ$ při~$B$, takže i~$|\angle BMZ| = 45^\circ$. Je tedy rovnoramenný pravoúhlý a~$|BZ| = |MZ| = 7$.
+    Konečně trojúhelník $MZB$ má pravý úhel při~$Z$ a~úhel $45^\circ$ při~$B$, takže $|\angle BMZ| = 45^\circ$. Je tedy rovnoramenný pravoúhlý a~$|BZ| = |MZ| = 7$.
 }
 
 \DisplayExerciseSolutions

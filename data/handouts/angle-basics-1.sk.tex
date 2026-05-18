@@ -275,6 +275,128 @@ Veľmi šikovná vec použiteľná v~neľahkých úlohách je nasledovná úloha
     \Remark Iné riešenie je uvážiť, že podľa Tálesovej vety je stred~$O$ kružnice opísanej trojuholníku $ABC$ zároveň stredom prepony $AB$. K~tomuto riešeniu sa podrobnejšie vrátime, keď sa budeme baviť o~kružniciach.
 }
 
+\sec Osi
+
+Zo školy iste poznáme dve osi: os úsečky a os uhla. V~tejto sekcii si uzrejmíme známe veci a~dôležité vlastnosti, ktoré budeme priebežne používať. 
+
+\secc Os strany 
+
+Os strany vieme definovať ako priamku, ktorá je kolmá na danú úsečku a~prechádza jej stredom. Iná definícia je, že je to množina bodov, ktoré majú rovnakú vzdialenosť od krajných bodov našej úsečky. Sú tieto definície ale ekvivalentné? Nuž, to nie je evidentné, zdôvodníme si to.
+
+\Theorem{os úsečky}{
+    Množina bodov, ktoré majú rovnakú vzdialenosť od krajných bodov úsečky $AB$, je kolmica prechádzajúca jej stredom~$M$.
+}{
+    \textit{($\Rightarrow$)} Nech bod~$X$ leží na kolmici na $AB$ vedenej stredom~$M$. Trojuholníky $AMX$ a~$BMX$ sú zhodné podľa vety $sus$: $|MA|=|MB|$ (stred), spoločná strana $MX$ a~zhodné pravé uhly pri~$M$. Odtiaľ $|XA|=|XB|$.
+
+    \Image{angles-perpendicular-bisector-forward.pdf}
+
+    \textit{($\Leftarrow$)} Predpokladajme, že bod~$X$ spĺňa $|XA|=|XB|$, ale neleží na kolmici na $AB$ cez~$M$. Ak $X$ leží na priamke $AB$, je zrejmé, že jediný bod tejto priamky rovnako vzdialený od~$A$ aj~$B$ je práve stred~$M$.
+
+    Predpokladajme teda, že $X$ na priamke $AB$ neleží. Bez ujmy na všeobecnosti nech je naša kolmica zvislá a~$X$ leží naľavo od nej. Označme $Y$ priesečník úsečky $XB$ s~touto kolmicou. Podľa už dokázanej implikácie platí $|YA|=|YB|$.
+
+    \Image{angles-perpendicular-bisector-converse.pdf}
+
+    V~rovnoramennom $\triangle XAB$ ($|XA|=|XB|$) je $|\angle XAB|=|\angle XBA|$. Keďže $Y$ leží na úsečke $XB$, polpriamky $BX$ a~$BY$ splývajú, takže $|\angle XBA|=|\angle YBA|$. Avšak v~rovnoramennom $\triangle YAB$ ($|YA|=|YB|$) je $|\angle YBA|=|\angle YAB|$. Spolu
+    $$
+    |\angle XAB|=|\angle XBA|=|\angle YBA|=|\angle YAB|.
+    $$
+    To je však nezmysel: bod~$Y$ leží vnútri úsečky $XB$, preto polpriamka $AY$ smeruje do vnútra trojuholníka $XAB$ a~leží striktne vnútri uhla $\angle XAB$, čiže $|\angle YAB|<|\angle XAB|$.
+}
+
+Najzákladnejšia veta zahŕňajúca osi strán je samozrejme nasledovné tvrdenie:
+
+\Theorem{existencia~$O$}{
+    Osi strán ľubovoľného trojuholníka sa pretínajú v~jednom bode. Tento je stredom kružnice opísanej danému trojuholníku.
+}{
+    Nech $ABC$ je trojuholník. Os úsečky $AB$ je kolmá na $AB$ a~os úsečky $AC$ je kolmá na $AC$; tieto dve kolmice sú rovnobežné iba v~prípade $AB \parallel AC$, čo zrejme neplatí. Preto sa osi úsečiek $AB$ a~$AC$ pretínajú v~jednom bode -- označme ho~$O$.
+
+    Podľa predošlej vety platí $|OA|=|OB|$ (lebo $O$ leží na osi $AB$) a~$|OA|=|OC|$ (lebo $O$ leží na osi $AC$). Dokopy to dáva $|OB|=|OC|$, čo nám zasa spätne dáva, že $O$ leží aj na osi úsečky $BC$. Všetky tri osi teda prechádzajú bodom~$O$.
+
+    \Image{angles-circumcenter.pdf}
+
+    \Remark{1} Bod $O$ spĺňa $|OA|=|OB|=|OC|$, takže je stredom kružnice prechádzajúcej cez všetky tri vrcholy -- teda kružnice opísanej trojuholníku $ABC$.
+
+    \Remark{2} Označenie $O$ pre stred opísanej kružnice je medzinárodný štandard. V~Česku a na Slovensku sa zvykne používať aj $S$ (zo slova \uv{stred}).
+}
+
+\secc Os uhla
+
+Podobne ako pri osi strany sa najprv zamyslíme nad definíciou. Majme uhol $XAY$. Pod jeho \textit{osou} (presnejšie \textit{vnútornou osou}) rozumieme polpriamku~$AZ$ takú, že $|\angle XAZ|=|\angle ZAY|$. Bod~$Z$ je teda zvolený tak, že polpriamka~$AZ$ rozdelí uhol $XAY$ na dva zhodné uhly. Voľne sa za os uhla pokladá aj~celá priamka určená touto polpriamkou.
+
+\Image{angles-bisector-definition.pdf}
+
+Rovnako ako pri osi strany sa táto definícia často zamieňa s~tvrdením, že os uhla je množina vnútorných bodov uhla, ktoré majú rovnakú vzdialenosť od jeho ramien. Aj~tu si to zaslúži dôkaz.
+
+\Theorem{os uhla}{
+    Bod~$Z$ vnútri uhla $XAY$ má rovnakú vzdialenosť od priamok $AX$ a~$AY$ práve vtedy, keď $|\angle XAZ|=|\angle ZAY|$.
+}{
+    \textit{($\Rightarrow$)} Nech polpriamka~$AZ$ delí uhol $XAY$ na dva zhodné uhly. Označme $X'$, $Y'$ päty kolmíc spustených z~$Z$ na priamky $AX$, $AY$. Pravouhlé trojuholníky $AX'Z$ a~$AY'Z$ sú zhodné podľa vety~$usu$: spoločná prepona $AZ$, zhodné uhly pri~$A$ a~zhodné pravé uhly pri~$X'$, $Y'$. Odtiaľ $|ZX'|=|ZY'|$, čo sú práve vzdialenosti bodu~$Z$ od priamok $AX$ a~$AY$.
+
+    \Image{angles-bisector-equidistant.pdf}
+
+    \textit{($\Leftarrow$)} Nech naopak $|ZX'|=|ZY'|$, kde $X'$, $Y'$ sú opäť päty kolmíc z~$Z$ na priamky $AX$, $AY$. Pravouhlé trojuholníky $AX'Z$ a~$AY'Z$ sú zhodné podľa vety~$Ssu$: spoločná prepona $AZ$, zhodné odvesny $|ZX'|=|ZY'|$ a~zhodné pravé uhly pri~$X'$, $Y'$ oproti tejto prepone (najdlhšej strane). Odtiaľ $|\angle X'AZ|=|\angle Y'AZ|$, čo je presne $|\angle XAZ|=|\angle ZAY|$.
+}
+
+Než si túto vetu naplno užijeme, zaveďme ešte pojem \textit{vonkajšej osi uhla}. Vonkajšou osou uhla $XAY$ rozumieme zjednotenie osí dvoch uhlov vedľajších k~$XAY$ -- označme si ich $XAY'$ a~$X'AY$, kde $X'$, $Y'$ ležia na opačných polpriamkach k~$AX$, $AY$. Osi týchto dvoch vedľajších uhlov sú opačné polpriamky vychádzajúce z~bodu $A$; ich zjednotenie je teda priamka prechádzajúca~$A$.
+
+\Image{angles-bisector-external-definition.pdf}
+
+Než pôjdeme ďalej, dokážme si túto základnú vlastnosť:
+
+\Exercise{}{
+    Dokážte, že vnútorná os uhla je kolmá na jeho vonkajšiu os.
+}{
+    Označme $\beta$ veľkosť polovice uhla $XAY$ a~$\alpha$ veľkosť polovice uhla vedľajšieho k~$XAY$, ako na obrázku. Súčet všetkých štyroch uhlov na priamke~$AY$ je
+    $$
+    \beta+\beta+\alpha+\alpha=180^\circ,
+    $$
+    z~čoho $\alpha+\beta=90^\circ$. Lenže $\alpha+\beta$ je práve uhol medzi vnútornou a~vonkajšou osou, takže sú kolmé.
+
+    \Image{angles-bisectors-perpendicular.pdf}
+}
+
+Vonkajšie osi majú prirodzene tiež vlastnosť, že ich body sú rovnako vzdialené od oboch ramien -- veď sú to stále len osi nejakých uhlov. Ak teda hľadáme množinu všetkých bodov, ktoré majú rovnakú vzdialenosť od dvoch nerovnobežných \textit{priamok} (t.j. nie len polpriamok), dostaneme \textit{zjednotenie} vnútornej a~vonkajšej osi uhla, ktorý tieto priamky zvierajú.
+
+\Image{angles-two-lines-bisectors.pdf}
+
+Teraz prejdime na najznámejší dôsledok súvisiaci s~osami uhlov. Týka sa trojuholníka a~musíme v~ňom dať pozor na to, ktorá os je vnútorná a~ktorá vonkajšia.
+
+\Theorem{existencia~$I$}{
+    Vnútorné osi uhlov ľubovoľného trojuholníka sa pretínajú v~jednom bode. Tento je stredom kružnice vpísanej danému trojuholníku.
+}{
+    Nech $ABC$ je trojuholník. Nech~$I$ je priesečník osí vnútorných uhlov pri vrcholoch~$B$ a~$C$, ktorý zrejme existuje a~zrejme leží vnútri $ABC$.
+
+    Podľa predošlej vety platí $d(I, AB) = d(I, BC)$ (lebo $I$ leží na osi uhla pri~$B$) a~$d(I, BC) = d(I, AC)$ (lebo $I$ leží na osi uhla pri~$C$). Odtiaľ $d(I, AB) = d(I, AC)$. Keďže~$I$ leží vnútri uhla~$BAC$, tak to znamená, že $I$ leží na jeho osi. Všetky tri vnútorné osi teda prechádzajú bodom~$I$.
+
+    \Image{angles-incenter.pdf}
+
+    \Remark{1} Bod~$I$ má rovnakú vzdialenosť od všetkých troch strán, takže je stredom kružnice, ktorá sa dotýka všetkých troch strán zvnútra -- teda kružnice vpísanej trojuholníku $ABC$.
+
+    \Remark{2} Označenie~$I$ pochádza z~anglického slova \uv{incentrum}. V~česko-slovenskej olympiáde sa často používa proste~$S$ (ako stred).
+}
+
+V~úlohách sa veľmi často objavia aj \textit{kružnice pripísané}.
+
+\Theorem{existencia~$I_a$}{
+    V~trojuholníku $ABC$ sa vnútorná os uhla pri~$A$ a~vonkajšie osi uhlov pri~$B$, $C$ pretínajú v~jednom bode. Tento je stredom kružnice pripísanej trojuholníku $ABC$ oproti vrcholu~$A$.
+}{
+    Pre prehľadnosť zápisu označme $X$, $Y$ body na polpriamkach opačných k~$CA$, $BA$. Vonkajšia os uhla pri~$B$ je práve vnútorná os uhla $YBC$ a~vonkajšia os pri~$C$ je vnútorná os uhla $XCB$. Označme~$I_a$ priesečník týchto osí.
+
+    Z~vety o~osi uhla aplikovanej na uhly $YBC$ a~$XCB$ dostaneme rovnosti
+    $$
+    d(I_a, AB) = d(I_a, BC) = d(I_a, AC).
+    $$
+    Bod~$I_a$ má teda rovnakú vzdialenosť od priamok $AB$ a~$AC$, takže leží na vnútornej alebo vonkajšej osi uhla $BAC$. Zjavne však leží vnútri uhla $BAC$, takže ide o jeho vnútornú os -- tá teda prechádza bodom~$I_a$.
+
+    \Image{angles-excenter.pdf}
+
+    \Remark{1} Bod~$I_a$ má rovnakú vzdialenosť od priamky $BC$ aj~od priamok obsahujúcich strany $AB$, $AC$, takže je stredom kružnice dotýkajúcej sa strany $BC$ zvonku a~zvyšných dvoch strán (presnejšie ich predĺžení) zvnútra -- kružnice pripísanej trojuholníku oproti vrcholu~$A$.
+
+    \Remark{2} Označenie~$I_a$ je bežné medzinárodné značenie. Kružnici pripísanej sa hovorí \uv{excircle}, takže možno logickejšie by mohlo byť $E_a$, ale to sa skôr nepoužíva. Kružnice vpísané ale súvisia s~incentrom, takže možno preto \UpsideDownSmile.
+}
+
+Osi uhlov, vnútorné i~vonkajšie, sú v~súťažných úlohách mimoriadne užitočný a~obľúbený koncept. Často sa skrývajú za iné podmienky a~kľúčový krok riešenia býva uvedomiť si, že nejaký bod leží na dvoch osiach, a~teda aj na tretej. Niekedy ide o~osi vnútorné, inokedy vonkajšie. Tie vonkajšie je často vidieť ťažšie. Určite sa s~osami oplatí kamarátiť.
+
 \sec Čo si zapamätať
 
 \secc Techniky
