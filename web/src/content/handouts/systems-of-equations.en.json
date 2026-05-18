@@ -3925,7 +3925,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "We can convince ourselves by checking that all 5 found solutions "
+                      "text": "A direct check confirms that all 5 found solutions "
                     },
                     {
                       "type": "math",
@@ -5654,7 +5654,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "The system is cyclic, so it suffices to solve the case when "
+                        "text": "The system is cyclic, so it suffices to solve when "
                       },
                       {
                         "type": "math",
