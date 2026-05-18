@@ -21,7 +21,7 @@ Draw(A, X);
 Draw(A, Y);
 Draw(A, Z, black + dashedPen);
 Draw(A, Ze, black + dashedPen);
-draw(A -- Yp, vertexPen);
+Draw(A, Yp, vertexPen);
 
 LabeledDot(A, "A", SE);
 LabeledDot(X, "X", NW);
