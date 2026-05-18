@@ -65,6 +65,26 @@ real Radius4 = 25;
 real Radius5 = 30;
 
 //
+// Multiplier for the outer of two equal-angle wedges that share a vertex and
+// a bisector ray. Call sites use the pre-multiplied `Radius*Nudged` tier
+// below — pass `radius = Radius2Nudged` rather than `Radius2 * WedgeNudge`.
+//
+real WedgeNudge = 1.2;
+
+//
+// Pre-multiplied counterparts of Radius1..5 for the outer wedge of a pair.
+// In a "two equal angles meeting at a bisector" pair, give the first AngleMark
+// a plain `Radius*` and the second the matching `Radius*Nudged`: the second
+// wedge sits slightly outside the first so the pair stair-steps at the
+// bisector instead of merging into one arc cut by the bisector line.
+//
+real Radius1Nudged = Radius1 * WedgeNudge;
+real Radius2Nudged = Radius2 * WedgeNudge;
+real Radius3Nudged = Radius3 * WedgeNudge;
+real Radius4Nudged = Radius4 * WedgeNudge;
+real Radius5Nudged = Radius5 * WedgeNudge;
+
+//
 // Font-size tiers for figure text, paralleling Radius1..Radius5. Font3 matches
 // the 13pt default set by defaultpen; pick lower for dense figures or narrow
 // angle sectors, higher for emphasis. Pass as `labelPen` to AngleMark /
