@@ -22,8 +22,8 @@ AngleMark(bisectorRight, A, Y, LightPink, radius = Radius2);
 Draw(A, X);
 Draw(A, Y);
 Draw(bisectorLeft, bisectorRight, black + dashedPen);
-draw(A -- Xprime, vertexPen);
-draw(A -- Yprime, vertexPen);
+Draw(A, Xprime, vertexPen);
+Draw(A, Yprime, vertexPen);
 
 LabeledDot(A, "A", S);
 LabeledDot(X, "X", NW);

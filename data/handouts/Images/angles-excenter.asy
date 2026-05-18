@@ -30,8 +30,8 @@ Draw(A, B);
 Draw(B, C);
 Draw(C, A);
 
-draw(B -- Y, vertexPen);
-draw(C -- X, vertexPen);
+Draw(B, Y, vertexPen);
+Draw(C, X, vertexPen);
 
 LabeledDot(A, "A", N);
 LabeledDot(B, "B", NW);

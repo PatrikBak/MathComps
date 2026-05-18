@@ -5,7 +5,19 @@ texpreamble("\usepackage{lmodern}\usepackage[T1]{fontenc}");
 
 // Basic units
 unitsize(1pt);
-defaultpen(fontsize(13pt));
+
+//
+// Line-width tiers. NormalWidth is the default for edges and circles, baked
+// into `defaultpen` below so any pen without its own `linewidth(...)` renders
+// at NormalWidth. Pens that DO specify their own linewidth (e.g. `vertexPen`'s
+// `ThinWidth`) override the default at draw time, so `Draw(A, B, vertexPen)`
+// renders thin without raw-`draw` workarounds.
+//
+real ThinWidth = 0.5;
+real NormalWidth = 1.0;
+real ThickWidth = 1.5;
+
+defaultpen(fontsize(13pt) + linewidth(NormalWidth));
 
 //
 // Palette: 5 hue families × Light/Normal/Dark. Pick the closest hue and shade.
@@ -34,13 +46,6 @@ pen DarkPink = rgb(0.75, 0.25, 0.5);
 pen LightYellow = rgb(1, 1, 0.5);
 pen Yellow = rgb(0.5, 0.5, 0);
 pen DarkYellow = rgb(0.25, 0.25, 0);
-
-//
-// Line-width tiers. NormalWidth is the default for edges and circles.
-//
-real ThinWidth = 0.5;
-real NormalWidth = 1.0;
-real ThickWidth = 1.5;
 
 //
 // Standard pens reused by every figure.
@@ -243,30 +248,28 @@ void AngleMark(
 
 //
 // Draws the segment AB with the standard edge styling. Pass a solid colour
-// (e.g. Blue) to tint; linewidth is added automatically. To keep extra pen
-// attributes such as a linetype, pass a fully-formed pen (e.g. `black + dashedPen`).
-//
-// Used global variables: NormalWidth
+// (e.g. Blue) to tint; the global `defaultpen` supplies NormalWidth when the
+// pen doesn't carry its own `linewidth(...)`. Pass a fully-formed pen
+// (e.g. `vertexPen`, `black + dashedPen`) to keep extra attributes — the
+// pen's own linewidth, if any, wins over the default.
 //
 void Draw(
     pair A,
     pair B,
     pen color = black)
 {
-    draw(A -- B, color + linewidth(NormalWidth));
+    draw(A -- B, color);
 }
 
 //
 // Draws a circle with the same edge styling as Draw — same colour-only convention.
-//
-// Used global variables: NormalWidth
 //
 void Circle(
     pair center,
     real radius,
     pen color = black)
 {
-    draw(circle(center, radius), color + linewidth(NormalWidth));
+    draw(circle(center, radius), color);
 }
 
 //
