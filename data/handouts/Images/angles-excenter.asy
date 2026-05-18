@@ -1,18 +1,11 @@
 import _common;
 
-real apexX = 10;
-real apexY = 75;
-real leftX = -30;
-real rightX = 35;
-real baseY = -20;
-real extensionLength = 55;
+pair A = (10, 75);
+pair B = (-30, -20);
+pair C = (35, -20);
 
-pair A = (apexX, apexY);
-pair B = (leftX, baseY);
-pair C = (rightX, baseY);
-
-pair Y = ExtendPast(A, B, extensionLength);
-pair X = ExtendPast(A, C, extensionLength);
+pair Y = ExtendPast(A, B, 55);
+pair X = ExtendPast(A, C, 55);
 
 pair dirA = unit(B - A) + unit(C - A);
 pair dirBext = unit(B - A) + unit(C - B);
@@ -22,9 +15,9 @@ real ra = abs(Ia - Foot(Ia, B, C));
 
 Circle(Ia, ra, LightBlue);
 
-Draw(A, Ia, Red + dashedPen);
-Draw(B, Ia, Green + dashedPen);
-Draw(C, Ia, Green + dashedPen);
+DashDotDraw(A, Ia, Red);
+DashDotDraw(B, Ia, Green);
+DashDotDraw(C, Ia, Green);
 
 Draw(A, B);
 Draw(B, C);

@@ -17,8 +17,8 @@ Draw(A, B);
 Draw(B, C);
 Draw(C, D);
 Draw(D, A);
-Draw(D, P, black + dashedPen);
-Draw(C, P, black + dashedPen);
+DashDotDraw(D, P);
+DashDotDraw(C, P);
 
 LabeledDot(A, "A", SW);
 LabeledDot(B, "B", SE);

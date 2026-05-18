@@ -54,11 +54,6 @@ pen edgePen = black + linewidth(NormalWidth);
 pen vertexPen = black + linewidth(ThinWidth);
 
 //
-// Dashed linetype for auxiliary segments — combine with a colour, e.g. `Draw(A, B, black + dashedPen)`.
-//
-pen dashedPen = linetype("3 3", offset=0, scale=false);
-
-//
 // Arc-radius presets for AngleMark. Radius3 is the default; pick a different
 // preset (or pass a literal) per call when a figure needs more variety.
 // Reassign any of these per file if the figure scale calls for it.
@@ -250,8 +245,9 @@ void AngleMark(
 // Draws the segment AB with the standard edge styling. Pass a solid colour
 // (e.g. Blue) to tint; the global `defaultpen` supplies NormalWidth when the
 // pen doesn't carry its own `linewidth(...)`. Pass a fully-formed pen
-// (e.g. `vertexPen`, `black + dashedPen`) to keep extra attributes — the
-// pen's own linewidth, if any, wins over the default.
+// (e.g. `vertexPen`) to keep extra attributes — the pen's own linewidth,
+// if any, wins over the default. For dashed / dash-dotted / dotted strokes
+// use `DashedDraw` / `DashDotDraw` / `DottedDraw` instead.
 //
 void Draw(
     pair A,
@@ -259,6 +255,75 @@ void Draw(
     pen color = black)
 {
     draw(A -- B, color);
+}
+
+//
+// Strokes segment AB with a custom alternating on/off pattern. `pattern`
+// holds the on/off lengths in pt (the array shape Asymptote's `linetype`
+// expects). `shift` advances the pattern's phase along the path in pt;
+// tune per call to place gaps over the vertices instead of dashes or dots.
+// `color`'s embedded linewidth, if any, wins over `defaultpen`'s NormalWidth,
+// so passing `vertexPen` thins the stroke without a separate width param.
+//
+void PatternDraw(
+    pair A,
+    pair B,
+    pen color,
+    real[] pattern,
+    real shift = 0)
+{
+    // Literal (unadjusted) linetype at the requested phase
+    pen p = linetype(pattern, offset = shift, scale = false, adjust = false);
+
+    // Compose colour (and its embedded linewidth, if any) with the pattern pen
+    draw(A -- B, color + p);
+}
+
+//
+// Draws segment AB with a dashed pattern: dash, gap, dash, gap, … each of
+// length `size` in pt. `shift` advances the phase in pt; tune per call to
+// place a gap over the vertex instead of mid-dash.
+//
+void DashedDraw(
+    pair A,
+    pair B,
+    pen color = black,
+    real size = 3,
+    real shift = 0)
+{
+    PatternDraw(A, B, color, new real[] {size, size}, shift);
+}
+
+//
+// Draws segment AB with a dash-dot pattern: dash (2·size), gap (size), dot,
+// gap (size), … Dashes are twice the gap so they read clearly as dashes
+// next to the dots, which render as ~linewidth-diameter circles via
+// Asymptote's default round linecap on a 0-length "on" segment. `shift`
+// advances the phase in pt.
+//
+void DashDotDraw(
+    pair A,
+    pair B,
+    pen color = black,
+    real size = 3,
+    real shift = 0)
+{
+    PatternDraw(A, B, color, new real[] {2 * size, size, 0, size}, shift);
+}
+
+//
+// Draws segment AB with a dotted pattern: dot, gap (size), dot, gap (size),
+// … Dots render as ~linewidth-diameter circles via Asymptote's default
+// round linecap on a 0-length "on" segment. `shift` advances the phase in pt.
+//
+void DottedDraw(
+    pair A,
+    pair B,
+    pen color = black,
+    real size = 3,
+    real shift = 0)
+{
+    PatternDraw(A, B, color, new real[] {0, size}, shift);
 }
 
 //

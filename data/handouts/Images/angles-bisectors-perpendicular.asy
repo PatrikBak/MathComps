@@ -19,8 +19,8 @@ AngleMark(Ze, A, Yp, LightPink, "\alpha", radius = Radius2Nudged, labelPen = Pin
 
 Draw(A, X);
 Draw(A, Y);
-Draw(A, Z, black + dashedPen);
-Draw(A, Ze, black + dashedPen);
+DashDotDraw(A, Z);
+DashDotDraw(A, Ze);
 Draw(A, Yp, vertexPen);
 
 LabeledDot(A, "A", SE);

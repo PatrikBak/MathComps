@@ -53,8 +53,8 @@ Draw(P4, F4b, LightPink);
 
 Draw(L1a, L1b);
 Draw(L2a, L2b);
-Draw(B1a, B1b, black + dashedPen);
-Draw(B2a, B2b, black + dashedPen);
+DashDotDraw(B1a, B1b);
+DashDotDraw(B2a, B2b);
 
 VertexDot(A);
 VertexDot(P1, radius = smallDot);

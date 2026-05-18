@@ -14,7 +14,7 @@ AngleMark(Cp, A, B, Red);
 Draw(A, B, Green);
 Draw(A, C, Blue);
 Draw(A, Cp, Blue);
-Draw(C, B, black + dashedPen);
+DashedDraw(C, B);
 
 LabeledDot(A, "A", W, Blue);
 LabeledDot(B, "B", E, Red);

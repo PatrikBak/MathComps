@@ -21,7 +21,7 @@ Draw(Z, Xp, Red);
 Draw(Z, Yp, Red);
 Draw(A, X);
 Draw(A, Y);
-Draw(A, Z, black + dashedPen);
+DashDotDraw(A, Z);
 
 LabeledDot(A, "A", S);
 LabeledDot(X, "X", NW);
