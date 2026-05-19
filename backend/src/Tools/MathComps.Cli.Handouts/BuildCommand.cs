@@ -189,7 +189,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
 
         // .asy filenames already recompiled by an earlier handout in this run — language
         // variants of the same handout reference the same figures, so without this every
-        // variant would re-run the same asy+inkscape pipeline.
+        // variant would re-run the same asy compile pipeline.
         var asyAlreadyRecompiled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // R2 keys already pushed in this run — language variants share image keys, so the
@@ -766,8 +766,9 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
 
     /// <summary>
     /// Invokes <c>_Export-Asy.ps1</c> via PowerShell 7+ (<c>pwsh</c>) with an explicit list
-    /// of stale <c>.asy</c> files. The script handles both the asy→PDF render and the
-    /// Inkscape PDF→SVG conversion.
+    /// of stale <c>.asy</c> files. The script renders each figure twice: once with
+    /// <c>asy -f pdf</c> for the TeX-consumed PDF and once with <c>asy -f svg</c> for the
+    /// web-consumed SVG.
     /// </summary>
     /// <param name="staleAsyFileNames">Filenames (not absolute paths) of stale <c>.asy</c> files inside <paramref name="imagesDir"/>.</param>
     /// <param name="imagesDir">Directory containing the <c>.asy</c> files and the export script.</param>
