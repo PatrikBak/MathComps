@@ -390,7 +390,7 @@ export default function HandoutDetail({
             </div>
           )}
 
-          {/* Three-dot overflow menu with share and PDF downloads */}
+          {/* Share / download actions — pills on sm+, three-dot dropdown on smaller screens */}
           <HandoutActions pdfFilenameStem={pdfFilenameStem} />
         </div>
       </header>
