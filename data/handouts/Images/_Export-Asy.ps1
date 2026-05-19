@@ -8,8 +8,9 @@
 #   2. Patch the PDF's non-deterministic metadata (timestamps and IDs that the bundled Ghostscript
 #      stamps with wall-clock values) so re-rendering an unchanged .asy produces a byte-identical
 #      PDF and stops creating spurious git diffs.
-#   3. Convert the PDF to SVG via Inkscape (matches the conversion path used by _Export-Ggb.ps1
-#      so handout figures coming from either source render identically downstream).
+#   3. Run asy a second time with -f svg to emit the SVG directly via the bundled
+#      dvisvgm. This preserves the zero-length entries in dash-dot patterns like
+#      [6, 3, 0, 3]; a generic PDF->SVG conversion flattens them into a plain [6, 6].
 param(
   # One or more directories, .asy files, or PowerShell wildcards (e.g. 'angles-*.asy'). Default
   # is the folder this script lives in, which matches the typical handout-figures layout.
@@ -30,18 +31,7 @@ if (-not (Test-Path -LiteralPath $AsyExe)) {
   exit 1
 }
 
-# Validate Inkscape is on PATH (used for converting the PDF to SVG). Prefer inkscape.exe
-# (GUI subsystem) over inkscape.com (console launcher) so it doesn't attach to our terminal.
-$inkscape = Get-Command inkscape -ErrorAction SilentlyContinue
-if (-not $inkscape) {
-  Write-Error "Inkscape not found on PATH (needed for PDF -> SVG conversion)"
-  exit 1
-}
-$inkscape = $inkscape.Source
-$inkscapeExe = [System.IO.Path]::ChangeExtension($inkscape, '.exe')
-if (Test-Path -LiteralPath $inkscapeExe) { $inkscape = $inkscapeExe }
-
-# Pipeline for one .asy file: asy PDF -> Inkscape SVG. Both outputs are written next to the
+# Pipeline for one .asy file: asy PDF + asy SVG. Both outputs are written next to the
 # input as <stem>.pdf / <stem>.svg.
 function Convert-OneAsy {
   param(
@@ -98,12 +88,12 @@ function Convert-OneAsy {
   # offsets stay valid without rebuilding the table.
   [System.IO.File]::WriteAllBytes($finalPdf, [System.Text.Encoding]::Latin1.GetBytes($pdfText))
 
-  # 3. Convert the PDF to plain SVG via Inkscape. The .com launcher on PATH is the console
-  #    launcher that waits for inkscape.exe, so -Wait is enough.
+  # 3. Render SVG directly from the .asy via asy's built-in dvisvgm pipeline.
   if (Test-Path -LiteralPath $finalSvg) { Remove-Item -LiteralPath $finalSvg -Force }
-  $proc = Start-Process -FilePath $inkscape -ArgumentList @($finalPdf, '--pdf-poppler', '--export-type=svg', '--export-plain-svg', "--export-filename=$finalSvg") -Wait -PassThru
+  $asySvgArgs = @('-noView', '-f', 'svg', '-o', $stem, '-cd', $dir, $AsyPath)
+  $proc = Start-Process -FilePath $AsyExe -ArgumentList $asySvgArgs -Wait -PassThru -NoNewWindow
   if ($proc.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $finalSvg)) {
-    throw "Inkscape SVG conversion failed (exit $($proc.ExitCode))"
+    throw "asy SVG render failed (exit $($proc.ExitCode))"
   }
 }
 

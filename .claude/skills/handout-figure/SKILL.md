@@ -16,7 +16,7 @@ You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; both `.
    ```
    pwsh -NoProfile -File ./_Export-Asy.ps1 <slug>.asy
    ```
-   Produces deterministic-metadata PDF and Inkscape-converted SVG. Both get committed.
+   Produces deterministic-metadata PDF and an `asy`-rendered SVG. Both get committed.
 5. **Visually verify** the rendered PDF with the `Read` tool before reporting done — wrong-side angle marks, label collisions, and clipping issues are obvious in the image but invisible in the source. The render exit code only tells you the file compiled.
 6. **Report** one sentence — what changed in the figure.
 
@@ -124,7 +124,7 @@ Top-level constants get framed comments too — one frame per logical group or p
 
 ## Rules
 
-- **Never call `asy.exe` directly for committed changes** — `_Export-Asy.ps1` is the canonical pipeline (deterministic PDF metadata, Inkscape SVG, `-cd` so `include` and `import` resolve).
+- **Never call `asy.exe` directly for committed changes** — `_Export-Asy.ps1` is the canonical pipeline (deterministic PDF metadata, asy-rendered SVG, `-cd` so `include` and `import` resolve).
 - **Never inline `rgb(...)`, `fontsize(...)`, ad-hoc widths, or stray `opacity(...)`** — extend the palette in `_common.asy` if a missing shade is genuinely needed, but don't sprinkle one-offs.
 - **Always use the `_common.asy` helpers — never raw `draw(...)`.** `Draw(A, B, pen)` for segments, `Circle(center, radius, pen)` for circles, `LabeledDot` / `VertexDot` for points. The global `defaultpen` carries `linewidth(NormalWidth)`, so any pen with its own `linewidth(...)` (e.g. `vertexPen`'s `ThinWidth`) still renders correctly through `Draw` — no raw `draw` for thin auxiliary lines. The only standing exceptions are `box.asy` (3D `draw(surface(...), ...)`) and `ag-proof.asy` (path-based draws with non-standard linewidths from SVG conversion).
 - **Never edit `<topic>-shared.asy` to change a single figure's marks** — only geometry and `Base*` layers belong there.
