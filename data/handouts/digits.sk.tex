@@ -8,96 +8,45 @@
 
 \sec Úvod
 
-Jeden z~typov úloh na Náboji sú úlohy o~cifrách -- typicky najmä preto, lebo v~nich hľadáme pekné číselné odpovedi. Ukážeme si niektoré veľmi základné triky používané pri číslach a~precvičíme si ich na úlohách.
+Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 
 \sec Techniky
 
 \begitems \style i
 \i Číslo $\overline{a_1a_2\dots a_n}$ rozpíšeme pomocou dekadického zápisu, napr. $\overline{ab}=10a+b$ alebo $\overline{abc}=100a+10b+c$.
-\i Číslo so sekvenciou cifier $x$ nasledovanou sekvenciou cifier $y$ dĺžky $k$ zapíšeme ako $x \cdot 10^k + y$, napríklad pre $x=42$ a $y=67$ máme $4267 = 42 \cdot 10^2 + 67$.
+\i Číslo so sekvenciou cifier $x$ nasledovanou sekvenciou cifier $y$ dĺžky $k$ zapíšeme ako $x \cdot 10^k + y$, napr. 4267 je pre $k=2$ rovné $42 \cdot 10^2 + 67$.
 \i Pri úlohách s~ciframi sa oplatí pozerať na zvyšky po delení~3 alebo~9, lebo číslo dáva rovnaký zvyšok po delení~3 alebo~9 práve keď je tomu tak pre ciferný súčet.
-\i Ďalšie dobré kritéria pre cifry sú pre deliteľnosť $2^n$ (posledných $n$ cifier tvorí číslo deliteľné~$2^n$).
+\i Ďalšie dobré kritériá pre cifry sú pre deliteľnosť $2^n$ (posledných $n$ cifier tvorí číslo deliteľné~$2^n$).
 \i A ešte jedno kritérium: číslo je deliteľné~11 práve keď súčet cifier na párnych miestach dáva rovnaký zvyšok po delení~11 ako súčet cifier na nepárnych miestach.
 \enditems 
 
 \sec Úlohy
 
 \Problem{0}{}{
-	Nájdite najväčšie prvočíslo zložené z~10 rôznych cifier.
-}{
-	Pozrite sa na ciferný súčet nášho čísla.
-}{
-	% SOL
+	Nájdite všetky štvorciferné čísla $\overline{abcd}$ s~ciferným súčtom~12 také, že $\overline{ab}-\overline{cd}=1$.
+}{	
+	Platí $\overline{ab}=\overline{cd}+1$. Rozoberte prípady podľa toho, či pri sčítaní napravo nastáva prechod cez~10.
+}{	
 }
 
 \Problem{0}{}{
-	Zdôvodnite, že každý palindróm s~párny počtom cifier je deliteľný~11.
-}{
-	Kritérium deliteľnosti~11 by nám to malo dať hneď.
-}{
-	% SOL
+	Určte všetky prirodzené čísla $n$, pre ktoré platí
+	$$
+	n+p(n)=70,
+	$$
+	pričom $p(n)$ označuje súčin všetkých cifier čísla $n$.
+}{	
+	Zapíšte $n=\overline{ab}$ a~rovnicu prepíšte.
+}{	
 }
 
 \Problem{0}{}{
-	Dokážte, že číslo $\underbrace{44\dots4}_{n+1}\underbrace{88\dots8}_{n}9$ je pre každé celé nezáporné číslo~$n$ štvorcom prirodzeného čísla.
+	Dvojciferné číslo $\overline{ab}$ nazveme \textit{nafúknuteľné}, ak z neho po pripočítaní 990-násobku vhodného jednociferného čísla získame štvorciferné číslo tvaru $\overline{axxb}$ s~nenulovou cifrou~$x$. Koľko nafúknuteľných čísel existuje?
+}{	
+	Zapíšte definíciu nafúknuteľnosti pomocou rovnice $\overline{ab}+990y=\overline{axxb}$, ktorú ďalej upravte.
 }{
-	Rozpíšme si číslo pomocou desatinného zápisu (technika 2)
-}{
-	% SOL
-}
-
-\Problem{0}{}{
-	Nájdite všetky čísla s~prvou číslicou~6 také, že po jej odstránení zostane 25-krát menšie číslo.
-}{
-	Zapíšte si číslo ako $6 \cdot 10^k + x$ a~preložte rovnicu zo zadania.
-}{
-	% SOL
-}
-
-\Problem{0}{}{
-	Mysli si trojciferné číslo, ktoré neobsahuje nulu a má prvú a poslednú cifru rôznu. Napíš ho odzadu a odčítaj menšie číslo od väčšieho. Vzniknuté číslo prípadne doplň zľava nulou na trojciferné, znova prepíš odzadu a tieto dve čísla sčítaj. Aké najmenšie a~aké najväčšie číslo sme mohli dostať?
-}{
-	Zapíšme si číslo ako $\overline{abc}$. Čo nám zostane po prvej operácii?
-}{
-	V~ďalšom kroku máme $|\overline{abc}-\overline{cba}|=99|a-c|$. Vypíšte si tieto možné čísla. 
-}{
-	% SOL
-}
-
-\Problem{0}{}{
-	Na číslo $123456789101112\dots 100$ aplikujeme postupne ciferný súčet, až kým nezískame jednociferné číslo. Aké číslo nám zostane?
-}{
-	Stačí nájsť ciferný súčet a použiť deliteľnosť~9.
-}{
-	Na spočítanie ciferného súčtu nášho čísla sa zamyslime, koľkokrát sa každá z~cifier vyskytuje v~našom čísle.
-}{
-	% SOL
-}
-
-\Problem{0}{}{
-	Je dané prirodzené číslo $n$. Určte poslednú číslicu čísla $n^2$, ak viete, že~7 je jeho predposledná číslica.
-}{
-	Zapíšte číslo ako $10x+y$, kde $y$ je posledná cifra. Ako vyzerá $n^2$?
-}{
-	Platí $n^2=100x^2+20xy+y^2$. Kedy môže byť 7 posledná cifra?
-}{
-	Analyzujte vplyv jednotlivých členov súčtu $100x^2+20xy+y^2$ na miesto desiatok.
-}{
-	Hlavná idea je, že $100x^2$ neprispieva na miesto desiatok vôbec a~$20xy$ prispieva párnou cifrou, takže $y^2$ musí mať nepárnu cifru na mieste desiatok.
-}{
-	% SOL
-}
-
-\Problem{0}{}{
-	Nájdite všetky štvorciferné čísla také, že sú druhou mocninou celého čísla, a~zároveň ich prvá cifra je rovnaká ako druhá a~tretia je rovnaká ako štvrtá.
-}{
-	Zapíšme si naše číslo ako $\overline{aabb}$ a~rozpíšme, čomu je rovné.
-}{
-	Vychádza nám $\overline{aabb}=11(100a+b)$. Aby bolo toto štvorec, potrebujeme, aby $100a+b$ bolo deliteľné~11.
-}{
-	Platí $100a+b=99a+(a+b)$, takže nutne $11 \mid a+b$. To už nie je veľa možností.
-}{
-	% SOL
+	Mali by sme prísť do rovnice $9(y-a)=x$. Lenže~$x$ je nenulová cifra, to nám veľa možností nedá.
+}{	
 }
 
 \Problem{0}{}{
@@ -107,7 +56,7 @@ Jeden z~typov úloh na Náboji sú úlohy o~cifrách -- typicky najmä preto, le
 }{
 	Keďže~$2016$ je deliteľné~9, tak ciferný súčet vkladaného čísla musí byť deliteľný~9, lebo ciferný súčet $20$ a~$16$ je~$9$. 
 }{
-	% SOL
+	Postupne skúšajte vkladať $9, 18, \dots$.
 }
 
 \Problem{0}{}{
@@ -119,30 +68,110 @@ Jeden z~typov úloh na Náboji sú úlohy o~cifrách -- typicky najmä preto, le
 }{
 	Rozmyslíme, že cifra~5 tam nutne musí byť. Už to nie je veľa možností, obzvlášť keď sa zamyslíme nad tým, čo môže byť prvá cifra.
 }{
-	% SOL
 }
 
 \Problem{0}{}{
-	Aké najväčšie číslo deliteľné~11 je možné poskladať z~cifier 1, 2, 3, 4, 5 a~6 tak, že každú použijeme práve raz?
+	Nájdite všetky štvorciferné čísla také, že sú druhou mocninou celého čísla, a~zároveň ich prvá cifra je rovnaká ako druhá a~tretia je rovnaká ako štvrtá.
+}{
+	Zapíšme si naše číslo ako $\overline{aabb}$ a~rozpíšme, čomu je rovné.
+}{
+	Vychádza nám $\overline{aabb}=11(100a+b)$. Aby bolo toto štvorec, potrebujeme, aby $100a+b$ bolo deliteľné~11.
+}{
+	Platí $100a+b=99a+(a+b)$, takže nutne $11 \mid a+b$. To už nie je veľa možností.
+}{
+}
+
+\Problem{0}{}{
+	Nájdite najväčšie prvočíslo zložené z~10 rôznych cifier.
+}{
+	Pozrite sa na ciferný súčet nášho čísla.
+}{
+}
+
+\Problem{0}{}{
+	Zdôvodnite, že každý palindróm s~párnym počtom cifier je deliteľný~11.
+}{
+	Kritérium deliteľnosti~11.
+}{
+}
+
+\Problem{0}{}{
+	Číslo $123456789101112\dots 100$ postupne nahradzujeme ciferným súčtom, až kým nezískame jednociferné číslo. Aké číslo nám zostane?
+}{
+	Stačí nájsť ciferný súčet a použiť deliteľnosť~9.
+}{
+	Na spočítanie ciferného súčtu nášho čísla sa zamyslime, koľkokrát sa každá z~cifier vyskytuje v~našom čísle.
+}{
+}
+
+\Problem{0}{}{
+	Existuje číslo deliteľné~11 zložené z~cifier 1, 2, 3, 4, 5 a~6 tak, že každú použijeme práve raz?
 }{
 	Použijeme kritérium deliteľnosti~11 -- chceme, aby rozdiel súčtu cifier na párnych miestach~$s_p$ a~na nepárnych miestach~$s_n$ bol deliteľný~11. Skúste nájsť možnosti pre tieto súčty.
 }{
 	Uvedomíme si, že $s_p+s_n$ je ciferný súčet nášho čísla, takže $1+2+3+4+5+6=21$. Z~toho nájdeme možnosti pre dvojice $s_p$ a~$s_n$ a~tie zanalyzujeme.
 }{
-	% SOL
 }
 
 \Problem{0}{}{
+	Mysli si trojciferné číslo, ktoré neobsahuje nulu a má prvú a poslednú cifru rôznu. Napíš ho odzadu a odčítaj menšie číslo od väčšieho. Vzniknuté číslo prípadne doplň zľava nulou na trojciferné, znova prepíš odzadu a tieto dve čísla sčítaj. Aké najmenšie a~aké najväčšie číslo sme mohli dostať?
+}{
+	Zapíšme si číslo ako $\overline{abc}$. Čo nám zostane po prvej operácii?
+}{
+	V~ďalšom kroku máme $|\overline{abc}-\overline{cba}|=99|a-c|$. Vypíšte si tieto možné čísla. 
+}{
+}
+
+\Problem{0}{}{
+	Nájdite všetky čísla s~prvou číslicou~6 také, že po jej odstránení zostane 25-krát menšie číslo.
+}{
+	Zapíšte si číslo ako $6 \cdot 10^k + x$, kde $k$ je počet cifier~$x$.
+}{
+	Zostavte si rovnicu zo zadania: $6 \cdot 10^k + x = 25x$. Z~toho vyjadrite $x$ a~zistite, pre aké $k$ bude $x$ celé číslo.
+}{
+}
+
+\Problem{0}{}{
+	Dokážte, že číslo $\underbrace{44\dots4}_{n+1}\underbrace{88\dots8}_{n}9$ je pre každé celé nezáporné číslo~$n$ štvorcom prirodzeného čísla.
+}{
+	Rozpíšme si číslo pomocou desatinného zápisu.
+}{
+	Pripomeňte si, že číslo zapísané ako $k$ rovnakých cifier $c$ sa dá vyjadriť ako $c \cdot \frac{10^k - 1}{9}$. Nezabudnite každú časť čísla vynásobiť príslušnou mocninou desiatky podľa toho, koľko cifier za ňou nasleduje.
+}{	
+}
+
+\Problem{0}{}{
+	Je dané prirodzené číslo $n$. Určte poslednú číslicu čísla $n^2$, ak viete, že~7 je jeho predposledná číslica.
+}{
+	Zapíšte číslo ako $10x+y$, kde $y$ je posledná cifra. Ako vyzerá $n^2$?
+}{
+	Platí $n^2=100x^2+20xy+y^2$. Kedy môže byť 7 predposledná cifra?
+}{
+	Analyzujte vplyv jednotlivých členov súčtu $100x^2+20xy+y^2$ na miesto desiatok.
+}{
+	Hlavná idea je, že $100x^2$ neprispieva na miesto desiatok vôbec a~$20xy$ prispieva párnou cifrou, takže $y^2$ musí mať nepárnu cifru na mieste desiatok.
+}{	
+}
+
+\Problem{1}{}{
 	Existujú dve rôzne mocniny dvojky s rovnakým počtom cifier, z ktorých by sa jedna dala získať iba preusporiadaním cifier tej druhej.
 }{
 	Pozrime sa na modulo~$9$.
 }{
 	Skúmajme mocniny dvojky modulo~9. Jednotlivé mocniny $2^1, 2^2, \dots$ sú $2,4,8,7,5,1$ a~tak~ďalej. Za akých podmienok $2^a$ a~$2^b$ dávajú rovnaký zvyšok po delení~9?
 }{
-	% SOL
 }
 
-\Problem{0}{}{
+\Problem{1}{}{
+	Pre ktoré prirodzené $n$ existuje $n$-ciferné číslo deliteľné $5^n$, ktoré má všetky cifry nepárne?
+}{
+	Skúsme také čísla zostrojovať induktívne. 
+}{
+    Vezmime si vyhovujúce číslo, ktoré má $n$ cifier. Dokážte, že pripojením jednej z~cifier $\{1,3,5,7,9\}$ na začiatok čísla dostaneme vyhovujúce číslo s $n+1$ ciframi.
+}{
+}
+
+\Problem{1}{}{
 	Uvažujme nasledovný proces: Začneme s~ľubovoľným prirodzeným číslom $a_1$ a~vygenerujeme postupnosť $a_1,a_2,\dots$ tak, že $a_{n+1}$ dostaneme z~$a_n$ prilepením cifry rôznej od~9. Dokážte, že v~tejto postupnosti bude nevyhnutne existovať nekonečne veľa zložených čísel.
 }{
 	Postupujeme sporom. Čo ak by tam bolo len konečne veľa zložených čísel? Rozmyslite si, aké cifry vôbec dokážeme pripájať.
@@ -160,26 +189,13 @@ Jeden z~typov úloh na Náboji sú úlohy o~cifrách -- typicky najmä preto, le
 }{
 }
 
-
-\Problem{0}{}{
-	Pre ktoré prirodzené $n$ existuje $n$-ciferné číslo deliteľné $5^n$, ktoré má všetky cifry nepárne?
-}{
-	Skúsme také čísla zostrojovať induktívne. 
-}{
-    Vezmime si vyhovujúce číslo, ktoré má $n$ cifier. Dokážte, že pripojením jednej z~cifier $\{1,3,5,7,9\}$ na koniec čísla dostaneme vyhovujúce číslo s $n+1$ ciframi.
-}{
-	% SOL
-}
-
-
-\Problem{0}{}{
+\Problem{2}{}{
 	Dokážte, že existuje nekonečne veľa kladných celých čísel $n$ takých, že $n^2$ zapísané v~štvorkovej sústave obsahuje iba číslice $1$ a~$2$. 
 }{
 	Skúsme také čísla zostrojovať induktívne. 
 }{
-	Trikom je, že z~troch kópii čísla vieme zostrojiť nové, ktoré vyhovuje. Nebojte sa zosilniť indukčný predpoklad.
+	Trikom je, že z~troch kópií čísla vieme zostrojiť nové, ktoré vyhovuje. Nebojte sa zosilniť indukčný predpoklad.
 }{
-	% SOL
 }
 
 \DisplayExerciseSolutions
