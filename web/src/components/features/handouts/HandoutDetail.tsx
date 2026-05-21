@@ -13,9 +13,7 @@ import type { SectionMetadata } from '@/components/features/handouts/handout-uti
 import { getProblemImageUrl } from '@/components/features/problems/services/problem-api-urls'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
-import { AppLink } from '@/components/shared/components/AppLink'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
-import { HelpTooltip } from '@/components/shared/components/HelpTooltip'
 import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
@@ -54,12 +52,6 @@ type HandoutDetailProps = {
   sectionMetadata: SectionMetadata[]
   /** The current locale */
   locale: Locale
-  /** Optional event name */
-  event?: string
-  /** Optional longer description of the event, shown in a tooltip */
-  eventDescription?: string
-  /** Optional external URL — when set, makes the event chip a clickable link */
-  eventLink?: string
 }
 
 /**
@@ -290,9 +282,6 @@ export default function HandoutDetail({
   contentId,
   pdfFilenameStem,
   locale,
-  event,
-  eventDescription,
-  eventLink,
 }: HandoutDetailProps) {
   // The translations objects
   const t = useTranslations('handouts')
@@ -343,35 +332,6 @@ export default function HandoutDetail({
               </span>
             </div>
           )}
-
-          {/* Event (only for events-style handouts) */}
-          {event &&
-            (() => {
-              // Create the event chip
-              const chip = (
-                <div
-                  className={cn(
-                    'inline-flex items-center gap-2 px-4 py-2 rounded-full border border-foreground/10',
-                    ACCENT_COLOR_MAP.amber.bg,
-                    ACCENT_COLOR_MAP.amber.text,
-                    eventLink && 'hover:opacity-80 transition-opacity'
-                  )}
-                >
-                  <div className="w-2 h-2 rounded-full bg-current"></div>
-                  <span className="font-medium text-sm">{event}</span>
-                  {eventDescription && <HelpTooltip content={eventDescription} />}
-                </div>
-              )
-              // If the event has a link, wrap it in an AppLink to make it clickable,
-              // otherwise just return the chip
-              return eventLink ? (
-                <AppLink href={eventLink} external newTab>
-                  {chip}
-                </AppLink>
-              ) : (
-                chip
-              )
-            })()}
 
           {/* Authors */}
           {authors.length > 0 && (

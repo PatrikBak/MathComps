@@ -8,7 +8,6 @@ import type { HandoutIndex } from '@/components/features/handouts/handout-metada
 import {
   getContentFileBasename,
   isReadyHandout,
-  resolveHandoutEvent,
   supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
@@ -107,9 +106,6 @@ export default withLocale(async function RenderPage({
   const handoutModule = await import(`@/content/handouts/${fileBasename}.${locale}.json`)
   const handoutData = handoutModule.default as HandoutData
 
-  // Resolve the event this handout was used at, if any
-  const resolvedEvent = resolveHandoutEvent(handoutMeta, index.events)
-
   // Compute section metadata once for both the TOC and the renderer
   const sectionMetadata = computeSectionMetadata(handoutData.document)
 
@@ -145,9 +141,6 @@ export default withLocale(async function RenderPage({
           contentId={handoutMeta.id}
           pdfFilenameStem={`${fileBasename}.${locale}`}
           locale={locale}
-          event={resolvedEvent?.name[locale]}
-          eventDescription={resolvedEvent?.description?.[locale]}
-          eventLink={resolvedEvent?.link}
         />
       </Layout>
     </LocalizedRouteProvider>
