@@ -17,19 +17,13 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 \begitems \style i
 \i Číslo $\overline{a_1a_2\dots a_n}$ rozepíšeme pomocí dekadického zápisu, např. $\overline{ab}=10a+b$ nebo $\overline{abc}=100a+10b+c$.
 \i Číslo se sekvencí číslic $x$ následovanou sekvencí číslic $y$ délky $k$ zapíšeme jako $x \cdot 10^k + y$, např. 4267 je pro $k=2$ rovno $42 \cdot 10^2 + 67$.
-\i U~úloh s~číslicemi se vyplatí dívat se na zbytky po dělení~3 nebo~9, protože číslo dává stejný zbytek po dělení~3 nebo~9 právě když je tomu tak pro ciferný součet.
-\i Další dobrá kritéria pro číslice jsou pro dělitelnost $2^n$ (posledních $n$ číslic tvoří číslo dělitelné~$2^n$).
-\i A ještě jedno kritérium: číslo je dělitelné~11 právě když součet číslic na sudých místech dává stejný zbytek po dělení~11 jako součet číslic na lichých místech.
+\i Zamýšlíme se nad tím, jak se čísla sčítají/odčítají/násobí pod sebou.
+\i Díváme se obzvláště na zbytky po dělení~3 nebo~9, protože číslo dává po dělení~3 nebo~9 stejný zbytek jako jeho ciferný součet.
+\i Další dobré kritérium pro zbytky je $2^n$: číslo dává po dělení $2^n$ stejný zbytek jako jeho posledních $n$ číslic.
+\i A ještě jedno kritérium: číslo dává po dělení~11 stejný zbytek jako součet číslic na lichých místech mínus součet číslic na sudých místech (paritu počítáme zprava: číslice na místě jednotek je na lichém místě).
 \enditems
 
 \sec Úlohy
-
-\Problem{0}{}{
-	Najděte všechna čtyřciferná čísla $\overline{abcd}$ s~ciferným součtem~12 taková, že $\overline{ab}-\overline{cd}=1$.
-}{
-	Platí $\overline{ab}=\overline{cd}+1$. Rozeberte případy podle toho, zda při sčítání napravo dochází k~přechodu přes~10.
-}{
-}
 
 \Problem{0}{}{
 	Určete všechna přirozená čísla $n$, pro která platí
@@ -38,8 +32,15 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	$$
 	přičemž $p(n)$ označuje součin všech číslic čísla $n$.
 }{
-	Zapište $n=\overline{ab}$ a~rovnici přepište.
+	Číslo~$n$ je zjevně nejvýše dvojciferné. Zapište $n=\overline{ab}$ a~rovnici přepište.
 }{
+	Po přepisu máme $10a+b+ab=70$. Nejjednodušší způsob je vyzkoušet možná~$a$ -- pro něj nemáme mnoho možností.
+}{
+	Jelikož $p(n)\ge 0$, máme $n\le 70$. Pro jednociferné~$n$ by rovnice dala $n+n=70$, čili $n=35$, což není jednociferné. Číslo $n$ je tedy dvojciferné. Zapišme $n=\overline{ab}=10a+b$ s~$a\in\{1,\ldots,9\}$, $b\in\{0,\ldots,9\}$. Rovnice se přepíše na
+	$$
+	10a+b+ab=70, \quad\hbox{tedy}\quad b(a+1)=70-10a.
+	$$
+	Postupně pro $a=1,2,\ldots,7$ dostaneme $b=30,\ 50/3,\ 10,\ 6,\ 20/6,\ 10/7,\ 0$. Číslicí je $b$ pouze při $a=4$ (což dává $n=46$) a~při $a=7$ (což dává $n=70$). Zkouškou ověříme $46+4\cdot 6=70$ a~$70+7\cdot 0=70$, takže řešením jsou $n=46$ a~$n=70$.
 }
 
 \Problem{0}{}{
@@ -49,16 +50,53 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Měli bychom dojít k~rovnici $9(y-a)=x$. Jenže~$x$ je nenulová číslice, to nám mnoho možností nedá.
 }{
+	Označme $y$ jednociferné číslo, jehož 990-násobek přičítáme. Podmínka nafukovatelnosti říká, že
+	$$
+	\overline{ab}+990y=\overline{axxb},
+	$$
+	tedy $10a+b+990y=1000a+110x+b$. Po úpravě dostaneme
+	$$
+	9(y-a)=x.
+	$$
+	Jelikož $x$ je nenulová číslice, levá strana musí být kladným násobkem devítky nepřevyšujícím~$9$, takže nutně $y-a=1$ a~$x=9$. Pro $a$ máme možnosti $1,2,\ldots,8$ ($a=9$ by dávalo dvojciferné $y$), za~$b$ pak můžeme volit libovolnou číslici. Nafukovatelných čísel je proto $8\cdot 10=80$.
+}
+
+\Problem{0}{}{
+	Najděte všechna čtyřciferná čísla $\overline{abcd}$ s~ciferným součtem~12 taková, že $\overline{ab}-\overline{cd}=1$.
+}{
+	Platí $\overline{ab}=\overline{cd}+1$. Zkuste se na pravou stranu podívat jako na sčítání čísel pod sebou.
+}{
+	Idea je rozebrat dva případy, $d=9$ a~$d\neq 9$. V~prvním nastává přechod přes~10 a~ve druhém ne. Z~rovnice hned dostaneme vyjádření číslic $a$ a~$b$ pomocí $c$ a~$d$, což se zkombinuje s~ciferným součtem.
+}{
+	Z~rovnosti $\overline{ab}-\overline{cd}=1$ dostáváme $\overline{ab}=\overline{cd}+1$. Na pravou stranu se podívejme jako na klasické sčítání pod sebou: k~číslu $\overline{cd}$ přičítáme $1$. Rozebereme dva případy podle toho, zda při sčítání nastane přechod přes desítku.
+
+	\textbf{Případ $d\neq 9$.} Přechod přes desítku nenastává, takže $b=d+1$ a~$a=c$. Z~ciferného součtu
+	$$
+	a+b+c+d=2c+2d+1=12
+	$$
+	dostáváme $2(c+d)=11$, což nemá řešení v~celých číslech.
+
+	\textbf{Případ $d=9$.} Přechod přes desítku nastává, takže $b=0$ a~$a=c+1$. Ciferný součet dává
+	$$
+	a+0+c+9=12,
+	$$
+	tedy $a+c=3$. Spolu s~$a=c+1$ vychází $c=1$ a~$a=2$.
+
+	Jediným řešením je $\overline{abcd}=2019$ a~skutečně $20-19=1$ a~$2+0+1+9=12$.
 }
 
 \Problem{0}{}{
 	Zjistěte, jaké nejmenší kladné celé číslo lze vložit mezi dvojčíslí $20$ a $16$ tak, aby výsledné číslo bylo násobkem čísla $2016$.
 }{
-	Podívejme se na modulo~$9$.
+	Podívejme se na zbytek po dělení~$9$.
 }{
 	Jelikož~$2016$ je dělitelné~9, tak ciferný součet vkládaného čísla musí být dělitelný~9, protože ciferný součet $20$ a~$16$ je~$9$.
 }{
-	Postupně zkoušejte vkládat $9, 18, \dots$.
+	Postupně zkoušejte vkládat $9, 18, \dots$. To se dá mechanicky. Můžete však také použít kritérium dělitelnosti dalšího pěkného dělitele~2016.
+}{
+	Číslo $2016$ má ciferný součet~9, takže je dělitelné~$9$, tedy i hledané číslo musí být dělitelné~$9$. Vyzkoušením prvních čtyř možností 9, 18, 27, 36 dojdeme k~tomu, že $36$ vyhovuje.
+
+	Toto zkoušení si můžeme zjednodušit pomocí kritéria dělitelnosti~16, jelikož $16 \mid 2016$. Čísla $20916$, $201816$, $202716$ totiž podle svého posledního čtyřčíslí nejsou dělitelná 16.
 }
 
 \Problem{0}{}{
@@ -70,6 +108,25 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Rozmyslíme, že číslice~5 tam nutně musí být. Už to není mnoho možností, obzvlášť když se zamyslíme nad tím, co může být první číslice.
 }{
+	Nechť hledané číslo má číslice $a$, $b$, $c$, kde $a\ge 1$, čili $\overline{abc}=a!+b!+c!$. Jelikož $7!=5040>999$, žádná číslice nemůže být $\ge 7$, takže všechny číslice jsou nejvýše~$6$.
+
+	Pokud by se mezi číslicemi vyskytla~$6$, tak $a!+b!+c!\ge 6!=720$, a~proto by první číslice musela být alespoň~$7$, což je spor. Největší číslice je tedy nejvýše~$5$. Naopak, pokud by byly všechny číslice nejvýše~$4$, dostali bychom
+	$$
+	a!+b!+c!\le 3\cdot 4!=72<100,
+	$$
+	což je spor s~tím, že číslo je trojciferné. Alespoň jedna číslice je tedy rovna~$5$.
+
+	Pokud by byly všechny 5, tak máme $5!+5!+5!=360$, což nevyhovuje.
+
+	Pokud bychom měli dvě číslice~5, tak máme nejvýše $5!+5!+4! \leq 264$, takže $a \leq 2$.
+
+	Rozeberme obě možnosti:
+	\begitems \style i
+	\i Při $a=2$ je číslo $\overline{2bc}\in[200,299]$. Pokud $b=c=5$, součet je $2+120+120=242\ne 255$. Jinak je právě jedna z~číslic $b$, $c$ rovna~$5$ a~druhá je nejvýše~$4$, takže $b!+c!\le 120+24=144$ a~součet $\le 146<200$, což není možné.
+	\i Zbývá $a=1$. Potom $1+b!+c!$ má být rovno $\overline{1bc}$, přičemž alespoň jedna z~číslic $b$, $c$ je~$5$. Ověříme možné hodnoty pro druhou číslici $d\in\{0,\ldots,5\}$: součet $1+120+d!$ postupně pro $d=0,1,2,3,4,5$ vychází $122,\ 122,\ 123,\ 127,\ 145,\ 241$. Jediná hodnota, jejíž číslice tvoří správnou trojici, je $145$ (číslice $1$, $4$, $5$).
+	\enditems
+
+	Zkouškou $1!+4!+5!=1+24+120=145$ ověříme, že vyhovuje. Hledaným číslem je jedině $145$.
 }
 
 \Problem{0}{}{
@@ -81,6 +138,19 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Platí $100a+b=99a+(a+b)$, takže nutně $11 \mid a+b$. To už není mnoho možností.
 }{
+	Hledané číslo má tvar $\overline{aabb}$, kde $a\in\{1,\dots,9\}$ a~$b\in\{0,\dots,9\}$. Rozepišme ho:
+	$$
+	\overline{aabb}=1100a+11b=11(100a+b).
+	$$
+	Jelikož $11$ je prvočíslo, aby byl tento výraz druhou mocninou, musí $11$ dělit i $100a+b$. Využijme, že
+	$$
+	100a+b=99a+(a+b),
+	$$
+	a~tedy $11\mid a+b$. Protože $a+b\in\{1,\dots,18\}$, jedinou možností je $a+b=11$. Dosazením máme
+	$$
+	\overline{aabb}=11(100a+b)=11(99a+11)=11^2 (9a+1).
+	$$
+	Potřebujeme, aby $9a+1$ byla druhou mocninou celého čísla. Postupně ověříme, že to pro nenulové číslice nastává jen pro $a=7$, čemuž odpovídá $b=4$. Jediné vyhovující číslo je $7744=88^2$.
 }
 
 \Problem{0}{}{
@@ -88,13 +158,23 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Podívejte se na ciferný součet našeho čísla.
 }{
+	Číslo složené z~10 různých číslic obsahuje každou z~číslic $0,1,\ldots,9$ právě jednou. Jeho ciferný součet je proto
+	$$
+	0+1+2+\cdots+9=45,
+	$$
+	což je dělitelné~$9$. Každé takové číslo je tedy dělitelné~$9$, a~jelikož je zjevně větší než~$9$, nemůže být prvočíslem. Žádné prvočíslo složené z~10 různých číslic tedy neexistuje.
 }
 
 \Problem{0}{}{
 	Zdůvodněte, že každý palindrom se sudým počtem číslic je dělitelný~11.
 }{
-	Kritérium dělitelnosti~11.
+	Použijte kritérium dělitelnosti~11.
 }{
+	Palindrom s~$2n$ číslicemi má tvar $\overline{a_1a_2\dots a_na_n\dots a_2a_1}$. Podle kritéria dělitelnosti~$11$ stačí ukázat, že střídavý součet číslic (počítaný zprava) je dělitelný~$11$. Jelikož jde o~palindrom, každá číslice $a_i$ se vyskytuje právě dvakrát, jednou na liché a~jednou na sudé pozici zprava. Střídavý součet je tedy
+	$$
+	(a_1+a_2+\cdots+a_n)-(a_n+\cdots+a_2+a_1)=0,
+	$$
+	což je dělitelné~$11$.
 }
 
 \Problem{0}{}{
@@ -104,6 +184,9 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Pro spočítání ciferného součtu našeho čísla se zamysleme, kolikrát se každá z~číslic vyskytuje v~našem čísle.
 }{
+	Připomeňme, že každé přirozené číslo dává stejný zbytek po~dělení devíti jako jeho ciferný součet. Opakovaným nahrazováním číslem ciferného součtu se tedy zbytek po dělení~$9$ nemění a~výsledné jednociferné číslo je právě tento zbytek, přičemž zbytku~$0$ odpovídá devítka.
+
+	Stačí tedy určit zbytek čísla $N=123456789101112\dots 100$ po~dělení devíti. Číslo $N$ vzniklo zřetězením čísel od~$1$ po~$100$. Pokud vynecháme~100, tak každá číslice byla použita 20-krát: 10-krát na místě desítek a~10-krát na místě jednotek -- ciferný součet takového čísla je $20(1+\cdots+9)=20 \cdot 45$, takže je dělitelný~9. My však máme ještě~100, takže celkový zbytek po dělení~9 našeho součtu je~1.
 }
 
 \Problem{0}{}{
@@ -113,6 +196,13 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Uvědomíme si, že $s_s+s_l$ je ciferný součet našeho čísla, takže $1+2+3+4+5+6=21$. Z~toho najdeme možnosti pro dvojice $s_s$ a~$s_l$ a~ty zanalyzujeme.
 }{
+	Použijeme kritérium dělitelnosti~$11$: označme $s_s$ součet číslic na sudých pozicích a~$s_l$ součet číslic na lichých pozicích hledaného čísla. Číslo je dělitelné~$11$ právě tehdy, když $11\mid s_l-s_s$.
+
+	Jelikož každou z~číslic $1,2,3,4,5,6$ použijeme právě jednou, platí
+	$$
+	s_s+s_l=1+2+3+4+5+6=21.
+	$$
+	Součet je lichý, takže i rozdíl $s_l-s_s$ musí být lichý, a~tedy $s_l-s_s\neq 0$. Navíc každý ze součtů $s_s$, $s_l$ je součtem tří různých číslic z~$\{1,2,3,4,5,6\}$, takže i $s_s$ i $s_l$ jsou alespoň $1+2+3$ a~nejvýše $4+5+6$. Z~toho $|s_l-s_s|\le 15-6=9<11$, takže $11\nmid s_l-s_s$. Hledané číslo tedy neexistuje.
 }
 
 \Problem{0}{}{
@@ -122,6 +212,28 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	V~dalším kroku máme $|\overline{abc}-\overline{cba}|=99|a-c|$. Vypište si tato možná čísla.
 }{
+	Označme myšlené číslo jako $\overline{abc}$, kde $a,c\in\{1,2,\dots,9\}$, $a\neq c$ a~$b\in\{0,1,\dots,9\}$. Po první operaci dostaneme
+	$$
+	|\overline{abc}-\overline{cba}|=|100a+10b+c-(100c+10b+a)|=99|a-c|.
+	$$
+	Jelikož $|a-c|\in\{1,2,\dots,8\}$, výsledek první operace je některé z~čísel
+	$$
+	99,\ 198,\ 297,\ 396,\ 495,\ 594,\ 693,\ 792.
+	$$
+	Ve druhém kroku každé z~nich doplníme zleva na trojciferné (pouze $99$ doplníme na $099$) a~přičteme jeho zápis pozpátku:
+	$$
+	\align
+	099+990&=1089,\cr
+	198+891&=1089,\cr
+	297+792&=1089,\cr
+	396+693&=1089,\cr
+	495+594&=1089,\cr
+	594+495&=1089,\cr
+	693+396&=1089,\cr
+	792+297&=1089.\cr
+	\endalign
+	$$
+	Ve všech případech tedy vyjde stejné číslo, takže nejmenší i největší možné číslo, které jsme mohli dostat, je $1089$.
 }
 
 \Problem{0}{}{
@@ -131,6 +243,19 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Sestavte si rovnici ze zadání: $6 \cdot 10^k + x = 25x$. Z~toho vyjádřete $x$ a~zjistěte, pro jaké $k$ bude $x$ celé číslo.
 }{
+	Označme hledané číslo jako $6\cdot 10^k+x$, kde $x$ je číslo po odstranění úvodní šestky a~$k$ je počet jeho číslic (včetně případných úvodních nul, čili $x<10^k$). Podmínka ze zadání dává rovnici
+	$$
+	6\cdot 10^k+x=25x,
+	$$
+	z~níž vyjádříme
+	$$
+	x=\frac{6\cdot 10^k}{24}=\frac{10^k}{4}.
+	$$
+	Aby bylo $x$ celé, musí $4\mid 10^k$, což nastane právě pro $k\ge 2$. Tehdy $x=25\cdot 10^{k-2}$ a~hledané číslo je
+	$$
+	6\cdot 10^k+25\cdot 10^{k-2}=625\cdot 10^{k-2}.
+	$$
+	Vyhovuje tedy nekonečně mnoho čísel: $625, 6250, 62500, \ldots$
 }
 
 \Problem{0}{}{
@@ -140,6 +265,30 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Připomeňte si, že číslo zapsané jako $k$ stejných číslic $c$ se dá vyjádřit jako $c \cdot \frac{10^k - 1}{9}$. Nezapomeňte každou část čísla vynásobit příslušnou mocninou desítky podle toho, kolik číslic za ní následuje.
 }{
+	Ve finálním vyjádření hledejte doplnění čísla na čtverec. Měl by nám zbýt čtverec zlomku, který na první pohled nemusí být přirozeným číslem. Reprezentuje však číslo s~pěkným desetinným zápisem.
+}{
+	Označme $N=\underbrace{44\dots4}_{n+1}\underbrace{88\dots8}_n 9$ a~rozepišme ho pomocí desetinného zápisu. Připomeňme, že $\underbrace{cc\dots c}_k=c\cdot\frac{10^k-1}{9}$. Skupina $(n+1)$ čtyřek je následována $n+1$ číslicemi, skupina $n$ osmiček jednou číslicí a~na konci stojí $9$, takže
+	$$
+	N=4\cdot\frac{10^{n+1}-1}{9}\cdot 10^{n+1}+8\cdot\frac{10^n-1}{9}\cdot 10+9.
+	$$
+	Vynásobením devíti dostaneme
+	$$
+	9N=4\cdot 10^{n+1}(10^{n+1}-1)+80(10^n-1)+81.
+	$$
+	Jelikož $-4\cdot 10^{n+1}+80\cdot 10^n=-40\cdot 10^n+80\cdot 10^n=4\cdot 10^{n+1}$, po roznásobení závorek vyjde
+	$$
+	9N=4\cdot 10^{2n+2}+4\cdot 10^{n+1}+1=\bigl(2\cdot 10^{n+1}+1\bigr)^2.
+	$$
+	Potom
+	$$
+	N=\(\frac{2\cdot 10^{n+1}+1}{3}\)^2.
+	$$
+	Číslo $2\cdot 10^{n+1}+1=2\underbrace{00\dots0}_n 1$ má ciferný součet~$3$, takže je dělitelné třemi, takže máme druhou mocninu přirozeného čísla.
+
+	\Remark Dokonce platí, že $\underbrace{66\dots6}_n 7\cdot 3=2\underbrace{00\dots0}_n 1$, takže
+	$$
+	N=\bigl(\underbrace{66\dots6}_n 7\bigr)^2.
+	$$
 }
 
 \Problem{0}{}{
@@ -153,15 +302,49 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Hlavní idea je, že $100x^2$ nepřispívá na místo desítek vůbec a~$20xy$ přispívá sudou číslicí, takže $y^2$ musí mít lichou číslici na místě desítek.
 }{
+	Zapišme $n=10x+y$, kde $y\in\{0,1,\dots,9\}$ je poslední číslice čísla $n$. Potom
+	$$
+	n^2=100x^2+20xy+y^2.
+	$$
+	Člen $100x^2$ na místo desítek nepřispívá vůbec a~člen $20xy=10\cdot(2xy)$ přispívá na místo desítek číslicí $2xy$, tedy sudou číslicí. Číslice na místě desítek čísla $n^2$ má tak stejnou paritu jako číslice na místě desítek čísla $y^2$ (žádné přenosy z~jednotek nenastávají, neboť $y^2<100$ a~jednotková číslice pochází výlučně z~$y^2$).
+
+	Jelikož $7$ je lichá, musí mít $y^2$ na místě desítek lichou číslici. Projděme všechny možnosti:
+	$$
+	\align
+	y=0,1,2,3:&\quad y^2=0,1,4,9\quad\hbox{(desítková číslice $0$),}\cr
+	y=4:&\quad y^2=16\quad\hbox{(desítková číslice $1$),}\cr
+	y=5:&\quad y^2=25\quad\hbox{(desítková číslice $2$),}\cr
+	y=6:&\quad y^2=36\quad\hbox{(desítková číslice $3$),}\cr
+	y=7:&\quad y^2=49\quad\hbox{(desítková číslice $4$),}\cr
+	y=8:&\quad y^2=64\quad\hbox{(desítková číslice $6$),}\cr
+	y=9:&\quad y^2=81\quad\hbox{(desítková číslice $8$).}\cr
+	\endalign
+	$$
+	Lichou desítkovou číslici dávají pouze $y=4$ a~$y=6$, přičemž v~obou případech je poslední číslice $y^2$ rovna $6$. Poslední číslice čísla $n^2$ je tedy~$6$.
 }
 
 \Problem{1}{}{
-	Existují dvě různé mocniny dvojky se stejným počtem číslic, z nichž by se jedna dala získat pouze přeuspořádáním číslic té druhé.
+	Existují dvě různé mocniny dvojky se stejným počtem číslic, z nichž by se jedna dala získat pouze přeuspořádáním číslic té druhé?
 }{
-	Podívejme se na modulo~$9$.
+	Podívejme se na zbytek po dělení~$9$.
 }{
-	Zkoumejme mocniny dvojky modulo~9. Jednotlivé mocniny $2^1, 2^2, \dots$ jsou $2,4,8,7,5,1$ a~tak~dále. Za jakých podmínek $2^a$ a~$2^b$ dávají stejný zbytek po dělení~9?
+	Zkoumejme zbytky mocnin~2 po dělení~9. Jednotlivé mocniny $2^1, 2^2, \dots$ jsou $2,4,8,7,5,1$ a~tak~dále. Za jakých podmínek $2^a$ a~$2^b$ dávají stejný zbytek po dělení~9?
 }{
+	Pokud by $2^a$ a~$2^b$ byly vzájemnými přeuspořádáními číslic, měly by stejný ciferný součet, a~tedy stejný zbytek po~dělení~$9$. Stačí tedy ukázat, že to, že $2^a$ a $2^b$ dávají po dělení 9 stejný zbytek pro $a\neq b$, vede ke~sporu s~tím, že obě čísla mají stejný počet číslic.
+
+	Zbytky mocnin dvou po~dělení~$9$ tvoří periodickou posloupnost
+	$$
+	2,\ 4,\ 8,\ 7,\ 5,\ 1,\ 2,\ 4,\ 8,\ 7,\ 5,\ 1,\ \dots
+	$$
+	s~periodou~$6$, takže nutně musíme mít $6\mid a-b$.
+
+	Bez újmy na obecnosti nechť $a<b$. Potom $b\ge a+6$, a~tedy
+	$$
+	\frac{2^b}{2^a}\ge 2^6=64.
+	$$
+	Jenže dvě čísla se stejným počtem číslic mají podíl ostře menší než~$10$, což je spor.
+
+	Taková dvojice mocnin dvou tedy neexistuje.
 }
 
 \Problem{1}{}{
@@ -169,8 +352,13 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 }{
 	Zkusme taková čísla konstruovat induktivně.
 }{
-    Vezměme si vyhovující číslo, které má $n$ číslic. Dokažte, že připojením jedné z~číslic $\{1,3,5,7,9\}$ na začátek čísla dostaneme vyhovující číslo s $n+1$ číslicemi.
+    Vezměme si vyhovující číslo, které má $n$ číslic. Dokažte, že připojením vhodné liché číslice na začátek čísla dostaneme vyhovující číslo s~$n+1$ číslicemi.
 }{
+	Postupujme indukcí podle $n$. Pro $n=1$ vyhovuje $N_1=5$. Předpokládejme, že máme $n$-ciferné číslo $N_n$ s~lichými číslicemi, pro které $5^n\mid N_n$, tedy $N_n=5^n m$ pro vhodné $m$. Ukážeme, že připojením vhodné liché číslice $d\in\{1,3,5,7,9\}$ na začátek dostaneme vyhovující $(n+1)$-ciferné číslo $N_{n+1}=d\cdot 10^n+N_n$. Platí
+	$$
+	N_{n+1}=d\cdot 10^n+5^n m=5^n(d\cdot 2^n+m),
+	$$
+	takže potřebujeme $5\mid d\cdot 2^n+m$. Jelikož $\{1,3,5,7,9\}\equiv\{1,3,0,2,4\}\pmod 5$ tvoří úplnou soustavu zbytků a~$\gcd(2^n,5)=1$, hodnoty $d\cdot 2^n\pmod 5$ při $d\in\{1,3,5,7,9\}$ proběhnou taktéž všechny zbytky modulo~$5$. Právě jedno $d$ tedy splňuje žádanou dělitelnost; číslice $d$ je lichá a~nenulová, takže $N_{n+1}$ je $(n+1)$-ciferné s~lichými číslicemi a~dělitelné $5^{n+1}$. Indukce tím končí a~vyhovující číslo existuje pro každé přirozené~$n$.
 }
 
 \Problem{1}{}{
@@ -189,15 +377,47 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	$$
 	Druhou část umíme také napsat explicitně. Rozmyslete si, že by stačilo, aby $10^n-1$ bylo dělitelné~$3a$.
 }{
+	Postupujme sporem. Předpokládejme, že od jistého místa jsou už všechny členy posloupnosti prvočísla. Podívejme se, jakou číslici $d$ vůbec můžeme v~této koncové fázi připojovat. Při připojení číslice $d$ k~číslu $N$ dostaneme $10N+d$. Pokud je $d$ sudá, je $10N+d$ sudé a~větší než~$2$, tedy složené. Pokud je $d=5$, je $10N+d$ dělitelné pěti a~větší než~$5$, tedy opět složené. Připojovat tedy můžeme pouze číslice z~množiny $\{1,3,7\}$.
+
+	Zkoumejme nyní zbytky po~dělení třemi. Jelikož $10N+d\equiv N+d\pmod 3$, připojení číslice~$3$ zbytek nemění, kdežto připojení číslice~$1$ či~$7$ jej zvětší o~$1$ modulo~$3$. Jenže každý člen v~koncové fázi je prvočíslo větší než~$3$, takže jeho zbytek modulo~$3$ patří do $\{1,2\}$ a~nikdy nesmí být~$0$. Po dvou připojeních jedničky nebo sedmičky by se však zbytek cyklicky posunul přes~$0$, což je spor. V~koncové fázi tedy můžeme připojit jedničku či sedmičku pouze konečně mnohokrát, a~tak od jistého okamžiku připojujeme výhradně trojky.
+
+	Označme $a$ člen posloupnosti, od kterého připojujeme už jen trojky. Číslo $a$ je prvočíslo větší než~$3$ a~jeho poslední číslice patří do $\{1,3,7\}$, takže $a$ je nesoudělné s~$10$. Po $n$ připojeních trojky dostaneme číslo
+	$$
+	a\cdot 10^n+\underbrace{\overline{33\dots3}}_n=a\cdot 10^n+\frac{10^n-1}{3}.
+	$$
+	Stačí nyní najít takové $n\ge 1$, pro~které $3a\mid 10^n-1$. Jelikož $\gcd(10,3a)=1$, podle Eulerovy věty stačí zvolit $n=\varphi(3a)$. Pro takové $n$ platí $a\mid\frac{10^n-1}{3}$, a~zároveň $a\mid a\cdot 10^n$, takže celé číslo je dělitelné~$a$ a~zjevně je od~$a$ větší. Je tedy složené, což je spor.
 }
 
 \Problem{2}{}{
 	Dokažte, že existuje nekonečně mnoho kladných celých čísel $n$ takových, že $n^2$ zapsané ve~čtyřkové soustavě obsahuje pouze číslice $1$ a~$2$.
 }{
-	Zkusme taková čísla konstruovat induktivně.
+	Zkusme taková čísla konstruovat induktivně. Předchozí nápady mohly selhat na tom, že při umocňování vznikaly dvojnásobky čísel, což při číslici~$2$ ve~čtyřkové soustavě způsobuje přenos a~vytváří nuly.
 }{
-	Trikem je, že ze tří kopií čísla umíme zkonstruovat nové, které vyhovuje. Nebojte se zesílit indukční předpoklad.
+	Zkuste nové číslo vytvořit ze~dvou kopií předchozího: $n_{k+1}=n_k(2^a+1)$. Pokud umocníte tento výraz, dostanete $n_k^2(2^{2a}+2^{a+1}+1)$. Jak je třeba zvolit $a$, aby se prostřední člen změnil na čistou mocninu čtyřky bez koeficientu~$2$?
 }{
+	Dokážeme silnější tvrzení: pro každé $k\ge 1$ existuje číslo $n_k$ takové, že jeho čtverec $n_k^2$ má ve~čtyřkové soustavě přesně $L_k$ číslic, všechny z~$\{1,2\}$, přičemž první a~poslední číslice jsou vždy~$1$.
+
+	Jako bázi indukce vezmeme $n_1=5$. Jeho čtverec je $25=121_4$, takže podmínky jsou splněny s~délkou $L_1=3$, číslo začíná i končí jedničkou.
+
+	Předpokládejme, že máme takové číslo $n_k$, jehož čtverec $n_k^2$ má ve~čtyřkové soustavě délku~$L$. Nové číslo $n_{k+1}$ zkonstruujeme následovně:
+	$$
+	n_{k+1}=n_k\cdot(2^{2L-1}+1).
+	$$
+	Po umocnění dostaneme
+	$$
+	n_{k+1}^2=n_k^2\cdot\bigl(2^{4L-2}+2\cdot 2^{2L-1}+1\bigr)=n_k^2\cdot\bigl(4^{2L-1}+4^L+1\bigr).
+	$$
+	Všimněme si, že díky vhodně zvolenému lichému exponentu se prostřední člen $2\cdot 2^{2L-1}$ změnil na $2^{2L}$, což je přesně $4^L$. Zmizel koeficient~$2$, který by ve~čtyřkové soustavě způsoboval nežádoucí přenosy. Výraz je tedy součtem tří kopií $n_k^2$ posunutých ve~čtyřkové soustavě o~$0$, $L$ a~$2L-1$ pozic doleva.
+
+	Podívejme se, jak se tyto tři bloky překryjí:
+	\begitems \style N
+	\i První blok (posun~$0$) zabírá pozice $0$ až $L-1$.
+	\i Druhý blok (posun~$L$) zabírá pozice $L$ až $2L-1$.
+	\i Třetí blok (posun $2L-1$) zabírá pozice $2L-1$ až $3L-2$.
+	\enditems
+	Mezi prvním a~druhým blokem není žádná mezera (druhý začíná přesně tam, kde první končí). Druhý a~třetí blok se překrývají v~přesně jedné pozici: $2L-1$. Na této pozici sčítáme nejvyšší číslici druhého bloku (což je nejvyšší číslice $n_k^2$, tedy~$1$) a~nejnižší číslici třetího bloku (což je nejnižší číslice $n_k^2$, tedy~$1$). Jejich součet je $1+1=2$, žádný přenos nevzniká.
+
+	Všechny ostatní číslice výsledného čísla jsou nedotčené číslice z~kopií $n_k^2$, tedy výhradně $1$ a~$2$. Výsledné číslo má délku $3L-1$, začíná nejvyšší číslicí třetího bloku ($1$) a~končí nejnižší číslicí prvního bloku ($1$). Tím je indukční krok hotov a~takových čísel existuje nekonečně mnoho.
 }
 
 \DisplayExerciseSolutions

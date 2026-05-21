@@ -139,7 +139,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "U\u00A0úloh s\u00A0číslicemi se vyplatí dívat se na zbytky po dělení\u00A03 nebo\u00A09, protože číslo dává stejný zbytek po dělení\u00A03 nebo\u00A09 právě když je tomu tak pro ciferný součet."
+                        "text": "Zamýšlíme se nad tím, jak se čísla sčítají/odčítají/násobí pod sebou."
                       }
                     ],
                     "highligted": false
@@ -151,7 +151,19 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Další dobrá kritéria pro číslice jsou pro dělitelnost "
+                        "text": "Díváme se obzvláště na zbytky po dělení\u00A03 nebo\u00A09, protože číslo dává po dělení\u00A03 nebo\u00A09 stejný zbytek jako jeho ciferný součet."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Další dobré kritérium pro zbytky je "
                       },
                       {
                         "type": "math",
@@ -160,7 +172,16 @@
                       },
                       {
                         "type": "text",
-                        "text": " (posledních "
+                        "text": ": číslo dává po dělení "
+                      },
+                      {
+                        "type": "math",
+                        "text": "2^n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " stejný zbytek jako jeho posledních "
                       },
                       {
                         "type": "math",
@@ -169,16 +190,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " číslic tvoří číslo dělitelné\u00A0"
-                      },
-                      {
-                        "type": "math",
-                        "text": "2^n",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ")."
+                        "text": " číslic."
                       }
                     ],
                     "highligted": false
@@ -190,7 +202,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "A ještě jedno kritérium: číslo je dělitelné\u00A011 právě když součet číslic na sudých místech dává stejný zbytek po dělení\u00A011 jako součet číslic na lichých místech."
+                        "text": "A ještě jedno kritérium: číslo dává po dělení\u00A011 stejný zbytek jako součet číslic na lichých místech mínus součet číslic na sudých místech (paritu počítáme zprava: číslice na místě jednotek je na lichém místě)."
                       }
                     ],
                     "highligted": false
@@ -207,64 +219,6 @@
         "level": 1,
         "text": {
           "content": [
-            {
-              "type": "problem",
-              "difficulty": 0,
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Najděte všechna čtyřciferná čísla "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\overline{abcd}",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " s\u00A0ciferným součtem\u00A012 taková, že "
-                    },
-                    {
-                      "type": "math",
-                      "text": "\\overline{ab}-\\overline{cd}=1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": "."
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "hints": [
-                [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Platí "
-                      },
-                      {
-                        "type": "math",
-                        "text": "\\overline{ab}=\\overline{cd}+1",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": ". Rozeberte případy podle toho, zda při sčítání napravo dochází k\u00A0přechodu přes\u00A010."
-                      }
-                    ],
-                    "highligted": false
-                  }
-                ]
-              ],
-              "solution": []
-            },
             {
               "type": "problem",
               "difficulty": 0,
@@ -329,7 +283,16 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Zapište "
+                        "text": "Číslo\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je zjevně nejvýše dvojciferné. Zapište "
                       },
                       {
                         "type": "math",
@@ -343,9 +306,245 @@
                     ],
                     "highligted": false
                   }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Po přepisu máme "
+                      },
+                      {
+                        "type": "math",
+                        "text": "10a+b+ab=70",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Nejjednodušší způsob je vyzkoušet možná\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " – pro něj nemáme mnoho možností."
+                      }
+                    ],
+                    "highligted": false
+                  }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p(n)\\ge 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n\\le 70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro jednociferné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by rovnice dala "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+n=70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=35",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což není jednociferné. Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy dvojciferné. Zapišme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=\\overline{ab}=10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\in\\{1,\\ldots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b\\in\\{0,\\ldots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Rovnice se přepíše na"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "10a+b+ab=70, \\quad\\hbox{tedy}\\quad b(a+1)=70-10a.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupně pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=1,2,\\ldots,7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=30,\\ 50/3,\\ 10,\\ 6,\\ 20/6,\\ 10/7,\\ 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Číslicí je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pouze při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (což dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=46",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (což dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Zkouškou ověříme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "46+4\\cdot 6=70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "70+7\\cdot 0=70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže řešením jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=46",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -455,7 +654,531 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jednociferné číslo, jehož 990-násobek přičítáme. Podmínka nafukovatelnosti říká, že"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\overline{ab}+990y=\\overline{axxb},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b+990y=1000a+110x+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po úpravě dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "9(y-a)=x.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nenulová číslice, levá strana musí být kladným násobkem devítky nepřevyšujícím\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže nutně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y-a=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme možnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1,2,\\ldots,8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by dávalo dvojciferné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), za\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pak můžeme volit libovolnou číslici. Nafukovatelných čísel je proto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8\\cdot 10=80",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Najděte všechna čtyřciferná čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{abcd}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0ciferným součtem\u00A012 taková, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{ab}-\\overline{cd}=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Platí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "\\overline{ab}=\\overline{cd}+1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Zkuste se na pravou stranu podívat jako na sčítání čísel pod sebou."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je rozebrat dva případy, "
+                      },
+                      {
+                        "type": "math",
+                        "text": "d=9",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "d\\neq 9",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". V\u00A0prvním nastává přechod přes\u00A010 a\u00A0ve druhém ne. Z\u00A0rovnice hned dostaneme vyjádření číslic "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "b",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " pomocí "
+                      },
+                      {
+                        "type": "math",
+                        "text": "c",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "d",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", což se zkombinuje s\u00A0ciferným součtem."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{ab}-\\overline{cd}=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostáváme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{ab}=\\overline{cd}+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Na pravou stranu se podívejme jako na klasické sčítání pod sebou: k\u00A0číslu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{cd}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přičítáme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Rozebereme dva případy podle toho, zda při sčítání nastane přechod přes desítku."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Případ "
+                        },
+                        {
+                          "type": "math",
+                          "text": "d\\neq 9",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Přechod přes desítku nenastává, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0ciferného součtu"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a+b+c+d=2c+2d+1=12",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "dostáváme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2(c+d)=11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což nemá řešení v\u00A0celých číslech."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "bold",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Případ "
+                        },
+                        {
+                          "type": "math",
+                          "text": "d=9",
+                          "isDisplay": false
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Přechod přes desítku nastává, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ciferný součet dává"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a+0+c+9=12,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+c=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Spolu s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vychází "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jediným řešením je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{abcd}=2019",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0skutečně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "20-19=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2+0+1+9=12",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -506,7 +1229,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Podívejme se na modulo\u00A0"
+                        "text": "Podívejme se na zbytek po dělení\u00A0"
                       },
                       {
                         "type": "math",
@@ -568,6 +1291,27 @@
                     ],
                     "highligted": false
                   }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupně zkoušejte vkládat "
+                      },
+                      {
+                        "type": "math",
+                        "text": "9, 18, \\dots",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". To se dá mechanicky. Můžete však také použít kritérium dělitelnosti dalšího pěkného dělitele\u00A02016."
+                      }
+                    ],
+                    "highligted": false
+                  }
                 ]
               ],
               "solution": [
@@ -576,16 +1320,89 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Postupně zkoušejte vkládat "
+                      "text": "Číslo "
                     },
                     {
                       "type": "math",
-                      "text": "9, 18, \\dots",
+                      "text": "2016",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": "."
+                      "text": " má ciferný součet\u00A09, takže je dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy i hledané číslo musí být dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vyzkoušením prvních čtyř možností 9, 18, 27, 36 dojdeme k\u00A0tomu, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "36",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyhovuje."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Toto zkoušení si můžeme zjednodušit pomocí kritéria dělitelnosti\u00A016, jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "16 \\mid 2016",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "20916",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "201816",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "202716",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " totiž podle svého posledního čtyřčíslí nejsou dělitelná 16."
                     }
                   ],
                   "highligted": false
@@ -645,7 +1462,500 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť hledané číslo má číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\ge 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{abc}=a!+b!+c!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "7!=5040>999",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", žádná číslice nemůže být "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\ge 7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže všechny číslice jsou nejvýše\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pokud by se mezi číslicemi vyskytla\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a!+b!+c!\\ge 6!=720",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0proto by první číslice musela být alespoň\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je spor. Největší číslice je tedy nejvýše\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Naopak, pokud by byly všechny číslice nejvýše\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", dostali bychom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a!+b!+c!\\le 3\\cdot 4!=72<100,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což je spor s\u00A0tím, že číslo je trojciferné. Alespoň jedna číslice je tedy rovna\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pokud by byly všechny 5, tak máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5!+5!+5!=360",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což nevyhovuje."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pokud bychom měli dvě číslice\u00A05, tak máme nejvýše "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5!+5!+4! \\leq 264",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\leq 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rozeberme obě možnosti:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Při "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je číslo "
+                          },
+                          {
+                            "type": "math",
+                            "text": "\\overline{2bc}\\in[200,299]",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Pokud "
+                          },
+                          {
+                            "type": "math",
+                            "text": "b=c=5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", součet je "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2+120+120=242\\ne 255",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Jinak je právě jedna z\u00A0číslic "
+                          },
+                          {
+                            "type": "math",
+                            "text": "b",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "c",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " rovna\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " a\u00A0druhá je nejvýše\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "4",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", takže "
+                          },
+                          {
+                            "type": "math",
+                            "text": "b!+c!\\le 120+24=144",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " a\u00A0součet "
+                          },
+                          {
+                            "type": "math",
+                            "text": "\\le 146<200",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", což není možné."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Zbývá "
+                          },
+                          {
+                            "type": "math",
+                            "text": "a=1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Potom "
+                          },
+                          {
+                            "type": "math",
+                            "text": "1+b!+c!",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " má být rovno "
+                          },
+                          {
+                            "type": "math",
+                            "text": "\\overline{1bc}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", přičemž alespoň jedna z\u00A0číslic "
+                          },
+                          {
+                            "type": "math",
+                            "text": "b",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "c",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " je\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Ověříme možné hodnoty pro druhou číslici "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d\\in\\{0,\\ldots,5\\}",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ": součet "
+                          },
+                          {
+                            "type": "math",
+                            "text": "1+120+d!",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " postupně pro "
+                          },
+                          {
+                            "type": "math",
+                            "text": "d=0,1,2,3,4,5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " vychází "
+                          },
+                          {
+                            "type": "math",
+                            "text": "122,\\ 122,\\ 123,\\ 127,\\ 145,\\ 241",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ". Jediná hodnota, jejíž číslice tvoří správnou trojici, je "
+                          },
+                          {
+                            "type": "math",
+                            "text": "145",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " (číslice "
+                          },
+                          {
+                            "type": "math",
+                            "text": "1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "4",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ", "
+                          },
+                          {
+                            "type": "math",
+                            "text": "5",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ")."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "LowerRomanParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zkouškou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1!+4!+5!=1+24+120=145",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ověříme, že vyhovuje. Hledaným číslem je jedině "
+                    },
+                    {
+                      "type": "math",
+                      "text": "145",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -745,7 +2055,180 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hledané číslo má tvar "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{aabb}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\in\\{1,\\dots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b\\in\\{0,\\dots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Rozepišme ho:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\overline{aabb}=1100a+11b=11(100a+b).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prvočíslo, aby byl tento výraz druhou mocninou, musí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělit i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "100a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Využijme, že"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "100a+b=99a+(a+b),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "a\u00A0tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "11\\mid a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b\\in\\{1,\\dots,18\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jedinou možností je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b=11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dosazením máme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\overline{aabb}=11(100a+b)=11(99a+11)=11^2 (9a+1).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Potřebujeme, aby "
+                    },
+                    {
+                      "type": "math",
+                      "text": "9a+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " byla druhou mocninou celého čísla. Postupně ověříme, že to pro nenulové číslice nastává jen pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čemuž odpovídá "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jediné vyhovující číslo je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "7744=88^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -776,7 +2259,69 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Číslo složené z\u00A010 různých číslic obsahuje každou z\u00A0číslic "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0,1,\\ldots,9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě jednou. Jeho ciferný součet je proto"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "0+1+2+\\cdots+9=45,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což je dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Každé takové číslo je tedy dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0jelikož je zjevně větší než\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", nemůže být prvočíslem. Žádné prvočíslo složené z\u00A010 různých číslic tedy neexistuje."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -800,14 +2345,94 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Kritérium dělitelnosti\u00A011."
+                        "text": "Použijte kritérium dělitelnosti\u00A011."
                       }
                     ],
                     "highligted": false
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Palindrom s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " číslicemi má tvar "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{a_1a_2\\dots a_na_n\\dots a_2a_1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podle kritéria dělitelnosti\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stačí ukázat, že střídavý součet číslic (počítaný zprava) je dělitelný\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož jde o\u00A0palindrom, každá číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_i",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se vyskytuje právě dvakrát, jednou na liché a\u00A0jednou na sudé pozici zprava. Střídavý součet je tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a_1+a_2+\\cdots+a_n)-(a_n+\\cdots+a_2+a_1)=0,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což je dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -859,7 +2484,91 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Připomeňme, že každé přirozené číslo dává stejný zbytek po\u00A0dělení devíti jako jeho ciferný součet. Opakovaným nahrazováním číslem ciferného součtu se tedy zbytek po dělení\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nemění a\u00A0výsledné jednociferné číslo je právě tento zbytek, přičemž zbytku\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " odpovídá devítka."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stačí tedy určit zbytek čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N=123456789101112\\dots 100",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po\u00A0dělení devíti. Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vzniklo zřetězením čísel od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "100",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pokud vynecháme\u00A0100, tak každá číslice byla použita 20-krát: 10-krát na místě desítek a\u00A010-krát na místě jednotek – ciferný součet takového čísla je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "20(1+\\cdots+9)=20 \\cdot 45",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže je dělitelný\u00A09. My však máme ještě\u00A0100, takže celkový zbytek po dělení\u00A09 našeho součtu je\u00A01."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -956,7 +2665,196 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Použijeme kritérium dělitelnosti\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_s",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " součet číslic na sudých pozicích a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_l",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " součet číslic na lichých pozicích hledaného čísla. Číslo je dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě tehdy, když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "11\\mid s_l-s_s",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož každou z\u00A0číslic "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1,2,3,4,5,6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " použijeme právě jednou, platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "s_s+s_l=1+2+3+4+5+6=21.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Součet je lichý, takže i rozdíl "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_l-s_s",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " musí být lichý, a\u00A0tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_l-s_s\\neq 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Navíc každý ze součtů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_s",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_l",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je součtem tří různých číslic z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1,2,3,4,5,6\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_s",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "s_l",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou alespoň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1+2+3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0nejvýše "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4+5+6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0toho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|s_l-s_s|\\le 15-6=9<11",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "11\\nmid s_l-s_s",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Hledané číslo tedy neexistuje."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1017,7 +2915,135 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme myšlené číslo jako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\overline{abc}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,c\\in\\{1,2,\\dots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\neq c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b\\in\\{0,1,\\dots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po první operaci dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|\\overline{abc}-\\overline{cba}|=|100a+10b+c-(100c+10b+a)|=99|a-c|.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|a-c|\\in\\{1,2,\\dots,8\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", výsledek první operace je některé z\u00A0čísel"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "99,\\ 198,\\ 297,\\ 396,\\ 495,\\ 594,\\ 693,\\ 792.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ve druhém kroku každé z\u00A0nich doplníme zleva na trojciferné (pouze "
+                    },
+                    {
+                      "type": "math",
+                      "text": "99",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " doplníme na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "099",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0přičteme jeho zápis pozpátku:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\n099+990&=1089,\\cr\n198+891&=1089,\\cr\n297+792&=1089,\\cr\n396+693&=1089,\\cr\n495+594&=1089,\\cr\n594+495&=1089,\\cr\n693+396&=1089,\\cr\n792+297&=1089.\\cr\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ve všech případech tedy vyjde stejné číslo, takže nejmenší i největší možné číslo, které jsme mohli dostat, je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1089",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1123,7 +3149,140 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme hledané číslo jako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "6\\cdot 10^k+x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je číslo po odstranění úvodní šestky a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je počet jeho číslic (včetně případných úvodních nul, čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x<10^k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Podmínka ze zadání dává rovnici"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "6\\cdot 10^k+x=25x,",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "z\u00A0níž vyjádříme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "x=\\frac{6\\cdot 10^k}{24}=\\frac{10^k}{4}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Aby bylo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " celé, musí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4\\mid 10^k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což nastane právě pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k\\ge 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tehdy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=25\\cdot 10^{k-2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0hledané číslo je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "6\\cdot 10^k+25\\cdot 10^{k-2}=625\\cdot 10^{k-2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhovuje tedy nekonečně mnoho čísel: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "625, 6250, 62500, \\ldots",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1209,9 +3368,206 @@
                     ],
                     "highligted": false
                   }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ve finálním vyjádření hledejte doplnění čísla na čtverec. Měl by nám zbýt čtverec zlomku, který na první pohled nemusí být přirozeným číslem. Reprezentuje však číslo s\u00A0pěkným desetinným zápisem."
+                      }
+                    ],
+                    "highligted": false
+                  }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N=\\underbrace{44\\dots4}_{n+1}\\underbrace{88\\dots8}_n 9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0rozepišme ho pomocí desetinného zápisu. Připomeňme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\underbrace{cc\\dots c}_k=c\\cdot\\frac{10^k-1}{9}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Skupina "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " čtyřek je následována "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " číslicemi, skupina "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " osmiček jednou číslicí a\u00A0na konci stojí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N=4\\cdot\\frac{10^{n+1}-1}{9}\\cdot 10^{n+1}+8\\cdot\\frac{10^n-1}{9}\\cdot 10+9.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vynásobením devíti dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "9N=4\\cdot 10^{n+1}(10^{n+1}-1)+80(10^n-1)+81.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-4\\cdot 10^{n+1}+80\\cdot 10^n=-40\\cdot 10^n+80\\cdot 10^n=4\\cdot 10^{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", po roznásobení závorek vyjde"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "9N=4\\cdot 10^{2n+2}+4\\cdot 10^{n+1}+1=\\bigl(2\\cdot 10^{n+1}+1\\bigr)^2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Potom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N=\\left(\\frac{2\\cdot 10^{n+1}+1}{3}\\right)^2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\cdot 10^{n+1}+1=2\\underbrace{00\\dots0}_n 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má ciferný součet\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže je dělitelné třemi, takže máme druhou mocninu přirozeného čísla."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Poznámka."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Dokonce platí, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\underbrace{66\\dots6}_n 7\\cdot 3=2\\underbrace{00\\dots0}_n 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N=\\bigl(\\underbrace{66\\dots6}_n 7\\bigr)^2.",
+                  "isDisplay": true
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1368,7 +3724,220 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zapišme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=10x+y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y\\in\\{0,1,\\dots,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je poslední číslice čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n^2=100x^2+20xy+y^2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Člen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "100x^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na místo desítek nepřispívá vůbec a\u00A0člen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "20xy=10\\cdot(2xy)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přispívá na místo desítek číslicí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2xy",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy sudou číslicí. Číslice na místě desítek čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má tak stejnou paritu jako číslice na místě desítek čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (žádné přenosy z\u00A0jednotek nenastávají, neboť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y^2<100",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0jednotková číslice pochází výlučně z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "y^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ")."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je lichá, musí mít "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na místě desítek lichou číslici. Projděme všechny možnosti:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{align*}\ny=0,1,2,3:&\\quad y^2=0,1,4,9\\quad\\hbox{(desítková číslice $0$),}\\cr\ny=4:&\\quad y^2=16\\quad\\hbox{(desítková číslice $1$),}\\cr\ny=5:&\\quad y^2=25\\quad\\hbox{(desítková číslice $2$),}\\cr\ny=6:&\\quad y^2=36\\quad\\hbox{(desítková číslice $3$),}\\cr\ny=7:&\\quad y^2=49\\quad\\hbox{(desítková číslice $4$),}\\cr\ny=8:&\\quad y^2=64\\quad\\hbox{(desítková číslice $6$),}\\cr\ny=9:&\\quad y^2=81\\quad\\hbox{(desítková číslice $8$).}\\cr\n\\end{align*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lichou desítkovou číslici dávají pouze "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y=4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "y=6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", přičemž v\u00A0obou případech je poslední číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " rovna "
+                    },
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Poslední číslice čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1379,7 +3948,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Existují dvě různé mocniny dvojky se stejným počtem číslic, z nichž by se jedna dala získat pouze přeuspořádáním číslic té druhé."
+                      "text": "Existují dvě různé mocniny dvojky se stejným počtem číslic, z nichž by se jedna dala získat pouze přeuspořádáním číslic té druhé?"
                     }
                   ],
                   "highligted": false
@@ -1392,7 +3961,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Podívejme se na modulo\u00A0"
+                        "text": "Podívejme se na zbytek po dělení\u00A0"
                       },
                       {
                         "type": "math",
@@ -1413,7 +3982,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Zkoumejme mocniny dvojky modulo\u00A09. Jednotlivé mocniny "
+                        "text": "Zkoumejme zbytky mocnin\u00A02 po dělení\u00A09. Jednotlivé mocniny "
                       },
                       {
                         "type": "math",
@@ -1456,7 +4025,186 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pokud by "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " byly vzájemnými přeuspořádáními číslic, měly by stejný ciferný součet, a\u00A0tedy stejný zbytek po\u00A0dělení\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Stačí tedy ukázat, že to, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dávají po dělení 9 stejný zbytek pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\neq b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", vede ke\u00A0sporu s\u00A0tím, že obě čísla mají stejný počet číslic."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zbytky mocnin dvou po\u00A0dělení\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvoří periodickou posloupnost"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "2,\\ 4,\\ 8,\\ 7,\\ 5,\\ 1,\\ 2,\\ 4,\\ 8,\\ 7,\\ 5,\\ 1,\\ \\dots",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "s\u00A0periodou\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže nutně musíme mít "
+                    },
+                    {
+                      "type": "math",
+                      "text": "6\\mid a-b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bez újmy na obecnosti nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a<b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b\\ge a+6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{2^b}{2^a}\\ge 2^6=64.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jenže dvě čísla se stejným počtem číslic mají podíl ostře menší než\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je spor."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Taková dvojice mocnin dvou tedy neexistuje."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1528,16 +4276,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " číslic. Dokažte, že připojením jedné z\u00A0číslic "
-                      },
-                      {
-                        "type": "math",
-                        "text": "\\{1,3,5,7,9\\}",
-                        "isDisplay": false
-                      },
-                      {
-                        "type": "text",
-                        "text": " na začátek čísla dostaneme vyhovující číslo s "
+                        "text": " číslic. Dokažte, že připojením vhodné liché číslice na začátek čísla dostaneme vyhovující číslo s\u00A0"
                       },
                       {
                         "type": "math",
@@ -1553,7 +4292,240 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujme indukcí podle "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyhovuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N_1=5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Předpokládejme, že máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-ciferné číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0lichými číslicemi, pro které "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5^n\\mid N_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N_n=5^n m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro vhodné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ukážeme, že připojením vhodné liché číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d\\in\\{1,3,5,7,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na začátek dostaneme vyhovující "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-ciferné číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N_{n+1}=d\\cdot 10^n+N_n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "N_{n+1}=d\\cdot 10^n+5^n m=5^n(d\\cdot 2^n+m),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže potřebujeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5\\mid d\\cdot 2^n+m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1,3,5,7,9\\}\\equiv\\{1,3,0,2,4\\}\\pmod 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvoří úplnou soustavu zbytků a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gcd(2^n,5)=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", hodnoty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d\\cdot 2^n\\pmod 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d\\in\\{1,3,5,7,9\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " proběhnou taktéž všechny zbytky modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Právě jedno "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tedy splňuje žádanou dělitelnost; číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je lichá a\u00A0nenulová, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N_{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(n+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-ciferné s\u00A0lichými číslicemi a\u00A0dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5^{n+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Indukce tím končí a\u00A0vyhovující číslo existuje pro každé přirozené\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1689,7 +4661,395 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujme sporem. Předpokládejme, že od jistého místa jsou už všechny členy posloupnosti prvočísla. Podívejme se, jakou číslici "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vůbec můžeme v\u00A0této koncové fázi připojovat. Při připojení číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0číslu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10N+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pokud je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sudá, je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10N+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sudé a\u00A0větší než\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy složené. Pokud je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d=5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10N+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělitelné pěti a\u00A0větší než\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy opět složené. Připojovat tedy můžeme pouze číslice z\u00A0množiny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1,3,7\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zkoumejme nyní zbytky po\u00A0dělení třemi. Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10N+d\\equiv N+d\\pmod 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", připojení číslice\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zbytek nemění, kdežto připojení číslice\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " či\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jej zvětší o\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jenže každý člen v\u00A0koncové fázi je prvočíslo větší než\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže jeho zbytek modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " patří do "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1,2\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0nikdy nesmí být\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po dvou připojeních jedničky nebo sedmičky by se však zbytek cyklicky posunul přes\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je spor. V\u00A0koncové fázi tedy můžeme připojit jedničku či sedmičku pouze konečně mnohokrát, a\u00A0tak od jistého okamžiku připojujeme výhradně trojky."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " člen posloupnosti, od kterého připojujeme už jen trojky. Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prvočíslo větší než\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0jeho poslední číslice patří do "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1,3,7\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nesoudělné s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " připojeních trojky dostaneme číslo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a\\cdot 10^n+\\underbrace{\\overline{33\\dots3}}_n=a\\cdot 10^n+\\frac{10^n-1}{3}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stačí nyní najít takové "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n\\ge 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pro\u00A0které "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3a\\mid 10^n-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\gcd(10,3a)=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", podle Eulerovy věty stačí zvolit "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=\\varphi(3a)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro takové "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\mid\\frac{10^n-1}{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0zároveň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a\\mid a\\cdot 10^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže celé číslo je dělitelné\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zjevně je od\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " větší. Je tedy složené, což je spor."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1749,7 +5109,16 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Zkusme taková čísla konstruovat induktivně."
+                        "text": "Zkusme taková čísla konstruovat induktivně. Předchozí nápady mohly selhat na tom, že při umocňování vznikaly dvojnásobky čísel, což při číslici\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " ve\u00A0čtyřkové soustavě způsobuje přenos a\u00A0vytváří nuly."
                       }
                     ],
                     "highligted": false
@@ -1761,14 +5130,561 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Trikem je, že ze tří kopií čísla umíme zkonstruovat nové, které vyhovuje. Nebojte se zesílit indukční předpoklad."
+                        "text": "Zkuste nové číslo vytvořit ze\u00A0dvou kopií předchozího: "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n_{k+1}=n_k(2^a+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Pokud umocníte tento výraz, dostanete "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n_k^2(2^{2a}+2^{a+1}+1)",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Jak je třeba zvolit "
+                      },
+                      {
+                        "type": "math",
+                        "text": "a",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", aby se prostřední člen změnil na čistou mocninu čtyřky bez koeficientu\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": "?"
                       }
                     ],
                     "highligted": false
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dokážeme silnější tvrzení: pro každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k\\ge 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existuje číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " takové, že jeho čtverec "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má ve\u00A0čtyřkové soustavě přesně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "L_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " číslic, všechny z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1,2\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", přičemž první a\u00A0poslední číslice jsou vždy\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jako bázi indukce vezmeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_1=5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jeho čtverec je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "25=121_4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže podmínky jsou splněny s\u00A0délkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "L_1=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", číslo začíná i končí jedničkou."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Předpokládejme, že máme takové číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jehož čtverec "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má ve\u00A0čtyřkové soustavě délku\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nové číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_{k+1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zkonstruujeme následovně:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n_{k+1}=n_k\\cdot(2^{2L-1}+1).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Po umocnění dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "n_{k+1}^2=n_k^2\\cdot\\bigl(2^{4L-2}+2\\cdot 2^{2L-1}+1\\bigr)=n_k^2\\cdot\\bigl(4^{2L-1}+4^L+1\\bigr).",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Všimněme si, že díky vhodně zvolenému lichému exponentu se prostřední člen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\cdot 2^{2L-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " změnil na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^{2L}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je přesně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "4^L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zmizel koeficient\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", který by ve\u00A0čtyřkové soustavě způsoboval nežádoucí přenosy. Výraz je tedy součtem tří kopií "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " posunutých ve\u00A0čtyřkové soustavě o\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2L-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pozic doleva."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podívejme se, jak se tyto tři bloky překryjí:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "První blok (posun\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ") zabírá pozice "
+                          },
+                          {
+                            "type": "math",
+                            "text": "0",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " až "
+                          },
+                          {
+                            "type": "math",
+                            "text": "L-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Druhý blok (posun\u00A0"
+                          },
+                          {
+                            "type": "math",
+                            "text": "L",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ") zabírá pozice "
+                          },
+                          {
+                            "type": "math",
+                            "text": "L",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " až "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2L-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ],
+                    [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Třetí blok (posun "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2L-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": ") zabírá pozice "
+                          },
+                          {
+                            "type": "math",
+                            "text": "2L-1",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": " až "
+                          },
+                          {
+                            "type": "math",
+                            "text": "3L-2",
+                            "isDisplay": false
+                          },
+                          {
+                            "type": "text",
+                            "text": "."
+                          }
+                        ],
+                        "highligted": false
+                      }
+                    ]
+                  ],
+                  "styleType": "NumberParens"
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Mezi prvním a\u00A0druhým blokem není žádná mezera (druhý začíná přesně tam, kde první končí). Druhý a\u00A0třetí blok se překrývají v\u00A0přesně jedné pozici: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2L-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Na této pozici sčítáme nejvyšší číslici druhého bloku (což je nejvyšší číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0nejnižší číslici třetího bloku (což je nejnižší číslice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Jejich součet je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1+1=2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", žádný přenos nevzniká."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Všechny ostatní číslice výsledného čísla jsou nedotčené číslice z\u00A0kopií "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n_k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy výhradně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Výsledné číslo má délku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3L-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", začíná nejvyšší číslicí třetího bloku ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ") a\u00A0končí nejnižší číslicí prvního bloku ("
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Tím je indukční krok hotov a\u00A0takových čísel existuje nekonečně mnoho."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
