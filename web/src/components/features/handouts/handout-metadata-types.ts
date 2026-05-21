@@ -20,20 +20,6 @@ export const HANDOUT_SOURCES = ['matikaCesku', 'events'] as const
 export type HandoutSource = (typeof HANDOUT_SOURCES)[number]
 
 /**
- * A named event (camp, competition, etc.) that handouts can reference.
- */
-export type HandoutEvent = {
-  /** Stable identifier used as a foreign key from handouts */
-  id: string
-  /** Localized display name of the event */
-  name: LocalizedString
-  /** Optional localized longer-form description of the event */
-  description?: LocalizedString
-  /** Optional external URL for the event homepage */
-  link?: string
-}
-
-/**
  * Fields common to all handout statuses.
  */
 type HandoutMetadataBase = {
@@ -75,8 +61,9 @@ export type ReadyHandoutMetadata = HandoutMetadataBase & {
   /** List of author names (not localized - names stay as-is) */
   authors: string[]
   /**
-   * ID of the {@link HandoutEvent} this handout was used at.
-   * Only meaningful for `source === 'events'` handouts; omitted otherwise.
+   * ID of the event this handout was used at (matches an entry in the index `events` array
+   * in `handouts.json`). Currently unread by the UI but kept so the JSON data round-trips
+   * through the type and so future UI work can resurface it.
    */
   eventId?: string
   /** Whether the handout appears in the public listing (defaults to true when absent) */
@@ -104,8 +91,6 @@ export type HandoutSection = {
  * Root structure of the handouts.json index file.
  */
 export type HandoutIndex = {
-  /** Named events that handouts can reference via `eventId` */
-  events: HandoutEvent[]
   /** Handouts grouped by category */
   sections: HandoutSection[]
 }
@@ -157,24 +142,4 @@ export function supportsLocale(handout: HandoutMetadata, locale: Locale): boolea
 export function getContentFileBasename(handout: ReadyHandoutMetadata): string {
   // Use the explicit fileSlug when provided (required for handouts without an English slug)
   return handout.fileSlug ?? handout.slug.en
-}
-
-/**
- * Looks up a {@link HandoutEvent} by its id from an events array.
- * Returns undefined when the handout has no eventId or the id is not found.
- *
- * @param handout - The ready handout metadata.
- * @param events - The full events array from the index.
- *
- * @returns The matching event, or undefined.
- */
-export function resolveHandoutEvent(
-  handout: ReadyHandoutMetadata,
-  events: HandoutEvent[]
-): HandoutEvent | undefined {
-  // We need handouts with an event id
-  if (!handout.eventId) return undefined
-
-  // Look up the event from the event index
-  return events.find((event) => event.id === handout.eventId)
 }

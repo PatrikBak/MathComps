@@ -8,12 +8,10 @@ import type { Locale } from '@/i18n/i18n'
 
 import {
   HANDOUT_SOURCES,
-  type HandoutEvent,
   type HandoutMetadata,
   type HandoutSection,
   type HandoutSource,
   isReadyHandout,
-  resolveHandoutEvent,
 } from './handout-metadata-types'
 import { PlannedHandoutCard, ReadyHandoutCard } from './HandoutCard'
 import { type CategoryOption, HandoutFilters } from './HandoutFilters'
@@ -36,8 +34,6 @@ type HandoutWithCategory = {
 type HandoutBrowserProps = {
   /** Locale-filtered handout sections from the server */
   sections: HandoutSection[]
-  /** Full events array from the handout index, used to resolve event names */
-  events: HandoutEvent[]
   /** Current locale */
   locale: Locale
 }
@@ -45,7 +41,7 @@ type HandoutBrowserProps = {
 /**
  * Top-level client wrapper for the handouts list that handles filtering too.
  */
-export function HandoutBrowser({ sections, events, locale }: HandoutBrowserProps) {
+export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
   // Translations for the planned heading and empty state
   const tFilters = useTranslations('handouts.filters')
   const t = useTranslations('handouts')
@@ -144,18 +140,12 @@ export function HandoutBrowser({ sections, events, locale }: HandoutBrowserProps
                 // This should not be possible
                 if (!isReadyHandout(item.handout)) return null
 
-                // Find the event from the handout it, might be null
-                const resolvedEvent = resolveHandoutEvent(item.handout, events)
-
                 return (
                   <li key={item.handout.id}>
                     <ReadyHandoutCard
                       handout={item.handout}
                       category={item.categoryLabel}
                       locale={locale}
-                      event={resolvedEvent?.name[locale]}
-                      eventDescription={resolvedEvent?.description?.[locale]}
-                      eventLink={resolvedEvent?.link}
                     />
                   </li>
                 )

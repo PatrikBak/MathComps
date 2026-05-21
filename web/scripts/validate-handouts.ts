@@ -13,7 +13,6 @@ import path from 'path'
 import {
   getContentFileBasename,
   HANDOUT_SOURCES,
-  type HandoutEvent,
   type HandoutIndex,
   isReadyHandout,
   type ReadyHandoutMetadata,
@@ -69,19 +68,7 @@ function validate(): boolean {
   }
 
   // Parse handouts.json
-  const { sections, events }: HandoutIndex = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'))
-
-  // Build a set of known event IDs for cross-reference validation
-  const knownEventIds = new Set(events.map((event: HandoutEvent) => event.id))
-
-  // Validate each event entry
-  for (const event of events) {
-    const eventContext = `event "${event.id}"`
-    errors.push(...validateRequiredField(event.id, 'id', eventContext))
-    errors.push(
-      ...validatePartialLocalizedString(event.name, 'name', eventContext, SUPPORTED_LOCALES)
-    )
-  }
+  const { sections }: HandoutIndex = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'))
 
   // Collect all ready handouts for uniqueness checks
   const readyHandouts = sections
@@ -196,13 +183,6 @@ function validate(): boolean {
         if (!allowedSources.has(readyHandout.source)) {
           errors.push(
             `${handoutContext}: unknown source "${readyHandout.source}" (expected one of: ${[...allowedSources].join(', ')})`
-          )
-        }
-
-        // Validate eventId references a known event
-        if (readyHandout.eventId !== undefined && !knownEventIds.has(readyHandout.eventId)) {
-          errors.push(
-            `${handoutContext}: eventId "${readyHandout.eventId}" does not match any entry in the events array`
           )
         }
 

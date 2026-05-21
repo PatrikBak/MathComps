@@ -48,27 +48,13 @@ type ReadyHandoutCardProps = {
   category: string
   /** Current locale */
   locale: Locale
-  /** Localized name of the event this handout was used at, if any */
-  event?: string
-  /** Longer-form description of the event, if any */
-  eventDescription?: string
-  /** External URL for the event, if any */
-  eventLink?: string
 }
 
 /**
  * Card for a ready handout: a full-card overlay link to the detail page, a category
- * tab on the top border, a source badge (shows the resolved event name when one
- * is available, the generic source label otherwise), author, and a comment count pill.
+ * tab on the top border, a generic source badge, author, and a comment count pill.
  */
-export function ReadyHandoutCard({
-  handout,
-  category,
-  locale,
-  event,
-  eventDescription,
-  eventLink,
-}: ReadyHandoutCardProps) {
+export function ReadyHandoutCard({ handout, category, locale }: ReadyHandoutCardProps) {
   // Translations for aria labels and source badge fallback
   const tAria = useTranslations('handouts.aria')
   const tStyles = useTranslations('handouts.styles')
@@ -103,12 +89,7 @@ export function ReadyHandoutCard({
         </span>
         {/* Source badge + author on the same line; wraps if the badge runs long */}
         <p className="mt-1 sm:mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground">
-          <HandoutStyleBadge
-            source={handout.source}
-            label={event ?? tStyles(handout.source)}
-            href={eventLink}
-            tooltipContent={eventDescription}
-          />
+          <HandoutStyleBadge source={handout.source} label={tStyles(handout.source)} />
           <span className="inline-flex items-center gap-1.5">
             <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 opacity-70 shrink-0" />
             <span className="truncate">{joinAuthors(handout.authors, 2)}</span>

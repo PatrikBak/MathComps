@@ -41,7 +41,7 @@ export async function generateMetadata({
  */
 export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   // Load the handout data JSON
-  const { sections, events } = handoutIndex as unknown as HandoutIndex
+  const { sections } = handoutIndex as unknown as HandoutIndex
 
   // Check for duplicate ids (only for ready handouts that have ids)
   validateUniqueIds(
@@ -65,7 +65,7 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   return (
     <Layout>
       <HandoutsHero />
-      <HandoutBrowser sections={publicSections} events={events} locale={locale} />
+      <HandoutBrowser sections={publicSections} locale={locale} />
     </Layout>
   )
 })
