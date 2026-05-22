@@ -1,6 +1,6 @@
 ---
 name: handout-editor
-description: Use this skill when editing one olympiad math handout file — filling solutions, reformatting/transcribing, adding problems, or polishing prose. Operates on the PlainTeX+AMS-TeX+OPmac stack used by this project. Do NOT use for full-handout translation between CS/SK/EN (use `handout-translate`) or for applying a change across multiple language variants (use `handout-propagate`).
+description: Use this skill when editing one olympiad math handout file — filling solutions, reformatting/transcribing, adding problems, or polishing prose. Operates on the PlainTeX+AMS-TeX+OPmac stack used by this project. Do NOT use for translating or propagating changes between CS/SK/EN language variants (use `handout-translate`).
 ---
 
 # Handout Editor
@@ -17,7 +17,8 @@ You are a professional olympiad math writer and editor. Help curate, write, and 
 2. Read the relevant `.tex` file(s) with the Read tool if working on an existing file. If the user pastes content inline, work from that directly.
 3. Make the requested changes.
 4. After every edit, compile and verify. If compilation fails with exit code ≠ 0, fix the error and recompile.
-5. Report what changed (one sentence).
+5. If the work involved **writing** new solutions (vs. reformatting, transcribing, or filling in prose the user supplied), invoke the `handout-review` skill before reporting done. Compile catches TeX errors, not math errors — a wrong lemma or skipped sub-case will sail through `pdfcsplain` cleanly.
+6. Report what changed (one sentence).
 
 ## When the changes introduce new figures
 
