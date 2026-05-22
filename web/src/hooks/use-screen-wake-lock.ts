@@ -2,6 +2,7 @@
 
 import { useLocalStorage, useWindowEvent } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
+import { useEffect } from 'react'
 import { useWakeLock } from 'react-screen-wake-lock'
 import { toast } from 'sonner'
 
@@ -53,6 +54,16 @@ export function useScreenWakeLock(): UseScreenWakeLockResult {
     if (!isSupported || !enabled || released === false) return
     request()
   })
+
+  // Release the held lock when the consumer unmounts — the library leaks the
+  // sentinel across SPA navigation otherwise, since route changes don't fire
+  // visibilitychange and the document stays visible. `release` is memoized by
+  // the library, so this cleanup runs only on actual unmount.
+  useEffect(() => {
+    return () => {
+      release()
+    }
+  }, [release])
 
   // Toggle handler — updates both the persisted intent and the live lock state
   const setEnabled = (value: boolean) => {
