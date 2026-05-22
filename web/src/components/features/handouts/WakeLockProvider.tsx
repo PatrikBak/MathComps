@@ -2,21 +2,12 @@
 
 import { createContext, useContext } from 'react'
 
-import { useScreenWakeLock } from '@/hooks/use-screen-wake-lock'
+import { useScreenWakeLock, type UseScreenWakeLockResult } from '@/hooks/use-screen-wake-lock'
 
 /**
- * Public shape exposed by {@link WakeLockProvider} — see {@link useWakeLockContext}.
+ * The context value for {@link WakeLockProvider}.
  */
-type WakeLockContextValue = {
-  /** Whether the Screen Wake Lock API is available in this browser. */
-  supported: boolean
-  /** Whether the user's persisted "keep screen on" intent is currently on. */
-  enabled: boolean
-  /** Flips the persisted intent and acquires or releases the lock accordingly. */
-  setEnabled: (value: boolean) => void
-}
-
-const WakeLockContext = createContext<WakeLockContextValue | null>(null)
+const WakeLockContext = createContext<UseScreenWakeLockResult | null>(null)
 
 /**
  * Props for {@link WakeLockProvider}.
@@ -36,7 +27,8 @@ export function WakeLockProvider({ children }: WakeLockProviderProps) {
   // Single wake-lock binding shared by the entire subtree
   const wakeLock = useScreenWakeLock()
 
-  return <WakeLockContext.Provider value={wakeLock}>{children}</WakeLockContext.Provider>
+  // Write children inside the wake-lock context
+  return <WakeLockContext value={wakeLock}>{children}</WakeLockContext>
 }
 
 /**
