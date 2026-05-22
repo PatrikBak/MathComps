@@ -901,6 +901,8 @@
       "edit": "Upravit",
       "editField": "Upravit {field}",
       "getPermalink": "Získat permalink",
+      "keepScreenOn": "Nechat obrazovku zapnutou",
+      "keepScreenOnUnavailable": "Obrazovku nelze nechat zapnutou (úsporný režim?)",
       "linkCopied": "Odkaz byl zkopírován do schránky",
       "open": "Otevřít",
       "or": "NEBO",

@@ -901,6 +901,8 @@
       "edit": "Edit",
       "editField": "Edit {field}",
       "getPermalink": "Get permalink",
+      "keepScreenOn": "Keep screen on",
+      "keepScreenOnUnavailable": "Can't keep screen on (battery saver?)",
       "linkCopied": "Link copied to clipboard",
       "open": "Open",
       "or": "OR",

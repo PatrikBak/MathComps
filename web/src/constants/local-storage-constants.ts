@@ -23,6 +23,12 @@ export const PENDING_COMMENT_LIKE_STORAGE_KEY = 'pending-comment-like'
 export const SHOW_TECHNIQUE_TAGS_STORAGE_KEY = 'showTechniqueTags'
 
 /**
+ * Key used to store the user's preference for keeping the screen awake while reading handouts.
+ * Currently uses localStorage, i.e. it is not user-specific for now.
+ */
+export const KEEP_SCREEN_ON_STORAGE_KEY = 'keepScreenOn'
+
+/**
  * Key used to store the return URL during the authentication flow (persists through redirects).
  * Note: This is used with sessionStorage.
  */
