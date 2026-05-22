@@ -14,9 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
-import { useScreenWakeLock } from '@/hooks/use-screen-wake-lock'
 
 import { ActionPill } from './ActionPill'
+import { useWakeLockContext } from './WakeLockProvider'
 
 /**
  * Props for the {@link HandoutActions} component.
@@ -152,12 +152,13 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
     toast.success(tActions('linkCopied'))
   }
 
-  // Persisted screen-wake-lock binding for the handout reader
+  // Wake-lock state from the handouts route provider — single shared instance
+  // that survives handout-to-handout navigation
   const {
     supported: wakeLockSupported,
     enabled: wantsScreenOn,
     setEnabled: setWantsScreenOn,
-  } = useScreenWakeLock()
+  } = useWakeLockContext()
 
   // Shared icon styling
   const iconClassName = 'size-4 text-muted-foreground'
