@@ -2,8 +2,7 @@
 
 import { useLocalStorage, useWindowEvent } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
-import { useEffect } from 'react'
-import { useWakeLock } from 'react-screen-wake-lock'
+import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { KEEP_SCREEN_ON_STORAGE_KEY } from '@/constants/local-storage-constants'
@@ -11,7 +10,7 @@ import { KEEP_SCREEN_ON_STORAGE_KEY } from '@/constants/local-storage-constants'
 /**
  * Result returned by {@link useScreenWakeLock}.
  */
-type UseScreenWakeLockResult = {
+export type UseScreenWakeLockResult = {
   /** Whether the Screen Wake Lock API is available in this browser. */
   supported: boolean
   /** Whether the user's persisted "keep screen on" intent is currently on. */
@@ -21,13 +20,14 @@ type UseScreenWakeLockResult = {
 }
 
 /**
- * Wraps the Screen Wake Lock API with a localStorage-persisted intent so the
- * user's "keep screen on" preference survives reloads and applies across pages.
+ * Owns a {@link WakeLockSentinel} directly via {@link Navigator.wakeLock} and
+ * persists the user's "keep screen on" intent in localStorage so it survives
+ * reloads and applies across pages.
  *
- * On mount, if the persisted intent is on but no lock is currently held, arms
- * a one-shot pointerdown listener to acquire the lock on the next user gesture —
- * the API rejects programmatic requests made outside a gesture. Rejected
- * requests surface as a toast.
+ * Two acquire paths share a single internal `acquire()` that returns a boolean
+ * outcome — callers decide what to do on failure. The user toggle surfaces
+ * failures as a toast; opportunistic background attempts (mount, first
+ * pointerdown, tab returning to visible) stay silent.
  */
 export function useScreenWakeLock(): UseScreenWakeLockResult {
   // Translation hook for the unavailable-lock toast
@@ -39,42 +39,106 @@ export function useScreenWakeLock(): UseScreenWakeLockResult {
     defaultValue: false,
   })
 
-  // Wake Lock binding — `released` is undefined before any request, false while
-  // a lock is held, true once released. `reacquireOnPageVisible` re-requests
-  // automatically when the tab returns to the foreground.
-  const { isSupported, released, request, release } = useWakeLock({
-    reacquireOnPageVisible: true,
-    onError: () => toast.error(tActions('keepScreenOnUnavailable')),
+  // Feature detection — read once per render, no state needed
+  const supported = typeof navigator !== 'undefined' && 'wakeLock' in navigator
+
+  // Active sentinel — non-null while we hold the lock, cleared on release
+  const sentinelRef = useRef<WakeLockSentinel | null>(null)
+
+  // Coalesces overlapping acquire() calls. Without this, the user-toggle path
+  // and the mount effect can both kick off navigator.wakeLock.request before
+  // either resolves, leaving us with two sentinels and a leak.
+  const inFlightRef = useRef(false)
+
+  // Internal acquire — single source of truth. Resolves to true on a fresh
+  // successful acquire, false on failure or short-circuit (already held,
+  // already in flight, or unsupported). The boolean lets callers decide
+  // whether to surface failures.
+  const acquire = useCallback(async (): Promise<boolean> => {
+    // Short-circuit if unsupported, already in flight, or already held
+    if (!supported || sentinelRef.current || inFlightRef.current) return false
+    inFlightRef.current = true
+    try {
+      // Try to acquire the lock and store it
+      const sentinel = await navigator.wakeLock.request('screen')
+      sentinelRef.current = sentinel
+      // Clear the ref when the browser releases the sentinel externally (e.g.
+      // when the tab is hidden) so the next opportunistic trigger re-acquires
+      // instead of short-circuiting on a stale reference.
+      sentinel.addEventListener('release', () => {
+        if (sentinelRef.current === sentinel) sentinelRef.current = null
+      })
+      return true
+    } catch {
+      return false
+    } finally {
+      // Clear the flag indicating acquiring is in flight
+      inFlightRef.current = false
+    }
+  }, [supported])
+
+  // Internal release — clears the ref synchronously so guards see "no lock
+  // held" immediately, then awaits the platform release.
+  const release = useCallback(async () => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    sentinelRef.current = null
+    await sentinel.release()
+  }, [])
+
+  // Shared opportunistic trigger — quiet by design, used by all three
+  // background acquire paths below. Idempotence comes from acquire()'s
+  // in-flight and sentinel guards, so firing this multiple times in quick
+  // succession is safe.
+  const tryAcquire = useCallback(() => {
+    if (!enabled) return
+    acquire()
+  }, [enabled, acquire])
+
+  // Mount + enable-flip — captures the transient activation still in flight
+  // when the user navigated in via a link click. Re-runs when intent flips
+  // true after localStorage hydrates; the in-flight guard absorbs the
+  // overlap with a user-toggle call.
+  useEffect(() => {
+    tryAcquire()
+  }, [tryAcquire])
+
+  // First-pointerdown fallback — covers the cold-load path where the mount
+  // effect fired without an active gesture. The handler short-circuits once
+  // a lock is acquired via sentinelRef inside acquire().
+  useWindowEvent('pointerdown', tryAcquire)
+
+  // Re-acquire when the tab returns to the foreground — the browser drops
+  // the sentinel on hide, and the sentinel's release handler clears our ref,
+  // so this re-arms cleanly on the next visible event.
+  useWindowEvent('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return
+    tryAcquire()
   })
 
-  // Auto-acquire on the next user gesture when intent is on but no lock is held —
-  // covers the "user enabled previously, now on a fresh page" path. The handler
-  // short-circuits once a lock is acquired (released === false).
-  useWindowEvent('pointerdown', () => {
-    if (!isSupported || !enabled || released === false) return
-    request()
-  })
-
-  // Release the held lock when the consumer unmounts — the library leaks the
-  // sentinel across SPA navigation otherwise, since route changes don't fire
-  // visibilitychange and the document stays visible. `release` is memoized by
-  // the library, so this cleanup runs only on actual unmount.
+  // Release on unmount — we own the sentinel, so leaving the route scope
+  // (e.g. navigating out of /handouts/*) must release explicitly. Route
+  // changes don't fire visibilitychange and the document stays visible.
   useEffect(() => {
     return () => {
       release()
     }
   }, [release])
 
-  // Toggle handler — updates both the persisted intent and the live lock state
+  // Public setter — user-initiated, surfaces failures as a toast. Stays
+  // synchronous from the caller's perspective; the acquire promise is
+  // chained internally.
   const setEnabled = (value: boolean) => {
     setEnabledState(value)
     if (value) {
-      request()
+      acquire().then((ok) => {
+        if (!ok) toast.error(tActions('keepScreenOnUnavailable'))
+      })
     } else {
       release()
     }
   }
 
   // Public shape — internal lock handles stay hidden
-  return { supported: isSupported, enabled, setEnabled }
+  return { supported, enabled, setEnabled }
 }
