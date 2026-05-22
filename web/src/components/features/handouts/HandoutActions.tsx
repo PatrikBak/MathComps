@@ -8,11 +8,13 @@ import { toast } from 'sonner'
 import { getHandoutPdfUrl } from '@/components/features/problems/services/problem-api-urls'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
+import { useScreenWakeLock } from '@/hooks/use-screen-wake-lock'
 
 import { ActionPill } from './ActionPill'
 
@@ -150,6 +152,13 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
     toast.success(tActions('linkCopied'))
   }
 
+  // Persisted screen-wake-lock binding for the handout reader
+  const {
+    supported: wakeLockSupported,
+    enabled: wantsScreenOn,
+    setEnabled: setWantsScreenOn,
+  } = useScreenWakeLock()
+
   // Shared icon styling
   const iconClassName = 'size-4 text-muted-foreground'
 
@@ -217,6 +226,18 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
             {downloadActions.map((action) => (
               <ActionDropdownItem key={action.key} action={action} />
             ))}
+            {wakeLockSupported && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={wantsScreenOn}
+                  onCheckedChange={setWantsScreenOn}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  {tActions('keepScreenOn')}
+                </DropdownMenuCheckboxItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -901,6 +901,8 @@
       "edit": "Upraviť",
       "editField": "Upraviť {field}",
       "getPermalink": "Získať permalink",
+      "keepScreenOn": "Nechať obrazovku zapnutú",
+      "keepScreenOnUnavailable": "Obrazovku nemožno nechať zapnutú (úsporný režim?)",
       "linkCopied": "Odkaz bol skopírovaný do schránky",
       "open": "Otvoriť",
       "or": "ALEBO",

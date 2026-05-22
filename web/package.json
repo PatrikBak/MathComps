@@ -56,6 +56,7 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.71.1",
     "react-markdown": "^10.1.0",
+    "react-screen-wake-lock": "^3.1.1",
     "react-syntax-highlighter": "^16.1.0",
     "react-virtuoso": "^4.18.1",
     "rehype-katex": "^7.0.1",
