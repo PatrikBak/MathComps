@@ -1,5 +1,8 @@
 // Shared setup for handout figures: imported with `import _common;`.
 
+// Pattern fills (e.g. hatching) — pulled in here so `HatchedFill` below is usable.
+import patterns;
+
 // Latin Modern for label text so figures match the surrounding handout body
 texpreamble("\usepackage{lmodern}\usepackage[T1]{fontenc}");
 
@@ -46,6 +49,15 @@ pen DarkPink = rgb(0.75, 0.25, 0.5);
 pen LightYellow = rgb(1, 1, 0.5);
 pen Yellow = rgb(0.5, 0.5, 0);
 pen DarkYellow = rgb(0.25, 0.25, 0);
+
+//
+// Diagonal-hatch fill pattern. Use as `fill(path, HatchedFill)` to shade a
+// region with NE-slanting 45° lines spaced 3mm apart in medium gray.
+// Reassign per file via `add("name", hatch(...)); HatchedFill = pattern("name");`
+// when a figure needs a denser, finer, or tinted variant.
+//
+add("hatched45", hatch(3mm, dir(45), gray(0.6)));
+pen HatchedFill = pattern("hatched45");
 
 //
 // Standard pens reused by every figure.
@@ -105,6 +117,13 @@ real vertexDotRadius = 2.95;
 // Default shift along alignDir for point labels
 //
 real pointLabelDistance = 3;
+
+//
+// Default `haloPad` for PointLabel / LabeledDot when `halo = true`: scales
+// the white ellipse relative to the text's bbox (1.0 ≈ inscribed in bbox,
+// ~1.3 clears the letter's corners cleanly, ~sqrt(2) ≈ circumscribed).
+//
+real pointLabelHaloPad = 1.1;
 
 //
 // Default shift along alignDir for edge labels
@@ -202,6 +221,123 @@ pair EquilateralTriangle(
     pair B)
 {
     return A + rotate(60) * (B - A);
+}
+
+//
+// Returns the two tangent points {T1, T2} of one external common tangent line
+// to circles (P1, r1) and (P2, r2): T1 sits on circle 1, T2 on circle 2, and
+// the segment T1T2 lies along the tangent. The two circles have two external
+// common tangents (one on each side); `side` ∈ {+1, -1} selects which.
+//
+// Caller picks `side` based on which side of the line P1P2 the tangent should
+// lie. Requires the circles to not enclose one another, i.e. |r2 - r1| < |P2 - P1|.
+//
+pair[] CommonExternalTangent(
+    pair P1,
+    real r1,
+    pair P2,
+    real r2,
+    int side)
+{
+    // Unit vector from circle 1 toward circle 2 and its CCW-perpendicular
+    pair d = P2 - P1;
+    real D = abs(d);
+    pair dHat = d / D;
+    pair dPerp = (-dHat.y, dHat.x);
+
+    // Normal direction `n` to the tangent line, parameterised by an angle whose
+    // cosine is forced by the radius difference along the centerline.
+    real cosA = (r2 - r1) / D;
+    real sinA = side * sqrt(1 - cosA * cosA);
+    pair n = cosA * dHat + sinA * dPerp;
+
+    // Tangent points: step from each center one radius opposite `n`.
+    return new pair[] { P1 - r1 * n, P2 - r2 * n };
+}
+
+//
+// Of the two external common tangents to circles (P1, r1) and (P2, r2),
+// returns the tangent points {T1, T2} of the one whose tangent line lies
+// FARTHER from `refPoint`. The disambiguator wanted whenever one external
+// tangent would cross toward `refPoint` (an interior reference) and the
+// other forms the outer boundary on the far side from it.
+//
+pair[] CommonExternalTangentAwayFrom(
+    pair P1,
+    real r1,
+    pair P2,
+    real r2,
+    pair refPoint)
+{
+    // Compute both side choices, keep whichever tangent line is farther from refPoint.
+    pair[] candPlus = CommonExternalTangent(P1, r1, P2, r2, +1);
+    pair[] candMinus = CommonExternalTangent(P1, r1, P2, r2, -1);
+    real distPlus = abs(refPoint - Foot(refPoint, candPlus[0], candPlus[1]));
+    real distMinus = abs(refPoint - Foot(refPoint, candMinus[0], candMinus[1]));
+    return distPlus > distMinus ? candPlus : candMinus;
+}
+
+//
+// Returns the two tangent points {T1, T2} on circle (O, r) from external point P.
+// Requires |P - O| > r. By Thales, the tangent points lie on the circle with
+// diameter PO, so they're the two intersections of that Thales circle with the
+// original circle. T1 is the CCW tangent point from ray O -> P (the "left" one
+// when standing at O facing P); T2 is the CW / "right" one.
+//
+pair[] TangentPointsFromExternal(
+    pair P,
+    pair O,
+    real r)
+{
+    // Center of the Thales circle (midpoint of PO) and its radius.
+    pair M = (P + O) / 2;
+    real D = abs(P - O);
+    real R = D / 2;
+
+    // Distance from O along OM to the chord shared by the two circles, and the
+    // half-chord length perpendicular to OM. Solve r^2 - x^2 = R^2 - (D - x)^2.
+    real x = (r * r) / D;
+    real h = sqrt(r * r - x * x);
+
+    // Unit vector from O toward P, and its CCW-perpendicular.
+    pair u = (P - O) / D;
+    pair uPerp = (-u.y, u.x);
+
+    // Two tangent points: step x along u from O, then ±h along uPerp.
+    return new pair[] { O + x * u + h * uPerp, O + x * u - h * uPerp };
+}
+
+//
+// Returns the two tangent points {T1, T2} of one internal common tangent of
+// disjoint circles (P1, r1) and (P2, r2): T1 sits on circle 1, T2 on circle 2,
+// and the segment T1T2 crosses between the two circles. Requires the circles
+// to be disjoint, i.e. |P1 - P2| > r1 + r2. The two internal tangents lie on
+// opposite sides of the centerline; `side` ∈ {+1, -1} selects which.
+//
+pair[] CommonInternalTangent(
+    pair P1,
+    real r1,
+    pair P2,
+    real r2,
+    int side)
+{
+    // Unit vector from circle 1 toward circle 2 and its CCW-perpendicular.
+    pair d = P2 - P1;
+    real D = abs(d);
+    pair dHat = d / D;
+    pair dPerp = (-dHat.y, dHat.x);
+
+    // Normal direction `n` to the tangent line, oriented so it points from the
+    // line toward circle 2 (cosA > 0). Internal tangents differ from external in
+    // that the centers sit on opposite sides of the line — hence cosA uses
+    // (r1 + r2) instead of (r2 - r1).
+    real cosA = (r1 + r2) / D;
+    real sinA = side * sqrt(1 - cosA * cosA);
+    pair n = cosA * dHat + sinA * dPerp;
+
+    // Tangent points: P1 sits on the −n side, so A' = P1 + r1*n reaches the line;
+    // P2 sits on the +n side, so B' = P2 − r2*n reaches the line.
+    return new pair[] { P1 + r1 * n, P2 - r2 * n };
 }
 
 //
@@ -338,6 +474,47 @@ void Circle(
 }
 
 //
+// Draws an arc of the circle centered at `center` (radius taken from
+// |start - center|) running from near `start`, through `through`, to near
+// `end`. The arc direction is chosen so it actually passes through `through`.
+// `bufferDeg` extends the arc past `start` and `end` by that many degrees,
+// away from `through` on both ends — useful when the visual cue is the
+// tangent/anchor points and a tail past them keeps the arc from looking
+// truncated.
+//
+void Arc(
+    pair center,
+    pair start,
+    pair through,
+    pair end,
+    real bufferDeg = 0,
+    pen color = black)
+{
+    real r = abs(start - center);
+    real a0 = degrees(start - center);
+    real a1 = degrees(through - center);
+    real a2 = degrees(end - center);
+
+    // Normalise a1 and a2 into the CCW interval starting at a0 so we can
+    // compare which of `through` and `end` we'd hit first walking CCW from `start`.
+    while (a1 < a0) a1 += 360;
+    while (a2 < a0) a2 += 360;
+
+    if (a1 < a2) {
+        // CCW from start hits through, then end — draw CCW with buffer on both ends.
+        draw(arc(center, r, a0 - bufferDeg, a2 + bufferDeg), color);
+    } else {
+        // CCW from start would hit end first, so the path through `through` is the
+        // CW one. Swap the endpoint roles: redraw CCW starting from `end`, which
+        // now reaches `through` before reaching `start`.
+        real b0 = degrees(end - center);
+        real b2 = degrees(start - center);
+        while (b2 < b0) b2 += 360;
+        draw(arc(center, r, b0 - bufferDeg, b2 + bufferDeg), color);
+    }
+}
+
+//
 // Draws a single coloured-fill black-outlined dot at point P.
 //
 // Used global variables: vertexDotRadius, vertexPen
@@ -368,7 +545,11 @@ void VertexDots(
 //
 // Places "$name$" near point P with an optional compass alignment (e.g. N, SE).
 // `distanceOffset` shifts the label outward along alignDir; `offset` nudges in
-// absolute coords for the rare case the compass directions aren't enough.
+// absolute coords for the rare case the compass directions aren't enough. Pass
+// `halo = true` to paint a white ellipse behind the text so it stays readable
+// when it overlaps a circle, line, or hatched fill; `haloPad` scales the
+// ellipse relative to the text's bounding box (1.0 ≈ inscribed in bbox, ~1.3
+// clears the letter's corners cleanly, ~sqrt(2) ≈ circumscribed).
 //
 // Used global variables: pointLabelDistance
 //
@@ -378,7 +559,9 @@ void PointLabel(
     pair alignDir = (0, 0),
     real distanceOffset = pointLabelDistance,
     pair offset = (0, 0),
-    pen color = Blue)
+    pen color = Blue,
+    bool halo = false,
+    real haloPad = pointLabelHaloPad)
 {
     // Start from the anchor with the absolute offset applied
     pair pos = P + offset;
@@ -386,13 +569,36 @@ void PointLabel(
     // Push outward along the compass direction, if one was given
     if (alignDir != (0, 0)) pos += distanceOffset * unit(alignDir);
 
-    // Render the LaTeX-wrapped name at that position
-    label("$" + name + "$", pos, alignDir, color);
+    // Pre-render the label into a throwaway picture/frame at the origin with
+    // the SAME align — `lpic.fit()` returns a frame whose min/max are in PT
+    // (true size), so the halo sizes itself against the label's actual bbox
+    // regardless of the figure's unitsize. Compose the white ellipse and the
+    // label into one frame, then place that frame at the user position `pos`
+    // so both render in true size together — using min/max(lpic) directly
+    // would mix user-coord scales between lpic and currentpicture.
+    if (halo) {
+        picture lpic;
+        label(lpic, "$" + name + "$", (0, 0), alignDir, color);
+        frame lframe = lpic.fit();
+        pair fmin = min(lframe);
+        pair fmax = max(lframe);
+        pair haloCenter = (fmin + fmax) / 2;
+        pair haloAxes = (fmax - fmin) / 2 * haloPad;
+
+        frame composite;
+        fill(composite, shift(haloCenter) * scale(haloAxes.x, haloAxes.y) * unitcircle, white);
+        add(composite, lframe);
+        add(currentpicture, composite, pos);
+    } else {
+        // Render the LaTeX-wrapped name at that position
+        label("$" + name + "$", pos, alignDir, color);
+    }
 }
 
 //
 // Draws a vertex dot at P plus its "$name$" label, both in the same colour.
 // Replaces the VertexDot + PointLabel pair that appears for every named point.
+// `halo` / `haloPad` forward to PointLabel; see its docstring.
 //
 // Used global variables: pointLabelDistance
 //
@@ -402,11 +608,14 @@ void LabeledDot(
     pair alignDir = (0, 0),
     real distanceOffset = pointLabelDistance,
     pair offset = (0, 0),
-    pen color = Blue)
+    pen color = Blue,
+    bool halo = false,
+    real haloPad = pointLabelHaloPad)
 {
-    // Draw the dot, then the label, using the same colour for both
+    // Label first, dot second: when halo is on, the ellipse can extend back
+    // toward P, and painting the dot last keeps it visible above the halo.
+    PointLabel(P, name, alignDir, distanceOffset, offset, color, halo, haloPad);
     VertexDot(P, color);
-    PointLabel(P, name, alignDir, distanceOffset, offset, color);
 }
 
 //
@@ -446,7 +655,8 @@ void RightAngleMark(
 // Places "$name$" near the midpoint of segment AB. `alignDir` (compass: N, S,
 // E, W, …) both nudges the position `distanceOffset` units off the segment AND
 // aligns the label box on that side, so it reads cleanly. `placement` shifts
-// away from the midpoint as a parametric position in 0..1.
+// away from the midpoint as a parametric position in 0..1. `fontScale` picks a
+// font tier (Font1..Font5); default matches the 13pt set by defaultpen.
 //
 // Used global variables: edgeLabelDistance
 //
@@ -457,7 +667,8 @@ void EdgeLabel(
     pair alignDir = (0, 0),
     real distanceOffset = edgeLabelDistance,
     real placement = 0.5,
-    pen color = black)
+    pen color = black,
+    pen fontScale = Font3)
 {
     // Start from the parametric position along AB
     pair pos = A + placement * (B - A);
@@ -466,7 +677,7 @@ void EdgeLabel(
     if (alignDir != (0, 0)) pos += distanceOffset * unit(alignDir);
 
     // Render the LaTeX-wrapped name there
-    label("$" + name + "$", pos, alignDir, color);
+    label("$" + name + "$", pos, alignDir, color + fontScale);
 }
 
 //

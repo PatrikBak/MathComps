@@ -258,6 +258,22 @@
             "en": "Foundations of the world of angles without circles. Covers vertical, corresponding, alternate, and supplementary angles, the angle sum in polygons, and the triangle congruence theorems."
           },
           "authors": ["Patrik Bak"]
+        },
+        {
+          "status": "ready",
+          "source": "events",
+          "id": "lzP-IzGpwQ5igE6fNyZ6l",
+          "languages": ["en"],
+          "slug": {
+            "en": "equal-tangents"
+          },
+          "title": {
+            "en": "Equal tangents"
+          },
+          "description": {
+            "en": "The technique of equal tangents in olympiad geometry — tangents from a point, incircle and excircle $s-a$ formulas, Pitot's theorem — applied to 17 problems including USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4, and Brianchon's theorem."
+          },
+          "authors": ["Patrik Bak"]
         }
       ]
     },
