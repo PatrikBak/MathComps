@@ -5,7 +5,7 @@ description: Use this skill when editing or adding handout figures — Asymptote
 
 # Handout Figure Editor
 
-You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; both `.pdf` (handout PDF) and `.svg` (website) are committed and must stay in sync with the source.
+You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; the `.svg` (website) is committed and must stay in sync with the source. The `.pdf` (handout PDF) is a build artifact — rendered locally, gitignored, regenerated on demand.
 
 ## Workflow
 
@@ -14,9 +14,9 @@ You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; both `.
 3. **Check for a shared module.** If `<topic>-shared.asy` exists, the figure is part of a statement/solution pair: geometry and base layers live in shared; individual files call `BaseFills() / BaseEdges() / BaseDots()` and add only their own marks.
 4. **Re-render** from `data/handouts/Images/`:
    ```
-   pwsh -NoProfile -File ./_Export-Asy.ps1 <slug>.asy
+   ./export-asy.sh <slug>.asy
    ```
-   Produces deterministic-metadata PDF and an `asy`-rendered SVG. Both get committed.
+   Produces the PDF (local preview / handout compile) and the `asy`-rendered SVG. Only the SVG is committed; the PDF is a gitignored build artifact.
 5. **Visually verify** the rendered PDF with the `Read` tool before reporting done — wrong-side angle marks, label collisions, and clipping issues are obvious in the image but invisible in the source. The render exit code only tells you the file compiled.
 6. **Report** one sentence — what changed in the figure.
 
@@ -119,12 +119,12 @@ Top-level constants get framed comments too — one frame per logical group or p
 - **`include "<topic>-shared.asy";` must be quoted** — bare `include foo;` parses `foo` as an identifier and hyphens are illegal. `import _common;` works because `_common` is a valid identifier. (`import` uses module-style scoping; `include` is textual-paste, which is what shared modules want.)
 - **Figure pairs that share geometry** → extract to `<topic>-shared.asy`:
   - Use the `-shared` suffix, not a `_` prefix (`_` is reserved for handout-wide modules like `_common.asy`; `-shared` sorts next to siblings).
-  - `_Export-Asy.ps1` already skips both conventions — no further config needed.
+  - `export-asy.sh` already skips both conventions — no further config needed.
   - Don't promote per-pair helpers into `_common.asy`. That file is for primitives; problem-specific configurations stay local.
 
 ## Rules
 
-- **Never call `asy.exe` directly for committed changes** — `_Export-Asy.ps1` is the canonical pipeline (deterministic PDF metadata, asy-rendered SVG, `-cd` so `include` and `import` resolve).
+- **Never call `asy` directly for committed changes** — `export-asy.sh` is the canonical pipeline (asy-rendered SVG, `-cd` so `include` and `import` resolve, Ghostscript wired in via `LIBGS` for `patterns`/EPS figures).
 - **Never inline `rgb(...)`, `fontsize(...)`, ad-hoc widths, or stray `opacity(...)`** — extend the palette in `_common.asy` if a missing shade is genuinely needed, but don't sprinkle one-offs.
 - **Always use the `_common.asy` helpers — never raw `draw(...)`.** `Draw(A, B, pen)` for segments, `Circle(center, radius, pen)` for circles, `LabeledDot` / `VertexDot` for points. The global `defaultpen` carries `linewidth(NormalWidth)`, so any pen with its own `linewidth(...)` (e.g. `vertexPen`'s `ThinWidth`) still renders correctly through `Draw` — no raw `draw` for thin auxiliary lines. The only standing exceptions are `box.asy` (3D `draw(surface(...), ...)`) and `ag-proof.asy` (path-based draws with non-standard linewidths from SVG conversion).
 - **Never edit `<topic>-shared.asy` to change a single figure's marks** — only geometry and `Base*` layers belong there.

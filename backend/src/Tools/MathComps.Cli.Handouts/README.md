@@ -6,7 +6,7 @@ A .NET tool that orchestrates the full handout build pipeline: generates skeleto
 
 For each matched `.tex` file, the tool runs these steps in order:
 
-1. **Refresh figures** — for every `.asy`-backed image the handout references, checks whether the compiled PDF/SVG are stale relative to the `.asy` source plus its transitive `include`/`import` deps, and batch-recompiles the stale ones via `Images/_Export-Asy.ps1` (asy → PDF and asy → SVG). See [Image pipeline](#image-pipeline-asymptote) below.
+1. **Refresh figures** — for every `.asy`-backed image the handout references, checks whether the compiled PDF/SVG are stale relative to the `.asy` source plus its transitive `include`/`import` deps, and batch-recompiles the stale ones via `Images/export-asy.sh` (asy → PDF and asy → SVG). See [Image pipeline](#image-pipeline-asymptote) below.
 2. **Generate skeleton** — strips solutions/proofs/hints, produces a `-skeleton.tex` worksheet
 3. **Compile TeX** — runs the configured compiler (2 passes) on both main + skeleton files
 4. **Parse to JSON** — converts the TeX document structure into `RawContentBlock[]` JSON (saved locally to `web/src/content/handouts/`)
@@ -109,7 +109,7 @@ Before touching the TeX pipeline, the build walks every image the document refer
 - Otherwise the build resolves the figure's transitive dependency set — its own source plus every file pulled in via `import <name>;` or `include "<file>";` — and recompiles when any source is newer than the older of the two compiled outputs (`.pdf` or `.svg` missing also counts as stale).
 - `Images/_common.asy` is intentionally **excluded** from the dep graph. Most edits to `_common.asy` are additive helpers that can't affect existing figures, so cascading invalidation across every figure would be pure waste. When a `_common.asy` change *does* alter rendering (palette tweak, modified helper used by existing figures), opt in with `--force-asy`.
 
-Stale figures are batched into a single invocation of `Images/_Export-Asy.ps1` per run, which renders each figure to both `.pdf` and `.svg` via Asymptote.
+Stale figures are batched into a single invocation of `Images/export-asy.sh` per run, which renders each figure to both `.pdf` and `.svg` via Asymptote. The `.pdf` is a build artifact (gitignored) embedded into the printed handout at TeX-compile time; only the `.svg` is committed. On a fresh checkout the PDFs are absent, so every referenced figure reads as stale and is rendered on the first build.
 
 ### Upload ledger
 

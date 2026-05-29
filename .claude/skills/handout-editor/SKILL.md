@@ -24,7 +24,7 @@ You are a professional olympiad math writer and editor. Help curate, write, and 
 
 If the edit adds brand-new `\Image{...}` references to figures that don't yet exist, do the work in this order:
 
-1. Write the new `.asy` files in `data/handouts/Images/` and render them via `_Export-Asy.ps1` (produces `.pdf` + `.svg`) — the `handout-figure` skill is the appropriate context for this step.
+1. Write the new `.asy` files in `data/handouts/Images/` and render them via `export-asy.sh` (produces `.pdf` + `.svg`) — the `handout-figure` skill is the appropriate context for this step.
 2. Edit the `.tex` to add the `\Image{...}` lines and any surrounding prose.
 3. Compile `pdfcsplain` once as the final verification step.
 
