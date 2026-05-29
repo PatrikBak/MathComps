@@ -261,7 +261,7 @@ public class VetoProblemTagsCommand(
 
         // If no candidate tags meet the criteria, return empty result
         if (candidateTags.Count == 0)
-            return ImmutableDictionary<string, bool>.Empty;
+            return [];
 
         // Build structured data for AI with names as keys
         var candidateTagsForAi = candidateTags.ToImmutableDictionary(
@@ -299,7 +299,7 @@ public class VetoProblemTagsCommand(
 
         // If AI service failed, return empty result
         if (aiResponseRaw is null)
-            return ImmutableDictionary<string, bool>.Empty;
+            return [];
 
         // Store the AI response for debugging and audit purposes
         var aiResponsePath = $"{LoggingConstants.LogsDirectory}/{folder}/{problem.Slug}.{suffix}.veto.json";
@@ -313,7 +313,7 @@ public class VetoProblemTagsCommand(
 
         // If parsing failed, return empty result
         if (approvalsByName is null)
-            return ImmutableDictionary<string, bool>.Empty;
+            return [];
 
         // Map names back to slugs for database
         return candidateTags

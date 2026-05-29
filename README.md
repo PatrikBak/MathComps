@@ -33,7 +33,7 @@ The frontend automatically connects to `http://localhost:5000` by default (no co
 
 - **Node.js** 20+ and npm
 - **PostgreSQL** 16+ with **pgvector extension** (only for backend/problem search)
-- **.NET SDK** 9.0+ (only for backend)
+- **.NET SDK** 10.0+ (only for backend)
 
 See [Backend README](backend/README.md) for database setup instructions.
 

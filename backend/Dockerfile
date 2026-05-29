@@ -1,5 +1,5 @@
 # Build stage: compile the .NET application
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy solution and project files
@@ -15,7 +15,7 @@ RUN dotnet restore src/Api/MathComps.Api/MathComps.Api.csproj
 RUN dotnet publish src/Api/MathComps.Api/MathComps.Api.csproj -c Release -o /app/publish
 
 # Runtime stage: minimal image for running the application
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
 # Install curl for health checks
