@@ -22,7 +22,7 @@ public record ImageProcessingState(
     /// <returns>A new <see cref="ImageProcessingState"/> with default values.</returns>
     public static ImageProcessingState Initial => new(
         Counter: 1,
-        ProcessedImages: ImmutableDictionary<string, string>.Empty,
+        ProcessedImages: [],
         DiscoveredImages: []
     );
 

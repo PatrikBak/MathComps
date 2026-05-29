@@ -290,7 +290,7 @@ public class TagProblemsCommand(
 
         // If no tags can be processed, return empty result
         if (tagsToProcess.Count == 0)
-            return ImmutableDictionary<string, ProblemTagData>.Empty;
+            return [];
 
         // Build context text about already assigned tags for AI
         var alreadyAssignedTagsText = alreadyAssignedTags.Count == 0 ? "" :
@@ -327,7 +327,7 @@ public class TagProblemsCommand(
 
         // If AI service failed, return empty result
         if (aiResponseRaw is null)
-            return ImmutableDictionary<string, ProblemTagData>.Empty;
+            return [];
 
         // Store the raw AI response for debugging
         var aiResponsePath = $"{logDirectory}/{problem.Slug}.{suffix}.json";
@@ -352,7 +352,7 @@ public class TagProblemsCommand(
 
         // If parsing failed, return empty result
         if (suggestedTags is null)
-            return ImmutableDictionary<string, ProblemTagData>.Empty;
+            return [];
 
         // Get the set of potential tags to consider
         var candidateSlugSet = tagsToProcess.Keys

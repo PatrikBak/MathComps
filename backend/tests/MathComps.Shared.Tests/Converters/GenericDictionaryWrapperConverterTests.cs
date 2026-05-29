@@ -327,7 +327,7 @@ public class GenericDictionaryWrapperConverterTests
         // Only this constructor exists - it doesn't take the dictionary parameter
         public TestRecordWithoutConstructor(string _)
         {
-            Data = ImmutableDictionary<string, int>.Empty;
+            Data = [];
         }
 
         // No parameterless constructor that could be used by the converter
