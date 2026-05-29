@@ -765,24 +765,22 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     }
 
     /// <summary>
-    /// Invokes <c>_Export-Asy.ps1</c> via PowerShell 7+ (<c>pwsh</c>) with an explicit list
-    /// of stale <c>.asy</c> files. The script renders each figure twice: once with
-    /// <c>asy -f pdf</c> for the TeX-consumed PDF and once with <c>asy -f svg</c> for the
-    /// web-consumed SVG.
+    /// Invokes <c>export-asy.sh</c> via <c>bash</c> with an explicit list of stale <c>.asy</c>
+    /// files. The script renders each figure twice: once with <c>asy -f pdf</c> for the
+    /// TeX-consumed PDF and once with <c>asy -f svg</c> for the web-consumed SVG.
     /// </summary>
     /// <param name="staleAsyFileNames">Filenames (not absolute paths) of stale <c>.asy</c> files inside <paramref name="imagesDir"/>.</param>
     /// <param name="imagesDir">Directory containing the <c>.asy</c> files and the export script.</param>
     private static void RunAsyExportScript(IReadOnlyList<string> staleAsyFileNames, DirectoryInfo imagesDir)
     {
         // Locate the export script next to the .asy sources
-        var scriptPath = Path.Combine(imagesDir.FullName, "_Export-Asy.ps1");
+        var scriptPath = Path.Combine(imagesDir.FullName, "export-asy.sh");
 
-        // Build the pwsh argv: hardening flags, then the script path, then the script's $Path varargs.
-        // -NoProfile skips $PROFILE (faster, deterministic); -ExecutionPolicy Bypass avoids signing issues.
-        string[] arguments = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath, .. staleAsyFileNames];
+        // Build the bash argv: the script path, then the stale .asy filenames it should render.
+        string[] arguments = [scriptPath, .. staleAsyFileNames];
 
-        // Run the export script under PowerShell 7+
-        var result = ProcessRunner.Run("pwsh", arguments, imagesDir.FullName);
+        // Run the export script under bash
+        var result = ProcessRunner.Run("bash", arguments, imagesDir.FullName);
 
         // Non-zero exit means at least one .asy failed — surface everything for debugging
         if (result.ExitCode != 0)
@@ -794,7 +792,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     /// Checks every <c>.asy</c>-backed image referenced by the document for staleness
     /// (against its own source plus its transitive <c>include</c>/<c>import</c> deps,
     /// excluding the global <c>_common.asy</c>) and batch-recompiles only the stale
-    /// ones via <c>_Export-Asy.ps1</c>. Images that have no sibling <c>.asy</c> (raster
+    /// ones via <c>export-asy.sh</c>. Images that have no sibling <c>.asy</c> (raster
     /// or externally-authored PDFs) are silently skipped — those are not produced by
     /// the asy pipeline.
     /// </summary>
@@ -876,7 +874,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
             return;
         }
 
-        // One pwsh invocation for the whole batch — _Export-Asy.ps1 iterates internally
+        // One bash invocation for the whole batch — export-asy.sh iterates internally
         RunAsyExportScript(staleFileNames, imagesDir);
         AnsiConsole.MarkupLine($"  [green]✓ Asy:[/] {staleFileNames.Count} image(s) recompiled");
 

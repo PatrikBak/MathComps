@@ -6,4 +6,7 @@
 !*.cs.tex
 !Images/
 !Images/**
+# Build artifacts under Images/ (not committed): asy scratch files and figure PDFs. The figure
+# PDFs are regenerated on demand (export-asy.sh / Handouts CLI); only the .svg deliverable is tracked.
 Images/texput.**
+Images/*.pdf
