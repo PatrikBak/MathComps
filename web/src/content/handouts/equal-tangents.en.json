@@ -537,6 +537,66 @@
                   "content": [
                     {
                       "type": "text",
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a right triangle with the right angle at "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be its inradius. Then"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "r = s - c = \\frac{a + b - c}{2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "equal-tangents/equal-tangents-right-inradius.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "proof": []
+            },
+            {
+              "type": "theorem",
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
                       "text": "Let the excircle of triangle "
                     },
                     {
@@ -5891,6 +5951,13 @@
       "originalId": "equal-tangents-incircle.pdf",
       "width": "164.118051pt",
       "height": "159.325923pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "equal-tangents/equal-tangents-right-inradius.svg",
+      "originalId": "equal-tangents-right-inradius.pdf",
+      "width": "192.94562pt",
+      "height": "150.504654pt",
       "scale": 1.0
     },
     {
