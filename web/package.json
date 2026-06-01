@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@clerk/types": "^4.101.14",
-    "@lingual/i18n-check": "^0.8.19",
+    "@lingual/i18n-check": "^0.9.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^25",
     "@types/react": "^19",
