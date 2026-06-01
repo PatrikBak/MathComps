@@ -61,7 +61,7 @@ type MembershipModeProps = {
 /**
  * Props for {@link UserListMenuItems} — discriminated union on `mode`.
  */
-export type UserListMenuItemsProps = FilterModeProps | MembershipModeProps
+type UserListMenuItemsProps = FilterModeProps | MembershipModeProps
 
 /**
  * Shared menu items for user lists.

@@ -4,7 +4,7 @@ import { ROUTES } from '@/i18n/i18n'
 /**
  * The suffix for the URL endpoint for images for different types of content.
  */
-export type ImageType = 'problems' | 'handouts'
+type ImageType = 'problems' | 'handouts'
 
 /**
  * Builds a public URL to a problem image by its content id.

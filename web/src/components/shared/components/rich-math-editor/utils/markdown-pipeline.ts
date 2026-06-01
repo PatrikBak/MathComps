@@ -158,7 +158,7 @@ type ValidationFailure = {
  * Result of running `validateMarkdown` against a string — discriminated
  * union representing success or failure.
  */
-export type ValidationResult = ValidationSuccess | ValidationFailure
+type ValidationResult = ValidationSuccess | ValidationFailure
 
 /**
  * Validates a Markdown+TeX string by running it through the same unified
