@@ -3,8 +3,8 @@
 import { useAuth } from '@clerk/nextjs'
 import { useMediaQuery } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState } from 'react'
 import React from 'react'
+import { useCallback, useState } from 'react'
 
 import { LoginButton } from '@/components/login/LoginButton'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
