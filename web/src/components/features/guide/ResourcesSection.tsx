@@ -1,8 +1,9 @@
-import { BookOpen, Link2, type LucideIcon, MessageSquare, Wrench, Youtube } from 'lucide-react'
+import { BookOpen, Link2, type LucideIcon, MessageSquare, Wrench } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
+import { YoutubeIcon } from '@/components/shared/components/brand-icons'
 import type { AccentColor } from '@/components/shared/utils/accent-colors'
 import { getSiteUrl } from '@/components/shared/utils/url-utils'
 import type { SectionNumberer } from '@/components/table-of-contents/SectionNumberer'
@@ -189,7 +190,7 @@ export default function ResourcesSection({ sectionNumberer }: ResourcesSectionPr
     },
     {
       title: tGuide(`titles.${GUIDE_TITLES.YOUTUBE}`),
-      icon: Youtube,
+      icon: YoutubeIcon,
       accent: 'red',
       resources: [
         {

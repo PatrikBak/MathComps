@@ -1,7 +1,7 @@
-import { Github, Linkedin } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { AppLink } from '@/components/shared/components/AppLink'
+import { GithubIcon, LinkedinIcon } from '@/components/shared/components/brand-icons'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 
 import AboutPanelSection from './layout/AboutPanelSection'
@@ -38,7 +38,7 @@ export const AuthorSection = () => {
               className="text-muted hover:text-foreground transition-colors flex items-center gap-2"
               title="LinkedIn"
             >
-              <Linkedin size={20} />
+              <LinkedinIcon size={20} />
               <span>LinkedIn</span>
             </AppLink>
 
@@ -47,7 +47,7 @@ export const AuthorSection = () => {
               className="text-muted hover:text-foreground transition-colors flex items-center gap-2"
               title="GitHub"
             >
-              <Github size={20} />
+              <GithubIcon size={20} />
               <span>GitHub</span>
             </AppLink>
           </div>
