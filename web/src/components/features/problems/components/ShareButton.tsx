@@ -3,8 +3,8 @@
 import { useClipboard } from '@mantine/hooks'
 import { Link as LinkIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useMemo } from 'react'
 import * as React from 'react'
+import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { ROUTES } from '@/i18n/i18n'
