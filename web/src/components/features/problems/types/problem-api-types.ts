@@ -41,7 +41,7 @@ export type SimilarProblem = {
   images: ProblemImage[]
 }
 
-export type ProblemImage = {
+type ProblemImage = {
   contentId: string
   width: string
   height: string

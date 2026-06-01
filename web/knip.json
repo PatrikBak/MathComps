@@ -1,6 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "ignore": ["src/i18n/request.ts"],
   "ignoreDependencies": [
     "eslint-config-next",
     "@next/eslint-plugin-next",
