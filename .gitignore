@@ -1,1 +1,4 @@
 *.log
+
+# Claude Code runtime lock files (scheduled tasks, etc.)
+.claude/*.lock
