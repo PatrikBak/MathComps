@@ -22,7 +22,7 @@ type UploadUrlResponse = {
  *
  * Contains an error code for client-side i18n translation.
  */
-export class FileUploadError extends Error {
+class FileUploadError extends Error {
   /** Structured error response for i18n */
   public readonly errorResponse: ApiErrorResponse
 

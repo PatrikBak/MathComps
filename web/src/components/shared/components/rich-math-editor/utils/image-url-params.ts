@@ -17,7 +17,7 @@ const PLACEHOLDER_BASE = 'http://__rendererplaceholder__/'
 const PLACEHOLDER_HOST = '__rendererplaceholder__'
 
 /** Best-effort parsed image parameter values. Errors do not block successful values. */
-export type ImageParams = {
+type ImageParams = {
   /** Intrinsic width in pixels when both width and height are present and valid */
   width?: number
   /** Intrinsic height in pixels when both width and height are present and valid */
@@ -29,13 +29,13 @@ export type ImageParams = {
 }
 
 /** A single validation error discovered while parsing an image URL. */
-export type ImageParamError = {
+type ImageParamError = {
   /** Human-readable description of what went wrong */
   message: string
 }
 
 /** Result of parsing an image URL — best-effort values, validation errors, and a cleaned URL. */
-export type ParsedImageUrl = {
+type ParsedImageUrl = {
   /** Best-effort parsed parameter values (each field independently set when valid) */
   params: ImageParams
   /** Validation errors discovered during parsing */
