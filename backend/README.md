@@ -46,36 +46,27 @@ Problem statements and solutions are stored in the `problem_texts` table with pe
 
 ## Getting Started
 
-### 0. Database Requirements
+### 1. Database Requirements
 
 This application requires **PostgreSQL with the pgvector extension** for AI-powered similarity search features.
 
-#### Quick Setup with Docker (Recommended)
+#### Quick Setup with Docker
+
+The database runs in Docker while the API runs natively (`dotnet run`). A dedicated
+dev-only compose file ([`docker-compose.dev.yml`](docker-compose.dev.yml)) starts just
+Postgres (pg16 + pgvector, matching production) with a persistent named volume:
 
 ```bash
-# Start PostgreSQL with pgvector
-docker run --name mathcomps-postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  -d pgvector/pgvector:pg17
-
-# Verify the extension is available
-docker exec -it mathcomps-postgres psql -U postgres -c "CREATE EXTENSION IF NOT EXISTS vector;"
+# From the backend directory
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-#### Local PostgreSQL Installation
+The pgvector extension is created automatically by the migrations in step 3, so no
+manual `CREATE EXTENSION` is needed. Data persists in the `pgdata_dev` volume across
+restarts — use `docker compose -f docker-compose.dev.yml down` to stop, or add `-v` to
+wipe the data.
 
-If you prefer a local installation:
-
-1. Install PostgreSQL 16+
-2. Install the pgvector extension: https://github.com/pgvector/pgvector#installation
-3. Verify the extension is available:
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS vector;
-   SELECT * FROM pg_extension WHERE extname = 'vector';
-   ```
-
-### 1. Configure Database Connection
+### 2. Configure Database Connection
 
 Set up your database connection string using .NET user secrets:
 
@@ -89,7 +80,7 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Da
 
 **Remark**: The command above uses the Api project, but the user secrets key is shared for all backend projects (see [`Directory.Build.props`](Directory.Build.props)), so the connection string will be available everywhere.
 
-### 2. Create Database Schema
+### 3. Create Database Schema
 
 If creating an empty DB from scratch, apply Entity Framework migrations:
 
@@ -103,6 +94,47 @@ dotnet ef database update
 
 This will create the database schema including the required PostgreSQL extensions (pgvector).
 
+#### Alternative: Seed from a Production Dump
+
+Instead of building an empty schema with migrations, you can restore a copy of the
+production database into the dev container — useful for debugging against real data.
+
+Prod Postgres runs inside a Docker container and only listens on the server's loopback
+interface, so you dump it from *inside* the container (where local connections are
+trusted — no DB password needed) rather than connecting over the network.
+
+```bash
+# 1. On the prod server, from the backend directory, dump the DB to a file.
+#    -Fc = compressed custom format (for pg_restore); -T keeps the binary stream clean.
+docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+  --env-file .env --env-file .env.prod \
+  exec -T postgres pg_dump -U mathcomps -Fc mathcomps > prod.dump
+
+# 2. Copy the dump to your machine (adjust the remote path to where prod.dump landed).
+scp your-server:~/prod.dump ~/prod.dump
+
+# 3. Restore it into the local dev container (started via docker-compose.dev.yml).
+#    Set DB to the target database — keep `mathcomps` to refresh the DB the app connects
+#    to, or use another name to keep several dumps side by side.
+DB=mathcomps         # the target database name
+DUMP=prod.dump       # the local dump file to restore
+
+# Recreate the target DB from scratch, then restore into it. --force terminates any open
+# connections (e.g. a running dev backend) so the drop succeeds; --no-owner/--no-acl drop
+# the prod-specific `mathcomps` role so it restores as the dev `postgres` user;
+# --single-transaction rolls the restore back on errors.
+docker compose -f docker-compose.dev.yml exec -T postgres \
+  sh -c "dropdb -U postgres --force --if-exists $DB && createdb -U postgres $DB && \
+    pg_restore --no-owner --no-acl --single-transaction -U postgres -d $DB" < "$DUMP"
+```
+
+The dump's own `CREATE EXTENSION vector` succeeds because both the prod and dev images
+ship the pgvector binary, and the restore is clean because both run Postgres 16
+(`pg_restore` does not migrate backwards across major versions — another reason the dev
+image is pinned to `pg16`). No migration step is needed after a successful restore. Since
+these are single-database dumps (the name lives only in the `-d` flag, not the archive),
+the same dump file can be restored under any name you choose.
+
 **Creating new migrations:**
 
 When you modify the data model, create a new migration from the Infrastructure directory:
@@ -113,7 +145,7 @@ cd backend/src/Infrastructure/MathComps.Infrastructure
 dotnet ef migrations add <MigrationName> --startup-project ../../Api/MathComps.Api
 ```
 
-### 3. Configure Gemini API (Optional)
+### 4. Configure Gemini API (Optional)
 
 For AI-powered tools (tagging, translation, embeddings), set up your Gemini API key:
 
@@ -127,22 +159,35 @@ dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/Api/
 
 Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### 4. Configure Clerk Webhooks (Optional)
+### 5. Configure Clerk Authentication
 
-For user authentication and synchronization, configure the Clerk webhook secret:
+The API needs three Clerk values for local dev (set once via user secrets — they persist
+across runs):
+
+- **Authority** — the Frontend API / issuer URL. Validates incoming JWTs on every
+  request; without it the app starts but each request fails with `Clerk authority not found`.
+- **Secret key** — used for server-to-Clerk calls (user sync, comment authors, the
+  webhook handler).
+- **Webhook secret** — `ClerkSettings` validates it whenever its options are loaded,
+  which happens on ordinary requests too (not just webhooks) — so it's required to serve
+  any request. If you aren't testing real webhooks locally, any non-empty placeholder works.
 
 ```bash
 # From the API directory
 cd backend/src/Api/MathComps.Api
 
-# Set Clerk webhook secret
-dotnet user-secrets set "Clerk:WebhookSecret" "your-clerk-webhook-secret"
-dotnet user-secrets set "Clerk:ClientSecret" "your-clerk-client-secret"
+# Use your *development* Clerk instance for local dev
+dotnet user-secrets set "Authentication:Clerk:Authority" "https://your-subdomain.clerk.accounts.dev"
+dotnet user-secrets set "Clerk:SecretKey" "sk_test_your-clerk-secret-key"
+dotnet user-secrets set "Clerk:WebhookSecret" "whsec_placeholder"
 ```
 
-The webhook endpoint synchronizes user data from Clerk to the local database. For details about events handled and testing instructions, see the [API README](src/Api/MathComps.Api/README.md#webhooks).
+Find the authority and secret key in the Clerk dashboard under **API Keys** (Frontend
+API → authority; Secret keys → secret key) — the same values deployed as
+`CLERK_AUTHORITY` and `CLERK_SECRET_KEY`. For the real webhook secret and instructions on
+testing webhooks locally, see the [API README](src/Api/MathComps.Api/README.md#webhooks).
 
-### 5. Run the API
+### 6. Run the API
 
 See the [API README](src/Api/MathComps.Api/README.md) for running instructions.
 
