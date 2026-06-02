@@ -1,0 +1,25 @@
+# Local development database only. The API runs natively via `dotnet run`.
+# Usage: docker compose -f docker-compose.dev.yml up -d
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    # Raise maintenance_work_mem above the 64 MB default so building the ivfflat embedding
+    # index during a prod-dump restore fits in memory.
+    command: ["postgres", "-c", "maintenance_work_mem=256MB"]
+    environment:
+      POSTGRES_DB: mathcomps
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata_dev:
