@@ -38,6 +38,7 @@ export default function MathCompsLogo({ className }: MathCompsLogoProps) {
           className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
           role="img"
           aria-label="MathComps Logo"
+          priority
           unoptimized
         />
         <span className="text-xl sm:text-2xl lg:text-3xl">
