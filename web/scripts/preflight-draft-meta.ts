@@ -17,7 +17,8 @@ export const FALLBACK_META: ManifestMeta = {
   competition: '',
   category: null,
   round: '',
-  season: { year: 0, edition: 0 },
+  season: { year: 0 },
+  date: '',
   language: DEFAULT_LOCALE,
 }
 
@@ -72,10 +73,11 @@ export function narrowMeta(parsed: unknown): MetaResult {
   const round = requireSlug(parsed.round, 'round', errors)
   const category = optionalSlug(parsed.category, 'category', errors)
   const season = narrowSeason(parsed.season, errors)
+  const date = narrowDate(parsed.date, errors)
   const language = narrowLanguage(parsed.language, errors)
 
   // Assemble the best-effort meta alongside the collected issues
-  return { meta: { competition, category, round, season, language }, errors }
+  return { meta: { competition, category, round, season, date, language }, errors }
 }
 
 /**
@@ -120,25 +122,46 @@ function optionalSlug(value: unknown, field: string, errors: VerdictError[]): st
 }
 
 /**
- * Narrows the `season` mapping, recording an error for each missing number.
+ * Narrows the `season` mapping, recording an error when its year is missing.
  *
  * @param value - The raw `season` value from the parsed document.
- * @param errors - Accumulator the issues are pushed onto.
+ * @param errors - Accumulator the issue is pushed onto.
  *
- * @returns The season, with `0` substituted for any missing number.
+ * @returns The season, with `0` substituted for a missing year.
  */
 function narrowSeason(value: unknown, errors: VerdictError[]): Season {
-  // The season must itself be a mapping of two numbers
+  // The season must itself be a mapping carrying a year
   if (!isRecord(value)) {
-    errors.push(metaIssue('season is required and must have numeric "year" and "edition"'))
-    return { year: 0, edition: 0 }
+    errors.push(metaIssue('season is required and must have a numeric "year"'))
+    return { year: 0 }
   }
 
-  // Narrow each number independently so both can be reported
+  // Narrow the season's year
   return {
     year: requireNumber(value.year, 'season.year', errors),
-    edition: requireNumber(value.edition, 'season.edition', errors),
   }
+}
+
+/**
+ * Reads the required `date` field, recording an error and returning `''` when it
+ * is missing or not a real `YYYY-MM-DD` calendar date.
+ *
+ * @param value - The raw `date` value from the parsed document.
+ * @param errors - Accumulator the issue is pushed onto.
+ *
+ * @returns The date string, or `''` when missing or malformed.
+ */
+function narrowDate(value: unknown, errors: VerdictError[]): string {
+  // A `YYYY-MM-DD` string that round-trips to the same calendar date is valid
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    // Parse as UTC midnight and reject impossible dates like 2026-13-01 that JS would roll over
+    const parsed = new Date(`${value}T00:00:00Z`)
+    if (!Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value)) return value
+  }
+
+  // Missing, wrong shape, or not a real date
+  errors.push(metaIssue('date is required and must be a valid YYYY-MM-DD date'))
+  return ''
 }
 
 /**
