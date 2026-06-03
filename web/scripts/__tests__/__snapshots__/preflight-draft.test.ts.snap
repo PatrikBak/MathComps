@@ -1,0 +1,366 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-bad-frontmatter 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.md",
+      "half": null,
+      "rule": "frontmatter",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-bad-katex-solution 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.md",
+      "half": "solution",
+      "rule": "katex",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-bad-katex-statement 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.md",
+      "half": "statement",
+      "rule": "katex",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-bad-language 1`] = `
+{
+  "errors": [
+    {
+      "file": "_meta.yaml",
+      "half": null,
+      "rule": "meta",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-duplicate-order 1`] = `
+{
+  "errors": [
+    {
+      "file": "(folder)",
+      "half": null,
+      "rule": "problem-files",
+      "severity": "error",
+    },
+    {
+      "file": "p1.md",
+      "half": null,
+      "rule": "problem-files",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 2,
+  "problemOrders": [
+    1,
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-empty-statement 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.md",
+      "half": "statement",
+      "rule": "empty-statement",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-malformed-meta 1`] = `
+{
+  "errors": [
+    {
+      "file": "_meta.yaml",
+      "half": null,
+      "rule": "meta",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-image 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.md",
+      "half": null,
+      "rule": "missing-image",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-meta-file 1`] = `
+{
+  "errors": [
+    {
+      "file": "_meta.yaml",
+      "half": null,
+      "rule": "meta",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-meta-round 1`] = `
+{
+  "errors": [
+    {
+      "file": "_meta.yaml",
+      "half": null,
+      "rule": "meta",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-no-problems 1`] = `
+{
+  "errors": [
+    {
+      "file": "(folder)",
+      "half": null,
+      "rule": "problem-files",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 0,
+  "problemOrders": [],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-noncontiguous 1`] = `
+{
+  "errors": [
+    {
+      "file": "p3.md",
+      "half": null,
+      "rule": "problem-files",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 2,
+  "problemOrders": [
+    1,
+    3,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-starts-at-two 1`] = `
+{
+  "errors": [
+    {
+      "file": "p2.md",
+      "half": null,
+      "rule": "problem-files",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    2,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-unterminated-frontmatter 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.md",
+      "half": null,
+      "rule": "frontmatter",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-basic 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 2,
+  "problemOrders": [
+    1,
+    2,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-external-image 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-image-params 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-multi-author 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-no-category 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-no-frontmatter 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-orphan-warns 1`] = `
+{
+  "errors": [
+    {
+      "file": "images/extra.svg",
+      "half": null,
+      "rule": "orphan-image",
+      "severity": "warning",
+    },
+  ],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-solution-image 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-solution-link 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemOrders": [
+    1,
+  ],
+}
+`;
