@@ -105,11 +105,11 @@ describe('resolveMarkdownImageUrl', () => {
     })
   })
 
-  describe('"problems" context — backend API host', () => {
-    // Bare contentIds (no path structure) get the backend problems image host
-    it('routes a bare contentId to the backend problems endpoint', () => {
+  describe('"problems" context — R2 problems host', () => {
+    // Bare contentIds (no path structure) get the R2 problems image host
+    it('routes a bare contentId to the R2 problems endpoint', () => {
       expect(resolveMarkdownImageUrl('media:abc123', 'problems')).toBe(
-        'https://api.example.test/images/problems/abc123'
+        'https://r2.example.test/problems/abc123'
       )
     })
 
@@ -117,14 +117,14 @@ describe('resolveMarkdownImageUrl', () => {
     // read width/height/inline/scale off the resolved URL downstream
     it('preserves a trailing query string after resolution', () => {
       expect(resolveMarkdownImageUrl('media:abc123?width=200&height=150', 'problems')).toBe(
-        'https://api.example.test/images/problems/abc123?width=200&height=150'
+        'https://r2.example.test/problems/abc123?width=200&height=150'
       )
     })
 
     // ?inline=true is the param the renderer reads to flow images with text
     it('preserves the inline param', () => {
       expect(resolveMarkdownImageUrl('media:abc123?inline=true', 'problems')).toBe(
-        'https://api.example.test/images/problems/abc123?inline=true'
+        'https://r2.example.test/problems/abc123?inline=true'
       )
     })
   })

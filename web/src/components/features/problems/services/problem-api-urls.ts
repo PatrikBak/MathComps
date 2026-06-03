@@ -7,20 +7,15 @@ import { ROUTES } from '@/i18n/i18n'
 type ImageType = 'problems' | 'handouts'
 
 /**
- * Builds a public URL to a problem image by its content id.
- * Handout images are served from Cloudflare R2, problem images from the backend API.
+ * Builds a public URL to a content image by its content id. Both problem and handout images
+ * live on Cloudflare R2 under a per-type prefix that matches the image type.
  *
  * @param contentId - The unique identifier of the problem content/image
  * @param type - The type of the image (problems or handouts)
  * @returns The URL to the image
  */
 export function getProblemImageUrl(contentId: string, type: ImageType): string {
-  switch (type) {
-    case 'handouts':
-      return `${getR2BaseUrl()}/handouts/${contentId}`
-    case 'problems':
-      return `${getApiBaseUrl()}/images/${type}/${contentId}`
-  }
+  return `${getR2BaseUrl()}/${type}/${contentId}`
 }
 
 /**
