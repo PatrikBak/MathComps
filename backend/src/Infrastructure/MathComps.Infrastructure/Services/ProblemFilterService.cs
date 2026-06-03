@@ -857,6 +857,7 @@ public class ProblemFilterService(
         var textSearchQuery = dbContext.ProblemTexts
             .Where(text =>
                 text.DocumentType == DocumentType.Statement &&
+                text.RawText != null &&
                 EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm));
 
         // If solution search is enabled...
@@ -867,6 +868,7 @@ public class ProblemFilterService(
                 dbContext.ProblemTexts
                     .Where(text =>
                         text.DocumentType == DocumentType.Solution &&
+                        text.RawText != null &&
                         EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm))
             );
         }
