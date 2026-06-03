@@ -468,7 +468,7 @@ public class TaggingDatabaseService(IDbContextFactory<MathCompsDbContext> dbCont
                  // Get statement text from ProblemTexts (original language)
                  Statement = problem.Texts
                      .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
-                     .Select(text => text.RawText)
+                     .Select(text => text.RawText!)
                      .First(),
 
                  // Get solution text from ProblemTexts (original language) if it exists

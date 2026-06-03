@@ -94,7 +94,7 @@ public class TranslationDatabaseService(IDbContextFactory<MathCompsDbContext> db
                 // Get statement text from ProblemTexts (original language)
                 problem.Texts
                     .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
-                    .Select(text => text.RawText)
+                    .Select(text => text.RawText!)
                     .First(),
                 // Get solution text from ProblemTexts (original language) if it exists
                 problem.Texts
@@ -218,7 +218,7 @@ public class TranslationDatabaseService(IDbContextFactory<MathCompsDbContext> db
                 text.Problem.Slug,
                 text.Language,
                 text.DocumentType,
-                text.RawText
+                text.RawText!
             ))
             .ToListAsync();
     }

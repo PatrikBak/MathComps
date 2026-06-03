@@ -30,10 +30,10 @@ public class ProblemText
     public required DocumentType DocumentType { get; set; }
 
     /// <summary>
-    /// The raw text content (TeX/markup). Potentially large, stored as TEXT.
+    /// The raw text content (TeX/markup) from the original source. Potentially large, stored as TEXT.
     /// </summary>
     [Column(TypeName = "text")]
-    public required string RawText { get; set; }
+    public string? RawText { get; set; }
 
     /// <summary>
     /// Parsed text as a JSON string (optional).
