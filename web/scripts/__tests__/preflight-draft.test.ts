@@ -148,7 +148,8 @@ describe('valid drafts — parsed manifest content', () => {
     expect(manifest.meta.competition).toBe('csmo')
     expect(manifest.meta.category).toBe('a')
     expect(manifest.meta.round).toBe('iii')
-    expect(manifest.meta.season).toEqual({ year: 2024, edition: 65 })
+    expect(manifest.meta.season).toEqual({ year: 2024 })
+    expect(manifest.meta.date).toBe('2024-03-15')
     expect(manifest.meta.language).toBe('sk')
 
     // A clean run carries no issues at all
@@ -415,7 +416,8 @@ describe('narrowMeta', () => {
       competition: 'csmo',
       category: 'a',
       round: 'iii',
-      season: { year: 2024, edition: 65 },
+      season: { year: 2024 },
+      date: '2024-03-15',
       language: 'sk',
     })
     expect(errors).toEqual([])
@@ -423,7 +425,8 @@ describe('narrowMeta', () => {
       competition: 'csmo',
       category: 'a',
       round: 'iii',
-      season: { year: 2024, edition: 65 },
+      season: { year: 2024 },
+      date: '2024-03-15',
       language: 'sk',
     })
   })
@@ -432,7 +435,8 @@ describe('narrowMeta', () => {
     const { meta, errors } = narrowMeta({
       competition: 'imo',
       round: 'i',
-      season: { year: 2024, edition: 65 },
+      season: { year: 2024 },
+      date: '2024-03-15',
       language: 'en',
     })
     expect(meta.category).toBeNull()
@@ -442,7 +446,8 @@ describe('narrowMeta', () => {
   it('errors on a missing required field', () => {
     const { errors } = narrowMeta({
       competition: 'csmo',
-      season: { year: 2024, edition: 65 },
+      season: { year: 2024 },
+      date: '2024-03-15',
       language: 'sk',
     })
     expect(errors.some((error) => error.message.includes('round'))).toBe(true)
@@ -452,16 +457,50 @@ describe('narrowMeta', () => {
     const { errors } = narrowMeta({
       competition: 'csmo',
       round: 'iii',
+      date: '2024-03-15',
       language: 'sk',
     })
     expect(errors.some((error) => error.message.includes('season'))).toBe(true)
+  })
+
+  it('errors on a missing date', () => {
+    const { errors } = narrowMeta({
+      competition: 'csmo',
+      round: 'iii',
+      season: { year: 2024 },
+      language: 'sk',
+    })
+    expect(errors.some((error) => error.message.includes('date'))).toBe(true)
+  })
+
+  it('errors on a date that is not a real calendar date', () => {
+    const { errors } = narrowMeta({
+      competition: 'csmo',
+      round: 'iii',
+      season: { year: 2024 },
+      date: '2024-13-01',
+      language: 'sk',
+    })
+    expect(errors.some((error) => error.message.includes('date'))).toBe(true)
+  })
+
+  it('errors on a misshapen date string', () => {
+    const { errors } = narrowMeta({
+      competition: 'csmo',
+      round: 'iii',
+      season: { year: 2024 },
+      date: 'not-a-date',
+      language: 'sk',
+    })
+    expect(errors.some((error) => error.message.includes('date'))).toBe(true)
   })
 
   it('errors on an unsupported language', () => {
     const { errors } = narrowMeta({
       competition: 'csmo',
       round: 'iii',
-      season: { year: 2024, edition: 65 },
+      season: { year: 2024 },
+      date: '2024-03-15',
       language: 'de',
     })
     expect(errors.some((error) => error.message.includes('language'))).toBe(true)

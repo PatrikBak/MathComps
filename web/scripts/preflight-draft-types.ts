@@ -12,12 +12,10 @@ export type ProblemHalf = 'statement' | 'solution'
 /** Whether a verdict entry blocks import (`error`) or is merely advisory (`warning`). */
 export type VerdictSeverity = 'error' | 'warning'
 
-/** A two-number competition season: the starting calendar year and the edition ordinal. */
+/** A competition season, identified by the calendar year it starts in. */
 export type Season = {
   /** Calendar year the season starts in (e.g. 2024 for the 2024/2025 season). */
   year: number
-  /** Edition ordinal (e.g. 65 for the 65th running of the competition). */
-  edition: number
 }
 
 /** Folder-level taxonomy, slugs verbatim from `_meta.yaml` for the C# side to resolve. */
@@ -30,6 +28,8 @@ export type ManifestMeta = {
   round: string
   /** Season the draft belongs to. */
   season: Season
+  /** Round-instance date as `YYYY-MM-DD`, feeding `RoundInstance.Date`. */
+  date: string
   /** Source language of the draft — the original {@link ProblemText} language. */
   language: Locale
 }
