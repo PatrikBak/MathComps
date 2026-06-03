@@ -8,3 +8,7 @@ public
 # Validator fixtures contain intentionally malformed markdown; Prettier would
 # auto-correct unclosed bold, angle-bracket dangerous URLs, etc.
 scripts/__fixtures__/validate-md
+
+# Draft preflight fixtures are hand-maintained test data — including malformed
+# YAML and binary-ish SVG assets that Prettier cannot parse.
+scripts/__fixtures__/preflight-draft
