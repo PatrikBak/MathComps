@@ -109,7 +109,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   // suspending the layout before it happens mhm. I guess it could
   // be done better but who cares, this comment is already too long
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={cn(inter.className, 'antialiased')}>
         <Suspense fallback={null}>
           <ClerkProvider>
