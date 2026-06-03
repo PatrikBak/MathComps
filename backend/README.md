@@ -30,6 +30,7 @@ The API supports multiple languages via the `Accept-Language` HTTP header. The f
 
 | File                     | Purpose                                         |
 | ------------------------ | ----------------------------------------------- |
+| `metadata.shared.json`   | Language-neutral taxonomy structure & order     |
 | `metadata.{locale}.json` | Localized competition names, round labels, etc. |
 | `approved-tags.json`     | Tag vocabulary with English slugs (canonical)   |
 
