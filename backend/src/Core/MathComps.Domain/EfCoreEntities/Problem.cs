@@ -50,6 +50,12 @@ public class Problem
     public string? SolutionLink { get; set; }
 
     /// <summary>
+    /// Whether this problem is publicly visible to end users. Existing problems default
+    /// to true; new problems can be created unpublished and made visible after review.
+    /// </summary>
+    public bool IsPublished { get; set; } = true;
+
+    /// <summary>
     /// Collection of texts (statements and solutions) in various languages.
     /// </summary>
     public ICollection<ProblemText> Texts { get; } = [];

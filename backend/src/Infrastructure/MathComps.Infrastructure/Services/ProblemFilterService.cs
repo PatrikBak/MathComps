@@ -173,10 +173,12 @@ public class ProblemFilterService(
                     // Evaluate 
                     .ToImmutableList(),
 
-                // Similar Problems 
+                // Similar Problems
                 data.problem.SimilarProblems
-                    // Only similar enough problems
-                    .Where(similarProblem => similarProblem.SimilarityScore >= similarityOptions.Value.MinSimilarityScore)
+                    // Only similar enough problems that are themselves published — never surface an unpublished problem
+                    .Where(similarProblem =>
+                        similarProblem.SimilarProblem.IsPublished &&
+                        similarProblem.SimilarityScore >= similarityOptions.Value.MinSimilarityScore)
                     // Most similar problems first
                     .OrderByDescending(similarProblem => similarProblem.SimilarityScore)
                     // Respect configured limit
@@ -345,6 +347,9 @@ public class ProblemFilterService(
     /// <returns>Filtered queryable with all applicable conditions applied</returns>
     private static IQueryable<Problem> ApplyFilters(IQueryable<Problem> problems, FilterParameters parameters, bool favoritesOnly, string? listContentId, MarkStatusFilter? markStatus, Guid? userId)
     {
+        // Only published problems are ever visible through public filtering, search, and facets
+        problems = problems.Where(problem => problem.IsPublished);
+
         // If favorites only is requested...
         if (favoritesOnly)
         {
@@ -876,6 +881,7 @@ public class ProblemFilterService(
         // Group all problems by their common contest data
         // We will then take only these data + problem count to build the result
         var contestData = await dbContext.Problems
+            .Where(problem => problem.IsPublished)
             .GroupBy(problem => new
             {
                 problem.RoundInstance.Season.EditionNumber,

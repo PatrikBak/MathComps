@@ -1339,6 +1339,133 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     #endregion
 
+    #region IsPublished filtering
+
+    /// <summary>
+    /// Verifies that an unpublished problem never appears in filter results and is not counted.
+    /// </summary>
+    [Fact]
+    public Task FilterExcludesUnpublishedProblems() => RunTestAsync(async service =>
+    {
+        // Arrange - no filters, so every published problem would be returned
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - only the 7 published problems, never the unpublished one
+        Assert.Equal(7, result.Problems.TotalCount);
+        Assert.DoesNotContain(result.Problems.Items, problem => problem.Slug == "imo-2025-2");
+    });
+
+    /// <summary>
+    /// Verifies that a tag and author used only by an unpublished problem never surface as facet options.
+    /// </summary>
+    [Fact]
+    public Task SearchOptionsExcludeUnpublishedFacets() => RunTestAsync(async service =>
+    {
+        // Arrange
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - the unpublished problem's unique tag/author are absent from facet options
+        Assert.NotNull(result.UpdatedOptions);
+        Assert.DoesNotContain(result.UpdatedOptions.Tags, tag => tag.Slug == "combinatorics");
+        Assert.DoesNotContain(result.UpdatedOptions.Authors, author => author.Slug == "hidden-author");
+    });
+
+    /// <summary>
+    /// Verifies that the contest browser problem counts exclude unpublished problems.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonExcludesUnpublished() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
+
+        // Assert - IMO in season 75 still counts only the single published problem (p7), not the unpublished p8
+        var season75 = result.Seasons.First(season => season.EditionNumber == 75);
+        var imo = season75.Contests.First(contest => contest.CompetitionSlug == "imo");
+        Assert.Equal(1, imo.ProblemCount);
+    });
+
+    /// <summary>
+    /// Verifies that searching for text that exists only in an unpublished problem returns nothing.
+    /// </summary>
+    [Fact]
+    public Task SearchExcludesUnpublishedEvenWhenTextMatches() => RunTestAsync(async service =>
+    {
+        // Arrange - "Hippopotamus" appears only in the unpublished problem's statement
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: "Hippopotamus",
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(query);
+
+        // Assert - the matching problem is unpublished, so no results
+        Assert.Equal(0, result.Problems.TotalCount);
+    });
+
+    #endregion
+
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -1524,7 +1651,14 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Name = "Mária Dományová",
             Slug = "maria-domanyova"
         };
-        context.Authors.AddRange(authorBak, authorTkadlec, authorDomanyova);
+        // Author used only by the unpublished problem — must never surface in public facets
+        var authorHidden = new Author
+        {
+            Id = Guid.NewGuid(),
+            Name = "Hidden Author",
+            Slug = "hidden-author"
+        };
+        context.Authors.AddRange(authorBak, authorTkadlec, authorDomanyova, authorHidden);
 
         // Tags - Create different mathematical area tags to test tag filtering and combinations
         // These tags are strategically assigned to test both OR and AND logic scenarios
@@ -1546,7 +1680,14 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Slug = "number-theory",
             TagType = TagType.Area
         };
-        context.Tags.AddRange(tagAlgebra, tagGeometry, tagNumberTheory);
+        // Tag used only by the unpublished problem — must never surface in public facets
+        var tagCombinatorics = new Tag
+        {
+            Id = Guid.NewGuid(),
+            Slug = "combinatorics",
+            TagType = TagType.Area
+        };
+        context.Tags.AddRange(tagAlgebra, tagGeometry, tagNumberTheory, tagCombinatorics);
 
         // Problems - Create a diverse set of problems to test various filtering scenarios
         // Each problem is carefully designed to test specific aspects of the filtering system
@@ -1749,15 +1890,45 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         });
         p7.ProblemTagsAll.Add(new ProblemTag { ProblemId = p7.Id, TagId = tagGeometry.Id, GoodnessOfFit = 1.0f });
 
+        // Problem 8: Unpublished IMO problem — its slug, unique tag/author, and statement text
+        // must stay invisible to every public read, so it doubles as a publication-filter guard
+        var p8 = new Problem
+        {
+            Id = Guid.NewGuid(),
+            Slug = "imo-2025-2",
+            RoundInstanceId = ri_2025_imo.Id,
+            Number = 2,
+            IsPublished = false
+        };
+        p8.Texts.Add(new ProblemText
+        {
+            Id = Guid.NewGuid(),
+            ProblemId = p8.Id,
+            DocumentType = DocumentType.Statement,
+            RawText = "A lone Hippopotamus guards the unpublished island.",
+            MarkdownText = "A lone Hippopotamus guards the unpublished island.",
+            Language = Language.EN,
+            DateModified = DateTime.UtcNow,
+            IsOriginal = true
+        });
+        p8.ProblemAuthors.Add(new ProblemAuthor
+        {
+            ProblemId = p8.Id,
+            AuthorId = authorHidden.Id,
+            Ordinal = 1
+        });
+        p8.ProblemTagsAll.Add(new ProblemTag { ProblemId = p8.Id, TagId = tagCombinatorics.Id, GoodnessOfFit = 1.0f });
+
         // Add all problems to the context and save changes
-        // This creates a total of 7 problems with the following distribution:
+        // This creates 7 published problems with the following distribution:
         // - Patrik Bak: 5 problems (p3, p4, p5, p6, p7)
         // - Josef Tkadlec: 1 problem (p1)
         // - Mária Dományová: 1 problem (p2)
         // - Geometry tag: 2 problems (p1, p7)
         // - Algebra tag: 1 problem (p4)
         // - Number theory tag: 1 problem (p5)
-        context.Problems.AddRange(p1, p2, p3, p4, p5, p6, p7);
+        // Plus 1 unpublished problem (p8) that every public read must exclude
+        context.Problems.AddRange(p1, p2, p3, p4, p5, p6, p7, p8);
 
         // Add users and likes for testing
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
