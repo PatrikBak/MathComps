@@ -72,9 +72,6 @@ public static class ApplicationBuilderExtensions
     {
         // Traefik handles HTTPS redirection; no need to do it in the app
 
-        // We can serve wwwroot content
-        app.UseStaticFiles();
-
         // We can take requests from the website
         app.UseCors("default");
 

@@ -1,4 +1,4 @@
-import { buildApiUrl, getApiBaseUrl, getR2BaseUrl } from '@/components/shared/utils/url-utils'
+import { buildApiUrl, getR2BaseUrl } from '@/components/shared/utils/url-utils'
 import { ROUTES } from '@/i18n/i18n'
 
 /**
@@ -30,13 +30,14 @@ export function getHandoutPdfUrl(filename: string): string {
 }
 
 /**
- * Builds the API URL for downloading a document asset by its identifier.
+ * Builds a public URL to a downloadable document by its identifier. Documents
+ * (handout-linked PDFs) live on Cloudflare R2 under the flat `documents/` prefix.
  *
  * @param documentId - The unique identifier of the document asset
- * @returns The API URL path to the document asset
+ * @returns The public URL to the document on R2
  */
 export function getDocumentUrl(documentId: string): string {
-  return `${getApiBaseUrl()}/documents/${documentId}`
+  return `${getR2BaseUrl()}/documents/${documentId}`
 }
 
 /**
