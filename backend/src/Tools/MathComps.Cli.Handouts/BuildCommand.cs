@@ -16,7 +16,7 @@ namespace MathComps.Cli.Handouts;
 /// <summary>
 /// The main orchestration command for the handout pipeline.
 /// Generates skeletons, compiles TeX to PDF, parses TeX to JSON,
-/// and uploads images and PDFs to Cloudflare R2.
+/// and uploads images, linked documents, and PDFs to Cloudflare R2.
 /// </summary>
 /// <param name="fileUploader">A lazily-resolved <see cref="IFileUploader"/> for uploading assets to remote storage.</param>
 [Description("Builds handouts: generates skeletons, compiles TeX, parses JSON, and copies assets.")]
@@ -55,7 +55,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         /// development when you only need the JSON output without R2 credentials.
         /// </summary>
         [CommandOption("--skip-upload")]
-        [Description("Skip uploading PDFs and images to R2")]
+        [Description("Skip uploading PDFs, images, and linked documents to R2")]
         public bool SkipUpload { get; set; }
 
         /// <summary>
@@ -105,6 +105,14 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
     /// The R2 prefix under which every handout artefact (PDFs, images) lives.
     /// </summary>
     private const string HandoutsR2Prefix = "handouts";
+
+    /// <summary>
+    /// The top-level R2 prefix under which handout-referenced documents (downloadable
+    /// PDFs linked via <c>\Link[file.pdf]{...}</c>) live. Deliberately a sibling of
+    /// <see cref="HandoutsR2Prefix"/> rather than nested under it, matching the flat
+    /// per-type layout shared by problems, handouts, and user uploads.
+    /// </summary>
+    private const string DocumentsR2Prefix = "documents";
 
     /// <summary>
     /// File name of the global Asymptote helper module imported by every figure.
@@ -192,15 +200,16 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // variant would re-run the same asy compile pipeline.
         var asyAlreadyRecompiled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // R2 keys already pushed in this run — language variants share image keys, so the
+        // R2 keys already pushed in this run — language variants share asset keys, so the
         // second variant of a handout skips re-uploading what the first variant just sent.
         var uploadedR2Keys = new HashSet<string>(StringComparer.Ordinal);
 
-        // Persistent ledger mapping each R2 key to the SVG mtime that was last pushed under it.
-        // An image is fresh on R2 exactly when its current mtime is not newer than the value
-        // recorded here, regardless of how/when it was generated (asy pipeline inside the build,
-        // manual `asy` compile beforehand, AI invoking the export script directly, partial runs
-        // that only touched a subset of handouts). Missing entry ⇒ never uploaded ⇒ must push.
+        // Persistent ledger mapping each R2 key to the source-file mtime that was last pushed under it.
+        // A file is fresh on R2 exactly when its current mtime is not newer than the value
+        // recorded here, regardless of how/when it was produced (asy pipeline inside the build,
+        // manual `asy` compile beforehand, AI invoking the export script directly, an author dropping
+        // a new linked document, partial runs that only touched a subset of handouts). Missing entry
+        // ⇒ never uploaded ⇒ must push.
         var uploadStatePath = Path.Combine(inputDirectory.FullName, ".r2-uploads.json");
         var uploadState = File.Exists(uploadStatePath)
             ? File.ReadAllText(uploadStatePath).FromJson<Dictionary<string, DateTime>>()
@@ -244,11 +253,15 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                     CompileTexFile(skeletonFile, inputDirectory, settings.Compiler, settings.ErrorLog);
                 }
 
-                // Process images and prepare uploads
-                var pendingImageUploads = new List<PendingUpload>();
+                // Process images and prepare uploads (images + linked documents share this queue)
+                var pendingUploads = new List<PendingUpload>();
 
                 // Process images in the document content and collect their metadata
-                var imageResult = ProcessHandoutImages(document, inputFile.Name, settings.SkipUpload ? null : pendingImageUploads);
+                var imageResult = ProcessHandoutImages(document, inputFile.Name, settings.SkipUpload ? null : pendingUploads);
+
+                // Queue any handout-referenced documents (\Link[file.pdf]{...}) for upload alongside images
+                if (!settings.SkipUpload)
+                    CollectDocumentUploads(document, inputDirectory, handoutSlug: ToHandoutSlug(inputFile.Name), pendingUploads);
 
                 // Serialize the handout data (document + images) to an indented JSON string
                 var jsonString = new
@@ -275,47 +288,47 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                 if (!unknownCommands.IsEmpty)
                     allUnknownCommands[inputFile.Name] = unknownCommands;
 
-                // Upload images and PDFs to R2 (unless skipped)
+                // Upload the queued assets (handout images + linked documents) and the PDFs to R2 (unless skipped)
                 if (uploader is not null)
                 {
-                    // Partition the queued image uploads: drop ones already pushed in this run
+                    // Partition the queued uploads: drop ones already pushed in this run
                     // (a sibling language variant covered the same R2 key) and ones whose current
-                    // on-disk SVG mtime matches the value recorded the last time we uploaded under
-                    // that key (⇒ same bytes already on R2). What remains is the set of SVGs that
+                    // on-disk mtime matches the value recorded the last time we uploaded under
+                    // that key (⇒ same bytes already on R2). What remains is the set of files that
                     // are either brand-new (no ledger entry) or have been rewritten on disk since
                     // their last successful push.
-                    var uploadsToSend = pendingImageUploads
+                    var uploadsToSend = pendingUploads
                         .Where(upload => !uploadedR2Keys.Contains(upload.R2Key))
                         .Where(upload => !uploadState.TryGetValue(upload.R2Key, out var lastMtime)
                             || File.GetLastWriteTimeUtc(upload.SourcePath) > lastMtime)
                         .ToList();
 
-                    // How many we filtered out — surfaced in the summary line below.
-                    var skippedUploadCount = pendingImageUploads.Count - uploadsToSend.Count;
+                    // How many we filtered out, for the summary count.
+                    var skippedUploadCount = pendingUploads.Count - uploadsToSend.Count;
 
                     // Handle the uploads sequentially
                     foreach (var upload in uploadsToSend)
                     {
-                        // Capture the SVG mtime up front — this is the version we're about to push
+                        // Capture the source-file mtime up front — this is the version we're about to push
                         // and want to record as "the bytes R2 has now" once the upload succeeds.
-                        var svgMtime = File.GetLastWriteTimeUtc(upload.SourcePath);
+                        var sourceMtime = File.GetLastWriteTimeUtc(upload.SourcePath);
 
-                        // Push the image
+                        // Push the file
                         await uploader.UploadAsync(upload.SourcePath, upload.R2Key);
 
                         // Mark this R2 key as handled so language variants later in this run skip it...
                         uploadedR2Keys.Add(upload.R2Key);
 
                         // ..And persist the mtime we just pushed so the NEXT run knows R2 has this version
-                        uploadState[upload.R2Key] = svgMtime;
+                        uploadState[upload.R2Key] = sourceMtime;
 
-                        // Per-image success log
-                        AnsiConsole.MarkupLine($"  [green]✓ Image uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
+                        // Per-asset success log (covers both images and linked documents)
+                        AnsiConsole.MarkupLine($"  [green]✓ Uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
                     }
 
-                    // Summary line so the publish run shows that unchanged images were intentionally skipped.
+                    // Summary line so the publish run shows that unchanged assets were intentionally skipped.
                     if (skippedUploadCount > 0)
-                        AnsiConsole.MarkupLine($"  [dim]· {skippedUploadCount} image(s) unchanged, skipped upload[/]");
+                        AnsiConsole.MarkupLine($"  [dim]· {skippedUploadCount} asset(s) unchanged, skipped upload[/]");
 
                     // PDFs only when we actually compiled them; otherwise the on-disk copies are
                     // from an earlier run and we'd risk publishing binaries that don't match the source.
@@ -669,6 +682,64 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
 
         // Frozen result for staleness lookups
         return idsBuilder.ToImmutable();
+    }
+
+    /// <summary>
+    /// Scans the parsed <see cref="Document"/> for handout-referenced documents and queues
+    /// each one for upload to R2. These come from <c>\Link[file.pdf]{...}</c> macros, which
+    /// the parser emits as <see cref="Link"/> nodes; a link whose URL is a bare filename
+    /// (not an absolute <c>http(s)</c> URL) is a downloadable document that lives under
+    /// <c>data/handouts/Documents</c> and is served from the <see cref="DocumentsR2Prefix"/>
+    /// folder on R2. External (<c>http(s)</c>) links are left untouched. Mirrors
+    /// <see cref="CollectImageIds"/>'s traversal so every nested container is covered.
+    /// </summary>
+    /// <param name="document">The parsed handout document to scan.</param>
+    /// <param name="inputDirectory">The <c>data/handouts</c> directory; documents sit in its <c>Documents</c> subfolder.</param>
+    /// <param name="handoutSlug">The language-stripped handout slug, used only for warning messages.</param>
+    /// <param name="pendingUploads">The shared upload queue document uploads are appended to.</param>
+    private static void CollectDocumentUploads(
+        Document document,
+        DirectoryInfo inputDirectory,
+        string handoutSlug,
+        List<PendingUpload> pendingUploads)
+    {
+        // Source folder for downloadable documents, a sibling of the .tex sources and Images/
+        var documentsDirectory = Path.Combine(inputDirectory.FullName, "Documents");
+
+        // Distinct local document filenames referenced anywhere in the document
+        var documentFileNames = ImmutableHashSet.CreateBuilder<string>(StringComparer.Ordinal);
+
+        // Walk every section's content tree; the side-effecting closure captures link targets
+        foreach (var section in document.Sections)
+        {
+            // Same recursive coverage as CollectImageIds — links can live inside any container
+            ContentTree.Map(section.Text.Content, node =>
+            {
+                // Only Link nodes matter, and only those pointing at a local file (not an external URL)
+                if (node is Link link && !Regex.IsMatch(link.Url, @"^https?://", RegexOptions.IgnoreCase))
+                    documentFileNames.Add(link.Url);
+
+                // Return the same reference to signal "no transformation"
+                return node;
+            });
+        }
+
+        // Queue each distinct document, warning when its source file is missing
+        foreach (var fileName in documentFileNames)
+        {
+            // Documents are referenced by bare filename and live directly under data/handouts/Documents
+            var sourcePath = Path.Combine(documentsDirectory, fileName);
+
+            // A referenced-but-missing document is an authoring error — surface it, don't queue it
+            if (!File.Exists(sourcePath))
+            {
+                AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutSlug}[/] links a missing document: {Markup.Escape(fileName)}");
+                continue;
+            }
+
+            // Flat documents/<file> key — the per-type layout shared by problems, handouts, and user uploads
+            pendingUploads.Add(new PendingUpload(sourcePath, $"{DocumentsR2Prefix}/{fileName}"));
+        }
     }
 
     /// <summary>
