@@ -1,0 +1,82 @@
+{
+  "competitions": [
+    {
+      "slug": "csmo",
+      "categories": [
+        "a",
+        "b",
+        "c",
+        "z9",
+        "z8",
+        "z7",
+        "z6",
+        "z5",
+        "z4"
+      ],
+      "rounds": [
+        "i",
+        "s",
+        "ii",
+        "iii"
+      ]
+    },
+    {
+      "slug": "tst",
+      "categories": null,
+      "rounds": [
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5"
+      ]
+    },
+    {
+      "slug": "memo",
+      "categories": null,
+      "rounds": [
+        "i",
+        "t"
+      ]
+    },
+    {
+      "slug": "imo",
+      "categories": null,
+      "rounds": []
+    },
+    {
+      "slug": "caps",
+      "categories": null,
+      "rounds": []
+    },
+    {
+      "slug": "egmo",
+      "categories": null,
+      "rounds": []
+    },
+    {
+      "slug": "tstc",
+      "categories": null,
+      "rounds": []
+    },
+    {
+      "slug": "cpsj",
+      "categories": null,
+      "rounds": [
+        "i",
+        "t"
+      ]
+    }
+  ],
+  "categories": [
+    "a",
+    "b",
+    "c",
+    "z9",
+    "z8",
+    "z7",
+    "z6",
+    "z5",
+    "z4"
+  ]
+}

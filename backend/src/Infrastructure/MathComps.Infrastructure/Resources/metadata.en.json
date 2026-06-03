@@ -34,191 +34,157 @@
     }
   },
   "rounds": {
-    "csmo": {
-      "withCategories": {
-        "a": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "s": {
-            "shortName": "School Round",
-            "fullName": "School Round"
-          },
-          "ii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          },
-          "iii": {
-            "shortName": "National Round",
-            "fullName": "National Round"
-          }
-        },
-        "b": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "s": {
-            "shortName": "School Round",
-            "fullName": "School Round"
-          },
-          "ii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          },
-          "iii": {
-            "shortName": "National Round",
-            "fullName": "National Round"
-          }
-        },
-        "c": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "s": {
-            "shortName": "School Round",
-            "fullName": "School Round"
-          },
-          "ii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          },
-          "iii": {
-            "shortName": "National Round",
-            "fullName": "National Round"
-          }
-        },
-        "z4": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "ii": {
-            "shortName": "School Round",
-            "fullName": "School Round"
-          }
-        },
-        "z5": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "ii": {
-            "shortName": "District Round",
-            "fullName": "District Round"
-          },
-          "iii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          }
-        },
-        "z6": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "ii": {
-            "shortName": "District Round",
-            "fullName": "District Round"
-          },
-          "iii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          }
-        },
-        "z7": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "ii": {
-            "shortName": "District Round",
-            "fullName": "District Round"
-          },
-          "iii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          }
-        },
-        "z8": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "ii": {
-            "shortName": "District Round",
-            "fullName": "District Round"
-          },
-          "iii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          }
-        },
-        "z9": {
-          "i": {
-            "shortName": "Home Round",
-            "fullName": "Home Round"
-          },
-          "ii": {
-            "shortName": "District Round",
-            "fullName": "District Round"
-          },
-          "iii": {
-            "shortName": "Regional Round",
-            "fullName": "Regional Round"
-          }
-        }
-      }
+    "csmo-a-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
     },
-    "memo": {
-      "withoutCategories": {
-        "i": {
-          "shortName": "Individual",
-          "fullName": "Individual Round"
-        },
-        "t": {
-          "shortName": "Team",
-          "fullName": "Team Round"
-        }
-      }
+    "csmo-a-s": {
+      "shortName": "School Round",
+      "fullName": "School Round"
     },
-    "cpsj": {
-      "withoutCategories": {
-        "i": {
-          "shortName": "Individual",
-          "fullName": "Individual Round"
-        },
-        "t": {
-          "shortName": "Team",
-          "fullName": "Team Round"
-        }
-      }
+    "csmo-a-ii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
     },
-    "tst": {
-      "withoutCategories": {
-        "d1": {
-          "shortName": "Day 1",
-          "fullName": "Day 1"
-        },
-        "d2": {
-          "shortName": "Day 2",
-          "fullName": "Day 2"
-        },
-        "d3": {
-          "shortName": "Day 3",
-          "fullName": "Day 3"
-        },
-        "d4": {
-          "shortName": "Day 4",
-          "fullName": "Day 4"
-        },
-        "d5": {
-          "shortName": "Day 5",
-          "fullName": "Day 5"
-        }
-      }
+    "csmo-a-iii": {
+      "shortName": "National Round",
+      "fullName": "National Round"
+    },
+    "csmo-b-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-b-s": {
+      "shortName": "School Round",
+      "fullName": "School Round"
+    },
+    "csmo-b-ii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "csmo-b-iii": {
+      "shortName": "National Round",
+      "fullName": "National Round"
+    },
+    "csmo-c-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-c-s": {
+      "shortName": "School Round",
+      "fullName": "School Round"
+    },
+    "csmo-c-ii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "csmo-c-iii": {
+      "shortName": "National Round",
+      "fullName": "National Round"
+    },
+    "csmo-z4-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-z4-ii": {
+      "shortName": "School Round",
+      "fullName": "School Round"
+    },
+    "csmo-z5-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-z5-ii": {
+      "shortName": "District Round",
+      "fullName": "District Round"
+    },
+    "csmo-z5-iii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "csmo-z6-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-z6-ii": {
+      "shortName": "District Round",
+      "fullName": "District Round"
+    },
+    "csmo-z6-iii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "csmo-z7-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-z7-ii": {
+      "shortName": "District Round",
+      "fullName": "District Round"
+    },
+    "csmo-z7-iii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "csmo-z8-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-z8-ii": {
+      "shortName": "District Round",
+      "fullName": "District Round"
+    },
+    "csmo-z8-iii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "csmo-z9-i": {
+      "shortName": "Home Round",
+      "fullName": "Home Round"
+    },
+    "csmo-z9-ii": {
+      "shortName": "District Round",
+      "fullName": "District Round"
+    },
+    "csmo-z9-iii": {
+      "shortName": "Regional Round",
+      "fullName": "Regional Round"
+    },
+    "memo-i": {
+      "shortName": "Individual",
+      "fullName": "Individual Round"
+    },
+    "memo-t": {
+      "shortName": "Team",
+      "fullName": "Team Round"
+    },
+    "cpsj-i": {
+      "shortName": "Individual",
+      "fullName": "Individual Round"
+    },
+    "cpsj-t": {
+      "shortName": "Team",
+      "fullName": "Team Round"
+    },
+    "tst-d1": {
+      "shortName": "Day 1",
+      "fullName": "Day 1"
+    },
+    "tst-d2": {
+      "shortName": "Day 2",
+      "fullName": "Day 2"
+    },
+    "tst-d3": {
+      "shortName": "Day 3",
+      "fullName": "Day 3"
+    },
+    "tst-d4": {
+      "shortName": "Day 4",
+      "fullName": "Day 4"
+    },
+    "tst-d5": {
+      "shortName": "Day 5",
+      "fullName": "Day 5"
     }
   },
   "categories": {

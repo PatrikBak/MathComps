@@ -31,6 +31,20 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
     #endregion
 
+    #region Public properties
+
+    /// <summary>
+    /// The language-neutral taxonomy structure: competitions, their categories and rounds, and the sort
+    /// order of all three. Loaded from metadata.shared.json.
+    /// </summary>
+    public SharedMetadata Shared { get; } = File.ReadAllText(
+            Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                ResourcePaths.SharedMetadataFile))
+        .FromJson<SharedMetadata>();
+
+    #endregion
+
     #region IMetadataLocalizationService implementation
 
     /// <inheritdoc />
@@ -113,6 +127,8 @@ public class MetadataLocalizationService : IMetadataLocalizationService
             ? throw new InvalidOperationException($"Metadata directory '{directory}' does not exist.")
             // Load all metadata from per-locale JSON files
             : Directory.GetFiles(directory, "metadata.*.json")
+                // Skip the language-neutral structural file (metadata.shared.json) — it's not a locale.
+                .Where(file => Path.GetFileName(file) != Path.GetFileName(ResourcePaths.SharedMetadataFile))
                 // Build a dictionary mapping language to its metadata
                 .ToImmutableDictionary(
                     ParseLanguageFromFile,

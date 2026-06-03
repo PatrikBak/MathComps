@@ -22,18 +22,11 @@ public record LocalizedNames(string ShortName, string FullName);
 public record CompetitionNamesBySlug(ImmutableDictionary<string, LocalizedNames> Data);
 
 /// <summary>
-/// Lookup of round slugs to their localized names.
+/// Lookup of composite round slugs to their localized names.
 /// </summary>
-/// <param name="Data">Dictionary mapping round slug to display names.</param>
+/// <param name="Data">Dictionary mapping composite round slug (e.g. "csmo-a-iii", "memo-i") to display names.</param>
 [JsonConverter(typeof(GenericDictionaryWrapperConverter<RoundNamesBySlug>))]
 public record RoundNamesBySlug(ImmutableDictionary<string, LocalizedNames> Data);
-
-/// <summary>
-/// Lookup of category slugs to their round names.
-/// </summary>
-/// <param name="Data">Dictionary mapping category slug to round names lookup.</param>
-[JsonConverter(typeof(GenericDictionaryWrapperConverter<RoundsByCategory>))]
-public record RoundsByCategory(ImmutableDictionary<string, RoundNamesBySlug> Data);
 
 /// <summary>
 /// Lookup of category slugs to their localized display names.
@@ -42,37 +35,21 @@ public record RoundsByCategory(ImmutableDictionary<string, RoundNamesBySlug> Dat
 [JsonConverter(typeof(GenericDictionaryWrapperConverter<CategoryNamesBySlug>))]
 public record CategoryNamesBySlug(ImmutableDictionary<string, string> Data);
 
-/// <summary>
-/// Lookup of competition slugs to their round translations.
-/// </summary>
-/// <param name="Data">Dictionary mapping competition slug to round configuration.</param>
-[JsonConverter(typeof(GenericDictionaryWrapperConverter<RoundsByCompetition>))]
-public record RoundsByCompetition(ImmutableDictionary<string, PerLocaleRounds> Data);
-
 #endregion
 
 #region Composite Types
 
 /// <summary>
-/// Round translations for a single competition, supporting both category-specific and category-independent rounds.
-/// </summary>
-/// <param name="WithCategories">Round names that vary by category (e.g., "Z9" category has different round names than "A").</param>
-/// <param name="WithoutCategories">Round names shared across all categories or when competition has no categories.</param>
-public record PerLocaleRounds(
-    RoundsByCategory? WithCategories,
-    RoundNamesBySlug? WithoutCategories);
-
-/// <summary>
-/// All metadata for a single locale. Deserializes directly from metadata.*.json files.
-/// Provides localized display names for competitions, rounds, and categories.
+/// Localized display names for one locale, deserialized directly from a metadata.{locale}.json file:
+/// names for competitions, rounds, and categories, plus the season-label template.
 /// </summary>
 /// <param name="Competitions">Competition slug to localized names mapping.</param>
-/// <param name="Rounds">Competition slug to round translations mapping.</param>
+/// <param name="Rounds">Composite round slug (e.g. "csmo-a-iii", "memo-i") to localized names mapping.</param>
 /// <param name="Categories">Category slug to localized display name mapping.</param>
 /// <param name="SeasonFormat">Template for season labels with {number}, {start}, {end} placeholders.</param>
 public record PerLocaleMetadata(
     CompetitionNamesBySlug Competitions,
-    RoundsByCompetition Rounds,
+    RoundNamesBySlug Rounds,
     CategoryNamesBySlug Categories,
     string SeasonFormat)
 {
@@ -90,38 +67,27 @@ public record PerLocaleMetadata(
             .Replace("{end}", endYear.ToString());
 
     /// <summary>
-    /// Gets the round names (short and full) for the specified competition, category, and round.
-    /// First tries category-specific rounds, then falls back to category-independent rounds.
-    /// Uses competition name if no round is specific found (e.g. default rounds).
+    /// Gets the round names (short and full) for the specified competition, category, and round. Composes the
+    /// composite round slug (e.g. "csmo-a-iii", "memo-i") and looks it up. A null round slug means the
+    /// competition's single default round, which uses the competition's own name (e.g. IMO -> IMO).
     /// </summary>
-    /// <param name="competitionSlug">The competition identifier (e.g., "mo", "imo").</param>
-    /// <param name="categorySlug">The category identifier (e.g., "a", "b"), or null for category-independent lookup.</param>
-    /// <param name="roundSlug">The round identifier (e.g., "school", "regional", "national").</param>
+    /// <param name="competitionSlug">The competition identifier (e.g., "csmo", "imo").</param>
+    /// <param name="categorySlug">The category identifier (e.g., "a", "b"), or null when the competition has no categories.</param>
+    /// <param name="roundSlug">The round identifier (e.g., "iii", "i", "d1"), or null for a default round.</param>
     /// <returns>Localized round names, or null if not found.</returns>
     public LocalizedNames? GetRoundNames(string competitionSlug, string? categorySlug, string? roundSlug)
     {
-        // Try explicit round metadata if available AND we have a specific round slug
-        if (roundSlug != null && Rounds.Data.TryGetValue(competitionSlug, out var roundsByCompetition))
-        {
-            // Try category-specific path first
-            if (categorySlug != null &&
-                roundsByCompetition.WithCategories?.Data.TryGetValue(categorySlug, out var roundsWithCategory) == true &&
-                roundsWithCategory.Data.TryGetValue(roundSlug, out var names))
-            {
-                return names;
-            }
+        // A default round (null slug) has no round name of its own — use the competition's own name.
+        if (roundSlug == null)
+            return Competitions.Data.GetValueOrDefault(competitionSlug);
 
-            // Try category-independent path
-            if (roundsByCompetition.WithoutCategories?.Data.GetValueOrDefault(roundSlug) is { } independentName)
-            {
-                return independentName;
-            }
-        }
+        // Compose the composite slug: {comp}[-{cat}]-{round}.
+        var compositeSlug = categorySlug == null
+            ? $"{competitionSlug}-{roundSlug}"
+            : $"{competitionSlug}-{categorySlug}-{roundSlug}";
 
-        // Fallback: If no explicit round definition found, and we are asking for the default round (null slug),
-        // use the Competition's own name (e.g. IMO -> IMO).
-        return roundSlug == null &&
-            Competitions.Data.TryGetValue(competitionSlug, out var competitionNames) ? competitionNames : null;
+        // Look up the composed key; null when the locale has no entry for it.
+        return Rounds.Data.GetValueOrDefault(compositeSlug);
     }
 }
 
