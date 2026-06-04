@@ -1,4 +1,5 @@
 using Clerk.BackendAPI;
+using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +64,7 @@ public static class DependencyInjectionHelpers
         services.AddScoped<IClerkWebhookService, ClerkWebhook>();
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IProblemImageService, ProblemImageService>();
+        services.AddScoped<IDraftResolutionService, DraftResolutionService>();
 
         // Clerk API Client
         services.AddScoped(serviceProvider =>

@@ -82,9 +82,93 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     public string GetSeasonLabel(Language language, int editionNumber, int startYear, int endYear) =>
         GetMetadata(language).GetSeasonLabel(editionNumber, startYear, endYear);
 
+    /// <inheritdoc />
+    public IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(
+        string competitionSlug,
+        string? categorySlug,
+        string? roundSlug)
+    {
+        // Collect every gap across the referenced competition / category / round slugs.
+        var issues = new List<TaxonomyRegistryIssue>();
+
+        // Competition: its structural entry in the shared backbone …
+        var competitionEntry = Shared.Competitions.FirstOrDefault(competition => competition.Slug == competitionSlug);
+
+        // Check if competition missing in some locale 
+        var competitionMissingLocales = LocalesMissing(metadata =>
+            metadata.Competitions?.Data.ContainsKey(competitionSlug) == true);
+
+        // Report the competition only when something's actually missing.
+        if (competitionEntry is null || competitionMissingLocales.Length > 0)
+            issues.Add(new TaxonomyRegistryIssue(
+                TaxonomyEntityKind.Competition,
+                competitionSlug,
+                MissingFromSharedStructure: competitionEntry is null,
+                competitionMissingLocales));
+
+        // Category is only referenced when the competition carries categories.
+        if (categorySlug is not null)
+        {
+            // Structural: in the global category list, and listed under this competition when the competition exists.
+            var categoryMissingFromShared =
+                !Shared.Categories.Contains(categorySlug) ||
+                (competitionEntry?.Categories is { } competitionCategories && !competitionCategories.Contains(categorySlug));
+
+            // Check if category missing in some locale
+            var categoryMissingLocales = LocalesMissing(metadata =>
+                metadata.Categories?.Data.ContainsKey(categorySlug) == true);
+
+            // Report only on a real gap.
+            if (categoryMissingFromShared || categoryMissingLocales.Length > 0)
+                issues.Add(new TaxonomyRegistryIssue(
+                    TaxonomyEntityKind.Category,
+                    categorySlug,
+                    categoryMissingFromShared,
+                    categoryMissingLocales));
+        }
+
+        // Round is referenced as the (competition, category, round) composite.
+        // Structural: the competition lists this round (a null round is the default round, i.e. no listed rounds).
+        var roundMissingFromShared = roundSlug is null
+            ? competitionEntry is not null && competitionEntry.Rounds.Length > 0
+            : competitionEntry is null || !competitionEntry.Rounds.Contains(roundSlug);
+
+        // Check if round missing in some locale
+        var roundMissingLocales = LocalesMissing(metadata =>
+            metadata.GetRoundNames(competitionSlug, categorySlug, roundSlug) is not null);
+
+        // Identify the round by its composite slug (e.g. "csmo-a-iii") — a round's canonical key form, so the gap
+        // names the exact key to look for. A default round (null slug) is keyed under the competition itself.
+        var roundIdentifier = roundSlug is null
+            ? competitionSlug
+            : TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, roundSlug);
+
+        // Report only on a real gap.
+        if (roundMissingFromShared || roundMissingLocales.Length > 0)
+            issues.Add(new TaxonomyRegistryIssue(
+                TaxonomyEntityKind.Round,
+                roundIdentifier,
+                roundMissingFromShared,
+                roundMissingLocales));
+
+        // Hand back every gap found (possibly none).
+        return issues;
+    }
+
     #endregion
 
     #region Private Helpers
+
+    /// <summary>
+    /// Returns the locales a slug is missing from — those whose loaded metadata fails the given presence
+    /// predicate, plus any locale whose file didn't load at all. Evaluates all three so the caller sees every
+    /// gap at once.
+    /// </summary>
+    /// <param name="isPresent">Predicate returning true when the slug is present in a locale's metadata.</param>
+    /// <returns>The locales where the slug is absent, in enum order.</returns>
+    private ImmutableArray<Language> LocalesMissing(Func<PerLocaleMetadata, bool> isPresent) =>
+        [.. Enum.GetValues<Language>().Where(locale =>
+            !(_metadata.TryGetValue(locale, out var metadata) && isPresent(metadata)))];
 
     /// <summary>
     /// Gets the metadata for a specific language, throwing if not loaded.
