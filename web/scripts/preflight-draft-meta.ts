@@ -20,6 +20,7 @@ export const FALLBACK_META: ManifestMeta = {
   season: { year: 0 },
   date: '',
   language: DEFAULT_LOCALE,
+  original: true,
 }
 
 /** Best-effort meta paired with every issue found while reading or narrowing it. */
@@ -75,9 +76,10 @@ export function narrowMeta(parsed: unknown): MetaResult {
   const season = narrowSeason(parsed.season, errors)
   const date = narrowDate(parsed.date, errors)
   const language = narrowLanguage(parsed.language, errors)
+  const original = narrowOriginal(parsed.original, errors)
 
   // Assemble the best-effort meta alongside the collected issues
-  return { meta: { competition, category, round, season, date, language }, errors }
+  return { meta: { competition, category, round, season, date, language, original }, errors }
 }
 
 /**
@@ -203,4 +205,25 @@ function narrowLanguage(value: unknown, errors: VerdictError[]): Locale {
     )
   )
   return DEFAULT_LOCALE
+}
+
+/**
+ * Narrows the optional `original` flag, defaulting to `true` when absent so an omitted flag reads as an
+ * original, and recording an error when present but not a boolean.
+ *
+ * @param value - The raw `original` value from the parsed document.
+ * @param errors - Accumulator the issue is pushed onto.
+ *
+ * @returns The flag, defaulting to `true` when absent or malformed.
+ */
+function narrowOriginal(value: unknown, errors: VerdictError[]): boolean {
+  // Absent means the draft is an original — the overwhelmingly common case
+  if (value === undefined || value === null) return true
+
+  // A real boolean is taken verbatim
+  if (typeof value === 'boolean') return value
+
+  // Present but malformed — record it and fall back to original
+  errors.push(metaIssue(`original must be a boolean when present (got ${JSON.stringify(value)})`))
+  return true
 }

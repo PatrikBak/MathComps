@@ -32,6 +32,11 @@ export type ManifestMeta = {
   date: string
   /** Source language of the draft — the original {@link ProblemText} language. */
   language: Locale
+  /**
+   * Draft-level original-vs-translation flag. `true` (the default) means these texts are the canonical original
+   * in the draft's language; `false` marks a translation that attaches onto an existing original.
+   */
+  original: boolean
 }
 
 /** One problem's normalized content, ready for the C# side to persist as rows. */

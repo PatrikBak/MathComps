@@ -151,6 +151,8 @@ describe('valid drafts — parsed manifest content', () => {
     expect(manifest.meta.season).toEqual({ year: 2024 })
     expect(manifest.meta.date).toBe('2024-03-15')
     expect(manifest.meta.language).toBe('sk')
+    // No `original` in the fixture's _meta.yaml, so it defaults to an original draft
+    expect(manifest.meta.original).toBe(true)
 
     // A clean run carries no issues at all
     expect(isOk(manifest.verdict.errors)).toBe(true)
@@ -161,6 +163,13 @@ describe('valid drafts — parsed manifest content', () => {
     const manifest = await loadFixture('valid-no-category')
     expect(manifest.meta.category).toBeNull()
     expect(manifest.meta.competition).toBe('imo')
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('carries an explicit original: false through as a translation import', async () => {
+    const manifest = await loadFixture('valid-translation')
+    expect(manifest.meta.original).toBe(false)
+    expect(manifest.meta.language).toBe('en')
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
@@ -238,6 +247,12 @@ describe('invalid drafts — specific issues', () => {
     const manifest = await loadFixture('invalid-bad-language')
     const error = findError(manifest, (entry) => entry.rule === 'meta')
     expect(error?.message).toContain('language')
+  })
+
+  it('flags a non-boolean original flag', async () => {
+    const manifest = await loadFixture('invalid-bad-original')
+    const error = findError(manifest, (entry) => entry.rule === 'meta')
+    expect(error?.message).toContain('original')
   })
 
   it('flags malformed meta YAML without throwing', async () => {
@@ -428,6 +443,7 @@ describe('narrowMeta', () => {
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'sk',
+      original: true,
     })
   })
 
@@ -504,6 +520,44 @@ describe('narrowMeta', () => {
       language: 'de',
     })
     expect(errors.some((error) => error.message.includes('language'))).toBe(true)
+  })
+
+  it('defaults original to true when absent', () => {
+    const { meta, errors } = narrowMeta({
+      competition: 'csmo',
+      round: 'iii',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      language: 'sk',
+    })
+    expect(meta.original).toBe(true)
+    expect(errors).toEqual([])
+  })
+
+  it('accepts an explicit original: false for a translation import', () => {
+    const { meta, errors } = narrowMeta({
+      competition: 'csmo',
+      round: 'iii',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      language: 'sk',
+      original: false,
+    })
+    expect(meta.original).toBe(false)
+    expect(errors).toEqual([])
+  })
+
+  it('errors on a non-boolean original and falls back to true', () => {
+    const { meta, errors } = narrowMeta({
+      competition: 'csmo',
+      round: 'iii',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      language: 'sk',
+      original: 'yes',
+    })
+    expect(meta.original).toBe(true)
+    expect(errors.some((error) => error.message.includes('original'))).toBe(true)
   })
 
   it('errors when the document is not a mapping', () => {
