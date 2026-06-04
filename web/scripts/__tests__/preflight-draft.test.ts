@@ -17,8 +17,8 @@ import { isOk, preflightDraft } from '../preflight-draft-core'
 import { narrowMeta } from '../preflight-draft-meta'
 import {
   collectImageNames,
-  parseFrontmatter,
-  splitFrontmatter,
+  hasLeadingFrontmatter,
+  parseProblemMeta,
   splitOnSentinel,
   toAbsoluteLine,
 } from '../preflight-draft-parse'
@@ -48,6 +48,8 @@ type ManifestSummary = {
   problemCount: number
   /** The problems' orders, in manifest order. */
   problemOrders: number[]
+  /** Each problem's text languages, original first, in manifest order. */
+  problemLanguages: string[][]
   /** Every issue reduced to its stable fields (message and position omitted). */
   errors: ErrorSummary[]
 }
@@ -66,6 +68,9 @@ function summarize(manifest: DraftManifest): ManifestSummary {
     ok: isOk(manifest.verdict.errors),
     problemCount: manifest.problems.length,
     problemOrders: manifest.problems.map((problem) => problem.order),
+    problemLanguages: manifest.problems.map((problem) =>
+      problem.texts.map((text) => text.language)
+    ),
     errors: manifest.verdict.errors.map((error) => ({
       file: error.file,
       half: error.half,
@@ -126,23 +131,29 @@ describe('preflight-draft fixtures (verdict + snapshot)', () => {
 })
 
 describe('valid drafts — parsed manifest content', () => {
-  it('parses meta, both halves, authors, and image refs', async () => {
+  it('parses meta, the original text, authors, and image refs', async () => {
     const manifest = await loadFixture('valid-basic')
 
     // Two problems, ordered by filename
     expect(manifest.problems.map((problem) => problem.order)).toEqual([1, 2])
 
-    // The first problem has a solution; the second (no sentinel) does not
+    // Each problem has a single Slovak original text variant
     const [first, second] = manifest.problems
-    expect(first!.solutionMarkdown).not.toBeNull()
-    expect(second!.solutionMarkdown).toBeNull()
+    const firstOriginal = first!.texts[0]!
+    expect(first!.texts).toHaveLength(1)
+    expect(firstOriginal.language).toBe('sk')
+    expect(firstOriginal.original).toBe(true)
+
+    // The first problem has a solution; the second (no sentinel) does not
+    expect(firstOriginal.solutionMarkdown).not.toBeNull()
+    expect(second!.texts[0]!.solutionMarkdown).toBeNull()
 
     // Author names survive parsing, including diacritics
     expect(first!.authors).toEqual(['Jaromír Šimša'])
 
     // Image references are reduced to basenames and the body still carries the relative ref for C#
     expect(first!.images).toEqual(['incircle.svg'])
-    expect(first!.statementMarkdown).toContain('images/incircle.svg')
+    expect(firstOriginal.statementMarkdown).toContain('images/incircle.svg')
 
     // Taxonomy is carried through verbatim
     expect(manifest.meta.competition).toBe('csmo')
@@ -151,8 +162,6 @@ describe('valid drafts — parsed manifest content', () => {
     expect(manifest.meta.season).toEqual({ year: 2024 })
     expect(manifest.meta.date).toBe('2024-03-15')
     expect(manifest.meta.language).toBe('sk')
-    // No `original` in the fixture's _meta.yaml, so it defaults to an original draft
-    expect(manifest.meta.original).toBe(true)
 
     // A clean run carries no issues at all
     expect(isOk(manifest.verdict.errors)).toBe(true)
@@ -166,10 +175,27 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
-  it('carries an explicit original: false through as a translation import', async () => {
-    const manifest = await loadFixture('valid-translation')
-    expect(manifest.meta.original).toBe(false)
-    expect(manifest.meta.language).toBe('en')
+  it('assembles every language variant with the original first', async () => {
+    const manifest = await loadFixture('valid-multilang')
+    const [problem] = manifest.problems
+
+    // The original (sk) sorts ahead of the translations, which follow in supported-locale order
+    expect(problem!.texts.map((text) => text.language)).toEqual(['sk', 'cs', 'en'])
+    expect(problem!.texts[0]!.original).toBe(true)
+    expect(problem!.texts.filter((text) => text.original)).toHaveLength(1)
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('lets a translation carry just the statement', async () => {
+    const manifest = await loadFixture('valid-translation-statement-only')
+    const translation = manifest.problems[0]!.texts.find((text) => text.language === 'en')!
+    expect(translation.solutionMarkdown).toBeNull()
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('unions a shared image across languages without an orphan warning', async () => {
+    const manifest = await loadFixture('valid-shared-image-across-langs')
+    expect(manifest.problems[0]!.images).toEqual(['fig.svg'])
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
@@ -209,8 +235,8 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
-  it('defaults authors when a problem has no frontmatter', async () => {
-    const manifest = await loadFixture('valid-no-frontmatter')
+  it('defaults authors when a problem declares none', async () => {
+    const manifest = await loadFixture('valid-minimal-meta')
     expect(manifest.problems[0]!.authors).toEqual([])
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
@@ -236,6 +262,13 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.half).toBe('solution')
   })
 
+  it('flags broken math in a translation, tagged to its body file', async () => {
+    const manifest = await loadFixture('invalid-translation-bad-katex')
+    const error = findError(manifest, (entry) => entry.rule === 'katex')
+    expect(error?.file).toBe('p1.en.md')
+    expect(error?.half).toBe('statement')
+  })
+
   it('flags a missing required meta field', async () => {
     const manifest = await loadFixture('invalid-missing-meta-round')
     const error = findError(manifest, (entry) => entry.rule === 'meta')
@@ -247,12 +280,6 @@ describe('invalid drafts — specific issues', () => {
     const manifest = await loadFixture('invalid-bad-language')
     const error = findError(manifest, (entry) => entry.rule === 'meta')
     expect(error?.message).toContain('language')
-  })
-
-  it('flags a non-boolean original flag', async () => {
-    const manifest = await loadFixture('invalid-bad-original')
-    const error = findError(manifest, (entry) => entry.rule === 'meta')
-    expect(error?.message).toContain('original')
   })
 
   it('flags malformed meta YAML without throwing', async () => {
@@ -267,10 +294,57 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.message).toContain('not found')
   })
 
-  it('flags malformed frontmatter without throwing', async () => {
-    const manifest = await loadFixture('invalid-bad-frontmatter')
-    const error = findError(manifest, (entry) => entry.rule === 'frontmatter')
+  it('flags malformed problem metadata shape without throwing', async () => {
+    const manifest = await loadFixture('invalid-bad-problem-meta')
+    const error = findError(manifest, (entry) => entry.rule === 'problem-meta')
+    expect(error?.file).toBe('p1.yaml')
     expect(error?.message).toContain('authors')
+  })
+
+  it('flags malformed problem metadata YAML without throwing', async () => {
+    const manifest = await loadFixture('invalid-malformed-problem-meta')
+    const error = findError(manifest, (entry) => entry.rule === 'problem-meta')
+    expect(error?.message).toContain('valid YAML')
+  })
+
+  it('flags a problem with body files but no metadata file', async () => {
+    const manifest = await loadFixture('invalid-missing-problem-meta')
+    const error = findError(manifest, (entry) => entry.rule === 'missing-problem-meta')
+    expect(error?.message).toContain('metadata file')
+  })
+
+  it('flags a problem with a metadata file but no body', async () => {
+    const manifest = await loadFixture('invalid-missing-body')
+    const error = findError(manifest, (entry) => entry.rule === 'missing-body')
+    expect(error?.message).toContain('body')
+  })
+
+  it('flags a problem with no body in the original language', async () => {
+    const manifest = await loadFixture('invalid-missing-original')
+    const error = findError(manifest, (entry) => entry.rule === 'missing-original')
+    expect(error?.message).toContain('sk')
+  })
+
+  it('flags a body file with an unsupported language token', async () => {
+    const manifest = await loadFixture('invalid-unknown-lang')
+    const error = findError(manifest, (entry) => entry.rule === 'unknown-lang')
+    expect(error?.file).toBe('p1.de.md')
+    expect(error?.message).toContain('de')
+  })
+
+  it('flags a body that carries frontmatter', async () => {
+    const manifest = await loadFixture('invalid-body-frontmatter')
+    const error = findError(manifest, (entry) => entry.rule === 'body-frontmatter')
+    expect(error?.file).toBe('p1.sk.md')
+  })
+
+  it('flags a translated solution with no original solution', async () => {
+    const manifest = await loadFixture('invalid-translation-solution-without-original')
+    const error = findError(
+      manifest,
+      (entry) => entry.rule === 'translation-solution-without-original'
+    )
+    expect(error?.half).toBe('solution')
   })
 
   it('flags an empty statement', async () => {
@@ -294,19 +368,13 @@ describe('invalid drafts — specific issues', () => {
   it('flags a folder with no problems', async () => {
     const manifest = await loadFixture('invalid-no-problems')
     const error = findError(manifest, (entry) => entry.rule === 'problem-files')
-    expect(error?.message).toContain('no pN.md')
-  })
-
-  it('flags an unterminated frontmatter block', async () => {
-    const manifest = await loadFixture('invalid-unterminated-frontmatter')
-    const error = findError(manifest, (entry) => entry.rule === 'frontmatter')
-    expect(error?.message).toContain('terminated')
+    expect(error?.message).toContain('no problem files')
   })
 
   it('flags a problem list that does not start at 1', async () => {
     const manifest = await loadFixture('invalid-starts-at-two')
     const error = findError(manifest, (entry) => entry.rule === 'problem-files')
-    expect(error?.message).toContain('p1.md')
+    expect(error?.message).toContain('p1.yaml')
   })
 })
 
@@ -318,7 +386,7 @@ describe('isOk', () => {
   it('fails when any issue has error severity', () => {
     const errors: VerdictError[] = [
       {
-        file: 'p1.md',
+        file: 'p1.sk.md',
         half: null,
         line: null,
         col: null,
@@ -346,26 +414,13 @@ describe('isOk', () => {
   })
 })
 
-describe('splitFrontmatter', () => {
-  it('returns the whole file as the body when there is no frontmatter', () => {
-    const result = splitFrontmatter('line one\nline two')
-    expect(result.frontmatterText).toBeNull()
-    expect(result.body).toBe('line one\nline two')
-    expect(result.bodyStartLine0).toBe(0)
-    expect(result.unterminated).toBe(false)
+describe('hasLeadingFrontmatter', () => {
+  it('detects a leading --- fence', () => {
+    expect(hasLeadingFrontmatter('---\nauthors:\n  - X\n---\nbody')).toBe(true)
   })
 
-  it('separates a terminated frontmatter block from the body', () => {
-    const result = splitFrontmatter('---\nauthors:\n  - X\n---\nbody line')
-    expect(result.frontmatterText).toBe('authors:\n  - X')
-    expect(result.body).toBe('body line')
-    expect(result.bodyStartLine0).toBe(4)
-    expect(result.unterminated).toBe(false)
-  })
-
-  it('flags an unterminated frontmatter block', () => {
-    const result = splitFrontmatter('---\nauthors:\n  - X\nbody with no closing fence')
-    expect(result.unterminated).toBe(true)
+  it('is false for a content-only body', () => {
+    expect(hasLeadingFrontmatter('A statement with no fence.')).toBe(false)
   })
 })
 
@@ -396,31 +451,31 @@ describe('splitOnSentinel', () => {
   })
 })
 
-describe('parseFrontmatter', () => {
-  it('defaults when there is no frontmatter', () => {
-    const result = parseFrontmatter(null)
+describe('parseProblemMeta', () => {
+  it('defaults when the file is empty', () => {
+    const result = parseProblemMeta('')
     expect(result.error).toBeNull()
-    expect(result.frontmatter).toEqual({ authors: [], solutionLink: null })
+    expect(result.meta).toEqual({ authors: [], solutionLink: null })
   })
 
   it('parses authors and an optional solution link', () => {
-    const result = parseFrontmatter('authors:\n  - A\n  - B\nsolutionLink: https://x.test')
+    const result = parseProblemMeta('authors:\n  - A\n  - B\nsolutionLink: https://x.test')
     expect(result.error).toBeNull()
-    expect(result.frontmatter).toEqual({ authors: ['A', 'B'], solutionLink: 'https://x.test' })
+    expect(result.meta).toEqual({ authors: ['A', 'B'], solutionLink: 'https://x.test' })
   })
 
   it('rejects authors that are not a list of strings', () => {
-    const result = parseFrontmatter('authors: not a list')
+    const result = parseProblemMeta('authors: not a list')
     expect(result.error).toContain('authors')
   })
 
   it('rejects a non-string solution link', () => {
-    const result = parseFrontmatter('solutionLink: 42')
+    const result = parseProblemMeta('solutionLink: 42')
     expect(result.error).toContain('solutionLink')
   })
 
   it('reports malformed YAML rather than throwing', () => {
-    const result = parseFrontmatter('authors: [A')
+    const result = parseProblemMeta('authors: [A')
     expect(result.error).toContain('valid YAML')
   })
 })
@@ -443,7 +498,6 @@ describe('narrowMeta', () => {
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'sk',
-      original: true,
     })
   })
 
@@ -522,44 +576,6 @@ describe('narrowMeta', () => {
     expect(errors.some((error) => error.message.includes('language'))).toBe(true)
   })
 
-  it('defaults original to true when absent', () => {
-    const { meta, errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
-      season: { year: 2024 },
-      date: '2024-03-15',
-      language: 'sk',
-    })
-    expect(meta.original).toBe(true)
-    expect(errors).toEqual([])
-  })
-
-  it('accepts an explicit original: false for a translation import', () => {
-    const { meta, errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
-      season: { year: 2024 },
-      date: '2024-03-15',
-      language: 'sk',
-      original: false,
-    })
-    expect(meta.original).toBe(false)
-    expect(errors).toEqual([])
-  })
-
-  it('errors on a non-boolean original and falls back to true', () => {
-    const { meta, errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
-      season: { year: 2024 },
-      date: '2024-03-15',
-      language: 'sk',
-      original: 'yes',
-    })
-    expect(meta.original).toBe(true)
-    expect(errors.some((error) => error.message.includes('original'))).toBe(true)
-  })
-
   it('errors when the document is not a mapping', () => {
     const { errors } = narrowMeta('not a mapping')
     expect(errors[0]?.message).toContain('mapping')
@@ -576,29 +592,17 @@ describe('toAbsoluteLine', () => {
     expect(toAbsoluteLine(4, null)).toBeNull()
   })
 
-  it('composes with the frontmatter and sentinel splits', () => {
-    const file = [
-      '---',
-      'authors:',
-      '  - X',
-      '---',
-      'statement line',
-      '<!-- solution -->',
-      'solution line 1',
-      'solution line 2',
-    ].join('\n')
+  it('composes with the sentinel split on a content-only body', () => {
+    const body = ['statement line', '<!-- solution -->', 'solution line 1', 'solution line 2'].join(
+      '\n'
+    )
 
-    // The body begins on the line after the closing fence
-    const { body, bodyStartLine0 } = splitFrontmatter(file)
-    expect(bodyStartLine0).toBe(4)
-
-    // The solution half begins two body lines in (statement + sentinel)
+    // The solution half begins on the body line after the sentinel
     const { solutionBodyLine0 } = splitOnSentinel(body)
     expect(solutionBodyLine0).toBe(2)
 
-    // The second solution line therefore maps to source line 8
-    const solutionStartLine0 = bodyStartLine0 + (solutionBodyLine0 ?? 0)
-    expect(toAbsoluteLine(solutionStartLine0, 2)).toBe(8)
+    // The second solution line therefore maps to source line 4
+    expect(toAbsoluteLine(solutionBodyLine0 ?? 0, 2)).toBe(4)
   })
 })
 

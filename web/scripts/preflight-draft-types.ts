@@ -30,34 +30,39 @@ export type ManifestMeta = {
   season: Season
   /** Round-instance date as `YYYY-MM-DD`, feeding `RoundInstance.Date`. */
   date: string
-  /** Source language of the draft — the original {@link ProblemText} language. */
+  /** The original language of this draft — the body whose `pN.<lang>.md` matches it is the original. */
   language: Locale
-  /**
-   * Draft-level original-vs-translation flag. `true` (the default) means these texts are the canonical original
-   * in the draft's language; `false` marks a translation that attaches onto an existing original.
-   */
+}
+
+/** One language variant of a problem — the original or a translation, body parsed into its two halves. */
+export type ManifestText = {
+  /** Language of this text, taken from its `pN.<lang>.md` filename. */
+  language: Locale
+  /** `true` for the original (its language matches `meta.language`), `false` for a translation. */
   original: boolean
+  /** Statement markdown verbatim, still carrying relative `images/…` references. */
+  statementMarkdown: string
+  /** Solution markdown verbatim, or `null` when this text has no solution sentinel. */
+  solutionMarkdown: string | null
 }
 
 /** One problem's normalized content, ready for the C# side to persist as rows. */
 export type ManifestProblem = {
-  /** 1-based position within the round, taken from the `pN.md` filename. */
+  /** 1-based position within the round, taken from the `pN.yaml` / `pN.<lang>.md` filenames. */
   order: number
   /** Author display names in declared order. */
   authors: string[]
   /** External solution URL, or `null` when absent. */
   solutionLink: string | null
-  /** Statement markdown verbatim, still carrying relative `images/…` references. */
-  statementMarkdown: string
-  /** Solution markdown verbatim, or `null` when the draft has no solution sentinel. */
-  solutionMarkdown: string | null
-  /** Basenames of the images this problem references (flat, under `images/`). */
+  /** Language variants — the original first, then translations in supported-locale order. */
+  texts: ManifestText[]
+  /** Basenames of every image referenced across this problem's texts (flat, under `images/`). */
   images: string[]
 }
 
 /** One issue found during preflight — an error or warning with its source location. */
 export type VerdictError = {
-  /** File the issue was found in (e.g. `p1.md` or `_meta.yaml`). */
+  /** File the issue was found in (e.g. `p1.en.md`, `p1.yaml`, or `_meta.yaml`). */
   file: string
   /** Half the issue belongs to, or `null` for file-level issues. */
   half: ProblemHalf | null
@@ -83,7 +88,7 @@ type Verdict = {
 export type DraftManifest = {
   /** Folder-level taxonomy. */
   meta: ManifestMeta
-  /** One entry per `pN.md`, ordered by problem number. */
+  /** One entry per problem, ordered by problem number. */
   problems: ManifestProblem[]
   /** The pass/fail decision and its supporting issues. */
   verdict: Verdict

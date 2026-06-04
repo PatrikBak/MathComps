@@ -9,32 +9,45 @@ import path from 'path'
 import { parse as parseYaml } from 'yaml'
 
 import { validateMarkdown } from '../src/components/shared/components/rich-math-editor/utils/markdown-pipeline'
+import type { Locale } from '../src/i18n/i18n'
+import { SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import type { MetaResult } from './preflight-draft-meta'
 import { FALLBACK_META, META_FILENAME, metaIssue, narrowMeta } from './preflight-draft-meta'
 import {
   asMessage,
   collectImageNames,
+  hasLeadingFrontmatter,
   IMAGE_REF_PREFIX,
   IMAGES_DIRNAME,
-  parseFrontmatter,
-  splitFrontmatter,
+  parseProblemMeta,
   splitOnSentinel,
   toAbsoluteLine,
 } from './preflight-draft-parse'
 import type {
   DraftManifest,
   ManifestProblem,
+  ManifestText,
   ProblemHalf,
   VerdictError,
   VerdictSeverity,
 } from './preflight-draft-types'
 
-/** A discovered problem file paired with the order parsed from its name. */
-type ProblemFile = {
-  /** The problem filename (e.g. `p1.md`). */
+/** A discovered `pN.<lang>.md` body file with the raw language token from its name. */
+type BodyFile = {
+  /** The body filename (e.g. `p1.en.md`). */
   file: string
-  /** The 1-based order parsed from the filename. */
+  /** The language token from the filename, not yet checked against the supported locales. */
+  langToken: string
+}
+
+/** One problem's files grouped by order: its `pN.yaml` metadata and its `pN.<lang>.md` bodies. */
+type ProblemGroup = {
+  /** The 1-based order parsed from the filenames. */
   order: number
+  /** The `pN.yaml` metadata filename, or `null` when no metadata file was found for this order. */
+  metaFile: string | null
+  /** The `pN.<lang>.md` body files found for this order, in readdir order. */
+  bodies: BodyFile[]
 }
 
 /**
@@ -53,11 +66,11 @@ export async function preflightDraft(folderPath: string): Promise<DraftManifest>
   const metaResult = readMeta(folderPath)
   errors.push(...metaResult.errors)
 
-  // One manifest entry per problem file, kept in numeric order for stable output
-  const problemFiles = listProblemFiles(folderPath, errors)
+  // One manifest entry per problem, kept in numeric order for stable output
+  const groups = groupProblemFiles(folderPath, errors)
   const problems: ManifestProblem[] = []
-  for (const problemFile of problemFiles) {
-    problems.push(await parseProblem(folderPath, problemFile.file, problemFile.order, errors))
+  for (const group of groups) {
+    problems.push(await parseProblem(folderPath, group, metaResult.meta.language, errors))
   }
 
   // Image files referenced by nobody are advisory leftovers, not failures
@@ -112,128 +125,263 @@ function readMeta(folderPath: string): MetaResult {
 }
 
 /**
- * Lists the `pN.md` problem files in numeric order and flags a missing,
- * non-contiguous, or duplicated numbering scheme.
+ * Groups a draft folder's `pN.yaml` metadata files and `pN.<lang>.md` body files
+ * by problem order, flagging a missing, non-contiguous, or duplicated numbering
+ * scheme plus any order that lacks its metadata file or any body file.
  *
  * @param folderPath - Path to the draft folder.
- * @param errors - Accumulator the sequencing issues are pushed onto.
+ * @param errors - Accumulator the structural issues are pushed onto.
  *
- * @returns The matched problem files paired with their 1-based order.
+ * @returns One {@link ProblemGroup} per discovered order, in numeric order.
  */
-function listProblemFiles(folderPath: string, errors: VerdictError[]): ProblemFile[] {
-  // Match `p<number>.md` and carry the parsed number alongside the filename
-  const matched = fs
-    .readdirSync(folderPath)
+function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemGroup[] {
+  // Split the folder's entries into the metadata files and the body files, each carrying its parsed order
+  const names = fs.readdirSync(folderPath)
+  const metaFiles = names
     .map((name) => {
-      const match = /^p(\d+)\.md$/.exec(name)
+      const match = /^p(\d+)\.yaml$/.exec(name)
       return match ? { file: name, order: Number(match[1]) } : null
     })
-    .filter((entry): entry is ProblemFile => entry !== null)
-    .sort((first, second) => first.order - second.order)
+    .filter((entry): entry is { file: string; order: number } => entry !== null)
+  const bodyFiles = names
+    .map((name) => {
+      const match = /^p(\d+)\.([a-z]+)\.md$/.exec(name)
+      return match ? { file: name, order: Number(match[1]), langToken: match[2]! } : null
+    })
+    .filter((entry): entry is { file: string; order: number; langToken: string } => entry !== null)
 
-  // A draft with no problems has nothing to import
-  if (matched.length === 0) {
-    errors.push(problemIssue('(folder)', null, 'problem-files', 'no pN.md problem files found'))
-    return matched
+  // A folder with nothing problem-shaped has nothing to import
+  if (metaFiles.length === 0 && bodyFiles.length === 0) {
+    errors.push(
+      problemIssue('(folder)', null, 'problem-files', 'no problem files found (expected pN.yaml)')
+    )
+    return []
   }
 
-  // Two files resolving to the same number (e.g. p1.md and p01.md) is ambiguous
-  const orders = matched.map((entry) => entry.order)
-  if (new Set(orders).size !== orders.length) {
+  // Two metadata files resolving to the same order (e.g. p1.yaml and p01.yaml) is ambiguous
+  const metaOrders = metaFiles.map((entry) => entry.order)
+  const duplicateOrders = [
+    ...new Set(metaOrders.filter((order, index) => metaOrders.indexOf(order) !== index)),
+  ]
+  duplicateOrders.forEach((order) => {
+    const files = metaFiles.filter((entry) => entry.order === order).map((entry) => entry.file)
     errors.push(
       problemIssue(
         '(folder)',
         null,
         'problem-files',
-        `duplicate problem numbers: ${orders.join(', ')}`
+        `duplicate problem ${order}: ${files.join(', ')}`
       )
     )
-  }
+  })
+
+  // Build one group per order, pairing each order's metadata file with its body files
+  const orders = [...new Set([...metaOrders, ...bodyFiles.map((entry) => entry.order)])].sort(
+    (first, second) => first - second
+  )
+  const groups = orders.map((order) => ({
+    order,
+    metaFile: metaFiles.find((entry) => entry.order === order)?.file ?? null,
+    bodies: bodyFiles
+      .filter((entry) => entry.order === order)
+      .map((entry) => ({ file: entry.file, langToken: entry.langToken })),
+  }))
 
   // Numbering must run 1, 2, 3, … with no gaps
   const gapIndex = orders.findIndex((order, index) => order !== index + 1)
   if (gapIndex !== -1) {
-    const expected = `p${gapIndex + 1}.md`
     errors.push(
       problemIssue(
-        matched[gapIndex]!.file,
+        '(folder)',
         null,
         'problem-files',
-        `problem numbering is not contiguous (expected ${expected})`
+        `problem numbering is not contiguous (expected p${gapIndex + 1}.yaml)`
       )
     )
   }
 
-  // Hand back the files in numeric order
-  return matched
+  // A problem with body files but no metadata file, or a metadata file with no bodies, is incomplete
+  groups.forEach((group) => {
+    if (group.metaFile === null) {
+      errors.push(
+        problemIssue(
+          `p${group.order}.yaml`,
+          null,
+          'missing-problem-meta',
+          `problem ${group.order} has body files but no p${group.order}.yaml metadata file`
+        )
+      )
+    } else if (group.bodies.length === 0) {
+      errors.push(
+        problemIssue(
+          group.metaFile,
+          null,
+          'missing-body',
+          `problem ${group.order} has no pN.<lang>.md body files`
+        )
+      )
+    }
+  })
+
+  // Hand back the groups in numeric order
+  return groups
 }
 
 /**
- * Parses one problem file into a {@link ManifestProblem}, validating both
- * markdown halves and resolving its image references against disk.
+ * Parses one problem group into a {@link ManifestProblem}: its `pN.yaml`
+ * metadata plus every `pN.<lang>.md` body as a text variant, flagging a missing
+ * original, a translated solution with no original solution, and unresolved
+ * images.
  *
  * @param folderPath - Path to the draft folder.
- * @param file - The problem filename (e.g. `p1.md`).
- * @param order - The problem's 1-based order.
+ * @param group - The problem's grouped files.
+ * @param originalLanguage - The draft's original language (`meta.language`).
  * @param errors - Accumulator the problem's issues are pushed onto.
  *
  * @returns The assembled manifest entry for this problem.
  */
 async function parseProblem(
   folderPath: string,
-  file: string,
-  order: number,
+  group: ProblemGroup,
+  originalLanguage: Locale,
   errors: VerdictError[]
 ): Promise<ManifestProblem> {
-  // Read the problem file
-  const content = fs.readFileSync(path.join(folderPath, file), 'utf-8')
+  // Problem-level metadata lives in pN.yaml; default it when the file is absent (already flagged)
+  let authors: string[] = []
+  let solutionLink: string | null = null
+  if (group.metaFile !== null) {
+    const { meta, error } = parseProblemMeta(
+      fs.readFileSync(path.join(folderPath, group.metaFile), 'utf-8')
+    )
+    if (error !== null) {
+      errors.push(problemIssue(group.metaFile, null, 'problem-meta', error))
+    }
+    authors = meta.authors
+    solutionLink = meta.solutionLink
+  }
 
-  // Peel off frontmatter
-  const { frontmatterText, body, bodyStartLine0, unterminated } = splitFrontmatter(content)
-  if (unterminated) {
+  // Parse each body into a text variant, dropping ones whose language token is unknown
+  const parsedBodies: ParsedBody[] = []
+  for (const body of group.bodies) {
+    const parsed = await parseBody(folderPath, body, originalLanguage, errors)
+    if (parsed !== null) parsedBodies.push(parsed)
+  }
+
+  // The original is the variant in the draft's language; its absence is an error
+  const original = parsedBodies.find((entry) => entry.text.original)
+  if (original === undefined) {
     errors.push(
       problemIssue(
-        file,
+        `p${group.order}.${originalLanguage}.md`,
         null,
-        'frontmatter',
-        'frontmatter block is not terminated with a closing ---'
+        'missing-original',
+        `problem ${group.order} has no ${originalLanguage} body (the original language)`
       )
     )
   }
 
-  // Parse the frontmatter
-  const { frontmatter, error: frontmatterError } = parseFrontmatter(frontmatterText)
-  if (frontmatterError !== null) {
-    errors.push(problemIssue(file, null, 'frontmatter', frontmatterError))
+  // A translated solution with no original solution to attach to would dangle
+  if (original !== undefined && original.text.solutionMarkdown === null) {
+    parsedBodies
+      .filter((entry) => !entry.text.original && entry.text.solutionMarkdown !== null)
+      .forEach((entry) => {
+        errors.push(
+          problemIssue(
+            `p${group.order}.${entry.text.language}.md`,
+            'solution',
+            'translation-solution-without-original',
+            `the ${entry.text.language} translation has a solution but the ${originalLanguage} original does not`
+          )
+        )
+      })
   }
 
-  // Split the body into problem and solution
-  const { statement, solution, solutionBodyLine0 } = splitOnSentinel(body)
+  // Order the variants original-first, then translations in supported-locale order
+  const texts = parsedBodies
+    .map((entry) => entry.text)
+    .sort((first, second) => textRank(first, originalLanguage) - textRank(second, originalLanguage))
+
+  // The images the problem references are the union across its bodies (shared across languages)
+  const images = [...new Set(parsedBodies.flatMap((entry) => entry.images))]
+
+  // Assemble this problem's manifest entry
+  return { order: group.order, authors, solutionLink, texts, images }
+}
+
+/** A parsed body file: its text variant plus the image basenames it references. */
+type ParsedBody = {
+  /** The text variant assembled from the body. */
+  text: ManifestText
+  /** The image basenames this body references. */
+  images: string[]
+}
+
+/**
+ * Parses one body file into a {@link ManifestText}, validating both markdown
+ * halves and resolving its image references against disk. Returns `null` when
+ * the filename's language token is not a supported locale.
+ *
+ * @param folderPath - Path to the draft folder.
+ * @param body - The body file and its raw language token.
+ * @param originalLanguage - The draft's original language, deciding `original`.
+ * @param errors - Accumulator the body's issues are pushed onto.
+ *
+ * @returns The text variant and its images, or `null` for an unknown language.
+ */
+async function parseBody(
+  folderPath: string,
+  body: BodyFile,
+  originalLanguage: Locale,
+  errors: VerdictError[]
+): Promise<ParsedBody | null> {
+  // The language token must be a supported locale to become a text variant
+  const language = SUPPORTED_LOCALES.find((locale) => locale === body.langToken)
+  if (language === undefined) {
+    errors.push(
+      problemIssue(
+        body.file,
+        null,
+        'unknown-lang',
+        `unknown language "${body.langToken}" (expected one of ${SUPPORTED_LOCALES.join(', ')})`
+      )
+    )
+    return null
+  }
+
+  // Bodies are content-only, so a leading frontmatter fence is a mistake (metadata belongs in pN.yaml)
+  const content = fs.readFileSync(path.join(folderPath, body.file), 'utf-8')
+  if (hasLeadingFrontmatter(content)) {
+    errors.push(
+      problemIssue(
+        body.file,
+        null,
+        'body-frontmatter',
+        "body is content-only — move metadata to the problem's pN.yaml"
+      )
+    )
+  }
+
+  // Split the body into statement and solution
+  const { statement, solution, solutionBodyLine0 } = splitOnSentinel(content)
   if (statement.trim() === '') {
-    errors.push(problemIssue(file, 'statement', 'empty-statement', 'statement is empty'))
+    errors.push(problemIssue(body.file, 'statement', 'empty-statement', 'statement is empty'))
   }
 
-  // Ensure statement is valid
-  await validateHalf(statement, file, 'statement', bodyStartLine0, errors)
-
-  // Ensure solution is valid if there is any
+  // Validate each half, mapping positions back to the body file (no frontmatter, so it starts at line 0)
+  await validateHalf(statement, body.file, 'statement', 0, errors)
   if (solution !== null) {
-    // The solution starts after the statement and the sentinel line
-    const solutionStartLine0 = bodyStartLine0 + (solutionBodyLine0 ?? 0)
-    await validateHalf(solution, file, 'solution', solutionStartLine0, errors)
+    await validateHalf(solution, body.file, 'solution', solutionBodyLine0 ?? 0, errors)
   }
 
-  // Gather image references across both halves,
+  // Gather this body's image references across both halves and check each resolves on disk
   const solutionImages = solution !== null ? collectImageNames(solution) : []
   const images = [...new Set([...collectImageNames(statement), ...solutionImages])]
-
-  // Check each image resolves on disk
   images
     .filter((name) => !fs.existsSync(path.join(folderPath, IMAGES_DIRNAME, name)))
     .forEach((name) => {
       errors.push(
         problemIssue(
-          file,
+          body.file,
           null,
           'missing-image',
           `referenced image "${IMAGE_REF_PREFIX}${name}" not found on disk`
@@ -241,15 +389,28 @@ async function parseProblem(
       )
     })
 
-  // Assemble this problem's manifest entry, halves kept verbatim for C#
-  return {
-    order,
-    authors: frontmatter.authors,
-    solutionLink: frontmatter.solutionLink,
+  // Assemble the text variant, halves kept verbatim for C#
+  const text: ManifestText = {
+    language,
+    original: language === originalLanguage,
     statementMarkdown: statement,
     solutionMarkdown: solution,
-    images,
   }
+  return { text, images }
+}
+
+/**
+ * Sort key that places the original variant first and the translations after it
+ * in supported-locale order.
+ *
+ * @param text - The text variant to rank.
+ * @param originalLanguage - The draft's original language.
+ *
+ * @returns `-1` for the original, otherwise the language's index among the locales.
+ */
+function textRank(text: ManifestText, originalLanguage: Locale): number {
+  // The original always sorts ahead of every translation
+  return text.language === originalLanguage ? -1 : SUPPORTED_LOCALES.indexOf(text.language)
 }
 
 /**

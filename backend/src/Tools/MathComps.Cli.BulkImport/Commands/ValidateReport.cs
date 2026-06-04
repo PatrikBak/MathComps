@@ -76,7 +76,7 @@ public static class ValidateReport
     /// <returns>The Spectre color name.</returns>
     private static string ColorFor(DraftTextAction action) => action switch
     {
-        DraftTextAction.SecondOriginal or DraftTextAction.OrphanTranslation => "red",
+        DraftTextAction.SecondOriginal => "red",
         DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation => "yellow",
         DraftTextAction.AddOriginal or DraftTextAction.AddTranslation => "blue",
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
@@ -94,7 +94,6 @@ public static class ValidateReport
         DraftTextAction.SecondOriginal => "second original",
         DraftTextAction.AddTranslation => "add translation",
         DraftTextAction.OverwriteTranslation => "overwrite translation",
-        DraftTextAction.OrphanTranslation => "orphan translation",
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
     };
 

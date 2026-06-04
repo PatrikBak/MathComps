@@ -6,11 +6,11 @@ namespace MathComps.Cli.BulkImport.Manifest;
 /// <summary>
 /// The whole output of the TS preflight (<c>web/scripts/preflight-draft.ts</c>), deserialized from its
 /// <c>--json</c> stdout — the manifest mirroring <c>preflight-draft-types.ts</c>. The preflight owns the entire
-/// draft-format read (folder walk, frontmatter, sentinel split, <c>validateMarkdown</c>, image-ref resolution)
-/// and emits this; the draft format is never parsed twice.
+/// draft-format read (folder walk, per-problem metadata, sentinel split, <c>validateMarkdown</c>, image-ref
+/// resolution) and emits this; the draft format is never parsed twice.
 /// </summary>
 /// <param name="Meta">Folder-level taxonomy parsed from <c>_meta.yaml</c>.</param>
-/// <param name="Problems">One entry per <c>pN.md</c>, ordered by problem number.</param>
+/// <param name="Problems">One entry per problem, ordered by problem number.</param>
 /// <param name="Verdict">The collected issues; pass/fail is derived from their severities.</param>
 public record DraftManifest(
     ManifestMeta Meta,
@@ -25,20 +25,14 @@ public record DraftManifest(
 /// <param name="Round">Round slug (e.g. <c>iii</c>).</param>
 /// <param name="Season">The season the draft belongs to.</param>
 /// <param name="Date">Round-instance date as <c>YYYY-MM-DD</c>; approximate is fine since it's a sort key.</param>
-/// <param name="Language">Source language of the draft — the problem-text language.</param>
-/// <param name="Original">
-/// Draft-level original-vs-translation flag mapping 1:1 to <c>ProblemText.IsOriginal</c>. <c>true</c> (the
-/// default) means these texts are the canonical original in <see cref="Language"/>; <c>false</c> marks a
-/// translation import that attaches onto an existing original.
-/// </param>
+/// <param name="Language">The original language of the draft — the text variant in it is the original.</param>
 public record ManifestMeta(
     string Competition,
     string? Category,
     string Round,
     ManifestSeason Season,
     string Date,
-    Language Language,
-    bool Original);
+    Language Language);
 
 /// <summary>
 /// The season a draft belongs to.
@@ -47,20 +41,35 @@ public record ManifestMeta(
 public record ManifestSeason(int Year);
 
 /// <summary>
-/// One draft problem (one <c>pN.md</c> file), with its statement/solution markdown carried verbatim.
+/// One language variant of a problem — the original or a translation, with its statement/solution markdown
+/// carried verbatim.
 /// </summary>
-/// <param name="Order">1-based position within the round, taken from the <c>pN.md</c> filename.</param>
+/// <param name="Language">The text's language, from its <c>pN.&lt;lang&gt;.md</c> filename.</param>
+/// <param name="Original">
+/// <c>true</c> for the original (its language matches <see cref="ManifestMeta.Language"/>), <c>false</c> for a
+/// translation. Maps 1:1 to <c>ProblemText.IsOriginal</c>.
+/// </param>
+/// <param name="StatementMarkdown">Statement markdown verbatim, still carrying relative <c>images/…</c> refs.</param>
+/// <param name="SolutionMarkdown">Solution markdown verbatim, or null when this text has no solution sentinel.</param>
+public record ManifestText(
+    Language Language,
+    bool Original,
+    string StatementMarkdown,
+    string? SolutionMarkdown);
+
+/// <summary>
+/// One draft problem: its language-invariant metadata plus one text variant per language (original first).
+/// </summary>
+/// <param name="Order">1-based position within the round, taken from the filenames.</param>
 /// <param name="Authors">Author display names in declared order.</param>
 /// <param name="SolutionLink">External solution URL, or null when absent.</param>
-/// <param name="StatementMarkdown">Statement markdown verbatim, still carrying relative <c>images/…</c> refs.</param>
-/// <param name="SolutionMarkdown">Solution markdown verbatim, or null when the draft has no solution sentinel.</param>
-/// <param name="Images">Basenames of the images this problem references (flat, under <c>images/</c>).</param>
+/// <param name="Texts">The language variants — the original first, then translations.</param>
+/// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record ManifestProblem(
     int Order,
     ImmutableArray<string> Authors,
     string? SolutionLink,
-    string StatementMarkdown,
-    string? SolutionMarkdown,
+    ImmutableArray<ManifestText> Texts,
     ImmutableArray<string> Images);
 
 /// <summary>

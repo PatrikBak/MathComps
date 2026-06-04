@@ -1,10 +1,21 @@
+using System.Collections.Immutable;
+
 namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
-/// The minimum a draft problem contributes to the read-only preview: its position (to derive the slug) and
-/// whether it carries a solution (to know whether the preview must check the <c>Solution</c> document type as
-/// well as the always-present <c>Statement</c>).
+/// One language variant a draft problem contributes to the read-only preview: its language, whether it is the
+/// original, and whether it carries a solution (so the preview knows to classify the <c>Solution</c> document
+/// type as well as the always-present <c>Statement</c>).
 /// </summary>
-/// <param name="Order">1-based position within the round, taken from the <c>pN.md</c> filename.</param>
-/// <param name="HasSolution">Whether the draft supplies a solution half for this problem.</param>
-public record DraftProblemRef(int Order, bool HasSolution);
+/// <param name="Language">The text's language.</param>
+/// <param name="Original">Whether this text is the original (<c>true</c>) or a translation (<c>false</c>).</param>
+/// <param name="HasSolution">Whether this text supplies a solution half.</param>
+public record DraftTextRef(Language Language, bool Original, bool HasSolution);
+
+/// <summary>
+/// The minimum a draft problem contributes to the read-only preview: its position (to derive the slug) and its
+/// per-language text variants (the original plus any translations).
+/// </summary>
+/// <param name="Order">1-based position within the round, taken from the filenames.</param>
+/// <param name="Texts">The text variants this problem would import.</param>
+public record DraftProblemRef(int Order, ImmutableArray<DraftTextRef> Texts);
