@@ -46,12 +46,15 @@ function printHumanReport(folderPath: string, manifest: DraftManifest): void {
   // Entangle manifest
   const { problems, verdict } = manifest
 
-  // Count different across problems
+  // Count distinct images and total text variants across problems
   const imageCount = new Set(problems.flatMap((problem) => problem.images)).size
+  const textCount = problems.reduce((sum, problem) => sum + problem.texts.length, 0)
 
   // Intro logs
   console.log(`🔍 Preflighting draft: ${folderPath}`)
-  console.log(`   ${problems.length} problem(s), ${imageCount} image(s) referenced\n`)
+  console.log(
+    `   ${problems.length} problem(s), ${textCount} text(s), ${imageCount} image(s) referenced\n`
+  )
 
   // List every issue, or confirm a clean run
   if (verdict.errors.length === 0) {

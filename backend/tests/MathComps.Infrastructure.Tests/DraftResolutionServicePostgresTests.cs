@@ -8,10 +8,10 @@ namespace MathComps.Infrastructure.Tests;
 /// <summary>
 /// Integration tests for <see cref="DraftResolutionService"/> against a real Postgres database. These pin the EF
 /// query field mappings a pure slug test can't reach — the round lookup keys on <c>CompositeSlug</c> (category
-/// included), the season on <c>StartYear</c>, the per-half check on <c>Problem.Slug</c> plus each text's
+/// included), the season on <c>StartYear</c>, the per-text check on <c>Problem.Slug</c> plus each text's
 /// <c>(DocumentType, Language, IsOriginal)</c> — and that each entity resolves independently, so a draft can
-/// reuse some of its taxonomy while creating the rest, and that the import outcome for each existing half is
-/// classified from the draft's language and original flag.
+/// reuse some of its taxonomy while creating the rest, and that the import outcome for each existing text variant
+/// is classified from that text's language and originality.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixture)
@@ -19,7 +19,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
 {
     /// <summary>
     /// The slug of the one seeded problem — it carries a Slovak original statement and an English statement
-    /// translation, and no solution, so every per-half outcome can be exercised against it.
+    /// translation, and no solution, so every per-text outcome can be exercised against it.
     /// </summary>
     private const string SeededProblemSlug = "2024-csmo-a-iii-1";
 
@@ -90,14 +90,14 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     }
 
     /// <summary>
-    /// A draft targeting the seeded round reuses every taxonomy entity (this proves the lookups; the per-half
+    /// A draft targeting the seeded round reuses every taxonomy entity (this proves the lookups; the per-text
     /// outcomes are covered by the resolution tests below).
     /// </summary>
     [Fact]
     public Task Existing_taxonomy_is_reused() => RunTestAsync(async service =>
     {
         // Preview a one-problem original draft against the seeded csmo/a/iii · 2024 round.
-        var preview = await service.PreviewAsync(SeededTarget(Language.SK, original: true), [new DraftProblemRef(1, false)]);
+        var preview = await service.PreviewAsync(SeededTarget(), [Problem(1, Original(Language.SK))]);
 
         // All three taxonomy entities already exist, so all reuse.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
@@ -106,15 +106,15 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// A draft for an unseen competition / season / round reports all three as creates, and a net-new original
-    /// problem produces no per-half resolution.
+    /// A draft for an unseen competition / season / round reports all three as creates, and a net-new problem
+    /// produces no per-text resolution.
     /// </summary>
     [Fact]
     public Task Unknown_taxonomy_is_reported_as_creates_with_no_resolutions() => RunTestAsync(async service =>
     {
         // Preview a draft whose competition, round and season are all absent.
         var preview = await service.PreviewAsync(
-            new DraftTarget("newcomp", null, "i", 2099, Language.SK, true), [new DraftProblemRef(1, false)]);
+            new DraftTarget("newcomp", null, "i", 2099), [Problem(1, Original(Language.SK))]);
 
         // Nothing exists yet, so all three would be created.
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "competition"));
@@ -134,7 +134,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Same csmo/a/iii round, but the 2025 season doesn't exist yet.
         var preview = await service.PreviewAsync(
-            new DraftTarget("csmo", "a", "iii", 2025, Language.SK, true), [new DraftProblemRef(1, false)]);
+            new DraftTarget("csmo", "a", "iii", 2025), [Problem(1, Original(Language.SK))]);
 
         // Competition and round are reused; only the season is new.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
@@ -154,7 +154,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // csmo/b/iii composes to "csmo-b-iii", which isn't the seeded "csmo-a-iii".
         var preview = await service.PreviewAsync(
-            new DraftTarget("csmo", "b", "iii", 2024, Language.SK, true), [new DraftProblemRef(1, false)]);
+            new DraftTarget("csmo", "b", "iii", 2024), [Problem(1, Original(Language.SK))]);
 
         // The competition and season still exist; the differently-keyed round does not.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
@@ -171,12 +171,27 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // memo/(no category)/i composes to "memo-i", which is seeded.
         var preview = await service.PreviewAsync(
-            new DraftTarget("memo", null, "i", 2024, Language.SK, true), [new DraftProblemRef(1, false)]);
+            new DraftTarget("memo", null, "i", 2024), [Problem(1, Original(Language.SK))]);
 
         // All three exist, so all reuse — proving the null-category composite matched the stored slug.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "season"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "round"));
+    });
+
+    /// <summary>
+    /// A brand-new problem importing its original plus translations is entirely quiet — every classifier reports
+    /// nothing on a net-new slug, so the translations are never mistaken for orphans.
+    /// </summary>
+    [Fact]
+    public Task A_fresh_problem_with_translations_is_quiet() => RunTestAsync(async service =>
+    {
+        // Problem 2's slug ("2024-csmo-a-iii-2") doesn't exist; import its Slovak original plus EN and CS texts.
+        var preview = await service.PreviewAsync(
+            SeededTarget(), [Problem(2, Original(Language.SK), Translation(Language.EN), Translation(Language.CS))]);
+
+        // Nothing lands on an existing slug, so there is nothing to report.
+        Assert.Empty(preview.TextResolutions);
     });
 
     /// <summary>
@@ -187,7 +202,8 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     public Task Same_language_original_overwrites_and_a_missing_solution_is_a_clean_add() => RunTestAsync(async service =>
     {
         // Slovak original draft for the seeded problem, carrying a solution the existing problem doesn't have.
-        var preview = await service.PreviewAsync(SeededTarget(Language.SK, original: true), [new DraftProblemRef(1, true)]);
+        var preview = await service.PreviewAsync(
+            SeededTarget(), [Problem(1, Original(Language.SK, hasSolution: true))]);
 
         // The Slovak statement original is overwritten in place; the absent solution is added cleanly.
         Assert.Equal(DraftTextAction.OverwriteOriginal, ResolutionFor(preview, DocumentType.Statement).Action);
@@ -195,16 +211,36 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// An original draft in a different language than the stored original is the forbidden second-original case.
+    /// An original in a different language than the stored original is the forbidden second-original case.
     /// </summary>
     [Fact]
     public Task A_different_language_original_is_rejected_as_a_second_original() => RunTestAsync(async service =>
     {
         // Czech original draft — but the statement's stored original is Slovak.
-        var preview = await service.PreviewAsync(SeededTarget(Language.CS, original: true), [new DraftProblemRef(1, false)]);
+        var preview = await service.PreviewAsync(SeededTarget(), [Problem(1, Original(Language.CS))]);
 
         // Importing it as an original would create a second original for the statement.
         Assert.Equal(DraftTextAction.SecondOriginal, ResolutionFor(preview, DocumentType.Statement).Action);
+    });
+
+    /// <summary>
+    /// Importing the original alongside a brand-new-language translation overwrites the original and adds the
+    /// translation cleanly — the multi-text path classifies each variant on its own.
+    /// </summary>
+    [Fact]
+    public Task Adding_a_language_overwrites_the_original_and_adds_the_translation() => RunTestAsync(async service =>
+    {
+        // The seeded problem's Slovak original plus a fresh Czech translation.
+        var preview = await service.PreviewAsync(
+            SeededTarget(), [Problem(1, Original(Language.SK), Translation(Language.CS))]);
+
+        // The Slovak original is overwritten; the Czech translation is a clean add.
+        Assert.Equal(
+            DraftTextAction.OverwriteOriginal,
+            ResolutionFor(preview, DocumentType.Statement, Language.SK).Action);
+        Assert.Equal(
+            DraftTextAction.AddTranslation,
+            ResolutionFor(preview, DocumentType.Statement, Language.CS).Action);
     });
 
     /// <summary>
@@ -214,7 +250,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     public Task A_translation_in_a_new_language_is_a_clean_add() => RunTestAsync(async service =>
     {
         // Czech translation draft — the statement has a Slovak original but no Czech text.
-        var preview = await service.PreviewAsync(SeededTarget(Language.CS, original: false), [new DraftProblemRef(1, false)]);
+        var preview = await service.PreviewAsync(SeededTarget(), [Problem(1, Translation(Language.CS))]);
 
         // The Czech translation is a clean add.
         Assert.Equal(DraftTextAction.AddTranslation, ResolutionFor(preview, DocumentType.Statement).Action);
@@ -227,33 +263,43 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     public Task A_translation_in_an_existing_language_overwrites_in_place() => RunTestAsync(async service =>
     {
         // English translation draft — the statement already carries an English translation.
-        var preview = await service.PreviewAsync(SeededTarget(Language.EN, original: false), [new DraftProblemRef(1, false)]);
+        var preview = await service.PreviewAsync(SeededTarget(), [Problem(1, Translation(Language.EN))]);
 
         // The existing English translation is overwritten in place.
         Assert.Equal(DraftTextAction.OverwriteTranslation, ResolutionFor(preview, DocumentType.Statement).Action);
     });
 
     /// <summary>
-    /// A translation aimed at a problem slug with no existing original is an orphan — nothing to attach to.
+    /// Builds a draft target for the seeded csmo/a/iii · 2024 round.
     /// </summary>
-    [Fact]
-    public Task A_translation_with_no_existing_original_is_an_orphan() => RunTestAsync(async service =>
-    {
-        // Czech translation draft for problem 2, whose slug ("2024-csmo-a-iii-2") doesn't exist.
-        var preview = await service.PreviewAsync(SeededTarget(Language.CS, original: false), [new DraftProblemRef(2, false)]);
-
-        // With no original to attach to, the translation would dangle.
-        Assert.Equal(DraftTextAction.OrphanTranslation, ResolutionFor(preview, DocumentType.Statement).Action);
-    });
+    /// <returns>The configured target.</returns>
+    private static DraftTarget SeededTarget() => new("csmo", "a", "iii", 2024);
 
     /// <summary>
-    /// Builds a draft target for the seeded csmo/a/iii · 2024 round with the given language and original flag.
+    /// Builds a draft problem reference from its order and text variants.
     /// </summary>
-    /// <param name="language">The language the draft's texts are in.</param>
-    /// <param name="original">Whether the draft carries originals or translations.</param>
-    /// <returns>The configured target.</returns>
-    private static DraftTarget SeededTarget(Language language, bool original) =>
-        new("csmo", "a", "iii", 2024, language, original);
+    /// <param name="order">The problem's 1-based order.</param>
+    /// <param name="texts">The problem's text variants (original plus any translations).</param>
+    /// <returns>The configured problem reference.</returns>
+    private static DraftProblemRef Problem(int order, params DraftTextRef[] texts) => new(order, [.. texts]);
+
+    /// <summary>
+    /// Builds an original text variant.
+    /// </summary>
+    /// <param name="language">The original's language.</param>
+    /// <param name="hasSolution">Whether the original carries a solution half.</param>
+    /// <returns>The original text reference.</returns>
+    private static DraftTextRef Original(Language language, bool hasSolution = false) =>
+        new(language, Original: true, hasSolution);
+
+    /// <summary>
+    /// Builds a translation text variant.
+    /// </summary>
+    /// <param name="language">The translation's language.</param>
+    /// <param name="hasSolution">Whether the translation carries a solution half.</param>
+    /// <returns>The translation text reference.</returns>
+    private static DraftTextRef Translation(Language language, bool hasSolution = false) =>
+        new(language, Original: false, hasSolution);
 
     /// <summary>
     /// Builds a seed <see cref="ProblemText"/> row with the fields the resolution check reads.
@@ -284,11 +330,24 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         preview.Entities.Single(entity => entity.EntityKind == entityKind).Action;
 
     /// <summary>
-    /// Pulls the single per-half resolution for a given document type out of a preview.
+    /// Pulls the single per-text resolution for a given document type out of a preview.
     /// </summary>
     /// <param name="preview">The preview to read.</param>
     /// <param name="documentType">The half whose resolution to fetch.</param>
     /// <returns>That half's resolution.</returns>
     private static ProblemTextResolution ResolutionFor(DraftDbPreview preview, DocumentType documentType) =>
         preview.TextResolutions.Single(resolution => resolution.DocumentType == documentType);
+
+    /// <summary>
+    /// Pulls the per-text resolution for a given document type and language out of a preview, for cases where a
+    /// problem writes more than one variant of the same half.
+    /// </summary>
+    /// <param name="preview">The preview to read.</param>
+    /// <param name="documentType">The half whose resolution to fetch.</param>
+    /// <param name="language">The language of the variant to fetch.</param>
+    /// <returns>That variant's resolution.</returns>
+    private static ProblemTextResolution ResolutionFor(
+        DraftDbPreview preview, DocumentType documentType, Language language) =>
+        preview.TextResolutions.Single(
+            resolution => resolution.DocumentType == documentType && resolution.Language == language);
 }

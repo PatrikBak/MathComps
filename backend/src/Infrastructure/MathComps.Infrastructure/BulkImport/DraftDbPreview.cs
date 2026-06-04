@@ -28,43 +28,37 @@ public record EntityResolution(
     ResolutionAction Action);
 
 /// <summary>
-/// What importing the draft would do to one existing problem text, decided from the draft's
-/// original-vs-translation flag and language against the rows already present for that
-/// <c>(problem, document type)</c>.
+/// What importing one of the draft's text variants would do, decided from that text's originality and language
+/// against the rows already present for the same <c>(problem, document type)</c>.
 /// </summary>
 public enum DraftTextAction
 {
-    /// <summary>An original draft adds the first original for this document type (none present yet).</summary>
+    /// <summary>An original text adds the first original for this document type (none present yet).</summary>
     AddOriginal,
 
-    /// <summary>An original draft replaces the existing original in the same language, in place.</summary>
+    /// <summary>An original text replaces the existing original in the same language, in place.</summary>
     OverwriteOriginal,
 
     /// <summary>
-    /// An original draft in a different language than the existing original — importing would create a second
+    /// An original text in a different language than the existing original — importing would create a second
     /// original, which the one-original-per-document index forbids. A hard conflict.
     /// </summary>
     SecondOriginal,
 
-    /// <summary>A translation draft adds a translation onto an existing original (none in this language yet).</summary>
+    /// <summary>A translation adds a text onto the original (none in this language yet).</summary>
     AddTranslation,
 
-    /// <summary>A translation draft replaces an existing same-language translation, in place.</summary>
-    OverwriteTranslation,
-
-    /// <summary>
-    /// A translation draft with no existing original to attach to (the problem or its original document is
-    /// absent) — the translation would dangle with no original. A hard conflict.
-    /// </summary>
-    OrphanTranslation
+    /// <summary>A translation replaces an existing same-language translation, in place.</summary>
+    OverwriteTranslation
 }
 
 /// <summary>
-/// What importing the draft would do to one <c>(problem, document type)</c> that already exists in the DB.
+/// What importing one of the draft's text variants would do to a <c>(problem, document type)</c> that already
+/// exists in the DB.
 /// </summary>
 /// <param name="Slug">The would-be problem slug that already exists.</param>
 /// <param name="DocumentType">The document half this resolution is about (statement or solution).</param>
-/// <param name="Language">The language the draft would write for this half.</param>
+/// <param name="Language">The language of the text variant this resolution is about.</param>
 /// <param name="Action">What the import would do to it.</param>
 public record ProblemTextResolution(
     string Slug,
@@ -74,13 +68,13 @@ public record ProblemTextResolution(
 
 /// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
-/// would need creating, and — for every problem half whose problem slug already exists — what the import would do
-/// to it given the draft's language and original-vs-translation flag. Produced by querying only — no rows written.
+/// would need creating, and — for every text variant whose problem slug already exists — what the import would do
+/// to it given that text's language and originality. Produced by querying only — no rows written.
 /// </summary>
 /// <param name="Entities">Exists-or-not for the competition, season and round, in that order.</param>
 /// <param name="TextResolutions">
-/// One entry per draft half that lands on an already-existing problem slug, classifying the outcome (clean add,
-/// in-place overwrite, or a hard conflict). A net-new problem slug contributes nothing here.
+/// One entry per draft text variant that lands on an already-existing problem slug, classifying the outcome
+/// (clean add, in-place overwrite, or a second-original conflict). A net-new problem slug contributes nothing.
 /// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,

@@ -68,14 +68,17 @@ public class ValidateCommand(
         {
             try
             {
-                // Map the manifest's taxonomy, language and original flag onto the Infrastructure contract.
+                // Map the manifest's taxonomy onto the Infrastructure contract.
                 var target = new DraftTarget(
                     manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round,
-                    manifest.Meta.Season.Year, manifest.Meta.Language, manifest.Meta.Original);
+                    manifest.Meta.Season.Year);
 
-                // Carry each problem's solution presence so the preview checks the solution half when there is one.
+                // Carry each problem's text variants — language, originality and solution presence per text.
                 var problemRefs = manifest.Problems
-                    .Select(problem => new DraftProblemRef(problem.Order, problem.SolutionMarkdown is not null))
+                    .Select(problem => new DraftProblemRef(
+                        problem.Order,
+                        [.. problem.Texts.Select(text => new DraftTextRef(
+                            text.Language, text.Original, text.SolutionMarkdown is not null))]))
                     .ToList();
 
                 // Run the read-only preview: create-vs-reuse plus the per-half import outcomes.
@@ -111,10 +114,10 @@ public class ValidateCommand(
     }
 
     /// <summary>
-    /// Turns one per-half DB resolution into an issue, or null when it's a clean add not worth surfacing.
-    /// Conflicts (a second original, an orphan translation) are errors; in-place overwrites are warnings.
+    /// Turns one per-text DB resolution into an issue, or null when it's a clean add not worth surfacing. A
+    /// second original is an error; in-place overwrites are warnings.
     /// </summary>
-    /// <param name="resolution">The per-half resolution from the DB preview.</param>
+    /// <param name="resolution">The per-text resolution from the DB preview.</param>
     /// <returns>The issue to report, or null for a clean add.</returns>
     private static VerdictError? IssueFor(ProblemTextResolution resolution)
     {
@@ -129,10 +132,6 @@ public class ValidateCommand(
             DraftTextAction.SecondOriginal => Issue("original-conflict",
                 $"problem '{slug}' {half} already has an original in a different language — importing as "
                 + "original would create a second original (forbidden)", VerdictSeverity.Error),
-
-            DraftTextAction.OrphanTranslation => Issue("orphan-translation",
-                $"problem '{slug}' {half} has no existing original — importing a {language} translation would "
-                + "leave it with no original", VerdictSeverity.Error),
 
             DraftTextAction.OverwriteOriginal => Issue("overwrite",
                 $"problem '{slug}' {half} already exists as the {language} original — importing would overwrite "

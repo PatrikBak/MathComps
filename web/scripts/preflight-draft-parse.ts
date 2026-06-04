@@ -1,7 +1,8 @@
 /**
- * Pure parsing helpers for the draft preflight: frontmatter and sentinel
- * splitting, source-line mapping, and image-reference discovery. None of these
- * touch the filesystem, so they are unit-tested directly with inline inputs.
+ * Pure parsing helpers for the draft preflight: per-problem metadata narrowing,
+ * solution-sentinel splitting, source-line mapping, and image-reference
+ * discovery. None of these touch the filesystem, so they are unit-tested
+ * directly with inline inputs.
  */
 
 import remarkParse from 'remark-parse'
@@ -18,31 +19,19 @@ export const IMAGE_REF_PREFIX = `${IMAGES_DIRNAME}/`
 /** HTML-comment line that separates a problem's statement from its solution. */
 const SOLUTION_SENTINEL = '<!-- solution -->'
 
-/** A `pN.md` body split away from its frontmatter, tracking where the body begins. */
-type FrontmatterSplit = {
-  /** Raw YAML text between the `---` fences, or `null` when there is no frontmatter. */
-  frontmatterText: string | null
-  /** Everything after the closing fence (or the whole file when there is no frontmatter). */
-  body: string
-  /** 0-based source line index where {@link FrontmatterSplit.body} starts. */
-  bodyStartLine0: number
-  /** True when an opening `---` fence is never closed. */
-  unterminated: boolean
-}
-
-/** The typed frontmatter fields the preflight reads off each problem. */
-type Frontmatter = {
+/** The typed metadata fields the preflight reads off each problem's `pN.yaml`. */
+type ProblemMeta = {
   /** Author display names, defaulting to an empty list. */
   authors: string[]
   /** External solution URL, or `null` when absent. */
   solutionLink: string | null
 }
 
-/** A frontmatter parse outcome — values plus the first structural error, if any. */
-type FrontmatterParse = {
+/** A problem-metadata parse outcome — values plus the first structural error, if any. */
+type ProblemMetaParse = {
   /** Best-effort parsed values (defaults when a field is missing). */
-  frontmatter: Frontmatter
-  /** First structural problem found, or `null` when the frontmatter is well-formed. */
+  meta: ProblemMeta
+  /** First structural problem found, or `null` when the metadata is well-formed. */
   error: string | null
 }
 
@@ -56,8 +45,8 @@ type SentinelSplit = {
   solutionBodyLine0: number | null
 }
 
-/** Frontmatter values for a problem that declares none. */
-const EMPTY_FRONTMATTER: Frontmatter = { authors: [], solutionLink: null }
+/** Metadata values for a problem whose `pN.yaml` declares none. */
+const EMPTY_PROBLEM_META: ProblemMeta = { authors: [], solutionLink: null }
 
 /** A processor used only to parse markdown into an mdast tree for image discovery. */
 const imageRefProcessor = unified().use(remarkParse)
@@ -87,71 +76,52 @@ export function asMessage(error: unknown): string {
 }
 
 /**
- * Splits a `pN.md` file into its optional YAML frontmatter and its body,
- * remembering the source line the body starts on so error positions can be
- * mapped back to the original file.
+ * Reports whether a body file opens with a `---` frontmatter fence. Bodies are
+ * content-only — their metadata lives in the sibling `pN.yaml` — so a leading
+ * fence is a mistake the preflight flags.
  *
- * @param content - The full text of a problem file.
+ * @param content - The full text of a body file.
  *
- * @returns The frontmatter text (or `null`), the body, the body's 0-based start
- *   line, and whether an opening fence was left unterminated.
+ * @returns `true` when the first line is a standalone `---`.
  */
-export function splitFrontmatter(content: string): FrontmatterSplit {
-  // Work line by line so positions stay in source coordinates
-  const lines = content.split('\n')
-
-  // A frontmatter block must open with `---` on the very first line
-  if (lines[0]?.trim() !== '---') {
-    return { frontmatterText: null, body: content, bodyStartLine0: 0, unterminated: false }
-  }
-
-  // The block runs to the next standalone `---`
-  const closingIndex = lines.findIndex((line, index) => index > 0 && line.trim() === '---')
-
-  // An opening fence with no close — surface it and treat the whole file as body
-  if (closingIndex === -1) {
-    return { frontmatterText: null, body: content, bodyStartLine0: 0, unterminated: true }
-  }
-
-  // Frontmatter is the lines between the fences; the body picks up after the close
-  const frontmatterText = lines.slice(1, closingIndex).join('\n')
-  const body = lines.slice(closingIndex + 1).join('\n')
-  return { frontmatterText, body, bodyStartLine0: closingIndex + 1, unterminated: false }
+export function hasLeadingFrontmatter(content: string): boolean {
+  // A frontmatter block would open with `---` on the very first line
+  return content.split('\n', 1)[0]?.trim() === '---'
 }
 
 /**
- * Parses a problem's frontmatter into typed fields, defaulting missing values
- * and reporting the first structural problem rather than throwing.
+ * Parses a problem's `pN.yaml` metadata into typed fields, defaulting missing
+ * values and reporting the first structural problem rather than throwing.
  *
- * @param frontmatterText - Raw YAML from {@link splitFrontmatter}, or `null`.
+ * @param yamlText - The raw contents of the `pN.yaml` file.
  *
- * @returns The parsed {@link Frontmatter} and the first error encountered, if any.
+ * @returns The parsed {@link ProblemMeta} and the first error encountered, if any.
  */
-export function parseFrontmatter(frontmatterText: string | null): FrontmatterParse {
-  // No frontmatter block at all — everything takes its default
-  if (frontmatterText === null || frontmatterText.trim() === '') {
-    return { frontmatter: EMPTY_FRONTMATTER, error: null }
+export function parseProblemMeta(yamlText: string): ProblemMetaParse {
+  // An empty file declares nothing — everything takes its default
+  if (yamlText.trim() === '') {
+    return { meta: EMPTY_PROBLEM_META, error: null }
   }
 
   // Reject malformed YAML up front so a syntax error reads clearly
   let parsed: unknown
   try {
-    parsed = parseYaml(frontmatterText)
+    parsed = parseYaml(yamlText)
   } catch (error) {
     return {
-      frontmatter: EMPTY_FRONTMATTER,
-      error: `frontmatter is not valid YAML: ${asMessage(error)}`,
+      meta: EMPTY_PROBLEM_META,
+      error: `metadata is not valid YAML: ${asMessage(error)}`,
     }
   }
 
-  // An empty document parses to null — treat it as no frontmatter
+  // An empty document parses to null — treat it as no metadata
   if (parsed === null || parsed === undefined) {
-    return { frontmatter: EMPTY_FRONTMATTER, error: null }
+    return { meta: EMPTY_PROBLEM_META, error: null }
   }
 
   // Anything that is not a mapping cannot carry our fields
   if (!isRecord(parsed)) {
-    return { frontmatter: EMPTY_FRONTMATTER, error: 'frontmatter must be a mapping of fields' }
+    return { meta: EMPTY_PROBLEM_META, error: 'metadata must be a mapping of fields' }
   }
 
   // Authors must be a list of strings when present, otherwise default to empty
@@ -160,8 +130,8 @@ export function parseFrontmatter(frontmatterText: string | null): FrontmatterPar
   if (rawAuthors !== undefined && rawAuthors !== null) {
     if (!Array.isArray(rawAuthors) || !rawAuthors.every((author) => typeof author === 'string')) {
       return {
-        frontmatter: EMPTY_FRONTMATTER,
-        error: 'frontmatter "authors" must be a list of strings',
+        meta: EMPTY_PROBLEM_META,
+        error: 'metadata "authors" must be a list of strings',
       }
     }
     authors = rawAuthors
@@ -174,22 +144,22 @@ export function parseFrontmatter(frontmatterText: string | null): FrontmatterPar
     // Reject a non-string link, keeping the authors parsed so far
     if (typeof rawLink !== 'string') {
       return {
-        frontmatter: { authors, solutionLink: null },
-        error: 'frontmatter "solutionLink" must be a string',
+        meta: { authors, solutionLink: null },
+        error: 'metadata "solutionLink" must be a string',
       }
     }
     solutionLink = rawLink
   }
 
   // Both fields are well-formed
-  return { frontmatter: { authors, solutionLink }, error: null }
+  return { meta: { authors, solutionLink }, error: null }
 }
 
 /**
  * Splits a problem body into its statement and solution halves on the solution
  * sentinel, remembering where the solution half begins.
  *
- * @param body - The problem body (frontmatter already removed).
+ * @param body - The body file's full contents.
  *
  * @returns The statement, the solution (or `null` when there is no sentinel),
  *   and the solution half's 0-based body-relative start line.
