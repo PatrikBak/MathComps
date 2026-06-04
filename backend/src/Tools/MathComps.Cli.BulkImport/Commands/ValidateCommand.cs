@@ -61,24 +61,31 @@ public class ValidateCommand(
         if (metaUsable)
             issues.AddRange(RegistryLinkValidator.Check(metadata, manifest.Meta));
 
-        // Read-only DB preview: create-vs-reuse + slug collisions. Best-effort — an unreachable DB degrades to a
-        // warning so the format and registry results still come through, no DB required.
+        // Read-only DB preview: create-vs-reuse + per-half import outcomes. Best-effort — an unreachable DB
+        // degrades to a warning so the format and registry results still come through, no DB required.
         DraftDbPreview? dbPreview = null;
         if (metaUsable)
         {
             try
             {
-                // Map the manifest's taxonomy onto the Infrastructure input contract, then preview.
+                // Map the manifest's taxonomy, language and original flag onto the Infrastructure contract.
                 var target = new DraftTarget(
-                    manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round, manifest.Meta.Season.Year);
-                dbPreview = await resolution.PreviewAsync(
-                    target, [.. manifest.Problems.Select(problem => problem.Order)]);
+                    manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round,
+                    manifest.Meta.Season.Year, manifest.Meta.Language, manifest.Meta.Original);
 
-                // Each problem-slug collision is a warning — importing would overwrite that problem in place.
-                issues.AddRange(dbPreview.CollidingProblemSlugs.Select(slug => new VerdictError(
-                    "_meta.yaml", Half: null, Line: null, Col: null, "slug-collision",
-                    $"problem slug '{slug}' already exists — importing would overwrite it",
-                    VerdictSeverity.Warning)));
+                // Carry each problem's solution presence so the preview checks the solution half when there is one.
+                var problemRefs = manifest.Problems
+                    .Select(problem => new DraftProblemRef(problem.Order, problem.SolutionMarkdown is not null))
+                    .ToList();
+
+                // Run the read-only preview: create-vs-reuse plus the per-half import outcomes.
+                dbPreview = await resolution.PreviewAsync(target, problemRefs);
+
+                // Turn each per-half resolution that's worth flagging into an issue; clean adds report nothing.
+                issues.AddRange(dbPreview.TextResolutions
+                    .Select(IssueFor)
+                    .Where(issue => issue is not null)
+                    .Select(issue => issue!));
             }
             catch (Exception exception)
             {
@@ -102,4 +109,54 @@ public class ValidateCommand(
         // Non-zero exit iff an error-severity issue exists.
         return result.Ok ? 0 : 1;
     }
+
+    /// <summary>
+    /// Turns one per-half DB resolution into an issue, or null when it's a clean add not worth surfacing.
+    /// Conflicts (a second original, an orphan translation) are errors; in-place overwrites are warnings.
+    /// </summary>
+    /// <param name="resolution">The per-half resolution from the DB preview.</param>
+    /// <returns>The issue to report, or null for a clean add.</returns>
+    private static VerdictError? IssueFor(ProblemTextResolution resolution)
+    {
+        // The half and language, lower-cased to match the rest of the report.
+        var half = resolution.DocumentType.ToString().ToLowerInvariant();
+        var language = resolution.Language.ToString().ToLowerInvariant();
+        var slug = resolution.Slug;
+
+        // Map each action to its rule, message and severity; clean adds map to null.
+        return resolution.Action switch
+        {
+            DraftTextAction.SecondOriginal => Issue("original-conflict",
+                $"problem '{slug}' {half} already has an original in a different language — importing as "
+                + "original would create a second original (forbidden)", VerdictSeverity.Error),
+
+            DraftTextAction.OrphanTranslation => Issue("orphan-translation",
+                $"problem '{slug}' {half} has no existing original — importing a {language} translation would "
+                + "leave it with no original", VerdictSeverity.Error),
+
+            DraftTextAction.OverwriteOriginal => Issue("overwrite",
+                $"problem '{slug}' {half} already exists as the {language} original — importing would overwrite "
+                + "it in place", VerdictSeverity.Warning),
+
+            DraftTextAction.OverwriteTranslation => Issue("overwrite",
+                $"problem '{slug}' {half} already has a {language} text — importing the translation would "
+                + "overwrite it in place", VerdictSeverity.Warning),
+
+            // A clean add (new original or new translation) is the expected path — nothing to flag.
+            DraftTextAction.AddOriginal or DraftTextAction.AddTranslation => null,
+
+            // Unhandled cases
+            _ => throw new ArgumentOutOfRangeException(nameof(resolution), resolution.Action, null)
+        };
+    }
+
+    /// <summary>
+    /// Builds a file-level <c>_meta.yaml</c> issue carrying a DB-preview finding.
+    /// </summary>
+    /// <param name="rule">The machine-readable rule category.</param>
+    /// <param name="message">The human-readable description.</param>
+    /// <param name="severity">Whether the finding blocks import or is advisory.</param>
+    /// <returns>The assembled issue.</returns>
+    private static VerdictError Issue(string rule, string message, VerdictSeverity severity) =>
+        new("_meta.yaml", Half: null, Line: null, Col: null, rule, message, severity);
 }

@@ -25,14 +25,20 @@ public record DraftManifest(
 /// <param name="Round">Round slug (e.g. <c>iii</c>).</param>
 /// <param name="Season">The season the draft belongs to.</param>
 /// <param name="Date">Round-instance date as <c>YYYY-MM-DD</c>; approximate is fine since it's a sort key.</param>
-/// <param name="Language">Source language of the draft — the original problem-text language.</param>
+/// <param name="Language">Source language of the draft — the problem-text language.</param>
+/// <param name="Original">
+/// Draft-level original-vs-translation flag mapping 1:1 to <c>ProblemText.IsOriginal</c>. <c>true</c> (the
+/// default) means these texts are the canonical original in <see cref="Language"/>; <c>false</c> marks a
+/// translation import that attaches onto an existing original.
+/// </param>
 public record ManifestMeta(
     string Competition,
     string? Category,
     string Round,
     ManifestSeason Season,
     string Date,
-    Language Language);
+    Language Language,
+    bool Original);
 
 /// <summary>
 /// The season a draft belongs to.

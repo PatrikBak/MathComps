@@ -57,10 +57,46 @@ public static class ValidateReport
             AnsiConsole.MarkupLine($"  [{color}]{action}[/] {entity.EntityKind} {Escape(entity.Identifier)}");
         }
 
-        // Collisions, when present — these problems already exist and would be overwritten in place.
-        foreach (var slug in preview.CollidingProblemSlugs)
-            AnsiConsole.MarkupLine($"  [yellow]overwrite[/] problem {Escape(slug)}");
+        // Per-half outcomes for slugs that already exist — clean adds, in-place overwrites, or hard conflicts.
+        foreach (var resolution in preview.TextResolutions)
+        {
+            // Colour and label by the action, then print the slug and which half it lands on.
+            var half = resolution.DocumentType.ToString().ToLowerInvariant();
+            AnsiConsole.MarkupLine(
+                $"  [{ColorFor(resolution.Action)}]{LabelFor(resolution.Action)}[/] "
+                + $"{Escape(resolution.Slug)} {half}");
+        }
     }
+
+    /// <summary>
+    /// The console color for a resolution: red for the hard conflicts, yellow for in-place overwrites, and a
+    /// muted blue for the clean adds.
+    /// </summary>
+    /// <param name="action">The resolution action.</param>
+    /// <returns>The Spectre color name.</returns>
+    private static string ColorFor(DraftTextAction action) => action switch
+    {
+        DraftTextAction.SecondOriginal or DraftTextAction.OrphanTranslation => "red",
+        DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation => "yellow",
+        DraftTextAction.AddOriginal or DraftTextAction.AddTranslation => "blue",
+        _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+    };
+
+    /// <summary>
+    /// The short verb shown for a resolution in the preview block.
+    /// </summary>
+    /// <param name="action">The resolution action.</param>
+    /// <returns>A human-readable label.</returns>
+    private static string LabelFor(DraftTextAction action) => action switch
+    {
+        DraftTextAction.AddOriginal => "add original",
+        DraftTextAction.OverwriteOriginal => "overwrite original",
+        DraftTextAction.SecondOriginal => "second original",
+        DraftTextAction.AddTranslation => "add translation",
+        DraftTextAction.OverwriteTranslation => "overwrite translation",
+        DraftTextAction.OrphanTranslation => "orphan translation",
+        _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+    };
 
     /// <summary>
     /// Renders every issue, grouped by file, each tagged with its severity, position and rule.
