@@ -81,13 +81,8 @@ public record PerLocaleMetadata(
         if (roundSlug == null)
             return Competitions.Data.GetValueOrDefault(competitionSlug);
 
-        // Compose the composite slug: {comp}[-{cat}]-{round}.
-        var compositeSlug = categorySlug == null
-            ? $"{competitionSlug}-{roundSlug}"
-            : $"{competitionSlug}-{categorySlug}-{roundSlug}";
-
-        // Look up the composed key; null when the locale has no entry for it.
-        return Rounds.Data.GetValueOrDefault(compositeSlug);
+        // Look up the round under its composite slug; null when the locale has no entry for it.
+        return Rounds.Data.GetValueOrDefault(TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, roundSlug));
     }
 }
 

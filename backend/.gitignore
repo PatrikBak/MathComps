@@ -89,7 +89,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Python virtual environments
 venv/

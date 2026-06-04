@@ -1,3 +1,5 @@
+using MathComps.Shared.Localization;
+
 namespace MathComps.Infrastructure.Services;
 
 /// <summary>
@@ -5,6 +7,27 @@ namespace MathComps.Infrastructure.Services;
 /// </summary>
 public interface IMetadataLocalizationService
 {
+    /// <summary>
+    /// The language-neutral taxonomy structure: competitions, their categories and rounds, and the sort order of
+    /// all three.
+    /// </summary>
+    SharedMetadata Shared { get; }
+
+    /// <summary>
+    /// Checks that the taxonomy a draft references is fully registered: every competition, category and round
+    /// slug must carry a structural entry in the shared taxonomy and a localized name in every locale. Returns
+    /// one <see cref="TaxonomyRegistryIssue"/> per slug with either gap, so a typo'd or unregistered slug is
+    /// caught up front rather than slipping through as a missing name; an empty list means it's fully registered.
+    /// </summary>
+    /// <param name="competitionSlug">The competition slug the draft references.</param>
+    /// <param name="categorySlug">The category slug, or null when the competition has no categories.</param>
+    /// <param name="roundSlug">The round slug, or null for a competition's default round.</param>
+    /// <returns>The registry-link issues found, or an empty list when everything resolves.</returns>
+    IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(
+        string competitionSlug,
+        string? categorySlug,
+        string? roundSlug);
+
     /// <summary>
     /// Gets the localized short name for a competition.
     /// </summary>

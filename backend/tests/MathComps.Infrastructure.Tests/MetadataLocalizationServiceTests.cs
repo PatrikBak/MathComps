@@ -251,6 +251,67 @@ public class MetadataLocalizationServiceTests
 
     #endregion
 
+    #region Registry-link validation
+
+    /// <summary>
+    /// A fully-registered taxonomy — present in the shared backbone and named in every locale — produces no
+    /// registry-link issues.
+    /// </summary>
+    /// <param name="competition">The competition slug.</param>
+    /// <param name="category">The category slug, or null for a category-less competition.</param>
+    /// <param name="round">The round slug.</param>
+    [Theory]
+    [InlineData("csmo", "a", "iii")]
+    [InlineData("csmo", "z5", "ii")]
+    [InlineData("memo", null, "i")]
+    [InlineData("tst", null, "d1")]
+    public void Registered_taxonomy_has_no_issues(string competition, string? category, string round) =>
+        Assert.Empty(_service.ValidateTaxonomyRegistration(competition, category, round));
+
+    /// <summary>
+    /// An unknown competition is reported as absent from the shared structure and from every locale.
+    /// </summary>
+    [Fact]
+    public void Unknown_competition_is_reported_structurally_and_in_all_locales()
+    {
+        // Validate a competition slug that doesn't exist anywhere.
+        var issues = _service.ValidateTaxonomyRegistration("nope", null, "i");
+
+        // The competition issue flags both the structural gap and all three missing locales.
+        var competitionIssue = issues.Single(issue => issue.EntityKind == TaxonomyEntityKind.Competition);
+        Assert.True(competitionIssue.MissingFromSharedStructure);
+        Assert.Equal([Language.SK, Language.CS, Language.EN], competitionIssue.MissingLocales.AsEnumerable());
+    }
+
+    /// <summary>
+    /// A round slug a real competition doesn't carry is reported as a round-level structural gap.
+    /// </summary>
+    [Fact]
+    public void Unknown_round_under_a_real_competition_is_reported()
+    {
+        // CSMO category A has no round "zzz".
+        var issues = _service.ValidateTaxonomyRegistration("csmo", "a", "zzz");
+
+        // The competition itself is fine; only the round is flagged.
+        Assert.DoesNotContain(issues, issue => issue.EntityKind == TaxonomyEntityKind.Competition);
+        Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Round && issue.MissingFromSharedStructure);
+    }
+
+    /// <summary>
+    /// A category slug a real competition doesn't carry is reported as a category-level gap.
+    /// </summary>
+    [Fact]
+    public void Unknown_category_is_reported()
+    {
+        // CSMO has no category "zzz".
+        var issues = _service.ValidateTaxonomyRegistration("csmo", "zzz", "iii");
+
+        // The category is flagged structurally.
+        Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Category && issue.MissingFromSharedStructure);
+    }
+
+    #endregion
+
     #region Helpers
 
     /// <summary>
