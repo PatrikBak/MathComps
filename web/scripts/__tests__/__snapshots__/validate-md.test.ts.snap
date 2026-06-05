@@ -200,6 +200,30 @@ exports[`validate-md fixtures > invalid-quote-with-attrs.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > invalid-unbalanced-dollar.md 1`] = `
+{
+  "errorFirstLine": "Unbalanced math delimiters: an odd number of unescaped $ — a delimiter is missing or unmatched.",
+  "stage": "math-delimiters",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-unbalanced-double-backslash.md 1`] = `
+{
+  "errorFirstLine": "Unbalanced math delimiters: an odd number of unescaped $ — a delimiter is missing or unmatched.",
+  "stage": "math-delimiters",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-unbalanced-escaped-mix.md 1`] = `
+{
+  "errorFirstLine": "Unbalanced math delimiters: an odd number of unescaped $ — a delimiter is missing or unmatched.",
+  "stage": "math-delimiters",
+  "verdict": "fail",
+}
+`;
+
 exports[`validate-md fixtures > valid-blockquote.md 1`] = `
 {
   "verdict": "ok",
@@ -237,6 +261,18 @@ exports[`validate-md fixtures > valid-display-math-own-line-in-directive-list.md
 `;
 
 exports[`validate-md fixtures > valid-display-math-own-line-in-native-list.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-dollar-in-code.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-escaped-dollar.md 1`] = `
 {
   "verdict": "ok",
 }
