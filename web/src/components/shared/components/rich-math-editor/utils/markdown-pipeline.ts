@@ -15,6 +15,7 @@ import { remarkImageParams } from '../plugins/remark-image-params'
 import { remarkInlineQuote } from '../plugins/remark-inline-quote'
 import { remarkListStyle } from '../plugins/remark-list-style'
 import { remarkSpoiler } from '../plugins/remark-spoiler'
+import { hasUnbalancedDollars } from './math-delimiters'
 import { preprocessDisplayMath } from './preprocessors'
 
 /**
@@ -122,9 +123,10 @@ function createValidationProcessor() {
 }
 
 /**
- * Pipeline stage at which validation failed.
+ * Pipeline stage at which validation failed. `math-delimiters` is a pre-pipeline
+ * structural check; the rest are stages of the unified processor.
  */
-type ValidationStage = 'parse' | 'sanitize' | 'katex' | 'unknown'
+type ValidationStage = 'math-delimiters' | 'parse' | 'sanitize' | 'katex' | 'unknown'
 
 /**
  * Represents a successful validation — the input rendered cleanly through
@@ -166,7 +168,10 @@ type ValidationResult = ValidationSuccess | ValidationFailure
  * {@link preprocessDisplayMath} first so `$$...$$` blocks behave the same
  * way they do in the editor.
  *
- * Failures surface in two ways:
+ * Failures surface in three ways:
+ * - A pre-pipeline `math-delimiters` check — an odd number of unescaped `$`
+ *   means a delimiter is missing, which `remark-math` would otherwise pair
+ *   greedily and render as wrong-but-valid math with no KaTeX error.
  * - Exceptions thrown during processing (rare — typically remark-parse on
  *   unrecoverable input).
  * - vfile messages emitted by plugins that catch their own errors. Notably
@@ -179,6 +184,16 @@ type ValidationResult = ValidationSuccess | ValidationFailure
  *   HTML) or failure (with stage, message, and optional source position).
  */
 export async function validateMarkdown(text: string): Promise<ValidationResult> {
+  // Catch a missing `$` before the pipeline silently re-pairs it into valid-looking math
+  if (hasUnbalancedDollars(text)) {
+    return {
+      ok: false,
+      error:
+        'Unbalanced math delimiters: an odd number of unescaped $ — a delimiter is missing or unmatched.',
+      stage: 'math-delimiters',
+    }
+  }
+
   // Mirror the renderer's preprocessing step so display math is detected the same way
   const preprocessed = preprocessDisplayMath(text)
 
