@@ -23,13 +23,13 @@ Problems are numbered from 1 and must be contiguous (`p1`, `p2`, …).
 Round-level taxonomy, all slugs (display names live in the registry, not here):
 
 ```yaml
-competition: csmo       # competition slug
-category: a             # category slug — omit for competitions with no categories
-round: iii              # round slug
+competition: csmo # competition slug
+category: a # category slug — omit for competitions with no categories
+round: iii # round slug
 season:
-  year: 2024            # calendar year the season starts
-date: 2024-03-15        # round-instance date, YYYY-MM-DD
-language: sk            # the draft's original language: sk | cs | en
+  year: 2024 # calendar year the season starts
+date: 2024-03-15 # round-instance date, YYYY-MM-DD
+language: sk # the draft's original language: sk | cs | en
 ```
 
 ## Problem body — `pN.<lang>.md`
@@ -55,7 +55,7 @@ One per problem, shared across its languages. Both fields are optional:
 ```yaml
 authors:
   - Jaromír Šimša
-solutionLink: https://example.com/p1   # external solution URL
+solutionLink: https://example.com/p1 # external solution URL
 ```
 
 ## Images
@@ -63,8 +63,8 @@ solutionLink: https://example.com/p1   # external solution URL
 Put assets in `images/` and reference them relatively. Sizing is optional:
 
 ```markdown
-![figure](images/diagram.svg)                       # fluid
-![figure](images/diagram.svg?width=400&height=300)  # fixed intrinsic size
+![figure](images/diagram.svg) # fluid
+![figure](images/diagram.svg?width=400&height=300) # fixed intrinsic size
 ```
 
 `width`/`height` are positive integers and must be given together; `?inline=true` renders inline with surrounding text; `?scale=50` shrinks to a percentage. Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error).
