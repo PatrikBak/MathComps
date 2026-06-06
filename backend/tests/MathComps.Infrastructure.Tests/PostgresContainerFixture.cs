@@ -100,8 +100,9 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
     /// <param name="databaseName">The unique database name for the test class.</param>
     /// <returns>A connection string for the specified database.</returns>
     public string GetConnectionString(string databaseName) =>
-        // Each test class uses its own database, hence its own Npgsql pool. Cap each pool so the pools can't
-        // collectively exhaust the shared server's max_connections as the suite walks through every class.
+        // Every test gets its own database, so its own Npgsql pool; pooled connections would be retained per
+        // database and pile up past the server's max_connections across the run. Disable pooling so each
+        // connection closes on dispose and the sequential suite never holds more than a handful at once.
         $"Host=localhost;Port={MappedPort};Database={databaseName};Username={DbUser};Password={DbPassword};"
-        + "Maximum Pool Size=10;";
+        + "Pooling=false;";
 }
