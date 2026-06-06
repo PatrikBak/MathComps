@@ -70,7 +70,7 @@ public static class ValidateReport
 
     /// <summary>
     /// The console color for a resolution: red for the hard conflicts, yellow for in-place overwrites, and a
-    /// muted blue for the clean adds.
+    /// muted blue for the quiet paths (clean adds and unchanged re-imports).
     /// </summary>
     /// <param name="action">The resolution action.</param>
     /// <returns>The Spectre color name.</returns>
@@ -78,7 +78,8 @@ public static class ValidateReport
     {
         DraftTextAction.SecondOriginal => "red",
         DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation => "yellow",
-        DraftTextAction.AddOriginal or DraftTextAction.AddTranslation => "blue",
+        DraftTextAction.AddOriginal or DraftTextAction.AddTranslation
+            or DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation => "blue",
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
     };
 
@@ -91,9 +92,11 @@ public static class ValidateReport
     {
         DraftTextAction.AddOriginal => "add original",
         DraftTextAction.OverwriteOriginal => "overwrite original",
+        DraftTextAction.UnchangedOriginal => "unchanged original",
         DraftTextAction.SecondOriginal => "second original",
         DraftTextAction.AddTranslation => "add translation",
         DraftTextAction.OverwriteTranslation => "overwrite translation",
+        DraftTextAction.UnchangedTranslation => "unchanged translation",
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
     };
 

@@ -53,18 +53,22 @@ public class DraftValidationPipeline(
                     manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round,
                     manifest.Meta.Season.Year);
 
-                // Carry each problem's text variants — language, originality and solution presence per text.
-                var problemRefs = manifest.Problems
-                    .Select(problem => new DraftProblemRef(
+                // Carry each problem's full content — the preview reproduces the bodies the import would store, so it
+                // needs the markdown and images, not just the shape.
+                var problems = manifest.Problems
+                    .Select(problem => new DraftProblemContent(
                         problem.Order,
-                        [.. problem.Texts.Select(text => new DraftTextRef(
-                            text.Language, text.Original, text.SolutionMarkdown is not null))]))
+                        problem.Authors,
+                        problem.SolutionLink,
+                        [.. problem.Texts.Select(text => new DraftTextContent(
+                            text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown))],
+                        problem.Images))
                     .ToList();
 
                 // Run the read-only preview: create-vs-reuse plus the per-half import outcomes.
-                dbPreview = await resolution.PreviewAsync(target, problemRefs);
+                dbPreview = await resolution.PreviewAsync(target, problems, Path.GetFullPath(folder));
 
-                // Turn each per-half resolution that's worth flagging into an issue; clean adds report nothing.
+                // Turn each per-half resolution that's worth flagging into an issue; routine outcomes report nothing.
                 issues.AddRange(dbPreview.TextResolutions
                     .Select(IssueFor)
                     .Where(issue => issue is not null)
@@ -85,50 +89,35 @@ public class DraftValidationPipeline(
     }
 
     /// <summary>
-    /// Turns one per-text DB resolution into an issue, or null when it's a clean add not worth surfacing. A
-    /// second original is an error; in-place overwrites are warnings.
+    /// Turns one per-text DB resolution into an issue, or null when the outcome is routine. Only a second original
+    /// (a forbidden different-language original) blocks the import; adds, unchanged re-imports and intentional
+    /// in-place overwrites are routine outcomes the report records without alarm.
     /// </summary>
     /// <param name="resolution">The per-text resolution from the DB preview.</param>
-    /// <returns>The issue to report, or null for a clean add.</returns>
+    /// <returns>The blocking issue, or null for a routine outcome.</returns>
     private static VerdictError? IssueFor(ProblemTextResolution resolution)
     {
-        // The half and language, lower-cased to match the rest of the report.
+        // The half, lower-cased to match the rest of the report.
         var half = resolution.DocumentType.ToString().ToLowerInvariant();
-        var language = resolution.Language.ToString().ToLowerInvariant();
         var slug = resolution.Slug;
 
-        // Map each action to its rule, message and severity; clean adds map to null.
+        // Only a second original blocks; everything else is a routine outcome the report already records.
         return resolution.Action switch
         {
-            DraftTextAction.SecondOriginal => Issue("original-conflict",
+            DraftTextAction.SecondOriginal => new VerdictError(
+                ManifestMeta.FileName, Half: null, Line: null, Col: null, "original-conflict",
                 $"problem '{slug}' {half} already has an original in a different language — importing as "
                 + "original would create a second original (forbidden)", VerdictSeverity.Error),
 
-            DraftTextAction.OverwriteOriginal => Issue("overwrite",
-                $"problem '{slug}' {half} already exists as the {language} original — importing would overwrite "
-                + "it in place", VerdictSeverity.Warning),
+            // Adds, unchanged re-imports and intentional in-place overwrites are all expected — nothing to flag.
+            DraftTextAction.AddOriginal or DraftTextAction.AddTranslation
+                or DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation
+                or DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation => null,
 
-            DraftTextAction.OverwriteTranslation => Issue("overwrite",
-                $"problem '{slug}' {half} already has a {language} text — importing the translation would "
-                + "overwrite it in place", VerdictSeverity.Warning),
-
-            // A clean add (new original or new translation) is the expected path — nothing to flag.
-            DraftTextAction.AddOriginal or DraftTextAction.AddTranslation => null,
-
-            // Unhandled cases
+            // Unhandled cases.
             _ => throw new ArgumentOutOfRangeException(nameof(resolution), resolution.Action, null)
         };
     }
-
-    /// <summary>
-    /// Builds a file-level <c>_meta.yaml</c> issue carrying a DB-preview finding.
-    /// </summary>
-    /// <param name="rule">The machine-readable rule category.</param>
-    /// <param name="message">The human-readable description.</param>
-    /// <param name="severity">Whether the finding blocks import or is advisory.</param>
-    /// <returns>The assembled issue.</returns>
-    private static VerdictError Issue(string rule, string message, VerdictSeverity severity) =>
-        new(ManifestMeta.FileName, Half: null, Line: null, Col: null, rule, message, severity);
 }
 
 /// <summary>

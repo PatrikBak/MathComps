@@ -72,6 +72,7 @@ public class DraftApplyService(
         var authorsCache = new Dictionary<string, Author>();
         var problemsInserted = 0;
         var problemsUpdated = 0;
+        var problemsUnchanged = 0;
         var imagesUploaded = 0;
 
         // Each problem in turn.
@@ -91,7 +92,7 @@ public class DraftApplyService(
                 .Include(candidate => candidate.ProblemAuthors)
                 .SingleOrDefaultAsync(candidate => candidate.Slug == slug);
 
-            // Insert a fresh problem, or overwrite the existing one in place.
+            // Insert a fresh problem, or reconcile the existing one — which may turn out to change nothing.
             if (existing is null)
             {
                 await InsertProblemAsync(
@@ -100,8 +101,13 @@ public class DraftApplyService(
             }
             else
             {
-                await UpdateProblemAsync(context, existing, problem, replacements, authorsCache, appliedTexts);
-                problemsUpdated++;
+                // An existing problem counts as updated only when the draft actually differs from it.
+                var changed = await UpdateProblemAsync(
+                    context, existing, problem, replacements, authorsCache, appliedTexts);
+                if (changed)
+                    problemsUpdated++;
+                else
+                    problemsUnchanged++;
             }
         }
 
@@ -110,7 +116,8 @@ public class DraftApplyService(
 
         // The run summary.
         return new DraftApplyResult(
-            entities.ToImmutable(), appliedTexts.ToImmutable(), problemsInserted, problemsUpdated, imagesUploaded);
+            entities.ToImmutable(), appliedTexts.ToImmutable(),
+            problemsInserted, problemsUpdated, problemsUnchanged, imagesUploaded);
     }
 
     /// <summary>
@@ -254,30 +261,13 @@ public class DraftApplyService(
     private async Task<Dictionary<string, string>> UploadProblemImagesAsync(
         DraftProblemContent problem, string slug, string draftFolder)
     {
-        // Ordinal keys — the refs are exact path tokens, not culture-sensitive text.
-        var replacements = new Dictionary<string, string>(StringComparer.Ordinal);
+        // The same ref map the markdown rewrite consumes, derived (slug + intrinsic dims) without any upload.
+        var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);
 
-        // Each referenced basename becomes one upload plus one rewrite entry.
+        // Push each file to the problems/ prefix the resolver already serves, under its deterministic content id.
         foreach (var basename in problem.Images)
-        {
-            // The relative ref as it appears in the markdown — the key the rewrite replaces.
-            var relativeRef = $"images/{basename}";
-
-            // The file on disk that ref points at.
-            var localPath = Path.Combine(draftFolder, "images", basename);
-
-            // Content id keeps the slug for stability across edits; the filename stem disambiguates within a problem.
-            var contentId = $"{slug}-{Path.GetFileNameWithoutExtension(basename)}";
-
-            // The SVG's intrinsic dimensions, read before the upload.
-            var (width, height) = SvgDimensions.Read(localPath);
-
-            // Upload under the problems/ prefix the resolver already serves.
-            await fileUploader.UploadAsync(localPath, $"problems/{contentId}");
-
-            // The resolved ref the markdown will point at — dimensions ride along in the query string.
-            replacements[relativeRef] = $"media:{contentId}?width={width}&height={height}";
-        }
+            await fileUploader.UploadAsync(
+                Path.Combine(draftFolder, "images", basename), $"problems/{ProblemImageRefs.ContentId(slug, basename)}");
 
         // The full map; a body that uses only some of the images simply leaves the rest unmatched.
         return replacements;
@@ -341,7 +331,7 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Overwrites an existing problem in place: refreshes its solution link, upserts each text by
+    /// Reconciles an existing problem with the draft: refreshes its solution link, upserts each text by
     /// <c>(document type, language)</c>, and reconciles its authors. Leaves <see cref="Problem.IsPublished"/>
     /// untouched — a re-import doesn't change whether a problem is visible.
     /// </summary>
@@ -351,7 +341,8 @@ public class DraftApplyService(
     /// <param name="replacements">The image-ref replacements to apply to each body.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
     /// <param name="appliedTexts">The accumulator the written texts are recorded into.</param>
-    private static async Task UpdateProblemAsync(
+    /// <returns>Whether anything actually changed — false when the draft matched the stored problem exactly.</returns>
+    private static async Task<bool> UpdateProblemAsync(
         MathCompsDbContext context,
         Problem existing,
         DraftProblemContent problem,
@@ -360,23 +351,28 @@ public class DraftApplyService(
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
         // The solution link is the only language-invariant field a re-import may change.
+        var linkChanged = existing.SolutionLink != problem.SolutionLink;
         existing.SolutionLink = problem.SolutionLink;
 
-        // Upsert each variant's halves against the rows already present.
+        // Upsert each variant's halves against the rows already present, noting whether any actually changed.
+        var textsChanged = false;
         foreach (var text in problem.Texts)
         {
             // The statement half — rewrite its image refs and upsert it.
-            UpsertText(context, existing, DocumentType.Statement, text,
+            textsChanged |= UpsertText(context, existing, DocumentType.Statement, text,
                 MarkdownImageRewriter.Rewrite(text.StatementMarkdown, replacements), appliedTexts);
 
             // The solution half, only when the draft carries one.
             if (text.SolutionMarkdown is { } solutionMarkdown)
-                UpsertText(context, existing, DocumentType.Solution, text,
+                textsChanged |= UpsertText(context, existing, DocumentType.Solution, text,
                     MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), appliedTexts);
         }
 
         // Bring the author set into line with the draft.
-        await ReconcileAuthorsAsync(context, existing, problem.Authors, authorsCache);
+        var authorsChanged = await ReconcileAuthorsAsync(context, existing, problem.Authors, authorsCache);
+
+        // Updated only if the link, some text, or the author set moved.
+        return linkChanged || textsChanged || authorsChanged;
     }
 
     /// <summary>
@@ -414,9 +410,8 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Upserts one half of an existing problem: rewrites the matching <c>(document type, language)</c> row in
-    /// place, or adds it when absent. Guards against a forbidden second original — validation already rejects it,
-    /// so reaching it here is a logic error worth a clear throw rather than an opaque unique-index violation.
+    /// Upserts one half of an existing problem: a clean add when the <c>(document type, language)</c> row is
+    /// absent, an in-place rewrite when its stored markdown differs, or a no-op when it already matches.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with its texts loaded.</param>
@@ -424,7 +419,8 @@ public class DraftApplyService(
     /// <param name="text">The draft text variant.</param>
     /// <param name="markdown">The rewritten markdown to store.</param>
     /// <param name="appliedTexts">The accumulator to record into.</param>
-    private static void UpsertText(
+    /// <returns>Whether the row was added or rewritten — false when it already held this exact markdown.</returns>
+    private static bool UpsertText(
         MathCompsDbContext context,
         Problem existing,
         DocumentType documentType,
@@ -446,15 +442,23 @@ public class DraftApplyService(
                     $"Refusing to write a second original for '{existing.Slug}' "
                     + $"{documentType.ToString().ToLowerInvariant()} — validation should have rejected this draft.");
 
-            // A clean add onto the existing problem.
+            // A clean add onto the existing problem — a real change.
             AddText(context, existing.Id, existing.Slug, documentType, text, markdown, appliedTexts);
-            return;
+            return true;
         }
 
-        // The same-language row exists — overwrite its markdown in place.
+        // The row already holds this exact markdown — leave it (and its DateModified) untouched.
+        if (match.MarkdownText == markdown)
+        {
+            appliedTexts.Add(new AppliedText(existing.Slug, documentType, text.Language, AppliedTextAction.Unchanged));
+            return false;
+        }
+
+        // The content differs — overwrite its markdown in place.
         match.MarkdownText = markdown;
         match.DateModified = DateTime.UtcNow;
         appliedTexts.Add(new AppliedText(existing.Slug, documentType, text.Language, AppliedTextAction.Overwritten));
+        return true;
     }
 
     /// <summary>
@@ -507,7 +511,8 @@ public class DraftApplyService(
     /// <param name="existing">The tracked existing problem, with its authors loaded.</param>
     /// <param name="authorNames">The draft's author names, in order.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
-    private static async Task ReconcileAuthorsAsync(
+    /// <returns>Whether the author rows changed — false when they already matched the draft.</returns>
+    private static async Task<bool> ReconcileAuthorsAsync(
         MathCompsDbContext context,
         Problem existing,
         ImmutableArray<string> authorNames,
@@ -520,7 +525,7 @@ public class DraftApplyService(
         var current = existing.ProblemAuthors.OrderBy(problemAuthor => problemAuthor.Ordinal)
             .Select(problemAuthor => problemAuthor.AuthorId);
         if (current.SequenceEqual(desired.Select(author => author.Id)))
-            return;
+            return false;
 
         // Replace wholesale: drop the old rows and flush, so re-numbered ordinals can't collide with the old ones.
         context.ProblemAuthors.RemoveRange(existing.ProblemAuthors);
@@ -534,5 +539,8 @@ public class DraftApplyService(
                 AuthorId = desired[index].Id,
                 Ordinal = index + 1
             });
+
+        // The set moved.
+        return true;
     }
 }

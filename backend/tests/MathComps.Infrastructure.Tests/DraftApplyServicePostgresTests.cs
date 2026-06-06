@@ -47,18 +47,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// registry, the season's edition derived as year − 1950, and the new problem hidden pending review.
     /// </summary>
     [Fact]
-    public Task A_net_new_draft_creates_the_whole_chain() => RunApplyAsync(async service =>
+    public Task A_net_new_draft_creates_the_whole_chain() => RunTestAsync(async service =>
     {
         // Import one Slovak-original problem with a statement and a solution.
         var result = await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement", "solution"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement", "solution"))], Path.GetTempPath());
 
         // Every taxonomy entity is newly created.
         Assert.All(result.Entities, entity => Assert.Equal(ResolutionAction.Create, entity.Action));
         Assert.Equal(1, result.ProblemsInserted);
 
         // Every created row carries the fields the registry and draft dictate.
-        await QueryAsync(async (context, metadata) =>
+        await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
         {
             // The competition carries its registry sort order.
             var competition = await context.Competitions.SingleAsync(entity => entity.Slug == "csmo");
@@ -115,20 +115,23 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// text or author rows appear, and the second run reports every taxonomy entity as reused.
     /// </summary>
     [Fact]
-    public Task Re_importing_overwrites_in_place_without_duplicates() => RunApplyAsync(async service =>
+    public Task Re_importing_overwrites_in_place_without_duplicates() => RunTestAsync(async service =>
     {
-        // First import, then a second with changed statement text.
+        // Import the problem.
         await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "first"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath());
+
+        // Re-import it with changed statement text.
         var second = await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "second"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "second"))], Path.GetTempPath());
 
         // The second run reuses the whole taxonomy and updates rather than inserts the problem.
         Assert.All(second.Entities, entity => Assert.Equal(ResolutionAction.Reuse, entity.Action));
         Assert.Equal(0, second.ProblemsInserted);
         Assert.Equal(1, second.ProblemsUpdated);
 
-        await QueryAsync(async (context, _) =>
+        // No rows were duplicated, and the statement now holds the second import's text.
+        await QueryAsync(async context =>
         {
             // Exactly one of everything — the re-import didn't duplicate rows.
             Assert.Equal(1, await context.Problems.CountAsync());
@@ -141,20 +144,155 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Re-importing byte-identical content changes nothing: the problem counts as unchanged rather than updated,
+    /// every text reports unchanged, and the stored row's modified timestamp isn't bumped.
+    /// </summary>
+    [Fact]
+    public Task Re_importing_identical_content_changes_nothing() => RunTestAsync(async service =>
+    {
+        // Import a problem.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // Read back its statement's modified timestamp.
+        var firstModified = await QueryValueAsync(context => context.ProblemTexts
+            .Where(text => text.DocumentType == DocumentType.Statement)
+            .Select(text => text.DateModified)
+            .SingleAsync());
+
+        // Re-import the exact same content.
+        var second = await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // Nothing moved — the problem counts unchanged, not updated, and every text reports unchanged.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        Assert.All(second.Texts, text => Assert.Equal(AppliedTextAction.Unchanged, text.Action));
+
+        // The stored row was left alone — its DateModified didn't advance.
+        var secondModified = await QueryValueAsync(context => context.ProblemTexts
+            .Where(text => text.DocumentType == DocumentType.Statement)
+            .Select(text => text.DateModified)
+            .SingleAsync());
+        Assert.Equal(firstModified, secondModified);
+    });
+
+    /// <summary>
+    /// A re-import that changes one language's body overwrites only that text and leaves the other untouched — the
+    /// problem still counts as updated because something moved.
+    /// </summary>
+    [Fact]
+    public Task Changing_one_language_overwrites_only_that_text() => RunTestAsync(async service =>
+    {
+        // Import a Slovak original plus an English translation.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [Problem(1, Original(Language.SK, "sk"), Translation(Language.EN, "en"))], Path.GetTempPath());
+
+        // Re-import with only the Slovak body changed.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [Problem(1, Original(Language.SK, "sk-new"), Translation(Language.EN, "en"))], Path.GetTempPath());
+
+        // Something moved, so the problem counts as updated.
+        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(0, second.ProblemsUnchanged);
+
+        // The Slovak statement was overwritten; the English one was recognised as unchanged.
+        Assert.Equal(
+            AppliedTextAction.Overwritten, second.Texts.Single(text => text.Language == Language.SK).Action);
+        Assert.Equal(
+            AppliedTextAction.Unchanged, second.Texts.Single(text => text.Language == Language.EN).Action);
+    });
+
+    /// <summary>
+    /// Re-importing an image-bearing problem unchanged is recognised as a no-op: the rewritten body reproduces
+    /// exactly, so the text reports unchanged and the problem doesn't count as updated.
+    /// </summary>
+    [Fact]
+    public Task Re_importing_an_image_problem_with_no_changes_is_unchanged() => RunTestAsync(async service =>
+    {
+        // A dedicated draft folder holding one SVG referenced by the statement.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(folder, "images"));
+        await File.WriteAllTextAsync(
+            Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
+
+        // Import the image problem.
+        var problem = new DraftProblemContent(
+            1, ["Author"], null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+        await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
+
+        // Re-import the very same draft.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
+
+        // The reproduced media body matches the stored one, so nothing counts as updated.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        Assert.All(second.Texts, text => Assert.Equal(AppliedTextAction.Unchanged, text.Action));
+    });
+
+    /// <summary>
+    /// A re-import that changes only the solution link counts the problem as updated, even though every text body is
+    /// identical — the language-invariant field moved.
+    /// </summary>
+    [Fact]
+    public Task Changing_only_the_solution_link_counts_as_updated() => RunTestAsync(async service =>
+    {
+        // Import without a solution link.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // Re-import the identical text, now carrying a solution link.
+        var withLink = new DraftProblemContent(
+            1, ["Jaromír Šimša"], "https://example.com/sol", [Original(Language.SK, "same")], Images: []);
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
+
+        // The link moved, so the problem counts as updated while its text reports unchanged.
+        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(0, second.ProblemsUnchanged);
+        Assert.All(second.Texts, text => Assert.Equal(AppliedTextAction.Unchanged, text.Action));
+    });
+
+    /// <summary>
+    /// A re-import that changes only the author set counts the problem as updated, even though the text body is
+    /// identical — the authors moved.
+    /// </summary>
+    [Fact]
+    public Task Changing_only_the_authors_counts_as_updated() => RunTestAsync(async service =>
+    {
+        // Import with two authors.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [ProblemBy(1, ["Alice", "Bob"], Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // Re-import the identical text with their order flipped.
+        var second = await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [ProblemBy(1, ["Bob", "Alice"], Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // The author set moved, so the problem counts as updated while its text reports unchanged.
+        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(0, second.ProblemsUnchanged);
+        Assert.Equal(
+            AppliedTextAction.Unchanged,
+            second.Texts.Single(text => text.DocumentType == DocumentType.Statement).Action);
+    });
+
+    /// <summary>
     /// A later draft that adds a translation onto an existing problem inserts the translation row and leaves the
     /// original's text and originality flag untouched.
     /// </summary>
     [Fact]
-    public Task A_translation_attaches_without_touching_the_original() => RunApplyAsync(async service =>
+    public Task A_translation_attaches_without_touching_the_original() => RunTestAsync(async service =>
     {
-        // Import the Slovak original, then re-import it alongside a fresh Czech translation.
+        // Import the Slovak original.
         await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "original"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "original"))], Path.GetTempPath());
+
+        // Re-import it alongside a fresh Czech translation.
         await service.ApplyAsync(
             CsmoTarget(), RoundDate,
-            [Problem(1, Original(Language.SK, "original"), Translation(Language.CS, "preklad"))], TempFolder());
+            [Problem(1, Original(Language.SK, "original"), Translation(Language.CS, "preklad"))], Path.GetTempPath());
 
-        await QueryAsync(async (context, _) =>
+        // The original survived untouched and the Czech translation landed alongside it.
+        await QueryAsync(async context =>
         {
             // Two statement rows now — the original plus the new translation.
             var statements = await context.ProblemTexts
@@ -179,10 +317,10 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// markdown, dimensions carried in the query string.
     /// </summary>
     [Fact]
-    public Task An_image_is_uploaded_and_its_ref_rewritten() => RunApplyAsync(async service =>
+    public Task An_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
     {
         // A draft folder holding one SVG referenced by the statement.
-        var folder = TempFolder();
+        var folder = Path.GetTempPath();
         Directory.CreateDirectory(Path.Combine(folder, "images"));
         await File.WriteAllTextAsync(
             Path.Combine(folder, "images", "incircle.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
@@ -199,7 +337,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal($"problems/{ProblemSlug}-incircle", key);
 
         // The stored markdown points at the resolved media ref, dimensions and all — no relative ref left.
-        await QueryAsync(async (context, _) =>
+        await QueryAsync(async context =>
         {
             var stored = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Statement);
             Assert.Equal(
@@ -212,15 +350,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// index — the reconcile drops the old rows before re-adding — and leaves the author set the same size.
     /// </summary>
     [Fact]
-    public Task Re_importing_with_reordered_authors_swaps_ordinals() => RunApplyAsync(async service =>
+    public Task Re_importing_with_reordered_authors_swaps_ordinals() => RunTestAsync(async service =>
     {
-        // Import with two authors, then re-import with their order flipped.
+        // Import with two authors.
         await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [ProblemBy(1, ["Alice", "Bob"], Original(Language.SK, "s"))], TempFolder());
-        await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [ProblemBy(1, ["Bob", "Alice"], Original(Language.SK, "s"))], TempFolder());
+            CsmoTarget(), RoundDate, [ProblemBy(1, ["Alice", "Bob"], Original(Language.SK, "s"))], Path.GetTempPath());
 
-        await QueryAsync(async (context, _) =>
+        // Re-import with their order flipped.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [ProblemBy(1, ["Bob", "Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // No duplicate authors, and they now sit in the flipped order.
+        await QueryAsync(async context =>
         {
             // Still exactly two distinct authors — no duplicate rows from the re-import.
             Assert.Equal(2, await context.Authors.CountAsync());
@@ -240,17 +381,17 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// than inserting a duplicate that the unique author slug would reject.
     /// </summary>
     [Fact]
-    public Task An_author_shared_across_problems_is_created_once() => RunApplyAsync(async service =>
+    public Task An_author_shared_across_problems_is_created_once() => RunTestAsync(async service =>
     {
         // Two problems in the same round, both crediting the same author.
         await service.ApplyAsync(CsmoTarget(), RoundDate,
         [
             ProblemBy(1, ["Shared Author"], Original(Language.SK, "one")),
             ProblemBy(2, ["Shared Author"], Original(Language.SK, "two"))
-        ], TempFolder());
+        ], Path.GetTempPath());
 
         // One author row, linked from both problems.
-        await QueryAsync(async (context, _) =>
+        await QueryAsync(async context =>
         {
             Assert.Equal(1, await context.Authors.CountAsync());
             Assert.Equal(2, await context.ProblemAuthors.CountAsync());
@@ -262,15 +403,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// rather than an opaque unique-index violation — the guard a clean validate makes unreachable, proven to fire.
     /// </summary>
     [Fact]
-    public Task A_second_original_in_another_language_is_rejected() => RunApplyAsync(async service =>
+    public Task A_second_original_in_another_language_is_rejected() => RunTestAsync(async service =>
     {
-        // Establish a Slovak original, then attempt a Czech original onto the same problem slug.
+        // Establish a Slovak original.
         await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "sk"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "sk"))], Path.GetTempPath());
 
         // The second original is rejected.
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.CS, "cs"))], TempFolder()));
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.CS, "cs"))], Path.GetTempPath()));
     });
 
     /// <summary>
@@ -278,16 +419,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// solution row without disturbing the statement.
     /// </summary>
     [Fact]
-    public Task A_solution_can_be_added_to_a_statement_only_problem() => RunApplyAsync(async service =>
+    public Task A_solution_can_be_added_to_a_statement_only_problem() => RunTestAsync(async service =>
     {
-        // Import the statement alone, then re-import the same statement now carrying a solution.
+        // Import the statement alone.
         await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Re-import the same statement now carrying a solution.
         await service.ApplyAsync(
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement", "solution"))], TempFolder());
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement", "solution"))], Path.GetTempPath());
 
         // The solution is now present as the Slovak original.
-        await QueryAsync(async (context, _) =>
+        await QueryAsync(async context =>
         {
             var solution = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Solution);
             Assert.True(solution.IsOriginal);
@@ -362,35 +505,6 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The solution text.</returns>
     private static ProblemText SolutionOf(IEnumerable<ProblemText> texts) =>
         texts.Single(text => text.DocumentType == DocumentType.Solution);
-
-    /// <summary>
-    /// A throwaway folder path for drafts that reference no on-disk images.
-    /// </summary>
-    /// <returns>A temp folder path.</returns>
-    private static string TempFolder() => Path.GetTempPath();
-
-    /// <summary>
-    /// Runs a test body with the apply service resolved from a fresh scope.
-    /// </summary>
-    /// <param name="testAction">The test body.</param>
-    /// <returns>A task representing the test.</returns>
-    private Task RunApplyAsync(Func<IDraftApplyService, Task> testAction) => RunTestAsync(testAction);
-
-    /// <summary>
-    /// Opens a fresh read scope against the same database and runs a query, handing the body both a context and the
-    /// registry so assertions can compare against registry-sourced values.
-    /// </summary>
-    /// <param name="query">The query body.</param>
-    /// <returns>A task representing the query.</returns>
-    private async Task QueryAsync(Func<MathCompsDbContext, IMetadataLocalizationService, Task> query)
-    {
-        // A new provider over the same connection string sees the committed rows.
-        await using var provider = CreateServiceProvider();
-        await using var scope = provider.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
-        var metadata = scope.ServiceProvider.GetRequiredService<IMetadataLocalizationService>();
-        await query(context, metadata);
-    }
 
     /// <summary>
     /// A test double for <see cref="IFileUploader"/> that records uploads instead of hitting remote storage.

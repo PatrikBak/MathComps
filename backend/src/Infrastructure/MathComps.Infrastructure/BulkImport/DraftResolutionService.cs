@@ -9,14 +9,16 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <summary>
 /// EF Core implementation of <see cref="IDraftResolutionService"/>. Spins up a short-lived, no-tracking
 /// <see cref="MathCompsDbContext"/> per call and resolves each taxonomy entity with an <c>AnyAsync</c> existence
-/// probe; for the problem halves it loads only the existing texts' <c>(document type, language, is-original)</c>
-/// for the slugs that already exist, then classifies each half in memory.
+/// probe; for the problem halves it loads the existing texts' <c>(document type, language, is-original, markdown)</c>
+/// for the slugs that already exist, reproduces the markdown the import would write (the same image-ref rewrite),
+/// then classifies each half in memory — including spotting a re-import that changes nothing.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
 public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IDraftResolutionService
 {
     /// <inheritdoc/>
-    public async Task<DraftDbPreview> PreviewAsync(DraftTarget target, IReadOnlyList<DraftProblemRef> problems)
+    public async Task<DraftDbPreview> PreviewAsync(
+        DraftTarget target, IReadOnlyList<DraftProblemContent> problems, string draftFolder)
     {
         // Read-only context; nothing here writes.
         await using var context = await dbContextFactory.CreateDbContextAsync();
@@ -55,20 +57,19 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
                 .Select(problem => new ExistingProblem(
                     problem.Slug,
                     problem.Texts
-                        .Select(text => new ExistingText(text.DocumentType, text.Language, text.IsOriginal))
+                        .Select(text => new ExistingText(
+                            text.DocumentType, text.Language, text.IsOriginal, text.MarkdownText))
                         .ToList()))
                 .ToListAsync())
             .ToDictionary(existing => existing.Slug, existing => existing.Texts);
 
         // Classify every text-variant half the draft writes (statement always; solution only when present).
         var textResolutions = problems
-            .SelectMany(problem => problem.Texts
-                .SelectMany(text => DocumentTypesFor(text)
-                    .SelectMany(documentType => Classify(
-                        slugByOrder[problem.Order],
-                        documentType,
-                        text,
-                        existingTextsBySlug.GetValueOrDefault(slugByOrder[problem.Order])))))
+            .SelectMany(problem => ClassifyProblem(
+                slugByOrder[problem.Order],
+                problem,
+                draftFolder,
+                existingTextsBySlug.GetValueOrDefault(slugByOrder[problem.Order])))
             .ToImmutableArray();
 
         // Hand back the create-vs-reuse picture plus the per-text resolutions for any colliding slugs.
@@ -76,97 +77,132 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
     }
 
     /// <summary>
-    /// The document types one text variant would write: a statement always, plus a solution when it carries one.
-    /// </summary>
-    /// <param name="text">The draft text-variant reference.</param>
-    /// <returns>The document types the import would persist for it.</returns>
-    private static IEnumerable<DocumentType> DocumentTypesFor(DraftTextRef text) =>
-        text.HasSolution
-            ? [DocumentType.Statement, DocumentType.Solution]
-            : [DocumentType.Statement];
-
-    /// <summary>
-    /// Decides what importing one text-variant half would do, from that text's originality and language against
-    /// the texts already present for that <c>(slug, document type)</c>. A net-new half yields nothing (the common,
-    /// quiet path); every other case yields exactly one resolution.
+    /// Classifies every half a single problem would write, reproducing the markdown the import would store (the
+    /// same image-ref rewrite) so an unchanged re-import can be told apart from a real overwrite. A net-new problem
+    /// slug collides with nothing, so it contributes no resolutions.
     /// </summary>
     /// <param name="slug">The would-be problem slug.</param>
-    /// <param name="documentType">The half being classified.</param>
-    /// <param name="text">The draft text variant — its language and whether it is the original.</param>
+    /// <param name="problem">The draft problem content — its text variants and image basenames.</param>
+    /// <param name="draftFolder">The draft folder the image refs resolve against.</param>
     /// <param name="existingTexts">The existing problem's texts, or null when the problem slug is absent.</param>
-    /// <returns>Zero or one resolution for this half.</returns>
-    private static IEnumerable<ProblemTextResolution> Classify(
+    /// <returns>One resolution per half of an already-existing problem; empty for a net-new slug.</returns>
+    private static IEnumerable<ProblemTextResolution> ClassifyProblem(
         string slug,
-        DocumentType documentType,
-        DraftTextRef text,
+        DraftProblemContent problem,
+        string draftFolder,
         IReadOnlyList<ExistingText>? existingTexts)
     {
-        // The existing original (at most one per document type) and whether any text shares this text's language.
-        var existingForDocument = existingTexts?.Where(existing => existing.DocumentType == documentType).ToList();
-        var existingOriginal = existingForDocument?.FirstOrDefault(existing => existing.IsOriginal);
-        var sameLanguageExists = existingForDocument?.Any(existing => existing.Language == text.Language) ?? false;
+        // A net-new slug collides with nothing — every half is the quiet path, so report none (and skip the image
+        // reads the body comparison would otherwise need).
+        if (existingTexts is null)
+            return [];
 
-        // Classify the original or the translation; a net-new problem is quiet either way.
-        var action = text.Original
-            ? ClassifyOriginal(existingTexts is null, existingOriginal, text.Language)
-            : ClassifyTranslation(existingTexts is null, sameLanguageExists);
+        // The image-ref → media-ref map the would-be markdown is rewritten against, sized off the draft's figures.
+        var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);
 
-        // A net-new half is the quiet path — nothing to report.
-        if (action is null)
-            yield break;
-
-        // Return the final resolution
-        yield return new ProblemTextResolution(slug, documentType, text.Language, action.Value);
+        // Classify each variant's halves against the rows already present.
+        return problem.Texts.SelectMany(text => ClassifyHalves(slug, text, replacements, existingTexts));
     }
 
     /// <summary>
-    /// Classifies an original-draft half: a new original where none exists, an in-place overwrite of the
-    /// same-language original, or a forbidden second original in a different language. A net-new problem yields
-    /// null (nothing to report).
+    /// Classifies the halves one text variant of an existing problem would write: a statement always, plus a
+    /// solution when the draft carries one.
     /// </summary>
-    /// <param name="problemAbsent">Whether the problem slug doesn't exist yet.</param>
+    /// <param name="slug">The problem slug.</param>
+    /// <param name="text">The draft text variant.</param>
+    /// <param name="replacements">The image-ref replacements the bodies are rewritten against.</param>
+    /// <param name="existingTexts">The existing problem's texts.</param>
+    /// <returns>One resolution per half the variant writes.</returns>
+    private static IEnumerable<ProblemTextResolution> ClassifyHalves(
+        string slug,
+        DraftTextContent text,
+        IReadOnlyDictionary<string, string> replacements,
+        IReadOnlyList<ExistingText> existingTexts)
+    {
+        // The statement half — classified against its rewritten body.
+        yield return Classify(slug, DocumentType.Statement, text,
+            MarkdownImageRewriter.Rewrite(text.StatementMarkdown, replacements), existingTexts);
+
+        // The solution half, only when the draft carries one.
+        if (text.SolutionMarkdown is { } solutionMarkdown)
+            yield return Classify(slug, DocumentType.Solution, text,
+                MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), existingTexts);
+    }
+
+    /// <summary>
+    /// Decides what importing one half of an already-existing problem would do, from that text's originality and
+    /// language and whether its would-be body differs from the row it lands on.
+    /// </summary>
+    /// <param name="slug">The problem slug.</param>
+    /// <param name="documentType">The half being classified.</param>
+    /// <param name="text">The draft text variant — its language and whether it is the original.</param>
+    /// <param name="markdown">The would-be stored markdown for this half (image refs already rewritten).</param>
+    /// <param name="existingTexts">The existing problem's texts.</param>
+    /// <returns>The resolution for this half.</returns>
+    private static ProblemTextResolution Classify(
+        string slug,
+        DocumentType documentType,
+        DraftTextContent text,
+        string markdown,
+        IReadOnlyList<ExistingText> existingTexts)
+    {
+        // The texts already present for this half, the existing original among them, and the same-language row the
+        // import would land on (matched on language alone, regardless of originality).
+        var existingForDocument = existingTexts.Where(existing => existing.DocumentType == documentType).ToList();
+        var existingOriginal = existingForDocument.FirstOrDefault(existing => existing.IsOriginal);
+        var sameLanguageRow = existingForDocument.FirstOrDefault(existing => existing.Language == text.Language);
+
+        // Classify the original or the translation against the rows present.
+        var action = text.Original
+            ? ClassifyOriginal(existingOriginal, text.Language, markdown)
+            : ClassifyTranslation(sameLanguageRow, markdown);
+
+        // Pair it with the slug, half and language.
+        return new ProblemTextResolution(slug, documentType, text.Language, action);
+    }
+
+    /// <summary>
+    /// Classifies an original-draft half against an existing problem: a new original where none exists, an unchanged
+    /// or in-place overwrite of the same-language original, or a forbidden second original in a different language.
+    /// </summary>
     /// <param name="existingOriginal">The existing original for this document type, or null when there is none.</param>
     /// <param name="draftLanguage">The language the draft would write.</param>
-    /// <returns>The action, or null when there's nothing to report.</returns>
-    private static DraftTextAction? ClassifyOriginal(
-        bool problemAbsent, ExistingText? existingOriginal, Language draftLanguage)
+    /// <param name="markdown">The would-be stored markdown, compared against the existing original's body.</param>
+    /// <returns>The action this half would take.</returns>
+    private static DraftTextAction ClassifyOriginal(
+        ExistingText? existingOriginal, Language draftLanguage, string markdown)
     {
-        // A brand-new problem just gets its original — the quiet, expected path, not worth a line.
-        if (problemAbsent)
-            return null;
-
         // The problem exists but this half has no original yet — the import adds it cleanly.
         if (existingOriginal is null)
             return DraftTextAction.AddOriginal;
 
-        // Same-language original already there — a re-import overwrites it in place.
-        if (existingOriginal.Language == draftLanguage)
-            return DraftTextAction.OverwriteOriginal;
-
         // A different-language original already holds the slot — a second original is forbidden.
-        return DraftTextAction.SecondOriginal;
+        if (existingOriginal.Language != draftLanguage)
+            return DraftTextAction.SecondOriginal;
+
+        // Same-language original — an identical body changes nothing, otherwise it's an in-place overwrite.
+        return existingOriginal.MarkdownText == markdown
+            ? DraftTextAction.UnchangedOriginal
+            : DraftTextAction.OverwriteOriginal;
     }
 
     /// <summary>
-    /// Classifies a translation half against existing DB rows. A draft always carries the problem's original, so
-    /// every translation has an original to attach to. A brand-new problem is the quiet path; against an existing
-    /// problem it's an in-place overwrite of a same-language translation, or a clean add.
+    /// Classifies a translation half against an existing problem: a clean add when this language is new, otherwise
+    /// an unchanged or in-place overwrite of the same-language text.
     /// </summary>
-    /// <param name="problemAbsent">Whether the problem slug doesn't exist yet.</param>
-    /// <param name="sameLanguageExists">Whether a text in this language already exists for this half.</param>
-    /// <returns>The action, or null when there's nothing to report.</returns>
-    private static DraftTextAction? ClassifyTranslation(bool problemAbsent, bool sameLanguageExists)
+    /// <param name="sameLanguageRow">The same-language text already present for this half, or null when none.</param>
+    /// <param name="markdown">The would-be stored markdown, compared against the existing text's body.</param>
+    /// <returns>The action this half would take.</returns>
+    private static DraftTextAction ClassifyTranslation(ExistingText? sameLanguageRow, string markdown)
     {
-        // A brand-new problem just gets its translation alongside the original — quiet, not worth a line.
-        if (problemAbsent)
-            return null;
-
-        // A translation in this language already exists — the import overwrites it in place.
-        if (sameLanguageExists)
-            return DraftTextAction.OverwriteTranslation;
-
         // The problem exists and this language is new — a clean translation add.
-        return DraftTextAction.AddTranslation;
+        if (sameLanguageRow is null)
+            return DraftTextAction.AddTranslation;
+
+        // A same-language text already exists — an identical body changes nothing, otherwise an in-place overwrite.
+        return sameLanguageRow.MarkdownText == markdown
+            ? DraftTextAction.UnchangedTranslation
+            : DraftTextAction.OverwriteTranslation;
     }
 
     /// <summary>
@@ -187,10 +223,11 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
     private record ExistingProblem(string Slug, IReadOnlyList<ExistingText> Texts);
 
     /// <summary>
-    /// One existing problem text reduced to what the conflict check reads.
+    /// One existing problem text reduced to what the conflict and content checks read.
     /// </summary>
     /// <param name="DocumentType">Which half the text is.</param>
     /// <param name="Language">The text's language.</param>
     /// <param name="IsOriginal">Whether it is the canonical original.</param>
-    private record ExistingText(DocumentType DocumentType, Language Language, bool IsOriginal);
+    /// <param name="MarkdownText">The stored markdown body, compared against the would-be import to spot a no-op.</param>
+    private record ExistingText(DocumentType DocumentType, Language Language, bool IsOriginal, string? MarkdownText);
 }

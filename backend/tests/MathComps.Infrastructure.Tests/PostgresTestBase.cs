@@ -112,4 +112,52 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
         // Execute the test action
         await testAction(service);
     }
+
+    /// <summary>
+    /// Runs a read against a fresh scope over the same database, handing the body a context so assertions can verify
+    /// the rows the service under test committed.
+    /// </summary>
+    /// <param name="query">The query body, handed a fresh context.</param>
+    /// <returns>A task representing the query.</returns>
+    protected async Task QueryAsync(Func<MathCompsDbContext, Task> query)
+    {
+        // A new provider over the same connection string sees the committed rows.
+        await using var provider = CreateServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
+        await query(context);
+    }
+
+    /// <summary>
+    /// Runs a read against a fresh scope over the same database, handing the body a context plus a resolved service
+    /// (e.g. the metadata registry) so assertions can compare committed rows against that service's values.
+    /// </summary>
+    /// <typeparam name="TResolved">The companion service to resolve alongside the context.</typeparam>
+    /// <param name="query">The query body, handed a fresh context and the resolved service.</param>
+    /// <returns>A task representing the query.</returns>
+    protected async Task QueryAsync<TResolved>(Func<MathCompsDbContext, TResolved, Task> query) where TResolved : notnull
+    {
+        // A new provider over the same connection string sees the committed rows.
+        await using var provider = CreateServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
+        var resolved = scope.ServiceProvider.GetRequiredService<TResolved>();
+        await query(context, resolved);
+    }
+
+    /// <summary>
+    /// Reads a single value from a fresh read scope against the same database — for assertions that need one figure
+    /// (e.g. a row count or timestamp) read back after the service under test has committed.
+    /// </summary>
+    /// <typeparam name="TValue">The value type the query returns.</typeparam>
+    /// <param name="query">The query body, handed a fresh context.</param>
+    /// <returns>The value the query produced.</returns>
+    protected async Task<TValue> QueryValueAsync<TValue>(Func<MathCompsDbContext, Task<TValue>> query)
+    {
+        // A new provider over the same connection string sees the committed rows.
+        await using var provider = CreateServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
+        return await query(context);
+    }
 }
