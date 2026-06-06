@@ -3,7 +3,7 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <summary>
 /// The taxonomy and season a draft resolves against — the slug references plus the season year needed to look up
 /// (or preview creating) the competition, round and season, and to derive problem slugs. Per-text language and
-/// originality live on each problem's <see cref="DraftTextRef"/>, not here. A small Infrastructure contract,
+/// originality live on each problem's <see cref="DraftTextContent"/>, not here. A small Infrastructure contract,
 /// independent of the preflight manifest shape.
 /// </summary>
 /// <param name="CompetitionSlug">Competition slug (e.g. <c>csmo</c>).</param>

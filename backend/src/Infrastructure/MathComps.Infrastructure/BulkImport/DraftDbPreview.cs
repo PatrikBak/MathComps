@@ -39,6 +39,9 @@ public enum DraftTextAction
     /// <summary>An original text replaces the existing original in the same language, in place.</summary>
     OverwriteOriginal,
 
+    /// <summary>An original text matches the existing same-language original byte-for-byte — importing changes nothing.</summary>
+    UnchangedOriginal,
+
     /// <summary>
     /// An original text in a different language than the existing original — importing would create a second
     /// original, which the one-original-per-document index forbids. A hard conflict.
@@ -49,7 +52,10 @@ public enum DraftTextAction
     AddTranslation,
 
     /// <summary>A translation replaces an existing same-language translation, in place.</summary>
-    OverwriteTranslation
+    OverwriteTranslation,
+
+    /// <summary>A translation matches the existing same-language text byte-for-byte — importing changes nothing.</summary>
+    UnchangedTranslation
 }
 
 /// <summary>

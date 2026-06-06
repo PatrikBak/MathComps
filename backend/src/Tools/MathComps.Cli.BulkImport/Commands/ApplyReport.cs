@@ -38,10 +38,11 @@ public static class ApplyReport
         // The problem-level counts.
         AnsiConsole.MarkupLine(
             $"\n[bold]Problems[/]: [green]{result.Applied.ProblemsInserted} inserted[/], "
-            + $"[yellow]{result.Applied.ProblemsUpdated} updated[/]");
+            + $"[yellow]{result.Applied.ProblemsUpdated} updated[/], "
+            + $"[blue]{result.Applied.ProblemsUnchanged} unchanged[/]");
 
-        // The per-text outcomes, each tagged inserted or overwritten.
-        foreach (var text in result.Applied.Texts)
+        // The per-text outcomes, each tagged inserted or overwritten. Unchanged texts stay quiet — the count says it.
+        foreach (var text in result.Applied.Texts.Where(text => text.Action != AppliedTextAction.Unchanged))
         {
             // Inserts are the clean path (green); overwrites touch a live row (yellow).
             var color = text.Action == AppliedTextAction.Inserted ? "green" : "yellow";

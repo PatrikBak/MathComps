@@ -8,9 +8,9 @@ Both commands run the same checks, so a clean `validate` all but guarantees a cl
 
 1. **Preflight** — shells out to the `web/` TypeScript preflight (`npm run draft:preflight`), which reads the draft folder and reports any format, markdown or image-reference problems.
 2. **Registry check** — every competition / category / round slug in `_meta.yaml` must be registered in the shared taxonomy and carry a localized name in each locale.
-3. **DB preview** — a read-only look at what each problem would create versus overwrite.
+3. **DB preview** — a read-only look at what each problem would create, overwrite, or leave unchanged (it compares the would-be body against what's stored, so a no-op re-import isn't flagged as an overwrite).
 
-`apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. New problems land unpublished pending review; a re-import overwrites in place (idempotent).
+`apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. New problems land unpublished pending review; a re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
 
 ## Draft folder
 

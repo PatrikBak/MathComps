@@ -5,9 +5,8 @@ namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
 /// One language variant a draft problem imports: its language, whether it is the original, and the statement /
-/// solution markdown carried verbatim (still with relative <c>images/…</c> refs). The apply-side counterpart to
-/// the preview's lighter <see cref="DraftTextRef"/>: it carries the content to write, not just the shape to
-/// classify.
+/// solution markdown carried verbatim (still with relative <c>images/…</c> refs). Carries the content to write,
+/// shared by both the read-only preview and the apply path.
 /// </summary>
 /// <param name="Language">The text's language.</param>
 /// <param name="Original">Whether this text is the original (maps 1:1 to
