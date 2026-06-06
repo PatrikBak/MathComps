@@ -7,6 +7,7 @@ using MathComps.Infrastructure.Storage;
 using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using static Microsoft.Extensions.Options.Options;
 
 namespace MathComps.Infrastructure.Tests;
 
@@ -32,10 +33,24 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private readonly RecordingFileUploader _uploader = new();
 
+    /// <summary>
+    /// A throwaway upload-ledger path, unique per test instance so the tracker one test fills can't leak into
+    /// another (xUnit builds a fresh instance per <c>[Fact]</c>).
+    /// </summary>
+    private readonly string _ledgerPath =
+        Path.Combine(Path.GetTempPath(), $"bulkimport-ledger-{Guid.NewGuid():N}.json");
+
     /// <inheritdoc/>
-    protected override void ConfigureServices(IServiceCollection services) =>
-        // The apply service needs an IFileUploader; supply the recording fake
+    protected override void ConfigureServices(IServiceCollection services)
+    {
+        // The recording fake stands in for R2. The tracker wraps it (real change-detection against a throwaway
+        // ledger), and the apply service depends on the tracker — registered here because the bulk-import host
+        // owns it, not shared infrastructure.
         services.AddSingleton<IFileUploader>(_uploader);
+        services.AddSingleton<ITrackedFileUploader>(_ => new TrackedFileUploader(
+            _uploader, Create(new UploadLedgerOptions { LedgerPath = _ledgerPath })));
+        services.AddScoped<IDraftApplyService, DraftApplyService>();
+    }
 
     /// <inheritdoc/>
     protected override Task SeedDataAsync(MathCompsDbContext context) =>
@@ -319,8 +334,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task An_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
     {
-        // A draft folder holding one SVG referenced by the statement.
-        var folder = Path.GetTempPath();
+        // A dedicated draft folder holding one SVG referenced by the statement.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
         Directory.CreateDirectory(Path.Combine(folder, "images"));
         await File.WriteAllTextAsync(
             Path.Combine(folder, "images", "incircle.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
@@ -333,6 +348,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // One image was uploaded, under the slug-based problems/ key.
         Assert.Equal(1, result.ImagesUploaded);
+        Assert.Equal(0, result.ImagesSkipped);
         var (_, key) = Assert.Single(_uploader.Uploads);
         Assert.Equal($"problems/{ProblemSlug}-incircle", key);
 
@@ -343,6 +359,39 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(
                 $"see ![fig](media:{ProblemSlug}-incircle?width=100&height=80)", stored.MarkdownText);
         });
+    });
+
+    /// <summary>
+    /// Re-applying a draft whose image hasn't changed skips the re-upload: the apply reports it uploaded the first
+    /// time and skipped the second, and the inner uploader is only ever called once.
+    /// </summary>
+    [Fact]
+    public Task Re_applying_an_unchanged_image_skips_the_upload() => RunTestAsync(async service =>
+    {
+        // A dedicated draft folder holding one SVG referenced by the statement.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(folder, "images"));
+        await File.WriteAllTextAsync(
+            Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
+
+        // The image problem the draft holds.
+        var problem = new DraftProblemContent(
+            1, ["Author"], null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+
+        // Import it.
+        var first = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
+
+        // Re-import the very same draft.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
+
+        // The first apply uploads the image; the second recognises it as unchanged and skips it.
+        Assert.Equal(1, first.ImagesUploaded);
+        Assert.Equal(0, first.ImagesSkipped);
+        Assert.Equal(0, second.ImagesUploaded);
+        Assert.Equal(1, second.ImagesSkipped);
+
+        // Only the first apply's single upload ever left the process.
+        Assert.Single(_uploader.Uploads);
     });
 
     /// <summary>

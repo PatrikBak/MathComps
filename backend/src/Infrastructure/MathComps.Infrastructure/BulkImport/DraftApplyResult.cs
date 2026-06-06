@@ -34,19 +34,21 @@ public record AppliedText(
     AppliedTextAction Action);
 
 /// <summary>
-/// A summary of what an apply run wrote: which taxonomy entities were created versus reused, what happened to
-/// every text, and how many images were uploaded.
+/// A summary of what an apply run did: which taxonomy entities were created versus reused, what happened to every
+/// text, and how many images were uploaded versus skipped as already on remote storage.
 /// </summary>
 /// <param name="Entities">Create-vs-reuse for the competition, category, round, season and round-instance.</param>
 /// <param name="Texts">One entry per statement/solution text written, across all problems and languages.</param>
 /// <param name="ProblemsInserted">How many problems were newly created.</param>
 /// <param name="ProblemsUpdated">How many existing problems had at least one field actually change.</param>
 /// <param name="ProblemsUnchanged">How many existing problems matched the draft exactly, so nothing was written.</param>
-/// <param name="ImagesUploaded">How many image objects were uploaded to remote storage.</param>
+/// <param name="ImagesUploaded">How many images were pushed to remote storage.</param>
+/// <param name="ImagesSkipped">How many images were skipped because their bytes were already on remote storage.</param>
 public record DraftApplyResult(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<AppliedText> Texts,
     int ProblemsInserted,
     int ProblemsUpdated,
     int ProblemsUnchanged,
-    int ImagesUploaded);
+    int ImagesUploaded,
+    int ImagesSkipped);
