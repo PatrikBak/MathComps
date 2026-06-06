@@ -203,7 +203,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         {
             var stored = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Statement);
             Assert.Equal(
-                $"see ![fig](media:{ProblemSlug}-incircle?width=100px&height=80px)", stored.MarkdownText);
+                $"see ![fig](media:{ProblemSlug}-incircle?width=100&height=80)", stored.MarkdownText);
         });
     });
 

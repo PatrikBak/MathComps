@@ -3,38 +3,52 @@ using MathComps.Infrastructure.BulkImport;
 namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
-/// Unit tests for <see cref="SvgDimensions.Parse"/> — the pure half of the SVG width/height reader. These pin the
-/// behaviours the apply ref-rewrite depends on: units are kept verbatim, single-quoted attributes are accepted,
-/// and a sizeless SVG is a hard error rather than a silent default.
+/// Unit tests for <see cref="SvgDimensions.Parse"/> — the pure half of the SVG width/height reader. They pin its
+/// contract: values resolve to whole pixels (px and unit-less), points convert at 96/72, single-quoted attributes
+/// are accepted, and a sizeless SVG or an unresolvable unit is a hard error rather than a silent default.
 /// </summary>
 public class SvgDimensionsTests
 {
     /// <summary>
-    /// A px-dimensioned root element yields its width and height verbatim.
+    /// A px-dimensioned root element yields its width and height as the integer pixel counts.
     /// </summary>
     [Fact]
-    public void Parses_pixel_dimensions_verbatim()
+    public void Parses_pixel_dimensions()
     {
-        // An SVG declaring integer-px dimensions.
+        // An SVG declaring px dimensions.
         var (width, height) = SvgDimensions.Parse("<svg width=\"100px\" height=\"80px\"></svg>");
 
-        // Both come back exactly as written.
-        Assert.Equal("100px", width);
-        Assert.Equal("80px", height);
+        // The "px" suffix is stripped to bare pixels.
+        Assert.Equal(100, width);
+        Assert.Equal(80, height);
     }
 
     /// <summary>
-    /// Non-px units (e.g. cm) survive untouched — the reader doesn't convert, it just carries the raw value.
+    /// A bare numeric value (no unit) is already pixels.
     /// </summary>
     [Fact]
-    public void Keeps_non_pixel_units()
+    public void Treats_a_unitless_value_as_pixels()
     {
-        // An SVG declaring centimetre dimensions.
-        var (width, height) = SvgDimensions.Parse("<svg width=\"10cm\" height=\"8cm\"></svg>");
+        // An SVG declaring unit-less dimensions.
+        var (width, height) = SvgDimensions.Parse("<svg width=\"100\" height=\"80\"></svg>");
 
-        // The units are preserved.
-        Assert.Equal("10cm", width);
-        Assert.Equal("8cm", height);
+        // Carried through as pixels unchanged.
+        Assert.Equal(100, width);
+        Assert.Equal(80, height);
+    }
+
+    /// <summary>
+    /// Point dimensions convert to pixels at 96/72, rounded to whole pixels.
+    /// </summary>
+    [Fact]
+    public void Converts_points_to_pixels()
+    {
+        // 72pt is exactly 96px; 10pt rounds from 13.33.
+        var (width, height) = SvgDimensions.Parse("<svg width=\"72pt\" height=\"10pt\"></svg>");
+
+        // The point→pixel conversion, rounded.
+        Assert.Equal(96, width);
+        Assert.Equal(13, height);
     }
 
     /// <summary>
@@ -46,10 +60,18 @@ public class SvgDimensionsTests
         // The same element with single quotes.
         var (width, height) = SvgDimensions.Parse("<svg width='42px' height='24px'></svg>");
 
-        // Normalized and read.
-        Assert.Equal("42px", width);
-        Assert.Equal("24px", height);
+        // Normalized and read as pixels.
+        Assert.Equal(42, width);
+        Assert.Equal(24, height);
     }
+
+    /// <summary>
+    /// A unit we can't resolve to a fixed pixel size (e.g. cm) is an authoring error rather than a silent guess.
+    /// </summary>
+    [Fact]
+    public void Throws_on_an_unsupported_unit() =>
+        // Centimetres don't map to a fixed intrinsic pixel size here.
+        Assert.Throws<InvalidOperationException>(() => SvgDimensions.Parse("<svg width=\"10cm\" height=\"8cm\"></svg>"));
 
     /// <summary>
     /// A missing dimension is an authoring error — a figure with no intrinsic size can't be sized — so it throws.
