@@ -2,7 +2,6 @@ using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Infrastructure.Storage;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,14 +30,8 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddMathCompsDbContext(configuration);
 
 // Add infrastructure services — the metadata localization service the registry-link check uses, the read-only
-// DB-resolution service backing the preview, and the apply service that performs the import.
+// DB-resolution service backing the preview, the apply service that performs the import, and the R2 uploader it uses.
 services.AddInfrastructureServices();
-
-// R2 uploader for apply's image uploads.
-services.AddOptions<R2Settings>()
-    .Bind(configuration.GetSection(R2Settings.SectionName))
-    .ValidateDataAnnotations();
-services.AddSingleton<IFileUploader, R2Uploader>();
 
 // The validation pipeline both commands share.
 services.AddScoped<DraftValidationPipeline>();
