@@ -27,7 +27,8 @@ public static class RegistryLinkValidator
 
     /// <summary>
     /// Renders a single registry-link issue as a <see cref="VerdictError"/>, describing both the structural gap
-    /// (absent from metadata.shared.json) and the localization gap (missing names in some locales).
+    /// (absent from <see cref="ResourcePaths.SharedMetadataFileName"/>) and the localization gap (missing names
+    /// in some locales).
     /// </summary>
     /// <param name="issue">The registry-link gap to map.</param>
     /// <returns>An error-severity issue against <c>_meta.yaml</c> with rule <c>registry</c>.</returns>
@@ -38,7 +39,7 @@ public static class RegistryLinkValidator
 
         // The structural backbone is missing the slug entirely.
         if (issue.MissingFromSharedStructure)
-            gaps.Add("no structural entry in metadata.shared.json");
+            gaps.Add($"no structural entry in {ResourcePaths.SharedMetadataFileName}");
 
         // Some locales carry no localized name for it.
         if (issue.MissingLocales.Length > 0)
@@ -53,6 +54,6 @@ public static class RegistryLinkValidator
 
         // Registry gaps are folder-level and always blocking.
         return new VerdictError(
-            "_meta.yaml", Half: null, Line: null, Col: null, "registry", message, VerdictSeverity.Error);
+            ManifestMeta.FileName, Half: null, Line: null, Col: null, "registry", message, VerdictSeverity.Error);
     }
 }

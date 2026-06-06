@@ -35,7 +35,7 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
     /// <summary>
     /// The language-neutral taxonomy structure: competitions, their categories and rounds, and the sort
-    /// order of all three. Loaded from metadata.shared.json.
+    /// order of all three. Loaded from <see cref="ResourcePaths.SharedMetadataFileName"/>.
     /// </summary>
     public SharedMetadata Shared { get; } = File.ReadAllText(
             Path.Combine(

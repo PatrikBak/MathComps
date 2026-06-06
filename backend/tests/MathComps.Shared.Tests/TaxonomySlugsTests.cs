@@ -37,9 +37,9 @@ public class TaxonomySlugsTests
         Assert.Equal("csmo-a-iii", TaxonomySlugs.ComposeRoundSlug("CSMO", "A", "III"));
 
     /// <summary>
-    /// A problem slug is <c>{year}-{compositeRoundSlug}-{order}</c>.
+    /// A problem slug is <c>{editionNumber}-{compositeRoundSlug}-{order}</c>.
     /// </summary>
     [Fact]
-    public void Problem_slug_combines_year_round_and_order() =>
-        Assert.Equal("2024-csmo-a-iii-1", TaxonomySlugs.ProblemSlug(2024, "csmo-a-iii", 1));
+    public void Problem_slug_combines_edition_round_and_order() =>
+        Assert.Equal("75-csmo-a-iii-1", TaxonomySlugs.ProblemSlug(75, "csmo-a-iii", 1));
 }

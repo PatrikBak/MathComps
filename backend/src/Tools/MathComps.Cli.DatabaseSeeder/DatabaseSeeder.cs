@@ -2,6 +2,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared;
 using MathComps.Shared.Cli;
+using MathComps.Shared.Localization;
 using MathComps.TexParser.Images;
 using MathComps.TexParser.Types;
 using Microsoft.EntityFrameworkCore;
@@ -85,16 +86,6 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         ImmutableList<int> Seasons,
         ImmutableList<(CompetitionRoundData Competition, int StartYear)> RoundInstances
     );
-
-    #endregion
-
-    #region Fields
-
-    /// <summary>
-    /// The base year for the Mathematical Olympiad, from which edition numbers are calculated.
-    /// The raw dataset uses an `OlympiadYear` property, which is an offset from this base year.
-    /// </summary>
-    private const int OlympiadBaseYear = 1950;
 
     #endregion
 
@@ -205,7 +196,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 ));
 
                 // Figure out the real start year
-                var startYear = parsedProblem.RawProblem.OlympiadYear + OlympiadBaseYear;
+                var startYear = Season.StartYearFromEdition(parsedProblem.RawProblem.OlympiadYear);
 
                 // Get some useful ids from cache 
                 var seasonId = seasonIds[startYear];
@@ -220,8 +211,9 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                 // Round instance
                 var roundInstanceId = roundInstanceIds[(roundData.RoundId, seasonId)];
 
-                // The slug should be unique and nice in an URL
-                var problemSlug = $"{parsedProblem.RawProblem.OlympiadYear}-{roundData.CompositeSlug}-{parsedProblem.RawProblem.Order}";
+                // The slug should be unique and nice in an URL — keyed by the edition (ročník), which OlympiadYear is.
+                var problemSlug = TaxonomySlugs.ProblemSlug(
+                    parsedProblem.RawProblem.OlympiadYear, roundData.CompositeSlug, parsedProblem.RawProblem.Order);
 
                 // Track this problem slug for orphan detection later.
                 processedProblemSlugs.Add(problemSlug);
@@ -421,7 +413,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
                     uniqueCategories.Add(parsedProblem.RawProblem.Category);
 
                 // Find the real start year, olympiad year is an edition
-                var startYear = parsedProblem.RawProblem.OlympiadYear + OlympiadBaseYear;
+                var startYear = Season.StartYearFromEdition(parsedProblem.RawProblem.OlympiadYear);
 
                 // Track unique season.
                 uniqueSeasons.Add(startYear);
@@ -700,7 +692,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         foreach (var startYear in startYears.Distinct())
         {
             // Slovak numbering ftw
-            var editionNumber = startYear - OlympiadBaseYear;
+            var editionNumber = Season.EditionFromStartYear(startYear);
 
             // Check if season already exists
             if (existingSeasons.TryGetValue(startYear, out var existingSeason))

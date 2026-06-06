@@ -12,8 +12,13 @@ public static class ResourcePaths
     public const string ApprovedTags = "Resources/approved-tags.json";
 
     /// <summary>
-    /// Path to the metadata.shared.json file holding the language-neutral taxonomy structure
-    /// (competitions, their categories and rounds, and the sort order of all three).
+    /// The metadata.shared.json file name — the language-neutral taxonomy structure (competitions, their
+    /// categories and rounds, and the sort order of all three).
     /// </summary>
-    public const string SharedMetadataFile = "Resources/metadata.shared.json";
+    public const string SharedMetadataFileName = "metadata.shared.json";
+
+    /// <summary>
+    /// Path to the <see cref="SharedMetadataFileName"/> resource, relative to the application base directory.
+    /// </summary>
+    public const string SharedMetadataFile = "Resources/" + SharedMetadataFileName;
 }

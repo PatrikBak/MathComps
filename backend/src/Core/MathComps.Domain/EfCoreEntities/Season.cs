@@ -25,12 +25,31 @@ public class Season
     [NotMapped]
     public int EndYear => StartYear + 1;
 
-
-
     /// <summary>
     /// Numeric edition for easier numeric filtering (e.g., 75).
     /// </summary>
     public required int EditionNumber { get; set; }
+
+    /// <summary>
+    /// The CZ/SK ročník base year: a season's <see cref="EditionNumber"/> is its <see cref="StartYear"/> minus this.
+    /// The season is competition-agnostic and the edition is unique, so this single base labels every competition's
+    /// season — it is not each competition's own edition count.
+    /// </summary>
+    public const int OlympiadBaseYear = 1950;
+
+    /// <summary>
+    /// Converts a season start year to its <see cref="EditionNumber"/> (the shared ročník).
+    /// </summary>
+    /// <param name="startYear">The season start year (e.g. 2024).</param>
+    /// <returns>The edition number (e.g. 74).</returns>
+    public static int EditionFromStartYear(int startYear) => startYear - OlympiadBaseYear;
+
+    /// <summary>
+    /// Converts an edition number (ročník) back to its season start year.
+    /// </summary>
+    /// <param name="editionNumber">The edition number (e.g. 74).</param>
+    /// <returns>The season start year (e.g. 2024).</returns>
+    public static int StartYearFromEdition(int editionNumber) => editionNumber + OlympiadBaseYear;
 
     /// <summary>
     /// Display name of the season (e.g., "2024/2025").

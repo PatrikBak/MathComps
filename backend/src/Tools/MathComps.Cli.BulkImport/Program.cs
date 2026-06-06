@@ -1,6 +1,8 @@
 using MathComps.Cli.BulkImport.Commands;
+using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Storage;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,16 +30,26 @@ services.AddSingleton<IConfiguration>(configuration);
 // Make sure DI can resolve DbContext — validate connects read-only for the create-vs-reuse preview.
 services.AddMathCompsDbContext(configuration);
 
-// Add infrastructure services — the metadata localization service the registry-link check uses, and the
-// read-only DB-resolution service backing the preview.
+// Add infrastructure services — the metadata localization service the registry-link check uses, the read-only
+// DB-resolution service backing the preview, and the apply service that performs the import.
 services.AddInfrastructureServices();
 
-// Start the app with DI
+// R2 uploader for apply's image uploads.
+services.AddOptions<R2Settings>()
+    .Bind(configuration.GetSection(R2Settings.SectionName))
+    .ValidateDataAnnotations();
+services.AddSingleton<IFileUploader, R2Uploader>();
+
+// The validation pipeline both commands share.
+services.AddScoped<DraftValidationPipeline>();
+
+// Wrap the service collection for Spectre's DI.
 using var registrar = new DependencyInjectionRegistrar(services);
 
 // Run the app using our custom runner
 return await CliRunner.RunAsync(new CommandApp(registrar), args, config =>
 {
-    // The dry-run command; the import command slots in later as a sibling.
+    // The dry-run command and its mutating sibling, the import.
     config.AddCommand<ValidateCommand>("validate");
+    config.AddCommand<ApplyCommand>("apply");
 });
