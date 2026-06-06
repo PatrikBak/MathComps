@@ -62,11 +62,26 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
             .Build();
 
         // Register all necessary services
-        return new ServiceCollection()
+        var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(configuration)
             .AddMathCompsDbContext(configuration)
-            .AddInfrastructureServices()
-            .BuildServiceProvider();
+            .AddInfrastructureServices();
+
+        // Let a derived class add or replace registrations (e.g. a fake for an external dependency).
+        ConfigureServices(services);
+
+        // Build the provider.
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// Hook for derived classes to add or override service registrations before the provider is built — e.g. to
+    /// supply a fake for an external dependency the service under test needs. The base does nothing.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    protected virtual void ConfigureServices(IServiceCollection services)
+    {
+        // No extra registrations by default.
     }
 
     /// <summary>

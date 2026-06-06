@@ -41,10 +41,12 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
             new EntityResolution("season", target.SeasonYear.ToString(), ToAction(seasonExists)),
             new EntityResolution("round", compositeRoundSlug, ToAction(roundExists)));
 
-        // Map each draft problem to its would-be slug so we can both probe the DB and report against it.
+        // Map each draft problem to its would-be slug so we can both probe the DB and report against it. The slug is
+        // keyed by the season's edition (ročník); derive it so the probe matches the persisted slug.
+        var editionNumber = Season.EditionFromStartYear(target.SeasonYear);
         var slugByOrder = problems.ToDictionary(
             problem => problem.Order,
-            problem => TaxonomySlugs.ProblemSlug(target.SeasonYear, compositeRoundSlug, problem.Order));
+            problem => TaxonomySlugs.ProblemSlug(editionNumber, compositeRoundSlug, problem.Order));
 
         // Load the existing texts for the slugs that already exist — keyed by slug for the per-half lookup below.
         var candidateSlugs = slugByOrder.Values.ToList();

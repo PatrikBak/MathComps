@@ -23,13 +23,13 @@ public static class TaxonomySlugs
             round is null ? "" : $"-{round}").ToSlug();
 
     /// <summary>
-    /// Derives a problem's slug — <c>{year}-{compositeRoundSlug}-{order}</c>.
+    /// Derives a problem's slug — <c>{editionNumber}-{compositeRoundSlug}-{order}</c>.
     /// </summary>
-    /// <param name="year">The season start year.</param>
+    /// <param name="editionNumber">The season's edition number (ročník), e.g. 75.</param>
     /// <param name="compositeRoundSlug">The round's composite slug from <see cref="ComposeRoundSlug"/>.</param>
     /// <param name="order">The problem's 1-based position within the round.</param>
-    /// <returns>The problem slug (e.g. <c>2024-csmo-a-iii-1</c>).</returns>
-    public static string ProblemSlug(int year, string compositeRoundSlug, int order) =>
-        // The composite slug is already canonical, so just bracket it with the year and order.
-        $"{year}-{compositeRoundSlug}-{order}";
+    /// <returns>The problem slug (e.g. <c>75-csmo-a-iii-1</c>).</returns>
+    public static string ProblemSlug(int editionNumber, string compositeRoundSlug, int order) =>
+        // The composite slug is already canonical, so just bracket it with the edition number and order.
+        $"{editionNumber}-{compositeRoundSlug}-{order}";
 }

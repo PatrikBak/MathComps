@@ -65,6 +65,7 @@ public static class DependencyInjectionHelpers
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IProblemImageService, ProblemImageService>();
         services.AddScoped<IDraftResolutionService, DraftResolutionService>();
+        services.AddScoped<IDraftApplyService, DraftApplyService>();
 
         // Clerk API Client
         services.AddScoped(serviceProvider =>

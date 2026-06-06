@@ -32,7 +32,13 @@ public record ManifestMeta(
     string Round,
     ManifestSeason Season,
     string Date,
-    Language Language);
+    Language Language)
+{
+    /// <summary>
+    /// The draft's folder-level metadata file name, used to attribute file-level issues to it.
+    /// </summary>
+    public const string FileName = "_meta.yaml";
+}
 
 /// <summary>
 /// The season a draft belongs to.
@@ -73,8 +79,8 @@ public record ManifestProblem(
     ImmutableArray<string> Images);
 
 /// <summary>
-/// The pass/fail decision and its supporting issues. There is no stored <c>ok</c> flag — a run passes only
-/// when nothing in <see cref="Errors"/> rises to <see cref="VerdictSeverity.Error"/> severity.
+/// The pass/fail decision and its supporting issues. Pass/fail is derived: a run passes only when nothing in
+/// <see cref="Errors"/> reaches <see cref="VerdictSeverity.Error"/> severity.
 /// </summary>
 /// <param name="Errors">Every error and warning found, in deterministic file order.</param>
 public record Verdict(ImmutableArray<VerdictError> Errors);

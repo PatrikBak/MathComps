@@ -21,7 +21,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// The slug of the one seeded problem — it carries a Slovak original statement and an English statement
     /// translation, and no solution, so every per-text outcome can be exercised against it.
     /// </summary>
-    private const string SeededProblemSlug = "2024-csmo-a-iii-1";
+    private const string SeededProblemSlug = "74-csmo-a-iii-1";
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
