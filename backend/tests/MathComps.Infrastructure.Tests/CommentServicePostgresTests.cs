@@ -51,11 +51,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     private static readonly string _testProblemSlug = "p1";
 
     /// <summary>
-    /// Slug of an unpublished problem whose comments must never be returned.
-    /// </summary>
-    private static readonly string _testUnpublishedProblemSlug = "p1-unpublished";
-
-    /// <summary>
     /// Test avatar URL for user 1.
     /// </summary>
     private static readonly string _user1AvatarUrl = "https://example.com/avatars/user1.png";
@@ -581,22 +576,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(2, counts[id]);
     });
 
-    /// <summary>
-    /// Verifies that comments on an unpublished problem are never returned.
-    /// </summary>
-    [Fact]
-    public Task GetCommentsAsync_ExcludesCommentsOnUnpublishedProblem() => RunTestAsync(async commentService =>
-    {
-        // Act - fetch comments for the unpublished problem (which has one seeded comment)
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Problem, _testUnpublishedProblemSlug),
-            _user1Id
-        );
-
-        // Assert - the problem is unpublished, so its comment is filtered out by the CTE
-        Assert.Empty(response);
-    });
-
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -676,29 +655,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             Slug = _testProblemSlug
         };
         context.Problems.Add(problem);
-
-        // Unpublished problem carrying a comment — the comment must stay hidden because the problem is unpublished
-        var unpublishedProblem = new Problem
-        {
-            RoundInstanceId = roundInstance.Id,
-            Number = 2,
-            Slug = _testUnpublishedProblemSlug,
-            IsPublished = false
-        };
-        context.Problems.Add(unpublishedProblem);
-        var hiddenComment = new Comment
-        {
-            Id = Guid.NewGuid(),
-            AuthorId = _user1Id,
-            Content = "Comment on an unpublished problem",
-            CreatedAt = DateTimeOffset.UtcNow
-        };
-        context.Comments.Add(hiddenComment);
-        context.ProblemComments.Add(new ProblemComment
-        {
-            ProblemId = unpublishedProblem.Id,
-            CommentId = hiddenComment.Id
-        });
 
         // Submit changes
         await context.SaveChangesAsync();

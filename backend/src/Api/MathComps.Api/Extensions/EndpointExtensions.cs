@@ -150,7 +150,7 @@ public static class EndpointExtensions
                 return Results.Unauthorized();
 
             // Get the internal problem ID
-            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug, publishedOnly: true);
+            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug);
 
             // Ensure the problem exists 
             if (problemId == null)
@@ -181,7 +181,7 @@ public static class EndpointExtensions
                 return Results.Unauthorized();
 
             // Get the internal problem ID
-            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug, publishedOnly: true);
+            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug);
 
             // Ensure the problem exists 
             if (problemId == null)

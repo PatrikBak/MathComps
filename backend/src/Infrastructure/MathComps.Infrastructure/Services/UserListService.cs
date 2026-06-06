@@ -259,9 +259,9 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
     /// <exception cref="InvalidOperationException">When no problem matches the slug.</exception>
     private async Task<Guid> ResolveProblemIdAsync(string problemSlug)
     {
-        // Look up the problem by slug (only published problems can be added to lists)
+        // Look up the problem by slug
         var problemId = await dbContext.Problems
-            .Where(problem => problem.IsPublished && problem.Slug == problemSlug)
+            .Where(problem => problem.Slug == problemSlug)
             .Select(problem => (Guid?)problem.Id)
             .FirstOrDefaultAsync();
 

@@ -206,10 +206,10 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
             case CommentTargetType.Problem:
                 // Fetch the problem's id
                 var problemId = (await dbContext.Problems
-                    .Where(problem => problem.IsPublished && problem.Slug == target.TargetId)
+                    .Where(problem => problem.Slug == target.TargetId)
                     .Select(problem => (Guid?)problem.Id)
                     .FirstOrDefaultAsync())
-                    // It must exist and be published
+                    // It must exist
                     ?? throw new InvalidOperationException($"Problem with id '{target.TargetId}' not found");
 
                 // Add a comment
@@ -323,10 +323,10 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
             case CommentTargetType.Problem:
                 // Get the problem's id (must exist since comment exists)
                 var problemId = (await dbContext.Problems
-                    .Where(problem => problem.IsPublished && problem.Slug == target.TargetId)
+                    .Where(problem => problem.Slug == target.TargetId)
                     .Select(problem => (Guid?)problem.Id)
                     .FirstOrDefaultAsync())
-                    // It must exist and be published
+                    // It must exist
                     ?? throw new InvalidOperationException($"Problem with slug '{target.TargetId}' not found");
 
                 // Add the comment to the problem
@@ -472,7 +472,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
             ),
             CommentTargetType.Problem => (
                 "JOIN problem_comments pc ON c.id = pc.comment_id JOIN problems p ON pc.problem_id = p.id",
-                "p.slug = @p0 AND p.is_published = true"
+                "p.slug = @p0"
             ),
             CommentTargetType.News => (
                 "JOIN news_article_comments nc ON c.id = nc.comment_id JOIN news_articles n ON nc.news_article_id = n.id",

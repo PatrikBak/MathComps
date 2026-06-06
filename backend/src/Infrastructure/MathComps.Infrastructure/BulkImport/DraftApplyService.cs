@@ -288,8 +288,7 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Inserts a brand-new problem and all of its texts and authors. New imports land hidden
-    /// (<c>IsPublished = false</c>) for review before they go live.
+    /// Inserts a brand-new problem and all of its texts and authors.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="problem">The draft problem content.</param>
@@ -307,14 +306,13 @@ public class DraftApplyService(
         IDictionary<string, Author> authorsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // The new problem row, hidden until reviewed.
+        // The new problem row.
         var newProblem = new Problem
         {
             Number = problem.Order,
             RoundInstanceId = roundInstanceId,
             Slug = slug,
-            SolutionLink = problem.SolutionLink,
-            IsPublished = false
+            SolutionLink = problem.SolutionLink
         };
         await context.Problems.AddAsync(newProblem);
 
@@ -346,8 +344,7 @@ public class DraftApplyService(
 
     /// <summary>
     /// Reconciles an existing problem with the draft: refreshes its solution link, upserts each text by
-    /// <c>(document type, language)</c>, and reconciles its authors. Leaves <see cref="Problem.IsPublished"/>
-    /// untouched — a re-import doesn't change whether a problem is visible.
+    /// <c>(document type, language)</c>, and reconciles its authors.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with texts and authors loaded.</param>
