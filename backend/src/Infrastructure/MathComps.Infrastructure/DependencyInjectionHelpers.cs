@@ -2,6 +2,7 @@ using Clerk.BackendAPI;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services;
+using MathComps.Infrastructure.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -45,6 +46,11 @@ public static class DependencyInjectionHelpers
             .BindConfiguration(ClerkSettings.SectionName)
             .Validate(options => !string.IsNullOrWhiteSpace(options.WebhookSecret), $"{nameof(ClerkSettings.WebhookSecret)} is required.");
 
+        // R2 storage settings, validated lazily so config is only required when an upload actually runs
+        services.AddOptions<R2Settings>()
+            .BindConfiguration(R2Settings.SectionName)
+            .ValidateDataAnnotations();
+
         // Gemini service with HttpClient
         services.AddHttpClient<IGeminiService, GeminiService>(client =>
         {
@@ -66,6 +72,9 @@ public static class DependencyInjectionHelpers
         services.AddScoped<IProblemImageService, ProblemImageService>();
         services.AddScoped<IDraftResolutionService, DraftResolutionService>();
         services.AddScoped<IDraftApplyService, DraftApplyService>();
+
+        // R2 uploader backing the apply service's image uploads
+        services.AddSingleton<IFileUploader, R2Uploader>();
 
         // Clerk API Client
         services.AddScoped(serviceProvider =>
