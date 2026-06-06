@@ -13,8 +13,8 @@ public interface IDraftApplyService
     /// <summary>
     /// Writes the draft. Upserts the taxonomy by slug — competition, category, round, season, round-instance —
     /// creating what's missing, reusing what exists, sourcing structural fields from the registry; uploads each
-    /// problem's images and rewrites their markdown refs; then inserts net-new <see cref="Problem"/> rows hidden
-    /// (<see cref="Problem.IsPublished"/> false) and overwrites existing <see cref="ProblemText"/> rows in place.
+    /// problem's images and rewrites their markdown refs; then inserts net-new <see cref="Problem"/> rows and
+    /// overwrites existing <see cref="ProblemText"/> rows in place.
     /// Partial failure is tolerated: orphaned uploads and half-written problems are reconciled by a re-run, so
     /// there's no wrapping transaction.
     /// </summary>

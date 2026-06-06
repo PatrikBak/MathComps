@@ -45,11 +45,6 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
     private const string Problem2Slug = "p2";
 
     /// <summary>
-    /// Slug of an unpublished problem that must not be addable to a list.
-    /// </summary>
-    private const string UnpublishedProblemSlug = "p-unpublished";
-
-    /// <summary>
     /// Verifies that GetListsAsync returns empty lists and the correct liked count from seeded data.
     /// </summary>
     [Fact]
@@ -338,20 +333,6 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
             () => service.ReorderListsAsync(_user1Id, ["wrong-id"]));
     });
 
-    /// <summary>
-    /// Verifies that an unpublished problem cannot be added to a list.
-    /// </summary>
-    [Fact]
-    public Task AddProblemAsync_ThrowsForUnpublishedProblem() => RunTestAsync(async service =>
-    {
-        // Arrange
-        var list = await service.CreateListAsync(_user1Id, "My List");
-
-        // Act + Assert - resolving an unpublished problem's slug fails, so it can't be added
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.AddProblemAsync(_user1Id, list.ContentId, UnpublishedProblemSlug));
-    });
-
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -431,16 +412,6 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
             Slug = "p2"
         };
         context.Problems.Add(problem2);
-
-        // Unpublished problem — users must not be able to add it to a list
-        var unpublishedProblem = new Problem
-        {
-            RoundInstanceId = roundInstance.Id,
-            Number = 3,
-            Slug = UnpublishedProblemSlug,
-            IsPublished = false
-        };
-        context.Problems.Add(unpublishedProblem);
 
         // Save to generate IDs
         await context.SaveChangesAsync();

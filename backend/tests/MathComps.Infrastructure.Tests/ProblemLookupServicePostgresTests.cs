@@ -6,53 +6,47 @@ namespace MathComps.Infrastructure.Tests;
 
 /// <summary>
 /// Integration tests for the EF-backed <see cref="IProblemLookupService"/> using a shared PostgreSQL container.
-/// Focuses on how the publication flag gates slug resolution for public vs. CLI/admin callers.
+/// Covers slug-to-id and slug-to-metadata resolution.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IProblemLookupService>(fixture)
 {
     /// <summary>
-    /// Slug of the published seeded problem.
+    /// Slug of the seeded problem.
     /// </summary>
-    private const string PublishedSlug = "lookup-published";
+    private const string ProblemSlug = "lookup-problem";
 
     /// <summary>
-    /// Slug of the unpublished seeded problem.
-    /// </summary>
-    private const string UnpublishedSlug = "lookup-unpublished";
-
-    /// <summary>
-    /// Verifies that the public detail-page lookup returns data for a published problem but not an unpublished one.
+    /// Verifies that slug-to-id resolution returns the row for a known slug and null for an unknown one.
     /// </summary>
     [Fact]
-    public Task GetProblemLookupDataReturnsNullForUnpublished() => RunTestAsync(async service =>
+    public Task GetProblemIdBySlugResolvesKnownSlug() => RunTestAsync(async service =>
     {
-        Assert.NotNull(await service.GetProblemLookupDataAsync(PublishedSlug));
-        Assert.Null(await service.GetProblemLookupDataAsync(UnpublishedSlug));
+        // A seeded slug resolves to its id
+        Assert.True((await service.GetProblemIdBySlugAsync(ProblemSlug)).HasValue);
+
+        // An unknown slug resolves to null
+        Assert.Null(await service.GetProblemIdBySlugAsync("does-not-exist"));
     });
 
     /// <summary>
-    /// Verifies that the published-only flag gates slug resolution: CLI/admin callers (the default) resolve
-    /// any problem, while public callers passing publishedOnly never resolve an unpublished one.
+    /// Verifies that the detail-page metadata lookup returns the taxonomy slugs for a known slug and null otherwise.
     /// </summary>
     [Fact]
-    public Task GetProblemIdBySlugRespectsPublishedOnlyFlag() => RunTestAsync(async service =>
+    public Task GetProblemLookupDataReturnsMetadataForKnownSlug() => RunTestAsync(async service =>
     {
-        // Default overload resolves any problem — this is what CLI enrichment relies on
-        Assert.True((await service.GetProblemIdBySlugAsync(UnpublishedSlug)).HasValue);
+        // A seeded slug yields its lookup metadata
+        Assert.NotNull(await service.GetProblemLookupDataAsync(ProblemSlug));
 
-        // Public callers must not resolve an unpublished problem
-        Assert.False((await service.GetProblemIdBySlugAsync(UnpublishedSlug, publishedOnly: true)).HasValue);
-
-        // A published problem resolves regardless of the flag
-        Assert.True((await service.GetProblemIdBySlugAsync(PublishedSlug, publishedOnly: true)).HasValue);
+        // An unknown slug yields null
+        Assert.Null(await service.GetProblemLookupDataAsync("does-not-exist"));
     });
 
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // Competition → Season → Round → RoundInstance chain shared by both problems
+        // Competition → Season → Round → RoundInstance chain the problem hangs off
         var competition = new Competition
         {
             Id = Guid.NewGuid(),
@@ -89,19 +83,12 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.RoundInstances.Add(roundInstance);
 
-        // One published and one unpublished problem in the same round instance
+        // One problem in the round instance
         context.Problems.Add(new Problem
         {
             RoundInstanceId = roundInstance.Id,
             Number = 1,
-            Slug = PublishedSlug
-        });
-        context.Problems.Add(new Problem
-        {
-            RoundInstanceId = roundInstance.Id,
-            Number = 2,
-            Slug = UnpublishedSlug,
-            IsPublished = false
+            Slug = ProblemSlug
         });
 
         // Submit changes

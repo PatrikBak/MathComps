@@ -13,10 +13,9 @@ public interface IProblemLookupService
     /// Enables translation from user-friendly slugs to internal database keys.
     /// </summary>
     /// <param name="problemSlug">URL-safe problem identifier (will be normalized to lowercase).</param>
-    /// <param name="publishedOnly">When true, only a published problem resolves; CLI/admin callers could leave this false to resolve any problem.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>Problem's database ID if found, null if not found.</returns>
-    Task<Guid?> GetProblemIdBySlugAsync(string problemSlug, bool publishedOnly = false, CancellationToken cancellationToken = default);
+    Task<Guid?> GetProblemIdBySlugAsync(string problemSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves problem metadata from a problem slug (which is unique per problem).

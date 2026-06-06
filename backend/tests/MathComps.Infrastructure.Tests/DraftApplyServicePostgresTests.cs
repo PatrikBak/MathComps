@@ -59,7 +59,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A net-new draft creates the whole taxonomy chain and the problem, with structural fields sourced from the
-    /// registry, the season's edition derived as year − 1950, and the new problem hidden pending review.
+    /// registry and the season's edition derived as year − 1950.
     /// </summary>
     [Fact]
     public Task A_net_new_draft_creates_the_whole_chain() => RunTestAsync(async service =>
@@ -96,11 +96,10 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             var roundInstance = await context.RoundInstances.SingleAsync();
             Assert.Equal(RoundDate, roundInstance.Date);
 
-            // The problem is hidden pending review, numbered and slugged.
+            // The problem is numbered and slugged.
             var problem = await context.Problems.SingleAsync();
             Assert.Equal(ProblemSlug, problem.Slug);
             Assert.Equal(1, problem.Number);
-            Assert.False(problem.IsPublished);
 
             // Two text rows landed — statement and solution.
             var texts = await context.ProblemTexts.Where(text => text.ProblemId == problem.Id).ToListAsync();
