@@ -71,9 +71,8 @@ public static class DependencyInjectionHelpers
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IProblemImageService, ProblemImageService>();
         services.AddScoped<IDraftResolutionService, DraftResolutionService>();
-        services.AddScoped<IDraftApplyService, DraftApplyService>();
 
-        // R2 uploader backing the apply service's image uploads
+        // R2 uploader backing image uploads
         services.AddSingleton<IFileUploader, R2Uploader>();
 
         // Clerk API Client

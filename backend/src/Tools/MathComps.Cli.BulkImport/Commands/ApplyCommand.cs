@@ -15,7 +15,8 @@ namespace MathComps.Cli.BulkImport.Commands;
 /// first is what makes a green <c>validate</c> all but guarantee a green <c>apply</c>: it's the very same check.
 /// </summary>
 /// <param name="pipeline">The shared read-only validation pipeline.</param>
-/// <param name="apply">The mutating apply service.</param>
+/// <param name="apply">The mutating apply service — the single source of truth for what the import wrote and
+/// uploaded.</param>
 [Description("Import a draft folder: validate, then upload images and write the rows. Mutates the database.")]
 public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService apply)
     : AsyncCommand<ApplyCommand.Settings>
@@ -89,10 +90,10 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         // The image refs resolve against the draft folder; use its absolute path.
         var folder = Path.GetFullPath(settings.Folder);
 
-        // Perform the write.
+        // Validation passed — perform the import.
         var applied = await apply.ApplyAsync(target, date, problems, folder);
 
-        // Carry the (warning-only) issues through so the report shows the overwrites the run proceeded past.
+        // Pair the apply outcome with the warning-only issues the run proceeded past.
         var result = new ApplyResult(applied, outcome.Result.Issues);
 
         // Emit machine-readable JSON, or the human report by default.

@@ -12,6 +12,8 @@ Both commands run the same checks, so a clean `validate` all but guarantees a cl
 
 `apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. New problems land unpublished pending review; a re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
 
+Image uploads are deduplicated against a ledger kept beside this tool's sources (`.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
+
 ## Draft folder
 
 A folder of plain files — one round's problems plus their images. Full authoring spec: [the draft format reference](../../../../web/scripts/PREFLIGHT_README.md).

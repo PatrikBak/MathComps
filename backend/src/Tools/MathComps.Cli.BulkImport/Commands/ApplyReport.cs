@@ -52,8 +52,9 @@ public static class ApplyReport
             AnsiConsole.MarkupLine($"  [{color}]{action}[/] {Escape(text.Slug)} {half} ({textLanguage})");
         }
 
-        // The image-upload tally.
-        AnsiConsole.MarkupLine($"\n[bold]Images[/]: {result.Applied.ImagesUploaded} uploaded");
+        // The image-upload tally — skipped count tagged on only when some were unchanged.
+        var skipped = result.Applied.ImagesSkipped > 0 ? $", {result.Applied.ImagesSkipped} skipped" : "";
+        AnsiConsole.MarkupLine($"\n[bold]Images[/]: {result.Applied.ImagesUploaded} uploaded{skipped}");
 
         // Any non-blocking warnings the run proceeded through (e.g. overwrites of live texts).
         RenderWarnings(result.Warnings);

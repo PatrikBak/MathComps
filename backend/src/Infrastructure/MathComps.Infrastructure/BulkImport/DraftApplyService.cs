@@ -11,16 +11,17 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <summary>
 /// EF Core implementation of <see cref="IDraftApplyService"/>. Spins up one tracking
 /// <see cref="MathCompsDbContext"/>, get-or-creates each taxonomy entity by slug (structural fields sourced from
-/// <see cref="IMetadataLocalizationService"/>), uploads images through the <see cref="IFileUploader"/> and rewrites
-/// their refs, then inserts or overwrites the problems and saves once at the end.
+/// <see cref="IMetadataLocalizationService"/>), uploads images through the <see cref="ITrackedFileUploader"/> (which
+/// skips ones already on remote storage) and rewrites their refs, then inserts or overwrites the problems and saves
+/// once at the end.
 /// </summary>
 /// <param name="dbContextFactory">Factory for the tracking write context.</param>
 /// <param name="metadata">The registry, source of the structural sort-order / default-round fields.</param>
-/// <param name="fileUploader">Remote storage for the problem images.</param>
+/// <param name="uploader">Remote storage for the problem images, skipping ones unchanged since their last upload.</param>
 public class DraftApplyService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService metadata,
-    IFileUploader fileUploader) : IDraftApplyService
+    ITrackedFileUploader uploader) : IDraftApplyService
 {
     /// <inheritdoc/>
     public async Task<DraftApplyResult> ApplyAsync(
@@ -74,6 +75,7 @@ public class DraftApplyService(
         var problemsUpdated = 0;
         var problemsUnchanged = 0;
         var imagesUploaded = 0;
+        var imagesSkipped = 0;
 
         // Each problem in turn.
         foreach (var problem in problems)
@@ -83,8 +85,9 @@ public class DraftApplyService(
                 Season.EditionFromStartYear(target.SeasonYear), compositeRoundSlug, problem.Order);
 
             // Upload the problem's images and build the relative-ref → media-ref map the markdown rewrite consumes.
-            var replacements = await UploadProblemImagesAsync(problem, slug, draftFolder);
-            imagesUploaded += replacements.Count;
+            var (replacements, uploaded, skipped) = await UploadProblemImagesAsync(problem, slug, draftFolder);
+            imagesUploaded += uploaded;
+            imagesSkipped += skipped;
 
             // The existing problem (with its texts and authors), or null when this slug is net-new.
             var existing = await context.Problems
@@ -117,7 +120,7 @@ public class DraftApplyService(
         // The run summary.
         return new DraftApplyResult(
             entities.ToImmutable(), appliedTexts.ToImmutable(),
-            problemsInserted, problemsUpdated, problemsUnchanged, imagesUploaded);
+            problemsInserted, problemsUpdated, problemsUnchanged, imagesUploaded, imagesSkipped);
     }
 
     /// <summary>
@@ -252,25 +255,36 @@ public class DraftApplyService(
     /// <summary>
     /// Uploads every image a problem references to remote storage and returns the map from each relative ref to its
     /// resolved <c>media:</c> ref — keyed <c>{slug}-{stem}</c> so re-imports overwrite the same object, with the
-    /// SVG's intrinsic dimensions carried in the query string.
+    /// SVG's intrinsic dimensions carried in the query string. Images unchanged since their last upload are skipped;
+    /// the upload-versus-skip tally rides back so the caller can total it across problems.
     /// </summary>
     /// <param name="problem">The problem whose images to upload.</param>
     /// <param name="slug">The problem slug, the content-id prefix.</param>
     /// <param name="draftFolder">The draft folder the relative refs resolve against.</param>
-    /// <returns>The relative-ref → media-ref replacements for the markdown rewrite.</returns>
-    private async Task<Dictionary<string, string>> UploadProblemImagesAsync(
+    /// <returns>The relative-ref → media-ref replacements for the markdown rewrite, plus how many images this
+    /// problem actually uploaded versus skipped as unchanged.</returns>
+    private async Task<(Dictionary<string, string> Replacements, int Uploaded, int Skipped)> UploadProblemImagesAsync(
         DraftProblemContent problem, string slug, string draftFolder)
     {
         // The same ref map the markdown rewrite consumes, derived (slug + intrinsic dims) without any upload.
         var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);
 
-        // Push each file to the problems/ prefix the resolver already serves, under its deterministic content id.
+        // Push each file to the problems/ prefix the resolver serves, under its deterministic content id, letting
+        // the tracker skip ones already on remote storage. Tally the outcomes.
+        var uploaded = 0;
+        var skipped = 0;
         foreach (var basename in problem.Images)
-            await fileUploader.UploadAsync(
+        {
+            var pushed = await uploader.UploadIfChangedAsync(
                 Path.Combine(draftFolder, "images", basename), $"problems/{ProblemImageRefs.ContentId(slug, basename)}");
+            if (pushed)
+                uploaded++;
+            else
+                skipped++;
+        }
 
-        // The full map; a body that uses only some of the images simply leaves the rest unmatched.
-        return replacements;
+        // The full map (a body that uses only some of the images simply leaves the rest unmatched), plus the tally.
+        return (replacements, uploaded, skipped);
     }
 
     /// <summary>

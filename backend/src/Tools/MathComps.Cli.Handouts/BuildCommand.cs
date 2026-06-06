@@ -18,9 +18,10 @@ namespace MathComps.Cli.Handouts;
 /// Generates skeletons, compiles TeX to PDF, parses TeX to JSON,
 /// and uploads images, linked documents, and PDFs to Cloudflare R2.
 /// </summary>
-/// <param name="fileUploader">A lazily-resolved <see cref="IFileUploader"/> for uploading assets to remote storage.</param>
+/// <param name="trackedUploader">A lazily-resolved deduping uploader for pushing assets to remote storage,
+/// skipping ones unchanged since their last run.</param>
 [Description("Builds handouts: generates skeletons, compiles TeX, parses JSON, and copies assets.")]
-public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<BuildCommand.Settings>
+public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCommand<BuildCommand.Settings>
 {
     /// <summary>
     /// The configuration settings for the build command.
@@ -156,11 +157,12 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // ..And output jsons for the web rendered here
         var jsonOutputDirectory = new DirectoryInfo("../../../../web/src/content/handouts");
 
-        // Resolve the uploader...We don't need it if we're skipping uploads.
-        IFileUploader? uploader = null;
+        // Resolve the uploader...We don't need it if we're skipping uploads. Resolving it loads the upload ledger,
+        // so a skipped run touches neither R2 config nor the ledger file.
+        ITrackedFileUploader? uploader = null;
         if (!settings.SkipUpload)
         {
-            uploader = fileUploader.Value;
+            uploader = trackedUploader.Value;
             AnsiConsole.MarkupLine("[green]✓ R2 uploader initialized[/]");
         }
         else
@@ -199,21 +201,6 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
         // variants of the same handout reference the same figures, so without this every
         // variant would re-run the same asy compile pipeline.
         var asyAlreadyRecompiled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        // R2 keys already pushed in this run — language variants share asset keys, so the
-        // second variant of a handout skips re-uploading what the first variant just sent.
-        var uploadedR2Keys = new HashSet<string>(StringComparer.Ordinal);
-
-        // Persistent ledger mapping each R2 key to the source-file mtime that was last pushed under it.
-        // A file is fresh on R2 exactly when its current mtime is not newer than the value
-        // recorded here, regardless of how/when it was produced (asy pipeline inside the build,
-        // manual `asy` compile beforehand, AI invoking the export script directly, an author dropping
-        // a new linked document, partial runs that only touched a subset of handouts). Missing entry
-        // ⇒ never uploaded ⇒ must push.
-        var uploadStatePath = Path.Combine(inputDirectory.FullName, ".r2-uploads.json");
-        var uploadState = File.Exists(uploadStatePath)
-            ? File.ReadAllText(uploadStatePath).FromJson<Dictionary<string, DateTime>>()
-            : [];
 
         // Process each discovered handout file.
         foreach (var inputFile in inputFiles)
@@ -291,42 +278,21 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
                 // Upload the queued assets (handout images + linked documents) and the PDFs to R2 (unless skipped)
                 if (uploader is not null)
                 {
-                    // Partition the queued uploads: drop ones already pushed in this run
-                    // (a sibling language variant covered the same R2 key) and ones whose current
-                    // on-disk mtime matches the value recorded the last time we uploaded under
-                    // that key (⇒ same bytes already on R2). What remains is the set of files that
-                    // are either brand-new (no ledger entry) or have been rewritten on disk since
-                    // their last successful push.
-                    var uploadsToSend = pendingUploads
-                        .Where(upload => !uploadedR2Keys.Contains(upload.R2Key))
-                        .Where(upload => !uploadState.TryGetValue(upload.R2Key, out var lastMtime)
-                            || File.GetLastWriteTimeUtc(upload.SourcePath) > lastMtime)
-                        .ToList();
-
-                    // How many we filtered out, for the summary count.
-                    var skippedUploadCount = pendingUploads.Count - uploadsToSend.Count;
-
-                    // Handle the uploads sequentially
-                    foreach (var upload in uploadsToSend)
+                    // Push each queued asset, letting the tracker skip ones whose bytes are already on R2
+                    // (unchanged since their last push, or covered by a sibling language variant this run).
+                    var uploadedThisFile = 0;
+                    foreach (var upload in pendingUploads)
                     {
-                        // Capture the source-file mtime up front — this is the version we're about to push
-                        // and want to record as "the bytes R2 has now" once the upload succeeds.
-                        var sourceMtime = File.GetLastWriteTimeUtc(upload.SourcePath);
-
-                        // Push the file
-                        await uploader.UploadAsync(upload.SourcePath, upload.R2Key);
-
-                        // Mark this R2 key as handled so language variants later in this run skip it...
-                        uploadedR2Keys.Add(upload.R2Key);
-
-                        // ..And persist the mtime we just pushed so the NEXT run knows R2 has this version
-                        uploadState[upload.R2Key] = sourceMtime;
-
-                        // Per-asset success log (covers both images and linked documents)
-                        AnsiConsole.MarkupLine($"  [green]✓ Uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
+                        // Upload only if changed; log the ones that actually went out (images and linked documents).
+                        if (await uploader.UploadIfChangedAsync(upload.SourcePath, upload.R2Key))
+                        {
+                            uploadedThisFile++;
+                            AnsiConsole.MarkupLine($"  [green]✓ Uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
+                        }
                     }
 
                     // Summary line so the publish run shows that unchanged assets were intentionally skipped.
+                    var skippedUploadCount = pendingUploads.Count - uploadedThisFile;
                     if (skippedUploadCount > 0)
                         AnsiConsole.MarkupLine($"  [dim]· {skippedUploadCount} asset(s) unchanged, skipped upload[/]");
 
@@ -352,19 +318,7 @@ public class BuildCommand(Lazy<IFileUploader> fileUploader) : AsyncCommand<Build
             AnsiConsole.WriteLine();
         }
 
-        // All handout files processed
-
-        // If we did any uploads, update the upload state file
-        if (uploader is not null)
-        {
-            // Prepare the sorted ledges, sorted so the file is human-readable for the occasional manual inspection.
-            var sortedState = uploadState
-                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
-                .ToDictionary(entry => entry.Key, entry => entry.Value);
-
-            // Persist the upload ledger
-            File.WriteAllText(uploadStatePath, sortedState.ToJson());
-        }
+        // All handout files processed. The upload ledger persists itself when the uploader is disposed at exit.
 
         // Report unknown commands if any were found.
         if (allUnknownCommands.Count != 0)

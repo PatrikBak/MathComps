@@ -23,8 +23,7 @@ public interface IDraftApplyService
     /// <param name="problems">The problems to write — content, authors, images, per-language texts.</param>
     /// <param name="draftFolder">The draft folder on disk, the root the relative <c>images/…</c> refs resolve
     /// against.</param>
-    /// <returns>A summary of what was created versus reused, what each text became, and how many images
-    /// uploaded.</returns>
+    /// <returns>A summary of what was created versus reused and what each text became.</returns>
     Task<DraftApplyResult> ApplyAsync(
         DraftTarget target,
         DateOnly date,
