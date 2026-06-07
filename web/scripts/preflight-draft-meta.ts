@@ -16,7 +16,7 @@ export const META_FILENAME = '_meta.yaml'
 export const FALLBACK_META: ManifestMeta = {
   competition: '',
   category: null,
-  round: '',
+  round: null,
   season: { year: 0 },
   date: '',
   language: DEFAULT_LOCALE,
@@ -70,7 +70,7 @@ export function narrowMeta(parsed: unknown): MetaResult {
   // Narrow each field independently so every problem is reported at once
   const errors: VerdictError[] = []
   const competition = requireSlug(parsed.competition, 'competition', errors)
-  const round = requireSlug(parsed.round, 'round', errors)
+  const round = optionalSlug(parsed.round, 'round', errors)
   const category = optionalSlug(parsed.category, 'category', errors)
   const season = narrowSeason(parsed.season, errors)
   const date = narrowDate(parsed.date, errors)

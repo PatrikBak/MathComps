@@ -24,8 +24,8 @@ export type ManifestMeta = {
   competition: string
   /** Category slug (e.g. `a`), or `null` when the competition has no categories. */
   category: string | null
-  /** Round slug (e.g. `iii`). */
-  round: string
+  /** Round slug (e.g. `iii`), or `null` for a competition whose single round is the default (e.g. IMO). */
+  round: string | null
   /** Season the draft belongs to. */
   season: Season
   /** Round-instance date as `YYYY-MM-DD`, feeding `RoundInstance.Date`. */

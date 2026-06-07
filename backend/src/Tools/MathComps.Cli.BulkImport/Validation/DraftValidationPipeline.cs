@@ -32,60 +32,72 @@ public class DraftValidationPipeline(
         // Start from the preflight's own issues, then layer the C# side's findings on top.
         var issues = new List<VerdictError>(manifest.Verdict.Errors);
 
-        // The taxonomy is only worth resolving once the preflight got usable competition + round slugs;
-        // otherwise it already reported the meta error and these checks would only echo garbage.
-        var metaUsable = !string.IsNullOrWhiteSpace(manifest.Meta.Competition)
-            && !string.IsNullOrWhiteSpace(manifest.Meta.Round);
+        // An unusable meta has already reported its own error; hand that verdict straight back rather than
+        // letting the registry/DB checks bury it under empty-slug noise.
+        if (!manifest.IsMetadataUsable)
+            return new DraftValidationOutcome(manifest, new ValidateResult(issues.InDisplayOrder(), null));
 
         // Registry-link: every taxonomy slug must be registered structurally and in all three locales.
-        if (metaUsable)
-            issues.AddRange(RegistryLinkValidator.Check(metadata, manifest.Meta));
+        issues.AddRange(RegistryLinkValidator.Check(metadata, manifest.Meta));
 
-        // Read-only DB preview: create-vs-reuse + per-half import outcomes. Best-effort — an unreachable DB
-        // degrades to a warning so the format and registry results still come through, no DB required.
-        DraftDbPreview? dbPreview = null;
-        if (metaUsable)
-        {
-            try
-            {
-                // Map the manifest's taxonomy onto the Infrastructure contract.
-                var target = new DraftTarget(
-                    manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round,
-                    manifest.Meta.Season.Year);
+        // Read-only DB preview: create-vs-reuse plus the per-half import outcomes.
+        var (dbPreview, dbIssues) = await PreviewDbAsync(manifest, folder);
 
-                // Carry each problem's full content — the preview reproduces the bodies the import would store, so it
-                // needs the markdown and images, not just the shape.
-                var problems = manifest.Problems
-                    .Select(problem => new DraftProblemContent(
-                        problem.Order,
-                        problem.Authors,
-                        problem.SolutionLink,
-                        [.. problem.Texts.Select(text => new DraftTextContent(
-                            text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown))],
-                        problem.Images))
-                    .ToList();
-
-                // Run the read-only preview: create-vs-reuse plus the per-half import outcomes.
-                dbPreview = await resolution.PreviewAsync(target, problems, Path.GetFullPath(folder));
-
-                // Turn each per-half resolution that's worth flagging into an issue; routine outcomes report nothing.
-                issues.AddRange(dbPreview.TextResolutions
-                    .Select(IssueFor)
-                    .Where(issue => issue is not null)
-                    .Select(issue => issue!));
-            }
-            catch (Exception exception)
-            {
-                // No DB reachable — don't fail the whole dry run; note it and let the other results stand.
-                issues.Add(new VerdictError(
-                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "db-preview",
-                    $"DB preview skipped: {exception.Message}", VerdictSeverity.Warning));
-            }
-        }
+        // Fold the preview's flagged outcomes into the issue list.
+        issues.AddRange(dbIssues);
 
         // Order the issues deterministically, then wrap them up — the result derives pass/fail from them itself.
-        var ordered = issues.InDisplayOrder();
-        return new DraftValidationOutcome(manifest, new ValidateResult(ordered, dbPreview));
+        return new DraftValidationOutcome(manifest, new ValidateResult(issues.InDisplayOrder(), dbPreview));
+    }
+
+    /// <summary>
+    /// Runs the read-only DB preview for a resolvable draft and maps its per-half resolutions to the issues
+    /// worth flagging. Best-effort: an unreachable database degrades to a single warning so the format and
+    /// registry results still stand, instead of failing the dry run.
+    /// </summary>
+    /// <param name="manifest">The preflight manifest whose taxonomy and problems are previewed.</param>
+    /// <param name="folder">The draft folder, against which the preview reproduces image references.</param>
+    /// <returns>The preview (null when the database was unreachable) and the issues it produced.</returns>
+    private async Task<(DraftDbPreview? Preview, IReadOnlyList<VerdictError> Issues)> PreviewDbAsync(
+        DraftManifest manifest, string folder)
+    {
+        try
+        {
+            // Map the manifest's taxonomy onto the Infrastructure contract.
+            var target = new DraftTarget(
+                manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round,
+                manifest.Meta.Season.Year);
+
+            // Carry each problem's full content — the preview reproduces the bodies the import would store, so it
+            // needs the markdown and images, not just the shape.
+            var problems = manifest.Problems
+                .Select(problem => new DraftProblemContent(
+                    problem.Order,
+                    problem.Authors,
+                    problem.SolutionLink,
+                    [.. problem.Texts.Select(text => new DraftTextContent(
+                        text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown))],
+                    problem.Images))
+                .ToList();
+
+            // Run the read-only preview.
+            var preview = await resolution.PreviewAsync(target, problems, Path.GetFullPath(folder));
+
+            // Keep only the per-half resolutions worth flagging.
+            var previewIssues = preview.TextResolutions
+                .Select(IssueFor)
+                .Where(issue => issue is not null)
+                .Select(issue => issue!)
+                .ToList();
+            return (preview, previewIssues);
+        }
+        catch (Exception exception)
+        {
+            // No DB reachable — don't fail the whole dry run; note it and let the other results stand.
+            return (null, [new VerdictError(
+                ManifestMeta.FileName, Half: null, Line: null, Col: null, "db-preview",
+                $"DB preview skipped: {exception.Message}", VerdictSeverity.Warning)]);
+        }
     }
 
     /// <summary>

@@ -259,13 +259,14 @@ public class MetadataLocalizationServiceTests
     /// </summary>
     /// <param name="competition">The competition slug.</param>
     /// <param name="category">The category slug, or null for a category-less competition.</param>
-    /// <param name="round">The round slug.</param>
+    /// <param name="round">The round slug, or null for a competition's default round.</param>
     [Theory]
     [InlineData("csmo", "a", "iii")]
     [InlineData("csmo", "z5", "ii")]
     [InlineData("memo", null, "i")]
     [InlineData("tst", null, "d1")]
-    public void Registered_taxonomy_has_no_issues(string competition, string? category, string round) =>
+    [InlineData("imo", null, null)]
+    public void Registered_taxonomy_has_no_issues(string competition, string? category, string? round) =>
         Assert.Empty(_service.ValidateTaxonomyRegistration(competition, category, round));
 
     /// <summary>
@@ -293,6 +294,21 @@ public class MetadataLocalizationServiceTests
         var issues = _service.ValidateTaxonomyRegistration("csmo", "a", "zzz");
 
         // The competition itself is fine; only the round is flagged.
+        Assert.DoesNotContain(issues, issue => issue.EntityKind == TaxonomyEntityKind.Competition);
+        Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Round && issue.MissingFromSharedStructure);
+    }
+
+    /// <summary>
+    /// Omitting the round (a null slug — the default round) for a competition that carries explicit rounds is a
+    /// round-level structural gap, caught rather than silently resolved to the competition itself.
+    /// </summary>
+    [Fact]
+    public void Default_round_on_a_competition_that_has_rounds_is_reported()
+    {
+        // CSMO carries explicit rounds, so a null round (the default-round claim) doesn't belong to it.
+        var issues = _service.ValidateTaxonomyRegistration("csmo", "a", roundSlug: null);
+
+        // The round is flagged structurally; the competition itself is fine.
         Assert.DoesNotContain(issues, issue => issue.EntityKind == TaxonomyEntityKind.Competition);
         Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Round && issue.MissingFromSharedStructure);
     }

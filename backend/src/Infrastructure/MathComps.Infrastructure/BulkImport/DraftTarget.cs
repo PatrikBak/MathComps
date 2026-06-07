@@ -8,10 +8,10 @@ namespace MathComps.Infrastructure.BulkImport;
 /// </summary>
 /// <param name="CompetitionSlug">Competition slug (e.g. <c>csmo</c>).</param>
 /// <param name="CategorySlug">Category slug (e.g. <c>a</c>), or null when the competition has no categories.</param>
-/// <param name="RoundSlug">Round slug (e.g. <c>iii</c>).</param>
+/// <param name="RoundSlug">Round slug (e.g. <c>iii</c>), or null for a competition whose single round is the default (e.g. IMO).</param>
 /// <param name="SeasonYear">Calendar year the season starts in (e.g. 2024 for the 2024/2025 season).</param>
 public record DraftTarget(
     string CompetitionSlug,
     string? CategorySlug,
-    string RoundSlug,
+    string? RoundSlug,
     int SeasonYear);

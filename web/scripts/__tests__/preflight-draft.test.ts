@@ -269,11 +269,13 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.half).toBe('statement')
   })
 
-  it('flags a missing required meta field', async () => {
-    const manifest = await loadFixture('invalid-missing-meta-round')
-    const error = findError(manifest, (entry) => entry.rule === 'meta')
-    expect(error?.file).toBe('_meta.yaml')
-    expect(error?.message).toContain('round')
+  it('accepts a draft with no round as a default-round competition (round is null)', async () => {
+    const manifest = await loadFixture('valid-default-round')
+
+    // A missing round is the default round (e.g. IMO), not a meta error, and is carried through as null.
+    expect(findError(manifest, (entry) => entry.rule === 'meta')).toBeUndefined()
+    expect(manifest.meta.round).toBeNull()
+    expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
   it('flags an unsupported language slug', async () => {
@@ -513,14 +515,25 @@ describe('narrowMeta', () => {
     expect(errors).toEqual([])
   })
 
-  it('errors on a missing required field', () => {
+  it('treats an absent round as null without erroring (default-round competition)', () => {
+    const { meta, errors } = narrowMeta({
+      competition: 'imo',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      language: 'en',
+    })
+    expect(meta.round).toBeNull()
+    expect(errors).toEqual([])
+  })
+
+  it('errors on a missing competition', () => {
     const { errors } = narrowMeta({
-      competition: 'csmo',
+      round: 'iii',
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'sk',
     })
-    expect(errors.some((error) => error.message.includes('round'))).toBe(true)
+    expect(errors.some((error) => error.message.includes('competition'))).toBe(true)
   })
 
   it('errors on a missing season', () => {
