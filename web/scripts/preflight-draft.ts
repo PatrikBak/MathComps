@@ -99,15 +99,20 @@ async function runCli(argv: string[]): Promise<void> {
   const folderPath = path.resolve(folderArg)
   const manifest = await preflightDraft(folderPath)
 
-  // --json emits only the contract so a caller can parse stdout directly
-  if (jsonMode) {
-    process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`)
-  } else {
-    printHumanReport(folderPath, manifest)
-  }
-
   // Success iff no errors
-  process.exit(isOk(manifest.verdict.errors) ? 0 : 1)
+  const exitCode = isOk(manifest.verdict.errors) ? 0 : 1
+
+  // --json emits only the contract so a caller can parse stdout directly. When stdout is a pipe (a parent
+  // process capturing it, not a terminal), a large manifest is written asynchronously — exiting before it
+  // drains would truncate it, so wait for the write to flush before exiting.
+  if (jsonMode) {
+    process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`, () => process.exit(exitCode))
+    return
+  } else {
+    // No --json: a human is reading this, so print the formatted report
+    printHumanReport(folderPath, manifest)
+    process.exit(exitCode)
+  }
 }
 
 // Run the CLI only when this file is the process entry point, never on import (e.g. from tests)

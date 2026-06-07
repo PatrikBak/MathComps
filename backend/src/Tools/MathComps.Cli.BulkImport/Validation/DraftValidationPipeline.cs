@@ -27,7 +27,7 @@ public class DraftValidationPipeline(
     public async Task<DraftValidationOutcome> RunAsync(string folder)
     {
         // One Node subprocess does the whole draft-format read; we consume its manifest.
-        var manifest = PreflightRunner.Run(folder);
+        var manifest = await PreflightRunner.RunAsync(folder);
 
         // Start from the preflight's own issues, then layer the C# side's findings on top.
         var issues = new List<VerdictError>(manifest.Verdict.Errors);

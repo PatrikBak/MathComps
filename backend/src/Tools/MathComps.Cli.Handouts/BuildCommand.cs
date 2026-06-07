@@ -220,7 +220,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
                 // reads the compiled PDF or SVG. --force-asy bypasses the staleness check and
                 // recompiles every figure unconditionally.
                 if (!settings.SkipAsy)
-                    EnsureAsyImagesFresh(document, imagesDirectory, settings.ForceAsy, asyAlreadyRecompiled);
+                    await EnsureAsyImagesFreshAsync(document, imagesDirectory, settings.ForceAsy, asyAlreadyRecompiled);
                 else
                     AnsiConsole.MarkupLine("  [yellow]⚠ Asy compile skipped (--skip-asy)[/]");
 
@@ -234,10 +234,10 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
                     skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules);
 
                     // Compile the main handout
-                    CompileTexFile(inputFile, inputDirectory, settings.Compiler, settings.ErrorLog);
+                    await CompileTexFileAsync(inputFile, inputDirectory, settings.Compiler, settings.ErrorLog);
 
                     // Compile the skeleton
-                    CompileTexFile(skeletonFile, inputDirectory, settings.Compiler, settings.ErrorLog);
+                    await CompileTexFileAsync(skeletonFile, inputDirectory, settings.Compiler, settings.ErrorLog);
                 }
 
                 // Process images and prepare uploads (images + linked documents share this queue)
@@ -470,7 +470,8 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     /// <param name="workingDirectory">The working directory for the compiler.</param>
     /// <param name="compiler">The compiler command to use.</param>
     /// <param name="errorLog">Path to the error log file for compiler output on failure.</param>
-    private static void CompileTexFile(
+    /// <returns>A task representing the asynchronous compilation.</returns>
+    private static async Task CompileTexFileAsync(
         FileInfo texFile,
         DirectoryInfo workingDirectory,
         string compiler,
@@ -493,7 +494,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             string[] arguments = [.. compilerParts.Skip(1), $@"\def\PUBLISH{{}}\input {texFile.Name}"];
 
             // Run the compiler; ProcessRunner drains stdout/stderr and reports the exit code
-            var result = ProcessRunner.Run(compilerExecutable, arguments, workingDirectory.FullName);
+            var result = await ProcessRunner.RunAsync(compilerExecutable, arguments, workingDirectory.FullName);
 
             // Check if compilation failed
             if (result.ExitCode != 0)
@@ -796,7 +797,8 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     /// </summary>
     /// <param name="staleAsyFileNames">Filenames (not absolute paths) of stale <c>.asy</c> files inside <paramref name="imagesDir"/>.</param>
     /// <param name="imagesDir">Directory containing the <c>.asy</c> files and the export script.</param>
-    private static void RunAsyExportScript(IReadOnlyList<string> staleAsyFileNames, DirectoryInfo imagesDir)
+    /// <returns>A task representing the asynchronous export run.</returns>
+    private static async Task RunAsyExportScriptAsync(IReadOnlyList<string> staleAsyFileNames, DirectoryInfo imagesDir)
     {
         // Locate the export script next to the .asy sources
         var scriptPath = Path.Combine(imagesDir.FullName, "export-asy.sh");
@@ -805,7 +807,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         string[] arguments = [scriptPath, .. staleAsyFileNames];
 
         // Run the export script under bash
-        var result = ProcessRunner.Run("bash", arguments, imagesDir.FullName);
+        var result = await ProcessRunner.RunAsync("bash", arguments, imagesDir.FullName);
 
         // Non-zero exit means at least one .asy failed — surface everything for debugging
         if (result.ExitCode != 0)
@@ -825,7 +827,12 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     /// <param name="imagesDir">Directory containing the <c>.asy</c> sources, compiled PDFs/SVGs, and the export script.</param>
     /// <param name="forceRecompile">When true, every <c>.asy</c>-backed image is recompiled regardless of staleness — used after a semantic <c>_common.asy</c> edit.</param>
     /// <param name="alreadyRecompiled">Cross-handout set of <c>.asy</c> filenames already recompiled in this CLI run; entries here are treated as fresh and not requeued. Updated with each batch.</param>
-    private static void EnsureAsyImagesFresh(Document document, DirectoryInfo imagesDir, bool forceRecompile, HashSet<string> alreadyRecompiled)
+    /// <returns>A task representing the asynchronous freshness check and any recompiles it triggers.</returns>
+    private static async Task EnsureAsyImagesFreshAsync(
+        Document document,
+        DirectoryInfo imagesDir,
+        bool forceRecompile,
+        HashSet<string> alreadyRecompiled)
     {
         // Collect the set of image ids referenced anywhere in the document
         var imageIds = CollectImageIds(document);
@@ -900,7 +907,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         }
 
         // One bash invocation for the whole batch — export-asy.sh iterates internally
-        RunAsyExportScript(staleFileNames, imagesDir);
+        await RunAsyExportScriptAsync(staleFileNames, imagesDir);
         AnsiConsole.MarkupLine($"  [green]✓ Asy:[/] {staleFileNames.Count} image(s) recompiled");
 
         // Record what we just compiled so later handouts in this run don't redo the same work
