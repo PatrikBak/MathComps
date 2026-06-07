@@ -191,15 +191,23 @@ public class DraftApplyService(
         // No explicit rounds means the one round is the synthetic default (e.g. IMO).
         var isDefault = competition.HasDefaultRound;
 
+        // The explicit round's slug, or null for the default round. A competition that carries rounds always
+        // arrives here with a slug — registry validation rejects a draft that omits one — so a missing slug is
+        // a guarded invariant breach, not a routine case.
+        var roundSlug = isDefault
+            ? null
+            : target.RoundSlug ?? throw new InvalidOperationException(
+                $"Competition '{target.CompetitionSlug}' carries explicit rounds but the draft specified no round.");
+
         // Build the row. A default round takes an empty slug and sorts first; an explicit one takes the draft's
         // slug and its position among the competition's rounds. The rest are the foreign keys and lookup key.
         var created = new Round
         {
             CompetitionId = competitionId,
             CategoryId = categoryId,
-            Slug = isDefault ? "" : target.RoundSlug,
+            Slug = roundSlug ?? "",
             CompositeSlug = compositeRoundSlug,
-            SortOrder = competition.RoundSortOrder(isDefault ? null : target.RoundSlug),
+            SortOrder = competition.RoundSortOrder(roundSlug),
             IsDefault = isDefault
         };
 

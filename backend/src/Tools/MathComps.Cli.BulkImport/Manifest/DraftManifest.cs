@@ -15,21 +15,29 @@ namespace MathComps.Cli.BulkImport.Manifest;
 public record DraftManifest(
     ManifestMeta Meta,
     ImmutableArray<ManifestProblem> Problems,
-    Verdict Verdict);
+    Verdict Verdict)
+{
+    /// <summary>
+    /// Whether the taxonomy can be resolved from this manifest — true once the metadata carries a competition
+    /// slug. A blank competition is the fallback the preflight emits when it can't read one (and it has already
+    /// reported that), so the registry and DB-preview checks would have nothing to resolve against.
+    /// </summary>
+    public bool IsMetadataUsable => !string.IsNullOrWhiteSpace(Meta.Competition);
+}
 
 /// <summary>
 /// Folder-level taxonomy from <c>_meta.yaml</c>. References slugs only — display names live in the registry.
 /// </summary>
 /// <param name="Competition">Competition slug (e.g. <c>csmo</c>).</param>
 /// <param name="Category">Category slug (e.g. <c>a</c>), or null when the competition has no categories.</param>
-/// <param name="Round">Round slug (e.g. <c>iii</c>).</param>
+/// <param name="Round">Round slug (e.g. <c>iii</c>), or null for a competition whose single round is the default (e.g. IMO).</param>
 /// <param name="Season">The season the draft belongs to.</param>
 /// <param name="Date">Round-instance date as <c>YYYY-MM-DD</c>; approximate is fine since it's a sort key.</param>
 /// <param name="Language">The original language of the draft — the text variant in it is the original.</param>
 public record ManifestMeta(
     string Competition,
     string? Category,
-    string Round,
+    string? Round,
     ManifestSeason Season,
     string Date,
     Language Language)
