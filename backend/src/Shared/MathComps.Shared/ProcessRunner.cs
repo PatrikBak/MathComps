@@ -3,11 +3,11 @@ using System.Diagnostics;
 namespace MathComps.Shared;
 
 /// <summary>
-/// Helper for spawning external executables with redirected stdout/stderr.
-/// Drains both pipes before waiting on the child to avoid the classic
-/// "pipe-buffer full, child blocks, parent waits forever" deadlock, and
-/// surfaces the exit code plus captured output so callers can apply their
-/// own failure policy (log file vs. exception, retries, etc.).
+/// Helper for spawning external executables with redirected stdout/stderr. Reads both pipes concurrently while
+/// awaiting the child's exit, so neither buffer fills and blocks the child (the classic
+/// "pipe-buffer full, child blocks, parent waits forever" deadlock, which also clips large output), and surfaces
+/// the exit code plus captured output so callers can apply their own failure policy (log file vs. exception,
+/// retries, etc.).
 /// </summary>
 public static class ProcessRunner
 {
@@ -31,8 +31,8 @@ public static class ProcessRunner
     /// <param name="fileName">The executable name (resolved against PATH) or absolute path.</param>
     /// <param name="arguments">Arguments passed to the child, one argv entry per element.</param>
     /// <param name="workingDirectory">The working directory the child inherits.</param>
-    /// <returns>The exit code plus everything the process wrote to stdout and stderr.</returns>
-    public static Result Run(string fileName, IReadOnlyList<string> arguments, string workingDirectory)
+    /// <returns>A task producing the exit code plus everything the process wrote to stdout and stderr.</returns>
+    public static async Task<Result> RunAsync(string fileName, IReadOnlyList<string> arguments, string workingDirectory)
     {
         // Configure the spawn: redirect both streams so we can capture them, no console window, no shell.
         var processInfo = new ProcessStartInfo
@@ -53,12 +53,17 @@ public static class ProcessRunner
         using var process = Process.Start(processInfo)
             ?? throw new InvalidOperationException($"Failed to start '{fileName}'");
 
-        // Drain output streams BEFORE WaitForExit — otherwise a chatty child fills the pipe buffer and deadlocks
-        var stdout = process.StandardOutput.ReadToEnd();
-        var stderr = process.StandardError.ReadToEnd();
+        // Kick off both reads before waiting — concurrent draining keeps either pipe buffer from filling and
+        // blocking the child.
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
 
-        // Once both streams are fully drained, the child is free to finish
-        process.WaitForExit();
+        // Wait for the child to exit.
+        await process.WaitForExitAsync();
+
+        // Drain both reads — at EOF they hold everything the child wrote.
+        var stdout = await stdoutTask;
+        var stderr = await stderrTask;
 
         // Hand back everything the caller needs to decide success vs. failure semantics
         return new Result(process.ExitCode, stdout, stderr);

@@ -20,8 +20,8 @@ public static class PreflightRunner
     /// <param name="draftFolder">
     /// Path to the draft folder, relative to the caller's working directory or absolute.
     /// </param>
-    /// <returns>The deserialized draft manifest.</returns>
-    public static DraftManifest Run(string draftFolder)
+    /// <returns>A task producing the deserialized draft manifest.</returns>
+    public static async Task<DraftManifest> RunAsync(string draftFolder)
     {
         // The npm script runs with cwd=web/, so hand the preflight an absolute folder path it can resolve.
         var draftFolderAbsolute = Path.GetFullPath(draftFolder);
@@ -30,7 +30,7 @@ public static class PreflightRunner
         var webDirectory = LocateWebDirectory();
 
         // One subprocess for the whole folder; --silent keeps npm's own banner off stdout so it's pure JSON.
-        var result = ProcessRunner.Run(
+        var result = await ProcessRunner.RunAsync(
             "npm",
             ["run", "--silent", "draft:preflight", "--", draftFolderAbsolute, "--json"],
             webDirectory);
