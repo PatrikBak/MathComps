@@ -161,6 +161,29 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-empty-statement
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-image-stem-collision 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.yaml",
+      "half": null,
+      "rule": "image-stem-collision",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > invalid-malformed-meta 1`] = `
 {
   "errors": [
@@ -464,6 +487,29 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-unknown-lang 1`
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-unsupported-image 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.sk.md",
+      "half": null,
+      "rule": "unsupported-image-format",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > valid-basic 1`] = `
 {
   "errors": [],
@@ -608,6 +654,22 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-orphan-warns 1`] 
       "severity": "warning",
     },
   ],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-raster-image 1`] = `
+{
+  "errors": [],
   "ok": true,
   "problemCount": 1,
   "problemLanguages": [

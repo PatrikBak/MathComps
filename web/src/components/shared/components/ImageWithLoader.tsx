@@ -129,15 +129,16 @@ export function ImageWithLoader({
         </Wrapper>
       )}
 
-      {/* The actual image — fluid mode runs unoptimized through next/image
-          with width/height=0 so it sizes from the source */}
+      {/* The actual image. Content images always run unoptimized: they're served from the R2 CDN, which next/image's
+          optimizer isn't configured for, and resizing a figure buys little. Width/height still reserve layout when
+          known; fluid mode (0/0) sizes from the source. */}
       <Image
         src={src}
         alt={alt}
         width={hasIntrinsicSize ? width : 0}
         height={hasIntrinsicSize ? height : 0}
         sizes={hasIntrinsicSize ? undefined : '100vw'}
-        unoptimized={!hasIntrinsicSize}
+        unoptimized
         priority={priority}
         className={cn(
           'transition-opacity duration-200 ease-in-out',

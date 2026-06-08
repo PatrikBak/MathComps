@@ -19,7 +19,7 @@ my-draft/
   p1.<lang>.md      # statement, then an optional "<!-- solution -->" line, then the solution
   p1.<lang2>.md     # translations (statement-only allowed; solution only if the original has one)
   p1.yaml           # authors / solutionLink — both optional, but the file must exist
-  images/           # referenced images (flat), e.g. ![fig](images/x.svg)
+  images/           # referenced figures (flat): .svg / .png / .jpg / .jpeg / .webp, each < 2 MB
 ```
 
 Problems are numbered from 1, contiguous. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original** (verbatim); the rest are translations.

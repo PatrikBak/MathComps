@@ -74,6 +74,9 @@ public sealed class R2Uploader : IFileUploader, IDisposable
         {
             ".pdf" => "application/pdf",
             ".svg" => "image/svg+xml",
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".webp" => "image/webp",
             ".json" => "application/json",
             _ => "application/octet-stream",
         };

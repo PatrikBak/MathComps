@@ -36,6 +36,14 @@
         </Content>
     </ItemGroup>
 
+    <!-- Link the shared real image fixtures for the raster-dimension and apply tests -->
+    <ItemGroup>
+        <Content Include="..\Fixtures\Images\**\*">
+            <Link>Fixtures\Images\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
     <ItemGroup>
         <Using Include="Xunit" />
     </ItemGroup>
