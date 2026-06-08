@@ -54,7 +54,7 @@ You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; the `.s
 Asymptote's z-order is purely insertion-order — call order IS layer order. Compose from background to foreground:
 
 1. **Fills** — polygon backgrounds AND `AngleMark` / `RightAngleMark` sector fills.
-2. **Colored edges** — anything non-black: `Circle(..., LightBlue)`, dashed bisectors (`Green + dashedPen`), distance segments.
+2. **Colored edges** — anything non-black: `Circle(..., LightBlue)`, dashed bisectors (`DashedDraw(A, B, Green)`), distance segments.
 3. **Black edges** — `Draw(A, B)` polygon sides, plain auxiliary lines.
 4. **Dots** — `VertexDot` / `LabeledDot`.
 5. **Standalone labels** — `label(...)` / `EdgeLabel(...)`.
