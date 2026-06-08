@@ -22,6 +22,14 @@
         <ProjectReference Include="..\..\src\Tools\MathComps.Cli.BulkImport\MathComps.Cli.BulkImport.csproj" />
     </ItemGroup>
 
+    <!-- Link the shared real image fixtures for the image-ref validator test -->
+    <ItemGroup>
+        <Content Include="..\Fixtures\Images\**\*">
+            <Link>Fixtures\Images\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
     <ItemGroup>
         <Using Include="Xunit" />
     </ItemGroup>

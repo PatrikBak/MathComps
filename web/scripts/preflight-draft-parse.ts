@@ -16,6 +16,12 @@ export const IMAGES_DIRNAME = 'images'
 /** Prefix every disk-resolved image reference carries in the markdown body. */
 export const IMAGE_REF_PREFIX = `${IMAGES_DIRNAME}/`
 
+/** Image formats the pipeline can size and serve — SVG plus the supported raster formats. */
+export const SUPPORTED_IMAGE_EXTENSIONS = ['.svg', '.png', '.jpg', '.jpeg', '.webp']
+
+/** Per-image size ceiling (MB): figures serve unoptimized, so a multi-megabyte scan would ship at full weight. */
+export const MAX_IMAGE_MB = 2
+
 /** HTML-comment line that separates a problem's statement from its solution. */
 const SOLUTION_SENTINEL = '<!-- solution -->'
 

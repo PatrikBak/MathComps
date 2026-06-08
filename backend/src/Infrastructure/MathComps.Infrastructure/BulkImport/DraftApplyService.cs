@@ -262,9 +262,10 @@ public class DraftApplyService(
 
     /// <summary>
     /// Uploads every image a problem references to remote storage and returns the map from each relative ref to its
-    /// resolved <c>media:</c> ref — keyed <c>{slug}-{stem}</c> so re-imports overwrite the same object, with the
-    /// SVG's intrinsic dimensions carried in the query string. Images unchanged since their last upload are skipped;
-    /// the upload-versus-skip tally rides back so the caller can total it across problems.
+    /// resolved <c>media:</c> ref — keyed by its content id (see <see cref="ProblemImageRefs.ContentId"/>) so
+    /// re-imports overwrite the same object, with the image's intrinsic dimensions carried in the query string.
+    /// Images unchanged since their last upload are skipped; the upload-versus-skip tally rides back so the caller
+    /// can total it across problems.
     /// </summary>
     /// <param name="problem">The problem whose images to upload.</param>
     /// <param name="slug">The problem slug, the content-id prefix.</param>

@@ -32,6 +32,11 @@ public class DraftValidationPipeline(
         // Start from the preflight's own issues, then layer the C# side's findings on top.
         var issues = new List<VerdictError>(manifest.Verdict.Errors);
 
+        // Every referenced image must size cleanly — the exact read apply performs, surfaced here as a hard error so
+        // a green validate can't hide a figure that would crash the import. It needs neither taxonomy nor DB, so it
+        // runs before the metadata gate and stands even when those are unusable.
+        issues.AddRange(ImageRefValidator.Check(manifest.Problems, Path.GetFullPath(folder)));
+
         // An unusable meta has already reported its own error; hand that verdict straight back rather than
         // letting the registry/DB checks bury it under empty-slug noise.
         if (!manifest.IsMetadataUsable)

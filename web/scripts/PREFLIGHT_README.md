@@ -67,7 +67,7 @@ Put assets in `images/` and reference them relatively. Sizing is optional:
 ![figure](images/diagram.svg?width=400&height=300) # fixed intrinsic size
 ```
 
-`width`/`height` are positive integers and must be given together; `?inline=true` renders inline with surrounding text; `?scale=50` shrinks to a percentage. Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error).
+`width`/`height` are positive integers and must be given together; `?inline=true` renders inline with surrounding text; `?scale=50` shrinks to a percentage. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error). Two images in one problem can't share a name (e.g. `fig.svg` and `fig.png`) — they'd collide on one stored key.
 
 ## Markdown & math checks
 
@@ -76,7 +76,7 @@ Each half runs through the same pipeline the site renders with. The preflight re
 - **Math delimiters** — an odd number of unescaped `$` is an error.
 - **Parse** — malformed markdown or directives.
 - **KaTeX** — every `$…$` / `$$…$$` must render.
-- **Images** — every `images/…` reference must resolve.
+- **Images** — every `images/…` reference must resolve, be a supported format (SVG/PNG/JPEG/WebP), stay under 2 MB, and not share a stem with another image in the same problem.
 
 ## Running the check
 

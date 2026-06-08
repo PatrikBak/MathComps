@@ -2,14 +2,15 @@ namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
 /// Builds the relative-ref → <c>media:</c> ref map a problem's markdown is rewritten against. The map is fully
-/// determined by the problem slug and the SVGs' intrinsic dimensions, so it can be reproduced without uploading —
+/// determined by the problem slug and the images' intrinsic dimensions, so it can be reproduced without uploading —
 /// the apply path builds it and then uploads, the read-only preview builds it only to compare content.
 /// </summary>
 public static class ProblemImageRefs
 {
     /// <summary>
     /// The media content id for one image: the slug keeps it stable across edits, the filename stem disambiguates
-    /// within a problem.
+    /// within a problem. Extension-less for every format, so the whole corpus shares one key shape; two images in one
+    /// problem must not share a stem, which keeps the bare key unambiguous.
     /// </summary>
     /// <param name="slug">The owning problem's slug.</param>
     /// <param name="basename">The image's basename (under <c>images/</c>).</param>
@@ -18,8 +19,8 @@ public static class ProblemImageRefs
         $"{slug}-{Path.GetFileNameWithoutExtension(basename)}";
 
     /// <summary>
-    /// Builds the relative-ref → resolved <c>media:</c> ref map for a problem's images, reading each SVG's intrinsic
-    /// dimensions off disk so they ride along in the query string. Writes nothing.
+    /// Builds the relative-ref → resolved <c>media:</c> ref map for a problem's images, reading each image's
+    /// intrinsic dimensions off disk so they ride along in the query string. Writes nothing.
     /// </summary>
     /// <param name="images">The image basenames the problem references.</param>
     /// <param name="slug">The owning problem's slug, the content-id prefix.</param>
@@ -37,9 +38,9 @@ public static class ProblemImageRefs
             // The relative ref as it appears in the markdown — the key the rewrite replaces.
             var relativeRef = $"images/{basename}";
 
-            // The file on disk that ref points at, and its intrinsic dimensions.
+            // The file on disk that ref points at, and its intrinsic dimensions (SVG or raster, by extension).
             var localPath = Path.Combine(draftFolder, "images", basename);
-            var (width, height) = SvgDimensions.Read(localPath);
+            var (width, height) = ImageDimensions.Read(localPath);
 
             // The resolved ref the markdown will point at — dimensions ride along in the query string.
             replacements[relativeRef] = $"media:{ContentId(slug, basename)}?width={width}&height={height}";

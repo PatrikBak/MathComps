@@ -361,6 +361,42 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A raster (PNG) image is uploaded under the slug-based key and its ref rewritten with the PNG's real pixel
+    /// dimensions — the raster counterpart to the SVG path, proving the pipeline sizes, keys and rewrites raster
+    /// figures too.
+    /// </summary>
+    [Fact]
+    public Task A_raster_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
+    {
+        // A dedicated draft folder holding one real 4×2 PNG referenced by the statement.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(folder, "images"));
+        File.Copy(
+            Path.Combine(AppContext.BaseDirectory, "Fixtures", "Images", "fig.png"),
+            Path.Combine(folder, "images", "incircle.png"));
+
+        // Import a problem whose statement references that image.
+        var statement = "see ![fig](images/incircle.png)";
+        var problem = new DraftProblemContent(
+            1, ["Author"], null, [Original(Language.SK, statement)], ["incircle.png"]);
+        var result = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
+
+        // One image uploaded, under the slug-based key.
+        Assert.Equal(1, result.ImagesUploaded);
+        Assert.Equal(0, result.ImagesSkipped);
+        var (_, key) = Assert.Single(_uploader.Uploads);
+        Assert.Equal($"problems/{ProblemSlug}-incircle", key);
+
+        // The stored markdown points at the resolved media ref, carrying the PNG's real 4×2 dimensions.
+        await QueryAsync(async context =>
+        {
+            var stored = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Statement);
+            Assert.Equal(
+                $"see ![fig](media:{ProblemSlug}-incircle?width=4&height=2)", stored.MarkdownText);
+        });
+    });
+
+    /// <summary>
     /// Re-applying a draft whose image hasn't changed skips the re-upload: the apply reports it uploaded the first
     /// time and skipped the second, and the inner uploader is only ever called once.
     /// </summary>

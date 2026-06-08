@@ -9,6 +9,7 @@
  */
 
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { describe, expect, it } from 'vitest'
@@ -235,6 +236,12 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
+  it('accepts a raster (PNG) figure', async () => {
+    const manifest = await loadFixture('valid-raster-image')
+    expect(manifest.problems[0]!.images).toEqual(['fig.png'])
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
   it('defaults authors when a problem declares none', async () => {
     const manifest = await loadFixture('valid-minimal-meta')
     expect(manifest.problems[0]!.authors).toEqual([])
@@ -248,6 +255,43 @@ describe('invalid drafts — specific issues', () => {
     const error = findError(manifest, (entry) => entry.rule === 'missing-image')
     expect(error?.severity).toBe('error')
     expect(error?.message).toContain('missing.svg')
+  })
+
+  it('flags an unsupported image format', async () => {
+    const manifest = await loadFixture('invalid-unsupported-image')
+    const error = findError(manifest, (entry) => entry.rule === 'unsupported-image-format')
+    expect(error?.severity).toBe('error')
+    expect(error?.message).toContain('diagram.gif')
+  })
+
+  it('flags an oversized image', async () => {
+    // A throwaway draft dir, cleaned up in the finally — keeps a multi-megabyte blob out of the committed fixtures.
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'preflight-oversized-'))
+    try {
+      // Seed it from the raster fixture.
+      fs.cpSync(path.join(FIXTURES_DIR, 'valid-raster-image'), tempDir, { recursive: true })
+
+      // Bloat the figure just past the 2 MB cap; statSync reads only the size, so zero bytes (not a real PNG) suffice.
+      fs.writeFileSync(path.join(tempDir, 'images', 'fig.png'), Buffer.alloc(2 * 1024 * 1024 + 1))
+
+      // Run the preflight over the bloated draft.
+      const manifest = await preflightDraft(tempDir)
+
+      // The oversized figure is flagged as a blocking error, attributed to the file.
+      const error = findError(manifest, (entry) => entry.rule === 'oversized-image')
+      expect(error?.severity).toBe('error')
+      expect(error?.message).toContain('fig.png')
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it('flags two images that share a stem', async () => {
+    const manifest = await loadFixture('invalid-image-stem-collision')
+    const error = findError(manifest, (entry) => entry.rule === 'image-stem-collision')
+    expect(error?.severity).toBe('error')
+    expect(error?.message).toContain('fig.svg')
+    expect(error?.message).toContain('fig.png')
   })
 
   it('flags broken math in the statement half', async () => {

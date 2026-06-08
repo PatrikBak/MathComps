@@ -19,8 +19,10 @@ import {
   hasLeadingFrontmatter,
   IMAGE_REF_PREFIX,
   IMAGES_DIRNAME,
+  MAX_IMAGE_MB,
   parseProblemMeta,
   splitOnSentinel,
+  SUPPORTED_IMAGE_EXTENSIONS,
   toAbsoluteLine,
 } from './preflight-draft-parse'
 import type {
@@ -304,6 +306,22 @@ async function parseProblem(
   // The images the problem references are the union across its bodies (shared across languages)
   const images = [...new Set(parsedBodies.flatMap((entry) => entry.images))]
 
+  // Two images sharing a stem would collide on one media key ({slug}-{stem}); reject so neither silently overwrites
+  // the other. Case-insensitive, since the key derives from the stem.
+  const stems = images.map((name) => path.parse(name).name.toLowerCase())
+  const collidingStems = [...new Set(stems.filter((stem, index) => stems.indexOf(stem) !== index))]
+  collidingStems.forEach((stem) => {
+    const names = images.filter((name) => path.parse(name).name.toLowerCase() === stem)
+    errors.push(
+      problemIssue(
+        `p${group.order}.yaml`,
+        null,
+        'image-stem-collision',
+        `images ${names.map((name) => `"${name}"`).join(' and ')} share a name and would collide on one media key; rename one`
+      )
+    )
+  })
+
   // Assemble this problem's manifest entry
   return { order: group.order, authors, solutionLink, texts, images }
 }
@@ -373,12 +391,17 @@ async function parseBody(
     await validateHalf(solution, body.file, 'solution', solutionBodyLine0 ?? 0, errors)
   }
 
-  // Gather this body's image references across both halves and check each resolves on disk
+  // Gather this body's image references across both halves and validate each: it must exist on disk, be a format the
+  // pipeline can size and serve, and stay under the size cap. Each guard mirrors a downstream one (existence, the
+  // backend's format whitelist, unoptimized-serving weight) so a bad figure fails here in Node, not deep in apply.
   const solutionImages = solution !== null ? collectImageNames(solution) : []
   const images = [...new Set([...collectImageNames(statement), ...solutionImages])]
-  images
-    .filter((name) => !fs.existsSync(path.join(folderPath, IMAGES_DIRNAME, name)))
-    .forEach((name) => {
+  images.forEach((name) => {
+    // Get the full image path
+    const imagePath = path.join(folderPath, IMAGES_DIRNAME, name)
+
+    // Missing on disk — the reference points at nothing.
+    if (!fs.existsSync(imagePath)) {
       errors.push(
         problemIssue(
           body.file,
@@ -387,7 +410,38 @@ async function parseBody(
           `referenced image "${IMAGE_REF_PREFIX}${name}" not found on disk`
         )
       )
-    })
+      return
+    }
+
+    // Wrong format — only SVG and the raster formats the backend can size and serve are allowed.
+    if (!SUPPORTED_IMAGE_EXTENSIONS.includes(path.extname(name).toLowerCase())) {
+      errors.push(
+        problemIssue(
+          body.file,
+          null,
+          'unsupported-image-format',
+          `image "${IMAGE_REF_PREFIX}${name}" has an unsupported format ` +
+            `(expected one of ${SUPPORTED_IMAGE_EXTENSIONS.join(', ')})`
+        )
+      )
+      return
+    }
+
+    // Too heavy — an unoptimized figure ships to every reader at full size, so an oversized scan is an authoring
+    // error to downscale rather than silently serve.
+    const sizeBytes = fs.statSync(imagePath).size
+    if (sizeBytes > MAX_IMAGE_MB * 1024 * 1024) {
+      const sizeMb = (sizeBytes / 1024 / 1024).toFixed(1)
+      errors.push(
+        problemIssue(
+          body.file,
+          null,
+          'oversized-image',
+          `image "${IMAGE_REF_PREFIX}${name}" is ${sizeMb} MB, over the ${MAX_IMAGE_MB} MB limit; downscale it`
+        )
+      )
+    }
+  })
 
   // Assemble the text variant, halves kept verbatim for C#
   const text: ManifestText = {
