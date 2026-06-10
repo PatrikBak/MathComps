@@ -370,6 +370,26 @@
             "cs": "Invarianty",
             "en": "Invariants"
           }
+        },
+        {
+          "status": "ready",
+          "source": "matikaCesku",
+          "id": "_hM0pyx5ZnjFE9rcXKunr",
+          "languages": ["sk", "cs"],
+          "fileSlug": "kombinatoricke-hry",
+          "slug": {
+            "sk": "kombinatoricke-hry",
+            "cs": "kombinatoricke-hry"
+          },
+          "title": {
+            "sk": "Kombinatorické hry",
+            "cs": "Kombinatorické hry"
+          },
+          "description": {
+            "sk": "Úvod do kombinatorických hier dvoch hráčov a hľadania víťazných stratégií. Pokrýva analýzu od konca, vyhrávajúce a prehrávajúce pozície, párovanie ťahov, symetriu a kradnutie stratégií.",
+            "cs": "Úvod do kombinatorických her dvou hráčů a hledání vítězných strategií. Pokrývá analýzu od konce, vyhrávající a prohrávající pozice, párování tahů, symetrii a kradení strategií."
+          },
+          "authors": ["Patrik Bak"]
         }
       ]
     }

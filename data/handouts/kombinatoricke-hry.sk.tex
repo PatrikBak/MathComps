@@ -1,0 +1,190 @@
+\input _template
+
+\setlanguage{SK}
+
+\Title{Kombinatorické hry}
+
+\MathcompsLink{kombinatoricke-hry}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+V~kombinatorických hrách zvyčajne rozhodujeme, ktorý z~dvoch hráčov má víťaznú stratégiu. Ukážeme si na to zopár opakujúcich sa nápadov.
+
+\sec Techniky
+
+\begitems \style i
+\i Hru analyzujeme od~konca: pozície triedime na \textit{prehrávajúce} (ten, kto je na ťahu, prehrá) a~\textit{výherné}.
+\i Políčka alebo ťahy vopred spárujeme a~na súperov ťah vždy odpovedáme ťahom do toho istého páru.
+\i Hľadáme symetriu hracieho plánu a~súperove ťahy iba zrkadlíme.
+\i Taktiež \textit{kradneme stratégie} -- predpokladáme, že víťaznú stratégiu má súper, a~dovedieme to do sporu -- ukážeme, že by sme si ju vedeli prisvojiť.
+\enditems
+
+\sec Úlohy
+
+\Problem{0}{}{
+    Na stole je 1000 zápaliek a~dvaja hráči sa striedajú v~ťahoch. V~každom ťahu hráč odoberie 1~alebo 2~zápalky. Vyhrá ten, kto urobil posledný ťah. Kto má vyhrávajúcu stratégiu? 
+}{
+    1000 je priveľa, skúste si to vyriešiť postupne pre 1, 2, 3, 4 zápalky...
+}{
+    Všimnime si, že pre 1, 2 vyhrá začínajúci hráč, avšak pre 3 nie -- vtedy totiž každý ťah hráča vedie do vyhrávajúcej pozície súpera. Ako je to pre 4, 5?
+}{
+    Pre 4 a 5 ťah 1 resp. 2 spraví to, že dostane druhého hráča do prehrávajúcej pozície -- tieto pozície sú teda vyhrávajúce. Vo všeobecnosti -- ak každý ťah z pozície~$n$ vedie len do vyhrávajúcich, tak $n$ je prehrávajúca, inak je vyhrávajúca. S~týmto pozorovaním pokračujme vo vypisovaní, ktoré pozície sú vyhrávajúce a~ktoré prehrávajúce, ako je to pre 6, 7, 8?    
+}{
+    Trik je dokázať, že prehrávajúce pozície sú práve tie deliteľné 3. Formálne to vieme spraviť indukciou.
+}{
+    Z~malých prípadov si spravíme hypotézu: pri 1 či 2 zápalkách začínajúci vyhrá, pri 3 nie (každý jeho ťah dá výhru súperovi), pri 4 a~5 zasa vyhrá. Vyzerá to tak, že prehrávajúce sú práve pozície s~počtom zápaliek deliteľným tromi -- a~to teraz dokážeme indukciou. Pozícia 0 je prehrávajúca, lebo hráč na~ťahu už nemá čo odobrať. Na druhej strane, pozície 1 a 2 sú vyhrávajúce. 
+    
+    Ak je počet deliteľný tromi, tak po odobratí 1 alebo 2 zostane počet nedeliteľný tromi, čiže súper dostane vyhrávajúcu pozíciu -- naša pozícia je teda prehrávajúca. Naopak z~počtu nedeliteľného tromi vieme odobratím 1 alebo 2 zanechať násobok troch, čím súpera dostaneme do prehrávajúcej pozície.
+
+    Keďže $1000 = 3\cdot 333 + 1$ nie je deliteľné tromi, vyhráva začínajúci hráč. Prvým ťahom odoberie jednu zápalku a~zanechá 999, a~potom na každé súperovo odobratie $k$ zápaliek odpovie odobratím $3-k$. Tým súperovi vždy zanechá násobok troch, až napokon~0.
+}
+
+\Problem{0}{}{
+    Dvaja hráči sa striedajú v~pomenúvaní dátumov v~rámci jedného roka, pričom začínajú 1.~januárom. V~každom ťahu hráč zväčší buď mesiac, alebo deň, ale nie oboje naraz (napríklad z~10.~januára môže prejsť napríklad na 10.~marca alebo napríklad na 15.~januára). Vyhráva ten, kto ako prvý povie 31.~december. Ktorý hráč má vyhrávajúcu stratégiu?
+}{
+    Postupujeme od konca -- akýkoľvek deň v decembri je super, lebo z neho vieme vyhrať. Je nejaký taký deň v novembri?
+}{
+    Idea je všimnúť si, že 30. novembra je super, lebo odtiaľ vie súper ísť len na 30. decembra, kedy vyhráme (31. november neexistuje). To chce byť náš cieľový deň v novembri. A čo v októbri?
+}{
+    V októbri bude deň istej prehry 29, a všetky vyššie dni budú dni výhry -- zdôvodnite. Idea je pokračovať takto ďalšími mesiacmi, až kým nenájdeme vzor.
+}{
+    Postupujme od~konca. Hráča na ťahu nazveme prehrávajúcim, ak pri správnej hre súpera prehrá.
+
+    Každý deň v~decembri je výherný -- stačí povedať rovno 31. december. Prvý prehrávajúci dátum je 30. november: jediný ťah z~neho vedie na 30. december (deň zväčšiť nevieme a~31. november neexistuje), odkiaľ súper vyhrá. Podobne sú prehrávajúce 29. október, 28. september a~tak ďalej -- prehrávajúce dni s~ubúdajúcim mesiacom klesajú o~jeden. To napovedá tvrdenie: \textit{prehrávajúce sú práve dátumy, v~ktorých sa deň a~poradové číslo mesiaca líšia o~19} -- teda 30. XI., 29. X., 28. IX., \dots, vo~$m$-tom mesiaci deň $m+19$.
+
+    Tvrdenie overíme priamo. Z~pozície s~rozdielom 19 každý ťah vlastnosť pokazí: zväčšením dňa rozdiel narastie nad 19, zväčšením mesiaca klesne pod 19. Naopak z~ľubovoľnej inej pozície vieme rozdiel jediným ťahom nastaviť presne na 19 -- ak je menší, zväčšíme deň, ak väčší, zväčšíme mesiac. Pozície s~rozdielom 19 sú teda prehrávajúce a~všetky ostatné výherné (aj cieľový 31. december má rozdiel 19 a~je tou poslednou v~rade).
+
+    Východisková pozícia 1. januára má rozdiel 0, je teda výherná a~vyhráva začínajúci hráč. Prvým ťahom prejde na 20. januára (rozdiel 19) a~potom po každom súperovom ťahu vráti rozdiel na~19. Súper tak nikdy nepovie 31. december ako prvý -- to napokon urobí začínajúci hráč.
+}
+
+\Problem{0}{}{
+    V~ľavom hornom rohu šachovnice $8 \times 8$ stojí figúrka kráľa. Dvaja hráči sa striedajú v~ťahoch, pričom každý svojím ťahom (legálnym šachovým ťahom) posunie figúrku na miesto, na ktorom ešte nestála. Kto nemá kam urobiť ťah, prehral. Ktorý hráč má vyhrávajúcu stratégiu?
+}{
+    Bolo by ideálne, ak by sme pre každé políčko vedeli, kam presne chceme ťahať -- to by nám ťahy nedošli.
+}{
+    Spárujeme všetky políčka šachovnice. Oplatí sa ťahať podľa týchto párov.
+}{
+    Vyhráva začínajúci hráč. Chceli by sme pre každé políčko vopred vedieť, kam z~neho potiahneme -- vtedy nám ťahy nikdy nedôjdu. To nás vedie k~myšlienke políčka spárovať: šachovnicu rozdelíme na 32 kostičiek domina $1\times2$ (napríklad na samé vodorovné dvojice). Začínajúci hráč najprv potiahne kráľa z~rohového políčka na jeho partnera v~tej istej kostičke. Ďalej na každý súperov ťah odpovie ťahom na druhé políčko tej kostičky, do ktorej súper práve vstúpil.
+
+    Takýto ťah je vždy možný: po každom ťahu začínajúceho hráča tvoria navštívené políčka úplné kostičky, takže keď súper vojde na nové políčko, jeho partner v~kostičke je ešte voľný a~susedí s~ním (kráľ tam vie potiahnuť). Súperovi sa tak skôr či neskôr minú ťahy, a~tým prehrá.
+}
+
+\Problem{0}{}{
+    Dvaja hráči striedavo kladú na okrúhly stôl rovnaké mince, pričom každá musí celá ležať na stole a~nesmie sa prekrývať so skôr položenými (dotyk je dovolený). Prehráva ten, kto už nemá kam položiť ďalšiu mincu. Ktorý z~hráčov má vyhrávajúcu stratégiu?
+}{
+    Skúste využiť symetriu kruhu pri hľadaní vhodnej stratégie, ktorá odpovedá na ťahy súpera.
+}{
+    Trikom je najprv zamedziť špeciálnu pozíciu kruhu, a síce stred. Vieme teraz využiť symetriu?
+}{
+    Vyhráva začínajúci hráč. Prvú mincu položí presne do stredu stola. Potom na každú mincu súpera odpovie mincou uloženou stredovo súmerne podľa stredu stola.
+
+    Táto súmerná pozícia je vždy voľná a~celá leží na stole: stôl je stredovo súmerný, takže obraz súperovej korektne položenej mince je opäť korektná pozícia. So súperovou mincou sa pritom kryť nemôže: jej stred je od~stredu stola vzdialený aspoň o~priemer mince (inak by sa prekrývala so stredovou mincou), takže od~svojho obrazu, ktorý je práve dvakrát tak ďaleko, je vzdialený aspoň o~dva priemery -- na prekrytie by pritom stačil menší odstup než jeden priemer. Začínajúci hráč má teda po každom súperovom ťahu kam ťahať, a~tak prehrá súper.
+}
+
+\Problem{0}{65-CSMO-C-II-4}{
+    Adam s~Barborou hrajú so zlomkom
+    $$
+    \frac{10a+b}{10c+d}
+    $$
+    takúto hru na štyri ťahy: Hráči striedavo nahrádzajú ľubovoľné z~doposiaľ neurčených písmen $a, b, c, d$ nejakou cifrou od~1 do~9. Barbora vyhrá, keď výsledný zlomok bude rovný buď celému číslu, alebo číslu s~konečným počtom desatinných miest; inak vyhrá Adam (napríklad keď vznikne zlomok $\frac{11}{29}$). Ak začína Adam, ako má hrať Barbora, aby zaručene vyhrala? Ak začína Barbora, je možné poradiť Adamovi tak, aby vždy vyhral?
+}{
+    Druhý hráč má výhodu, lebo vie vhodne reagovať na ťahy prvého hráča. Skúste najprv vyriešiť prípad, kedy sa snaží, aby zlomok bol celočíselný.
+}{
+    Idea je, že ho spraví rovným 1.
+}{
+    Ťažšia časť je, keď sa druhý hráč snaží o periodický zlomok. Čo typicky kazí zlomky a robí ich periodické?
+}{
+    Idea je, že spraví menovateľ deliteľný vhodným číslom, zatiaľ čo v čitateli túto deliteľnosť zamedzí.
+}{
+    \textit{Ak začína Adam.} Barbora vie zariadiť, aby výsledný zlomok bol rovný~1, čo je celé číslo, a~teda jej výhra. Stačí jej docieliť $a=c$ a~$b=d$, lebo potom $10a+b=10c+d$. Ťahá preto \uv{súmerne} podľa zlomkovej čiary: keď Adam doplní niektoré z~písmen $a,b$, ona doplní tú istú cifru do partnerského $c,d$, a~naopak. Tým po štyroch ťahoch zaručí $a=c$ aj $b=d$.
+
+    \textit{Ak začína Barbora.} Zlomok má konečný rozvoj práve vtedy, keď sa dá vykrátiť na menovateľa zloženého len z~dvojok a~pätiek. Adam to pokazí, ak do menovateľa dostane iný prvočíselný deliteľ, ktorý sa nedá vykrátiť -- najjednoduchšie trojku. Poradíme mu teda zariadiť, aby menovateľ $10c+d$ bol deliteľný tromi, no čitateľ $10a+b$ nie; taký zlomok má potom nekonečný periodický rozvoj a~Adam vyhrá. Keďže $10a+b$ a~jeho ciferný súčet $a+b$ dávajú rovnaký zvyšok po delení tromi (a~podobne $10c+d$ a~$c+d$), stačí Adamovi zariadiť, aby $c+d$ bolo deliteľné tromi a~$a+b$ nie. To dosiahne tak, že po každom z~oboch Barboriných ťahov vhodne doplní čitateľ či menovateľ -- napríklad zariadi $a+b=10$ (nedeliteľné tromi) a~$c+d=9$ alebo~$12$ (deliteľné tromi).
+}
+
+\Problem{0}{}{
+    Hráči $A$ a~$B$ striedavo kreslia uhlopriečky v~pravidelnom 2026-uholníku. Uhlopriečku smú nakresliť iba vtedy, keď nepretína žiadnu zo skôr nakreslených (spoločný koncový vrchol sa za pretnutie nepovažuje). Prehráva ten, kto nemôže ťahať. Ktorý z~hráčov vyhráva?
+}{
+    Pravidelný n-uholník je dosť symetrická vec, vieme to nejako využiť? Trikom je spraviť dobrý prvý ťah, ktorý nám túto symetriu pomôže využiť.
+}{
+    Trik je nakresliť diagonálu, ktorá ho rozdeľuje na symetrické časti. Zrazu máme úplne symetrické polovice.
+}{
+    Vyhráva začínajúci hráč $A$. Najprv nakreslí \uv{hlavnú} uhlopriečku spájajúcu dva protiľahlé vrcholy (tie existujú, lebo 2026 je párne); tá rozdelí mnohouholník na dve zhodné polovice, súmerné podľa priamky tejto uhlopriečky. Ďalej $A$ na každú uhlopriečku súpera odpovie jej zrkadlovým obrazom podľa tejto osi.
+
+    Stratégia je korektná: súper nemôže nakresliť uhlopriečku pretínajúcu hlavnú, lebo tá je už nakreslená, takže každá jeho uhlopriečka leží celá v~jednej z~polovíc. Zvlášť žiadna nie je sama sebe súmerná -- taká by totiž spájala dvojicu zrkadlovo združených vrcholov, ležala by teda v~oboch poloviciach a~pretínala hlavnú uhlopriečku. Zrkadlový obraz súperovej uhlopriečky preto leží v~druhej polovici, je rôzny od~nej samej aj od~všetkých doteraz nakreslených a~žiadnu z~nich nepretína (inak by sa pretínali aj ich obrazy, čiže predošlé súperove ťahy). $A$ má teda po každom súperovom ťahu odpoveď, a~tak prehrá súper.
+}
+
+\Problem{1}{Chomp}{
+    Predstavme si obdĺžnikovú čokoládu rozdelenú na aspoň dva štvorcové dieliky, pričom ľavý horný dielik je otrávený. Dvaja hráči sa striedajú v~ťahoch. V~každom ťahu si hráč vyberie niektorý dielik a~zje ho spolu so všetkými dielikmi, ktoré ležia od neho doprava a~nadol -- teda celý obdĺžnik, ktorého ľavým horným rohom je zvolený dielik. Prehráva ten, kto je nútený zjesť otrávený ľavý horný dielik. Ktorý hráč má vyhrávajúcu stratégiu?
+}{
+    Úloha je fascinujúca v tom, že vieme dokázať, že jeden z hráčov má víťaznú stratégiu, ale nevieme akú -- konkrétne prvý hráč. Skúste sa zamyslieť, čo ak by mal druhý hráč takúto stratégiu, vedel by ju prvý hráč zneužiť?
+}{
+    Ukážeme, že víťaznú stratégiu má prvý hráč -- ak by ju mal druhý hráč, tak prvý hráč vie urobiť veľmi jednoduchý ťah, ktorý hru prakticky nijako nezmení -- následne odpozoruje stratégiu druhého hráča. Lenže, keď to hru nezmenilo, prečo ju nemohol použiť on sám?
+}{
+    Magický ťah je odlomiť 1x1 kúsok sprava dole. Rozmyslite, že to úplne stačí.
+}{
+    Vyhráva začínajúci hráč. Ukážeme to bez toho, aby sme jeho stratégiu vedeli popísať. Predpokladajme naopak, že víťaznú stratégiu má druhý hráč. Začínajúci hráč potom zahrá \uv{magický} ťah -- odhryzne iba pravý dolný dielik $1\times1$. Vznikne tým nejaká pozícia, na ktorú má druhý hráč (z~predpokladu) víťaznú odpoveď.
+
+    Lenže tú istú výslednú pozíciu vie navodiť aj začínajúci hráč hneď svojím prvým ťahom -- veď každé odhryznutie zahŕňa aj pravý dolný roh, takže ľubovoľná odpoveď druhého hráča je zároveň legálnym prvým ťahom. Začínajúci hráč si ju teda mohol prisvojiť a~vyhrať sám, čo je spor. Víťaznú stratégiu má preto začínajúci hráč.
+}
+
+\Problem{1}{}{
+    Dvaja hráči hrajú hru podľa pravidiel klasického šachu, s~jediným rozdielom: hráč, ktorý je na ťahu, urobí vždy dva ťahy po sebe. Dokážte, že začínajúci hráč má neprehrávajúcu stratégiu, teda vie si zaručiť aspoň remízu.
+}{
+    Kradneme stratégiu podobne ako v~Chomp úlohe. Šach však pripúšťa remízu, takže prvému hráčovi takto zaručíme aspoň neprehru, aj keď konkrétnu stratégiu nepoznáme.
+}{
+    Znova hľadáme nejaký neutrálny ťah, ktorý môže prvý hráč urobiť na začiatku. K tomu treba využiť, že vie robiť dva ťahy.
+}{
+    Predpokladajme opak -- že súper $B$ začínajúceho hráča $A$ má vyhrávajúcu stratégiu $S$. Hráč $A$ vtedy na začiatku zahrá neutrálny dvojťah: vytiahne jazdca a~hneď ho vráti späť. Na šachovnici je opäť počiatočná pozícia, ibaže na~ťahu je teraz $B$, akoby partiu začínal on.
+
+    Hráč $A$ sa teraz vžije do roly druhého hráča a~od tejto chvíle hrá podľa stratégie $S$. Tou by ale vyhral on sám, čo je spor s~tým, že vyhrávajúcu stratégiu mal mať $B$. Súper teda vyhrávajúcu stratégiu nemá; a~keďže šach je konečná hra bez náhody, $A$ si vie zaručiť aspoň remízu.
+}
+
+\Problem{1}{}{
+    Dvaja hráči hrajú hru, kde sa striedajú v~ťahoch. Na začiatku máme číslo 2. V~každom kroku k~nemu pripočítame nejaký jeho nevlastný deliteľ (deliteľ menší než ono samo). Cieľ je získať číslo $\ge 2026$. Kto má vyhrávajúcu stratégiu?
+}{
+    Premýšľajte od konca, pre ktoré čísla by sme celkom isto vyhrali v ďalšom ťahu? 
+}{
+    Kľúčom je premýšľať nad párnymi číslami, tie totiž vieme zväčšiť jeden a pol krát týmto algoritmom, to je vcelku dosť. Hráč, ktorý ich vie zabezpečiť, má výhodu.
+}{
+    Posledné uvedomenie je, že prvý hráč si vie zabezpečiť párne čísla. Rozmyslite ako a tiež dokážte, že mu to postačí.
+}{
+    Vyhráva začínajúci hráč $A$ a~kľúčom je, že si vie zabezpečiť, aby vždy ťahal z~párneho čísla. Z~párneho $m$ totiž vie pripočítať jeho polovicu a~zväčšiť ho jeden a~pol násobne; len čo raz dostane na ťah párne $m\ge1352$, jediným ťahom skočí na $m+\frac m2 \ge \frac32\cdot1352 = 2028 \ge 2026$ a~vyhrá. Práve čísla od~1352 sú tie, z~ktorých vie vyhrať v~jednom ťahu.
+
+    Ako si párne čísla zabezpečí? Jeho prvý ťah je vynútený, $2\to3$ (jediný nevlastný deliteľ dvojky je~1). Odvtedy sa drží pravidla, že súperovi vždy zanechá nepárne číslo -- keď je na ťahu párne $m<1352$, pripočíta~1. Súper $B$ tak vždy pripočítava nevlastného deliteľa nepárneho čísla, ktorý je nepárny, a~tak po jeho ťahu vznikne opäť párne číslo, ktoré pripadne $A$. Čísla pritom stále rastú, takže $A$ sa raz dostane k~párnemu $m\ge1352$.
+
+    Ostáva overiť, že $B$ medzitým nevyhrá. $A$ totiž súperovi zanecháva iba nepárne čísla menšie než 1352, teda najviac 1351. Z~nepárneho $y$ vie $B$ pripočítať nanajvýš jeho tretinu (nevlastný deliteľ nepárneho čísla je $\le y/3$), takže sa dostane najviac na $\frac43\cdot1351 = 1801 < 2026$. K~cieľu sa teda nikdy nedostane.
+}
+
+\Problem{1}{70-CSMO-A-III-1}{
+    Zlomok s~1010 políčkami v~čitateli a~1011 políčkami v~menovateli slúži ako hrací plán pre hru dvoch hráčov.
+    $$
+    \frac{\square+\square+\cdots+\square}{\square+\square+\cdots+\square+\square}
+    $$
+    Hráči sa striedajú v~ťahoch. V~každom ťahu hráč vyberie jedno z~čísel $1$, $2$, $\dots$, $2021$ a~vloží ho do ľubovoľného prázdneho políčka. Každé číslo pritom môže byť použité iba raz. Začínajúci hráč vyhráva, ak sa hodnota zlomku po zaplnení všetkých políčok líši od čísla 1 o~menej ako $10^{-6}$. V~opačnom prípade vyhráva druhý hráč. Rozhodnite, ktorý z~hráčov má vyhrávajúcu stratégiu.
+}{
+    Hodnota zlomku vyzerá, že môže mať hrozne veľa hodnôt. Idea hry je ale vymyslieť spôsob, ako jeden z hráčov dokáže túto hodnotu dobre kontrolovať.
+}{
+    Jednoduchý spôsob kontroly hodnoty je vhodne reagovať na ťahy súpera.
+}{
+    Ukážte, že vyhrávajúcu stratégiu má práve prvý hráč. Ak mu totiž vymyslíme dobrý prvý ťah, tak môže previesť vhodné párovanie ťahov. Posledné, čo zostáva rozmyslieť, je, ako to párovanie bude vyzerať, aby vedel dobre kontrolovať hodnotu zlomku a ideálne teda bola dosť malá.
+}{
+    Prvý hráč začne jednotkou v menovateli -- tým zostane všade párny počet. Už len nájsť párovanie zvyšku.
+}{
+    Vyhráva začínajúci hráč $A$. Ukážeme, že vie zariadiť, aby bol menovateľ presne o~1 väčší než čitateľ.
+
+    Najprv vloží číslo 1 do menovateľa. Potom kedykoľvek súper $B$ vloží do zlomku číslo $x$, hráč $A$ odpovie tým, že vloží číslo $2023-x$ do tej istej časti zlomku (čitateľa, resp. menovateľa), do ktorej hral $B$. Prečo to vždy ide? Po vložení jednotky do menovateľa je v~čitateli aj v~menovateli párny počet voľných políčok (po 1010) a~táto vlastnosť sa po každom $A$-ovom ťahu zachová. Súper teda nikdy nezaplní poslednú voľnú pozíciu niektorej časti, takže $A$ má vždy kam odpovedať. A~číslo $2023-x$ je k~dispozícii, lebo čísla $2,3,\dots,2021$ sa rozpadnú na dvojice s~rovnakým súčtom 2023:
+    $$
+    \{2,2021\},\ \{3,2020\},\ \{4,2019\},\ \dots,\ \{1011,1012\}.
+    $$
+    Pri každom svojom ťahu teda $B$ nejakú dvojicu \uv{načne} a~$A$ ju vzápätí \uv{dokončí}.
+
+    Po zaplnení má čitateľ 1010 políčok, čiže 505 takýchto dvojíc, a~tak je jeho hodnota $505\cdot2023$. Menovateľ má okrem jednotky tiež 505 dvojíc, takže jeho hodnota je $505\cdot2023+1$. Keďže
+    $$
+    0 < 1 - \frac{505\cdot2023}{505\cdot2023+1} = \frac1{505\cdot2023+1} < \frac1{500\cdot2000} = 10^{-6},
+    $$
+    hodnota zlomku sa od~1 líši o~menej než $10^{-6}$ a~začínajúci hráč naozaj vyhráva.
+}
+
+\bye
