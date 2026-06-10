@@ -1,0 +1,1848 @@
+{
+  "document": {
+    "title": "Kombinatorické hry",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0kombinatorických hrách zvyčajne rozhodujeme, ktorý z\u00A0dvoch hráčov má víťaznú stratégiu. Ukážeme si na to zopár opakujúcich sa nápadov."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Techniky",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hru analyzujeme od\u00A0konca: pozície triedime na "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "prehrávajúce"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " (ten, kto je na ťahu, prehrá) a\u00A0"
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "výherné"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Políčka alebo ťahy vopred spárujeme a\u00A0na súperov ťah vždy odpovedáme ťahom do toho istého páru."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hľadáme symetriu hracieho plánu a\u00A0súperove ťahy iba zrkadlíme."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Taktiež "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "kradneme stratégie"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " – predpokladáme, že víťaznú stratégiu má súper, a\u00A0dovedieme to do sporu – ukážeme, že by sme si ju vedeli prisvojiť."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "LowerRomanParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Úlohy",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na stole je 1000 zápaliek a\u00A0dvaja hráči sa striedajú v\u00A0ťahoch. V\u00A0každom ťahu hráč odoberie 1\u00A0alebo 2\u00A0zápalky. Vyhrá ten, kto urobil posledný ťah. Kto má vyhrávajúcu stratégiu?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "1000 je priveľa, skúste si to vyriešiť postupne pre 1, 2, 3, 4 zápalky..."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Všimnime si, že pre 1, 2 vyhrá začínajúci hráč, avšak pre 3 nie – vtedy totiž každý ťah hráča vedie do vyhrávajúcej pozície súpera. Ako je to pre 4, 5?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pre 4 a 5 ťah 1 resp. 2 spraví to, že dostane druhého hráča do prehrávajúcej pozície – tieto pozície sú teda vyhrávajúce. Vo všeobecnosti – ak každý ťah z pozície\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " vedie len do vyhrávajúcich, tak "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je prehrávajúca, inak je vyhrávajúca. S\u00A0týmto pozorovaním pokračujme vo vypisovaní, ktoré pozície sú vyhrávajúce a\u00A0ktoré prehrávajúce, ako je to pre 6, 7, 8?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trik je dokázať, že prehrávajúce pozície sú práve tie deliteľné 3. Formálne to vieme spraviť indukciou."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0malých prípadov si spravíme hypotézu: pri 1 či 2 zápalkách začínajúci vyhrá, pri 3 nie (každý jeho ťah dá výhru súperovi), pri 4 a\u00A05 zasa vyhrá. Vyzerá to tak, že prehrávajúce sú práve pozície s\u00A0počtom zápaliek deliteľným tromi – a\u00A0to teraz dokážeme indukciou. Pozícia 0 je prehrávajúca, lebo hráč na\u00A0ťahu už nemá čo odobrať. Na druhej strane, pozície 1 a 2 sú vyhrávajúce."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ak je počet deliteľný tromi, tak po odobratí 1 alebo 2 zostane počet nedeliteľný tromi, čiže súper dostane vyhrávajúcu pozíciu – naša pozícia je teda prehrávajúca. Naopak z\u00A0počtu nedeliteľného tromi vieme odobratím 1 alebo 2 zanechať násobok troch, čím súpera dostaneme do prehrávajúcej pozície."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1000 = 3\\cdot 333 + 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie je deliteľné tromi, vyhráva začínajúci hráč. Prvým ťahom odoberie jednu zápalku a\u00A0zanechá 999, a\u00A0potom na každé súperovo odobratie "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zápaliek odpovie odobratím "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3-k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tým súperovi vždy zanechá násobok troch, až napokon\u00A00."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dvaja hráči sa striedajú v\u00A0pomenúvaní dátumov v\u00A0rámci jedného roka, pričom začínajú 1.\u00A0januárom. V\u00A0každom ťahu hráč zväčší buď mesiac, alebo deň, ale nie oboje naraz (napríklad z\u00A010.\u00A0januára môže prejsť napríklad na 10.\u00A0marca alebo napríklad na 15.\u00A0januára). Vyhráva ten, kto ako prvý povie 31.\u00A0december. Ktorý hráč má vyhrávajúcu stratégiu?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme od konca – akýkoľvek deň v decembri je super, lebo z neho vieme vyhrať. Je nejaký taký deň v novembri?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je všimnúť si, že 30. novembra je super, lebo odtiaľ vie súper ísť len na 30. decembra, kedy vyhráme (31. november neexistuje). To chce byť náš cieľový deň v novembri. A čo v októbri?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V októbri bude deň istej prehry 29, a všetky vyššie dni budú dni výhry – zdôvodnite. Idea je pokračovať takto ďalšími mesiacmi, až kým nenájdeme vzor."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujme od\u00A0konca. Hráča na ťahu nazveme prehrávajúcim, ak pri správnej hre súpera prehrá."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Každý deň v\u00A0decembri je výherný – stačí povedať rovno 31. december. Prvý prehrávajúci dátum je 30. november: jediný ťah z\u00A0neho vedie na 30. december (deň zväčšiť nevieme a\u00A031. november neexistuje), odkiaľ súper vyhrá. Podobne sú prehrávajúce 29. október, 28. september a\u00A0tak ďalej – prehrávajúce dni s\u00A0ubúdajúcim mesiacom klesajú o\u00A0jeden. To napovedá tvrdenie: "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "prehrávajúce sú práve dátumy, v\u00A0ktorých sa deň a\u00A0poradové číslo mesiaca líšia o\u00A019"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " – teda 30. XI., 29. X., 28. IX., \\dots, vo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tom mesiaci deň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+19",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tvrdenie overíme priamo. Z\u00A0pozície s\u00A0rozdielom 19 každý ťah vlastnosť pokazí: zväčšením dňa rozdiel narastie nad 19, zväčšením mesiaca klesne pod 19. Naopak z\u00A0ľubovoľnej inej pozície vieme rozdiel jediným ťahom nastaviť presne na 19 – ak je menší, zväčšíme deň, ak väčší, zväčšíme mesiac. Pozície s\u00A0rozdielom 19 sú teda prehrávajúce a\u00A0všetky ostatné výherné (aj cieľový 31. december má rozdiel 19 a\u00A0je tou poslednou v\u00A0rade)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Východisková pozícia 1. januára má rozdiel 0, je teda výherná a\u00A0vyhráva začínajúci hráč. Prvým ťahom prejde na 20. januára (rozdiel 19) a\u00A0potom po každom súperovom ťahu vráti rozdiel na\u00A019. Súper tak nikdy nepovie 31. december ako prvý – to napokon urobí začínajúci hráč."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0ľavom hornom rohu šachovnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stojí figúrka kráľa. Dvaja hráči sa striedajú v\u00A0ťahoch, pričom každý svojím ťahom (legálnym šachovým ťahom) posunie figúrku na miesto, na ktorom ešte nestála. Kto nemá kam urobiť ťah, prehral. Ktorý hráč má vyhrávajúcu stratégiu?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Bolo by ideálne, ak by sme pre každé políčko vedeli, kam presne chceme ťahať – to by nám ťahy nedošli."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Spárujeme všetky políčka šachovnice. Oplatí sa ťahať podľa týchto párov."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhráva začínajúci hráč. Chceli by sme pre každé políčko vopred vedieť, kam z\u00A0neho potiahneme – vtedy nám ťahy nikdy nedôjdu. To nás vedie k\u00A0myšlienke políčka spárovať: šachovnicu rozdelíme na 32 kostičiek domina "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\times2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (napríklad na samé vodorovné dvojice). Začínajúci hráč najprv potiahne kráľa z\u00A0rohového políčka na jeho partnera v\u00A0tej istej kostičke. Ďalej na každý súperov ťah odpovie ťahom na druhé políčko tej kostičky, do ktorej súper práve vstúpil."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Takýto ťah je vždy možný: po každom ťahu začínajúceho hráča tvoria navštívené políčka úplné kostičky, takže keď súper vojde na nové políčko, jeho partner v\u00A0kostičke je ešte voľný a\u00A0susedí s\u00A0ním (kráľ tam vie potiahnuť). Súperovi sa tak skôr či neskôr minú ťahy, a\u00A0tým prehrá."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dvaja hráči striedavo kladú na okrúhly stôl rovnaké mince, pričom každá musí celá ležať na stole a\u00A0nesmie sa prekrývať so skôr položenými (dotyk je dovolený). Prehráva ten, kto už nemá kam položiť ďalšiu mincu. Ktorý z\u00A0hráčov má vyhrávajúcu stratégiu?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Skúste využiť symetriu kruhu pri hľadaní vhodnej stratégie, ktorá odpovedá na ťahy súpera."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikom je najprv zamedziť špeciálnu pozíciu kruhu, a síce stred. Vieme teraz využiť symetriu?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhráva začínajúci hráč. Prvú mincu položí presne do stredu stola. Potom na každú mincu súpera odpovie mincou uloženou stredovo súmerne podľa stredu stola."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Táto súmerná pozícia je vždy voľná a\u00A0celá leží na stole: stôl je stredovo súmerný, takže obraz súperovej korektne položenej mince je opäť korektná pozícia. So súperovou mincou sa pritom kryť nemôže: jej stred je od\u00A0stredu stola vzdialený aspoň o\u00A0priemer mince (inak by sa prekrývala so stredovou mincou), takže od\u00A0svojho obrazu, ktorý je práve dvakrát tak ďaleko, je vzdialený aspoň o\u00A0dva priemery – na prekrytie by pritom stačil menší odstup než jeden priemer. Začínajúci hráč má teda po každom súperovom ťahu kam ťahať, a\u00A0tak prehrá súper."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "65-CSMO-C-II-4"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Adam s\u00A0Barborou hrajú so zlomkom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{10a+b}{10c+d}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takúto hru na štyri ťahy: Hráči striedavo nahrádzajú ľubovoľné z\u00A0doposiaľ neurčených písmen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b, c, d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nejakou cifrou od\u00A01 do\u00A09. Barbora vyhrá, keď výsledný zlomok bude rovný buď celému číslu, alebo číslu s\u00A0konečným počtom desatinných miest; inak vyhrá Adam (napríklad keď vznikne zlomok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{11}{29}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Ak začína Adam, ako má hrať Barbora, aby zaručene vyhrala? Ak začína Barbora, je možné poradiť Adamovi tak, aby vždy vyhral?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Druhý hráč má výhodu, lebo vie vhodne reagovať na ťahy prvého hráča. Skúste najprv vyriešiť prípad, kedy sa snaží, aby zlomok bol celočíselný."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je, že ho spraví rovným 1."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ťažšia časť je, keď sa druhý hráč snaží o periodický zlomok. Čo typicky kazí zlomky a robí ich periodické?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je, že spraví menovateľ deliteľný vhodným číslom, zatiaľ čo v čitateli túto deliteľnosť zamedzí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Ak začína Adam."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Barbora vie zariadiť, aby výsledný zlomok bol rovný\u00A01, čo je celé číslo, a\u00A0teda jej výhra. Stačí jej docieliť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", lebo potom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b=10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ťahá preto "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "súmerne"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " podľa zlomkovej čiary: keď Adam doplní niektoré z\u00A0písmen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ona doplní tú istú cifru do partnerského "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c,d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0naopak. Tým po štyroch ťahoch zaručí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Ak začína Barbora."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Zlomok má konečný rozvoj práve vtedy, keď sa dá vykrátiť na menovateľa zloženého len z\u00A0dvojok a\u00A0pätiek. Adam to pokazí, ak do menovateľa dostane iný prvočíselný deliteľ, ktorý sa nedá vykrátiť – najjednoduchšie trojku. Poradíme mu teda zariadiť, aby menovateľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bol deliteľný tromi, no čitateľ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie; taký zlomok má potom nekonečný periodický rozvoj a\u00A0Adam vyhrá. Keďže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0jeho ciferný súčet "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dávajú rovnaký zvyšok po delení tromi (a\u00A0podobne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), stačí Adamovi zariadiť, aby "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bolo deliteľné tromi a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie. To dosiahne tak, že po každom z\u00A0oboch Barboriných ťahov vhodne doplní čitateľ či menovateľ – napríklad zariadi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b=10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (nedeliteľné tromi) a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d=9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " alebo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "12",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (deliteľné tromi)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hráči "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " striedavo kreslia uhlopriečky v\u00A0pravidelnom 2026-uholníku. Uhlopriečku smú nakresliť iba vtedy, keď nepretína žiadnu zo skôr nakreslených (spoločný koncový vrchol sa za pretnutie nepovažuje). Prehráva ten, kto nemôže ťahať. Ktorý z\u00A0hráčov vyhráva?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pravidelný n-uholník je dosť symetrická vec, vieme to nejako využiť? Trikom je spraviť dobrý prvý ťah, ktorý nám túto symetriu pomôže využiť."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trik je nakresliť diagonálu, ktorá ho rozdeľuje na symetrické časti. Zrazu máme úplne symetrické polovice."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhráva začínajúci hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Najprv nakreslí "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "hlavnú"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " uhlopriečku spájajúcu dva protiľahlé vrcholy (tie existujú, lebo 2026 je párne); tá rozdelí mnohouholník na dve zhodné polovice, súmerné podľa priamky tejto uhlopriečky. Ďalej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na každú uhlopriečku súpera odpovie jej zrkadlovým obrazom podľa tejto osi."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stratégia je korektná: súper nemôže nakresliť uhlopriečku pretínajúcu hlavnú, lebo tá je už nakreslená, takže každá jeho uhlopriečka leží celá v\u00A0jednej z\u00A0polovíc. Zvlášť žiadna nie je sama sebe súmerná – taká by totiž spájala dvojicu zrkadlovo združených vrcholov, ležala by teda v\u00A0oboch poloviciach a\u00A0pretínala hlavnú uhlopriečku. Zrkadlový obraz súperovej uhlopriečky preto leží v\u00A0druhej polovici, je rôzny od\u00A0nej samej aj od\u00A0všetkých doteraz nakreslených a\u00A0žiadnu z\u00A0nich nepretína (inak by sa pretínali aj ich obrazy, čiže predošlé súperove ťahy). "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má teda po každom súperovom ťahu odpoveď, a\u00A0tak prehrá súper."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Chomp"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predstavme si obdĺžnikovú čokoládu rozdelenú na aspoň dva štvorcové dieliky, pričom ľavý horný dielik je otrávený. Dvaja hráči sa striedajú v\u00A0ťahoch. V\u00A0každom ťahu si hráč vyberie niektorý dielik a\u00A0zje ho spolu so všetkými dielikmi, ktoré ležia od neho doprava a\u00A0nadol – teda celý obdĺžnik, ktorého ľavým horným rohom je zvolený dielik. Prehráva ten, kto je nútený zjesť otrávený ľavý horný dielik. Ktorý hráč má vyhrávajúcu stratégiu?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Úloha je fascinujúca v tom, že vieme dokázať, že jeden z hráčov má víťaznú stratégiu, ale nevieme akú – konkrétne prvý hráč. Skúste sa zamyslieť, čo ak by mal druhý hráč takúto stratégiu, vedel by ju prvý hráč zneužiť?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ukážeme, že víťaznú stratégiu má prvý hráč – ak by ju mal druhý hráč, tak prvý hráč vie urobiť veľmi jednoduchý ťah, ktorý hru prakticky nijako nezmení – následne odpozoruje stratégiu druhého hráča. Lenže, keď to hru nezmenilo, prečo ju nemohol použiť on sám?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Magický ťah je odlomiť 1x1 kúsok sprava dole. Rozmyslite, že to úplne stačí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhráva začínajúci hráč. Ukážeme to bez toho, aby sme jeho stratégiu vedeli popísať. Predpokladajme naopak, že víťaznú stratégiu má druhý hráč. Začínajúci hráč potom zahrá "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "magický"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " ťah – odhryzne iba pravý dolný dielik "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\times1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vznikne tým nejaká pozícia, na ktorú má druhý hráč (z\u00A0predpokladu) víťaznú odpoveď."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lenže tú istú výslednú pozíciu vie navodiť aj začínajúci hráč hneď svojím prvým ťahom – veď každé odhryznutie zahŕňa aj pravý dolný roh, takže ľubovoľná odpoveď druhého hráča je zároveň legálnym prvým ťahom. Začínajúci hráč si ju teda mohol prisvojiť a\u00A0vyhrať sám, čo je spor. Víťaznú stratégiu má preto začínajúci hráč."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dvaja hráči hrajú hru podľa pravidiel klasického šachu, s\u00A0jediným rozdielom: hráč, ktorý je na ťahu, urobí vždy dva ťahy po sebe. Dokážte, že začínajúci hráč má neprehrávajúcu stratégiu, teda vie si zaručiť aspoň remízu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kradneme stratégiu podobne ako v\u00A0Chomp úlohe. Šach však pripúšťa remízu, takže prvému hráčovi takto zaručíme aspoň neprehru, aj keď konkrétnu stratégiu nepoznáme."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Znova hľadáme nejaký neutrálny ťah, ktorý môže prvý hráč urobiť na začiatku. K tomu treba využiť, že vie robiť dva ťahy."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Predpokladajme opak – že súper "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " začínajúceho hráča "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má vyhrávajúcu stratégiu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vtedy na začiatku zahrá neutrálny dvojťah: vytiahne jazdca a\u00A0hneď ho vráti späť. Na šachovnici je opäť počiatočná pozícia, ibaže na\u00A0ťahu je teraz "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", akoby partiu začínal on."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa teraz vžije do roly druhého hráča a\u00A0od tejto chvíle hrá podľa stratégie "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tou by ale vyhral on sám, čo je spor s\u00A0tým, že vyhrávajúcu stratégiu mal mať "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Súper teda vyhrávajúcu stratégiu nemá; a\u00A0keďže šach je konečná hra bez náhody, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " si vie zaručiť aspoň remízu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dvaja hráči hrajú hru, kde sa striedajú v\u00A0ťahoch. Na začiatku máme číslo 2. V\u00A0každom kroku k\u00A0nemu pripočítame nejaký jeho nevlastný deliteľ (deliteľ menší než ono samo). Cieľ je získať číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\ge 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Kto má vyhrávajúcu stratégiu?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Premýšľajte od konca, pre ktoré čísla by sme celkom isto vyhrali v ďalšom ťahu?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kľúčom je premýšľať nad párnymi číslami, tie totiž vieme zväčšiť jeden a pol krát týmto algoritmom, to je vcelku dosť. Hráč, ktorý ich vie zabezpečiť, má výhodu."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Posledné uvedomenie je, že prvý hráč si vie zabezpečiť párne čísla. Rozmyslite ako a tiež dokážte, že mu to postačí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhráva začínajúci hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0kľúčom je, že si vie zabezpečiť, aby vždy ťahal z\u00A0párneho čísla. Z\u00A0párneho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " totiž vie pripočítať jeho polovicu a\u00A0zväčšiť ho jeden a\u00A0pol násobne; len čo raz dostane na ťah párne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m\\ge1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jediným ťahom skočí na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+\\frac m2 \\ge \\frac32\\cdot1352 = 2028 \\ge 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vyhrá. Práve čísla od\u00A01352 sú tie, z\u00A0ktorých vie vyhrať v\u00A0jednom ťahu."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ako si párne čísla zabezpečí? Jeho prvý ťah je vynútený, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\to3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (jediný nevlastný deliteľ dvojky je\u00A01). Odvtedy sa drží pravidla, že súperovi vždy zanechá nepárne číslo – keď je na ťahu párne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m<1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pripočíta\u00A01. Súper "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak vždy pripočítava nevlastného deliteľa nepárneho čísla, ktorý je nepárny, a\u00A0tak po jeho ťahu vznikne opäť párne číslo, ktoré pripadne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Čísla pritom stále rastú, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa raz dostane k\u00A0párnemu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m\\ge1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ostáva overiť, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " medzitým nevyhrá. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " totiž súperovi zanecháva iba nepárne čísla menšie než 1352, teda najviac 1351. Z\u00A0nepárneho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vie "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pripočítať nanajvýš jeho tretinu (nevlastný deliteľ nepárneho čísla je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\le y/3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), takže sa dostane najviac na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac43\\cdot1351 = 1801 < 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". K\u00A0cieľu sa teda nikdy nedostane."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "70-CSMO-A-III-1"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zlomok s\u00A01010 políčkami v\u00A0čitateli a\u00A01011 políčkami v\u00A0menovateli slúži ako hrací plán pre hru dvoch hráčov."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{\\square+\\square+\\cdots+\\square}{\\square+\\square+\\cdots+\\square+\\square}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hráči sa striedajú v\u00A0ťahoch. V\u00A0každom ťahu hráč vyberie jedno z\u00A0čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\dots",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2021",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vloží ho do ľubovoľného prázdneho políčka. Každé číslo pritom môže byť použité iba raz. Začínajúci hráč vyhráva, ak sa hodnota zlomku po zaplnení všetkých políčok líši od čísla 1 o\u00A0menej ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10^{-6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V\u00A0opačnom prípade vyhráva druhý hráč. Rozhodnite, ktorý z\u00A0hráčov má vyhrávajúcu stratégiu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hodnota zlomku vyzerá, že môže mať hrozne veľa hodnôt. Idea hry je ale vymyslieť spôsob, ako jeden z hráčov dokáže túto hodnotu dobre kontrolovať."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jednoduchý spôsob kontroly hodnoty je vhodne reagovať na ťahy súpera."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ukážte, že vyhrávajúcu stratégiu má práve prvý hráč. Ak mu totiž vymyslíme dobrý prvý ťah, tak môže previesť vhodné párovanie ťahov. Posledné, čo zostáva rozmyslieť, je, ako to párovanie bude vyzerať, aby vedel dobre kontrolovať hodnotu zlomku a ideálne teda bola dosť malá."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Prvý hráč začne jednotkou v menovateli – tým zostane všade párny počet. Už len nájsť párovanie zvyšku."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhráva začínajúci hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ukážeme, že vie zariadiť, aby bol menovateľ presne o\u00A01 väčší než čitateľ."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Najprv vloží číslo 1 do menovateľa. Potom kedykoľvek súper "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vloží do zlomku číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " odpovie tým, že vloží číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2023-x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " do tej istej časti zlomku (čitateľa, resp. menovateľa), do ktorej hral "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prečo to vždy ide? Po vložení jednotky do menovateľa je v\u00A0čitateli aj v\u00A0menovateli párny počet voľných políčok (po 1010) a\u00A0táto vlastnosť sa po každom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-ovom ťahu zachová. Súper teda nikdy nezaplní poslednú voľnú pozíciu niektorej časti, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má vždy kam odpovedať. A\u00A0číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2023-x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je k\u00A0dispozícii, lebo čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2,3,\\dots,2021",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa rozpadnú na dvojice s\u00A0rovnakým súčtom 2023:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\{2,2021\\},\\ \\{3,2020\\},\\ \\{4,2019\\},\\ \\dots,\\ \\{1011,1012\\}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pri každom svojom ťahu teda "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nejakú dvojicu "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "načne"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ju vzápätí "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "dokončí"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Po zaplnení má čitateľ 1010 políčok, čiže 505 takýchto dvojíc, a\u00A0tak je jeho hodnota "
+                    },
+                    {
+                      "type": "math",
+                      "text": "505\\cdot2023",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Menovateľ má okrem jednotky tiež 505 dvojíc, takže jeho hodnota je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "505\\cdot2023+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Keďže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "0 < 1 - \\frac{505\\cdot2023}{505\\cdot2023+1} = \\frac1{505\\cdot2023+1} < \\frac1{500\\cdot2000} = 10^{-6},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "hodnota zlomku sa od\u00A01 líši o\u00A0menej než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10^{-6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0začínajúci hráč naozaj vyhráva."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

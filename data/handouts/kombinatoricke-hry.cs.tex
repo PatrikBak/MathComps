@@ -1,0 +1,190 @@
+\input _template
+
+\setlanguage{CS}
+
+\Title{Kombinatorické hry}
+
+\MathcompsLink{kombinatoricke-hry}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vítěznou strategii. Ukážeme si na to několik opakujících se nápadů.
+
+\sec Techniky
+
+\begitems \style i
+\i Hru analyzujeme od~konce: pozice třídíme na \textit{prohrávající} (ten, kdo je na tahu, prohraje) a~\textit{výherní}.
+\i Políčka nebo tahy předem spárujeme a~na soupeřův tah vždy odpovídáme tahem do téhož páru.
+\i Hledáme symetrii hracího plánu a~soupeřovy tahy jen zrcadlíme.
+\i Také \textit{krademe strategie} -- předpokládáme, že vítěznou strategii má soupeř, a~dovedeme to ke sporu -- ukážeme, že bychom si ji dokázali přivlastnit.
+\enditems
+
+\sec Úlohy
+
+\Problem{0}{}{
+    Na stole je 1000 zápalek a~dva hráči se střídají v~tazích. V~každém tahu hráč odebere 1~nebo 2~zápalky. Vyhraje ten, kdo udělal poslední tah. Kdo má vyhrávající strategii?
+}{
+    1000 je příliš mnoho, zkuste si to vyřešit postupně pro 1, 2, 3, 4 zápalky...
+}{
+    Všimněme si, že pro 1, 2 vyhraje začínající hráč, avšak pro 3 nikoli -- tehdy totiž každý tah hráče vede do vyhrávající pozice soupeře. Jak je to pro 4, 5?
+}{
+    Pro 4 a 5 tah 1, resp. 2 způsobí, že dostane druhého hráče do prohrávající pozice -- tyto pozice jsou tedy vyhrávající. Obecně -- pokud každý tah z~pozice~$n$ vede jen do vyhrávajících, je $n$ prohrávající, jinak je vyhrávající. S~tímto pozorováním pokračujme ve vypisování, které pozice jsou vyhrávající a~které prohrávající, jak je to pro 6, 7, 8?
+}{
+    Trik je dokázat, že prohrávající pozice jsou právě ty dělitelné 3. Formálně to umíme udělat indukcí.
+}{
+    Z~malých případů si uděláme hypotézu: při 1 či 2 zápalkách začínající vyhraje, při 3 nikoli (každý jeho tah dá výhru soupeři), při 4 a~5 zase vyhraje. Vypadá to tak, že prohrávající jsou právě pozice s~počtem zápalek dělitelným třemi -- a~to teď dokážeme indukcí. Pozice 0 je prohrávající, protože hráč na~tahu už nemá co odebrat. Na druhou stranu pozice 1 a 2 jsou vyhrávající.
+
+    Je-li počet dělitelný třemi, pak po odebrání 1 nebo 2 zůstane počet nedělitelný třemi, takže soupeř dostane vyhrávající pozici -- naše pozice je tedy prohrávající. Naopak z~počtu nedělitelného třemi umíme odebráním 1 nebo 2 zanechat násobek tří, čímž soupeře dostaneme do prohrávající pozice.
+
+    Jelikož $1000 = 3\cdot 333 + 1$ není dělitelné třemi, vyhrává začínající hráč. Prvním tahem odebere jednu zápalku a~zanechá 999, a~potom na každé soupeřovo odebrání $k$ zápalek odpoví odebráním $3-k$. Tím soupeři vždy zanechá násobek tří, až nakonec~0.
+}
+
+\Problem{0}{}{
+    Dva hráči střídavě jmenují data v~rámci jednoho roku, přičemž začínají 1.~lednem. V~každém tahu hráč zvětší buď měsíc, nebo den, ale ne obojí najednou (například z~10.~ledna může přejít třeba na 10.~března nebo třeba na 15.~ledna). Vyhrává ten, kdo jako první řekne 31.~prosinec. Který hráč má vyhrávající strategii?
+}{
+    Postupujeme od konce -- jakýkoli den v prosinci je super, protože z něj umíme vyhrát. Je nějaký takový den v listopadu?
+}{
+    Idea je všimnout si, že 30. listopadu je super, protože odtud může soupeř jít jen na 30. prosince, kdy vyhrajeme (31. listopad neexistuje). Právě to bude náš cílový den v listopadu. A co v říjnu?
+}{
+    V říjnu bude dnem jisté prohry 29 a všechny vyšší dny budou dny výhry -- zdůvodněte. Idea je pokračovat takto dalšími měsíci, dokud nenajdeme vzor.
+}{
+    Postupujme od~konce. Hráče na tahu nazveme prohrávajícím, pokud při správné hře soupeře prohraje.
+
+    Každý den v~prosinci je výherní -- stačí říct rovnou 31. prosinec. První prohrávající datum je 30. listopad: jediný tah z~něj vede na 30. prosinec (den zvětšit neumíme a~31. listopad neexistuje), odkud soupeř vyhraje. Podobně jsou prohrávající 29. říjen, 28. září a~tak dále -- prohrávající dny s~ubývajícím měsícem klesají o~jeden. To napovídá tvrzení: \textit{prohrávající jsou právě data, v~nichž se den a~pořadové číslo měsíce liší o~19} -- tedy 30. XI., 29. X., 28. IX., \dots, v~$m$-tém měsíci den $m+19$.
+
+    Tvrzení ověříme přímo. Z~pozice s~rozdílem 19 každý tah vlastnost pokazí: zvětšením dne rozdíl naroste nad 19, zvětšením měsíce klesne pod 19. Naopak z~libovolné jiné pozice umíme rozdíl jediným tahem nastavit přesně na 19 -- je-li menší, zvětšíme den, je-li větší, zvětšíme měsíc. Pozice s~rozdílem 19 jsou tedy prohrávající a~všechny ostatní výherní (i~cílový 31. prosinec má rozdíl 19 a~je tou poslední v~řadě).
+
+    Výchozí pozice 1. ledna má rozdíl 0, je tedy výherní a~vyhrává začínající hráč. Prvním tahem přejde na 20. ledna (rozdíl 19) a~potom po každém soupeřově tahu vrátí rozdíl na~19. Soupeř tak nikdy neřekne 31. prosinec jako první -- to nakonec udělá začínající hráč.
+}
+
+\Problem{0}{}{
+    V~levém horním rohu šachovnice $8 \times 8$ stojí figurka krále. Dva hráči se střídají v~tazích, přičemž každý svým tahem (legálním šachovým tahem) posune figurku na místo, na kterém ještě nestála. Kdo nemá kam udělat tah, prohrál. Který hráč má vyhrávající strategii?
+}{
+    Bylo by ideální, kdybychom pro každé políčko věděli, kam přesně chceme táhnout -- pak by nám tahy nedošly.
+}{
+    Spárujeme všechna políčka šachovnice. Vyplatí se táhnout podle těchto párů.
+}{
+    Vyhrává začínající hráč. Chtěli bychom pro každé políčko předem vědět, kam z~něj potáhneme -- pak nám tahy nikdy nedojdou. To nás vede k~myšlence políčka spárovat: šachovnici rozdělíme na 32 kostiček domina $1\times2$ (například na samé vodorovné dvojice). Začínající hráč nejprve potáhne králem z~rohového políčka na jeho partnera v~téže kostičce. Dále na každý soupeřův tah odpoví tahem na druhé políčko té kostičky, do které soupeř právě vstoupil.
+
+    Takový tah je vždy možný: po každém tahu začínajícího hráče tvoří navštívená políčka úplné kostičky, takže když soupeř vstoupí na nové políčko, jeho partner v~kostičce je ještě volný a~sousedí s~ním (král tam umí potáhnout). Soupeři tak dříve či později dojdou tahy, a~tím prohraje.
+}
+
+\Problem{0}{}{
+    Dva hráči střídavě pokládají na kulatý stůl stejné mince, přičemž každá musí celá ležet na stole a~nesmí se překrývat s~dříve položenými (dotyk je dovolen). Prohrává ten, kdo už nemá kam položit další minci. Který z~hráčů má vyhrávající strategii?
+}{
+    Zkuste využít symetrii kruhu při hledání vhodné strategie, která odpovídá na tahy soupeře.
+}{
+    Trikem je nejprve zablokovat speciální pozici kruhu, a sice střed. Umíme teď využít symetrii?
+}{
+    Vyhrává začínající hráč. První minci položí přesně do středu stolu. Potom na každou minci soupeře odpoví mincí umístěnou středově souměrně podle středu stolu.
+
+    Tato souměrná pozice je vždy volná a~celá leží na stole: stůl je středově souměrný, takže obraz soupeřovy korektně položené mince je opět korektní pozice. Se soupeřovou mincí se přitom krýt nemůže: její střed je od~středu stolu vzdálen alespoň o~průměr mince (jinak by se překrývala se středovou mincí), takže od~svého obrazu, který je právě dvakrát tak daleko, je vzdálen alespoň o~dva průměry -- na překrytí by přitom stačil menší odstup než jeden průměr. Začínající hráč má tedy po každém soupeřově tahu kam táhnout, a~tak prohraje soupeř.
+}
+
+\Problem{0}{65-CSMO-C-II-4}{
+    Adam s~Barborou hrají se zlomkem
+    $$
+    \frac{10a+b}{10c+d}
+    $$
+    takovouto hru na čtyři tahy: Hráči střídavě nahrazují libovolné z~dosud neurčených písmen $a, b, c, d$ nějakou cifrou od~1 do~9. Barbora vyhraje, když výsledný zlomek bude roven buď celému číslu, nebo číslu s~konečným počtem desetinných míst; jinak vyhraje Adam (například když vznikne zlomek $\frac{11}{29}$). Pokud začíná Adam, jak má hrát Barbora, aby zaručeně vyhrála? Pokud začíná Barbora, lze poradit Adamovi tak, aby vždy vyhrál?
+}{
+    Druhý hráč má výhodu, protože může vhodně reagovat na tahy prvního hráče. Zkuste nejprve vyřešit případ, kdy se snaží, aby zlomek byl celočíselný.
+}{
+    Idea je, že ho udělá rovným 1.
+}{
+    Těžší část je, když se druhý hráč snaží o periodický zlomek. Co typicky kazí zlomky a dělá je periodickými?
+}{
+    Idea je, že udělá jmenovatel dělitelný vhodným číslem, zatímco v čitateli tuto dělitelnost vyloučí.
+}{
+    \textit{Pokud začíná Adam.} Barbora dokáže zařídit, aby výsledný zlomek byl roven~1, což je celé číslo, a~tedy její výhra. Stačí jí docílit $a=c$ a~$b=d$, neboť potom $10a+b=10c+d$. Táhne proto \uv{souměrně} podle zlomkové čáry: když Adam doplní některé z~písmen $a,b$, ona doplní tutéž cifru do partnerského $c,d$, a~naopak. Tím po čtyřech tazích zaručí $a=c$ i~$b=d$.
+
+    \textit{Pokud začíná Barbora.} Zlomek má konečný rozvoj právě tehdy, když se dá zkrátit na jmenovatel složený jen ze~dvojek a~pětek. Adam to pokazí, pokud do jmenovatele dostane jiný prvočíselný dělitel, který se nedá zkrátit -- nejjednodušeji trojku. Poradíme mu tedy zařídit, aby jmenovatel $10c+d$ byl dělitelný třemi, ale čitatel $10a+b$ ne; takový zlomek má pak nekonečný periodický rozvoj a~Adam vyhraje. Protože $10a+b$ a~jeho ciferný součet $a+b$ dávají stejný zbytek po dělení třemi (a~podobně $10c+d$ a~$c+d$), stačí Adamovi zařídit, aby $c+d$ bylo dělitelné třemi a~$a+b$ ne. Toho dosáhne tak, že po každém z~obou Barbořiných tahů vhodně doplní čitatel či jmenovatel -- například zařídí $a+b=10$ (nedělitelné třemi) a~$c+d=9$ nebo~$12$ (dělitelné třemi).
+}
+
+\Problem{0}{}{
+    Hráči $A$ a~$B$ střídavě kreslí úhlopříčky v~pravidelném 2026úhelníku. Úhlopříčku smějí nakreslit jen tehdy, když neprotíná žádnou z~dříve nakreslených (společný koncový vrchol se za protnutí nepovažuje). Prohrává ten, kdo nemůže táhnout. Který z~hráčů vyhrává?
+}{
+    Pravidelný n-úhelník je dost symetrická věc, umíme to nějak využít? Trikem je udělat dobrý první tah, který nám tuto symetrii pomůže využít.
+}{
+    Trik je nakreslit diagonálu, která jej rozděluje na symetrické části. Najednou máme úplně symetrické poloviny.
+}{
+    Vyhrává začínající hráč $A$. Nejprve nakreslí \uv{hlavní} úhlopříčku spojující dva protilehlé vrcholy (ty existují, protože 2026 je sudé); ta rozdělí mnohoúhelník na dvě shodné poloviny, souměrné podle přímky této úhlopříčky. Dále $A$ na každou úhlopříčku soupeře odpoví jejím zrcadlovým obrazem podle této osy.
+
+    Strategie je korektní: soupeř nemůže nakreslit úhlopříčku protínající hlavní, protože ta je už nakreslena, takže každá jeho úhlopříčka leží celá v~jedné z~polovin. Zvláště žádná není souměrná sama se sebou -- taková by totiž spojovala dvojici zrcadlově sdružených vrcholů, ležela by tedy v~obou polovinách a~protínala hlavní úhlopříčku. Zrcadlový obraz soupeřovy úhlopříčky proto leží v~druhé polovině, je různý od~ní samé i~od~všech dosud nakreslených a~žádnou z~nich neprotíná (jinak by se protínaly i~jejich obrazy, tedy předchozí soupeřovy tahy). $A$ má tedy po každém soupeřově tahu odpověď, a~tak prohraje soupeř.
+}
+
+\Problem{1}{Chomp}{
+    Představme si obdélníkovou čokoládu rozdělenou na alespoň dva čtvercové dílky, přičemž levý horní dílek je otrávený. Dva hráči se střídají v~tazích. V~každém tahu si hráč vybere některý dílek a~sní ho spolu se všemi dílky, které leží od něj doprava a~dolů -- tedy celý obdélník, jehož levým horním rohem je zvolený dílek. Prohrává ten, kdo je nucen sníst otrávený levý horní dílek. Který hráč má vyhrávající strategii?
+}{
+    Úloha je fascinující tím, že umíme dokázat, že jeden z hráčů má vítěznou strategii, ale nevíme jakou -- konkrétně první hráč. Zkuste se zamyslet: co kdyby měl takovou strategii druhý hráč, dokázal by ji první hráč zneužít?
+}{
+    Ukážeme, že vítěznou strategii má první hráč -- kdyby ji měl druhý hráč, umí první hráč udělat velmi jednoduchý tah, který hru prakticky nijak nezmění -- následně odpozoruje strategii druhého hráče. Jenže když to hru nezměnilo, proč ji nemohl použít on sám?
+}{
+    Magický tah je odlomit kousek 1x1 vpravo dole. Rozmyslete si, že to úplně stačí.
+}{
+    Vyhrává začínající hráč. Ukážeme to, aniž bychom jeho strategii uměli popsat. Předpokládejme naopak, že vítěznou strategii má druhý hráč. Začínající hráč pak zahraje \uv{magický} tah -- ukousne pouze pravý dolní dílek $1\times1$. Vznikne tím nějaká pozice, na kterou má druhý hráč (podle předpokladu) vítěznou odpověď.
+
+    Jenže tutéž výslednou pozici umí navodit i~začínající hráč hned svým prvním tahem -- vždyť každé ukousnutí zahrnuje i~pravý dolní roh, takže libovolná odpověď druhého hráče je zároveň legálním prvním tahem. Začínající hráč si ji tedy mohl přivlastnit a~vyhrát sám, což je spor. Vítěznou strategii má proto začínající hráč.
+}
+
+\Problem{1}{}{
+    Dva hráči hrají hru podle pravidel klasického šachu, s~jediným rozdílem: hráč, který je na tahu, udělá vždy dva tahy po sobě. Dokažte, že začínající hráč má neprohrávající strategii, tedy si umí zaručit alespoň remízu.
+}{
+    Krademe strategii podobně jako v~úloze Chomp. Šachy ovšem připouštějí remízu, takže prvnímu hráči takto zaručíme alespoň neprohru, i~když konkrétní strategii neznáme.
+}{
+    Znovu hledáme nějaký neutrální tah, který může první hráč udělat na začátku. K tomu je třeba využít, že smí dělat dva tahy.
+}{
+    Předpokládejme opak -- že soupeř $B$ začínajícího hráče $A$ má vyhrávající strategii $S$. Hráč $A$ pak na začátku zahraje neutrální dvojtah: vytáhne jezdce a~hned ho vrátí zpět. Na šachovnici je opět výchozí pozice, jenže na~tahu je teď $B$, jako by partii začínal on.
+
+    Hráč $A$ se nyní vžije do role druhého hráče a~od této chvíle hraje podle strategie $S$. Tou by ale vyhrál on sám, což je spor s~tím, že vyhrávající strategii měl mít $B$. Soupeř tedy vyhrávající strategii nemá; a~jelikož šachy jsou konečná hra bez náhody, $A$ si umí zaručit alespoň remízu.
+}
+
+\Problem{1}{}{
+    Dva hráči hrají hru, ve které se střídají v~tazích. Na začátku máme číslo 2. V~každém kroku k~němu přičteme nějaký jeho nevlastní dělitel (dělitel menší než ono samo). Cílem je získat číslo $\ge 2026$. Kdo má vyhrávající strategii?
+}{
+    Přemýšlejte od konce: pro která čísla bychom zcela jistě vyhráli v dalším tahu?
+}{
+    Klíčem je přemýšlet o sudých číslech, ta totiž umíme tímto postupem zvětšit jedenapůlkrát, což je celkem dost. Hráč, který si je dokáže zajistit, má výhodu.
+}{
+    Poslední uvědomění je, že první hráč si umí zajistit sudá čísla. Rozmyslete si jak a také dokažte, že mu to stačí.
+}{
+    Vyhrává začínající hráč $A$ a~klíčem je, že si umí zajistit, aby vždy táhl ze sudého čísla. K~sudému $m$ totiž může přičíst jeho polovinu a~zvětšit ho tak jedenapůlkrát; jakmile jednou dostane na tah sudé $m\ge1352$, jediným tahem skočí na $m+\frac m2 \ge \frac32\cdot1352 = 2028 \ge 2026$ a~vyhraje. Právě čísla od~1352 jsou ta, ze kterých umí vyhrát v~jednom tahu.
+
+    Jak si sudá čísla zajistí? Jeho první tah je vynucený, $2\to3$ (jediný nevlastní dělitel dvojky je~1). Od té doby se drží pravidla, že soupeři vždy zanechá liché číslo -- když je na tahu sudé $m<1352$, přičte~1. Soupeř $B$ tak vždy přičítá nevlastního dělitele lichého čísla, který je lichý, a~tak po jeho tahu vznikne opět sudé číslo, které připadne $A$. Čísla přitom stále rostou, takže $A$ se jednou dostane k~sudému $m\ge1352$.
+
+    Zbývá ověřit, že $B$ mezitím nevyhraje. $A$ totiž soupeři zanechává jen lichá čísla menší než 1352, tedy nejvýše 1351. K~lichému $y$ může $B$ přičíst nanejvýš jeho třetinu (nevlastní dělitel lichého čísla je $\le y/3$), takže se dostane nejvýše na $\frac43\cdot1351 = 1801 < 2026$. K~cíli se tedy nikdy nedostane.
+}
+
+\Problem{1}{70-CSMO-A-III-1}{
+    Zlomek s~1010 políčky v~čitateli a~1011 políčky ve jmenovateli slouží jako hrací plán pro hru dvou hráčů.
+    $$
+    \frac{\square+\square+\cdots+\square}{\square+\square+\cdots+\square+\square}
+    $$
+    Hráči se střídají v~tazích. V~každém tahu hráč vybere jedno z~čísel $1$, $2$, $\dots$, $2021$ a~vloží ho do libovolného prázdného políčka. Každé číslo přitom může být použito jen jednou. Začínající hráč vyhrává, pokud se hodnota zlomku po zaplnění všech políček liší od čísla 1 o~méně než $10^{-6}$. V~opačném případě vyhrává druhý hráč. Rozhodněte, který z~hráčů má vyhrávající strategii.
+}{
+    Zdá se, že zlomek může nabývat strašně mnoha hodnot. Idea hry je ale vymyslet způsob, jak může jeden z hráčů tuto hodnotu dobře kontrolovat.
+}{
+    Jednoduchý způsob, jak hodnotu kontrolovat, je vhodně reagovat na tahy soupeře.
+}{
+    Ukažte, že vyhrávající strategii má právě první hráč. Pokud mu totiž vymyslíme dobrý první tah, může provést vhodné párování tahů. Poslední, co zbývá rozmyslet, je, jak bude to párování vypadat, aby uměl hodnotu zlomku dobře kontrolovat a ideálně tedy byla dost malá.
+}{
+    První hráč začne jedničkou ve jmenovateli -- tím všude zůstane sudý počet. Už jen najít párování zbytku.
+}{
+    Vyhrává začínající hráč $A$. Ukážeme, že umí zařídit, aby byl jmenovatel přesně o~1 větší než čitatel.
+
+    Nejprve vloží číslo 1 do jmenovatele. Pak kdykoli soupeř $B$ vloží do zlomku číslo $x$, hráč $A$ odpoví tím, že vloží číslo $2023-x$ do téže části zlomku (čitatele, resp. jmenovatele), do které hrál $B$. Proč to vždy jde? Po vložení jedničky do jmenovatele je v~čitateli i~ve jmenovateli sudý počet volných políček (po 1010) a~tato vlastnost se po každém tahu hráče $A$ zachová. Soupeř tedy nikdy nezaplní poslední volnou pozici některé části, takže $A$ má vždy kam odpovědět. A~číslo $2023-x$ je k~dispozici, protože čísla $2,3,\dots,2021$ se rozpadnou na dvojice se stejným součtem 2023:
+    $$
+    \{2,2021\},\ \{3,2020\},\ \{4,2019\},\ \dots,\ \{1011,1012\}.
+    $$
+    Při každém svém tahu tedy $B$ nějakou dvojici \uv{načne} a~$A$ ji vzápětí \uv{dokončí}.
+
+    Po zaplnění má čitatel 1010 políček, čili 505 takových dvojic, a~jeho hodnota je tak $505\cdot2023$. Jmenovatel má kromě jedničky také 505 dvojic, takže jeho hodnota je $505\cdot2023+1$. Jelikož
+    $$
+    0 < 1 - \frac{505\cdot2023}{505\cdot2023+1} = \frac1{505\cdot2023+1} < \frac1{500\cdot2000} = 10^{-6},
+    $$
+    hodnota zlomku se od~1 liší o~méně než $10^{-6}$ a~začínající hráč opravdu vyhrává.
+}
+
+\bye

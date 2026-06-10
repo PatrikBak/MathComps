@@ -1,0 +1,1848 @@
+{
+  "document": {
+    "title": "Kombinatorické hry",
+    "sections": [
+      {
+        "title": "Úvod",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "V\u00A0kombinatorických hrách obvykle rozhodujeme, který ze\u00A0dvou hráčů má vítěznou strategii. Ukážeme si na to několik opakujících se nápadů."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Techniky",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hru analyzujeme od\u00A0konce: pozice třídíme na "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "prohrávající"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " (ten, kdo je na tahu, prohraje) a\u00A0"
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "výherní"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Políčka nebo tahy předem spárujeme a\u00A0na soupeřův tah vždy odpovídáme tahem do téhož páru."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hledáme symetrii hracího plánu a\u00A0soupeřovy tahy jen zrcadlíme."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Také "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "krademe strategie"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " – předpokládáme, že vítěznou strategii má soupeř, a\u00A0dovedeme to ke sporu – ukážeme, že bychom si ji dokázali přivlastnit."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "LowerRomanParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Úlohy",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Na stole je 1000 zápalek a\u00A0dva hráči se střídají v\u00A0tazích. V\u00A0každém tahu hráč odebere 1\u00A0nebo 2\u00A0zápalky. Vyhraje ten, kdo udělal poslední tah. Kdo má vyhrávající strategii?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "1000 je příliš mnoho, zkuste si to vyřešit postupně pro 1, 2, 3, 4 zápalky..."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Všimněme si, že pro 1, 2 vyhraje začínající hráč, avšak pro 3 nikoli – tehdy totiž každý tah hráče vede do vyhrávající pozice soupeře. Jak je to pro 4, 5?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pro 4 a 5 tah 1, resp. 2 způsobí, že dostane druhého hráče do prohrávající pozice – tyto pozice jsou tedy vyhrávající. Obecně – pokud každý tah z\u00A0pozice\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " vede jen do vyhrávajících, je "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " prohrávající, jinak je vyhrávající. S\u00A0tímto pozorováním pokračujme ve vypisování, které pozice jsou vyhrávající a\u00A0které prohrávající, jak je to pro 6, 7, 8?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trik je dokázat, že prohrávající pozice jsou právě ty dělitelné 3. Formálně to umíme udělat indukcí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0malých případů si uděláme hypotézu: při 1 či 2 zápalkách začínající vyhraje, při 3 nikoli (každý jeho tah dá výhru soupeři), při 4 a\u00A05 zase vyhraje. Vypadá to tak, že prohrávající jsou právě pozice s\u00A0počtem zápalek dělitelným třemi – a\u00A0to teď dokážeme indukcí. Pozice 0 je prohrávající, protože hráč na\u00A0tahu už nemá co odebrat. Na druhou stranu pozice 1 a 2 jsou vyhrávající."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Je-li počet dělitelný třemi, pak po odebrání 1 nebo 2 zůstane počet nedělitelný třemi, takže soupeř dostane vyhrávající pozici – naše pozice je tedy prohrávající. Naopak z\u00A0počtu nedělitelného třemi umíme odebráním 1 nebo 2 zanechat násobek tří, čímž soupeře dostaneme do prohrávající pozice."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1000 = 3\\cdot 333 + 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " není dělitelné třemi, vyhrává začínající hráč. Prvním tahem odebere jednu zápalku a\u00A0zanechá 999, a\u00A0potom na každé soupeřovo odebrání "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zápalek odpoví odebráním "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3-k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tím soupeři vždy zanechá násobek tří, až nakonec\u00A00."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dva hráči střídavě jmenují data v\u00A0rámci jednoho roku, přičemž začínají 1.\u00A0lednem. V\u00A0každém tahu hráč zvětší buď měsíc, nebo den, ale ne obojí najednou (například z\u00A010.\u00A0ledna může přejít třeba na 10.\u00A0března nebo třeba na 15.\u00A0ledna). Vyhrává ten, kdo jako první řekne 31.\u00A0prosinec. Který hráč má vyhrávající strategii?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Postupujeme od konce – jakýkoli den v prosinci je super, protože z něj umíme vyhrát. Je nějaký takový den v listopadu?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je všimnout si, že 30. listopadu je super, protože odtud může soupeř jít jen na 30. prosince, kdy vyhrajeme (31. listopad neexistuje). Právě to bude náš cílový den v listopadu. A co v říjnu?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "V říjnu bude dnem jisté prohry 29 a všechny vyšší dny budou dny výhry – zdůvodněte. Idea je pokračovat takto dalšími měsíci, dokud nenajdeme vzor."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Postupujme od\u00A0konce. Hráče na tahu nazveme prohrávajícím, pokud při správné hře soupeře prohraje."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Každý den v\u00A0prosinci je výherní – stačí říct rovnou 31. prosinec. První prohrávající datum je 30. listopad: jediný tah z\u00A0něj vede na 30. prosinec (den zvětšit neumíme a\u00A031. listopad neexistuje), odkud soupeř vyhraje. Podobně jsou prohrávající 29. říjen, 28. září a\u00A0tak dále – prohrávající dny s\u00A0ubývajícím měsícem klesají o\u00A0jeden. To napovídá tvrzení: "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "prohrávající jsou právě data, v\u00A0nichž se den a\u00A0pořadové číslo měsíce liší o\u00A019"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " – tedy 30. XI., 29. X., 28. IX., \\dots, v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tém měsíci den "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+19",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tvrzení ověříme přímo. Z\u00A0pozice s\u00A0rozdílem 19 každý tah vlastnost pokazí: zvětšením dne rozdíl naroste nad 19, zvětšením měsíce klesne pod 19. Naopak z\u00A0libovolné jiné pozice umíme rozdíl jediným tahem nastavit přesně na 19 – je-li menší, zvětšíme den, je-li větší, zvětšíme měsíc. Pozice s\u00A0rozdílem 19 jsou tedy prohrávající a\u00A0všechny ostatní výherní (i\u00A0cílový 31. prosinec má rozdíl 19 a\u00A0je tou poslední v\u00A0řadě)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Výchozí pozice 1. ledna má rozdíl 0, je tedy výherní a\u00A0vyhrává začínající hráč. Prvním tahem přejde na 20. ledna (rozdíl 19) a\u00A0potom po každém soupeřově tahu vrátí rozdíl na\u00A019. Soupeř tak nikdy neřekne 31. prosinec jako první – to nakonec udělá začínající hráč."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0levém horním rohu šachovnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stojí figurka krále. Dva hráči se střídají v\u00A0tazích, přičemž každý svým tahem (legálním šachovým tahem) posune figurku na místo, na kterém ještě nestála. Kdo nemá kam udělat tah, prohrál. Který hráč má vyhrávající strategii?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Bylo by ideální, kdybychom pro každé políčko věděli, kam přesně chceme táhnout – pak by nám tahy nedošly."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Spárujeme všechna políčka šachovnice. Vyplatí se táhnout podle těchto párů."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhrává začínající hráč. Chtěli bychom pro každé políčko předem vědět, kam z\u00A0něj potáhneme – pak nám tahy nikdy nedojdou. To nás vede k\u00A0myšlence políčka spárovat: šachovnici rozdělíme na 32 kostiček domina "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\times2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (například na samé vodorovné dvojice). Začínající hráč nejprve potáhne králem z\u00A0rohového políčka na jeho partnera v\u00A0téže kostičce. Dále na každý soupeřův tah odpoví tahem na druhé políčko té kostičky, do které soupeř právě vstoupil."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Takový tah je vždy možný: po každém tahu začínajícího hráče tvoří navštívená políčka úplné kostičky, takže když soupeř vstoupí na nové políčko, jeho partner v\u00A0kostičce je ještě volný a\u00A0sousedí s\u00A0ním (král tam umí potáhnout). Soupeři tak dříve či později dojdou tahy, a\u00A0tím prohraje."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dva hráči střídavě pokládají na kulatý stůl stejné mince, přičemž každá musí celá ležet na stole a\u00A0nesmí se překrývat s\u00A0dříve položenými (dotyk je dovolen). Prohrává ten, kdo už nemá kam položit další minci. Který z\u00A0hráčů má vyhrávající strategii?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zkuste využít symetrii kruhu při hledání vhodné strategie, která odpovídá na tahy soupeře."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trikem je nejprve zablokovat speciální pozici kruhu, a sice střed. Umíme teď využít symetrii?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhrává začínající hráč. První minci položí přesně do středu stolu. Potom na každou minci soupeře odpoví mincí umístěnou středově souměrně podle středu stolu."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tato souměrná pozice je vždy volná a\u00A0celá leží na stole: stůl je středově souměrný, takže obraz soupeřovy korektně položené mince je opět korektní pozice. Se soupeřovou mincí se přitom krýt nemůže: její střed je od\u00A0středu stolu vzdálen alespoň o\u00A0průměr mince (jinak by se překrývala se středovou mincí), takže od\u00A0svého obrazu, který je právě dvakrát tak daleko, je vzdálen alespoň o\u00A0dva průměry – na překrytí by přitom stačil menší odstup než jeden průměr. Začínající hráč má tedy po každém soupeřově tahu kam táhnout, a\u00A0tak prohraje soupeř."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "65-CSMO-C-II-4"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Adam s\u00A0Barborou hrají se zlomkem"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{10a+b}{10c+d}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takovouto hru na čtyři tahy: Hráči střídavě nahrazují libovolné z\u00A0dosud neurčených písmen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b, c, d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nějakou cifrou od\u00A01 do\u00A09. Barbora vyhraje, když výsledný zlomek bude roven buď celému číslu, nebo číslu s\u00A0konečným počtem desetinných míst; jinak vyhraje Adam (například když vznikne zlomek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{11}{29}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Pokud začíná Adam, jak má hrát Barbora, aby zaručeně vyhrála? Pokud začíná Barbora, lze poradit Adamovi tak, aby vždy vyhrál?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Druhý hráč má výhodu, protože může vhodně reagovat na tahy prvního hráče. Zkuste nejprve vyřešit případ, kdy se snaží, aby zlomek byl celočíselný."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je, že ho udělá rovným 1."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Těžší část je, když se druhý hráč snaží o periodický zlomek. Co typicky kazí zlomky a dělá je periodickými?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Idea je, že udělá jmenovatel dělitelný vhodným číslem, zatímco v čitateli tuto dělitelnost vyloučí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Pokud začíná Adam."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Barbora dokáže zařídit, aby výsledný zlomek byl roven\u00A01, což je celé číslo, a\u00A0tedy její výhra. Stačí jí docílit "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", neboť potom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b=10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Táhne proto "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "souměrně"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " podle zlomkové čáry: když Adam doplní některé z\u00A0písmen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ona doplní tutéž cifru do partnerského "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c,d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0naopak. Tím po čtyřech tazích zaručí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " i\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Pokud začíná Barbora."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Zlomek má konečný rozvoj právě tehdy, když se dá zkrátit na jmenovatel složený jen ze\u00A0dvojek a\u00A0pětek. Adam to pokazí, pokud do jmenovatele dostane jiný prvočíselný dělitel, který se nedá zkrátit – nejjednodušeji trojku. Poradíme mu tedy zařídit, aby jmenovatel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " byl dělitelný třemi, ale čitatel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ne; takový zlomek má pak nekonečný periodický rozvoj a\u00A0Adam vyhraje. Protože "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0jeho ciferný součet "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dávají stejný zbytek po dělení třemi (a\u00A0podobně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), stačí Adamovi zařídit, aby "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bylo dělitelné třemi a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ne. Toho dosáhne tak, že po každém z\u00A0obou Barbořiných tahů vhodně doplní čitatel či jmenovatel – například zařídí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b=10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (nedělitelné třemi) a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d=9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "12",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (dělitelné třemi)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hráči "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " střídavě kreslí úhlopříčky v\u00A0pravidelném 2026úhelníku. Úhlopříčku smějí nakreslit jen tehdy, když neprotíná žádnou z\u00A0dříve nakreslených (společný koncový vrchol se za protnutí nepovažuje). Prohrává ten, kdo nemůže táhnout. Který z\u00A0hráčů vyhrává?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pravidelný n-úhelník je dost symetrická věc, umíme to nějak využít? Trikem je udělat dobrý první tah, který nám tuto symetrii pomůže využít."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Trik je nakreslit diagonálu, která jej rozděluje na symetrické části. Najednou máme úplně symetrické poloviny."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhrává začínající hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nejprve nakreslí "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "hlavní"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " úhlopříčku spojující dva protilehlé vrcholy (ty existují, protože 2026 je sudé); ta rozdělí mnohoúhelník na dvě shodné poloviny, souměrné podle přímky této úhlopříčky. Dále "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na každou úhlopříčku soupeře odpoví jejím zrcadlovým obrazem podle této osy."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Strategie je korektní: soupeř nemůže nakreslit úhlopříčku protínající hlavní, protože ta je už nakreslena, takže každá jeho úhlopříčka leží celá v\u00A0jedné z\u00A0polovin. Zvláště žádná není souměrná sama se sebou – taková by totiž spojovala dvojici zrcadlově sdružených vrcholů, ležela by tedy v\u00A0obou polovinách a\u00A0protínala hlavní úhlopříčku. Zrcadlový obraz soupeřovy úhlopříčky proto leží v\u00A0druhé polovině, je různý od\u00A0ní samé i\u00A0od\u00A0všech dosud nakreslených a\u00A0žádnou z\u00A0nich neprotíná (jinak by se protínaly i\u00A0jejich obrazy, tedy předchozí soupeřovy tahy). "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má tedy po každém soupeřově tahu odpověď, a\u00A0tak prohraje soupeř."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Chomp"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Představme si obdélníkovou čokoládu rozdělenou na alespoň dva čtvercové dílky, přičemž levý horní dílek je otrávený. Dva hráči se střídají v\u00A0tazích. V\u00A0každém tahu si hráč vybere některý dílek a\u00A0sní ho spolu se všemi dílky, které leží od něj doprava a\u00A0dolů – tedy celý obdélník, jehož levým horním rohem je zvolený dílek. Prohrává ten, kdo je nucen sníst otrávený levý horní dílek. Který hráč má vyhrávající strategii?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Úloha je fascinující tím, že umíme dokázat, že jeden z hráčů má vítěznou strategii, ale nevíme jakou – konkrétně první hráč. Zkuste se zamyslet: co kdyby měl takovou strategii druhý hráč, dokázal by ji první hráč zneužít?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ukážeme, že vítěznou strategii má první hráč – kdyby ji měl druhý hráč, umí první hráč udělat velmi jednoduchý tah, který hru prakticky nijak nezmění – následně odpozoruje strategii druhého hráče. Jenže když to hru nezměnilo, proč ji nemohl použít on sám?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Magický tah je odlomit kousek 1x1 vpravo dole. Rozmyslete si, že to úplně stačí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhrává začínající hráč. Ukážeme to, aniž bychom jeho strategii uměli popsat. Předpokládejme naopak, že vítěznou strategii má druhý hráč. Začínající hráč pak zahraje "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "magický"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " tah – ukousne pouze pravý dolní dílek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\times1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vznikne tím nějaká pozice, na kterou má druhý hráč (podle předpokladu) vítěznou odpověď."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jenže tutéž výslednou pozici umí navodit i\u00A0začínající hráč hned svým prvním tahem – vždyť každé ukousnutí zahrnuje i\u00A0pravý dolní roh, takže libovolná odpověď druhého hráče je zároveň legálním prvním tahem. Začínající hráč si ji tedy mohl přivlastnit a\u00A0vyhrát sám, což je spor. Vítěznou strategii má proto začínající hráč."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dva hráči hrají hru podle pravidel klasického šachu, s\u00A0jediným rozdílem: hráč, který je na tahu, udělá vždy dva tahy po sobě. Dokažte, že začínající hráč má neprohrávající strategii, tedy si umí zaručit alespoň remízu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Krademe strategii podobně jako v\u00A0úloze Chomp. Šachy ovšem připouštějí remízu, takže prvnímu hráči takto zaručíme alespoň neprohru, i\u00A0když konkrétní strategii neznáme."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Znovu hledáme nějaký neutrální tah, který může první hráč udělat na začátku. K tomu je třeba využít, že smí dělat dva tahy."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Předpokládejme opak – že soupeř "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " začínajícího hráče "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má vyhrávající strategii "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pak na začátku zahraje neutrální dvojtah: vytáhne jezdce a\u00A0hned ho vrátí zpět. Na šachovnici je opět výchozí pozice, jenže na\u00A0tahu je teď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jako by partii začínal on."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se nyní vžije do role druhého hráče a\u00A0od této chvíle hraje podle strategie "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tou by ale vyhrál on sám, což je spor s\u00A0tím, že vyhrávající strategii měl mít "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Soupeř tedy vyhrávající strategii nemá; a\u00A0jelikož šachy jsou konečná hra bez náhody, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " si umí zaručit alespoň remízu."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dva hráči hrají hru, ve které se střídají v\u00A0tazích. Na začátku máme číslo 2. V\u00A0každém kroku k\u00A0němu přičteme nějaký jeho nevlastní dělitel (dělitel menší než ono samo). Cílem je získat číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\ge 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Kdo má vyhrávající strategii?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Přemýšlejte od konce: pro která čísla bychom zcela jistě vyhráli v dalším tahu?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Klíčem je přemýšlet o sudých číslech, ta totiž umíme tímto postupem zvětšit jedenapůlkrát, což je celkem dost. Hráč, který si je dokáže zajistit, má výhodu."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Poslední uvědomění je, že první hráč si umí zajistit sudá čísla. Rozmyslete si jak a také dokažte, že mu to stačí."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhrává začínající hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0klíčem je, že si umí zajistit, aby vždy táhl ze sudého čísla. K\u00A0sudému "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " totiž může přičíst jeho polovinu a\u00A0zvětšit ho tak jedenapůlkrát; jakmile jednou dostane na tah sudé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m\\ge1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jediným tahem skočí na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+\\frac m2 \\ge \\frac32\\cdot1352 = 2028 \\ge 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vyhraje. Právě čísla od\u00A01352 jsou ta, ze kterých umí vyhrát v\u00A0jednom tahu."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jak si sudá čísla zajistí? Jeho první tah je vynucený, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\to3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (jediný nevlastní dělitel dvojky je\u00A01). Od té doby se drží pravidla, že soupeři vždy zanechá liché číslo – když je na tahu sudé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m<1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", přičte\u00A01. Soupeř "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak vždy přičítá nevlastního dělitele lichého čísla, který je lichý, a\u00A0tak po jeho tahu vznikne opět sudé číslo, které připadne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Čísla přitom stále rostou, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se jednou dostane k\u00A0sudému "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m\\ge1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zbývá ověřit, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " mezitím nevyhraje. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " totiž soupeři zanechává jen lichá čísla menší než 1352, tedy nejvýše 1351. K\u00A0lichému "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " může "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přičíst nanejvýš jeho třetinu (nevlastní dělitel lichého čísla je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\le y/3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), takže se dostane nejvýše na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac43\\cdot1351 = 1801 < 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". K\u00A0cíli se tedy nikdy nedostane."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "70-CSMO-A-III-1"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zlomek s\u00A01010 políčky v\u00A0čitateli a\u00A01011 políčky ve jmenovateli slouží jako hrací plán pro hru dvou hráčů."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{\\square+\\square+\\cdots+\\square}{\\square+\\square+\\cdots+\\square+\\square}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hráči se střídají v\u00A0tazích. V\u00A0každém tahu hráč vybere jedno z\u00A0čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\dots",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2021",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vloží ho do libovolného prázdného políčka. Každé číslo přitom může být použito jen jednou. Začínající hráč vyhrává, pokud se hodnota zlomku po zaplnění všech políček liší od čísla 1 o\u00A0méně než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10^{-6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V\u00A0opačném případě vyhrává druhý hráč. Rozhodněte, který z\u00A0hráčů má vyhrávající strategii."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Zdá se, že zlomek může nabývat strašně mnoha hodnot. Idea hry je ale vymyslet způsob, jak může jeden z hráčů tuto hodnotu dobře kontrolovat."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Jednoduchý způsob, jak hodnotu kontrolovat, je vhodně reagovat na tahy soupeře."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ukažte, že vyhrávající strategii má právě první hráč. Pokud mu totiž vymyslíme dobrý první tah, může provést vhodné párování tahů. Poslední, co zbývá rozmyslet, je, jak bude to párování vypadat, aby uměl hodnotu zlomku dobře kontrolovat a ideálně tedy byla dost malá."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "První hráč začne jedničkou ve jmenovateli – tím všude zůstane sudý počet. Už jen najít párování zbytku."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyhrává začínající hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Ukážeme, že umí zařídit, aby byl jmenovatel přesně o\u00A01 větší než čitatel."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejprve vloží číslo 1 do jmenovatele. Pak kdykoli soupeř "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vloží do zlomku číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", hráč "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " odpoví tím, že vloží číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2023-x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " do téže části zlomku (čitatele, resp. jmenovatele), do které hrál "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Proč to vždy jde? Po vložení jedničky do jmenovatele je v\u00A0čitateli i\u00A0ve jmenovateli sudý počet volných políček (po 1010) a\u00A0tato vlastnost se po každém tahu hráče "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zachová. Soupeř tedy nikdy nezaplní poslední volnou pozici některé části, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má vždy kam odpovědět. A\u00A0číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2023-x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je k\u00A0dispozici, protože čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2,3,\\dots,2021",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se rozpadnou na dvojice se stejným součtem 2023:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\{2,2021\\},\\ \\{3,2020\\},\\ \\{4,2019\\},\\ \\dots,\\ \\{1011,1012\\}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Při každém svém tahu tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nějakou dvojici "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "načne"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ji vzápětí "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "dokončí"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Po zaplnění má čitatel 1010 políček, čili 505 takových dvojic, a\u00A0jeho hodnota je tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "505\\cdot2023",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jmenovatel má kromě jedničky také 505 dvojic, takže jeho hodnota je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "505\\cdot2023+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "0 < 1 - \\frac{505\\cdot2023}{505\\cdot2023+1} = \\frac1{505\\cdot2023+1} < \\frac1{500\\cdot2000} = 10^{-6},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "hodnota zlomku se od\u00A01 liší o\u00A0méně než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10^{-6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0začínající hráč opravdu vyhrává."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}
