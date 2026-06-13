@@ -7937,6 +7937,32 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "|\\angle ACB| = 36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BAD| = 36^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -8444,6 +8470,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -9597,6 +9640,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "|BZ| = 7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {

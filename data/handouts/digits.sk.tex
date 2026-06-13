@@ -34,6 +34,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Po prepise máme $10a+b+ab=70$. Najjednoduchší spôsob je vyskúšať možné~$a$ -- preň nemáme veľa možností.
 }{
+	\Answer{$n=46$ a~$n=70$.}
+
 	Keďže $p(n)\ge 0$, máme $n\le 70$. Pre jednociferné~$n$ by rovnica dala $n+n=70$, čiže $n=35$, čo nie je jednociferné. Číslo $n$ je teda dvojciferné. Zapíšme $n=\overline{ab}=10a+b$ s~$a\in\{1,\ldots,9\}$, $b\in\{0,\ldots,9\}$. Rovnica sa prepíše na
 	$$
 	10a+b+ab=70, \quad\hbox{teda}\quad b(a+1)=70-10a.
@@ -48,6 +50,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Mali by sme prísť do rovnice $9(y-a)=x$. Lenže~$x$ je nenulová cifra, to nám veľa možností nedá.
 }{
+	\Answer{$80$.}
+
 	Označme $y$ jednociferné číslo, ktorého 990-násobok pripočítavame. Podmienka nafúknuteľnosti hovorí, že
 	$$
 	\overline{ab}+990y=\overline{axxb},
@@ -66,6 +70,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{	
 	Idea je rozobrať dva prípady, $d=9$ a~$d\neq 9$. V~prvom nastáva prechod cez~10 a~v~druhom nie. Z~rovnice hneď dostaneme vyjadrenie cifier $a$ a~$b$ podľa $c$ a~$d$, čo sa skombinuje s~ciferným súčtom.
 }{
+	\Answer{$\overline{abcd}=2019$.}
+
 	Z~rovnosti $\overline{ab}-\overline{cd}=1$ dostávame $\overline{ab}=\overline{cd}+1$. Na pravú stranu nahliadnime ako na klasické sčítanie pod sebou: k~číslu $\overline{cd}$ pripočítavame $1$. Rozoberieme dva prípady podľa toho, či pri sčítaní nastane prechod cez desiatku.
 
 	\textbf{Prípad $d\neq 9$.} Prechod cez desiatku nenastáva, takže $b=d+1$ a~$a=c$. Z~ciferného súčtu
@@ -92,6 +98,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Postupne skúšajte vkladať $9, 18, \dots$. To sa dá mechanicky. Môžete tiež však použiť kritérium deliteľnosti ďalšieho pekného deliteľa~2016.
 }{
+	\Answer{$36$.}
+
 	Číslo $2016$ má ciferný súčet~9, takže je deliteľné~$9$, teda aj hľadané číslo musí byť deliteľné~$9$. Vyskúšaním prvých štyroch možností 9, 18, 27, 36 dôjdeme k~tomu, že $36$ vyhovuje.
 
 	Toto skúšanie si môžeme zjednodušiť pomocou kritéria deliteľnosti~16, keďže $16 \mid 2016$. Čísla $20916$, $201816$, $202716$ totiž podľa svojho posledného štvorčíslia nie sú deliteľné 16.
@@ -106,6 +114,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Rozmyslíme, že cifra~5 tam nutne musí byť. Už to nie je veľa možností, obzvlášť keď sa zamyslíme nad tým, čo môže byť prvá cifra.
 }{
+	\Answer{$145$.}
+
 	Nech hľadané číslo má cifry $a$, $b$, $c$, kde $a\ge 1$, čiže $\overline{abc}=a!+b!+c!$. Keďže $7!=5040>999$, žiadna cifra nemôže byť $\ge 7$, takže všetky cifry sú nanajvýš~$6$.
 
 	Ak by sa medzi ciframi vyskytla~$6$, tak $a!+b!+c!\ge 6!=720$, a~preto by prvá cifra musela byť aspoň~$7$, čo je spor. Najväčšia cifra je teda nanajvýš~$5$. Naopak, ak by boli všetky cifry nanajvýš~$4$, dostali by sme
@@ -136,6 +146,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Platí $100a+b=99a+(a+b)$, takže nutne $11 \mid a+b$. To už nie je veľa možností.
 }{
+	\Answer{$7744=88^2$.}
+
 	Hľadané číslo má tvar $\overline{aabb}$, kde $a\in\{1,\dots,9\}$ a~$b\in\{0,\dots,9\}$. Rozpíšme ho:
 	$$
 	\overline{aabb}=1100a+11b=11(100a+b).
@@ -156,6 +168,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Pozrite sa na ciferný súčet nášho čísla.
 }{
+	\Answer{Žiadne také prvočíslo neexistuje.}
+
 	Číslo zložené z~10 rôznych cifier obsahuje každú z~cifier $0,1,\ldots,9$ práve raz. Jeho ciferný súčet je preto
 	$$
 	0+1+2+\cdots+9=45,
@@ -182,6 +196,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Na spočítanie ciferného súčtu nášho čísla sa zamyslime, koľkokrát sa každá z~cifier vyskytuje v~našom čísle.
 }{
+	\Answer{$1$.}
+
 	Pripomeňme, že každé prirodzené číslo dáva rovnaký zvyšok po~delení deviatimi ako jeho ciferný súčet. Opakovaným nahradzovaním číslom ciferného súčtu sa teda zvyšok po delení~$9$ nemení a~výsledné jednociferné číslo je práve tento zvyšok, pričom zvyšku~$0$ zodpovedá deviatka.
 
 	Stačí teda určiť zvyšok čísla $N=123456789101112\dots 100$ po~delení deviatimi. Číslo $N$ vzniklo zreťazením čísel od~$1$ po~$100$. Ak vynecháme~100, tak každá cifra bola použitá 20-krát: 10-krát na mieste desiatok a~10-krát na mieste jednotiek -- ciferný súčet takéhoto čísla je $20(1+\cdots+9)=20 \cdot 45$, takže je deliteľný~9. My však máme ešte~100, takže celkový zvyšok po delení~9 nášho súčtu je~1.
@@ -194,6 +210,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Uvedomíme si, že $s_p+s_n$ je ciferný súčet nášho čísla, takže $1+2+3+4+5+6=21$. Z~toho nájdeme možnosti pre dvojice $s_p$ a~$s_n$ a~tie zanalyzujeme.
 }{
+	\Answer{Nie, také číslo neexistuje.}
+
 	Použijeme kritérium deliteľnosti~$11$: označme $s_p$ súčet cifier na párnych pozíciách a~$s_n$ súčet cifier na nepárnych pozíciách hľadaného čísla. Číslo je deliteľné~$11$ práve vtedy, keď $11\mid s_n-s_p$.
 
 	Keďže každú z~cifier $1,2,3,4,5,6$ použijeme práve raz, platí
@@ -210,6 +228,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	V~ďalšom kroku máme $|\overline{abc}-\overline{cba}|=99|a-c|$. Vypíšte si tieto možné čísla.
 }{
+	\Answer{Vždy vyjde $1089$, takže najmenšie aj najväčšie je $1089$.}
+
 	Označme myslené číslo ako $\overline{abc}$, kde $a,c\in\{1,2,\dots,9\}$, $a\neq c$ a~$b\in\{0,1,\dots,9\}$. Po prvej operácii dostaneme
 	$$
 	|\overline{abc}-\overline{cba}|=|100a+10b+c-(100c+10b+a)|=99|a-c|.
@@ -241,6 +261,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Zostavte si rovnicu zo zadania: $6 \cdot 10^k + x = 25x$. Z~toho vyjadrite $x$ a~zistite, pre aké $k$ bude $x$ celé číslo.
 }{
+	\Answer{Nekonečne veľa čísel: $625, 6250, 62500, \ldots$}
+
 	Označme hľadané číslo ako $6\cdot 10^k+x$, kde $x$ je číslo po odstránení úvodnej šestky a~$k$ je počet jeho cifier (vrátane prípadných úvodných núl, čiže $x<10^k$). Podmienka zo zadania dáva rovnicu
 	$$
 	6\cdot 10^k+x=25x,
@@ -300,6 +322,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Hlavná idea je, že $100x^2$ neprispieva na miesto desiatok vôbec a~$20xy$ prispieva párnou cifrou, takže $y^2$ musí mať nepárnu cifru na mieste desiatok.
 }{
+	\Answer{$6$.}
+
 	Zapíšme $n=10x+y$, kde $y\in\{0,1,\dots,9\}$ je posledná cifra čísla $n$. Potom
 	$$
 	n^2=100x^2+20xy+y^2.
@@ -328,6 +352,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
 	Skúmajme zvyšky mocnín~2 po delení~9. Jednotlivé mocniny $2^1, 2^2, \dots$ sú $2,4,8,7,5,1$ a~tak~ďalej. Za akých podmienok $2^a$ a~$2^b$ dávajú rovnaký zvyšok po delení~9?
 }{
+	\Answer{Nie, taká dvojica neexistuje.}
+
 	Ak by $2^a$ a~$2^b$ boli vzájomnými preusporiadaniami cifier, mali by rovnaký ciferný súčet, a~teda rovnaký zvyšok po~delení~$9$. Stačí teda ukázať, že to, že $2^a$ a $2^b$ dávajú po delení 9 rovnaký zvyšok pre $a\neq b$ vedie k~sporu s~tým, že obe čísla majú rovnaký počet cifier.
 
 	Zvyšky mocnín dvojky po~delení~$9$ tvoria periodickú postupnosť
@@ -352,6 +378,8 @@ Ukážeme si základné tipy a~triky používané v~úlohách s~ciframi.
 }{
     Vezmime si vyhovujúce číslo, ktoré má $n$ cifier. Dokážte, že pripojením vhodnej nepárnej cifry na začiatok čísla dostaneme vyhovujúce číslo s~$n+1$ ciframi.
 }{
+	\Answer{Pre každé prirodzené~$n$.}
+
 	Postupujme indukciou podľa $n$. Pre $n=1$ vyhovuje $N_1=5$. Predpokladajme, že máme $n$-ciferné číslo $N_n$ s~nepárnymi ciframi, pre ktoré $5^n\mid N_n$, teda $N_n=5^n m$ pre vhodné $m$. Ukážeme, že pripojením vhodnej nepárnej cifry $d\in\{1,3,5,7,9\}$ na začiatok dostaneme vyhovujúce $(n+1)$-ciferné číslo $N_{n+1}=d\cdot 10^n+N_n$. Platí
 	$$
 	N_{n+1}=d\cdot 10^n+5^n m=5^n(d\cdot 2^n+m),

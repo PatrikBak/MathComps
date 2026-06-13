@@ -39,6 +39,8 @@ Many examples can be solved simply by using common manipulations such as expandi
     $$
     by size.
 }{
+    \Answer{$x<y<z$.}
+
     Let's try to calculate $x-y$. We have
     $$
     \gather
@@ -63,6 +65,8 @@ Try it out on a problem from the school round A:
     $$
     If $a$ is the largest of these four numbers, which of them is the smallest?
 }{
+    \Answer{The smallest is $c$.}
+
     Let's rearrange the given inequalities. The first inequality $ab+cd > bc+ad$ is equivalent to
     $$
     \align
@@ -97,6 +101,8 @@ The next example shows that it pays to know the formulas we presented in the fir
     $$
     Also determine when equality occurs.
 }{
+    \Answer{Equality occurs precisely when $a+b=0$ or $a=b$.}
+
     Notice that the left side can be factorized using a known formula as $(a+b)(a^2-ab+b^2)$. The right side can be factorized as $ab(a+b)$. It therefore makes sense to move everything to the left side and factorize. We get:
     $$
     \align
@@ -122,6 +128,8 @@ Try these exercises to practice basic factorizations. Notice that the following 
     $$
     and find all cases of equality.
 }{
+    \Answer{Equality occurs precisely when $a=b$.}
+
     We move all terms to one side and try to factorize:
     $$
     \align
@@ -190,6 +198,8 @@ A slightly harder but still manageable example is this one. Note that we have \t
 }{
     After successfully performing the factorization, it should suffice to prove $(a-b)(a-b+1) \ge 0$, i.e., $k(k+1) \ge 0$. Here we must use the fact that $a,b$ are integers, so $k$ is also an integer.
 }{
+    \Answer{Equality occurs precisely when $a=b$ or $b=a+1$.}
+
     We expand the expressions on the left side, move the term $2ab$ from the right side to the left, and factorize:
     $$
     \align
@@ -274,6 +284,8 @@ Now it's your turn:
     $$
     and find all cases of equality.
 }{
+    \Answer{Equality occurs precisely for $x=y=1$.}
+
     The inequality is equivalent to the inequality where we move all terms to the left side:
     $$
     x^2 - 2x + y^2 - 2y + 2 \ge 0.
@@ -296,6 +308,8 @@ Now it's your turn:
     $$
     and find all cases of equality.
 }{
+    \Answer{Equality occurs precisely for $(a,b)=(0,0)$ or $(1,1)$.}
+
     We multiply out both sides of the inequality, move all terms to the left side, rearrange the terms, and find squares:
     $$
     \align
@@ -419,6 +433,8 @@ Finally, it is time to reveal the solution to the motivational problem from the 
 
     \Image{box.pdf}
 }{
+    \Answer{The largest volume is $128$ (a $8 \times 8 \times 2$ box).}
+
     Let $x$ denote the side of the square we cut from the corner. Then our box has a base in the shape of a square with side $12-2x$ and height $x$. Its volume is therefore $(12-2x)^2x$, and our goal is to maximize this expression. We have the product of three things: $12-2x$, $12-2x$, $x$. If we estimated them directly, the sum of these things would be in the estimate -- that won't help us much, and in fact, we won't solve the problem with it (equality won't occur in the correct case). However, if we used AM-GM on $12-2x$, $12-2x$, $4x$, then the $x$'s cancel out. We can artificially create this~4:
     $$
     \gather
@@ -505,6 +521,8 @@ i.e., the sum of a positive number and its reciprocal is at least 2.
     $$
     Prove the inequality $ab\ge4$ and find the smallest possible value of the expression $ab + cd$.
 }{
+    \Answer{The smallest value of $ab+cd$ is $2+2\sqrt{2}$.}
+
     Multiplying the given equalities, we have:
     $$
     \gather
@@ -701,6 +719,8 @@ $$
 }{
     The trick is to complete $x^2y^2+1$ to a square, thereby creating $xy-1$, which is the expression from the right side. What happens to the rest of the left side?
 }{
+    \Answer{Equality occurs for $(x,y) \in \{(2,3),(3,2),(0,-1),(-1,0)\}$.}
+
     After expanding the left side and completing $x^2+y^2+1$ and $x^2+y^2$ to a square, we get:
     $$
     \gather
@@ -753,6 +773,8 @@ $$
 }{
     The trick is to complete $a_1^2-a_1a_n$ to a square as $(a_1-a_n/2)^2$ and similarly the others. However, we will create a large surplus of $a_n^2$ terms. Express exactly how many there are. Let's not forget that the goal is not to prove the inequality, but to reveal when it holds.
 }{
+    \Answer{$n \in \{2, 3, 4, 5\}$.}
+    
     We move all terms to the left side and modify them by completing the square for $i=1, \ldots, n-1$:
     $$
     \align
@@ -783,6 +805,8 @@ $$
 }{
     After using $x+y \leq 1$, we have $x^4+y^4-xy(x+y) \ge x^4+y^4-xy$, so we are estimating $x^4+y^4-xy$. Can't we estimate $x^4+y^4$ in such a way that we produce $xy$ in some way?
 }{
+    \Answer{The smallest value is $-1/8$, at $x=y=1/2$.}
+
     Let $V$ denote the examined expression. We modify it and use the condition $x+y \le 1$:
     $$
     V = x^4+y^4-xy(x+y) \ge x^4+y^4-xy(1) = x^4+y^4-xy

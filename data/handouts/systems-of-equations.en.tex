@@ -46,6 +46,8 @@ The most common method for more interesting systems consists of subtracting equa
     \endalign
     $$
 }{
+    \Answer{$(x,y)=(1,1)$.}
+
     Subtracting the second equation from the first, we get
     $$
     \align
@@ -74,6 +76,8 @@ The situation is more complex when we have more equations, then we often need to
     \endalign
     $$
 }{
+    \Answer{Five triples: $(1+\sqrt2,1+\sqrt2,1+\sqrt2)$, $(1-\sqrt2,1-\sqrt2,1-\sqrt2)$, $(-1,0,0)$, $(0,-1,0)$ and~$(0,0,-1)$.}
+
     Subtracting the first and second equation, we get
     $$
     x^2-y^2=(y+z)-(z+x)=y-x.
@@ -119,6 +123,8 @@ You can practice subtracting equations on the following examples:
     \endalign
     $$
 }{
+    \Answer{Two solutions: $(1,1)$ and~$(-1/2,-1/2)$.}
+
     Subtracting the equations we get $x^2-y^2=x-y$, which we adjust to
     $$
     (x-y)(x+y-1)=0.
@@ -144,6 +150,8 @@ You can practice subtracting equations on the following examples:
     \endalign
     $$
 }{
+    \Answer{Two solutions: $(1,1,1)$ and~$(-3,-3,-3)$.}
+
     Subtracting the second equation from the first, we get 
     $$
     (xy+x+y) - (yz+y+z) = 0,
@@ -178,6 +186,8 @@ You can practice subtracting equations on the following examples:
     \endalign
     $$
 }{
+    \Answer{Triples $(t,t,t)$, $(t,0,t)$ and~$(t,0,-t)$ for any real $t$.}
+
     Subtracting the second equation from the first we get
     $$
     \align
@@ -219,6 +229,8 @@ Besides subtracting, it is sometimes a good idea to add the equations as well. T
     \endalign
     $$
 }{
+    \Answer{$(x,y)=(1,1)$.}
+
     Adding the equations from the problem statement, we get
     $$
     x^2+1+y^2+1 = 2y+2x.
@@ -247,6 +259,8 @@ We will show an even more complex example with actually three variables:
     \endalign
     $$
 }{
+    \Answer{Triples $(t,t,t)$ for any real $t$.}
+    
     After adjusting equations to the form
     $$
     x^2+xy=2yz,\qquad y^2+yz=2zx,\qquad z^2+zx=2xy
@@ -274,6 +288,8 @@ We will show an even more complex example with actually three variables:
     \endalign
     $$
 }{
+    \Answer{$(a,b,c)=(0,0,0)$.}
+    
     Adding the given three equations we have
     $$
     a^2+b^2+c^2+a+b+c = a+b+c,
@@ -297,6 +313,8 @@ We will show an even more complex example with actually three variables:
     \endalign
     $$
 }{
+    \Answer{$(x,y,z)=(2,2,2)$.}
+
     Adding the equations we get
     $$
     x^2+y^2+z^2=4(x+y+z-3).
@@ -322,6 +340,8 @@ We will show an even more complex example with actually three variables:
     \endalign
     $$
 }{
+    \Answer{Two solutions: $(2,3,5)$ and~$(-2,-3,-5)$.}
+
     Let's notice that in all three equations a common factor $x+y+z$ occurs, thus by adding the equations we will be able to factor it out:
     $$
     \align
@@ -366,6 +386,8 @@ Without much talk, we will show this on our example:
     \endalign
     $$
 }{
+    \Answer{$(x,y)=(1,1)$.}
+
     Let's realize that the system is \textit{symmetric} in variables $x$ and $y$, since by swapping variables $x$ and $y$ we get the same problem. In other words, the pair $(x,y)$ is a solution if and only if the pair $(y,x)$ is also. Thus, it suffices to find those pairs where $x \ge y$, and in the result add pairs with swapped elements to these pairs. Let's do it:
 
     If we have $x \ge y$, then $2x \ge 2y$, so $y^2+1 \ge x^2+1$, which gives $y^2 \ge x^2$. From this, it does \textit{not} follow in general that $y \ge x$, this holds only for positive $x$ and $y$. However, our $x$ and $y$ are certainly positive, for example in the first equation we have $x^2+1=2y$, on the left is a positive number, so $2y$ is also positive, so $y$ as well, and similarly $x$ too. Thus, from $y^2 \ge x^2$ it really follows that $y \ge x$. We thus have $x \ge y$ and $y \ge x$, which together gives $x=y$. We then finish the solution as before and obtain the single solution $(1,1)$.
@@ -381,6 +403,8 @@ Let us note that this system has no solution where the variables would not be eq
     \endalign
     $$
 }{
+    \Answer{Two solutions: $(3,1)$ and~$(1,3)$.}
+
     The system is symmetric, so without loss of generality $x \ge y$. Thereby we get a system of two linear equations with two unknowns:
     $$
     \align
@@ -407,6 +431,8 @@ In the next example, we will show that we can order something even when we do no
     \endalign
     $$
 }{
+    \Answer{Three solutions $(t,t,t)$, where $t \in \{1, \frac12(-1\pm\sqrt5)\}$.}
+
     This system \textit{is not} symmetric: by swapping variables $x$ and $y$ we do not get exactly the same set of three equations. However, we see that it still exhibits a form of symmetry --- the equations somehow repeat the variables $x,y,z$ \uv{in a circle} in this order. More precisely: If we replace variables $(x,y,z)$ with variables $(z,x,y)$, we get the same system (verify this). We call such systems \textit{cyclic}. In them, we cannot afford to order all variables as in symmetric ones, however, we can afford without loss of generality to assume that one of the variables is the largest/smallest. If e.g. $x$ is the maximum of $x,y,z$ and we find a solution for example $(3,2,1)$, then thanks to the cyclicity of the system we obtain another two solutions $(2,1,3)$ and $(1,2,3)$.
 
     After a long introduction, let's finally get into the example. Since our system is cyclic, it suffices to solve the case where $x=\max\{x,y,z\}$. Then it holds $x \ge z$, thus $x^3+1 \ge z^3+1$ (since the function $f\colon x\rightarrow x^3$ is increasing). But from the comparison of the first and third equation this means that $2y \ge 2x$, or $y \ge x$. This together with $x \ge y$ gives $x=y$. This allows us to use $y \ge z$ in a similar way, $2z=y^3+1 \ge z^3+1 = 2x$, so $z \ge x$, thus $z=x$, altogether $x=y=z$.
@@ -429,6 +455,8 @@ In the next example, we will show that we can order something even when we do no
     \endalign
     $$
 }{
+    \Answer{$(x,y)=(2,2)$.}
+    
     The system is symmetric, without loss of generality let us assume that $x \ge y$. Since the function $f(t)=\sqrt{t+2}$ is increasing, it holds
     $$
     x \ge y \implies \sqrt{x+2} \ge \sqrt{y+2},
@@ -450,6 +478,8 @@ In the next example, we will show that we can order something even when we do no
     \endalign
     $$
 }{
+    \Answer{Three solutions: $(0,0,0)$, $(1,1,1)$ and~$(-1,-1,-1)$.}
+
     The system is symmetric, therefore without loss of generality let us assume that $x \ge y \ge z$. Then also $32x \ge 32y \ge 32z$, according to the system we therefore have
     $$
     (y+z)^5 \ge (z+x)^5 \ge (x+y)^5.
@@ -477,6 +507,8 @@ In the next example, we will show that we can order something even when we do no
     \endalign
     $$
 }{
+    \Answer{Five solutions: $(0,0,0)$, $(1,1,1)$, $(-1,-1,-1)$, $(2,2,2)$ and~$(-2,-2,-2)$.}
+
     The system is not symmetric, so we cannot assume $x \ge y \ge z$. However, it is cyclic, without loss of generality let $x=\max\{x,y,z\}$. Thus $x \ge z$, and therefore $x^5 \ge z^5$. Let's look at what the first and third equations tell us:
     $$
     \align
@@ -536,6 +568,8 @@ So that it's not too little, here are a few more problems. All combine in variou
 }{
     The second equation gives us $(y-x)(y-2)=0$. This gives two cases, $y=x$ and $y=2$. Substitute into the first equation and let's notice that it looks very \textit{square-like}.
 }{
+    \Answer{Two solutions: $(0,0,1)$ and~$(4,2,1)$.}
+
     We factor the second equation by successive factoring out:
     $$
     y(y-2) - x(y-2) = 0 \implies (y-x)(y-2) = 0.
@@ -583,6 +617,8 @@ So that it's not too little, here are a few more problems. All combine in variou
 }{
     After subtracting the equations and factoring we have that either $x=y$ or $x^2+xy+y^2-x-y+1=0$. The second equation is non-evident. A straightforward way to solve it is to consider one variable (e.g., $x$) as an unknown and the second (e.g., $y$) as a parameter and solve the quadratic equation. However, a nicer way is to find a factorization into a sum of squares, for which similar to the analysis of $x^2+y^2+z^2-xy-yz-zx$ we first need to multiply by two.
 }{
+    \Answer{Three solutions: $(0,0)$, $(\frac{1+\sqrt{5}}{2}, \frac{1+\sqrt{5}}{2})$ and~$(\frac{1-\sqrt{5}}{2}, \frac{1-\sqrt{5}}{2})$.}
+
     Subtracting the equations we get $x-y-(x^2-y^2)=y^3-x^3$, which after factoring out the term $(x-y)$ leads to
     $$
     (x-y)(1 - x - y + x^2+xy+y^2) = 0.
@@ -623,6 +659,8 @@ So that it's not too little, here are a few more problems. All combine in variou
 }{
     After removing absolute values, it is possible for example to subtract each pair of equations and factor (our goal is not to find all solutions, but only possible values of the sum $x+y+z$, which will help us in the discussion). An even faster solution is surprisingly to add all equations. In any case, do not forget to verify that for the found candidates for $x+y+z$ there indeed exist $x,y,z$ for which the sum is attainable.
 }{
+    \Answer{The sum $x+y+z$ can take the values $1$ and~$-3$.}
+
     To get rid of absolute values, we square each of the three equations:
     $$
     \align
@@ -665,6 +703,8 @@ So that it's not too little, here are a few more problems. All combine in variou
 }{
     The trick is to add all equations and subtract twice the second equation, thereby completely zeroing out the right side and leaving $x^2=z^2$ on the left, which thanks to the positivity of $x,y,z$ gives $x=z$.
 }{
+    \Answer{$(x,y,z)=(10/3,5/3,10/3)$.}
+
     Adding all three equations we get
     $$
     3x^2+3y^2+3z^2 = 6x+9y+12z.
@@ -682,9 +722,9 @@ So that it's not too little, here are a few more problems. All combine in variou
     y^2 + 2x^2 &= 6x + 3y = 3(2x+y), \\
     \endalign
     $$
-    We see that $3(x^2+2y^2) = 2(y^2+2x^2)$, from which $4y^2=x^2$, thus from positivity we have $2y=x$. By backward substitution into e.g. the first equation we get $(2y)^2 + 2y^2 = 2(4y+y)$, thus $6y^2=10y$, so either $y=0$ or $y=5/3$. 
+    We see that $3(x^2+2y^2) = 2(y^2+2x^2)$, from which $4y^2=x^2$, thus from positivity we have $2y=x$. By backward substitution into e.g. the first equation we get $(2y)^2 + 2y^2 = 2(4y+y)$, thus $6y^2=10y$. Since $y$ is positive, this gives $y=5/3$ (the root $y=0$ is excluded by positivity).
     
-    Altogether we have two candidates for solutions: $(0,0,0)$, $(10/3,5/3,10/3)$. By checking we easily verify that both triples satisfy the system.
+    This gives the single solution $(10/3,5/3,10/3)$, which we easily verify satisfies the system.
 }
 
 \Problem{0}{}{
@@ -702,6 +742,8 @@ So that it's not too little, here are a few more problems. All combine in variou
 }{
     The key is to use $a^3 \ge c^3$, this gives us $c-b \ge a-d$, which after adjustment means $d-b \ge a-c$, so necessarily $d \ge b$. What does $d^3 \ge b^3$ give us?
 }{
+    \Answer{Three quadruples: $(0,0,0,0)$, $(\sqrt{2}, -\sqrt{2}, \sqrt{2}, -\sqrt{2})$ and~$(-\sqrt{2}, \sqrt{2}, -\sqrt{2}, \sqrt{2})$.}
+
     The system is cyclic, therefore it suffices to solve $a=\max\{a,b,c,d\}$. Then $a \ge c$, so also $a^3 \ge c^3$. From the first and third equation we thus get $c-b \ge a-d$, which we adjust to $d-b \ge a-c$. Since $a \ge c$, the right side is non-negative, thus $d \ge b$.
 
     From the inequality $d \ge b$ we similarly derive $d^3 \ge b^3$, which after substitution from the second and fourth equation gives $b-a \ge d-c$, thus $b-d \ge a-c$. But $a \ge c$, thus $b \ge d$, which together with $d \ge b$ gives $d=b$, and subsequently $b-d \ge a-c$ gives $0 \ge a-c$, so $c=a$.
@@ -738,6 +780,8 @@ So that it's not too little, here are a few more problems. All combine in variou
 }{
     It holds $x^3+y^3+x^2y+y^2x=(x+y)(x^2+y^2)$. The second equation is meanwhile $(x+y)+(x^2+y^2)=n+1$. The numbers $A=x+y$, $B=x^2+y^2$ therefore satisfy $AB=n$, $A+B=n+1$. Which ones can they be? Formally we can derive them either by realizing that from Vieta's\fnote{Vieta's formulas are named after the French mathematician Francois Viète (1540--1603), who is considered one of the fathers of modern algebra thanks to his systematic use of letters to represent unknowns and parameters, which allowed solving problems more generally.} formulas $A,B$ must be roots of the quadratic equation $t^2-(n+1)t+n=0$ and solving it; or we can substitute $B=n+1-A$ into the first equation, etc. In any case we obtain two possibilities for $(A,B)$. One of them can be excluded quickly (let's not forget that $n$ is a four-digit number, thus it is positive).
 }{
+    \Answer{$n=1013$.}
+
     It holds $x^3+y^3+x^2y+y^2x=(x+y)(x^2+y^2)$. If we denote $A=x+y$ and $B=x^2+y^2$, the system can be equivalently rewritten to the form $AB=n$ and $A+B=n+1$. From Vieta's formulas it follows that $A$ and $B$ are roots of the quadratic equation $t^2-(n+1)t+n=0$, which we can factor as $(t-1)(t-n)=0$. Possible values for the pair $\{A,B\}$ are therefore $\{1,n\}$. We will analyze both cases.
 
     \begitems
@@ -775,6 +819,8 @@ So that it's not too little, here are a few more problems. All combine in variou
     $$
     Now we can multiply and assuming mutual distinctness of $a,b,c$ and their non-zero status it yields useful things. It will not be the end, but we will be close.
 }{
+    \Answer{Triples $(t,t,t)$ for any real $t$.}
+
     We adjust the first equation by rearranging terms:
     $$
     \align

@@ -165,6 +165,23 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "x<y<z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -378,6 +395,27 @@
                     {
                       "type": "text",
                       "text": " z těchto čtyř čísel největší, které z nich je nejmenší?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejmenší je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -703,6 +741,36 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost nastává právě když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -883,6 +951,27 @@
                     {
                       "type": "text",
                       "text": "a\u00A0najděte všechny případy rovnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost nastává právě když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -1462,6 +1551,36 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost nastává právě když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=a+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -2198,6 +2317,27 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost nastává právě pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=y=1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -2325,6 +2465,36 @@
                     {
                       "type": "text",
                       "text": "a\u00A0najděte všechny případy rovnosti."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost nastává právě pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(a,b)=(0,0)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(1,1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -3596,6 +3766,36 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Největší objem je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "128",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (krabice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 8 \\times 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ")."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -4325,6 +4525,36 @@
                     {
                       "type": "math",
                       "text": "ab + cd",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejmenší hodnota "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ab+cd",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2+2\\sqrt{2}",
                       "isDisplay": false
                     },
                     {
@@ -6219,6 +6449,27 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rovnost nastává pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(x,y) \\in \\{(2,3),(3,2),(0,-1),(-1,0)\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -6658,6 +6909,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "n \\in \\{2, 3, 4, 5\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -7014,6 +7282,36 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejmenší hodnota je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-1/8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", při "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=y=1/2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {

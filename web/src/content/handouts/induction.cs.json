@@ -1378,6 +1378,27 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Všechna přirozená čísla kromě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -4456,6 +4477,23 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "a_n = 2^{n-1}-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -4616,6 +4654,23 @@
                     {
                       "type": "text",
                       "text": " a\u00A0dokažte ho indukcí."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "a_n = 3^n-2^n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -6889,6 +6944,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "23",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zlomení."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {

@@ -183,6 +183,8 @@ Doposud jsme dokazovali tvrzení pro všechna přirozená čísla~$n$. V~násled
 \Example{}{
     Pro která přirozená čísla $n$ platí $2^n \ge n^2$?
 }{
+    \Answer{Všechna přirozená čísla kromě $n=3$.}
+    
     Vyzkoušením malých případů dostaneme zvláštní chování: Pro $n=1$ a $n=2$ tvrzení platí. Člověk by si myslel, že platí stále. Avšak pro $n=3$ máme $8 \ge 9$. Pro $n=4$ jsou však věci znovu v~pořádku a máme $16 \ge 16$. Pro $n=5$ pak $32 \ge 25$, dále $64 \ge 32$. Rozdíly se zvětšují, zdá se, že tvrzení už bude platit stále. Formálně ho dokážeme matematickou indukcí pro $n \ge 4$.
     
     Pro $n=4$ tvrzení platí. Předpokládejme, že platí pro dané $n \ge 4$, tedy že $2^n \ge n^2$. Pak odhadujeme:
@@ -414,6 +416,8 @@ Technicky jedna z~forem úplné indukce je i~když indukční předpoklad použi
     $$
     pro $n \ge 3$. Uhádněte explicitní vzorec pro $a_n$ a~dokažte ho indukcí.
 }{
+    \Answer{$a_n = 2^{n-1}-1$.}
+    
     Z~malých hodnot $a_1=0, a_2=1, a_3=3, a_4=7, a_5=15, a_6=31$ uhádneme $a_n = 2^{n-1}-1$. Tento vzorec dokážeme indukcí: 
     
     Pro $n=1$ platí $2^0-1=0$. Pro $n=2$ platí $2^1-1=1$. Předpokládejme platnost pro $n-1$ a~$n$. Pak
@@ -432,6 +436,8 @@ Technicky jedna z~forem úplné indukce je i~když indukční předpoklad použi
     $$ 
     pro $n \ge 3$. Uhádněte explicitní vzorec pro $a_n$ a~dokažte ho indukcí.
 }{
+    \Answer{$a_n = 3^n-2^n$.}
+    
     Vyzkoušením $a_1=1, a_2=5, a_3=19, a_4=65, a_5=211$ uhádneme vzorec $a_n = 3^n-2^n$. Ten dokážeme indukcí:
     
     Pro $n=1$ platí $3-2=1$. Pro $n=2$ platí $9-4=5$. Předpokládejme platnost pro $n-1$ a~$n$. Pak
@@ -617,6 +623,8 @@ Příkladů na indukci je opravdu mnoho a jak jsme viděli, dá se použít v~pr
 }{
 	Idea indukčního předpokladu je, že zlomením $m \times n$ na dvě čokolády vždy vyrobíme dvě čokolády, které mají menší součet rozměrů než původní $m+n$. Umíme tedy aplikovat indukční předpoklad a~už je to jen trocha algebry.
 }{
+	\Answer{$23$ zlomení.}
+	
 	Ukážeme, že pro čokoládu $m \times n$ potřebujeme vždy přesně $mn-1$ zlomení bez ohledu na strategii. Pro zadanou čokoládu $8 \times 3$ to tedy je $23$ zlomení.
 	
 	Tvrzení dokážeme úplnou indukcí podle součtu rozměrů $k = m+n$. Pro $k=2$ máme čokoládu $1 \times 1$, kterou už nemusíme lámat, což odpovídá $1\cdot 1 - 1 = 0$.

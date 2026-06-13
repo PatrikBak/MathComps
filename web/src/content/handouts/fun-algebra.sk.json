@@ -173,6 +173,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -618,6 +635,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -839,6 +873,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -1878,6 +1929,36 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5521",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "8113",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -2072,6 +2153,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "x=-1\\pm \\sqrt[ 4 ] 7",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -2208,6 +2306,27 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Množina riešení je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{0, 2, 1 \\pm \\sqrt{6}, 1 \\pm 2\\sqrt{2}\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {

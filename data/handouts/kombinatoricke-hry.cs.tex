@@ -34,6 +34,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Trik je dokázat, že prohrávající pozice jsou právě ty dělitelné 3. Formálně to umíme udělat indukcí.
 }{
+    \Answer{Vyhrává začínající hráč.}
+
     Z~malých případů si uděláme hypotézu: při 1 či 2 zápalkách začínající vyhraje, při 3 nikoli (každý jeho tah dá výhru soupeři), při 4 a~5 zase vyhraje. Vypadá to tak, že prohrávající jsou právě pozice s~počtem zápalek dělitelným třemi -- a~to teď dokážeme indukcí. Pozice 0 je prohrávající, protože hráč na~tahu už nemá co odebrat. Na druhou stranu pozice 1 a 2 jsou vyhrávající.
 
     Je-li počet dělitelný třemi, pak po odebrání 1 nebo 2 zůstane počet nedělitelný třemi, takže soupeř dostane vyhrávající pozici -- naše pozice je tedy prohrávající. Naopak z~počtu nedělitelného třemi umíme odebráním 1 nebo 2 zanechat násobek tří, čímž soupeře dostaneme do prohrávající pozice.
@@ -50,6 +52,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     V říjnu bude dnem jisté prohry 29 a všechny vyšší dny budou dny výhry -- zdůvodněte. Idea je pokračovat takto dalšími měsíci, dokud nenajdeme vzor.
 }{
+    \Answer{Vyhrává začínající hráč.}
+
     Postupujme od~konce. Hráče na tahu nazveme prohrávajícím, pokud při správné hře soupeře prohraje.
 
     Každý den v~prosinci je výherní -- stačí říct rovnou 31. prosinec. První prohrávající datum je 30. listopad: jediný tah z~něj vede na 30. prosinec (den zvětšit neumíme a~31. listopad neexistuje), odkud soupeř vyhraje. Podobně jsou prohrávající 29. říjen, 28. září a~tak dále -- prohrávající dny s~ubývajícím měsícem klesají o~jeden. To napovídá tvrzení: \textit{prohrávající jsou právě data, v~nichž se den a~pořadové číslo měsíce liší o~19} -- tedy 30. XI., 29. X., 28. IX., \dots, v~$m$-tém měsíci den $m+19$.
@@ -66,6 +70,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Spárujeme všechna políčka šachovnice. Vyplatí se táhnout podle těchto párů.
 }{
+    \Answer{Vyhrává začínající hráč.}
+
     Vyhrává začínající hráč. Chtěli bychom pro každé políčko předem vědět, kam z~něj potáhneme -- pak nám tahy nikdy nedojdou. To nás vede k~myšlence políčka spárovat: šachovnici rozdělíme na 32 kostiček domina $1\times2$ (například na samé vodorovné dvojice). Začínající hráč nejprve potáhne králem z~rohového políčka na jeho partnera v~téže kostičce. Dále na každý soupeřův tah odpoví tahem na druhé políčko té kostičky, do které soupeř právě vstoupil.
 
     Takový tah je vždy možný: po každém tahu začínajícího hráče tvoří navštívená políčka úplné kostičky, takže když soupeř vstoupí na nové políčko, jeho partner v~kostičce je ještě volný a~sousedí s~ním (král tam umí potáhnout). Soupeři tak dříve či později dojdou tahy, a~tím prohraje.
@@ -78,6 +84,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Trikem je nejprve zablokovat speciální pozici kruhu, a sice střed. Umíme teď využít symetrii?
 }{
+    \Answer{Vyhrává začínající hráč.}
+
     Vyhrává začínající hráč. První minci položí přesně do středu stolu. Potom na každou minci soupeře odpoví mincí umístěnou středově souměrně podle středu stolu.
 
     Tato souměrná pozice je vždy volná a~celá leží na stole: stůl je středově souměrný, takže obraz soupeřovy korektně položené mince je opět korektní pozice. Se soupeřovou mincí se přitom krýt nemůže: její střed je od~středu stolu vzdálen alespoň o~průměr mince (jinak by se překrývala se středovou mincí), takže od~svého obrazu, který je právě dvakrát tak daleko, je vzdálen alespoň o~dva průměry -- na překrytí by přitom stačil menší odstup než jeden průměr. Začínající hráč má tedy po každém soupeřově tahu kam táhnout, a~tak prohraje soupeř.
@@ -98,6 +106,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Idea je, že udělá jmenovatel dělitelný vhodným číslem, zatímco v čitateli tuto dělitelnost vyloučí.
 }{
+    \Answer{V~obou případech vyhraje druhý hráč.}
+
     \textit{Pokud začíná Adam.} Barbora dokáže zařídit, aby výsledný zlomek byl roven~1, což je celé číslo, a~tedy její výhra. Stačí jí docílit $a=c$ a~$b=d$, neboť potom $10a+b=10c+d$. Táhne proto \uv{souměrně} podle zlomkové čáry: když Adam doplní některé z~písmen $a,b$, ona doplní tutéž cifru do partnerského $c,d$, a~naopak. Tím po čtyřech tazích zaručí $a=c$ i~$b=d$.
 
     \textit{Pokud začíná Barbora.} Zlomek má konečný rozvoj právě tehdy, když se dá zkrátit na jmenovatel složený jen ze~dvojek a~pětek. Adam to pokazí, pokud do jmenovatele dostane jiný prvočíselný dělitel, který se nedá zkrátit -- nejjednodušeji trojku. Poradíme mu tedy zařídit, aby jmenovatel $10c+d$ byl dělitelný třemi, ale čitatel $10a+b$ ne; takový zlomek má pak nekonečný periodický rozvoj a~Adam vyhraje. Protože $10a+b$ a~jeho ciferný součet $a+b$ dávají stejný zbytek po dělení třemi (a~podobně $10c+d$ a~$c+d$), stačí Adamovi zařídit, aby $c+d$ bylo dělitelné třemi a~$a+b$ ne. Toho dosáhne tak, že po každém z~obou Barbořiných tahů vhodně doplní čitatel či jmenovatel -- například zařídí $a+b=10$ (nedělitelné třemi) a~$c+d=9$ nebo~$12$ (dělitelné třemi).
@@ -110,6 +120,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Trik je nakreslit diagonálu, která jej rozděluje na symetrické části. Najednou máme úplně symetrické poloviny.
 }{
+    \Answer{Vyhrává začínající hráč~$A$.}
+
     Vyhrává začínající hráč $A$. Nejprve nakreslí \uv{hlavní} úhlopříčku spojující dva protilehlé vrcholy (ty existují, protože 2026 je sudé); ta rozdělí mnohoúhelník na dvě shodné poloviny, souměrné podle přímky této úhlopříčky. Dále $A$ na každou úhlopříčku soupeře odpoví jejím zrcadlovým obrazem podle této osy.
 
     Strategie je korektní: soupeř nemůže nakreslit úhlopříčku protínající hlavní, protože ta je už nakreslena, takže každá jeho úhlopříčka leží celá v~jedné z~polovin. Zvláště žádná není souměrná sama se sebou -- taková by totiž spojovala dvojici zrcadlově sdružených vrcholů, ležela by tedy v~obou polovinách a~protínala hlavní úhlopříčku. Zrcadlový obraz soupeřovy úhlopříčky proto leží v~druhé polovině, je různý od~ní samé i~od~všech dosud nakreslených a~žádnou z~nich neprotíná (jinak by se protínaly i~jejich obrazy, tedy předchozí soupeřovy tahy). $A$ má tedy po každém soupeřově tahu odpověď, a~tak prohraje soupeř.
@@ -124,6 +136,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Magický tah je odlomit kousek 1x1 vpravo dole. Rozmyslete si, že to úplně stačí.
 }{
+    \Answer{Vyhrává začínající hráč.}
+
     Vyhrává začínající hráč. Ukážeme to, aniž bychom jeho strategii uměli popsat. Předpokládejme naopak, že vítěznou strategii má druhý hráč. Začínající hráč pak zahraje \uv{magický} tah -- ukousne pouze pravý dolní dílek $1\times1$. Vznikne tím nějaká pozice, na kterou má druhý hráč (podle předpokladu) vítěznou odpověď.
 
     Jenže tutéž výslednou pozici umí navodit i~začínající hráč hned svým prvním tahem -- vždyť každé ukousnutí zahrnuje i~pravý dolní roh, takže libovolná odpověď druhého hráče je zároveň legálním prvním tahem. Začínající hráč si ji tedy mohl přivlastnit a~vyhrát sám, což je spor. Vítěznou strategii má proto začínající hráč.
@@ -150,6 +164,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     Poslední uvědomění je, že první hráč si umí zajistit sudá čísla. Rozmyslete si jak a také dokažte, že mu to stačí.
 }{
+    \Answer{Vyhrává začínající hráč~$A$.}
+
     Vyhrává začínající hráč $A$ a~klíčem je, že si umí zajistit, aby vždy táhl ze sudého čísla. K~sudému $m$ totiž může přičíst jeho polovinu a~zvětšit ho tak jedenapůlkrát; jakmile jednou dostane na tah sudé $m\ge1352$, jediným tahem skočí na $m+\frac m2 \ge \frac32\cdot1352 = 2028 \ge 2026$ a~vyhraje. Právě čísla od~1352 jsou ta, ze kterých umí vyhrát v~jednom tahu.
 
     Jak si sudá čísla zajistí? Jeho první tah je vynucený, $2\to3$ (jediný nevlastní dělitel dvojky je~1). Od té doby se drží pravidla, že soupeři vždy zanechá liché číslo -- když je na tahu sudé $m<1352$, přičte~1. Soupeř $B$ tak vždy přičítá nevlastního dělitele lichého čísla, který je lichý, a~tak po jeho tahu vznikne opět sudé číslo, které připadne $A$. Čísla přitom stále rostou, takže $A$ se jednou dostane k~sudému $m\ge1352$.
@@ -172,6 +188,8 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 }{
     První hráč začne jedničkou ve jmenovateli -- tím všude zůstane sudý počet. Už jen najít párování zbytku.
 }{
+    \Answer{Vyhrává začínající hráč~$A$.}
+
     Vyhrává začínající hráč $A$. Ukážeme, že umí zařídit, aby byl jmenovatel přesně o~1 větší než čitatel.
 
     Nejprve vloží číslo 1 do jmenovatele. Pak kdykoli soupeř $B$ vloží do zlomku číslo $x$, hráč $A$ odpoví tím, že vloží číslo $2023-x$ do téže části zlomku (čitatele, resp. jmenovatele), do které hrál $B$. Proč to vždy jde? Po vložení jedničky do jmenovatele je v~čitateli i~ve jmenovateli sudý počet volných políček (po 1010) a~tato vlastnost se po každém tahu hráče $A$ zachová. Soupeř tedy nikdy nezaplní poslední volnou pozici některé části, takže $A$ má vždy kam odpovědět. A~číslo $2023-x$ je k~dispozici, protože čísla $2,3,\dots,2021$ se rozpadnou na dvojice se stejným součtem 2023:

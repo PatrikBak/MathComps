@@ -123,6 +123,8 @@ Ve složitějších úlohách je rozklad typicky jen jeden z~více kroků. Můž
 }{
     Jelikož $a^{37}+b^{37}=(a+b)(\cdots)$, tak stačí, aby $7 \mid a+b$.
 }{
+    \Answer{Např. $(1,6)$, $(2,5)$, $(3,4)$.}
+
     Platí $a^{37}+b^{37}=(a+b)(a^{36}+\cdots+b^{36})$, takže $a+b \mid a^{37}+b^{37}$, takže stačí, aby $7 \mid a+b$. Toho už lehce docílíme dvojicemi $(a,b)$ rovnými $(1,6), (2,5), (3,4)$.
 }
 
@@ -133,6 +135,8 @@ Ve složitějších úlohách je rozklad typicky jen jeden z~více kroků. Můž
 }{
     Jeden možný rozklad je $n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)$. Druhá závorka se sice dá rozložit, ale není vůbec evidentní jak. Lepší rozklad je $n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)$. Z~tohoto rozkládáme dále. Následně už máme alespoň 4 činitele, což zní podezřele, pokud má číslo být součinem tří prvočísel.
 }{
+    \Answer{$n=2$.}
+
     Máme rozklad
     $$
     n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)=(n-1)(n^2+n+1)(n+1)(n^2-n+1).
@@ -147,6 +151,8 @@ Běžný školní postup postupného rozkladu funguje i v~těžších úlohách.
 \Example{}{
     Rozložte výraz $a^4-a-b^4+b$ na součin. 
 }{
+    \Answer{$(a-b)(a^3+a^2b+ab^2+b^3-1)$.}
+
     Bez toho, abychom viděli výsledný rozklad, tak můžeme říci, že v~něm bude $a-b$, protože zkoumaný výraz je pro $a=b$ roven 0. Díky tomu cílevědomě přeuspořádáme členy jako $(a^4-b^4)-(a-b)$. Teď můžeme z~obou výrazů vytknout $a-b$ před závorku a~máme 
     $$
     (a-b)(a^3+a^2b+ab^2+b^3)-(a-b)=(a-b)(a^3+a^2b+ab^2+b^3-1).
@@ -308,6 +314,8 @@ Obecně jsme vlastně použili $a^2+2ab = (a+b)^2 - b^2$. Doplňovat na čtverec
 \Example{}{
     Rozložte $m^4+m^2n^2+n^4$ na součin.
 }{
+    \Answer{$(m^2+n^2-mn)(m^2+n^2+mn)$.}
+
     První, co nás může napadnout, je doplnit $m^4+m^2n^2$ na čtverec. Tím dostaneme 
     $$
     m^4+m^2n^2+n^4= \(m^2 +\frac{n^2}2\)^2 + \frac{3n^4}4.
@@ -326,6 +334,8 @@ Procvičte si to na odvození známé identity:
 }{
     Rozložte $a^4+4b^4$ na součin.
 }{
+    \Answer{$(a^2+2b^2-2ab)(a^2+2b^2+2ab)$.}
+
     Doplněním na čtverec máme 
     $$
     a^4+4b^4 = (a^2)^2 + (2b^2)^2 = (a^2+2b^2)^2 - (2ab)^2 = (a^2+2b^2-2ab)(a^2+2b^2+2ab).
@@ -345,6 +355,8 @@ Zkuste si příklad z~celostátního kola MO:
     $$
     Vidíme známý vzorec?
 }{
+    \Answer{$n=1$ a~$n=2$.}
+
     Platí 
     $$
     \gather
@@ -400,6 +412,8 @@ Ještě pár těžších úloh na procvičení:
 }{
     Druhý hledaný \uv{čtverec} bude $-c^4$, platí totiž: $-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2$. To vcelku dobře ladí se zbytkem výrazu.
 }{
+    \Answer{$(a+b+c)(a+b-c)(a-b+c)(-a+b+c)$.}
+
     Nejprve si ve výrazu všimneme $2a^2b^2-a^4-b^4$ a vytvoříme čtverec:
     $$
     2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4 = -(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2.
@@ -449,6 +463,8 @@ Ještě pár těžších úloh na procvičení:
     $$  
     Na druhou stranu, případ sudého $n$ je zase evidentně neprvočíselný.
 }{
+    \Answer{$n=1$.}
+
     Roz probereme dva případy podle parity $n$.
 
     \begitems \style i
@@ -482,6 +498,8 @@ Ukážeme si to na příkladu:
 \Example{}{
     Rozložte $a^3+b^3+c^3-3abc$ na součin.
 }{
+    \Answer{$(a+b+c)(a^2+b^2+c^2-ab-bc-ca)$.}
+
     Použitím doplnění na krychli máme
     $$
     \align

@@ -338,6 +338,32 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "n=46",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n=70",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -654,6 +680,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "80",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -926,6 +969,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "\\overline{abcd}=2019",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -1314,6 +1374,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "36",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -1461,6 +1538,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "145",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -2055,6 +2149,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "7744=88^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -2258,6 +2369,18 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Žádné takové prvočíslo neexistuje."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -2484,6 +2607,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -2664,6 +2804,18 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ne, takové číslo neexistuje."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -2915,6 +3067,36 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vždy vyjde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1089",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže nejmenší i největší je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1089",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -3148,6 +3330,23 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nekonečně mnoho čísel: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "625, 6250, 62500, \\ldots",
+                      "isDisplay": false
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
@@ -3724,6 +3923,23 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -4025,6 +4241,18 @@
                   }
                 ]
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ne, taková dvojice neexistuje."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -4291,6 +4519,27 @@
                     "highligted": false
                   }
                 ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro každé přirozené\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
               ],
               "solution": [
                 {
