@@ -1,6 +1,8 @@
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests;
 
@@ -12,6 +14,11 @@ namespace MathComps.Infrastructure.Tests;
 public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IProblemLookupService>(fixture)
 {
+    /// <inheritdoc/>
+    protected override void ConfigureServices(IServiceCollection services) =>
+        // Register the problem services module the test resolves from
+        services.AddProblemServices();
+
     /// <summary>
     /// Slug of the seeded problem.
     /// </summary>

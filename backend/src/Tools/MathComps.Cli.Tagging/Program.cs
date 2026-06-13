@@ -1,7 +1,6 @@
 using MathComps.Cli.Tagging.Commands;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
@@ -49,8 +48,11 @@ services.AddOptions<VetoProblemTagsSettings>()
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
 
-// Add infrastructure services including the shared problem lookup service
-services.AddInfrastructureServices();
+// Tag suggestion runs on Gemini
+services.AddGemini();
+
+// The interactive manager reads through the problem lookup service
+services.AddProblemServices();
 
 // Database operations are encapsulated in a dedicated service with scoped lifetime.
 services.AddScoped<ITaggingDatabaseService, TaggingDatabaseService>();

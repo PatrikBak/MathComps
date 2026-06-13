@@ -61,11 +61,11 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
             })
             .Build();
 
-        // Register all necessary services
+        // The infrastructure shared by every test; a derived class adds its own service module via ConfigureServices.
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(configuration)
-            .AddMathCompsDbContext(configuration)
-            .AddInfrastructureServices();
+            .AddLogging()
+            .AddMathCompsDbContext(configuration);
 
         // Let a derived class add or replace registrations (e.g. a fake for an external dependency).
         ConfigureServices(services);

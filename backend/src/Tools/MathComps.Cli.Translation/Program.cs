@@ -1,7 +1,6 @@
 using MathComps.Cli.Translation.Commands;
 using MathComps.Cli.Translation.Services;
 using MathComps.Cli.Translation.Settings;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
@@ -37,8 +36,11 @@ services.AddOptions<TranslateProblemsSettings>()
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
 
-// Add infrastructure services including the shared Gemini service
-services.AddInfrastructureServices();
+// The translate command runs on Gemini
+services.AddGemini();
+
+// The parse command reads problem images through the problem services
+services.AddProblemServices();
 
 // Database operations are encapsulated in a dedicated service with scoped lifetime.
 services.AddScoped<ITranslationDatabaseService, TranslationDatabaseService>();

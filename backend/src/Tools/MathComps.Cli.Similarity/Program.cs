@@ -1,7 +1,6 @@
 using MathComps.Cli.Similarity.Commands;
 using MathComps.Cli.Similarity.Services;
 using MathComps.Cli.Similarity.Settings;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
@@ -29,8 +28,8 @@ services.AddSingleton<IConfiguration>(configuration);
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
 
-// Add DB services
-services.AddInfrastructureServices();
+// The interactive manager reads through the problem lookup service
+services.AddProblemServices();
 
 // Bind similarity calculation settings
 services.AddOptions<SimilarityCalculationSettings>()

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
 using MathComps.Infrastructure.Storage;
@@ -49,6 +50,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         services.AddSingleton<IFileUploader>(_uploader);
         services.AddSingleton<ITrackedFileUploader>(_ => new TrackedFileUploader(
             _uploader, Create(new UploadLedgerOptions { LedgerPath = _ledgerPath })));
+
+        // The apply service also reads the metadata registry for taxonomy structure
+        services.AddLocalization();
+
+        // The tested service
         services.AddScoped<IDraftApplyService, DraftApplyService>();
     }
 

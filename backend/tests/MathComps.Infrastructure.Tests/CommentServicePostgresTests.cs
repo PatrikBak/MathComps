@@ -1,5 +1,6 @@
 using MathComps.Domain.ApiDtos.Comments;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,11 @@ namespace MathComps.Infrastructure.Tests;
 public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<ICommentService>(fixture)
 {
+    /// <inheritdoc/>
+    protected override void ConfigureServices(IServiceCollection services) =>
+        // Register the user services module the test resolves from
+        services.AddUserServices();
+
     /// <summary>
     /// Test user ID 1.
     /// </summary>
