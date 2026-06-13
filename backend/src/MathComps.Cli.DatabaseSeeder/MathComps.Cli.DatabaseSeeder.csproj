@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MathComps.Domain\MathComps.Domain.csproj" />
+    <ProjectReference Include="..\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
+    <ProjectReference Include="..\MathComps.Shared.Cli\MathComps.Shared.Cli.csproj" />
+    <ProjectReference Include="..\MathComps.Cli.SkmoParser\MathComps.Cli.SkmoParser.csproj" />
+    <ProjectReference Include="..\MathComps.Shared\MathComps.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+</Project>

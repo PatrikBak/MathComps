@@ -9,10 +9,10 @@ COPY Directory.Build.props Directory.Packages.props MathComps.sln ./
 COPY . ./
 
 # Restore the API project
-RUN dotnet restore src/Api/MathComps.Api/MathComps.Api.csproj
+RUN dotnet restore src/MathComps.Api/MathComps.Api.csproj
 
 # Build and publish the API
-RUN dotnet publish src/Api/MathComps.Api/MathComps.Api.csproj -c Release -o /app/publish
+RUN dotnet publish src/MathComps.Api/MathComps.Api.csproj -c Release -o /app/publish
 
 # Runtime stage: minimal image for running the application
 FROM mcr.microsoft.com/dotnet/aspnet:10.0

@@ -184,7 +184,7 @@ This will give you a public URL (e.g., `https://random-name.loca.lt`) that you c
 
 ### Handouts
 
-Educational handouts are parsed from TeX and stored as JSON in [`src/content/handouts/`](src/content/handouts/). See the [Handouts CLI tool](../backend/src/Tools/MathComps.Cli.Handouts/README.md) for parsing instructions.
+Educational handouts are parsed from TeX and stored as JSON in [`src/content/handouts/`](src/content/handouts/). See the [Handouts CLI tool](../backend/src/MathComps.Cli.Handouts/README.md) for parsing instructions.
 
 ### Contact Form
 

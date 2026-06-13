@@ -1,6 +1,6 @@
 # Draft folder format
 
-How competition problems are authored for bulk import. A **draft folder** holds one round's problems as plain files; `npm run draft:preflight <folder>` checks it, and the [bulk-import CLI](../../backend/src/Tools/MathComps.Cli.BulkImport/README.md) imports it. The preflight here is the single source of truth for the format — the C# side never re-parses the folder, it consumes this script's JSON manifest.
+How competition problems are authored for bulk import. A **draft folder** holds one round's problems as plain files; `npm run draft:preflight <folder>` checks it, and the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md) imports it. The preflight here is the single source of truth for the format — the C# side never re-parses the folder, it consumes this script's JSON manifest.
 
 ## Layout
 
@@ -87,7 +87,7 @@ npm run draft:preflight -- ./my-draft          # human-readable report
 npm run draft:preflight -- ./my-draft --json   # machine-readable manifest
 ```
 
-Exit `0` when clean, `1` on any error. Warnings (e.g. orphan images) don't fail the run. A clean preflight is what the [`apply` command](../../backend/src/Tools/MathComps.Cli.BulkImport/README.md) needs to import the draft.
+Exit `0` when clean, `1` on any error. Warnings (e.g. orphan images) don't fail the run. A clean preflight is what the [`apply` command](../../backend/src/MathComps.Cli.BulkImport/README.md) needs to import the draft.
 
 ## Examples
 

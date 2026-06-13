@@ -42,12 +42,15 @@ See [Backend README](backend/README.md) for database setup instructions.
 ```
 MathComps/
 ├── backend/                   # .NET backend (API + CLI tools)
-│   └── src/
-│       ├── Api/               # Web API + Webhooks
-│       ├── Core/              # Domain models
-│       ├── Infrastructure/    # Database & user management
-│       ├── Shared/            # Shared utilities
-│       └── Tools/             # CLI tools
+│   ├── src/                   # All projects flat, named MathComps.*
+│   │   ├── MathComps.Api               # Web API + Webhooks
+│   │   ├── MathComps.Domain            # Domain models & DTOs
+│   │   ├── MathComps.TexParser         # TeX parsing
+│   │   ├── MathComps.Infrastructure    # Database, EF Core, services
+│   │   ├── MathComps.Shared            # Shared utilities
+│   │   ├── MathComps.Shared.Cli        # Shared CLI helpers
+│   │   └── MathComps.Cli.*             # CLI tools (BulkImport, Tagging, Handouts, …)
+│   └── tests/                 # Test projects
 ├── web/                       # Next.js frontend + Webhooks
 │   └── src/
 │       ├── app/               # Pages (App Router)

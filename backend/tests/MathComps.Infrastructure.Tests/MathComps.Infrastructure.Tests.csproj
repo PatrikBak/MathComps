@@ -24,13 +24,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Infrastructure\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
-        <ProjectReference Include="..\..\src\Core\MathComps.Domain\MathComps.Domain.csproj" />
+        <ProjectReference Include="..\..\src\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\src\MathComps.Domain\MathComps.Domain.csproj" />
     </ItemGroup>
 
     <!-- Link Resources from Infrastructure so tests can access metadata files -->
     <ItemGroup>
-        <Content Include="..\..\src\Infrastructure\MathComps.Infrastructure\Resources\**\*">
+        <Content Include="..\..\src\MathComps.Infrastructure\Resources\**\*">
             <Link>Resources\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

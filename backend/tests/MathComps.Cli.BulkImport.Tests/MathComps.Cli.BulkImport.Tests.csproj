@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Tools\MathComps.Cli.BulkImport\MathComps.Cli.BulkImport.csproj" />
+        <ProjectReference Include="..\..\src\MathComps.Cli.BulkImport\MathComps.Cli.BulkImport.csproj" />
     </ItemGroup>
 
     <!-- Link the shared real image fixtures for the image-ref validator test -->

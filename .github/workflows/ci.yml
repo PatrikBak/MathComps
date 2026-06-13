@@ -45,7 +45,7 @@ jobs:
       - run: dotnet test backend/MathComps.sln --configuration Release --no-build
 
       - name: Regenerate archive JSON
-        working-directory: backend/src/Tools/MathComps.Cli.SkmoParser
+        working-directory: backend/src/MathComps.Cli.SkmoParser
         run: dotnet run --configuration Release --no-build
 
       - name: Verify archive JSON unchanged (run SkmoParser locally if this fails)
@@ -54,7 +54,7 @@ jobs:
           git diff --staged --exit-code
 
       - name: Regenerate handout JSONs
-        working-directory: backend/src/Tools/MathComps.Cli.Handouts
+        working-directory: backend/src/MathComps.Cli.Handouts
         # --skip-asy/compile/upload: Hard to ensure in CI, the author better run the CLI manually 😬
         run: dotnet run --configuration Release --no-build -- --skip-compile --skip-upload --skip-asy '*.sk.tex' '*.en.tex' '*.cs.tex'
 
