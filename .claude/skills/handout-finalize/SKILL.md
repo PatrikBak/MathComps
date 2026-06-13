@@ -24,13 +24,14 @@ The user will name the handout (base filename, e.g. `adding-points`) or point at
 Read `web/src/content/handouts.json` and list `data/handouts/<base>.*.tex`. From each `.{locale}.tex`, extract:
 
 - **locale** ← `\setlanguage{SK|CS|EN}` → lowercase (cross-check against filename)
-- **title[locale]** ← `\Subtitle{...}` (NOT `\Title{...}` — that's the category heading)
+- **title[locale]** ← `\Title{...}`
 - **slug[locale]** ← `\MathcompsLink{...}`
 - **authors** ← `\Author{...}` (must agree across locales)
 
 Then decide:
 
-- **Category** — guess from the existing sections and the handout's topic. Hints: `\Title{Geometry}` often matches the section name; factoring/inequalities → Algebra; angles/triangles → Geometria; divisibility/primes → Teória čísel; counting/coloring/invariants → Kombinatorika; proof basics/induction → Všeobecné. If an existing `"status": "planned"` entry in any section matches the title, replace it in place and keep its section.
+- **`source` / `eventId`** — default `"source": "matikaCesku"` with no `eventId`. Only if the user says the handout was made for an event, set `"source": "events"` and `eventId` to the matching entry in the index's top-level `events` array (match by name; no match → ask the user whether to add the event).
+- **Category** — guess from the existing sections and the handout's topic. Hints: factoring/inequalities → Algebra; angles/triangles → Geometria; divisibility/primes → Teória čísel; counting/coloring/invariants → Kombinatorika; proof basics/induction → Všeobecné. If an existing `"status": "planned"` entry in any section matches the title, replace it in place and keep its section.
 - **Description per locale** — write one yourself from the `.tex` intro (`\sec Introduction` / `\sec Úvod`) and section headings. 1–3 sentences, SEO/OG-grade, matching the terse factual style of existing entries. Write each locale natively from that locale's .tex; do not machine-translate.
 - **`languages`** — set to the locales that have a `.tex` file only if that is a strict subset of `sk`, `cs`, `en`. If all three exist, omit.
 - **`fileSlug`** — set to `<base>` only if there is no English `.tex`; otherwise omit.
@@ -45,6 +46,7 @@ Write the entry matching the field order, 2-space indent, and trailing-newline s
 ```json
 {
   "status": "ready",
+  "source": "<matikaCesku|events>",
   "id": "<nanoid>",
   "slug": { ... },
   "title": { ... },
@@ -53,14 +55,14 @@ Write the entry matching the field order, 2-space indent, and trailing-newline s
 }
 ```
 
-Optional fields, only when applicable, inserted in this order after `id`: `"public": false`, `"languages": [...]`, `"fileSlug": "..."`.
+Optional fields, only when applicable, inserted in this order after `id`: `"public": false`, `"languages": [...]`, `"eventId": "..."`, `"fileSlug": "..."`.
 
 - **Planned → ready:** replace in place.
 - **New:** append to the chosen section's `handouts` array.
 
 ### 3. Run the Handouts CLI
 
-From `backend/src/Tools/MathComps.Cli.Handouts/`:
+From `backend/src/MathComps.Cli.Handouts/`:
 
 ```bash
 dotnet run -- <base>.*.tex
@@ -76,7 +78,7 @@ The CLI exits 1 on compile failures OR unknown commands.
 
 **Unknown commands:** the CLI prints a `Source File` → `\command` table.
 
-The purpose of `backend/src/Core/MathComps.TexParser/TexCleaner/tex_cleaner_rules.txt` is to **bridge the source world (PlainTeX + AMS-TeX + OPmac, compiled by `pdfcsplain` to PDF) with the web world (KaTeX-rendered math in the site's content JSON)**. Many macros that PlainTeX/OPmac understand do not exist in KaTeX (or mean something different there); the rules file decides how each command crosses that boundary: pass through to KaTeX unchanged (`[leave]`), rewrite to a KaTeX-compatible form (`[substitute]`), or drop entirely because it only affected PDF layout (`[remove]`).
+The purpose of `backend/src/MathComps.TexParser/TexCleaner/tex_cleaner_rules.txt` is to **bridge the source world (PlainTeX + AMS-TeX + OPmac, compiled by `pdfcsplain` to PDF) with the web world (KaTeX-rendered math in the site's content JSON)**. Many macros that PlainTeX/OPmac understand do not exist in KaTeX (or mean something different there); the rules file decides how each command crosses that boundary: pass through to KaTeX unchanged (`[leave]`), rewrite to a KaTeX-compatible form (`[substitute]`), or drop entirely because it only affected PDF layout (`[remove]`).
 
 Apply your judgment per row (do not ask), then report one line per decision:
 

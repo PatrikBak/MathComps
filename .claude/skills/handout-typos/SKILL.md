@@ -24,9 +24,9 @@ You proofread one olympiad math handout `.tex` file (PlainTeX + AMS-TeX + OPmac)
 
 ## Workflow
 
-1. **Identify the target file.** If the user hasn't named one, ask.
+1. **Identify the target file.** If the user hasn't named one: prefer the handout created or edited in the current session (e.g. the output of a just-finished translate/edit pass) and say so. Otherwise check `git status` — when exactly one handout `.tex` is modified or added, take it as the target and say so. Otherwise ask.
 2. **Read** the file and note the language.
-3. **Pass 1 — collect candidates** across prose only. Include only *serious*, *objective* errors:
+3. **Pass 1 — collect candidates** across prose only. Sweep the **High-frequency pitfalls** list below explicitly — those errors parse fine and slip past a prose read. Include only *serious*, *objective* errors:
    - **Misspellings** and missing/wrong diacritics.
    - **Broken agreement** (gender/number/case), clearly wrong verb forms, a missing or doubled word that breaks the sentence.
    - **Unequivocal punctuation mistakes** that change parsing or are clearly wrong (not stylistic comma choices).
@@ -43,7 +43,7 @@ You proofread one olympiad math handout `.tex` file (PlainTeX + AMS-TeX + OPmac)
    Otherwise, for each Uncertain item print a short paragraph with: a line-number anchor (e.g. `L296`), the problematic clause with surrounding context, a minimal proposed fix, and a few-word reason (e.g. "missing verb", "wrong case ending", "doubled preposition"). Deduplicate — each distinct item once.
 
    Then call `AskUserQuestion` (batched up to 4 per call) with options per item: **Apply suggested fix** / **Leave alone**. Apply approved fixes via Edit and emit a final one-liner with what was applied. If you genuinely have no idea what the author meant for an item, leave it out of `AskUserQuestion` and ask in plain text instead.
-7. **Fan out by section** for multi-problem handouts. Dispatch 3–5 parallel subagents to run **passes 1–2** (steps 3–4) over contiguous, non-overlapping slices. Each subagent returns its **Fix directly** and **Uncertain** lists as text — it does not call Edit. The main session then applies all fixes (step 5) and produces the merged report (step 6). Trust your judgment to skip fan-out on trivially small inputs.
+7. **No fan-out — proofread in the main session**, even for long handouts (the longest are ~850 lines, well within one context). Whole-file context is part of the detection toolkit (consistency evidence, referent tracking), and slice-based subagent proofreading has shown near-zero recall on real inflection errors while producing exactly the style false positives this skill forbids. On long multi-problem handouts, keep attention sharp by running pass 1 as sequential chunks — one `\Problem` block (or ~150-line window) at a time — instead of one continuous skim.
 
 Do not compile. Typo fixes in prose cannot break TeX. If the user wants a compile check afterwards, they will ask.
 
@@ -68,6 +68,19 @@ Never alter the macro name or its options — only the prose inside.
 ## TeX spaces
 
 `~` is a non-breaking space. Treat it as a normal space for tokenization and repeated-word detection (e.g. `k~nájdenému`). **Never** remove, insert, or flag `~` itself.
+
+---
+
+## High-frequency pitfalls (sweep explicitly)
+
+These errors leave the sentence parsing fine, so a prose read glides over them — check occurrences deliberately:
+
+- **SK singular inštrumentál needs `í`:** `svojím ťahom`, `ním`, `tvojím`; the short forms `svojim`/`nim` are plural datives.
+- **Inanimate math nouns decline inanimately:** SK `v čitateli`, `v menovateli` — `čitateľovi` is the animate form (a reader, not a numerator). CS: `v čitateli`, `ve jmenovateli`.
+- **CS classics:** `mně`/`mě`, `ji`/`jí`, `by jsme` → `bychom`, `aby jste` → `abyste`.
+- **Contaminated or incomplete constructions:** crosses like `vyzerá byť, že` (mix of `vyzerá byť X` and `vyzerá, že`); clefts missing their verb (`Posledné, čo zostáva rozmyslieť, je, ako…`).
+- **Referent slips:** the same role-noun twice in one clause where the second should be the other actor (`každý ťah hráča vedie do vyhrávajúcej pozície hráča` → `súpera`). When a player/opponent noun repeats, check who is actually meant. Meaning-dependent → Uncertain, not a direct fix.
+- **Consistency evidence:** before fixing an inflection, search the file for other occurrences — a correctly inflected form elsewhere in the same handout confirms both the slip and the fix.
 
 ---
 
