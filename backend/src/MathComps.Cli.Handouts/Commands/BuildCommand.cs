@@ -419,13 +419,6 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             builder.AppendLine();
         }
 
-        // Subtitle
-        if (!string.IsNullOrEmpty(document.Subtitle))
-        {
-            builder.AppendLine($@"\Subtitle{{{document.Subtitle}}}");
-            builder.AppendLine();
-        }
-
         // MathcompsLink
         if (mathcompsLinkLine is not null)
         {

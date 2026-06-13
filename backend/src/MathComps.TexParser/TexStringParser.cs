@@ -21,7 +21,7 @@ namespace MathComps.TexParser;
 /// During parsing, lots of stuff is going on, special commands/behavours is as follows:
 /// <list type="bullet">
 /// <item><c>\\sec Title</c> and <c>\\secc Title</c> define sections; the title is the rest of the line.</item>
-/// <item><c>\\Title{...}</c> and <c>\\Subtitle{...}</c> for the document's header.</item>
+/// <item><c>\\Title{...}</c> for the document's header.</item>
 /// <item><c>\\Theorem{title}{body}{proof}</c></item>
 /// <item><c>\\Exercise{title}{body}{solution}</c></item>
 /// <item><c>\\Problem{difficulty}{title}{body}{hint1}...{hintn}{solution}</c> (0+ hints)</item>
@@ -59,8 +59,8 @@ public static class TexStringParser
     #region Public API
 
     /// <summary>
-    /// Parses a string representing a full TeX document. It extracts the title, subtitle, and sections, 
-    /// parsing the content of each into structured blocks. Finally, It identifies any TeX 
+    /// Parses a string representing a full TeX document. It extracts the title and sections,
+    /// parsing the content of each into structured blocks. Finally, It identifies any TeX
     /// commands not present in the provided list of known macros taken from <paramref name="rules"/>.
     /// </summary>
     /// <param name="content">The raw TeX string content of the document.</param>
@@ -82,10 +82,6 @@ public static class TexStringParser
         // Use regex to find the document title. Might be null if not found.
         var titleMatch = Regex.Match(content, @"\\Title\{(.*?)\}", RegexOptions.Singleline);
         var title = titleMatch.Success ? titleMatch.Groups[1].Value.Trim() : null;
-
-        // Use regex to find the document subtitle; Might be null if not found.
-        var subtitleMatch = Regex.Match(content, @"\\Subtitle\{(.*?)\}", RegexOptions.Singleline);
-        var subtitle = subtitleMatch.Success ? subtitleMatch.Groups[1].Value.Trim() : null;
 
         // Split the document into parts based on the occurrence of section commands (\sec or \secc).
         var sectionParts = Regex.Split(content, @"(?=\\se[c]{1,2}\s)");
@@ -126,8 +122,8 @@ public static class TexStringParser
             // Enumerate
             .ToImmutableList();
 
-        // Return the final Document object, containing the title, subtitle, and all parsed sections.
-        var document = new Document(title, subtitle, sections);
+        // Return the final Document object, containing the title and all parsed sections.
+        var document = new Document(title, sections);
 
         // Scan the commands after parsing the full document.
         var commands = FindCommands(document.Sections.SelectMany(section => section.Text.Content));

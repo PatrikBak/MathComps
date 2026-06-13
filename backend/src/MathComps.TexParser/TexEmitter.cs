@@ -29,10 +29,6 @@ public static class TexEmitter
         if (!string.IsNullOrEmpty(document.Title))
             builder.AppendLine($@"\Title{{{document.Title}}}");
 
-        // Emit the document subtitle if present.
-        if (!string.IsNullOrEmpty(document.Subtitle))
-            builder.AppendLine($@"\Subtitle{{{document.Subtitle}}}");
-
         // Emit each section of the document in order.
         foreach (var section in document.Sections)
             EmitSection(builder, section);

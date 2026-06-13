@@ -4,12 +4,11 @@ namespace MathComps.TexParser.Types;
 
 /// <summary>
 /// Represents the top-level structure of a parsed TeX document,
-/// including its title, subtitle, and an ordered list of sections.
+/// including its title and an ordered list of sections.
 /// </summary>
 /// <param name="Title">The main title of the document, if present.</param>
-/// <param name="Subtitle">The subtitle of the document, if present.</param>
 /// <param name="Sections">An ordered list of the sections that make up the document's body.</param>
-public record Document(string? Title, string? Subtitle, ImmutableList<Section> Sections);
+public record Document(string? Title, ImmutableList<Section> Sections);
 
 /// <summary>
 /// Represents a single section within a TeX document, defined by a title,

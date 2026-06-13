@@ -14,8 +14,6 @@ import { getProblemImageUrl } from '@/components/features/problems/services/prob
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
-import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
-import { cn } from '@/components/shared/utils/css-utils'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard, type DisclosurePanelProps } from './Cards'
@@ -57,7 +55,7 @@ type HandoutDetailProps = {
 /**
  * Renders the optional title of an environment block (e.g. theorem name,
  * definition concept) as a single math-aware string, matching how the
- * document title and subtitle are rendered.
+ * document title is rendered.
  *
  * @param title The optional inline title block, or null/undefined if absent.
  * @returns The rendered React node, or null if no title was provided.
@@ -312,27 +310,12 @@ export default function HandoutDetail({
       <header className="lg:mb-12">
         <div className="mb-6">
           <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight">
-            <MathRendererClient content={document.subtitle || document.title || ''} />
+            <MathRendererClient content={document.title || ''} />
           </h1>
         </div>
 
-        {/* Title & subtitle */}
+        {/* Metadata badges */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          {document.subtitle && (
-            <div
-              className={cn(
-                'inline-flex items-center gap-2 px-4 py-2 rounded-full border border-foreground/10',
-                ACCENT_COLOR_MAP.blue.bg,
-                ACCENT_COLOR_MAP.blue.text
-              )}
-            >
-              <div className="w-2 h-2 rounded-full bg-current"></div>
-              <span className="font-medium text-sm">
-                <MathRendererClient content={document.title || ''} />
-              </span>
-            </div>
-          )}
-
           {/* Authors */}
           {authors.length > 0 && (
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-foreground/5 border border-foreground/10 leading-5">
