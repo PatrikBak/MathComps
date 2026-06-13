@@ -44,6 +44,17 @@ jobs:
       - run: dotnet build backend/MathComps.sln --configuration Release --no-restore
       - run: dotnet test backend/MathComps.sln --configuration Release --no-build
 
+      - name: Restore EF Core tools
+        working-directory: backend
+        run: dotnet tool restore
+
+      - name: Verify no pending model changes (scaffold a migration locally if this fails)
+        working-directory: backend
+        # Placeholder connection string only lets the factory build the model; this never connects.
+        env:
+          ConnectionStrings__DefaultConnection: Host=ci;Database=ci;Username=ci;Password=ci
+        run: dotnet ef migrations has-pending-model-changes --project src/MathComps.Infrastructure/MathComps.Infrastructure.csproj --startup-project src/MathComps.Infrastructure/MathComps.Infrastructure.csproj
+
       - name: Regenerate archive JSON
         working-directory: backend/src/MathComps.Cli.SkmoParser
         run: dotnet run --configuration Release --no-build
