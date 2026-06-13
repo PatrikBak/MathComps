@@ -376,7 +376,7 @@
           "source": "matikaCesku",
           "id": "_hM0pyx5ZnjFE9rcXKunr",
           "languages": ["sk", "cs"],
-          "fileSlug": "kombinatoricke-hry",
+          "fileSlug": "combinatorial-games",
           "slug": {
             "sk": "kombinatoricke-hry",
             "cs": "kombinatoricke-hry"
