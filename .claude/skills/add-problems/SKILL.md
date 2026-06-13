@@ -9,7 +9,7 @@ Turn a competition's problems into a validated **draft folder** under `data/prob
 
 `data/problems/` is **gitignored** (`data/problems/.gitignore` = `*`) — drafts are local staging input, never committed. The committable artifact is any taxonomy/code change.
 
-The format spec is the single source of truth — read it first: `web/scripts/PREFLIGHT_README.md` (authoring) and `backend/src/Tools/MathComps.Cli.BulkImport/README.md` (CLI).
+The format spec is the single source of truth — read it first: `web/scripts/PREFLIGHT_README.md` (authoring) and `backend/src/MathComps.Cli.BulkImport/README.md` (CLI).
 
 ## Draft layout
 
@@ -26,7 +26,7 @@ Problems are numbered from 1, contiguous. The file whose `<lang>` matches `_meta
 
 ## Step 1 — Register the competition (only if its slug is new)
 
-Check `backend/src/Infrastructure/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to **all four** metadata files, or the registry check fails with "no structural entry":
+Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to **all four** metadata files, or the registry check fails with "no structural entry":
 
 - `metadata.shared.json` — structure: `{ "slug": "...", "categories": [...] | null, "rounds": [...] }`. Array position = sort order.
 - `metadata.{cs,sk,en}.json` — `competitions["slug"] = { shortName, fullName }`, plus a `rounds["<composite>"]` entry per round, and a `categories["x"]` entry per category.
@@ -72,7 +72,7 @@ Then **verify parity yourself** (don't trust the agents): per problem, assert or
 # Fast inner loop on markdown/KaTeX/images (run from web/):
 cd web && npm run draft:preflight -- ../data/problems/my-draft
 # Full check (preflight + registry + read-only DB preview):
-dotnet run --project backend/src/Tools/MathComps.Cli.BulkImport -- validate ./data/problems/my-draft
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./data/problems/my-draft
 ```
 
 A genuine pass shows the **DB preview** (create/reuse competition, season, round) then `No issues. PASS`. The preflight is the fast loop for body errors; the dotnet validate adds the registry + DB checks. **Never run `apply`** — that's the user's call.
