@@ -1,5 +1,77 @@
 [
   {
+    "id": "GHQXMtHbpbtUPDtz2jmYs",
+    "slug": "kombinatoricke-hry",
+    "title": {
+      "sk": "Nový materiál o kombinatorických hrách",
+      "en": "New Handout on Combinatorial Games",
+      "cs": "Nový materiál o kombinatorických hrách"
+    },
+    "date": "2026-06-10",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
+    "id": "9f07zTlYlGXQWbjHJISW7",
+    "slug": "equal-tangents",
+    "title": {
+      "sk": "Nový materiál o technike Equal Tangents",
+      "en": "New Handout on Equal Tangents",
+      "cs": "Nový materiál o technice Equal Tangents"
+    },
+    "date": "2026-05-28",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
+    "id": "NPA7j6BrCPenDddLsLN8P",
+    "slug": "keep-screen-on",
+    "title": {
+      "sk": "Obrazovka zostane zapnutá",
+      "en": "Keep the Screen Awake",
+      "cs": "Obrazovka zůstane zapnutá"
+    },
+    "date": "2026-05-22",
+    "category": "development",
+    "author": "Patrik Bak"
+  },
+  {
+    "id": "CYi1Kr-LJyN_acI7A2yxQ",
+    "slug": "angle-basics-1",
+    "title": {
+      "sk": "Nový materiál o počítaní uhlov",
+      "en": "New Handout on Angle Chasing Basics",
+      "cs": "Nový materiál o počítání úhlů"
+    },
+    "date": "2026-05-07",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
+    "id": "MSZDCwdt5idqfE72_lsXa",
+    "slug": "digits",
+    "title": {
+      "sk": "Nový materiál o úlohách s ciframi",
+      "en": "New Handout on Digits",
+      "cs": "Nový materiál o úlohách s číslicemi"
+    },
+    "date": "2026-05-06",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
+    "id": "zZYy27WLQFMjOWeLMmDPE",
+    "slug": "emo-camp-handouts",
+    "title": {
+      "sk": "Nové materiály z EMO 2026 Campu",
+      "en": "New EMO 2026 Camp Handouts",
+      "cs": "Nové materiály z EMO 2026 Campu"
+    },
+    "date": "2026-04-22",
+    "category": "handouts",
+    "author": "Patrik Bak"
+  },
+  {
     "id": "Wv3nQxYz7rMtKpLsJcFbN",
     "slug": "75-national-round",
     "title": {
