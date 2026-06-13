@@ -10,7 +10,12 @@ services:
     volumes:
       - postgres_data_staging:/var/lib/postgresql/data
 
+  # Env-specific image tag so prod and staging don't clobber each other on a shared host.
+  migrate:
+    image: mathcomps-api:staging
+
   api:
+    image: mathcomps-api:staging
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
     labels:

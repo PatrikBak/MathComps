@@ -316,6 +316,13 @@ The backend supports separate **staging** and **production** environments using 
 ./deploy.sh prod logs -f api
 ```
 
+### Database Migrations
+
+Migrations are applied automatically on every deploy: a migration bundle (`efbundle`) built into the image (see the [Dockerfile](Dockerfile)) is run by a one-shot `migrate` service against the local Postgres before the API starts.
+
+- The API is gated on the migrate service finishing successfully, so it won't start if a migration fails — the failing migration is named in `./deploy.sh prod logs migrate`.
+- It's idempotent: a deploy with nothing pending is a no-op.
+
 ### Environment Setup
 
 1. Copy the base example file to `.env`:

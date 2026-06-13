@@ -18,11 +18,31 @@ services:
       timeout: 5s
       retries: 5
 
+  # One-shot: applies pending EF Core migrations against postgres, then exits.
+  # Reuses the API image and runs the baked-in migration bundle.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mathcomps-api
+    restart: "no"
+    entrypoint: ["./efbundle"]
+    # efbundle reads its connection string from this env var.
+    # Command Timeout=300 keeps long index builds from aborting at the 30s default.
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD};Command Timeout=300
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
   # .NET API - communicates with postgres via internal network
   api:
     build:
       context: .
       dockerfile: Dockerfile
+    image: mathcomps-api
     restart: unless-stopped
     environment:
       ASPNETCORE_URLS: http://+:8080
@@ -34,6 +54,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - internal
       - traefik-public
