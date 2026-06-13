@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Shared\MathComps.Shared\MathComps.Shared.csproj" />
-    <ProjectReference Include="..\..\src\Core\MathComps.Domain\MathComps.Domain.csproj" />
+    <ProjectReference Include="..\..\src\MathComps.Shared\MathComps.Shared.csproj" />
+    <ProjectReference Include="..\..\src\MathComps.Domain\MathComps.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

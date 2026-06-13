@@ -56,35 +56,35 @@ try {
     # Execute the right command
     switch ($command) {
         "seed" {
-            Set-Location ../src/Tools/MathComps.Cli.DatabaseSeeder
+            Set-Location ../src/MathComps.Cli.DatabaseSeeder
             Invoke-Dotnet
         }
         "import-tags" {
-            Set-Location ../src/Tools/MathComps.Cli.Tagging
+            Set-Location ../src/MathComps.Cli.Tagging
             Invoke-Dotnet -- import-tags ../../../../../Scripts/tags.csv
         }
         "tagging" {
-            Set-Location ../src/Tools/MathComps.Cli.Tagging
+            Set-Location ../src/MathComps.Cli.Tagging
             Invoke-Dotnet
         }
         "update-links" {
-            Set-Location ../src/Tools/MathComps.Cli.SkmoScraper
+            Set-Location ../src/MathComps.Cli.SkmoScraper
             dotnet run -c Release -- update-solution-links
         }
         "embeddings" {
-            Set-Location ../src/Tools/MathComps.Cli.Embeddings
+            Set-Location ../src/MathComps.Cli.Embeddings
             Invoke-Dotnet
         }
         "translations" {
-            Set-Location ../src/Tools/MathComps.Cli.Translation
+            Set-Location ../src/MathComps.Cli.Translation
             Invoke-Dotnet
         }
         "migrate" {
-            Set-Location ../src/Infrastructure/MathComps.Infrastructure
+            Set-Location ../src/MathComps.Infrastructure
             dotnet ef database update
         }
         "sync-users" {
-            Set-Location ../src/Tools/MathComps.Cli.UserSync
+            Set-Location ../src/MathComps.Cli.UserSync
             Invoke-Dotnet
         }
         

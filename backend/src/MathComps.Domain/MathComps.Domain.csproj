@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Nanoid" />
+    <PackageReference Include="Pgvector" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MathComps.Shared\MathComps.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

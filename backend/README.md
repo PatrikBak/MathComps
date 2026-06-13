@@ -4,18 +4,20 @@ The .NET backend for the MathComps application. Includes a Web API and CLI tools
 
 ## Structure
 
-- **`src/Api/MathComps.Api`** – Main Web API
-  - See the [API README](src/Api/MathComps.Api/README.md) for setup and running instructions
-- **`src/Core/`** – Domain models and parsing logic
-- **`src/Infrastructure/`** – Database, EF Core, and data access
+All projects live flat under `src/`, grouped by their `MathComps.*` names:
+
+- **`src/MathComps.Api`** – Main Web API
+  - See the [API README](src/MathComps.Api/README.md) for setup and running instructions
+- **`src/MathComps.Domain`**, **`src/MathComps.TexParser`** – Domain models and parsing logic
+- **`src/MathComps.Infrastructure`** – Database, EF Core, and data access
   - **`Resources/`** – Shared metadata files (e.g., `approved-tags.json`, `metadata.*.json`)
-- **`src/Shared/`** – Shared utilities and common code
+- **`src/MathComps.Shared`**, **`src/MathComps.Shared.Cli`** – Shared utilities and common code
   - **`ResourcePaths.cs`** – Centralized paths to shared resources
-- **`src/Tools/`** – CLI tools for data processing (see below)
+- **`src/MathComps.Cli.*`** – CLI tools for data processing (see below)
 
 ### Shared Resources
 
-Metadata files in `src/Infrastructure/MathComps.Infrastructure/Resources/` are embedded and copied to output directories, making them available to both the API and CLI tools at runtime via `ResourcePaths` constants.
+Metadata files in `src/MathComps.Infrastructure/Resources/` are embedded and copied to output directories, making them available to both the API and CLI tools at runtime via `ResourcePaths` constants.
 
 ### Localization
 
@@ -36,7 +38,7 @@ The API supports multiple languages via the `Accept-Language` HTTP header. The f
 
 **Problem translations:**
 
-Problem statements and solutions are stored in the `problem_texts` table with per-language entries. The original language is marked, and AI-generated translations are created using the [Translation Assistant CLI](src/Tools/MathComps.Cli.Translation/README.md). The API returns problem text in the requested language, falling back to the original if unavailable.
+Problem statements and solutions are stored in the `problem_texts` table with per-language entries. The original language is marked, and AI-generated translations are created using the [Translation Assistant CLI](src/MathComps.Cli.Translation/README.md). The API returns problem text in the requested language, falling back to the original if unavailable.
 
 **Adding a new language:**
 
@@ -73,7 +75,7 @@ Set up your database connection string using .NET user secrets:
 
 ```bash
 # We need a directory with a .csproj
-cd backend/src/Api/MathComps.Api
+cd backend/src/MathComps.Api
 
 # Set the value of the connection string
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=mathcomps;Username=postgres;Password=postgres"
@@ -87,7 +89,7 @@ If creating an empty DB from scratch, apply Entity Framework migrations:
 
 ```bash
 # From the DB project directory
-cd backend/src/Infrastructure/MathComps.Infrastructure
+cd backend/src/MathComps.Infrastructure
 
 # Run the migration tool
 dotnet ef database update
@@ -142,8 +144,8 @@ When you modify the data model, create a new migration from the Infrastructure d
 
 ```bash
 # From the Infrastructure directory
-cd backend/src/Infrastructure/MathComps.Infrastructure
-dotnet ef migrations add <MigrationName> --startup-project ../../Api/MathComps.Api
+cd backend/src/MathComps.Infrastructure
+dotnet ef migrations add <MigrationName> --startup-project ../MathComps.Api
 ```
 
 ### 4. Configure Gemini API (Optional)
@@ -155,7 +157,7 @@ For AI-powered tools (tagging, translation, embeddings), set up your Gemini API 
 cd backend
 
 # Set Gemini API key (shared across all tools)
-dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/Api/MathComps.Api
+dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/MathComps.Api
 ```
 
 Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
@@ -175,7 +177,7 @@ across runs):
 
 ```bash
 # From the API directory
-cd backend/src/Api/MathComps.Api
+cd backend/src/MathComps.Api
 
 # Use your *development* Clerk instance for local dev
 dotnet user-secrets set "Authentication:Clerk:Authority" "https://your-subdomain.clerk.accounts.dev"
@@ -186,11 +188,11 @@ dotnet user-secrets set "Clerk:WebhookSecret" "whsec_placeholder"
 Find the authority and secret key in the Clerk dashboard under **API Keys** (Frontend
 API → authority; Secret keys → secret key) — the same values deployed as
 `CLERK_AUTHORITY` and `CLERK_SECRET_KEY`. For the real webhook secret and instructions on
-testing webhooks locally, see the [API README](src/Api/MathComps.Api/README.md#webhooks).
+testing webhooks locally, see the [API README](src/MathComps.Api/README.md#webhooks).
 
 ### 6. Run the API
 
-See the [API README](src/Api/MathComps.Api/README.md) for running instructions.
+See the [API README](src/MathComps.Api/README.md) for running instructions.
 
 ## CLI Tools
 
@@ -198,20 +200,20 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 ### Data Pipeline Tools
 
-- **[SKMO Parser](src/Tools/MathComps.Cli.SkmoParser/README.md)** – Parses raw `.tex` archive into structured JSON
-- **[Database Seeder](src/Tools/MathComps.Cli.DatabaseSeeder/README.md)** – Populates database from parsed JSON
-- **[SKMO Scraper](src/Tools/MathComps.Cli.SkmoScraper/README.md)** – Scrapes solution links from SKMO website and updates database with these links
+- **[SKMO Parser](src/MathComps.Cli.SkmoParser/README.md)** – Parses raw `.tex` archive into structured JSON
+- **[Database Seeder](src/MathComps.Cli.DatabaseSeeder/README.md)** – Populates database from parsed JSON
+- **[SKMO Scraper](src/MathComps.Cli.SkmoScraper/README.md)** – Scrapes solution links from SKMO website and updates database with these links
 
 ### AI-Powered Tools
 
-- **[Tagging Assistant](src/Tools/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization with Gemini
-- **[Translation Assistant](src/Tools/MathComps.Cli.Translation/README.md)** – AI-powered problem translation with Gemini
-- **[Embeddings CLI](src/Tools/MathComps.Cli.Embeddings/README.md)** – Gemini-based vector embedding generator
-- **[Similarity System](src/Tools/MathComps.Cli.Similarity/README.md)** – Problem similarity calculation using embeddings + tags and other things
+- **[Tagging Assistant](src/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization with Gemini
+- **[Translation Assistant](src/MathComps.Cli.Translation/README.md)** – AI-powered problem translation with Gemini
+- **[Embeddings CLI](src/MathComps.Cli.Embeddings/README.md)** – Gemini-based vector embedding generator
+- **[Similarity System](src/MathComps.Cli.Similarity/README.md)** – Problem similarity calculation using embeddings + tags and other things
 
 ### Content Tools
 
-- **[Handouts Parser](src/Tools/MathComps.Cli.Handouts/README.md)** – Converts `.tex` handouts to `.json` for frontend
+- **[Handouts Parser](src/MathComps.Cli.Handouts/README.md)** – Converts `.tex` handouts to `.json` for frontend
 
 ## Adding New Problems
 
@@ -227,7 +229,7 @@ Edit the correct `.tex` file in `data/skmo/Archive/<year>/`:
 ### 2. Parse the Archive
 
 ```powershell
-# From backend/src/Tools/MathComps.Cli.SkmoParser
+# From backend/src/MathComps.Cli.SkmoParser
 dotnet run -c Release
 ```
 
@@ -284,7 +286,7 @@ Useful when tagging many problems, as manual adjustments can be tedious.
 If new solution PDFs are available on the SKMO website (using the correct year):
 
 ```powershell
-# From backend/src/Tools/MathComps.Cli.SkmoScraper
+# From backend/src/MathComps.Cli.SkmoScraper
 dotnet run -c Release -- scrape --start-year 75 --end-year 75
 ```
 
