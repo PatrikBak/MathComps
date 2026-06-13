@@ -71,6 +71,23 @@
                   "highligted": false
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "80",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bodů."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -116,6 +133,23 @@
                     {
                       "type": "text",
                       "text": ". Určete délku strany čtverce, který má stejný obsah jako tento obdélník."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "6\\,\\rm cm",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -250,6 +284,23 @@
                     {
                       "type": "text",
                       "text": "Jaká je jeho průměrná rychlost?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "40\\,\\rm km/h",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -691,6 +742,135 @@
                   "isDisplay": true
                 }
               ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(2,8)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A=5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "G=4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "H=3{,}2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(3,12)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A=7{,}5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "G=6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "H=4{,}8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(5,20)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A=12{,}5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "G=10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "H=8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vždy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "H<G<A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
               "solution": [
                 {
                   "type": "paragraph",
@@ -854,6 +1034,27 @@
                     {
                       "type": "text",
                       "text": ", pro kterou se jejich aritmetický, geometrický a\u00A0harmonický průměr rovnají."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Právě tehdy, když "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false
@@ -1538,6 +1739,41 @@
                     {
                       "type": "text",
                       "text": "(na geometrický průměr použijte kalkulačku)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "math",
+                      "text": "A=1{,}6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "G\\approx 1{,}43",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "H\\approx 1{,}30",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
                     }
                   ],
                   "highligted": false

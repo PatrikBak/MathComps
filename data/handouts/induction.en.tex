@@ -183,6 +183,8 @@ So far, we have proved statements for all natural numbers~$n$. In the following 
 \Example{}{
     For which natural numbers $n$ does $2^n \ge n^2$ hold?
 }{
+    \Answer{All natural numbers except $n=3$.}
+    
     By testing small cases, we get strange behavior: For $n=1$ and $n=2$ the statement holds. One might think it holds always. However, for $n=3$ we have $8 \ge 9$. For $n=4$, things are fine again and we have $16 \ge 16$. For $n=5$ then $32 \ge 25$, further $64 \ge 32$. The differences are increasing, it seems the statement will hold always from now on. We will formally prove it by mathematical induction for $n \ge 4$.
     
     For $n=4$ the statement holds. Assume that it holds for a given $n \ge 4$, that is, $2^n \ge n^2$. Then we estimate:
@@ -414,6 +416,8 @@ Technically, one of the forms of strong induction is also when we use the induct
     $$
     for $n \ge 3$. Guess the explicit formula for $a_n$ and prove it by induction.
 }{
+    \Answer{$a_n = 2^{n-1}-1$.}
+    
     From the small values $a_1=0, a_2=1, a_3=3, a_4=7, a_5=15, a_6=31$ we guess $a_n = 2^{n-1}-1$. We prove this formula by induction: 
     
     For $n=1$, $2^0-1=0$ holds. For $n=2$, $2^1-1=1$ holds. Assume it holds for $n-1$ and~$n$. Then
@@ -432,6 +436,8 @@ Technically, one of the forms of strong induction is also when we use the induct
     $$ 
     for $n \ge 3$. Guess the explicit formula for $a_n$ and prove it by induction.
 }{
+    \Answer{$a_n = 3^n-2^n$.}
+    
     By trying $a_1=1, a_2=5, a_3=19, a_4=65, a_5=211$ we guess the formula $a_n = 3^n-2^n$. We prove this by induction:
     
     For $n=1$, $3-2=1$ holds. For $n=2$, $9-4=5$ holds. Assume it holds for $n-1$ and~$n$. Then
@@ -617,6 +623,8 @@ There are truly many examples of induction and, as we have seen, it can be used 
 }{
 	The idea of the induction hypothesis is that by breaking an $m \times n$ bar we always produce two bars whose dimension sums are smaller than the original $m+n$. We can therefore apply the induction hypothesis, and the rest is just a~bit of algebra.
 }{
+	\Answer{$23$ breaks.}
+	
 	We show that for a~chocolate bar $m \times n$ we always need exactly $mn-1$ breaks regardless of strategy. For the given bar $8 \times 3$ this is $23$ breaks.
 	
 	We prove the statement by strong induction on the sum of dimensions $k = m+n$. For $k=2$ we have a~$1 \times 1$ bar, which needs no breaking, corresponding to $1\cdot 1 - 1 = 0$.

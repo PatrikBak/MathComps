@@ -123,6 +123,8 @@ In more complex problems, factorization is typically just one of several steps. 
 }{
     Since $a^{37}+b^{37}=(a+b)(\cdots)$, it suffices that $7 \mid a+b$.
 }{
+    \Answer{The pairs $(1,6)$, $(2,5)$, $(3,4)$.}
+
     It holds that $a^{37}+b^{37}=(a+b)(a^{36}+\cdots+b^{36})$, so $a+b \mid a^{37}+b^{37}$, thus it suffices that $7 \mid a+b$. We can easily achieve this with pairs $(a,b)$ equal to $(1,6), (2,5), (3,4)$.
 }
 
@@ -133,6 +135,8 @@ In more complex problems, factorization is typically just one of several steps. 
 }{
     One possible factorization is $n^6-1=(n^2)^3-1=(n^2-1)(n^4-n^2+1)$. The second parenthesis can indeed be factorized, but it is not at all evident how. A better factorization is $n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)$. We factorize further from here. Consequently, we already have at least 4 factors, which sounds suspicious if the number is to be a product of three primes.
 }{
+    \Answer{$n=2$.}
+
     We have the factorization
     $$
     n^6-1=(n^3)^2-1 = (n^3-1)(n^3+1)=(n-1)(n^2+n+1)(n+1)(n^2-n+1).
@@ -147,6 +151,8 @@ The common school procedure of gradual factorization works even in harder proble
 \Example{}{
     Factorize the expression $a^4-a-b^4+b$. 
 }{
+    \Answer{$(a-b)(a^3+a^2b+ab^2+b^3-1)$.}
+
     Without seeing the resulting factorization, we can say that it will contain $a-b$, because the examined expression is equal to 0 for $a=b$. Thanks to this, we purposefully rearrange the terms as $(a^4-b^4)+(a-b)$. Now we can take $a-b$ out in front of the parenthesis from both expressions and we have
     $$
     (a-b)(a^3+a^2b+ab^2+b^3)-(a-b)=(a-b)(a^3+a^2b+ab^2+b^3-1).
@@ -308,6 +314,8 @@ Generally, we actually used $a^2+2ab = (a+b)^2 - b^2$. However, we can also comp
 \Example{}{
     Factorize $m^4+m^2n^2+n^4$.
 }{
+    \Answer{$(m^2+n^2-mn)(m^2+n^2+mn)$.}
+
     The first thing that might occur to us is to complete $m^4+m^2n^2$ to a square. By doing this we get
     $$
     m^4+m^2n^2+n^4= \(m^2 +\frac{n^2}2\)^2 + \frac{3n^4}4.
@@ -326,6 +334,8 @@ Practice this by deriving the known identity:
 }{
     Factorize $a^4+4b^4$.
 }{
+    \Answer{$(a^2+2b^2-2ab)(a^2+2b^2+2ab)$.}
+
     By completing to a square we have
     $$
     a^4+4b^4 = (a^2)^2 + (2b^2)^2 = (a^2+2b^2)^2 - (2ab)^2 = (a^2+2b^2-2ab)(a^2+2b^2+2ab).
@@ -345,6 +355,8 @@ Try an example from the national round of the MO:
     $$
     Do we see a known formula?
 }{
+    \Answer{$n=1$ and $n=2$.}
+
     It holds that
     $$
     \gather
@@ -400,6 +412,8 @@ A few more harder problems for practice:
 }{
     The second sought \uv{square} will be $-c^4$, as it holds: $-(a^2-b^2)^2 - c^4 = -(a^2-b^2+c^2)^2 + 2(a^2-b^2)c^2$. That fits quite well with the rest of the expression.
 }{
+    \Answer{$(a+b+c)(a+b-c)(a-b+c)(-a+b+c)$.}
+
     First we notice $2a^2b^2-a^4-b^4$ in the expression and create a square:
     $$
     2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4 = -(a^2-b^2)^2 - c^4 + 2b^2c^2 + 2c^2a^2.
@@ -449,6 +463,8 @@ A few more harder problems for practice:
     $$  
     On the other hand, the case of even $n$ is evidently non-prime.
 }{
+    \Answer{$n=1$.}
+
     We analyze two cases according to the parity of $n$.
 
     \begitems \style i
@@ -482,6 +498,8 @@ We will demonstrate this on an example:
 \Example{}{
     Factorize $a^3+b^3+c^3-3abc$.
 }{
+    \Answer{$(a+b+c)(a^2+b^2+c^2-ab-bc-ca)$.}
+
     Using completion to a cube we have
     $$
     \align
