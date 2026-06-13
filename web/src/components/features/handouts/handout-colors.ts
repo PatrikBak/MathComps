@@ -73,8 +73,9 @@ export const ENVIRONMENT_TEXT_COLOR: Record<HandoutEnvironmentType, string> = {
 }
 
 /**
- * Badge colors for collapsible section buttons (proof, solution, hint)
- * in the detail view.
+ * Badge colors for each environment's collapsible solution/proof button in the detail view.
+ * The cross-cutting hint and answer buttons get their own palettes ({@link HINT_BADGE},
+ * {@link ANSWER_BADGE}).
  */
 export const ENVIRONMENT_BADGE: Record<HandoutEnvironmentType, BadgePaletteEntry> = {
   theorem: {
@@ -123,4 +124,18 @@ export const HINT_BADGE: BadgePaletteEntry = {
   text: 'text-yellow-200',
   bg: 'bg-yellow-500/15',
   border: 'border-yellow-400/20',
+}
+
+/**
+ * Text color for answer headings in the detail view.
+ */
+export const ANSWER_TEXT_COLOR = 'text-teal-300'
+
+/**
+ * Badge colors for the answer toggle button in the detail view.
+ */
+export const ANSWER_BADGE: BadgePaletteEntry = {
+  text: 'text-teal-200',
+  bg: 'bg-teal-500/15',
+  border: 'border-teal-400/20',
 }

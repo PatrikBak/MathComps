@@ -365,11 +365,14 @@ public static class ContentTree
         // Process body.
         (var newBody, state, var bodyChanged) = TraverseList(exercise.Body, state, transformer);
 
+        // Process the optional answer.
+        (var newAnswer, state, var answerChanged) = TraverseOptionalList(exercise.Answer, state, transformer);
+
         // Process solution.
         (var newSolution, state, var solutionChanged) = TraverseList(exercise.Solution, state, transformer);
 
         // Determine if anything changed.
-        var anyChanged = titleChanged || bodyChanged || solutionChanged;
+        var anyChanged = titleChanged || bodyChanged || answerChanged || solutionChanged;
 
         // Reconstruct only if needed.
         var result = anyChanged
@@ -377,6 +380,7 @@ public static class ContentTree
             {
                 Title = newTitle,
                 Body = newBody,
+                Answer = newAnswer,
                 Solution = newSolution
             }
             : exercise;
@@ -424,11 +428,14 @@ public static class ContentTree
             hintsBuilder.Add(newHint);
         }
 
+        // Process the optional answer.
+        (var newAnswer, state, var answerChanged) = TraverseOptionalList(problem.Answer, state, transformer);
+
         // Process solution.
         (var newSolution, state, var solutionChanged) = TraverseList(problem.Solution, state, transformer);
 
         // Determine if anything changed.
-        var anyChanged = titleChanged || bodyChanged || hintsChanged || solutionChanged;
+        var anyChanged = titleChanged || bodyChanged || hintsChanged || answerChanged || solutionChanged;
 
         // Reconstruct only if needed.
         var result = anyChanged
@@ -437,6 +444,7 @@ public static class ContentTree
                 Title = newTitle,
                 Body = newBody,
                 Hints = hintsBuilder.ToImmutable(),
+                Answer = newAnswer,
                 Solution = newSolution
             }
             : problem;
@@ -464,11 +472,14 @@ public static class ContentTree
         // Process body.
         (var newBody, state, var bodyChanged) = TraverseList(example.Body, state, transformer);
 
+        // Process the optional answer.
+        (var newAnswer, state, var answerChanged) = TraverseOptionalList(example.Answer, state, transformer);
+
         // Process solution.
         (var newSolution, state, var solutionChanged) = TraverseList(example.Solution, state, transformer);
 
         // Determine if anything changed.
-        var anyChanged = titleChanged || bodyChanged || solutionChanged;
+        var anyChanged = titleChanged || bodyChanged || answerChanged || solutionChanged;
 
         // Reconstruct only if needed.
         var result = anyChanged
@@ -476,6 +487,7 @@ public static class ContentTree
             {
                 Title = newTitle,
                 Body = newBody,
+                Answer = newAnswer,
                 Solution = newSolution
             }
             : example;
@@ -547,6 +559,31 @@ public static class ContentTree
         return newBlock is not RawContentBlock rawResult
             ? throw new InvalidOperationException($"Transformer returned {newBlock.GetType().Name} but expected {nameof(RawContentBlock)}")
             : new(rawResult, newState, changed);
+    }
+
+    /// <summary>
+    /// Traverses an optional list of blocks, leaving a null list untouched. Used for fields like a
+    /// problem's answer that are null when absent.
+    /// </summary>
+    /// <typeparam name="TState">The type of state threaded through the traversal.</typeparam>
+    /// <param name="items">The optional list of blocks, or null when absent.</param>
+    /// <param name="state">The current state.</param>
+    /// <param name="transformer">The transformation function.</param>
+    /// <returns>A <see cref="TraversalResult{TNode, TState}"/> containing the result list (or null).</returns>
+    private static TraversalResult<ImmutableList<RawContentBlock>?, TState> TraverseOptionalList<TState>(
+        ImmutableList<RawContentBlock>? items,
+        TState state,
+        NodeTransformer<TState> transformer
+    )
+    {
+        // A null list carries no content to traverse.
+        if (items is null)
+            return new(null, state, false);
+
+        // Traverse it like any other block list. The ! silences CS8619: TraversalResult is invariant
+        // in its node type, so the non-nullable list result doesn't implicitly widen to this method's
+        // nullable-node return type, even though the value is fine.
+        return TraverseList(items, state, transformer)!;
     }
 
     #endregion

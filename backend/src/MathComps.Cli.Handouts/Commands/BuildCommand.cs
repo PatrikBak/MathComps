@@ -379,9 +379,9 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             .Where(block => block is Exercise or Problem or Example)
             .Select(block => block switch
             {
-                Exercise exercise => exercise with { Solution = [] },
-                Problem problem => problem with { Solution = [], Hints = [] },
-                Example example => example with { Solution = [] },
+                Exercise exercise => exercise with { Solution = [], Answer = null },
+                Problem problem => problem with { Solution = [], Hints = [], Answer = null },
+                Example example => example with { Solution = [], Answer = null },
                 _ => block
             })
             .ToImmutableList();

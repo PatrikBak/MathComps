@@ -43,10 +43,12 @@ public record Theorem(
 /// </summary>
 /// <param name="Title">The optional title or number of the exercise.</param>
 /// <param name="Body">The content that forms the question or problem statement.</param>
+/// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content that provides the solution to the exercise.</param>
 public record Exercise(
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
+    ImmutableList<RawContentBlock>? Answer,
     ImmutableList<RawContentBlock> Solution
 ) : ContentBlock;
 
@@ -58,12 +60,14 @@ public record Exercise(
 /// <param name="Title">The optional title of the problem.</param>
 /// <param name="Body">The main content of the problem statement.</param>
 /// <param name="Hints">A list of hints, where each hint is a list of content blocks. Can be empty.</param>
+/// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing the solution to the problem.</param>
 public record Problem(
     int Difficulty,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<ImmutableList<RawContentBlock>> Hints,
+    ImmutableList<RawContentBlock>? Answer,
     ImmutableList<RawContentBlock> Solution
 ) : ContentBlock;
 
@@ -73,10 +77,12 @@ public record Problem(
 /// </summary>
 /// <param name="Title">The optional title of the example.</param>
 /// <param name="Body">The main content demonstrating the example.</param>
+/// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing a solution or further explanation.</param>
 public record Example(
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
+    ImmutableList<RawContentBlock>? Answer,
     ImmutableList<RawContentBlock> Solution
 ) : ContentBlock;
 
