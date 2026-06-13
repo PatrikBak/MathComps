@@ -379,6 +379,9 @@ public static class TexEmitter
         // Open the solution argument.
         builder.Append("}{");
 
+        // Emit the optional final answer as a leading \Answer{...} inside the solution.
+        EmitAnswer(builder, exercise.Answer);
+
         // Emit the solution content if present.
         if (exercise.Solution.Count > 0)
         {
@@ -427,6 +430,9 @@ public static class TexEmitter
         // Open the final brace group for the solution.
         builder.Append('{');
 
+        // Emit the optional final answer as a leading \Answer{...} inside the solution.
+        EmitAnswer(builder, problem.Answer);
+
         // Emit the solution content if present.
         if (problem.Solution.Count > 0)
         {
@@ -439,6 +445,27 @@ public static class TexEmitter
         // Close the solution and the problem block with a trailing blank line.
         builder.AppendLine("}");
         builder.AppendLine();
+    }
+
+    /// <summary>
+    /// Emits an optional final answer as a leading <c>\Answer{...}</c> macro inside a solution brace
+    /// group. Does nothing when the answer is null or empty.
+    /// </summary>
+    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="answer">The answer content, or null when the block carries no answer.</param>
+    private static void EmitAnswer(StringBuilder builder, ImmutableList<RawContentBlock>? answer)
+    {
+        // Skip blocks that carry no answer.
+        if (answer is not { Count: > 0 })
+            return;
+
+        // Emit \Answer{...} on its own indented lines, ahead of the solution content.
+        builder.AppendLine();
+        builder.Append(Indent).AppendLine(@"\Answer{");
+        EmitContentBlocks(builder, answer, Indent + Indent);
+        TrimTrailingWhitespace(builder);
+        builder.AppendLine();
+        builder.Append(Indent).AppendLine("}");
     }
 
     /// <summary>
@@ -460,6 +487,9 @@ public static class TexEmitter
 
         // Open the solution argument.
         builder.Append("}{");
+
+        // Emit the optional final answer as a leading \Answer{...} inside the solution.
+        EmitAnswer(builder, example.Answer);
 
         // Emit the solution content if present.
         if (example.Solution.Count > 0)

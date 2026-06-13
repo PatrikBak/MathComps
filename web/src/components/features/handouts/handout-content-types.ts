@@ -151,6 +151,8 @@ type ExerciseBlock = {
   title?: RawContentBlock | null
   /** The exercise statement/question */
   body: RawContentSequence
+  /** Optional final answer to the exercise. Absent when it has none. */
+  answer?: RawContentSequence
   /** The solution to the exercise */
   solution: RawContentSequence
 }
@@ -167,6 +169,8 @@ type ProblemBlock = {
   body: RawContentSequence
   /** Array of collapsible hints, each hint is a content sequence */
   hints: RawContentList
+  /** Optional final answer to the problem. Absent when it has none. */
+  answer?: RawContentSequence
   /** The complete solution to the problem */
   solution: RawContentSequence
 }
@@ -179,6 +183,8 @@ type ExampleBlock = {
   title?: RawContentBlock | null
   /** The example setup/problem */
   body: RawContentSequence
+  /** Optional final answer to the example. Absent when it has none. */
+  answer?: RawContentSequence
   /** The worked solution */
   solution: RawContentSequence
 }

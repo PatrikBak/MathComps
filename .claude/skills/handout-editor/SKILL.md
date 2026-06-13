@@ -78,6 +78,14 @@ Ignore all warnings — do not investigate, fix, or mention them — with one ex
 
 **`\Problem` stars argument** must be a non-negative integer (`0`, `1`, `2`, …). Never leave it empty (`{}`). Use `{0}` when the difficulty is unspecified.
 
+**`\Answer{result}`** — an optional final answer (a number, expression, yes/no) for a `\Problem`, `\Exercise`, or `\Example`. Place it at the START of the solution argument, with the worked solution on the next line; it renders as an italic `Výsledok:` / `Výsledek:` / `Answer:` line above the solution and feeds a separate collapsible answer on the web. Omit it for proof-style problems with no short result — never write `\Answer{}`. Example:
+```tex
+}{
+    \Answer{Dve riešenia: $(1,1)$ a~$(-1/2,-1/2)$.}
+    Odčítaním rovníc dostaneme \dots
+}
+```
+
 **`\NamedProof{caption}`** — `\Theorem` auto-prepends an italic `Dôkaz.` (or `Důkaz.` / `Proof.`) caption to its proof argument. `\NamedProof` at the START of the proof body REPLACES that caption with `caption` italicized. Use ONLY when `caption` already plays the role of "Dôkaz." — i.e. it contains/replaces the word, as in `\NamedProof{Dôkaz 1 (matematická indukcia).}` to label one of several alternative proofs. Do NOT use it for sub-case markers like `(⇒)`, `(⇐)`, `Priama implikácia.`, `Obrátená implikácia.` — those are case headers WITHIN one proof, and the default `Dôkaz.` must remain. For those, write plain `\textit{($\Rightarrow$)}` at the start of the case; the rendered output is `Dôkaz. (⇒) ...`, which is the intended look.
 
 When the user asks to **reformat or transcribe** (e.g. "convert this old format", "add these problems"), copy content faithfully — do not invent, improve, or fill in solutions. Leave solution arguments as `{}` if no solution is provided.

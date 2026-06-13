@@ -307,27 +307,11 @@ public static class TexStringParser
                 Proof: [.. ParseRawContent(arguments[2])]
             ),
 
-            "Exercise" => new Exercise(
-                Title: ParseAtMostSingleRawBlock(arguments[0]),
-                Body: [.. ParseRawContent(arguments[1])],
-                Solution: [.. ParseRawContent(arguments[2])]
-            ),
+            "Exercise" => BuildExercise(arguments),
 
-            "Problem" => new Problem(
-                Difficulty: int.Parse(arguments[0]),
-                Title: ParseAtMostSingleRawBlock(arguments[1]),
-                Body: [.. ParseRawContent(arguments[2])],
-                // Hints are arguments 3 to n-2 (everything between Body and Solution)
-                Hints: [.. arguments[3..^1].Select(hint => (ImmutableList<RawContentBlock>)[.. ParseRawContent(hint)])],
-                // Solution is always the last argument
-                Solution: [.. ParseRawContent(arguments[^1])]
-            ),
+            "Problem" => BuildProblem(arguments),
 
-            "Example" => new Example(
-                Title: ParseAtMostSingleRawBlock(arguments[0]),
-                Body: [.. ParseRawContent(arguments[1])],
-                Solution: [.. ParseRawContent(arguments[2])]
-            ),
+            "Example" => BuildExample(arguments),
 
             "Highlight" => new Paragraph(
                 Content: [.. ParseRawContent(arguments[0])],
@@ -347,6 +331,91 @@ public static class TexStringParser
         return (newBlock, newIndex);
     }
 
+    /// <summary>
+    /// Builds a <see cref="Problem"/> from its raw arguments, splitting a leading
+    /// <c>\Answer{...}</c> off the solution into the structured answer field.
+    /// </summary>
+    /// <param name="arguments">The raw braced arguments of the <c>\Problem</c> command.</param>
+    /// <returns>The parsed problem block.</returns>
+    private static Problem BuildProblem(List<string> arguments)
+    {
+        // Pull the optional final answer off the front of the solution argument.
+        var (answer, solution) = SplitLeadingAnswer(arguments[^1]);
+
+        // Assemble the problem; hints are everything between body and solution.
+        return new Problem(
+            Difficulty: int.Parse(arguments[0]),
+            Title: ParseAtMostSingleRawBlock(arguments[1]),
+            Body: [.. ParseRawContent(arguments[2])],
+            Hints: [.. arguments[3..^1].Select(hint => (ImmutableList<RawContentBlock>)[.. ParseRawContent(hint)])],
+            Answer: answer is null ? null : [.. ParseRawContent(answer)],
+            Solution: [.. ParseRawContent(solution)]
+        );
+    }
+
+    /// <summary>
+    /// Builds an <see cref="Exercise"/> from its raw arguments, splitting a leading
+    /// <c>\Answer{...}</c> off the solution into the structured answer field.
+    /// </summary>
+    /// <param name="arguments">The raw braced arguments of the <c>\Exercise</c> command.</param>
+    /// <returns>The parsed exercise block.</returns>
+    private static Exercise BuildExercise(List<string> arguments)
+    {
+        // Pull the optional final answer off the front of the solution argument.
+        var (answer, solution) = SplitLeadingAnswer(arguments[2]);
+
+        // Assemble the exercise.
+        return new Exercise(
+            Title: ParseAtMostSingleRawBlock(arguments[0]),
+            Body: [.. ParseRawContent(arguments[1])],
+            Answer: answer is null ? null : [.. ParseRawContent(answer)],
+            Solution: [.. ParseRawContent(solution)]
+        );
+    }
+
+    /// <summary>
+    /// Builds an <see cref="Example"/> from its raw arguments, splitting a leading
+    /// <c>\Answer{...}</c> off the solution into the structured answer field.
+    /// </summary>
+    /// <param name="arguments">The raw braced arguments of the <c>\Example</c> command.</param>
+    /// <returns>The parsed example block.</returns>
+    private static Example BuildExample(List<string> arguments)
+    {
+        // Pull the optional final answer off the front of the solution argument.
+        var (answer, solution) = SplitLeadingAnswer(arguments[2]);
+
+        // Assemble the example.
+        return new Example(
+            Title: ParseAtMostSingleRawBlock(arguments[0]),
+            Body: [.. ParseRawContent(arguments[1])],
+            Answer: answer is null ? null : [.. ParseRawContent(answer)],
+            Solution: [.. ParseRawContent(solution)]
+        );
+    }
+
+    /// <summary>
+    /// Splits a leading <c>\Answer{...}</c> off a solution argument. The macro only counts when it
+    /// is the very first token of the solution; its braced content becomes the answer and the rest
+    /// becomes the remaining solution. Returns a null answer when no leading macro is present.
+    /// </summary>
+    /// <param name="solutionArgument">The raw solution argument, possibly prefixed with the macro.</param>
+    /// <returns>The extracted answer (or null) and the remaining solution text.</returns>
+    private static (string? answer, string solution) SplitLeadingAnswer(string solutionArgument)
+    {
+        // The answer macro only counts when it leads the solution.
+        var trimmedStart = solutionArgument.TrimStart();
+        const string answerMacro = @"\Answer";
+        if (!trimmedStart.StartsWith(answerMacro, StringComparison.Ordinal))
+            return (null, solutionArgument);
+
+        // Read the braced answer content that follows the macro name; bail if it isn't a brace group
+        // (e.g. an unrelated command like \Answers... that merely shares the prefix).
+        if (!TryGetBracedContent(trimmedStart, answerMacro.Length, out var answer, out var afterAnswerIndex))
+            return (null, solutionArgument);
+
+        // Everything past the answer's closing brace is the actual solution.
+        return (answer, trimmedStart[afterAnswerIndex..]);
+    }
 
     /// <summary>
     /// Parses a string that may contain text, math, and lists, returning a list of raw blocks.

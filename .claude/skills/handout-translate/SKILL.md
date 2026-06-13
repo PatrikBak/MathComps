@@ -20,7 +20,7 @@ Pick the mode by checking the target file first, then the user's pointer:
 Scope:
 
 - One source `.tex` file → one target `.tex` file in `data/handouts/`. Keep the source filename stem; change only the language suffix (e.g., `factorization.en.tex` → `factorization.sk.tex`).
-- Translate **all prose**: statements, solutions, section headings, footnotes, intro text.
+- Translate **all prose**: statements, solutions, `\Answer` results, section headings, footnotes, intro text.
 - Keep all math, macro names, and structure identical.
 - Set the correct `\setlanguage{...}` and `\MathcompsLink{...}` slug.
 - Match the target language's label conventions used in existing handouts.

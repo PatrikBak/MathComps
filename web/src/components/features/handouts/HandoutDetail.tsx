@@ -18,6 +18,8 @@ import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard, type DisclosurePanelProps } from './Cards'
 import {
+  ANSWER_BADGE,
+  ANSWER_TEXT_COLOR,
   ENVIRONMENT_BADGE,
   ENVIRONMENT_TEXT_COLOR,
   type HandoutEnvironmentType,
@@ -208,6 +210,15 @@ function renderDocumentSections(
                 break
               case 'exercise':
               case 'example':
+                if (contentBlock.answer && contentBlock.answer.length > 0) {
+                  disclosures.push({
+                    label: t('labels.answer'),
+                    textColorClass: ANSWER_TEXT_COLOR,
+                    badge: ANSWER_BADGE,
+                    badgeContent: '=',
+                    children: renderBlocks(contentBlock.answer, imagesById, imageMissingText),
+                  })
+                }
                 if (contentBlock.solution.length > 0) {
                   disclosures.push({
                     label: t('labels.solution'),
@@ -228,6 +239,15 @@ function renderDocumentSections(
                     children: renderBlocks(hint, imagesById, imageMissingText),
                   })
                 })
+                if (contentBlock.answer && contentBlock.answer.length > 0) {
+                  disclosures.push({
+                    label: t('labels.answer'),
+                    textColorClass: ANSWER_TEXT_COLOR,
+                    badge: ANSWER_BADGE,
+                    badgeContent: '=',
+                    children: renderBlocks(contentBlock.answer, imagesById, imageMissingText),
+                  })
+                }
                 if (contentBlock.solution.length > 0) {
                   disclosures.push({
                     label: t('labels.solution'),

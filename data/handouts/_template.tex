@@ -66,6 +66,7 @@
     \def\captionDefinition{Definice}%
     \def\captionExample{Příklad}%
     \def\captionSolution{Řešení}%
+    \def\captionAnswer{Výsledek}%
     \def\captionProblem{Úloha}%
     \def\captionRemark{Poznámka}%
     \def\captionHint{Návod}%
@@ -104,6 +105,7 @@
     \def\captionDefinition{Definícia}%
     \def\captionExample{Príklad}%
     \def\captionSolution{Riešenie}%
+    \def\captionAnswer{Výsledok}%
     \def\captionProblem{Úloha}%
     \def\captionRemark{Poznámka}%
     \def\captionHint{Návod}%
@@ -142,6 +144,7 @@
     \def\captionDefinition{Definition}%
     \def\captionExample{Example}%
     \def\captionSolution{Solution}%
+    \def\captionAnswer{Answer}%
     \def\captionProblem{Problem}%
     \def\captionRemark{Remark}%
     \def\captionHint{Hint}%
@@ -213,6 +216,35 @@
 % Helper macros to get rid of spaces when reading/printing
 \long\def\saferead#1{\ignorespaces#1}
 \long\def\safepar{\par\removelastskip}
+
+% Renders one answer line: the italic answer caption, the result, and a trailing paragraph break.
+\long\def\AnswerLine#1{{\em \captionAnswer:}\enskip\saferead{#1}\safepar}
+
+% Final answer of a problem/exercise/example: \Answer{<result>}, written at the start of the
+% solution argument. A blank line may follow it; the renderer drops it. In the collected-solution
+% sections it renders on its own line after the problem heading; inline solutions hoist it ABOVE
+% the heading (see \solutionDispatch).
+\long\def\Answer#1{\safepar\AnswerLine{#1}}
+
+% Renders an inline solution body that may begin with \Answer{...}. The caller sets \solutionHeader to
+% the heading tokens (e.g. the italic solution label). A leading answer is hoisted onto its own line
+% ABOVE the heading; otherwise the heading is printed, then the body. Mirrors \theoremDispatchProof.
+\long\def\solutionDispatch#1#2\solutionDispatchEnd{%
+  \ifx#1\Answer%
+    \solutionHoist#2\solutionDispatchEnd%
+  \else%
+    \solutionHeader\saferead{#1#2}%
+  \fi%
+}
+
+% \solutionDispatch helper for a body that starts with \Answer: #1 is the answer content, #2 the
+% remaining solution. Prints the answer line, then the heading, then the body.
+\long\def\solutionHoist#1#2\solutionDispatchEnd{\AnswerLine{#1}\solutionHeader\solutionBody#2\par\solutionBodyEnd}
+
+% Renders a solution body, dropping a leading \par so a blank line written after \Answer{...} in the
+% source doesn't open an empty line under the heading. The undelimited #1 skips the end-of-line space
+% in front of that \par; the caller's trailing \par lets an empty body match #1 safely.
+\long\def\solutionBody#1#2\solutionBodyEnd{\ifx#1\par\saferead{#2}\else\saferead{#1#2}\fi}
 
 % Remark: \Remark text  or  \Remark{label} text
 \def\Remark{\safepar\isnextchar\bgroup{\remarkwitharg}{\remarknoarg}}
@@ -287,7 +319,8 @@
 		\enskip\saferead{#2}\safepar%
 	}%
 	\ifReviewMode%
-		{\em \captionSolution.}\enskip\saferead{#3}\endblock%
+		\def\solutionHeader{{\em \captionSolution.}\enskip}%
+		\solutionDispatch#3\solutionDispatchEnd\endblock%
 	\fi%
 }
 
@@ -336,7 +369,7 @@
 		\enskip\saferead{#2}%
 	}%
 	\IfShowingTexts%
-    {{\em \captionSolution.}\enskip\saferead{#3}\endblock}%
+    {\def\solutionHeader{{\em \captionSolution.}\enskip}\solutionDispatch#3\solutionDispatchEnd\endblock}%
     {}%
 }
 
@@ -463,8 +496,11 @@
         \csname p\the\problems-hint\the\currentArgIndex\endcsname%
         \advance\currentArgIndex by 1\relax%
       \repeat%
-      \safepar{\em \captionSolution.}\enskip%
-      \csname p\the\problems-solution\endcsname%
+      \safepar%
+      % Expand the stored solution one level so \solutionDispatch can peek a leading \Answer
+      \def\solutionHeader{{\em \captionSolution.}\enskip}%
+      \expandafter\let\expandafter\currentSolution\csname p\the\problems-solution\endcsname%
+      \expandafter\solutionDispatch\currentSolution\solutionDispatchEnd%
       \endblock%
     \fi%
   \fi%
