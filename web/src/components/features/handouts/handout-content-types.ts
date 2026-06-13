@@ -225,8 +225,6 @@ type DocumentSection = {
 export type Document = {
   /** The document title (can contain LaTeX math), or null if untitled */
   title: string | null
-  /** Optional subtitle (can contain LaTeX math), displayed as main heading when present */
-  subtitle?: string | null
   /** The ordered list of document sections */
   sections: DocumentSection[]
 }
