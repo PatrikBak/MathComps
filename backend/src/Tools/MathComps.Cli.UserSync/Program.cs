@@ -1,7 +1,5 @@
 using MathComps.Cli.UserSync.Commands;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Infrastructure.Options;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,16 +26,14 @@ services.AddSingleton<IConfiguration>(configuration);
 // Configure logging to reduce noise.
 services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Warning));
 
-// Bind Clerk settings from configuration
-services.AddOptions<ClerkSettings>()
-    .Bind(configuration.GetSection(ClerkSettings.SectionName))
-    .ValidateDataAnnotations();
-
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
 
-// Add infrastructure services which should inject ClerkBackendApi and IUserManager
-services.AddInfrastructureServices();
+// Sync reads upstream users through the Clerk API client
+services.AddClerkApi();
+
+// It writes them into the database through the user manager
+services.AddUserServices();
 
 // Start the app with DI
 using var registrar = new DependencyInjectionRegistrar(services);

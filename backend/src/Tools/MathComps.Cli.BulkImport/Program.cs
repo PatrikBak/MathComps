@@ -1,13 +1,10 @@
 using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Validation;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Infrastructure.Storage;
 using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
@@ -32,22 +29,20 @@ services.AddSingleton<IConfiguration>(configuration);
 // Make sure DI can resolve DbContext — validate connects read-only for the create-vs-reuse preview.
 services.AddMathCompsDbContext(configuration);
 
-// Add infrastructure services — the metadata localization service the registry-link check uses, the read-only
-// DB-resolution service backing the preview, and the R2 uploader the import builds on.
-services.AddInfrastructureServices();
+// The metadata localization service the registry-link check uses
+services.AddLocalization();
 
-// Dedupe image uploads against a ledger kept beside this tool's sources — gitignored and preserved across runs,
-// so a re-apply skips images already on R2 no matter which draft folder they came from. Resolve the path from the
-// assembly location (bin/<config>/<tfm> ⇒ up three to the project dir) so it's found regardless of the working
-// directory. Decorate wraps the R2 uploader in the tracker; expose that one instance as ITrackedFileUploader.
+// The read-only DB-resolution service backing the preview
+services.AddBulkImport();
+
+// Resolve the ledger path from the assembly location (bin/<config>/<tfm> ⇒ up three to the project dir) so the
+// dedupe ledger is found beside this tool's sources regardless of the working directory.
 var projectDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
 var uploadLedgerPath = Path.Combine(projectDirectory, ".r2-uploads.json");
-services.AddSingleton(Options.Create(new UploadLedgerOptions { LedgerPath = uploadLedgerPath }));
-services.Decorate<IFileUploader, TrackedFileUploader>();
-services.AddSingleton(provider => (ITrackedFileUploader)provider.GetRequiredService<IFileUploader>());
+// The R2 uploader the import builds on, wrapped in the tracker that skips images already on R2 across re-applies.
+services.AddStorage().AddTrackedFileUploader(uploadLedgerPath);
 
-// The apply service lives here rather than in shared infrastructure because it depends on the tracking uploader
-// above, which only this tool wires up.
+// The apply service that writes a resolved draft to the database.
 services.AddScoped<IDraftApplyService, DraftApplyService>();
 
 // The validation pipeline both commands share.

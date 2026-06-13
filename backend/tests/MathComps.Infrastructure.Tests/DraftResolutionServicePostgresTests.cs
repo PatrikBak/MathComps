@@ -1,7 +1,9 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests;
 
@@ -17,6 +19,11 @@ namespace MathComps.Infrastructure.Tests;
 public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IDraftResolutionService>(fixture)
 {
+    /// <inheritdoc/>
+    protected override void ConfigureServices(IServiceCollection services) =>
+        // Register the bulk-import module the test resolves from
+        services.AddBulkImport();
+
     /// <summary>
     /// The slug of the one seeded text problem — it carries a Slovak original statement and an English statement
     /// translation, both with the body <see cref="SeededBody"/>, and no solution, so every per-text outcome can be

@@ -1,6 +1,5 @@
 using MathComps.Cli.Embeddings.Commands;
 using MathComps.Cli.Embeddings.Services;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Shared.Cli;
@@ -39,9 +38,6 @@ services.AddHttpClient<IGeminiEmbeddingService, GeminiEmbeddingService>();
 
 // Make sure DI can resolve DbContext
 services.AddMathCompsDbContext(configuration);
-
-// Add infrastructure services
-services.AddInfrastructureServices();
 
 // Database operations are encapsulated in a dedicated service with scoped lifetime.
 services.AddScoped<IEmbeddingDatabaseService, EmbeddingDatabaseService>();

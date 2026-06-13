@@ -1,5 +1,4 @@
 using MathComps.Api.Extensions;
-using MathComps.Infrastructure;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Shared;
@@ -63,8 +62,14 @@ builder.Services.Configure<JsonOptions>(options =>
 // Make sure we have DB
 builder.Services.AddMathCompsDbContext(builder.Configuration);
 
-// Infrastructure services: options + problem filtering service
-builder.Services.AddInfrastructureServices();
+// Problem browsing and filtering
+builder.Services.AddProblemServices();
+
+// User accounts and comments
+builder.Services.AddUserServices();
+
+// The Clerk webhook handler
+builder.Services.AddClerkWebhook();
 
 // Request localization for Accept-Language header support
 // Auto-detect supported cultures from the Language enum
