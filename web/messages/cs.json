@@ -670,6 +670,7 @@
     "user": "Uživatel"
   },
   "news": {
+    "addComment": "Komentovat",
     "categories": {
       "archive": "Archiv",
       "development": "Vývoj",
@@ -680,6 +681,7 @@
     "filtering": "Filtruji:",
     "newerArticles": "Novější články",
     "olderArticles": "Starší články",
+    "showOlder": "Starší novinky",
     "title": "Novinky"
   },
   "notFound": {

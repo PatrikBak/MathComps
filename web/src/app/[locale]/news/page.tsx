@@ -85,7 +85,7 @@ export function getAllNewsArticles(locale: Locale): NewsArticle[] {
       title: entry.title[locale],
       date: entry.date,
       category: entry.category,
-      author: entry.author,
+      cover: entry.cover,
       content,
     }
   })
@@ -98,11 +98,11 @@ export function getAllNewsArticles(locale: Locale): NewsArticle[] {
 }
 
 /**
- * The news list page, centered mid-screen.
+ * The news list page.
  */
 export default withLocale(async function NovinkyPage({ locale }) {
   return (
-    <Layout wider centerMidscreen>
+    <Layout wider>
       <Suspense>
         <NewsList articles={getAllNewsArticles(locale)} />
       </Suspense>

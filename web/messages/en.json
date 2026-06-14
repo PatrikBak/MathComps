@@ -670,6 +670,7 @@
     "user": "User"
   },
   "news": {
+    "addComment": "Comment",
     "categories": {
       "archive": "Archive",
       "development": "Development",
@@ -680,6 +681,7 @@
     "filtering": "Filtering:",
     "newerArticles": "Newer articles",
     "olderArticles": "Older articles",
+    "showOlder": "Older news",
     "title": "News"
   },
   "notFound": {

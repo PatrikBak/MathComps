@@ -2,7 +2,8 @@
  * Validates news content structure:
  * - Every news entry in news.json has matching .{locale}.mdx content files
  * - All localized fields have values for all supported locales
- * - Required fields (id, slug, date, category, author) are present
+ * - Required fields (id, slug, date, category) are present
+ * - Category is a known value, and the cover is valid (registered icon, existing figure file, or non-empty equation)
  *
  * Run with: npx tsx scripts/validate-news.ts
  */
@@ -10,7 +11,9 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { NewsIndexEntry } from '../src/components/features/news/types'
+import { NEWS_ICONS } from '../src/components/features/news/news-icons'
+import type { NewsCover, NewsIndexEntry } from '../src/components/features/news/types'
+import { NEWS_CATEGORIES } from '../src/components/features/news/types'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import {
   validateDateFormat,
@@ -24,6 +27,55 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/news')
 
 /** Path to news.json */
 const INDEX_PATH = path.join(CONTENT_DIR, '../news.json')
+
+/** Directory served as static assets, holding the figure cover SVGs referenced by news.json */
+const PUBLIC_DIR = path.join(process.cwd(), 'public')
+
+/**
+ * Validates a news entry's cover. news.json is untyped at the JSON boundary, so a missing cover, a
+ * misnamed icon, a dangling figure path, or an empty equation would otherwise only surface when the
+ * card renders.
+ *
+ * @param cover - The cover to validate; required on every entry.
+ * @param context - Description of the containing entry (for error messages).
+ *
+ * @yields Error messages for any validation failures.
+ */
+function* validateCover(cover: NewsCover | undefined, context: string): Generator<string> {
+  // Cover is mandatory
+  if (!cover) {
+    yield `❌ Missing cover for ${context}`
+    return
+  }
+
+  // Each variant validates its own required field
+  switch (cover.kind) {
+    case 'figure':
+      // The SVG must actually exist under /public, mirroring the content-file check
+      if (!fs.existsSync(path.join(PUBLIC_DIR, cover.src))) {
+        yield `❌ Missing cover figure "${cover.src}" for ${context}`
+      }
+      break
+
+    case 'equation':
+      // An empty expression would render a blank cover
+      if (!cover.latex || cover.latex.trim() === '') {
+        yield `❌ Empty cover equation for ${context}`
+      }
+      break
+
+    case 'icon':
+      // The name must be one the registry can actually render
+      if (!(cover.name in NEWS_ICONS)) {
+        yield `❌ Unknown cover icon "${cover.name}" for ${context}`
+      }
+      break
+
+    default:
+      // An unrecognized kind slipped past the untyped JSON
+      yield `❌ Unknown cover kind "${(cover as { kind: string }).kind}" for ${context}`
+  }
+}
 
 /** Main validation logic */
 function validate(): boolean {
@@ -68,13 +120,20 @@ function validate(): boolean {
     errors.push(...validateRequiredField(entry.id, 'id', context))
     errors.push(...validateRequiredField(entry.slug, 'slug', context))
     errors.push(...validateRequiredField(entry.category, 'category', context))
-    errors.push(...validateRequiredField(entry.author, 'author', context))
 
     // Validate title (LocalizedString)
     errors.push(...validateLocalizedString(entry.title, 'title', context))
 
     // Validate date format
     errors.push(...validateDateFormat(entry.date, context))
+
+    // Validate the category is one of the known values (it drives the badge color)
+    if (entry.category && !NEWS_CATEGORIES.includes(entry.category)) {
+      errors.push(`❌ Unknown category "${entry.category}" for ${context}`)
+    }
+
+    // Validate the cover (icon name registered, figure file present, equation non-empty)
+    errors.push(...validateCover(entry.cover, context))
 
     // Validate content files exist for all locales
     if (entry.slug) {

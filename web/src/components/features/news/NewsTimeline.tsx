@@ -1,10 +1,9 @@
 'use client'
 
-import { useWindowEvent } from '@mantine/hooks'
-import { ChevronLeft, ChevronRight, MessageSquare, Newspaper, X } from 'lucide-react'
+import { MessageSquare, MessageSquarePlus, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useFormatter, useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   CommentCountProvider,
@@ -21,11 +20,21 @@ import { CATEGORY_COLORS } from './news-colors'
 import { type NewsArticle, type NewsCategory } from './types'
 
 /**
+ * How many entries to show before the "older news" reveal.
+ */
+const INITIAL_VISIBLE = 8
+
+/**
+ * A timeline date split into its day/month and year parts.
+ */
+type TimelineDate = { dayMonth: string; year: string }
+
+/**
  * Validates and parses the category URL parameter.
  *
  * @param value The category value to validate.
  *
- * @return The category if valid, otherwise null.
+ * @returns The category if valid, otherwise null.
  */
 function parseCategory(value: string | null): NewsCategory | null {
   // Guard against null
@@ -36,47 +45,6 @@ function parseCategory(value: string | null): NewsCategory | null {
 
   // Return the category
   return value as NewsCategory
-}
-
-/**
- * The props for the {@link TimelineNavButton} component.
- */
-type TimelineNavButtonProps = {
-  /** The direction of the button */
-  direction: 'left' | 'right'
-  /** The click handler */
-  onClick: () => void
-  /** Whether the button is visible */
-  visible: boolean
-}
-
-/**
- * Navigation button for scrolling the timeline horizontally.
- * Positioned on the timeline axis at the left or right edge.
- */
-function TimelineNavButton({ direction, onClick, visible }: TimelineNavButtonProps) {
-  // Translations for the nav button aria-labels
-  const t = useTranslations('news')
-
-  // The correct icon component
-  const Icon = direction === 'left' ? ChevronLeft : ChevronRight
-
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'absolute bottom-[45px] -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full',
-        'bg-background border-2 border-focus/60 text-focus-light',
-        'hover:bg-surface-hover hover:border-focus-light hover:text-focus-light',
-        'transition-all duration-200',
-        direction === 'left' ? 'left-0' : 'right-0',
-        visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      )}
-      aria-label={direction === 'left' ? t('newerArticles') : t('olderArticles')}
-    >
-      <Icon size={18} strokeWidth={2.5} />
-    </button>
-  )
 }
 
 /**
@@ -99,17 +67,26 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
   // Get the count from the context
   const { count, isLoading } = useCommentCount(articleId)
 
+  // Once loaded, an empty thread shows a quiet "add a comment" invite
+  const isEmpty = !isLoading && count === 0
+
   return (
     <button
       onClick={openComments}
-      className="w-fit self-center flex items-center justify-center gap-4 py-2 px-4 text-muted hover:bg-surface/50 rounded-lg transition-colors"
+      className="w-fit flex items-center gap-3 py-1.5 px-3 -ml-3 text-muted hover:text-foreground hover:bg-surface/50 rounded-lg transition-colors"
     >
-      <div className="flex items-center gap-1.5">
-        <CountBadge count={count} color="indigo" isHighlighted={count > 0} isLoading={isLoading}>
-          <MessageSquare size={20} />
-        </CountBadge>
-      </div>
-      <span className="text-sm font-medium">{t('comments')}</span>
+      {isEmpty ? (
+        // Empty: invite to comment, no count
+        <MessageSquarePlus size={18} />
+      ) : (
+        // Loading or has comments: show the count badge
+        <div className="flex items-center gap-1.5">
+          <CountBadge count={count} color="indigo" isHighlighted={count > 0} isLoading={isLoading}>
+            <MessageSquare size={18} />
+          </CountBadge>
+        </div>
+      )}
+      <span className="text-sm font-medium">{isEmpty ? t('addComment') : t('comments')}</span>
     </button>
   )
 }
@@ -133,9 +110,8 @@ type NewsTimelineProps = {
 }
 
 /**
- * A horizontally scrollable timeline layout for news articles.
- * Desktop/Tablet: Side-by-side cards with a visual timeline below.
- * Mobile: Falls back to vertical stacked layout.
+ * A vertical timeline of news: dates run down the left with a connecting rail,
+ * newest on top. Scales to any number of posts and keeps the page top-aligned.
  */
 export function NewsTimeline({ items }: NewsTimelineProps) {
   // Translations for the news timeline
@@ -153,12 +129,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   // Parse and validate the category filter from the URL
   const categoryFilter = parseCategory(useSearchParams().get('category'))
 
-  // The scroll container ref, we'll need to manually scroll when clicking the buttons
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  // The state of the buttons that do horizontal scrolling
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(false)
+  // Whether the older entries past the initial window are revealed
+  const [showAll, setShowAll] = useState(false)
 
   // Selected article for comments modal
   const [commentsArticle, setCommentsArticle] = useState<NewsArticle | null>(null)
@@ -175,13 +147,19 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   }, [categoryFilter, router])
 
   // Filter items by category
-  const filteredItems = React.useMemo(() => {
+  const filteredItems = useMemo(() => {
     // No filtering if no category is selected
     if (!categoryFilter) return items
 
     // Otherwise filter by category
     return items.filter((item) => item.article.category === categoryFilter)
   }, [items, categoryFilter])
+
+  // The slice currently shown — capped until the reader asks for older news
+  const visibleItems = showAll ? filteredItems : filteredItems.slice(0, INITIAL_VISIBLE)
+
+  // How many entries are still hidden behind the reveal
+  const hiddenCount = filteredItems.length - visibleItems.length
 
   /**
    * Function to open the comments modal for an article
@@ -214,292 +192,107 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
     }
   }, [items, pendingTarget, openComments])
 
-  // Check scroll position to update button states
-  const updateScrollButtons = useCallback(() => {
-    // Get the scroll container element
-    const container = scrollContainerRef.current
-
-    // Guard against a not set state?
-    if (!container) return
-
-    // The threshold for when the buttons should be enabled
-    const threshold = 10
-
-    // Get the scroll position and container dimensions
-    const { scrollLeft, scrollWidth, clientWidth } = container
-
-    // Update the button states based on the scroll position
-    setCanScrollLeft(scrollLeft > threshold)
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - threshold)
-  }, [])
-
-  // Update scroll buttons on resize (cleanup handled automatically by Mantine)
-  useWindowEvent('resize', updateScrollButtons)
-
-  // Ensure scroll buttons have the right position when content changes
-  useEffect(() => {
-    updateScrollButtons()
-  }, [updateScrollButtons, filteredItems.length])
-
-  /** Function to scroll the container left or right */
-  const scroll = (direction: 'left' | 'right') => {
-    // Get the scroll container element
-    const container = scrollContainerRef.current
-
-    // Guard against a not set state?
-    if (!container) return
-
-    // Navigate to cards row → first card for precise width measurement
-    const firstCard = container.querySelector('[data-cards-row]')?.firstElementChild as HTMLElement
-
-    // Guard against no cards
-    if (!firstCard) return
-
-    // gap-6 = 1.5rem = 24px at default root font size
-    const gapPx = 24
-    const scrollAmount = firstCard.offsetWidth + gapPx
-
-    // Calculate the new scroll position
-    const newPosition =
-      direction === 'left'
-        ? container.scrollLeft - scrollAmount
-        : container.scrollLeft + scrollAmount
-
-    // Smoothly scroll to the new position
-    container.scrollTo({
-      left: newPosition,
-      behavior: 'smooth',
-    })
-  }
-
   /** Function to clear the category filter */
   const clearFilter = () => {
-    // URL change will trigger a re-render cause we're parsing
-    // the category from the URL
+    // URL change will trigger a re-render cause we're parsing the category from the URL
     router.push(ROUTES.NEWS)
   }
 
-  /** Function to format a date for the timeline */
-  const formatTimelineDate = (dateString: string) => {
+  /** Function to format a date into its day/month and year parts */
+  const formatTimelineDate = (dateString: string): TimelineDate => {
     // Parse the date string into a Date object
     const date = new Date(dateString)
 
     // Format day + month with locale-aware ordering
-    const dayMonth = format.dateTime(date, {
-      day: 'numeric',
-      month: 'numeric',
-    })
+    const dayMonth = format.dateTime(date, { day: 'numeric', month: 'numeric' })
 
-    return {
-      dayMonth,
-      year: date.getFullYear().toString(),
-    }
+    return { dayMonth, year: date.getFullYear().toString() }
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-full px-6">
-      {/* Mobile Header - stacked layout */}
-      <div className="md:hidden text-center flex flex-col gap-4">
-        {/* Title with icon */}
-        <div className="flex items-center justify-center gap-3">
-          <Newspaper size={32} className="text-focus-light shrink-0" strokeWidth={1.5} />
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('title')}</h1>
+    <div className="w-full max-w-4xl mx-auto px-6 py-10">
+      {/* Title stays in the DOM for SEO and screen readers; the running feed below makes it
+          visually redundant, so it's hidden to let content start right under the nav. */}
+      <h1 className="sr-only">{t('title')}</h1>
+
+      {/* Filter indicator - appears when a category filter is active */}
+      {categoryFilter && (
+        <div className="flex items-center gap-2 mb-8">
+          <span className="text-sm text-muted-foreground">{t('filtering')}</span>
+          <button
+            onClick={clearFilter}
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
+              CATEGORY_COLORS[categoryFilter].bg,
+              'hover:opacity-80 transition-opacity'
+            )}
+          >
+            {tCategories(categoryFilter)}
+            <X size={14} />
+          </button>
         </div>
+      )}
 
-        {/* Mobile filter indicator */}
-        {categoryFilter && (
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-sm text-muted-foreground">{t('filtering')}</span>
-            <button
-              onClick={clearFilter}
-              className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
-                CATEGORY_COLORS[categoryFilter],
-                'hover:opacity-80 transition-opacity'
-              )}
-            >
-              {tCategories(categoryFilter)}
-              <X size={14} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Timeline Section - Desktop/Tablet only */}
       {filteredItems.length > 0 && (
         <CommentCountProvider targetType="News" targetIds={articleIds}>
-          {/* MOBILE: Vertical stacked layout */}
-          <div className="md:hidden flex flex-col gap-4">
-            {filteredItems.map((item) => (
-              <div key={item.article.id} className="flex flex-col gap-2">
-                {item.card}
-                <NewsCommentButton
-                  articleId={item.article.id}
-                  openComments={() => openComments(item.article)}
-                />
-              </div>
-            ))}
-          </div>
+          <div className="flex flex-col">
+            {visibleItems.map((item, index) => {
+              // Day/month + year for the left rail (desktop)
+              const dateInfo = formatTimelineDate(item.article.date)
 
-          {/* DESKTOP/TABLET: Horizontal timeline */}
-          <div className="hidden md:block relative">
-            {/* Header row with title in center */}
-            <div className="flex items-center justify-center mb-12">
-              {/* Center: Title + optional filter */}
-              <div className="flex items-center gap-4">
-                {/* Title with icon */}
-                <div className="flex items-center gap-3">
-                  <Newspaper size={36} className="text-focus-light shrink-0" strokeWidth={1.5} />
-                  <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                    {t('title')}
-                  </h1>
-                </div>
+              // Newest entry gets a lit dot; older ones a quiet hollow one
+              const isNewest = index === 0
 
-                {/* Filter indicator - appears next to title when active */}
-                {categoryFilter && (
-                  <>
-                    <div className="w-px h-8 bg-foreground/10" />
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">{t('filtering')}</span>
-                      <button
-                        onClick={clearFilter}
+              return (
+                <div key={item.article.id} className="flex gap-0 md:gap-5">
+                  {/* Left rail with date + dot (desktop only) */}
+                  <div className="hidden md:flex shrink-0 gap-3">
+                    {/* Date */}
+                    <div className="w-14 pt-0.5 text-right">
+                      <div className="text-sm font-semibold text-foreground tabular-nums">
+                        {dateInfo.dayMonth}
+                      </div>
+                      <div className="text-xs text-muted mt-0.5">{dateInfo.year}</div>
+                    </div>
+
+                    {/* Rail line + dot */}
+                    <div className="relative flex justify-center w-3">
+                      <div className="absolute top-2 bottom-0 w-px bg-foreground/10" />
+                      <div
                         className={cn(
-                          'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
-                          CATEGORY_COLORS[categoryFilter],
-                          'hover:opacity-80 transition-opacity'
+                          'relative mt-1 w-3 h-3 rounded-full border-2',
+                          isNewest
+                            ? 'bg-focus-light border-focus-light'
+                            : 'bg-background border-foreground/25'
                         )}
-                      >
-                        {tCategories(categoryFilter)}
-                        <X size={14} />
-                      </button>
+                      />
                     </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Scrollable container with cards AND timeline */}
-            <div className="relative">
-              {/* Navigation arrows on the timeline axis */}
-              <TimelineNavButton
-                direction="left"
-                onClick={() => scroll('left')}
-                visible={canScrollLeft}
-              />
-              <TimelineNavButton
-                direction="right"
-                onClick={() => scroll('right')}
-                visible={canScrollRight}
-              />
-
-              <div
-                ref={scrollContainerRef}
-                onScroll={updateScrollButtons}
-                className="overflow-x-auto"
-                style={{
-                  scrollBehavior: 'smooth',
-                  scrollbarWidth: 'none', // Firefox
-                  msOverflowStyle: 'none', // IE/Edge
-                }}
-              >
-                {/* Hide scrollbar for Chrome/Safari */}
-                <style jsx>{`
-                  div::-webkit-scrollbar {
-                    display: none;
-                  }
-                `}</style>
-
-                <div className="flex flex-col min-w-max">
-                  {/* Cards row */}
-                  <div data-cards-row className="flex gap-6">
-                    {filteredItems.map((item) => {
-                      return (
-                        <div
-                          key={item.article.id}
-                          className="w-[340px] lg:w-[388px] flex-shrink-0 flex flex-col gap-2"
-                        >
-                          <div className="h-[200px] transition-all duration-300 hover:saturate-100">
-                            {item.card}
-                          </div>
-                          <NewsCommentButton
-                            articleId={item.article.id}
-                            openComments={() => openComments(item.article)}
-                          />
-                        </div>
-                      )
-                    })}
                   </div>
 
-                  {/* Timeline row - scrolls together with cards */}
-                  <div className="relative mt-6 pt-4">
-                    {/* Horizontal line spanning entire width - fade towards older */}
-                    <div className="absolute top-4 left-0 right-0 h-[3px] bg-gradient-to-r from-focus-light via-focus/30 to-muted/10" />
-
-                    {/* Date markers */}
-                    <div className="flex gap-6">
-                      {filteredItems.map((item, index) => {
-                        // Parse the date info for the timeline
-                        const dateInfo = formatTimelineDate(item.article.date)
-
-                        // Check if this is the first item, it will be highlighted
-                        const isFirst = index === 0
-
-                        return (
-                          <div
-                            key={item.article.id}
-                            className="w-[340px] lg:w-[388px] flex-shrink-0 flex flex-col items-center"
-                          >
-                            {/* Timeline dot with optional glow ring for newest */}
-                            <div className="relative -mt-[6px] z-10">
-                              {/* Animated glow ring for first/newest item */}
-                              {isFirst && <div className="absolute inset-0 rounded-full" />}
-                              {/* Dot - oldest dots get progressively darker borders */}
-                              {(() => {
-                                // Calculate border color - fades from indigo to dark slate
-                                const borderOpacity = Math.max(20, 60 - index * 10)
-                                const borderColor = isFirst
-                                  ? // First item is styled with className, others with inline style
-                                    undefined
-                                  : `color-mix(in srgb, var(--color-focus) ${borderOpacity}%, transparent)`
-
-                                return (
-                                  <div
-                                    className={cn(
-                                      'w-4 h-4 rounded-full border-[3px]',
-                                      isFirst
-                                        ? 'bg-focus-light border-focus-light/50'
-                                        : 'bg-background'
-                                    )}
-                                    style={isFirst ? undefined : { borderColor }}
-                                  />
-                                )
-                              })()}
-                            </div>
-
-                            {/* Date info - also fades with age */}
-                            <div
-                              className="mt-4 text-center transition-opacity"
-                              style={{ opacity: isFirst ? 1 : Math.max(0.5, 1 - index * 0.12) }}
-                            >
-                              <div
-                                className={cn(
-                                  'text-xl font-bold',
-                                  isFirst ? 'text-focus-light' : 'text-muted'
-                                )}
-                              >
-                                {dateInfo.dayMonth}
-                              </div>
-                              <div className="text-sm text-muted mt-1">{dateInfo.year}</div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
+                  {/* Entry: the card + its comment affordance */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-2 pb-10">
+                    {item.card}
+                    <NewsCommentButton
+                      articleId={item.article.id}
+                      openComments={() => openComments(item.article)}
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
+              )
+            })}
           </div>
+
+          {/* Reveal for older entries */}
+          {hiddenCount > 0 && (
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={() => setShowAll(true)}
+                className="px-5 py-2 text-sm font-medium text-muted hover:text-foreground border border-foreground/10 hover:border-foreground/25 rounded-lg transition-colors"
+              >
+                {t('showOlder')} ({hiddenCount})
+              </button>
+            </div>
+          )}
         </CommentCountProvider>
       )}
 

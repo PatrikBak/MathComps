@@ -3,7 +3,7 @@ import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 
-import { NewsAuthorLabel } from './NewsAuthorLabel'
+import { NewsCardCover } from './NewsCardCover'
 import { NewsCategoryBadge } from './NewsCategoryBadge'
 import { NewsDateLabel } from './NewsDateLabel'
 import type { NewsArticle } from './types'
@@ -90,27 +90,31 @@ type NewsCardProps = {
  */
 export function NewsCard({ article }: NewsCardProps) {
   return (
-    <article className="bg-surface/50 border border-foreground/10 rounded-xl p-4 sm:p-5 h-full flex flex-col overflow-hidden">
-      {/* Metadata: Badge pinned top-right, Author in left column */}
-      <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 mb-3 text-sm items-start">
-        {/* Left column: Date + Author wrap naturally */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          {/* Show date on mobile */}
+    <article className="bg-surface/50 border border-foreground/10 rounded-xl flex flex-col md:flex-row overflow-hidden">
+      {/* Cover: a banner on mobile, a left panel on desktop */}
+      <div className="h-40 md:h-auto md:w-52 shrink-0">
+        <NewsCardCover cover={article.cover} title={article.title} />
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-col flex-grow p-4 sm:p-5 min-w-0">
+        {/* Eyebrow: category kicker, plus the date on mobile (timeline shows it on desktop) */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1.5">
+          <NewsCategoryBadge category={article.category} />
           <div className="md:hidden">
             <NewsDateLabel date={article.date} />
           </div>
-          <NewsAuthorLabel author={article.author} />
         </div>
-        {/* Right column: Badge stays pinned */}
-        <NewsCategoryBadge category={article.category} />
-      </div>
 
-      {/* Title */}
-      <h3 className="text-xl font-bold text-foreground leading-tight mb-3">{article.title}</h3>
+        {/* Title */}
+        <h3 className="font-serif text-xl font-bold text-foreground leading-tight mb-2">
+          {article.title}
+        </h3>
 
-      {/* MDX Content - server-rendered for SEO */}
-      <div className="flex-grow">
-        <MDXRemote source={article.content} components={cardMdxComponents} />
+        {/* MDX Content - server-rendered for SEO */}
+        <div className="flex-grow">
+          <MDXRemote source={article.content} components={cardMdxComponents} />
+        </div>
       </div>
     </article>
   )

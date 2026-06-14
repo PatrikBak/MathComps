@@ -1,9 +1,51 @@
 import type { LocalizedString } from '@/i18n/i18n'
 
+import type { NewsIconName } from './news-icons'
+
 /**
- * Available news article categories
+ * Available news article categories.
  */
-export type NewsCategory = 'archive' | 'handouts' | 'development' | 'misc'
+export const NEWS_CATEGORIES = ['archive', 'handouts', 'development', 'misc'] as const
+
+/**
+ * A news article category.
+ */
+export type NewsCategory = (typeof NEWS_CATEGORIES)[number]
+
+/**
+ * A hand-drawn handout figure, rendered from an SVG.
+ */
+type NewsFigureCover = {
+  /** Discriminant. */
+  kind: 'figure'
+  /** Public path to the SVG (e.g. /news/equal-tangents.svg). */
+  src: string
+}
+
+/**
+ * A KaTeX-rendered expression.
+ */
+type NewsEquationCover = {
+  /** Discriminant. */
+  kind: 'equation'
+  /** The LaTeX body (no delimiters), rendered in display mode. */
+  latex: string
+}
+
+/**
+ * A line icon.
+ */
+type NewsIconCover = {
+  /** Discriminant. */
+  kind: 'icon'
+  /** Which registered icon to render. */
+  name: NewsIconName
+}
+
+/**
+ * The cover art for a news card: a hand-drawn handout figure, a rendered equation, or a line icon.
+ */
+export type NewsCover = NewsFigureCover | NewsEquationCover | NewsIconCover
 
 /**
  * News article metadata from news.json index (raw JSON structure).
@@ -20,24 +62,16 @@ export type NewsIndexEntry = {
   date: string
   /** Category of the article */
   category: NewsCategory
-  /** Author of the article */
-  author: string
+  /** Cover art shown on the card. */
+  cover: NewsCover
 }
 
 /**
- * A single news article
+ * A single news article, resolved to one locale from a {@link NewsIndexEntry}.
  */
-export type NewsArticle = {
-  /** Permanent unique identifier (nanoid from frontmatter) */
-  id: string
-  /** Article title */
+export type NewsArticle = Omit<NewsIndexEntry, 'slug' | 'title'> & {
+  /** Article title resolved to the current locale. */
   title: string
-  /** Publication date (ISO string) */
-  date: string
-  /** Category for color coding */
-  category: NewsCategory
-  /** Author name */
-  author: string
-  /** MDX content body (rendered in cards) */
+  /** MDX content body (rendered in cards). */
   content: string
 }

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="none" stroke="#1e293b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Poisoned corner cell: the square you don't want to eat -->
+  <rect x="16" y="17" width="22" height="22" fill="#1e293b" fill-opacity="0.1" stroke="none" />
+  <!-- Chocolate bar outline -->
+  <rect x="16" y="17" width="88" height="66" />
+  <!-- Vertical cell divisions -->
+  <line x1="38" y1="17" x2="38" y2="83" />
+  <line x1="60" y1="17" x2="60" y2="83" />
+  <line x1="82" y1="17" x2="82" y2="83" />
+  <!-- Horizontal cell divisions -->
+  <line x1="16" y1="39" x2="104" y2="39" />
+  <line x1="16" y1="61" x2="104" y2="61" />
+  <!-- The poison mark in the corner cell -->
+  <line x1="22" y1="23" x2="32" y2="33" />
+  <line x1="32" y1="23" x2="22" y2="33" />
+</svg>
