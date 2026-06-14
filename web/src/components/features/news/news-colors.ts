@@ -1,7 +1,7 @@
 import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 
 /**
- * Category badge background colors.
+ * Accent color for each news category.
  */
 export const CATEGORY_COLORS = {
   archive: ACCENT_COLOR_MAP.indigo,

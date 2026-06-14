@@ -16,7 +16,8 @@ type NewsCategoryBadgeProps = {
 }
 
 /**
- * Colored badge for news article category.
+ * Category label for a news article, styled as a small colored eyebrow.
+ * Links to the category-filtered news list.
  */
 export function NewsCategoryBadge({ category }: NewsCategoryBadgeProps) {
   // Translations for category labels
@@ -28,10 +29,9 @@ export function NewsCategoryBadge({ category }: NewsCategoryBadgeProps) {
   // Fetch the color scheme mapping for the category
   const scheme = CATEGORY_COLORS[category]
 
-  // Classes for the badge combining the defaults and category-specific classes
+  // Eyebrow styling: small uppercase letterspaced label in the category color
   const className = cn(
-    'px-2.5 py-1 text-xs font-medium rounded-md',
-    scheme.bg,
+    'text-xs font-semibold uppercase tracking-wider',
     scheme.text,
     'hover:opacity-80 transition-opacity'
   )
