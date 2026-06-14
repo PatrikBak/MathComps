@@ -5,28 +5,11 @@ using System.Text.Json;
 namespace MathComps.Cli.Tagging.Commands.Helpers;
 
 /// <summary>
-/// Commons helpers to parse AI response for tagging, which is common for both suggesting tags
-/// and actual problem tagging.
+/// Helpers to parse the AI tagging responses — fitness scores from the generate pass and approvals from the veto
+/// pass — both of which arrive as JSON keyed by tag name, possibly wrapped in markdown fences.
 /// </summary>
 public static class TaggingHelpers
 {
-    /// <summary>
-    /// Parses a raw assistant response produced by the tagging tools into a structured <see cref="SimpleTagsByCategory"/>.
-    /// Cleans markdown code fences. Doesn't catch exceptions.
-    /// </summary>
-    /// <param name="response">Raw text returned by the assistant. May include markdown fences (``` or ```json</param>
-    /// <returns>A <see cref="SimpleTagsByCategory"/> when parsing succeeds</returns>
-    public static SimpleTagsByCategory ParseSuggestedTags(string response)
-    {
-        // Clean up AI response - remove markdown code blocks if present.
-        var cleanedResponse = CleanJsonResponse(response);
-
-        // Attempt to parse the JSON response to validate format and count suggestions.
-        return JsonSerializer.Deserialize<SimpleTagsByCategory>(cleanedResponse)
-            // Ensure it doesn't parse to null
-            ?? throw new Exception("AI response parsed to null") { Data = { ["AiResponse"] = response } };
-    }
-
     /// <summary>
     /// Parses a raw assistant response containing tag approval decisions into a structured dictionary.
     /// Cleans markdown code fences. Doesn't catch exceptions.
@@ -60,17 +43,6 @@ public static class TaggingHelpers
             // Ensure it doesn't parse to null
             ?? throw new Exception("AI response parsed to null") { Data = { ["AiResponse"] = response } };
     }
-
-    /// <summary>
-    /// Reads tag names from a file, where each line contains one tag name.
-    /// Trims whitespace from each line and filters out empty lines and commented-out lines (starting with #).
-    /// </summary>
-    /// <param name="filePath">Path to the file containing tag names, one per line.</param>
-    /// <returns>A hash set of tag names read from the file.</returns>
-    public static HashSet<string> ReadTagsFromFile(string filePath)
-        => [.. File.ReadAllLines(filePath)
-            .Select(line => line.Trim())
-            .Where(line => line != "" && !line.StartsWith('#'))];
 
     /// <summary>
     /// Cleans AI response by removing markdown code block markers that interfere with JSON parsing.

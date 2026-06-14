@@ -1,12 +1,11 @@
 /**
- * The draft-preflight manifest contract — the single artifact the preflight
- * emits and the C# import CLI deserializes — plus the verdict shapes that
- * describe a run's issues. Kept in one place so both sides stay strongly typed.
+ * The draft-preflight manifest contract plus the verdict shapes that describe a
+ * run's issues.
  */
 
 import type { Locale } from '../src/i18n/i18n'
 
-/** A problem's two markdown halves, used to tag where an error was found. */
+/** A problem's two markdown halves. */
 export type ProblemHalf = 'statement' | 'solution'
 
 /** Whether a verdict entry blocks import (`error`) or is merely advisory (`warning`). */
@@ -18,7 +17,7 @@ export type Season = {
   year: number
 }
 
-/** Folder-level taxonomy, slugs verbatim from `_meta.yaml` for the C# side to resolve. */
+/** Folder-level taxonomy, slugs verbatim from `_meta.yaml`. */
 export type ManifestMeta = {
   /** Competition slug (e.g. `csmo`). */
   competition: string
@@ -28,7 +27,7 @@ export type ManifestMeta = {
   round: string | null
   /** Season the draft belongs to. */
   season: Season
-  /** Round-instance date as `YYYY-MM-DD`, feeding `RoundInstance.Date`. */
+  /** Round-instance date as `YYYY-MM-DD`. */
   date: string
   /** The original language of this draft — the body whose `pN.<lang>.md` matches it is the original. */
   language: Locale
@@ -46,7 +45,7 @@ export type ManifestText = {
   solutionMarkdown: string | null
 }
 
-/** One problem's normalized content, ready for the C# side to persist as rows. */
+/** One problem's normalized content. */
 export type ManifestProblem = {
   /** 1-based position within the round, taken from the `pN.yaml` / `pN.<lang>.md` filenames. */
   order: number
@@ -54,6 +53,11 @@ export type ManifestProblem = {
   authors: string[]
   /** External solution URL, or `null` when absent. */
   solutionLink: string | null
+  /**
+   * Tag slugs to assign, or `null` when the `pN.yaml` omits a `tags:` key. Unlike `authors`, an absent key stays
+   * `null` (leave existing tags untouched) rather than defaulting to `[]` (clear) — omit and clear stay distinct.
+   */
+  tags: string[] | null
   /** Language variants — the original first, then translations in supported-locale order. */
   texts: ManifestText[]
   /** Basenames of every image referenced across this problem's texts (flat, under `images/`). */
@@ -84,7 +88,7 @@ type Verdict = {
   errors: VerdictError[]
 }
 
-/** The single artifact a preflight run produces — the C# import contract. */
+/** The assembled draft-preflight manifest. */
 export type DraftManifest = {
   /** Folder-level taxonomy. */
   meta: ManifestMeta

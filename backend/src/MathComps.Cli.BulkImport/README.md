@@ -14,6 +14,8 @@ Both commands run the same checks, so a clean `validate` all but guarantees a cl
 
 Image uploads are deduplicated against a ledger kept beside this tool's sources (`.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
 
+Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/README.md)'s `tag-draft` writes a `tags:` list into each `pN.yaml`, which `apply` turns into the problem's tags. Run it *before* `validate`, so the preflight checks the slugs.
+
 ## Draft folder
 
 A folder of plain files — one round's problems plus their images. Full authoring spec: [the draft format reference](../../../../web/scripts/PREFLIGHT_README.md).
@@ -22,7 +24,7 @@ A folder of plain files — one round's problems plus their images. Full authori
 my-draft/
   _meta.yaml        # competition / category / round / season / date / language
   p1.sk.md          # problem 1 — statement + solution (one file per language)
-  p1.yaml           # problem 1 metadata — authors, solution link
+  p1.yaml           # problem 1 metadata — authors, solution link, tags
   p2.sk.md
   p2.yaml
   images/           # referenced images (flat)

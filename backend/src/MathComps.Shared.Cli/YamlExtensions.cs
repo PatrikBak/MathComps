@@ -1,10 +1,11 @@
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace MathComps.Cli.Translation.Extensions;
+namespace MathComps.Shared.Cli;
 
 /// <summary>
-/// Extension methods for YAML serialization operations.
+/// Extension methods for YAML serialization — the YAML counterpart of the JSON helpers, shared by the CLI tools that
+/// read and write the draft sidecars. camelCase naming matches the keys those files use.
 /// </summary>
 public static class YamlExtensions
 {

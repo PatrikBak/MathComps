@@ -37,6 +37,11 @@ public class DraftValidationPipeline(
         // runs before the metadata gate and stands even when those are unusable.
         issues.AddRange(ImageRefValidator.Check(manifest.Problems, Path.GetFullPath(folder)));
 
+        // Tag slugs must resolve to the approved vocabulary. Like the image check this needs neither taxonomy nor DB
+        // (the vocabulary is a bundled offline file), so it runs before the metadata gate and stands even when that
+        // is unusable.
+        issues.AddRange(TagSlugValidator.Check(manifest.Problems));
+
         // An unusable meta has already reported its own error; hand that verdict straight back rather than
         // letting the registry/DB checks bury it under empty-slug noise.
         if (!manifest.IsMetadataUsable)
@@ -80,6 +85,7 @@ public class DraftValidationPipeline(
                     problem.Order,
                     problem.Authors,
                     problem.SolutionLink,
+                    problem.Tags,
                     [.. problem.Texts.Select(text => new DraftTextContent(
                         text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown))],
                     problem.Images))

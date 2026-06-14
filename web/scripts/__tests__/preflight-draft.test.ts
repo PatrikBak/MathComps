@@ -501,13 +501,13 @@ describe('parseProblemMeta', () => {
   it('defaults when the file is empty', () => {
     const result = parseProblemMeta('')
     expect(result.error).toBeNull()
-    expect(result.meta).toEqual({ authors: [], solutionLink: null })
+    expect(result.meta).toEqual({ authors: [], solutionLink: null, tags: null })
   })
 
   it('parses authors and an optional solution link', () => {
     const result = parseProblemMeta('authors:\n  - A\n  - B\nsolutionLink: https://x.test')
     expect(result.error).toBeNull()
-    expect(result.meta).toEqual({ authors: ['A', 'B'], solutionLink: 'https://x.test' })
+    expect(result.meta).toEqual({ authors: ['A', 'B'], solutionLink: 'https://x.test', tags: null })
   })
 
   it('rejects authors that are not a list of strings', () => {
@@ -518,6 +518,25 @@ describe('parseProblemMeta', () => {
   it('rejects a non-string solution link', () => {
     const result = parseProblemMeta('solutionLink: 42')
     expect(result.error).toContain('solutionLink')
+  })
+
+  it('parses a tag list when present', () => {
+    const result = parseProblemMeta('tags:\n  - algebra\n  - pigeonhole')
+    expect(result.error).toBeNull()
+    expect(result.meta.tags).toEqual(['algebra', 'pigeonhole'])
+  })
+
+  it('keeps an absent tags key as null, distinct from an explicit empty clear', () => {
+    // No tags key — leave existing tags untouched (null), not clear them ([]).
+    expect(parseProblemMeta('authors:\n  - A').meta.tags).toBeNull()
+
+    // An explicit empty list is a clear, not the absent default.
+    expect(parseProblemMeta('tags: []').meta.tags).toEqual([])
+  })
+
+  it('rejects tags that are not a list of strings', () => {
+    const result = parseProblemMeta('tags: not a list')
+    expect(result.error).toContain('tags')
   })
 
   it('reports malformed YAML rather than throwing', () => {

@@ -5,6 +5,7 @@
     <PackageReference Include="ReadLine" />
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
 </Project>

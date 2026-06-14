@@ -4,8 +4,8 @@ namespace MathComps.Shared.Cli;
 
 /// <summary>
 /// Helper class for executing operations with progress tracking using Spectre.Console.
-/// Supports both parallel and sequential processing with thread-safe progress updates,
-/// semaphore-controlled database access, and real-time progress visualization.
+/// Supports both parallel and sequential processing, serializing each item's result handling
+/// and progress updates through a semaphore so concurrent work can't corrupt the display.
 /// </summary>
 public static class ProgressHelper
 {
@@ -16,9 +16,9 @@ public static class ProgressHelper
     /// <typeparam name="T">The type of items in the batch.</typeparam>
     /// <param name="batch">The list of items to describe.</param>
     /// <param name="itemDescription">Function that converts an item to its string representation.</param>
-    /// <returns>A string showing the first item, or "first last" if batch has multiple items.</returns>
+    /// <returns>A string showing the first item, or "first - last" when the batch has multiple items.</returns>
     public static string NiceBatchDescription<T>(List<T> batch, Func<T, string> itemDescription)
-        // Print the first item and potentially the last too
+        // Show the first item, and the last too when the batch has more than one
         => $"{itemDescription(batch.First())}{(batch.Count == 1 ? "" : $" - {itemDescription(batch.Last())}")}";
 
     /// <summary>
@@ -87,7 +87,7 @@ public static class ProgressHelper
     /// <typeparam name="TItem">The type of items to process.</typeparam>
     /// <typeparam name="TResult">The type of result returned by the processing function.</typeparam>
     /// <param name="items">The collection of items to process.</param>
-    /// <param name="progressDescription">The description to above the progress bar.</param>
+    /// <param name="progressDescription">The description to display above the progress bar.</param>
     /// <param name="getItemDescription">Function to get a description of the item for progress display.</param>
     /// <param name="parallelOptions">Options controlling the degree of parallelism.</param>
     /// <param name="processItemAsync">The async function to process each item.</param>
@@ -122,7 +122,10 @@ public static class ProgressHelper
                 var processingTask = progressContext.AddTask(progressDescription, maxValue: items.Count);
                 processingTask.StartTask();
 
-                // Semaphore to ensure thread-safe database operations and progress updates
+                // Paint the empty bar now — auto-refresh is off, so without this it wouldn't show until the first item lands
+                progressContext.Refresh();
+
+                // Semaphore to ensure thread-safe result handling and progress updates
                 SemaphoreSlim semaphore = new(1, 1);
 
                 // Process items with configured parallelism
@@ -147,7 +150,7 @@ public static class ProgressHelper
                             exception = innerException;
                         }
 
-                        // Use semaphore to ensure thread-safe database access and progress updates
+                        // Use semaphore to ensure thread-safe result handling and progress updates
                         await semaphore.WaitAsync(token);
 
                         try
@@ -172,7 +175,7 @@ public static class ProgressHelper
                             // Get the item's descriptor
                             var itemDescription = getItemDescription(item);
 
-                            // A nice description of the curent task
+                            // A nice description of the current task
                             processingTask.Description =
                                 $"{processingTask.Value}/{items.Count} " +
                                 (itemDescription is null ? "" : $"[dim]({itemDescription})[/]");

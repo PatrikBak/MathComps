@@ -361,7 +361,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Replay the image problem's statement verbatim, sized off the same on-disk figure.
         var problem = new DraftProblemContent(
-            2, [], SolutionLink: null, [Original(Language.SK, ImageStatement)], ["fig.svg"]);
+            2, [], SolutionLink: null, Tags: null, Texts: [Original(Language.SK, ImageStatement)], Images: ["fig.svg"]);
         var preview = await service.PreviewAsync(SeededTarget(), [problem], _imageFolder);
 
         // The reproduced body matches the stored one, so the re-import is unchanged.
@@ -401,7 +401,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// <param name="texts">The problem's text variants (original plus any translations).</param>
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent Problem(int order, params DraftTextContent[] texts) =>
-        new(order, Authors: [], SolutionLink: null, [.. texts], Images: []);
+        new(order, Authors: [], SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds an original text variant. The body defaults to one that differs from the seeded body, so an original

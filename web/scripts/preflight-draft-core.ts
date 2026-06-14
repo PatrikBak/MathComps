@@ -38,7 +38,7 @@ import type {
 type BodyFile = {
   /** The body filename (e.g. `p1.en.md`). */
   file: string
-  /** The language token from the filename, not yet checked against the supported locales. */
+  /** The raw language token from the filename (e.g. `en`). */
   langToken: string
 }
 
@@ -54,7 +54,7 @@ type ProblemGroup = {
 
 /**
  * Runs the whole preflight against a draft folder and assembles its manifest.
- * Never throws on malformed input — every problem surfaces as a verdict entry.
+ * Malformed input surfaces as a verdict entry instead of throwing.
  *
  * @param folderPath - Path to the draft folder to validate.
  *
@@ -68,8 +68,10 @@ export async function preflightDraft(folderPath: string): Promise<DraftManifest>
   const metaResult = readMeta(folderPath)
   errors.push(...metaResult.errors)
 
-  // One manifest entry per problem, kept in numeric order for stable output
+  // Group the problem files by order
   const groups = groupProblemFiles(folderPath, errors)
+
+  // One manifest entry per problem, kept in numeric order for stable output
   const problems: ManifestProblem[] = []
   for (const group of groups) {
     problems.push(await parseProblem(folderPath, group, metaResult.meta.language, errors))
@@ -137,14 +139,18 @@ function readMeta(folderPath: string): MetaResult {
  * @returns One {@link ProblemGroup} per discovered order, in numeric order.
  */
 function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemGroup[] {
-  // Split the folder's entries into the metadata files and the body files, each carrying its parsed order
+  // Read the folder's entries
   const names = fs.readdirSync(folderPath)
+
+  // The metadata files (pN.yaml), each carrying its parsed order
   const metaFiles = names
     .map((name) => {
       const match = /^p(\d+)\.yaml$/.exec(name)
       return match ? { file: name, order: Number(match[1]) } : null
     })
     .filter((entry): entry is { file: string; order: number } => entry !== null)
+
+  // The body files (pN.<lang>.md), each carrying its order and language token
   const bodyFiles = names
     .map((name) => {
       const match = /^p(\d+)\.([a-z]+)\.md$/.exec(name)
@@ -160,11 +166,15 @@ function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemG
     return []
   }
 
-  // Two metadata files resolving to the same order (e.g. p1.yaml and p01.yaml) is ambiguous
+  // The orders claimed by metadata files
   const metaOrders = metaFiles.map((entry) => entry.order)
+
+  // Two files resolving to the same order (e.g. p1.yaml and p01.yaml) is ambiguous
   const duplicateOrders = [
     ...new Set(metaOrders.filter((order, index) => metaOrders.indexOf(order) !== index)),
   ]
+
+  // Report each ambiguous order
   duplicateOrders.forEach((order) => {
     const files = metaFiles.filter((entry) => entry.order === order).map((entry) => entry.file)
     errors.push(
@@ -177,10 +187,12 @@ function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemG
     )
   })
 
-  // Build one group per order, pairing each order's metadata file with its body files
+  // Every order that appears in either file set, in ascending order
   const orders = [...new Set([...metaOrders, ...bodyFiles.map((entry) => entry.order)])].sort(
     (first, second) => first - second
   )
+
+  // Pair each order's metadata file with its body files
   const groups = orders.map((order) => ({
     order,
     metaFile: metaFiles.find((entry) => entry.order === order)?.file ?? null,
@@ -248,18 +260,25 @@ async function parseProblem(
   originalLanguage: Locale,
   errors: VerdictError[]
 ): Promise<ManifestProblem> {
-  // Problem-level metadata lives in pN.yaml; default it when the file is absent (already flagged)
+  // Problem metadata lives in pN.yaml; default each field for the no-metadata case
   let authors: string[] = []
   let solutionLink: string | null = null
+  let tags: string[] | null = null
   if (group.metaFile !== null) {
+    // Parse the sidecar
     const { meta, error } = parseProblemMeta(
       fs.readFileSync(path.join(folderPath, group.metaFile), 'utf-8')
     )
+
+    // Surface a malformed sidecar
     if (error !== null) {
       errors.push(problemIssue(group.metaFile, null, 'problem-meta', error))
     }
+
+    // Adopt the parsed fields
     authors = meta.authors
     solutionLink = meta.solutionLink
+    tags = meta.tags
   }
 
   // Parse each body into a text variant, dropping ones whose language token is unknown
@@ -323,7 +342,7 @@ async function parseProblem(
   })
 
   // Assemble this problem's manifest entry
-  return { order: group.order, authors, solutionLink, texts, images }
+  return { order: group.order, authors, solutionLink, tags, texts, images }
 }
 
 /** A parsed body file: its text variant plus the image basenames it references. */
@@ -391,9 +410,8 @@ async function parseBody(
     await validateHalf(solution, body.file, 'solution', solutionBodyLine0 ?? 0, errors)
   }
 
-  // Gather this body's image references across both halves and validate each: it must exist on disk, be a format the
-  // pipeline can size and serve, and stay under the size cap. Each guard mirrors a downstream one (existence, the
-  // backend's format whitelist, unoptimized-serving weight) so a bad figure fails here in Node, not deep in apply.
+  // Gather this body's image references across both halves and validate each — it must exist on disk, be a supported
+  // format, and stay under the size cap — so a bad figure fails in preflight rather than mid-import.
   const solutionImages = solution !== null ? collectImageNames(solution) : []
   const images = [...new Set([...collectImageNames(statement), ...solutionImages])]
   images.forEach((name) => {
@@ -413,7 +431,7 @@ async function parseBody(
       return
     }
 
-    // Wrong format — only SVG and the raster formats the backend can size and serve are allowed.
+    // Wrong format — only SVG and the supported raster formats are allowed.
     if (!SUPPORTED_IMAGE_EXTENSIONS.includes(path.extname(name).toLowerCase())) {
       errors.push(
         problemIssue(
@@ -427,8 +445,7 @@ async function parseBody(
       return
     }
 
-    // Too heavy — an unoptimized figure ships to every reader at full size, so an oversized scan is an authoring
-    // error to downscale rather than silently serve.
+    // Too heavy — over the size cap.
     const sizeBytes = fs.statSync(imagePath).size
     if (sizeBytes > MAX_IMAGE_MB * 1024 * 1024) {
       const sizeMb = (sizeBytes / 1024 / 1024).toFixed(1)
@@ -443,13 +460,15 @@ async function parseBody(
     }
   })
 
-  // Assemble the text variant, halves kept verbatim for C#
+  // Assemble the text variant, halves kept verbatim
   const text: ManifestText = {
     language,
     original: language === originalLanguage,
     statementMarkdown: statement,
     solutionMarkdown: solution,
   }
+
+  // Hand back the variant with its referenced images
   return { text, images }
 }
 

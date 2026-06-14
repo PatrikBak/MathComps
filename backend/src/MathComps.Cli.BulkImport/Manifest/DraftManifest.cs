@@ -77,12 +77,18 @@ public record ManifestText(
 /// <param name="Order">1-based position within the round, taken from the filenames.</param>
 /// <param name="Authors">Author display names in declared order.</param>
 /// <param name="SolutionLink">External solution URL, or null when absent.</param>
+/// <param name="Tags">
+/// Tag slugs to assign, or null when the <c>pN.yaml</c> omits a <c>tags:</c> key. Null leaves existing tags untouched;
+/// an empty array clears them; a populated array replaces them — so omit is distinct from clear, unlike
+/// <see cref="Authors"/>.
+/// </param>
 /// <param name="Texts">The language variants — the original first, then translations.</param>
 /// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record ManifestProblem(
     int Order,
     ImmutableArray<string> Authors,
     string? SolutionLink,
+    ImmutableArray<string>? Tags,
     ImmutableArray<ManifestText> Texts,
     ImmutableArray<string> Images);
 

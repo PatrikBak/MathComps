@@ -71,6 +71,7 @@ public class DraftApplyService(
         // Write the problems, tallying the per-text outcomes and the insert/update/image counts.
         var appliedTexts = ImmutableArray.CreateBuilder<AppliedText>();
         var authorsCache = new Dictionary<string, Author>();
+        var tagsCache = new Dictionary<string, Tag>();
         var problemsInserted = 0;
         var problemsUpdated = 0;
         var problemsUnchanged = 0;
@@ -89,24 +90,30 @@ public class DraftApplyService(
             imagesUploaded += uploaded;
             imagesSkipped += skipped;
 
-            // The existing problem (with its texts and authors), or null when this slug is net-new.
+            // The existing problem (with its texts, authors, and tags), or null when this slug is net-new.
             var existing = await context.Problems
                 .Include(candidate => candidate.Texts)
                 .Include(candidate => candidate.ProblemAuthors)
+                .Include(candidate => candidate.ProblemTagsAll)
                 .SingleOrDefaultAsync(candidate => candidate.Slug == slug);
 
-            // Insert a fresh problem, or reconcile the existing one — which may turn out to change nothing.
+            // Insert a net-new problem, or reconcile an existing one against the draft.
             if (existing is null)
             {
+                // Insert the new problem with its texts, authors, and tags.
                 await InsertProblemAsync(
-                    context, problem, slug, roundInstance.Id, replacements, authorsCache, appliedTexts);
+                    context, problem, slug, roundInstance.Id, replacements, authorsCache, tagsCache, appliedTexts);
+
+                // Count it as an insert.
                 problemsInserted++;
             }
             else
             {
                 // An existing problem counts as updated only when the draft actually differs from it.
                 var changed = await UpdateProblemAsync(
-                    context, existing, problem, replacements, authorsCache, appliedTexts);
+                    context, existing, problem, replacements, authorsCache, tagsCache, appliedTexts);
+
+                // Tally it as updated or unchanged.
                 if (changed)
                     problemsUpdated++;
                 else
@@ -305,6 +312,7 @@ public class DraftApplyService(
     /// <param name="roundInstanceId">The round-instance the problem hangs off.</param>
     /// <param name="replacements">The image-ref replacements to apply to each body.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
+    /// <param name="tagsCache">The run-scoped tag cache.</param>
     /// <param name="appliedTexts">The accumulator the written texts are recorded into.</param>
     private static async Task InsertProblemAsync(
         MathCompsDbContext context,
@@ -313,6 +321,7 @@ public class DraftApplyService(
         Guid roundInstanceId,
         IReadOnlyDictionary<string, string> replacements,
         IDictionary<string, Author> authorsCache,
+        IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
         // The new problem row.
@@ -349,6 +358,12 @@ public class DraftApplyService(
                 AuthorId = authors[index].Id,
                 Ordinal = index + 1
             });
+
+        // Assign the draft's tags when it declares any — a brand-new problem has none to clear, so null and the empty
+        // list both add nothing.
+        if (problem.Tags is { } tagSlugs)
+            foreach (var tag in await ResolveTagsAsync(context, DistinctCanonicalSlugs(tagSlugs), tagsCache))
+                await context.ProblemTags.AddAsync(NewProblemTag(newProblem.Id, tag.Id));
     }
 
     /// <summary>
@@ -360,6 +375,7 @@ public class DraftApplyService(
     /// <param name="problem">The draft problem content.</param>
     /// <param name="replacements">The image-ref replacements to apply to each body.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
+    /// <param name="tagsCache">The run-scoped tag cache.</param>
     /// <param name="appliedTexts">The accumulator the written texts are recorded into.</param>
     /// <returns>Whether anything actually changed — false when the draft matched the stored problem exactly.</returns>
     private static async Task<bool> UpdateProblemAsync(
@@ -368,6 +384,7 @@ public class DraftApplyService(
         DraftProblemContent problem,
         IReadOnlyDictionary<string, string> replacements,
         IDictionary<string, Author> authorsCache,
+        IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
         // The solution link is the only language-invariant field a re-import may change.
@@ -391,8 +408,11 @@ public class DraftApplyService(
         // Bring the author set into line with the draft.
         var authorsChanged = await ReconcileAuthorsAsync(context, existing, problem.Authors, authorsCache);
 
-        // Updated only if the link, some text, or the author set moved.
-        return linkChanged || textsChanged || authorsChanged;
+        // Bring the tag set into line with the draft (skipped entirely when the draft omits a tags key).
+        var tagsChanged = await ReconcileTagsAsync(context, existing, problem.Tags, tagsCache);
+
+        // Updated only if the link, some text, the author set, or the tag set moved.
+        return linkChanged || textsChanged || authorsChanged || tagsChanged;
     }
 
     /// <summary>
@@ -547,20 +567,141 @@ public class DraftApplyService(
         if (current.SequenceEqual(desired.Select(author => author.Id)))
             return false;
 
-        // Replace wholesale: drop the old rows and flush, so re-numbered ordinals can't collide with the old ones.
-        context.ProblemAuthors.RemoveRange(existing.ProblemAuthors);
-        await context.SaveChangesAsync();
-
-        // Re-add in the draft's order, 1-based.
-        for (var index = 0; index < desired.Count; index++)
-            await context.ProblemAuthors.AddAsync(new ProblemAuthor
+        // Replace wholesale, re-adding in the draft's order with 1-based ordinals.
+        await ReplaceJoinRowsAsync(
+            context,
+            existing.ProblemAuthors,
+            desired.Select((author, index) => new ProblemAuthor
             {
                 ProblemId = existing.Id,
-                AuthorId = desired[index].Id,
+                AuthorId = author.Id,
                 Ordinal = index + 1
-            });
+            }));
 
         // The set moved.
         return true;
+    }
+
+    /// <summary>
+    /// Brings an existing problem's tag set into line with the draft, gated on the nullable trigger: a null tags list
+    /// (no <c>tags:</c> key) leaves the stored tags untouched, an empty list clears them, and a populated list replaces
+    /// them. A no-op when the set already matches. Tags are written at the human-assigned convention — fit 1.0, no
+    /// confidence or justification — since every draft slug was reviewed before apply.
+    /// </summary>
+    /// <param name="context">The write context.</param>
+    /// <param name="existing">The tracked existing problem, with its tags loaded.</param>
+    /// <param name="draftTags">The draft's tag slugs, or null when it declares no <c>tags:</c> key.</param>
+    /// <param name="tagsCache">The run-scoped tag cache.</param>
+    /// <returns>Whether the tag rows changed — false when absent or already matching the draft.</returns>
+    private static async Task<bool> ReconcileTagsAsync(
+        MathCompsDbContext context,
+        Problem existing,
+        ImmutableArray<string>? draftTags,
+        IDictionary<string, Tag> tagsCache)
+    {
+        // Absent (null) → leave the stored tags untouched.
+        if (draftTags is not { } slugs)
+            return false;
+
+        // The tags the draft wants, get-or-created from the approved vocabulary.
+        var desired = await ResolveTagsAsync(context, DistinctCanonicalSlugs(slugs), tagsCache);
+
+        // Already correct — same set — so leave the rows alone.
+        var current = existing.ProblemTagsAll.Select(problemTag => problemTag.TagId).ToHashSet();
+        if (current.SetEquals(desired.Select(tag => tag.Id)))
+            return false;
+
+        // Replace wholesale — the draft is the source of truth.
+        await ReplaceJoinRowsAsync(
+            context,
+            existing.ProblemTagsAll,
+            desired.Select(tag => NewProblemTag(existing.Id, tag.Id)));
+
+        // The set moved.
+        return true;
+    }
+
+    /// <summary>
+    /// Resolves tag slugs to entities, get-or-creating each by slug and deriving its <see cref="TagType"/> from the
+    /// approved vocabulary. A run-scoped cache means a slug shared across problems is looked up once.
+    /// </summary>
+    /// <param name="context">The write context.</param>
+    /// <param name="slugs">The distinct canonical slugs to resolve.</param>
+    /// <param name="tagsCache">The run-scoped slug → tag cache.</param>
+    /// <returns>The tag entities.</returns>
+    private static async Task<List<Tag>> ResolveTagsAsync(
+        MathCompsDbContext context, ImmutableArray<string> slugs, IDictionary<string, Tag> tagsCache)
+    {
+        // Accumulate the resolved tags.
+        var resolved = new List<Tag>(capacity: slugs.Length);
+
+        // Walk the slugs, resolving each to its Tag.
+        foreach (var slug in slugs)
+        {
+            // Cache miss — resolve the tag.
+            if (!tagsCache.TryGetValue(slug, out var tag))
+            {
+                // Reuse the existing DB row when the tag is already there.
+                tag = await context.Tags.FirstOrDefaultAsync(candidate => candidate.Slug == slug);
+                if (tag is null)
+                {
+                    // Preflight has already rejected unknown slugs, so the vocabulary must resolve the category.
+                    var tagType = TagVocabulary.TryGetTagType(slug)
+                        ?? throw new InvalidOperationException($"Tag slug '{slug}' is not in the approved vocabulary.");
+
+                    // Create it from the vocabulary category.
+                    tag = new Tag { Slug = slug, TagType = tagType };
+                    await context.Tags.AddAsync(tag);
+                }
+
+                // Cache it for the rest of the run.
+                tagsCache[slug] = tag;
+            }
+
+            // Collect it in input order.
+            resolved.Add(tag);
+        }
+
+        // The resolved tags, one per input slug.
+        return resolved;
+    }
+
+    /// <summary>
+    /// Builds a draft-assigned tag row: the human-assigned convention (fit 1.0, no confidence or justification), which
+    /// clears the visibility threshold so the tag surfaces immediately.
+    /// </summary>
+    /// <param name="problemId">The owning problem.</param>
+    /// <param name="tagId">The tag to assign.</param>
+    /// <returns>The join row to add.</returns>
+    private static ProblemTag NewProblemTag(Guid problemId, Guid tagId) =>
+        new() { ProblemId = problemId, TagId = tagId, GoodnessOfFit = 1.0f, Confidence = null, Justification = null };
+
+    /// <summary>
+    /// Canonicalizes tag slugs (trim + lowercase) and drops duplicates, so two casings of the same slug can't produce
+    /// a colliding <c>(problem, tag)</c> row.
+    /// </summary>
+    /// <param name="slugs">The raw draft slugs.</param>
+    /// <returns>The distinct canonical slugs.</returns>
+    private static ImmutableArray<string> DistinctCanonicalSlugs(ImmutableArray<string> slugs) =>
+        [.. slugs.Select(TagVocabulary.Canonicalize).Distinct()];
+
+    /// <summary>
+    /// Replaces a problem's join rows wholesale: deletes the existing rows and flushes before adding the new ones, so
+    /// a re-used key (an ordinal, or a <c>(problem, tag)</c> pair) can't transiently violate its unique index within
+    /// one statement batch.
+    /// </summary>
+    /// <typeparam name="TRow">The join-row entity type.</typeparam>
+    /// <param name="context">The write context.</param>
+    /// <param name="existingRows">The rows to delete.</param>
+    /// <param name="newRows">The rows to add after the delete is flushed.</param>
+    private static async Task ReplaceJoinRowsAsync<TRow>(
+        MathCompsDbContext context, IEnumerable<TRow> existingRows, IEnumerable<TRow> newRows) where TRow : class
+    {
+        // Drop the old rows and flush so re-used keys can't collide with them.
+        context.Set<TRow>().RemoveRange(existingRows);
+        await context.SaveChangesAsync();
+
+        // Add the replacements.
+        await context.Set<TRow>().AddRangeAsync(newRows);
     }
 }

@@ -239,7 +239,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Import the image problem.
         var problem = new DraftProblemContent(
-            1, ["Author"], null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+            1, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
         await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
 
         // Re-import the very same draft.
@@ -264,7 +264,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Re-import the identical text, now carrying a solution link.
         var withLink = new DraftProblemContent(
-            1, ["Jaromír Šimša"], "https://example.com/sol", [Original(Language.SK, "same")], Images: []);
+            1, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
         var second = await service.ApplyAsync(CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // The link moved, so the problem counts as updated while its text reports unchanged.
@@ -349,7 +349,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Import a problem whose statement references that image.
         var statement = "see ![fig](images/incircle.svg)";
         var problem = new DraftProblemContent(
-            1, ["Author"], null, [Original(Language.SK, statement)], ["incircle.svg"]);
+            1, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.svg"]);
         var result = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
 
         // One image was uploaded, under the slug-based problems/ key.
@@ -385,7 +385,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Import a problem whose statement references that image.
         var statement = "see ![fig](images/incircle.png)";
         var problem = new DraftProblemContent(
-            1, ["Author"], null, [Original(Language.SK, statement)], ["incircle.png"]);
+            1, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.png"]);
         var result = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
 
         // One image uploaded, under the slug-based key.
@@ -418,7 +418,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // The image problem the draft holds.
         var problem = new DraftProblemContent(
-            1, ["Author"], null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+            1, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
 
         // Import it.
         var first = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
@@ -531,6 +531,199 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A draft carrying a populated tags list assigns each tag at the human-assigned convention (fit 1.0, no
+    /// confidence or justification) and creates the Tag rows with the category derived from the vocabulary.
+    /// </summary>
+    [Fact]
+    public Task A_populated_tags_list_assigns_the_tags() => RunTestAsync(async service =>
+    {
+        // Import a problem tagged with one Area slug and one Technique slug.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra", "am-gm-inequality"], Original(Language.SK, "s", "sol"))],
+            Path.GetTempPath());
+
+        // Read the stored tags back from the database.
+        await QueryAsync(async context =>
+        {
+            // Both tags were created with the right category and joined to the problem.
+            Assert.Equal(TagType.Area, await TagTypeOfAsync(context, "algebra"));
+            Assert.Equal(TagType.Technique, await TagTypeOfAsync(context, "am-gm-inequality"));
+
+            // Each join row follows the human-assigned convention.
+            var rows = await context.ProblemTags.ToListAsync();
+            Assert.Equal(2, rows.Count);
+            Assert.All(rows, row =>
+            {
+                Assert.Equal(1.0f, row.GoodnessOfFit);
+                Assert.Null(row.Confidence);
+                Assert.Null(row.Justification);
+            });
+        });
+    });
+
+    /// <summary>
+    /// A re-import that omits the <c>tags:</c> key (null) leaves the stored tags untouched — protecting tags assigned
+    /// by an earlier draft from a tag-less re-apply.
+    /// </summary>
+    [Fact]
+    public Task Absent_tags_leave_existing_tags_untouched() => RunTestAsync(async service =>
+    {
+        // Import the problem tagged.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import with no tags key at all.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, null, Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Nothing moved — the absent key is not a clear — and the tag survives.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        await QueryAsync(async context => Assert.Equal(["algebra"], await TagSlugsAsync(context)));
+    });
+
+    /// <summary>
+    /// A re-import with an explicit empty list clears the stored tags.
+    /// </summary>
+    [Fact]
+    public Task An_empty_tags_list_clears_the_tags() => RunTestAsync(async service =>
+    {
+        // Import the problem tagged.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import with an empty tags list.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, [], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The clear counts as an update and removes the join row.
+        Assert.Equal(1, second.ProblemsUpdated);
+        await QueryAsync(async context => Assert.Equal(0, await context.ProblemTags.CountAsync()));
+    });
+
+    /// <summary>
+    /// A re-import with a different tag set replaces the stored tags wholesale (the draft is the source of truth),
+    /// without tripping the (problem, tag) unique key — the reconcile drops the old rows before re-adding.
+    /// </summary>
+    [Fact]
+    public Task A_changed_tags_list_replaces_the_set() => RunTestAsync(async service =>
+    {
+        // Import with one tag.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import with a different one.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["number-theory"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The set moved, leaving exactly the new tag.
+        Assert.Equal(1, second.ProblemsUpdated);
+        await QueryAsync(async context => Assert.Equal(["number-theory"], await TagSlugsAsync(context)));
+    });
+
+    /// <summary>
+    /// Re-importing the identical tag set changes nothing — the problem counts as unchanged, not updated.
+    /// </summary>
+    [Fact]
+    public Task Re_importing_the_same_tags_changes_nothing() => RunTestAsync(async service =>
+    {
+        // Import tagged.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import the very same tags.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The tag set matched, so the problem is unchanged and no rows were duplicated.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        await QueryAsync(async context => Assert.Equal(1, await context.ProblemTags.CountAsync()));
+    });
+
+    /// <summary>
+    /// Reducing the tag set to a subset of itself — dropping one member while keeping another — is recognised as a
+    /// change and leaves exactly the retained tag. This is the partial-overlap reconcile transition the disjoint
+    /// replace and the full clear don't exercise.
+    /// </summary>
+    [Fact]
+    public Task Reducing_the_tag_set_keeps_only_the_retained_tag() => RunTestAsync(async service =>
+    {
+        // Import with two tags.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra", "number-theory"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import dropping one but keeping the other.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The set moved, leaving exactly the retained tag.
+        Assert.Equal(1, second.ProblemsUpdated);
+        await QueryAsync(async context => Assert.Equal(["algebra"], await TagSlugsAsync(context)));
+    });
+
+    /// <summary>
+    /// A draft that lists the same slug twice (here with differing casing) collapses to a single tag row stored under
+    /// the canonical slug, rather than tripping the (problem, tag) primary key on a duplicate insert.
+    /// </summary>
+    [Fact]
+    public Task A_duplicate_or_case_variant_slug_collapses_to_one_canonical_row() => RunTestAsync(async service =>
+    {
+        // Import a problem whose tags list repeats one slug under two casings.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemWithTags(1, ["algebra", "Algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Exactly one row, stored under the canonical lowercase slug.
+        await QueryAsync(async context =>
+        {
+            Assert.Equal(1, await context.ProblemTags.CountAsync());
+            Assert.Equal(["algebra"], await TagSlugsAsync(context));
+        });
+    });
+
+    /// <summary>
+    /// A tag shared by two problems in one run is created once — the run-scoped tag cache reuses the row rather than
+    /// inserting a duplicate the unique tag slug would reject (the tag analogue of the shared-author case).
+    /// </summary>
+    [Fact]
+    public Task A_tag_shared_across_problems_is_created_once() => RunTestAsync(async service =>
+    {
+        // Two problems in one run, both carrying the same tag.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+        [
+            ProblemWithTags(1, ["algebra"], Original(Language.SK, "one")),
+            ProblemWithTags(2, ["algebra"], Original(Language.SK, "two"))
+        ], Path.GetTempPath());
+
+        // One Tag row, linked from both problems.
+        await QueryAsync(async context =>
+        {
+            Assert.Equal(1, await context.Tags.CountAsync());
+            Assert.Equal(2, await context.ProblemTags.CountAsync());
+        });
+    });
+
+    /// <summary>
+    /// Reads the slugs currently tagged on the single test problem, in alphabetical order.
+    /// </summary>
+    /// <param name="context">The query context.</param>
+    /// <returns>The tagged slugs.</returns>
+    private static async Task<List<string>> TagSlugsAsync(MathCompsDbContext context) =>
+        await context.ProblemTags
+            .Join(context.Tags, problemTag => problemTag.TagId, tag => tag.Id, (_, tag) => tag.Slug)
+            .OrderBy(slug => slug)
+            .ToListAsync();
+
+    /// <summary>
+    /// Reads the category stored for a tag slug.
+    /// </summary>
+    /// <param name="context">The query context.</param>
+    /// <param name="slug">The slug to look up.</param>
+    /// <returns>The tag's category.</returns>
+    private static async Task<TagType> TagTypeOfAsync(MathCompsDbContext context, string slug) =>
+        (await context.Tags.SingleAsync(tag => tag.Slug == slug)).TagType;
+
+    /// <summary>
     /// The round-instance date every draft in these tests imports under.
     /// </summary>
     private static DateOnly RoundDate => new(2024, 3, 15);
@@ -559,7 +752,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent ProblemBy(
         int order, ImmutableArray<string> authors, params DraftTextContent[] texts) =>
-        new(order, authors, SolutionLink: null, [.. texts], Images: []);
+        new(order, authors, SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
+
+    /// <summary>
+    /// Builds a draft problem carrying the given tags and a single author.
+    /// </summary>
+    /// <param name="order">The problem's 1-based order.</param>
+    /// <param name="tags">The tag slugs, or null for no <c>tags:</c> key.</param>
+    /// <param name="texts">The problem's text variants.</param>
+    /// <returns>The configured problem content.</returns>
+    private static DraftProblemContent ProblemWithTags(
+        int order, ImmutableArray<string>? tags, params DraftTextContent[] texts) =>
+        new(order, ["Jaromír Šimša"], SolutionLink: null, Tags: tags, Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds an original text variant.

@@ -18,7 +18,7 @@ my-draft/
   _meta.yaml        # competition / category? / round? / season / date / language
   p1.<lang>.md      # statement, then an optional "<!-- solution -->" line, then the solution
   p1.<lang2>.md     # translations (statement-only allowed; solution only if the original has one)
-  p1.yaml           # authors / solutionLink — both optional, but the file must exist
+  p1.yaml           # authors / solutionLink / tags — all optional, but the file must exist
   images/           # referenced figures (flat): .svg / .png / .jpg / .jpeg / .webp, each < 2 MB
 ```
 
@@ -66,7 +66,17 @@ Generate the original first, preflight it clean, **then** translate. Spawn paral
 
 Then **verify parity yourself** (don't trust the agents): per problem, assert original vs translation have equal `$` count, equal `$$` count, identical image-ref set, equal `<!-- solution -->` and `---` counts, and translation ≠ original.
 
-## Step 5 — Validate (the goal)
+## Step 5 — Tag the draft
+
+Tag the problems before validating, so the preflight checks the slugs:
+
+```bash
+dotnet run --project backend/src/MathComps.Cli.Tagging -- tag-draft ./data/problems/my-draft
+```
+
+This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo one, delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Gemini:ApiKey` in that project's user secrets; skip this step if the key isn't set (`apply` leaves existing tags untouched when a problem has no `tags:` key).
+
+## Step 6 — Validate (the goal)
 
 ```bash
 # Fast inner loop on markdown/KaTeX/images (run from web/):
@@ -75,4 +85,4 @@ cd web && npm run draft:preflight -- ../data/problems/my-draft
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./data/problems/my-draft
 ```
 
-A genuine pass shows the **DB preview** (create/reuse competition, season, round) then `No issues. PASS`. The preflight is the fast loop for body errors; the dotnet validate adds the registry + DB checks. **Never run `apply`** — that's the user's call.
+A genuine pass shows the **DB preview** (create/reuse competition, season, round) then `No issues. PASS`. The preflight is the fast loop for body errors; the dotnet validate adds the registry + DB checks (including that every tag slug is in the approved vocabulary). **Never run `apply`** — that's the user's call.
