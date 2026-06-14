@@ -49,13 +49,17 @@ export type ManifestText = {
 export type ManifestProblem = {
   /** 1-based position within the round, taken from the `pN.yaml` / `pN.<lang>.md` filenames. */
   order: number
-  /** Author display names in declared order. */
-  authors: string[]
+  /**
+   * Author display names in declared order, or `null` when the `pN.yaml` omits an `authors:` key. An absent key
+   * stays `null` (leave existing authors untouched) rather than defaulting to `[]` (clear) — omit and clear stay
+   * distinct.
+   */
+  authors: string[] | null
   /** External solution URL, or `null` when absent. */
   solutionLink: string | null
   /**
-   * Tag slugs to assign, or `null` when the `pN.yaml` omits a `tags:` key. Unlike `authors`, an absent key stays
-   * `null` (leave existing tags untouched) rather than defaulting to `[]` (clear) — omit and clear stay distinct.
+   * Tag slugs to assign, or `null` when the `pN.yaml` omits a `tags:` key. An absent key stays `null` (leave
+   * existing tags untouched) rather than defaulting to `[]` (clear) — omit and clear stay distinct.
    */
   tags: string[] | null
   /** Language variants — the original first, then translations in supported-locale order. */

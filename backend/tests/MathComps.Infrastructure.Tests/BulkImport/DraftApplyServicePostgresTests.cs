@@ -458,13 +458,88 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(2, await context.Authors.CountAsync());
 
             // They now sit in the flipped order.
-            var ordered = await context.ProblemAuthors
-                .OrderBy(problemAuthor => problemAuthor.Ordinal)
-                .Join(context.Authors, problemAuthor => problemAuthor.AuthorId, author => author.Id,
-                    (_, author) => author.Name)
-                .ToListAsync();
-            Assert.Equal(["Bob", "Alice"], ordered);
+            Assert.Equal(["Bob", "Alice"], await AuthorNamesAsync(context));
         });
+    });
+
+    /// <summary>
+    /// A re-import that omits the <c>authors:</c> key (null) leaves the stored authors untouched — protecting authors
+    /// credited by an earlier draft from an author-less re-apply (e.g. one attaching only a solution).
+    /// </summary>
+    [Fact]
+    public Task Absent_authors_leave_existing_authors_untouched() => RunTestAsync(async service =>
+    {
+        // Import the problem credited to one author.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import with no authors key at all.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, null, Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Nothing moved — the absent key is not a clear — and the author survives.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        await QueryAsync(async context => Assert.Equal(["Alice"], await AuthorNamesAsync(context)));
+    });
+
+    /// <summary>
+    /// A re-import with an explicit empty list clears the stored authors.
+    /// </summary>
+    [Fact]
+    public Task An_empty_authors_list_clears_the_authors() => RunTestAsync(async service =>
+    {
+        // Import the problem credited to one author.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import with an empty authors list.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, [], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The clear counts as an update and removes the join row.
+        Assert.Equal(1, second.ProblemsUpdated);
+        await QueryAsync(async context => Assert.Equal(0, await context.ProblemAuthors.CountAsync()));
+    });
+
+    /// <summary>
+    /// A re-import with a different author set replaces the stored authors wholesale (the draft is the source of
+    /// truth), without tripping the (problem, ordinal) unique key — the reconcile drops the old rows before re-adding.
+    /// </summary>
+    [Fact]
+    public Task A_changed_authors_list_replaces_the_set() => RunTestAsync(async service =>
+    {
+        // Import with one author.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import with a different one.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, ["Bob"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The set moved, leaving exactly the new author.
+        Assert.Equal(1, second.ProblemsUpdated);
+        await QueryAsync(async context => Assert.Equal(["Bob"], await AuthorNamesAsync(context)));
+    });
+
+    /// <summary>
+    /// Re-importing the identical author set changes nothing — the problem counts as unchanged, not updated.
+    /// </summary>
+    [Fact]
+    public Task Re_importing_the_same_authors_changes_nothing() => RunTestAsync(async service =>
+    {
+        // Import credited to one author.
+        await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // Re-import the very same authors.
+        var second = await service.ApplyAsync(CsmoTarget(), RoundDate,
+            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
+
+        // The author set matched, so the problem is unchanged and no rows were duplicated.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        await QueryAsync(async context => Assert.Equal(1, await context.ProblemAuthors.CountAsync()));
     });
 
     /// <summary>
@@ -704,6 +779,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Reads the author names credited on the single test problem, in ordinal order.
+    /// </summary>
+    /// <param name="context">The query context.</param>
+    /// <returns>The author names, ordered by their ordinal.</returns>
+    private static async Task<List<string>> AuthorNamesAsync(MathCompsDbContext context) =>
+        await context.ProblemAuthors
+            .OrderBy(problemAuthor => problemAuthor.Ordinal)
+            .Join(context.Authors, problemAuthor => problemAuthor.AuthorId, author => author.Id,
+                (_, author) => author.Name)
+            .ToListAsync();
+
+    /// <summary>
     /// Reads the slugs currently tagged on the single test problem, in alphabetical order.
     /// </summary>
     /// <param name="context">The query context.</param>
@@ -747,11 +834,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// Builds a draft problem with the given authors and no images.
     /// </summary>
     /// <param name="order">The problem's 1-based order.</param>
-    /// <param name="authors">The author names, in order.</param>
+    /// <param name="authors">The author names in order, or null for no <c>authors:</c> key.</param>
     /// <param name="texts">The problem's text variants.</param>
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent ProblemBy(
-        int order, ImmutableArray<string> authors, params DraftTextContent[] texts) =>
+        int order, ImmutableArray<string>? authors, params DraftTextContent[] texts) =>
         new(order, authors, SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
 
     /// <summary>

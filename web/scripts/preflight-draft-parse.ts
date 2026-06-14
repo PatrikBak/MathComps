@@ -27,8 +27,8 @@ const SOLUTION_SENTINEL = '<!-- solution -->'
 
 /** Typed metadata fields from a problem's `pN.yaml`. */
 type ProblemMeta = {
-  /** Author display names, defaulting to an empty list. */
-  authors: string[]
+  /** Author display names, or `null` when no `authors:` key is present — kept distinct from `[]` (an explicit clear). */
+  authors: string[] | null
   /** External solution URL, or `null` when absent. */
   solutionLink: string | null
   /** Tag slugs, or `null` when no `tags:` key is present — kept distinct from `[]` (an explicit clear). */
@@ -54,7 +54,7 @@ type SentinelSplit = {
 }
 
 /** Metadata values for a problem whose `pN.yaml` declares none. */
-const EMPTY_PROBLEM_META: ProblemMeta = { authors: [], solutionLink: null, tags: null }
+const EMPTY_PROBLEM_META: ProblemMeta = { authors: null, solutionLink: null, tags: null }
 
 /** A processor used only to parse markdown into an mdast tree for image discovery. */
 const imageRefProcessor = unified().use(remarkParse)
@@ -132,10 +132,11 @@ export function parseProblemMeta(yamlText: string): ProblemMetaParse {
     return { meta: EMPTY_PROBLEM_META, error: 'metadata must be a mapping of fields' }
   }
 
-  // Authors must be a list of strings when present, otherwise default to empty
+  // authors is an optional list of strings; an absent key stays null (leave existing authors) rather than [] (clear)
   const rawAuthors = parsed.authors
-  let authors: string[] = []
+  let authors: string[] | null = null
   if (rawAuthors !== undefined && rawAuthors !== null) {
+    // Reject a non-list or non-string entries, keeping the fields parsed so far
     if (!Array.isArray(rawAuthors) || !rawAuthors.every((author) => typeof author === 'string')) {
       return {
         meta: EMPTY_PROBLEM_META,

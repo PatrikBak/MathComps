@@ -242,9 +242,9 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
-  it('defaults authors when a problem declares none', async () => {
+  it('leaves authors null when a problem declares none', async () => {
     const manifest = await loadFixture('valid-minimal-meta')
-    expect(manifest.problems[0]!.authors).toEqual([])
+    expect(manifest.problems[0]!.authors).toBeNull()
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 })
@@ -501,13 +501,21 @@ describe('parseProblemMeta', () => {
   it('defaults when the file is empty', () => {
     const result = parseProblemMeta('')
     expect(result.error).toBeNull()
-    expect(result.meta).toEqual({ authors: [], solutionLink: null, tags: null })
+    expect(result.meta).toEqual({ authors: null, solutionLink: null, tags: null })
   })
 
   it('parses authors and an optional solution link', () => {
     const result = parseProblemMeta('authors:\n  - A\n  - B\nsolutionLink: https://x.test')
     expect(result.error).toBeNull()
     expect(result.meta).toEqual({ authors: ['A', 'B'], solutionLink: 'https://x.test', tags: null })
+  })
+
+  it('keeps an absent authors key as null, distinct from an explicit empty clear', () => {
+    // No authors key — leave existing authors untouched (null), not clear them ([]).
+    expect(parseProblemMeta('solutionLink: https://x.test').meta.authors).toBeNull()
+
+    // An explicit empty list is a clear, not the absent default.
+    expect(parseProblemMeta('authors: []').meta.authors).toEqual([])
   })
 
   it('rejects authors that are not a list of strings', () => {

@@ -347,17 +347,22 @@ public class DraftApplyService(
                     MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), appliedTexts);
         }
 
-        // Resolve the draft's authors to entities, in declared order.
-        var authors = await ResolveAuthorsAsync(context, problem.Authors, authorsCache);
+        // Assign the draft's authors when it declares any — a brand-new problem has none to clear, so null and the
+        // empty list both add nothing.
+        if (problem.Authors is { } authorNames)
+        {
+            // Resolve the draft's authors to entities, in declared order.
+            var authors = await ResolveAuthorsAsync(context, authorNames, authorsCache);
 
-        // One ProblemAuthor per author, the ordinal 1-based in that order.
-        for (var index = 0; index < authors.Count; index++)
-            await context.ProblemAuthors.AddAsync(new ProblemAuthor
-            {
-                ProblemId = newProblem.Id,
-                AuthorId = authors[index].Id,
-                Ordinal = index + 1
-            });
+            // One ProblemAuthor per author, the ordinal 1-based in that order.
+            for (var index = 0; index < authors.Count; index++)
+                await context.ProblemAuthors.AddAsync(new ProblemAuthor
+                {
+                    ProblemId = newProblem.Id,
+                    AuthorId = authors[index].Id,
+                    Ordinal = index + 1
+                });
+        }
 
         // Assign the draft's tags when it declares any — a brand-new problem has none to clear, so null and the empty
         // list both add nothing.
@@ -543,23 +548,29 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Brings an existing problem's author set into line with the draft. A no-op when the authors and their order
-    /// already match; otherwise the old rows are deleted and flushed before the new ones are added, so the
-    /// <c>(problem, ordinal)</c> unique index can't be transiently violated within one statement batch.
+    /// Brings an existing problem's author set into line with the draft, gated on the nullable trigger: a null author
+    /// list (no <c>authors:</c> key) leaves the stored authors untouched, an empty list clears them, and a populated
+    /// list replaces them. A no-op when the authors and their order already match; otherwise the old rows are deleted
+    /// and flushed before the new ones are added, so the <c>(problem, ordinal)</c> unique index can't be transiently
+    /// violated within one statement batch.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with its authors loaded.</param>
-    /// <param name="authorNames">The draft's author names, in order.</param>
+    /// <param name="authorNames">The draft's author names in order, or null when it declares no <c>authors:</c> key.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
-    /// <returns>Whether the author rows changed — false when they already matched the draft.</returns>
+    /// <returns>Whether the author rows changed — false when absent or already matching the draft.</returns>
     private static async Task<bool> ReconcileAuthorsAsync(
         MathCompsDbContext context,
         Problem existing,
-        ImmutableArray<string> authorNames,
+        ImmutableArray<string>? authorNames,
         IDictionary<string, Author> authorsCache)
     {
+        // Absent (null) → leave the stored authors untouched.
+        if (authorNames is not { } names)
+            return false;
+
         // The authors the draft wants, in order.
-        var desired = await ResolveAuthorsAsync(context, authorNames, authorsCache);
+        var desired = await ResolveAuthorsAsync(context, names, authorsCache);
 
         // Already correct — same authors, same order — so leave the rows alone.
         var current = existing.ProblemAuthors.OrderBy(problemAuthor => problemAuthor.Ordinal)
