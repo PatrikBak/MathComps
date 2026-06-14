@@ -61,7 +61,7 @@ tags: # approved tag slugs; usually written by the tag-draft tool, hand-editable
   - am-gm-inequality
 ```
 
-`tags` behaves differently from `authors`: an **absent** key leaves a problem's existing tags untouched on apply, an **empty** list (`tags: []`) clears them, and a populated list replaces them. Each slug must be in the approved vocabulary (`approved-tags.json`) — the C# validate step rejects unknown ones.
+`authors` and `tags` share the same omit-vs-clear semantics on apply: an **absent** key leaves a problem's existing values untouched, an **empty** list (`authors: []` / `tags: []`) clears them, and a populated list replaces them. So a partial re-import — say, attaching only a solution — can leave both authors and tags alone by omitting their keys. Each tag slug must be in the approved vocabulary (`approved-tags.json`) — the C# validate step rejects unknown ones.
 
 ## Images
 

@@ -261,7 +261,7 @@ async function parseProblem(
   errors: VerdictError[]
 ): Promise<ManifestProblem> {
   // Problem metadata lives in pN.yaml; default each field for the no-metadata case
-  let authors: string[] = []
+  let authors: string[] | null = null
   let solutionLink: string | null = null
   let tags: string[] | null = null
   if (group.metaFile !== null) {
