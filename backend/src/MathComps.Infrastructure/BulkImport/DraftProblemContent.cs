@@ -27,11 +27,16 @@ public record DraftTextContent(
 /// <param name="Order">1-based position within the round, taken from the filenames.</param>
 /// <param name="Authors">Author display names in declared order.</param>
 /// <param name="SolutionLink">External solution URL, or null when absent.</param>
+/// <param name="Tags">
+/// Tag slugs to assign, or null when the draft omits a <c>tags:</c> key. Null leaves existing tags untouched; an
+/// empty array clears them; a populated array replaces them.
+/// </param>
 /// <param name="Texts">The language variants this problem imports — the original plus any translations.</param>
 /// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record DraftProblemContent(
     int Order,
     ImmutableArray<string> Authors,
     string? SolutionLink,
+    ImmutableArray<string>? Tags,
     ImmutableArray<DraftTextContent> Texts,
     ImmutableArray<string> Images);

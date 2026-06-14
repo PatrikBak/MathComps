@@ -1,7 +1,7 @@
 /**
  * Meta narrowing for the draft preflight: turns the parsed `_meta.yaml` document
  * into a typed {@link ManifestMeta}, collecting one error per missing or
- * malformed field. Pure (no filesystem), so it is unit-tested directly.
+ * malformed field. Pure — no filesystem access.
  */
 
 import type { Locale } from '../src/i18n/i18n'
@@ -9,10 +9,10 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import { isRecord } from './preflight-draft-parse'
 import type { ManifestMeta, Season, VerdictError } from './preflight-draft-types'
 
-/** Filename of the folder-level taxonomy file, parsed once per draft. */
+/** Filename of the folder-level taxonomy file. */
 export const META_FILENAME = '_meta.yaml'
 
-/** Meta values to fall back on so the manifest shape stays stable when `_meta.yaml` is unusable. */
+/** Meta values substituted for any field that can't be read. */
 export const FALLBACK_META: ManifestMeta = {
   competition: '',
   category: null,
@@ -154,8 +154,10 @@ function narrowSeason(value: unknown, errors: VerdictError[]): Season {
 function narrowDate(value: unknown, errors: VerdictError[]): string {
   // A `YYYY-MM-DD` string that round-trips to the same calendar date is valid
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    // Parse as UTC midnight and reject impossible dates like 2026-13-01 that JS would roll over
+    // Parse as UTC midnight
     const parsed = new Date(`${value}T00:00:00Z`)
+
+    // Accept only when it round-trips — rejects rolled-over dates like 2026-13-01
     if (!Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value)) return value
   }
 

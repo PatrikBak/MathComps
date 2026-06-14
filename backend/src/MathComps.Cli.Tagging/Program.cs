@@ -15,10 +15,10 @@ using System.Text;
 Console.InputEncoding = Encoding.UTF8;
 Console.OutputEncoding = Encoding.UTF8;
 
-// Fancy header
+// Render the "Tagging" banner.
 AnsiConsole.Write(new FigletText("Tagging").Centered().Color(Color.Aqua));
 
-// We'll use DI
+// Build the service collection.
 var services = new ServiceCollection();
 
 // Configuration is built manually to support both appsettings.json and user secrets.
@@ -34,40 +34,23 @@ services.AddSingleton<IConfiguration>(configuration);
 // HttpClient is registered for making HTTP requests to external APIs.
 services.AddHttpClient();
 
-// Add settings for commands
-services.AddOptions<SuggestTagsSettings>()
-    .Bind(configuration.GetSection(SuggestTagsSettings.SectionName))
-    .ValidateDataAnnotations();
-services.AddOptions<TagProblemsSettings>()
-    .Bind(configuration.GetSection(TagProblemsSettings.SectionName))
-    .ValidateDataAnnotations();
-services.AddOptions<VetoProblemTagsSettings>()
-    .Bind(configuration.GetSection(VetoProblemTagsSettings.SectionName))
+// tag-draft binds its four Gemini passes and the fit floor.
+services.AddOptions<TagDraftSettings>()
+    .Bind(configuration.GetSection(TagDraftSettings.SectionName))
     .ValidateDataAnnotations();
 
-// Make sure DI can resolve DbContext
-services.AddMathCompsDbContext(configuration);
-
-// Tag suggestion runs on Gemini
+// Tagging runs on Gemini.
 services.AddGemini();
 
-// The interactive manager reads through the problem lookup service
-services.AddProblemServices();
+// Register the draft-tagging core that wraps Gemini with the generate/veto passes.
+services.AddScoped<IAiTaggingService, AiTaggingService>();
 
-// Database operations are encapsulated in a dedicated service with scoped lifetime.
-services.AddScoped<ITaggingDatabaseService, TaggingDatabaseService>();
-
-// Start the app with DI
+// Wrap the services in the registrar the CommandApp resolves from.
 using var registrar = new DependencyInjectionRegistrar(services);
 
-// Run the app using our custom runner
+// Run the CLI.
 return await CliRunner.RunAsync(new CommandApp(registrar), args, config =>
 {
-    // Commands
-    config.AddCommand<SuggestTagsCommand>("suggest-tags");
-    config.AddCommand<TagProblemsCommand>("tag-problems");
-    config.AddCommand<VetoProblemTagsCommand>("veto-problem-tags");
-    config.AddCommand<PruneTagsCommand>("prune-tags");
-    config.AddCommand<InteractiveTagManagerCommand>("interactive");
-    config.AddCommand<ImportTagsCommand>("import-tags");
+    // The sole command — tag a bulk-import draft in place.
+    config.AddCommand<TagDraftCommand>("tag-draft");
 });

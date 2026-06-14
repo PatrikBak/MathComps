@@ -50,13 +50,18 @@ The problem number and language come from the filename. The file whose `<lang>` 
 
 ## Problem metadata — `pN.yaml`
 
-One per problem, shared across its languages. Both fields are optional:
+One per problem, shared across its languages. Every field is optional:
 
 ```yaml
 authors:
   - Jaromír Šimša
 solutionLink: https://example.com/p1 # external solution URL
+tags: # approved tag slugs; usually written by the tag-draft tool, hand-editable
+  - algebra
+  - am-gm-inequality
 ```
+
+`tags` behaves differently from `authors`: an **absent** key leaves a problem's existing tags untouched on apply, an **empty** list (`tags: []`) clears them, and a populated list replaces them. Each slug must be in the approved vocabulary (`approved-tags.json`) — the C# validate step rejects unknown ones.
 
 ## Images
 

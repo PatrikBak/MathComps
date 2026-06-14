@@ -90,5 +90,5 @@ public class ImageRefValidatorTests : IDisposable
     /// <param name="basename">The image basename the problem references.</param>
     /// <returns>A problem carrying just that one image reference.</returns>
     private static ManifestProblem ProblemReferencing(string basename) =>
-        new(1, [], null, [], [basename]);
+        new(1, [], null, null, [], [basename]);
 }

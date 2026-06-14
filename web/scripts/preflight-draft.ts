@@ -29,6 +29,8 @@ import type { DraftManifest, VerdictError } from './preflight-draft-types'
 function formatVerdictLine(error: VerdictError): string {
   // AI loves emojis
   const icon = error.severity === 'error' ? '❌' : '⚠️ '
+
+  // Optional half / line location tags
   const halfTag = error.half !== null ? ` → ${error.half}` : ''
   const lineTag = error.line !== null ? ` (line ${error.line})` : ''
 
@@ -43,15 +45,19 @@ function formatVerdictLine(error: VerdictError): string {
  * @param manifest - The manifest the run produced.
  */
 function printHumanReport(folderPath: string, manifest: DraftManifest): void {
-  // Entangle manifest
+  // Pull the problems and verdict off the manifest
   const { problems, verdict } = manifest
 
-  // Count distinct images and total text variants across problems
+  // Count distinct images across problems
   const imageCount = new Set(problems.flatMap((problem) => problem.images)).size
+
+  // Count total text variants across problems
   const textCount = problems.reduce((sum, problem) => sum + problem.texts.length, 0)
 
-  // Intro logs
+  // Log the folder being checked
   console.log(`🔍 Preflighting draft: ${folderPath}`)
+
+  // Log the problem, text, and image counts
   console.log(
     `   ${problems.length} problem(s), ${textCount} text(s), ${imageCount} image(s) referenced\n`
   )
@@ -86,7 +92,7 @@ async function runCli(argv: string[]): Promise<void> {
   // Outputting JSON?
   const jsonMode = argv.includes('--json')
 
-  // Where's this running?
+  // Which draft folder?
   const folderArg = argv.find((arg) => !arg.startsWith('--'))
 
   // The draft folder is the one required argument
@@ -95,8 +101,10 @@ async function runCli(argv: string[]): Promise<void> {
     process.exit(1)
   }
 
-  // Parse the folder
+  // Resolve to an absolute path
   const folderPath = path.resolve(folderArg)
+
+  // Run the preflight
   const manifest = await preflightDraft(folderPath)
 
   // Success iff no errors

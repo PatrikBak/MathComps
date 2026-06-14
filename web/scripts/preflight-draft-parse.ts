@@ -13,24 +13,26 @@ import { parse as parseYaml } from 'yaml'
 /** Subfolder holding the draft's image assets. */
 export const IMAGES_DIRNAME = 'images'
 
-/** Prefix every disk-resolved image reference carries in the markdown body. */
+/** Path prefix marking an image reference as draft-local: `images/`. */
 export const IMAGE_REF_PREFIX = `${IMAGES_DIRNAME}/`
 
-/** Image formats the pipeline can size and serve — SVG plus the supported raster formats. */
+/** Supported image formats — SVG plus the raster formats that can be sized and served. */
 export const SUPPORTED_IMAGE_EXTENSIONS = ['.svg', '.png', '.jpg', '.jpeg', '.webp']
 
-/** Per-image size ceiling (MB): figures serve unoptimized, so a multi-megabyte scan would ship at full weight. */
+/** Per-image size ceiling, in MB. Figures ship unoptimized, so oversized scans must be downscaled. */
 export const MAX_IMAGE_MB = 2
 
 /** HTML-comment line that separates a problem's statement from its solution. */
 const SOLUTION_SENTINEL = '<!-- solution -->'
 
-/** The typed metadata fields the preflight reads off each problem's `pN.yaml`. */
+/** Typed metadata fields from a problem's `pN.yaml`. */
 type ProblemMeta = {
   /** Author display names, defaulting to an empty list. */
   authors: string[]
   /** External solution URL, or `null` when absent. */
   solutionLink: string | null
+  /** Tag slugs, or `null` when no `tags:` key is present — kept distinct from `[]` (an explicit clear). */
+  tags: string[] | null
 }
 
 /** A problem-metadata parse outcome — values plus the first structural error, if any. */
@@ -52,7 +54,7 @@ type SentinelSplit = {
 }
 
 /** Metadata values for a problem whose `pN.yaml` declares none. */
-const EMPTY_PROBLEM_META: ProblemMeta = { authors: [], solutionLink: null }
+const EMPTY_PROBLEM_META: ProblemMeta = { authors: [], solutionLink: null, tags: null }
 
 /** A processor used only to parse markdown into an mdast tree for image discovery. */
 const imageRefProcessor = unified().use(remarkParse)
@@ -150,15 +152,29 @@ export function parseProblemMeta(yamlText: string): ProblemMetaParse {
     // Reject a non-string link, keeping the authors parsed so far
     if (typeof rawLink !== 'string') {
       return {
-        meta: { authors, solutionLink: null },
+        meta: { authors, solutionLink: null, tags: null },
         error: 'metadata "solutionLink" must be a string',
       }
     }
     solutionLink = rawLink
   }
 
-  // Both fields are well-formed
-  return { meta: { authors, solutionLink }, error: null }
+  // tags is an optional list of strings; an absent key stays null (leave existing tags) rather than [] (clear)
+  const rawTags = parsed.tags
+  let tags: string[] | null = null
+  if (rawTags !== undefined && rawTags !== null) {
+    // Reject a non-list or non-string entries, keeping the fields parsed so far
+    if (!Array.isArray(rawTags) || !rawTags.every((tag) => typeof tag === 'string')) {
+      return {
+        meta: { authors, solutionLink, tags: null },
+        error: 'metadata "tags" must be a list of strings',
+      }
+    }
+    tags = rawTags
+  }
+
+  // Every field is well-formed
+  return { meta: { authors, solutionLink, tags }, error: null }
 }
 
 /**

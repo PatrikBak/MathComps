@@ -1,4 +1,3 @@
-using MathComps.Cli.Translation.Extensions;
 using MathComps.Cli.SkmoParser.Rendering;
 using MathComps.Cli.Translation.Dtos;
 using MathComps.Cli.Translation.Enums;

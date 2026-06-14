@@ -82,6 +82,7 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
                 problem.Order,
                 problem.Authors,
                 problem.SolutionLink,
+                problem.Tags,
                 [.. problem.Texts.Select(text => new DraftTextContent(
                     text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown))],
                 problem.Images))
