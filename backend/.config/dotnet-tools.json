@@ -5,6 +5,10 @@
     "dotnet-ef": {
       "version": "10.0.8",
       "commands": ["dotnet-ef"]
+    },
+    "jetbrains.resharper.globaltools": {
+      "version": "2026.1.2",
+      "commands": ["jb"]
     }
   }
 }
