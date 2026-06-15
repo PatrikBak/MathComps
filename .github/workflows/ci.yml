@@ -80,9 +80,6 @@ jobs:
   inspect:
     name: Inspect
     runs-on: ubuntu-latest
-    permissions:
-      # Lets the SARIF upload publish to the Security → Code scanning tab.
-      security-events: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
@@ -101,12 +98,6 @@ jobs:
         working-directory: backend
         # No --no-build: inspectcode restores and builds the solution itself, matching the local baseline.
         run: dotnet jb inspectcode MathComps.sln --output=inspect.sarif --format=Sarif
-
-      - name: Upload SARIF to Code Scanning
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: backend/inspect.sarif
 
       - name: Fail on any finding
         run: |
