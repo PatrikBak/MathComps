@@ -69,7 +69,7 @@ export async function preflightDraft(folderPath: string): Promise<DraftManifest>
   errors.push(...metaResult.errors)
 
   // Group the problem files by order
-  const groups = groupProblemFiles(folderPath, metaResult.meta.language, errors)
+  const groups = groupProblemFiles(folderPath, errors)
 
   // One manifest entry per problem, kept in numeric order for stable output
   const problems: ManifestProblem[] = []
@@ -130,24 +130,20 @@ function readMeta(folderPath: string): MetaResult {
 
 /**
  * Groups a draft folder's `pN.yaml` metadata files and `pN.<lang>.md` body files
- * by problem order, flagging a missing, non-contiguous, or duplicated numbering
- * scheme plus any order that lacks its metadata file or any body file.
+ * by problem order, flagging a duplicated numbering scheme or a metadata file with
+ * no body to attach to.
  *
- * A translation-only draft — one with body files but none in the original language —
- * is dropping fixes onto problems already in the DB, so its orders needn't be
- * contiguous and its `pN.yaml` files are optional; both checks are skipped for it.
+ * Numbering need not be contiguous and `pN.yaml` files are optional here: whether a
+ * draft's orders fill the round without gaps, and whether a newly-created problem
+ * carries its metadata, both depend on what already lives in the DB — so they're
+ * decided by the DB-aware `validate` step, not this DB-blind format read.
  *
  * @param folderPath - Path to the draft folder.
- * @param originalLanguage - The draft's original language (`meta.language`).
  * @param errors - Accumulator the structural issues are pushed onto.
  *
  * @returns One {@link ProblemGroup} per discovered order, in numeric order.
  */
-function groupProblemFiles(
-  folderPath: string,
-  originalLanguage: Locale,
-  errors: VerdictError[]
-): ProblemGroup[] {
+function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemGroup[] {
   // Read the folder's entries
   const names = fs.readdirSync(folderPath)
 
@@ -201,6 +197,20 @@ function groupProblemFiles(
     (first, second) => first - second
   )
 
+  // Orders are 1-based; a problem numbered below 1 (e.g. a p0 typo) is malformed regardless of the DB
+  orders
+    .filter((order) => order < 1)
+    .forEach((order) =>
+      errors.push(
+        problemIssue(
+          '(folder)',
+          null,
+          'problem-files',
+          `problem order must be ≥ 1 (found p${order})`
+        )
+      )
+    )
+
   // Pair each order's metadata file with its body files
   const groups = orders.map((order) => ({
     order,
@@ -210,36 +220,9 @@ function groupProblemFiles(
       .map((entry) => ({ file: entry.file, langToken: entry.langToken })),
   }))
 
-  // A draft with body files but none in the original language carries only translations onto existing problems
-  const isTranslationOnly =
-    bodyFiles.length > 0 && bodyFiles.every((entry) => entry.langToken !== originalLanguage)
-
-  // Fresh imports must number 1, 2, 3, … with no gaps; a translation-only subset may skip orders
-  const gapIndex = orders.findIndex((order, index) => order !== index + 1)
-  if (!isTranslationOnly && gapIndex !== -1) {
-    errors.push(
-      problemIssue(
-        '(folder)',
-        null,
-        'problem-files',
-        `problem numbering is not contiguous (expected p${gapIndex + 1}.yaml)`
-      )
-    )
-  }
-
-  // A problem with body files but no metadata file (only required for a fresh import), or a metadata file with no
-  // bodies, is incomplete
+  // A metadata file with no bodies to attach to is malformed regardless of the DB — flag it here.
   groups.forEach((group) => {
-    if (group.metaFile === null && !isTranslationOnly) {
-      errors.push(
-        problemIssue(
-          `p${group.order}.yaml`,
-          null,
-          'missing-problem-meta',
-          `problem ${group.order} has body files but no p${group.order}.yaml metadata file`
-        )
-      )
-    } else if (group.metaFile !== null && group.bodies.length === 0) {
+    if (group.metaFile !== null && group.bodies.length === 0) {
       errors.push(
         problemIssue(
           group.metaFile,
@@ -345,8 +328,16 @@ async function parseProblem(
     )
   })
 
-  // Assemble this problem's manifest entry
-  return { order: group.order, authors, solutionLink, tags, texts, images }
+  // Assemble this problem's manifest entry; hasSidecar records whether a pN.yaml is present
+  return {
+    order: group.order,
+    hasSidecar: group.metaFile !== null,
+    authors,
+    solutionLink,
+    tags,
+    texts,
+    images,
+  }
 }
 
 /** A parsed body file: its text variant plus the image basenames it references. */

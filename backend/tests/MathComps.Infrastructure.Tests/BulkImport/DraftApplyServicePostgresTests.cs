@@ -240,7 +240,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Import the image problem.
         var problem = new DraftProblemContent(
-            1, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+            1, true, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
         await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
 
         // Re-import the very same draft.
@@ -265,7 +265,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Re-import the identical text, now carrying a solution link.
         var withLink = new DraftProblemContent(
-            1, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
+            1, true, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
         var second = await service.ApplyAsync(CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // The link moved, so the problem counts as updated while its text reports unchanged.
@@ -283,7 +283,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Import the problem carrying a solution link.
         var withLink = new DraftProblemContent(
-            1, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
+            1, true, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
         await service.ApplyAsync(CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // Re-import the identical text with no solutionLink key at all.
@@ -373,7 +373,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Import a problem whose statement references that image.
         var statement = "see ![fig](images/incircle.svg)";
         var problem = new DraftProblemContent(
-            1, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.svg"]);
+            1, true, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.svg"]);
         var result = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
 
         // One image was uploaded, under the slug-based problems/ key.
@@ -409,7 +409,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Import a problem whose statement references that image.
         var statement = "see ![fig](images/incircle.png)";
         var problem = new DraftProblemContent(
-            1, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.png"]);
+            1, true, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.png"]);
         var result = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
 
         // One image uploaded, under the slug-based key.
@@ -442,7 +442,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // The image problem the draft holds.
         var problem = new DraftProblemContent(
-            1, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+            1, true, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
 
         // Import it.
         var first = await service.ApplyAsync(CsmoTarget(), RoundDate, [problem], folder);
@@ -863,7 +863,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent ProblemBy(
         int order, ImmutableArray<string>? authors, params DraftTextContent[] texts) =>
-        new(order, authors, SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
+        new(order, HasSidecar: true, authors, SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds a draft problem carrying the given tags and a single author.
@@ -874,7 +874,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent ProblemWithTags(
         int order, ImmutableArray<string>? tags, params DraftTextContent[] texts) =>
-        new(order, ["Jaromír Šimša"], SolutionLink: null, Tags: tags, Texts: [.. texts], Images: []);
+        new(order, HasSidecar: true, ["Jaromír Šimša"], SolutionLink: null, Tags: tags, Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds an original text variant.

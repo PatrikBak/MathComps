@@ -16,7 +16,7 @@ my-draft/
     incircle.svg
 ```
 
-Problems are numbered from 1 and must be contiguous (`p1`, `p2`, …) — except a **translation-only** drop (below), which may carry an arbitrary subset of orders (e.g. `p3`, `p7`) since its problems already exist in the DB.
+Problems are numbered from 1. A full fresh import numbers them `p1`, `p2`, … with no gaps, but a draft may also carry an arbitrary **subset** of orders (e.g. just `p4`, to correct one problem). The preflight here doesn't police that — whether the orders fill the round without gaps is decided by the DB-aware `validate` step, which can see what already exists (see [Format vs. validate](#format-vs-validate)).
 
 ## `_meta.yaml`
 
@@ -48,7 +48,17 @@ By AM–GM, $a^2 + b^2 \ge 2ab$, and the claim follows.
 
 The problem number and language come from the filename. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original**; any others (`p1.en.md`, `p1.cs.md`) are **translations**. A translation may be statement-only, but it can only carry a solution if the in-draft original does too.
 
-A draft may **omit the original-language file entirely** and carry only translations — a way to drop, say, `cs`/`en` translations onto a problem that already lives in the DB without re-importing its untouched original. Such a translation-only draft also **needn't be contiguous** and may **omit `pN.yaml`** for any problem (with no `pN.yaml`, `authors`/`tags`/`solutionLink` default to "leave the stored values untouched"), so a draft can hold exactly the problems being corrected and nothing else. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even when that file is absent; otherwise a translation gets marked as the original and collides with the stored one (a second original is forbidden). The preflight runs DB-offline so it can't see whether the target exists — the C# `validate` step is the gate: it rejects a no-original draft whose problem isn't already in the DB (`no-original-new-problem`). With no in-draft original, the "solution only if the original has one" check can't run, so a dropped translated solution is accepted on faith — make sure the stored original already has its own solution, or you'll orphan the translated one.
+A draft may **omit the original-language file entirely** and carry only translations — a way to drop, say, `cs`/`en` translations onto a problem that already lives in the DB without re-importing its untouched original. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even when that file is absent; otherwise a translation gets marked as the original and collides with the stored one (a second original is forbidden). With no in-draft original, the "solution only if the original has one" check can't run, so a dropped translated solution is accepted on faith — make sure the stored original already has its own solution, or you'll orphan the translated one.
+
+## Format vs. validate
+
+The preflight here is **DB-blind** — it checks the draft's _format_ (file shape, markdown, math, images) and only that. Whether a subset's numbering fills the round without gaps, or whether a created problem carries its `pN.yaml`, depends on what already exists in the DB — so those calls belong to the C# `validate` step, which queries the DB and can tell a correction or append from a mistake:
+
+- **Round contiguity** — once the import lands, the round's problem orders (those already in the DB plus the draft's) must run `1..N` with no gap. A fresh import that skipped a problem, or a subset drop onto an order that doesn't exist yet, is rejected (`round-contiguity`). A single-problem correction or a clean append passes.
+- **New-problem metadata** — a problem the import would **create** must carry a `pN.yaml` sidecar (`missing-problem-meta`). A re-import onto an existing problem may omit it: with no `pN.yaml`, `authors`/`tags`/`solutionLink` default to "leave the stored values untouched", so a draft can hold exactly the problems being corrected and nothing else.
+- **Original existence** — a no-original (translation-only) drop is rejected unless its problem already exists (`no-original-new-problem`), and an original in a language other than the stored one is rejected as a second original (`original-conflict`).
+
+Because all of this is DB-aware, `validate` **requires a reachable database** — it fails (rather than warning) when it can't reach one, since a dry run that can't see the DB can't vouch for the import. `apply` likewise needs a live DB.
 
 ## Problem metadata — `pN.yaml`
 

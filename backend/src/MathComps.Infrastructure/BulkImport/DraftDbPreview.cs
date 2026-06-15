@@ -63,7 +63,14 @@ public enum DraftTextAction
     /// problem whose every text is a translation, leaving it with no canonical original. A hard conflict: a
     /// translation-only drop is only valid onto a problem that already exists.
     /// </summary>
-    NoOriginalForNewProblem
+    NoOriginalForNewProblem,
+
+    /// <summary>
+    /// A problem's slug is absent from the DB — so importing would create it — but its draft folder carries no
+    /// <c>pN.yaml</c> sidecar. A fresh problem should declare its metadata; only a re-import onto an existing problem
+    /// may omit it (omit = leave the stored authors/tags/link untouched). A hard conflict.
+    /// </summary>
+    NewProblemMissingMetadata
 }
 
 /// <summary>
@@ -89,9 +96,15 @@ public record ProblemTextResolution(
 /// <param name="TextResolutions">
 /// One entry per draft text variant that lands on an already-existing problem slug, classifying the outcome
 /// (clean add, in-place overwrite, or a second-original conflict). A net-new problem slug contributes nothing —
-/// unless it carries no original body, the one net-new case worth flagging
-/// (<see cref="DraftTextAction.NoOriginalForNewProblem"/>).
+/// unless it carries no original body or no metadata sidecar, the net-new cases worth flagging
+/// (<see cref="DraftTextAction.NoOriginalForNewProblem"/>, <see cref="DraftTextAction.NewProblemMissingMetadata"/>).
+/// </param>
+/// <param name="MissingProblemOrders">
+/// The problem orders missing from the round once this import lands — the gaps in <c>1..N</c> of the union of the
+/// orders already in the DB and the draft's orders. Empty when the round would be contiguous; non-empty flags an
+/// import that would leave (or create) a gap-numbered round.
 /// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,
-    ImmutableArray<ProblemTextResolution> TextResolutions);
+    ImmutableArray<ProblemTextResolution> TextResolutions,
+    ImmutableArray<int> MissingProblemOrders);

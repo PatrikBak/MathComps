@@ -5,7 +5,7 @@ description: Use this skill when adding a competition's problems to the site dat
 
 # Add problems (bulk-import draft)
 
-Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with the wanted languages present.** A fresh problem needs its original language (plus any translations); a re-import onto a problem already in the DB may carry **translations only** (omit the original file — see "Translation-only drop" below). Never run `apply` — the user does that.
+Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with the wanted languages present.** A fresh problem needs its original language (plus any translations); a re-import onto problems already in the DB may carry any **subset** — correct one original, or drop translations only (see "What a draft can do" below). Never run `apply` — the user does that.
 
 `data/problems/` is **gitignored** (`data/problems/.gitignore` = `*`) — drafts are local staging input, never committed. The committable artifact is any taxonomy/code change.
 
@@ -15,16 +15,32 @@ The format spec is the single source of truth — read it first: `web/scripts/PR
 
 ```
 my-draft/
-  _meta.yaml        # competition / category? / round? / season / date / language
-  p1.<lang>.md      # statement, then an optional "<!-- solution -->" line, then the solution
-  p1.<lang2>.md     # translations (statement-only allowed; solution only if the original has one)
-  p1.yaml           # authors / solutionLink / tags — all optional; file required except on a translation-only drop
+  _meta.yaml        # round taxonomy: competition / category? / round? / season / date / language (the original language, e.g. sk)
+  p1.sk.md          # problem 1 in its original language (the locale matching _meta's language): statement, optional "<!-- solution -->", solution
+  p1.cs.md          # problem 1 in another locale (cs, en, …) — a translation; statement-only ok, solution only if the original has one
+  p1.yaml           # problem 1's authors / solutionLink / tags — all optional; the file itself is required only for a newly-created problem
   images/           # referenced figures (flat): .svg / .png / .jpg / .jpeg / .webp, each < 2 MB
 ```
 
-Problems are numbered from 1, contiguous (a **translation-only drop** is the exception — see below). The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original** (verbatim); the rest are translations.
+Filenames are `p<number>.<locale>.md`, locale one of `sk` / `cs` / `en`. The file whose locale matches `_meta.yaml`'s `language` is the **original** (verbatim); the rest are translations. Keep `language` set to the true original even when that file is absent from the draft — else a translation gets taken as the original and collides with the stored one.
 
-**Translation-only drop:** to add translations to a problem **already in the DB**, omit the original file and ship only the translation bodies (e.g. `p1.cs.md` + `p1.en.md`). Such a draft may also carry an **arbitrary subset of orders** (e.g. just `p3` + `p7`, no contiguity) and may **omit `pN.yaml`** entirely (with no sidecar, authors/tags/solutionLink default to "leave untouched"), so the draft holds exactly the problems being corrected. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even though that file is absent — otherwise a translation is marked as the original and collides with the stored one. `validate` rejects this (`no-original-new-problem`) if the problem doesn't already exist.
+## What a draft can do
+
+Each problem is matched to the DB by slug (`{edition}-{round}-{order}`). The one fork is **does it already exist?**
+
+- **New problem** → the import _creates_ it: it needs its original-language body **and** a `pN.yaml`; translations optional.
+- **Existing problem** → the import _patches_ it: ship only the bodies you're changing, and `pN.yaml` is optional (omit = leave authors/tags/link untouched). Statement and solution are independent halves, so adding just a solution is fine.
+
+| Intent | `pN.<orig>.md` (e.g. `p4.sk.md`) | `pN.<trans>.md` (cs/en) | `pN.yaml` |
+| --- | --- | --- | --- |
+| Create a new problem | required | optional | required |
+| Correct an existing original | the corrected body | optional | optional |
+| Add / fix a translation (leave the original) | omit | the translation(s) | optional |
+| Add a solution to an existing problem | the body, now with `<!-- solution -->` | — | optional |
+
+A full fresh import is `p1..pN` contiguous; a re-import carries any **subset** (e.g. just `p4`, or `p3` + `p7`) since the rest already exist. A draft is just per-problem ops — mix freely; the only cross-problem rule is round contiguity, enforced by `validate` below.
+
+The preflight checks **format only**; the DB-aware `validate` is the gate (so it **needs a reachable DB**). It rejects: an import that would leave the round non-contiguous (`round-contiguity`, e.g. a `p5` whose `p4` doesn't exist yet); a problem it would create with no original (`no-original-new-problem`) or no `pN.yaml` (`missing-problem-meta`); and an original in a different language than the stored one (`original-conflict`). **A brand-new problem with only translations is _not_ valid** — translation-only drops require the problem to already exist.
 
 ## Step 1 — Register the competition (only if its slug is new)
 

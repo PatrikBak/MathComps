@@ -296,6 +296,85 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
+    /// Correcting one existing problem's original in a subset draft — the round already holds it — leaves the round
+    /// contiguous, so no gap is flagged. This is the single-problem original correction the relocated contiguity
+    /// check is meant to allow.
+    /// </summary>
+    [Fact]
+    public Task A_subset_reimport_of_an_existing_original_leaves_the_round_contiguous() => RunTestAsync(async service =>
+    {
+        // A Slovak original correction for the seeded problem 1 (the round already holds problems 1 and 2).
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // The original is overwritten in place, and the round stays gap-free — nothing to flag.
+        Assert.Equal(DraftTextAction.OverwriteOriginal, ResolutionFor(preview, DocumentType.Statement).Action);
+        Assert.Empty(preview.MissingProblemOrders);
+    });
+
+    /// <summary>
+    /// Importing a problem at an order that leaves a hole — here problem 4 while the round holds only 1 and 2 — would
+    /// create a gap-numbered round, so the missing order is flagged. This is the safety the DB-blind preflight can't
+    /// provide: it can't tell a genuine subset re-import from a fresh import that skipped a problem.
+    /// </summary>
+    [Fact]
+    public Task An_import_that_would_leave_a_round_gap_is_flagged() => RunTestAsync(async service =>
+    {
+        // Problem 4 (slug "74-csmo-a-iii-4") doesn't exist; importing it leaves order 3 missing between 1, 2 and 4.
+        var preview = await PreviewAsync(service, Problem(4, Original(Language.SK)));
+
+        // The post-import round would run 1, 2, 4 — order 3 is the gap.
+        Assert.Equal(3, Assert.Single(preview.MissingProblemOrders));
+    });
+
+    /// <summary>
+    /// Appending the next problem in sequence — problem 3 onto a round holding 1 and 2 — keeps the round contiguous
+    /// and, with its original and metadata sidecar present, is a clean create with nothing to flag.
+    /// </summary>
+    [Fact]
+    public Task Appending_the_next_problem_is_a_clean_contiguous_create() => RunTestAsync(async service =>
+    {
+        // Problem 3 is net-new but extends the round without a gap, and carries an original plus a sidecar.
+        var preview = await PreviewAsync(service, Problem(3, Original(Language.SK)));
+
+        // A clean create — no per-text conflict and no round gap.
+        Assert.Empty(preview.TextResolutions);
+        Assert.Empty(preview.MissingProblemOrders);
+    });
+
+    /// <summary>
+    /// A net-new problem carrying an original but no <c>pN.yaml</c> sidecar is flagged — a fresh problem should
+    /// declare its metadata. (A re-import onto an existing problem may omit it; this slug doesn't exist yet.)
+    /// </summary>
+    [Fact]
+    public Task A_new_problem_with_no_metadata_sidecar_is_flagged() => RunTestAsync(async service =>
+    {
+        // Problem 3 is net-new (so importing creates it), carries a Slovak original, but has no sidecar.
+        var preview = await PreviewAsync(service, Problem(3, hasSidecar: false, Original(Language.SK)));
+
+        // The whole problem is flagged once as missing its metadata.
+        var resolution = Assert.Single(preview.TextResolutions);
+        Assert.Equal(DraftTextAction.NewProblemMissingMetadata, resolution.Action);
+    });
+
+    /// <summary>
+    /// Correcting an existing problem's original while omitting its <c>pN.yaml</c> sidecar is accepted — the
+    /// missing-metadata rule fires only for a problem the import would create, never a re-import (which leaves the
+    /// stored authors/tags/link untouched). This is the SK-original-correction shape the change is built for.
+    /// </summary>
+    [Fact]
+    public Task A_subset_reimport_omitting_the_sidecar_is_accepted() => RunTestAsync(async service =>
+    {
+        // A Slovak original correction for the seeded problem 1, shipped with no pN.yaml.
+        var preview = await PreviewAsync(service, Problem(1, hasSidecar: false, Original(Language.SK)));
+
+        // The original is overwritten in place, and nothing is flagged as missing metadata.
+        Assert.Equal(DraftTextAction.OverwriteOriginal, ResolutionFor(preview, DocumentType.Statement).Action);
+        Assert.DoesNotContain(
+            preview.TextResolutions,
+            resolution => resolution.Action == DraftTextAction.NewProblemMissingMetadata);
+    });
+
+    /// <summary>
     /// Re-importing the original in its own language with a different body overwrites the existing original in place,
     /// while the solution half — which the seeded problem lacks — is reported as a clean add.
     /// </summary>
@@ -403,7 +482,8 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Replay the image problem's statement verbatim, sized off the same on-disk figure.
         var problem = new DraftProblemContent(
-            2, [], SolutionLink: null, Tags: null, Texts: [Original(Language.SK, ImageStatement)], Images: ["fig.svg"]);
+            2, HasSidecar: true, Authors: [], SolutionLink: null, Tags: null,
+            Texts: [Original(Language.SK, ImageStatement)], Images: ["fig.svg"]);
         var preview = await service.PreviewAsync(SeededTarget(), [problem], _imageFolder);
 
         // The reproduced body matches the stored one, so the re-import is unchanged.
@@ -437,13 +517,24 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         service.PreviewAsync(target, [problem], _imageFolder);
 
     /// <summary>
-    /// Builds a draft problem from its order and text variants, carrying no images.
+    /// Builds a draft problem from its order and text variants, carrying no images and (by default) a metadata
+    /// sidecar.
     /// </summary>
     /// <param name="order">The problem's 1-based order.</param>
     /// <param name="texts">The problem's text variants (original plus any translations).</param>
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent Problem(int order, params DraftTextContent[] texts) =>
-        new(order, Authors: [], SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
+        Problem(order, hasSidecar: true, texts);
+
+    /// <summary>
+    /// Builds a draft problem from its order, whether it carries a metadata sidecar, and its text variants.
+    /// </summary>
+    /// <param name="order">The problem's 1-based order.</param>
+    /// <param name="hasSidecar">Whether a <c>pN.yaml</c> sidecar exists for the problem.</param>
+    /// <param name="texts">The problem's text variants (original plus any translations).</param>
+    /// <returns>The configured problem content.</returns>
+    private static DraftProblemContent Problem(int order, bool hasSidecar, params DraftTextContent[] texts) =>
+        new(order, hasSidecar, Authors: [], SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds an original text variant. The body defaults to one that differs from the seeded body, so an original

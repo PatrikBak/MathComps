@@ -26,6 +26,10 @@ public record DraftTextContent(
 /// independent of the preflight manifest shape.
 /// </summary>
 /// <param name="Order">1-based position within the round, taken from the filenames.</param>
+/// <param name="HasSidecar">
+/// Whether a <c>pN.yaml</c> sidecar exists for this problem. A newly-created problem with no sidecar is flagged (it
+/// forgot its metadata); a re-import onto an existing problem may omit it (omit = leave the stored values untouched).
+/// </param>
 /// <param name="Authors">
 /// Author display names in declared order, or null when the draft omits an <c>authors:</c> key. Null leaves existing
 /// authors untouched; an empty array clears them; a populated array replaces them.
@@ -42,6 +46,7 @@ public record DraftTextContent(
 /// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record DraftProblemContent(
     int Order,
+    bool HasSidecar,
     ImmutableArray<string>? Authors,
     string? SolutionLink,
     ImmutableArray<string>? Tags,

@@ -297,29 +297,6 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-meta-fi
 }
 `;
 
-exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-problem-meta 1`] = `
-{
-  "errors": [
-    {
-      "file": "p1.yaml",
-      "half": null,
-      "rule": "missing-problem-meta",
-      "severity": "error",
-    },
-  ],
-  "ok": false,
-  "problemCount": 1,
-  "problemLanguages": [
-    [
-      "sk",
-    ],
-  ],
-  "problemOrders": [
-    1,
-  ],
-}
-`;
-
 exports[`preflight-draft fixtures (verdict + snapshot) > invalid-no-problems 1`] = `
 {
   "errors": [
@@ -334,56 +311,6 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-no-problems 1`]
   "problemCount": 0,
   "problemLanguages": [],
   "problemOrders": [],
-}
-`;
-
-exports[`preflight-draft fixtures (verdict + snapshot) > invalid-noncontiguous 1`] = `
-{
-  "errors": [
-    {
-      "file": "(folder)",
-      "half": null,
-      "rule": "problem-files",
-      "severity": "error",
-    },
-  ],
-  "ok": false,
-  "problemCount": 2,
-  "problemLanguages": [
-    [
-      "sk",
-    ],
-    [
-      "sk",
-    ],
-  ],
-  "problemOrders": [
-    1,
-    3,
-  ],
-}
-`;
-
-exports[`preflight-draft fixtures (verdict + snapshot) > invalid-starts-at-two 1`] = `
-{
-  "errors": [
-    {
-      "file": "(folder)",
-      "half": null,
-      "rule": "problem-files",
-      "severity": "error",
-    },
-  ],
-  "ok": false,
-  "problemCount": 1,
-  "problemLanguages": [
-    [
-      "sk",
-    ],
-  ],
-  "problemOrders": [
-    2,
-  ],
 }
 `;
 
@@ -477,6 +404,29 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-unsupported-ima
   ],
   "problemOrders": [
     1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-zero-order 1`] = `
+{
+  "errors": [
+    {
+      "file": "(folder)",
+      "half": null,
+      "rule": "problem-files",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    0,
   ],
 }
 `;
@@ -615,6 +565,22 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-no-category 1`] =
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-no-problem-meta 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > valid-orphan-warns 1`] = `
 {
   "errors": [
@@ -699,6 +665,42 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-solution-link 1`]
   ],
   "problemOrders": [
     1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-starts-at-two 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    2,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-subset-with-originals 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 2,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+    3,
   ],
 }
 `;

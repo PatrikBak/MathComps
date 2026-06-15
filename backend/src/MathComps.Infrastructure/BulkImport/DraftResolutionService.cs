@@ -12,7 +12,8 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <see cref="MathCompsDbContext"/> per call and resolves each taxonomy entity with an <c>AnyAsync</c> existence
 /// probe; for the problem halves it loads the existing texts' <c>(document type, language, is-original, markdown)</c>
 /// for the slugs that already exist, reproduces the markdown the import would write (the same image-ref rewrite),
-/// then classifies each half in memory — including spotting a re-import that changes nothing.
+/// then classifies each half in memory — including spotting a re-import that changes nothing. It also loads the
+/// round's full set of problem orders to check that the import would leave the round contiguous.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
 public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IDraftResolutionService
@@ -73,35 +74,70 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
                 existingTextsBySlug.GetValueOrDefault(slugByOrder[problem.Order])))
             .ToImmutableArray();
 
-        // Hand back the create-vs-reuse picture plus the per-text resolutions for any colliding slugs.
-        return new DraftDbPreview(resolutions, textResolutions);
+        // Contiguity is a post-import property: once this import lands, the round's problem orders — those already
+        // in the DB plus the draft's — must run 1..N with no gap. Loading every order in the round (not just the
+        // draft's candidate slugs) is what lets a fresh import that skipped a problem, or a subset re-import onto a
+        // slug that doesn't exist yet, be told apart from a legitimate correction or append.
+        var existingOrders = await context.Problems.AsNoTracking()
+            .Where(problem => problem.RoundInstance.Round.CompositeSlug == compositeRoundSlug
+                              && problem.RoundInstance.Season.StartYear == target.SeasonYear)
+            .Select(problem => problem.Number)
+            .ToListAsync();
+
+        // The orders present after the import, and the gaps in 1..N that would remain.
+        var postImportOrders = existingOrders.Concat(problems.Select(problem => problem.Order)).ToHashSet();
+        var highestOrder = postImportOrders.Count == 0 ? 0 : postImportOrders.Max();
+        var missingProblemOrders = Enumerable.Range(1, highestOrder)
+            .Where(order => !postImportOrders.Contains(order))
+            .ToImmutableArray();
+
+        // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, and the round's gaps.
+        return new DraftDbPreview(resolutions, textResolutions, missingProblemOrders);
     }
 
     /// <summary>
     /// Classifies every half a single problem would write, reproducing the markdown the import would store (the
     /// same image-ref rewrite) so an unchanged re-import can be told apart from a real overwrite. A net-new problem
-    /// slug collides with nothing, so it contributes no resolutions.
+    /// slug usually collides with nothing and contributes no resolutions — except the two create-time conflicts worth
+    /// flagging: a problem with no original body, and one with no <c>pN.yaml</c> sidecar.
     /// </summary>
     /// <param name="slug">The would-be problem slug.</param>
     /// <param name="problem">The draft problem content — its text variants and image basenames.</param>
     /// <param name="draftFolder">The draft folder the image refs resolve against.</param>
     /// <param name="existingTexts">The existing problem's texts, or null when the problem slug is absent.</param>
-    /// <returns>One resolution per half of an already-existing problem; empty for a net-new slug.</returns>
+    /// <returns>
+    /// One resolution per half of an already-existing problem; for a net-new slug, a single create-conflict
+    /// resolution or empty when the create is clean.
+    /// </returns>
     private static IEnumerable<ProblemTextResolution> ClassifyProblem(
         string slug,
         DraftProblemContent problem,
         string draftFolder,
         IReadOnlyList<ExistingText>? existingTexts)
     {
-        // A net-new slug collides with nothing — every half is the quiet path, so report none (and skip the image
-        // reads the body comparison would otherwise need). The one exception: a problem that carries at least one
-        // body but no original can't be inserted (it would have only translations, no canonical original), so flag
-        // that single case.
+        // A net-new slug collides with nothing — importing would create the problem. Most halves are the quiet
+        // create path (so we skip the image reads the body comparison would otherwise need), but two net-new shapes
+        // are still worth flagging.
         if (existingTexts is null)
-            return problem.Texts is [var firstText, ..] && !problem.Texts.Any(text => text.Original)
-                ? [new ProblemTextResolution(
-                    slug, DocumentType.Statement, firstText.Language, DraftTextAction.NoOriginalForNewProblem)]
-                : [];
+        {
+            // No bodies to create — the preflight already flagged the empty group; nothing to classify here.
+            if (problem.Texts is not [var firstText, ..])
+                return [];
+
+            // Bodies but no original — the problem would land with only translations and no canonical original.
+            if (!problem.Texts.Any(text => text.Original))
+                return [new ProblemTextResolution(
+                    slug, DocumentType.Statement, firstText.Language, DraftTextAction.NoOriginalForNewProblem)];
+
+            // A fresh problem with no pN.yaml sidecar forgot its metadata (a re-import may omit it, but this slug
+            // doesn't exist yet, so this is a create).
+            if (!problem.HasSidecar)
+                return [new ProblemTextResolution(
+                    slug, DocumentType.Statement, firstText.Language, DraftTextAction.NewProblemMissingMetadata)];
+
+            // Otherwise a clean create — nothing to flag.
+            return [];
+        }
 
         // The image-ref → media-ref map the would-be markdown is rewritten against, sized off the draft's figures.
         var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);
