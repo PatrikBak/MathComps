@@ -1,4 +1,4 @@
-using MathComps.Domain.ApiDtos.UserLists;
+using MathComps.Domain.Contracts.UserLists;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

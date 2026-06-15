@@ -1,5 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.ApiDtos.Comments;
+using MathComps.Domain.Contracts.Comments;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Comments;

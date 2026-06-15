@@ -1,4 +1,4 @@
-using MathComps.Domain.ApiDtos.Comments;
+using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

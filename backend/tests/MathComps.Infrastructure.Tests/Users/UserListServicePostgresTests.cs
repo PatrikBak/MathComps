@@ -1,5 +1,5 @@
 using MathComps.Infrastructure.Tests.TestInfrastructure;
-using MathComps.Domain.ApiDtos.UserLists;
+using MathComps.Domain.Contracts.UserLists;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
