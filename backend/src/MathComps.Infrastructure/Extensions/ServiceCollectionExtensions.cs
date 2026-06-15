@@ -15,6 +15,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using MathComps.Domain.Tagging;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Infrastructure.Extensions;
 

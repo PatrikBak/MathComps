@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
+using MathComps.Domain.Localization;
+using MathComps.Domain.Tagging;
 
 #nullable disable
 

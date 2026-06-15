@@ -3,12 +3,13 @@ using MathComps.Cli.Translation.Enums;
 using MathComps.Cli.Translation.Services;
 using MathComps.Cli.Translation.Settings;
 using MathComps.Infrastructure.Services.Integrations;
-using MathComps.Shared;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using MathComps.Domain.Localization;
+using MathComps.Shared.Extensions;
+using MathComps.Shared.Cli.Progress;
 
 namespace MathComps.Cli.Translation.Commands;
 

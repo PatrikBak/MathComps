@@ -1,5 +1,5 @@
 using MathComps.Cli.BulkImport.Manifest;
-using MathComps.Shared.Localization;
+using MathComps.Domain.Tagging;
 
 namespace MathComps.Cli.BulkImport.Validation;
 

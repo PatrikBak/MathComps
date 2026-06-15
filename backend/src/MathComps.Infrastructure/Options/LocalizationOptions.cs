@@ -1,3 +1,4 @@
+using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.Options;
 
 /// <summary>

@@ -1,13 +1,13 @@
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
-using MathComps.Shared;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
+using MathComps.Domain.Localization;
 
 // Standard ASP.NET Core app
 var builder = WebApplication.CreateBuilder(args);

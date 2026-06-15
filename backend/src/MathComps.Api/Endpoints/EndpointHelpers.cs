@@ -1,6 +1,6 @@
 using System.Globalization;
 using MathComps.Infrastructure.Services.Users;
-using MathComps.Shared;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Api.Endpoints;
 

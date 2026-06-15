@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using MathComps.Domain.ApiDtos.Helpers;
-using MathComps.Shared;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Domain.ApiDtos.ProblemQuery;
 

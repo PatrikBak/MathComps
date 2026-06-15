@@ -1,8 +1,8 @@
 using MathComps.Cli.Similarity.Services;
 using MathComps.Infrastructure.Services.Problems;
-using MathComps.Shared.Cli;
 using Spectre.Console;
 using System.ComponentModel;
+using MathComps.Shared.Cli.Commands;
 
 namespace MathComps.Cli.Similarity.Commands;
 

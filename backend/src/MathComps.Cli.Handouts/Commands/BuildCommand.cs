@@ -1,5 +1,4 @@
 using MathComps.Infrastructure.Storage;
-using MathComps.Shared;
 using MathComps.TexParser;
 using MathComps.TexParser.Images;
 using MathComps.TexParser.TexCleaner;
@@ -10,6 +9,9 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
+using MathComps.Shared.Serialization;
+using MathComps.Shared.Extensions;
+using MathComps.Shared.Diagnostics;
 
 namespace MathComps.Cli.Handouts.Commands;
 

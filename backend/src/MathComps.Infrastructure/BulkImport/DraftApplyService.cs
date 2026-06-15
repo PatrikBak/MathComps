@@ -3,8 +3,10 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Storage;
-using MathComps.Shared.Localization;
 using Microsoft.EntityFrameworkCore;
+using MathComps.Domain.Taxonomy;
+using MathComps.Shared.Extensions;
+using MathComps.Domain.Tagging;
 
 namespace MathComps.Infrastructure.BulkImport;
 

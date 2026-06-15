@@ -1,9 +1,9 @@
 using MathComps.Cli.SkmoScraper.Dtos;
 using MathComps.Cli.SkmoScraper.Services;
-using MathComps.Shared;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.SkmoScraper.Commands;
 

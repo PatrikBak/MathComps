@@ -1,8 +1,9 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Shared.Localization;
 using Microsoft.EntityFrameworkCore;
+using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 
 namespace MathComps.Infrastructure.BulkImport;
 

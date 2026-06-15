@@ -1,14 +1,18 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared;
-using MathComps.Shared.Cli;
-using MathComps.Shared.Localization;
 using MathComps.TexParser.Images;
 using MathComps.TexParser.Types;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
+using MathComps.Cli.SkmoParser.Paths;
+using MathComps.Shared.Serialization;
+using MathComps.Shared.Extensions;
+using MathComps.Shared.Cli.Progress;
+using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 using EfProblem = MathComps.Domain.EfCoreEntities.Problem;
 using Text = MathComps.TexParser.Types.Text;
 

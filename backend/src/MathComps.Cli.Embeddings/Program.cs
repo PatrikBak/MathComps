@@ -2,12 +2,12 @@ using MathComps.Cli.Embeddings.Commands;
 using MathComps.Cli.Embeddings.Services;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("Embeddings").Centered().Color(Color.Aqua));

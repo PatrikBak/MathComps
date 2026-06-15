@@ -1,6 +1,6 @@
-using MathComps.Shared;
-using MathComps.Shared.Localization;
 using System.Collections.Immutable;
+using MathComps.Domain.Tagging;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Cli.Tagging.Services;
 

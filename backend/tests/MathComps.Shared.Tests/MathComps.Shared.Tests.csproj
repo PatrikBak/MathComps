@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MathComps.Shared\MathComps.Shared.csproj" />
-    <ProjectReference Include="..\..\src\MathComps.Domain\MathComps.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

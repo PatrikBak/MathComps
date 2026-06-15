@@ -1,13 +1,14 @@
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
-using MathComps.Shared;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using MathComps.Domain.Tagging;
+using MathComps.Shared.Serialization;
+using MathComps.Shared.Cli.Progress;
 
 namespace MathComps.Cli.Tagging.Commands;
 

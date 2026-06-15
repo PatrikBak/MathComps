@@ -1,7 +1,7 @@
 using MathComps.Cli.Translation.Dtos;
 using MathComps.Cli.Translation.Enums;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Shared;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Cli.Translation.Services;
 

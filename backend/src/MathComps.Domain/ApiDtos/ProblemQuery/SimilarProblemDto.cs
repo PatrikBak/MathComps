@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using MathComps.Shared;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Domain.ApiDtos.ProblemQuery;
 

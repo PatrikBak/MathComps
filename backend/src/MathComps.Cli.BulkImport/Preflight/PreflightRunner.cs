@@ -1,5 +1,6 @@
 using MathComps.Cli.BulkImport.Manifest;
-using MathComps.Shared;
+using MathComps.Shared.Diagnostics;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.BulkImport.Preflight;
 

@@ -6,8 +6,9 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
-using MathComps.Shared;
 using Microsoft.Extensions.DependencyInjection;
+using MathComps.Domain.Localization;
+using MathComps.Domain.Tagging;
 
 namespace MathComps.Infrastructure.Tests.Problems;
 

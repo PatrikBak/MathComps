@@ -1,5 +1,6 @@
-using MathComps.Shared.Localization;
 
+using MathComps.Domain.Taxonomy;
+using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.Services.Localization;
 
 /// <summary>

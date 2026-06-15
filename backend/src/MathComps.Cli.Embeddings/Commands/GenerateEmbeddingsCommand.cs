@@ -2,11 +2,11 @@ using MathComps.Cli.Embeddings.Dtos;
 using MathComps.Cli.Embeddings.Services;
 using MathComps.Domain.Constants;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Shared;
-using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using MathComps.Shared.Extensions;
+using MathComps.Shared.Cli.Progress;
 
 namespace MathComps.Cli.Embeddings.Commands;
 

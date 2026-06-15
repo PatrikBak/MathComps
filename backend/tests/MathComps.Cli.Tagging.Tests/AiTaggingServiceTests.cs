@@ -1,9 +1,9 @@
 using MathComps.Cli.Tagging.Services;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Integrations;
-using MathComps.Shared;
 using Moq;
 using System.Collections.Immutable;
+using MathComps.Domain.Tagging;
 
 namespace MathComps.Cli.Tagging.Tests;
 

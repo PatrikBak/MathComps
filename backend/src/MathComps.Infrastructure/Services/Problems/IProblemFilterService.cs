@@ -1,5 +1,6 @@
 using MathComps.Domain.ApiDtos.ProblemQuery;
 using MathComps.Domain.ApiDtos.SearchBar;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Infrastructure.Services.Problems;
 
