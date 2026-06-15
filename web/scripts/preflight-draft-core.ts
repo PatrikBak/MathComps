@@ -69,7 +69,7 @@ export async function preflightDraft(folderPath: string): Promise<DraftManifest>
   errors.push(...metaResult.errors)
 
   // Group the problem files by order
-  const groups = groupProblemFiles(folderPath, errors)
+  const groups = groupProblemFiles(folderPath, metaResult.meta.language, errors)
 
   // One manifest entry per problem, kept in numeric order for stable output
   const problems: ManifestProblem[] = []
@@ -133,12 +133,21 @@ function readMeta(folderPath: string): MetaResult {
  * by problem order, flagging a missing, non-contiguous, or duplicated numbering
  * scheme plus any order that lacks its metadata file or any body file.
  *
+ * A translation-only draft — one with body files but none in the original language —
+ * is dropping fixes onto problems already in the DB, so its orders needn't be
+ * contiguous and its `pN.yaml` files are optional; both checks are skipped for it.
+ *
  * @param folderPath - Path to the draft folder.
+ * @param originalLanguage - The draft's original language (`meta.language`).
  * @param errors - Accumulator the structural issues are pushed onto.
  *
  * @returns One {@link ProblemGroup} per discovered order, in numeric order.
  */
-function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemGroup[] {
+function groupProblemFiles(
+  folderPath: string,
+  originalLanguage: Locale,
+  errors: VerdictError[]
+): ProblemGroup[] {
   // Read the folder's entries
   const names = fs.readdirSync(folderPath)
 
@@ -201,9 +210,13 @@ function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemG
       .map((entry) => ({ file: entry.file, langToken: entry.langToken })),
   }))
 
-  // Numbering must run 1, 2, 3, … with no gaps
+  // A draft with body files but none in the original language carries only translations onto existing problems
+  const isTranslationOnly =
+    bodyFiles.length > 0 && bodyFiles.every((entry) => entry.langToken !== originalLanguage)
+
+  // Fresh imports must number 1, 2, 3, … with no gaps; a translation-only subset may skip orders
   const gapIndex = orders.findIndex((order, index) => order !== index + 1)
-  if (gapIndex !== -1) {
+  if (!isTranslationOnly && gapIndex !== -1) {
     errors.push(
       problemIssue(
         '(folder)',
@@ -214,9 +227,10 @@ function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemG
     )
   }
 
-  // A problem with body files but no metadata file, or a metadata file with no bodies, is incomplete
+  // A problem with body files but no metadata file (only required for a fresh import), or a metadata file with no
+  // bodies, is incomplete
   groups.forEach((group) => {
-    if (group.metaFile === null) {
+    if (group.metaFile === null && !isTranslationOnly) {
       errors.push(
         problemIssue(
           `p${group.order}.yaml`,
@@ -225,7 +239,7 @@ function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemG
           `problem ${group.order} has body files but no p${group.order}.yaml metadata file`
         )
       )
-    } else if (group.bodies.length === 0) {
+    } else if (group.metaFile !== null && group.bodies.length === 0) {
       errors.push(
         problemIssue(
           group.metaFile,
