@@ -1,8 +1,8 @@
 using MathComps.Api.Constants;
-using MathComps.Domain.ApiDtos.Helpers;
-using MathComps.Domain.ApiDtos.ProblemQuery;
-using MathComps.Domain.ApiDtos.SearchBar;
-using MathComps.Domain.ApiDtos.UserLists;
+using MathComps.Domain.Contracts.Helpers;
+using MathComps.Domain.Contracts.ProblemQuery;
+using MathComps.Domain.Contracts.SearchBar;
+using MathComps.Domain.Contracts.UserLists;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
 

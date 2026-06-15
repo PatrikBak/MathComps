@@ -1,6 +1,6 @@
-using MathComps.Domain.ApiDtos.Helpers;
-using MathComps.Domain.ApiDtos.ProblemQuery;
-using MathComps.Domain.ApiDtos.SearchBar;
+using MathComps.Domain.Contracts.Helpers;
+using MathComps.Domain.Contracts.ProblemQuery;
+using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;

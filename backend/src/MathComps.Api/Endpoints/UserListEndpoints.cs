@@ -1,5 +1,5 @@
 using MathComps.Api.Constants;
-using MathComps.Domain.ApiDtos.UserLists;
+using MathComps.Domain.Contracts.UserLists;
 using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;

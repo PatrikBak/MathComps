@@ -1,5 +1,5 @@
 using MathComps.Api.Constants;
-using MathComps.Domain.ApiDtos.Comments;
+using MathComps.Domain.Contracts.Comments;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Users;
 

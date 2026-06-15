@@ -1,4 +1,4 @@
-using MathComps.Domain.ApiDtos.ProblemQuery;
+using MathComps.Domain.Contracts.ProblemQuery;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

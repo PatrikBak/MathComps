@@ -1,4 +1,4 @@
-using MathComps.Domain.ApiDtos.UserLists;
+using MathComps.Domain.Contracts.UserLists;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Users;
