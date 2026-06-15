@@ -10,11 +10,4 @@ namespace MathComps.Domain.ApiDtos.Helpers;
 /// <param name="Page">1-based index of the current page.</param>
 /// <param name="PageSize">Requested number of items per page.</param>
 /// <param name="TotalCount">Total number of items across all pages.</param>
-public record PagedList<T>(ImmutableList<T> Items, int Page, int PageSize, int TotalCount)
-{
-    /// <summary>
-    /// Total number of available pages derived from <see cref="TotalCount"/> and <see cref="PageSize"/>.
-    /// Returns 0 when <see cref="PageSize"/> is not positive.
-    /// </summary>
-    public int TotalPages => PageSize > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 0;
-}
+public record PagedList<T>(ImmutableList<T> Items, int Page, int PageSize, int TotalCount);

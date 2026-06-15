@@ -16,67 +16,12 @@ public static class TexEmitter
     private const string Indent = "    ";
 
     /// <summary>
-    /// Emits TeX source for a complete document.
-    /// </summary>
-    /// <param name="document">The document to emit.</param>
-    /// <returns>The TeX source string.</returns>
-    public static string Emit(Document document)
-    {
-        // Create a builder to accumulate the output TeX source.
-        var builder = new StringBuilder();
-
-        // Emit the document title if present.
-        if (!string.IsNullOrEmpty(document.Title))
-            builder.AppendLine($@"\Title{{{document.Title}}}");
-
-        // Emit each section of the document in order.
-        foreach (var section in document.Sections)
-            EmitSection(builder, section);
-
-        // Return the accumulated TeX source.
-        return builder.ToString();
-    }
-
-    /// <summary>
-    /// Emits TeX source for a single section, including its header command and content.
-    /// </summary>
-    /// <param name="builder">The string builder to append to.</param>
-    /// <param name="section">The section to emit.</param>
-    private static void EmitSection(StringBuilder builder, Section section)
-    {
-        // Determine the appropriate section command based on nesting level.
-        var command = section.Level switch
-        {
-            // Level 1 uses \sec
-            1 => "sec",
-
-            // Level 2 uses \secc
-            2 => "secc",
-
-            // Default to \sec for any unexpected levels
-            _ => "sec"
-        };
-
-        // Add a blank line before the section header for readability.
-        builder.AppendLine();
-
-        // Emit the section command followed by the title.
-        builder.AppendLine($@"\{command} {section.Title}");
-
-        // Add a blank line after the header before the content.
-        builder.AppendLine();
-
-        // Emit all content blocks within this section.
-        EmitContentBlocks(builder, section.Text.Content, indent: "");
-    }
-
-    /// <summary>
     /// Emits TeX source for a list of content blocks.
     /// </summary>
     /// <param name="builder">The string builder to append to.</param>
     /// <param name="blocks">The content blocks to emit.</param>
     /// <param name="indent">The indentation prefix for each block.</param>
-    public static void EmitContentBlocks(StringBuilder builder, IEnumerable<ContentBlock> blocks, string indent)
+    private static void EmitContentBlocks(StringBuilder builder, IEnumerable<ContentBlock> blocks, string indent)
     {
         // Emit each block sequentially.
         foreach (var block in blocks)

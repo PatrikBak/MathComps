@@ -771,19 +771,19 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var season75 = result.Seasons.First(s => s.EditionNumber == 75);
 
         // CSMO A in season 75 has 2 problems (p1, p4)
-        var csmoA = season75.Contests.First(contest => contest.CompetitionSlug == "csmo" && contest.CategorySlug == "a");
+        var csmoA = season75.Contests.First(contest => contest is { CompetitionSlug: "csmo", CategorySlug: "a" });
         Assert.Equal(2, csmoA.ProblemCount);
 
         // CSMO B in season 75 has 1 problem (p2)
-        var csmoB = season75.Contests.First(contest => contest.CompetitionSlug == "csmo" && contest.CategorySlug == "b");
+        var csmoB = season75.Contests.First(contest => contest is { CompetitionSlug: "csmo", CategorySlug: "b" });
         Assert.Equal(1, csmoB.ProblemCount);
 
         // CSMO C in season 75 has 1 problem (p3)
-        var csmoC = season75.Contests.First(c => c.CompetitionSlug == "csmo" && c.CategorySlug == "c");
+        var csmoC = season75.Contests.First(contest => contest is { CompetitionSlug: "csmo", CategorySlug: "c" });
         Assert.Equal(1, csmoC.ProblemCount);
 
         // IMO in season 75 has 1 problem (p7)
-        var imo = season75.Contests.First(c => c.CompetitionSlug == "imo");
+        var imo = season75.Contests.First(contest => contest.CompetitionSlug == "imo");
         Assert.Equal(1, imo.ProblemCount);
     });
 
@@ -801,13 +801,13 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var season75 = result.Seasons.First(season => season.EditionNumber == 75);
 
         // CSMO A should have competition and category slugs
-        var csmoA = season75.Contests.First(contest => contest.CompetitionSlug == "csmo" && contest.CategorySlug == "a");
+        var csmoA = season75.Contests.First(contest => contest is { CompetitionSlug: "csmo", CategorySlug: "a" });
         Assert.Equal("csmo", csmoA.CompetitionSlug);
         Assert.Equal("a", csmoA.CategorySlug);
         Assert.NotNull(csmoA.RoundSlug);
 
         // IMO should have competition slug but no category (direct round)
-        var imo = season75.Contests.First(c => c.CompetitionSlug == "imo");
+        var imo = season75.Contests.First(contest => contest.CompetitionSlug == "imo");
         Assert.Equal("imo", imo.CompetitionSlug);
         Assert.Null(imo.CategorySlug);
     });

@@ -42,7 +42,7 @@ public class GenericDictionaryWrapperConverter<TRecord> : JsonConverter<TRecord>
     }
 
     /// <inheritdoc/>
-    public override TRecord? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override TRecord Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         // Deserialize dictionary directly from JSON
         var dictionary = JsonSerializer.Deserialize(ref reader, _dataProperty.PropertyType, options)

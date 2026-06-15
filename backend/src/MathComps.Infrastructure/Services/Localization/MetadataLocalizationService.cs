@@ -49,12 +49,12 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
     /// <inheritdoc />
     public string GetCompetitionShortName(Language language, string slug) =>
-        GetMetadata(language).Competitions?.Data.GetValueOrDefault(slug)?.ShortName
+        GetMetadata(language).Competitions.Data.GetValueOrDefault(slug)?.ShortName
             ?? throw MissingLocalization("competition", slug, language);
 
     /// <inheritdoc />
     public string GetCompetitionFullName(Language language, string slug) =>
-        GetMetadata(language).Competitions?.Data.GetValueOrDefault(slug)?.FullName
+        GetMetadata(language).Competitions.Data.GetValueOrDefault(slug)?.FullName
             ?? throw MissingLocalization("competition", slug, language);
 
     /// <inheritdoc />
@@ -69,7 +69,7 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
     /// <inheritdoc />
     public string GetCategoryName(Language language, string slug) =>
-        GetMetadata(language).Categories?.Data.GetValueOrDefault(slug)
+        GetMetadata(language).Categories.Data.GetValueOrDefault(slug)
             ?? throw MissingLocalization("category", slug, language);
 
     /// <inheritdoc />
@@ -96,7 +96,7 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
         // Check if competition missing in some locale 
         var competitionMissingLocales = LocalesMissing(metadata =>
-            metadata.Competitions?.Data.ContainsKey(competitionSlug) == true);
+            metadata.Competitions.Data.ContainsKey(competitionSlug));
 
         // Report the competition only when something's actually missing.
         if (competitionEntry is null || competitionMissingLocales.Length > 0)
@@ -116,7 +116,7 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
             // Check if category missing in some locale
             var categoryMissingLocales = LocalesMissing(metadata =>
-                metadata.Categories?.Data.ContainsKey(categorySlug) == true);
+                metadata.Categories.Data.ContainsKey(categorySlug));
 
             // Report only on a real gap.
             if (categoryMissingFromShared || categoryMissingLocales.Length > 0)

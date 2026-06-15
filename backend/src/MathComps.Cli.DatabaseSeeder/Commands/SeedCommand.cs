@@ -18,6 +18,9 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
     /// </summary>
     public class Settings : CommandSettings
     {
+        /// <summary>
+        /// Skip updating problems that already exist, inserting only new ones.
+        /// </summary>
         [CommandOption("-s|--skip-existing")]
         [Description(
             """
@@ -27,6 +30,9 @@ public class SeedCommand(IDatabaseSeeder seeder) : AsyncCommand<SeedCommand.Sett
         )]
         public bool SkipExisting { get; set; }
 
+        /// <summary>
+        /// The competition year(s) to process; an empty array means every year.
+        /// </summary>
         [CommandArgument(0, "[years]")]
         [Description("Only process problems from the specified year(s), space-separated (e.g., '72 59 41')")]
         public int[] Years { get; set; } = [];

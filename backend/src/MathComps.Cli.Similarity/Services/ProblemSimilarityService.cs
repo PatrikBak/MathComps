@@ -150,7 +150,7 @@ public class ProblemSimilarityService(
                 candidate.Problem.Id,
 
                 // Statement distance
-                StatementDistance = (double)candidate.StatementEmbedding.CosineDistance(sourceProblemData.StatementEmbedding),
+                StatementDistance = candidate.StatementEmbedding.CosineDistance(sourceProblemData.StatementEmbedding),
 
                 // Solution distance, if both problems have it
                 SolutionDistance = candidate.SolutionEmbedding != null && sourceProblemData.SolutionEmbedding != null
@@ -178,7 +178,7 @@ public class ProblemSimilarityService(
                 var statementSimilarity = 1 - candidateData.StatementDistance;
 
                 // The solution similarity
-                var solutionSimilarity = candidateData.SolutionDistance is null ? null : 1 - candidateData.SolutionDistance;
+                var solutionSimilarity = 1 - candidateData.SolutionDistance;
 
                 // The tag similarity (Jaccard)
                 var tagSimilarity =

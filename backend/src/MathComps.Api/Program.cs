@@ -21,7 +21,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         // Parse the Clerk configuration
-        var authority = builder.Configuration.GetSection("Authentication:Clerk")?["Authority"]
+        var authority = builder.Configuration.GetSection("Authentication:Clerk")["Authority"]
             ?? throw new InvalidOperationException("Clerk authority not found");
 
         // Tell the middleware where to find the keys (OIDC Discovery)
@@ -114,6 +114,3 @@ app.MapWebhookEndpoints();
 
 // Run the API
 await app.RunAsync();
-
-// Apparently this shit neeeded
-public partial class Program;

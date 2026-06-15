@@ -8,7 +8,7 @@ namespace MathComps.TexParser.Types;
 /// <param name="RawProblem">The original, unparsed problem data.</param>
 /// <param name="ParsedStatement">The parsed problem statement as a structured <see cref="Text"/> object, or <c><see langword="null"/></c> if not parsed.</param>
 /// <param name="ParsedSolution">The parsed problem solution as a structured <see cref="Text"/> object, or <see langword="null"/> if not parsed.</param>
-public record class SkmoParsedProblem(
+public record SkmoParsedProblem(
     SkmoRawProblem RawProblem,
     Text? ParsedStatement,
     Text? ParsedSolution
@@ -25,7 +25,7 @@ public record class SkmoParsedProblem(
 /// <param name="Statement">The raw TeX string of the problem's statement.</param>
 /// <param name="Solution">The raw TeX string of the problem's solution.</param>
 /// <param name="Authors">A list of the problem's authors. Might be empty if unknown</param>
-public record class SkmoRawProblem(
+public record SkmoRawProblem(
     int OlympiadYear,
     string? Category,
     string Competition,

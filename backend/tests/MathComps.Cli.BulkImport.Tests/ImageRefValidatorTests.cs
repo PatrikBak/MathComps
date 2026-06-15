@@ -23,7 +23,14 @@ public class ImageRefValidatorTests : IDisposable
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Directory.Delete(_folder, recursive: true);
+    public void Dispose()
+    {
+        // Wipe the throwaway draft folder.
+        Directory.Delete(_folder, recursive: true);
+
+        // No finalizer to run.
+        GC.SuppressFinalize(this);
+    }
 
     /// <summary>
     /// A problem referencing a real, readable figure yields no issues.
@@ -45,7 +52,7 @@ public class ImageRefValidatorTests : IDisposable
     public void An_unsupported_format_is_a_blocking_error()
     {
         // A file with an extension the pipeline can't size or serve.
-        File.WriteAllBytes(Path.Combine(_folder, "images", "icon.gif"), [0x47, 0x49, 0x46]);
+        File.WriteAllBytes(Path.Combine(_folder, "images", "icon.gif"), "GIF"u8);
 
         // Exactly one error, attributed to the figure, at error severity.
         var issue = Assert.Single(ImageRefValidator.Check([ProblemReferencing("icon.gif")], _folder));

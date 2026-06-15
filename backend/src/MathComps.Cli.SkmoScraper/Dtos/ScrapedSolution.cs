@@ -24,5 +24,5 @@ public record ScrapedSolution(
     public string Slug =>
         $"{Year}" +
         $"{(Category == null ? "" : $"-{Category.ToUpperInvariant()}")}" +
-        $"{(CompetitionId == null ? "" : $"-{CompetitionId.ToUpperInvariant()}")}";
+        $"-{CompetitionId.ToUpperInvariant()}";
 }

@@ -126,7 +126,7 @@ public static class SkmoArchiveParser
                 #region Handle authors
 
                 // TST problems should have no authors, the author strings here are original sources
-                var authorString = problem.Id.StartsWith("vyberko") ? null : problem.AuthorString;
+                var authorString = problem.Id.StartsWith("vyberko", StringComparison.Ordinal) ? null : problem.AuthorString;
 
                 // No empty strings
                 authorString = string.IsNullOrEmpty(authorString?.Trim()) ? null : authorString;
@@ -160,7 +160,7 @@ public static class SkmoArchiveParser
                     .Replace("vyberko C, den 1", "TSTC");
 
                 // The regex for the 'official' olympiad contests
-                var ourMOMatch = Regex.Match(problemId, @"^(.+)-(.+)-(\d+)$");
+                var ourMoMatch = Regex.Match(problemId, @"^(.+)-(.+)-(\d+)$");
 
                 // The regex for 'international' contests + non-official ones
                 var internationalMatch = Regex.Match(problemId, @"^(\w*) (\w*)(?: )?(\d+)$");
@@ -169,10 +169,10 @@ public static class SkmoArchiveParser
                 (string? Category, string Competition, string? Subcompetition, int Order) parsedId;
 
                 // Try to match our MO
-                if (ourMOMatch.Success)
+                if (ourMoMatch.Success)
                 {
                     // If it works out, we have no subcompetition, the rest is there
-                    parsedId = (ourMOMatch.Groups[1].Value, ourMOMatch.Groups[2].Value, null, int.Parse(ourMOMatch.Groups[3].Value));
+                    parsedId = (ourMoMatch.Groups[1].Value, ourMoMatch.Groups[2].Value, null, int.Parse(ourMoMatch.Groups[3].Value));
                 }
                 // Try to match the international contests
                 else if (internationalMatch.Success)

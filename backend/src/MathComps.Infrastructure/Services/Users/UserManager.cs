@@ -87,7 +87,7 @@ public class UserManager(
         // Happy path, we have the user
         var userDto = new UserSyncDto(
             clerkUser.Id,
-            clerkUser.EmailAddresses?.FirstOrDefault()?.EmailAddressValue ?? "",
+            clerkUser.EmailAddresses.FirstOrDefault()?.EmailAddressValue ?? "",
             displayName,
             clerkUser.ImageUrl
         );

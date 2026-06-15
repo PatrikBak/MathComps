@@ -374,7 +374,7 @@ public class ProblemFilterService(
                     problem.MarkStatuses.Any(markStatus => markStatus.UserId == userId.Value)),
 
                 MarkStatusFilter.Unmarked => problems.Where(problem =>
-                    !problem.MarkStatuses.Any(markStatus => markStatus.UserId == userId.Value)),
+                    problem.MarkStatuses.All(markStatus => markStatus.UserId != userId.Value)),
 
                 _ => throw new InvalidOperationException("Invalid mark status filter.")
             };
@@ -503,7 +503,7 @@ public class ProblemFilterService(
 
                 // Sad
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(parameters.TagLogic), parameters.TagLogic, "Invalid tag logic option");
+                    throw new ArgumentOutOfRangeException(nameof(parameters), parameters.TagLogic, "Invalid tag logic option");
             }
         }
 
@@ -536,7 +536,7 @@ public class ProblemFilterService(
 
                 // Sad
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(parameters.TagLogic), parameters.TagLogic, "Invalid tag logic option");
+                    throw new ArgumentOutOfRangeException(nameof(parameters), parameters.TagLogic, "Invalid tag logic option");
             }
         }
 
@@ -578,12 +578,12 @@ public class ProblemFilterService(
         // For tags: use conjunctive counting when AND logic is selected with at least one tag
         // This shows "how many results if I add this tag" instead of "how many results are available"
         // Otherwise, use disjunctive counting (exclude selected tags)
-        var tagsScope = parameters.TagLogic == LogicToggle.And && parameters.TagSlugs.Count > 0
+        var tagsScope = parameters is { TagLogic: LogicToggle.And, TagSlugs.Count: > 0 }
             ? ApplyFilters(baseQuery, parameters, favoritesOnly, listContentId, markStatus, userId)
             : ApplyFilters(baseQuery, parameters with { TagSlugs = [] }, favoritesOnly, listContentId, markStatus, userId);
 
         // For authors: Analogous logic to that of with tags
-        var authorsScope = parameters.AuthorLogic == LogicToggle.And && parameters.AuthorSlugs.Count > 0
+        var authorsScope = parameters is { AuthorLogic: LogicToggle.And, AuthorSlugs.Count: > 0 }
             ? ApplyFilters(baseQuery, parameters, favoritesOnly, listContentId, markStatus, userId)
             : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] }, favoritesOnly, listContentId, markStatus, userId);
 
@@ -673,13 +673,13 @@ public class ProblemFilterService(
             // Extract competition, category, and round info for grouping
             .GroupBy(problem => new
             {
-                CompetitionSlug = problem.RoundInstance!.Round.Competition.Slug,
-                CompetitionSortOrder = problem.RoundInstance!.Round.Competition.SortOrder,
-                CategorySlug = problem.RoundInstance!.Round.Category != null ? problem.RoundInstance!.Round.Category.Slug : null,
-                CategorySortOrder = problem.RoundInstance!.Round.Category != null ? problem.RoundInstance!.Round.Category.SortOrder : (int?)null,
-                RoundSlug = problem.RoundInstance!.Round.Slug,
-                RoundSortOrder = problem.RoundInstance!.Round.SortOrder,
-                problem.RoundInstance!.Round.IsDefault,
+                CompetitionSlug = problem.RoundInstance.Round.Competition.Slug,
+                CompetitionSortOrder = problem.RoundInstance.Round.Competition.SortOrder,
+                CategorySlug = problem.RoundInstance.Round.Category != null ? problem.RoundInstance.Round.Category.Slug : null,
+                CategorySortOrder = problem.RoundInstance.Round.Category != null ? problem.RoundInstance.Round.Category.SortOrder : (int?)null,
+                RoundSlug = problem.RoundInstance.Round.Slug,
+                RoundSortOrder = problem.RoundInstance.Round.SortOrder,
+                problem.RoundInstance.Round.IsDefault,
             })
             // Project to intermediate structure with counts
             .Select(competitionGroup => new
@@ -725,7 +725,7 @@ public class ProblemFilterService(
                     .Select(categoryGroup => new CategoryFilterOption(
                         // Category option with aggregated count and localized name
                         new FacetOption(
-                            categoryGroup.Key.CategorySlug!,
+                            categoryGroup.Key.CategorySlug,
                             localization.GetCategoryName(language, categoryGroup.Key.CategorySlug),
                             FullName: null,
                             categoryGroup.Sum(roundData => roundData.Count)

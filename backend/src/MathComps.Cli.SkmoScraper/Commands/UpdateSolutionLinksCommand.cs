@@ -43,7 +43,7 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
         var scrapedSolutions = jsonContent.FromJson<List<ScrapedSolution>>();
 
         // Ensure we have it
-        if (scrapedSolutions == null || scrapedSolutions.Count == 0)
+        if (scrapedSolutions.Count == 0)
         {
             // Make aware if not
             AnsiConsole.MarkupLine("[red]No solution data found in the JSON file.[/]");

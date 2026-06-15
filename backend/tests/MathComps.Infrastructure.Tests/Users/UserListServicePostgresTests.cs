@@ -73,9 +73,9 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
     public Task GetListsAsync_ReturnsListsOrderedBySortOrder() => RunTestAsync(async service =>
     {
         // Arrange — create lists in non-alphabetical order
-        var list1 = await service.CreateListAsync(_user1Id, "Charlie");
-        var list2 = await service.CreateListAsync(_user1Id, "Alpha");
-        var list3 = await service.CreateListAsync(_user1Id, "Bravo");
+        await service.CreateListAsync(_user1Id, "Charlie");
+        await service.CreateListAsync(_user1Id, "Alpha");
+        await service.CreateListAsync(_user1Id, "Bravo");
 
         // Act
         var response = await service.GetListsAsync(_user1Id);

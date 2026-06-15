@@ -295,7 +295,7 @@ public class MetadataLocalizationServiceTests
 
         // The competition itself is fine; only the round is flagged.
         Assert.DoesNotContain(issues, issue => issue.EntityKind == TaxonomyEntityKind.Competition);
-        Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Round && issue.MissingFromSharedStructure);
+        Assert.Contains(issues, issue => issue is { EntityKind: TaxonomyEntityKind.Round, MissingFromSharedStructure: true });
     }
 
     /// <summary>
@@ -310,7 +310,7 @@ public class MetadataLocalizationServiceTests
 
         // The round is flagged structurally; the competition itself is fine.
         Assert.DoesNotContain(issues, issue => issue.EntityKind == TaxonomyEntityKind.Competition);
-        Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Round && issue.MissingFromSharedStructure);
+        Assert.Contains(issues, issue => issue is { EntityKind: TaxonomyEntityKind.Round, MissingFromSharedStructure: true });
     }
 
     /// <summary>
@@ -323,7 +323,7 @@ public class MetadataLocalizationServiceTests
         var issues = _service.ValidateTaxonomyRegistration("csmo", "zzz", "iii");
 
         // The category is flagged structurally.
-        Assert.Contains(issues, issue => issue.EntityKind == TaxonomyEntityKind.Category && issue.MissingFromSharedStructure);
+        Assert.Contains(issues, issue => issue is { EntityKind: TaxonomyEntityKind.Category, MissingFromSharedStructure: true });
     }
 
     #endregion

@@ -17,12 +17,12 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
     /// <summary>
     /// The username for the database.
     /// </summary>
-    public string DbUser { get; } = "postgres";
+    private string DbUser { get; } = "postgres";
 
     /// <summary>
     /// The password for the database.
     /// </summary>
-    public string DbPassword { get; } = "postgres";
+    private string DbPassword { get; } = "postgres";
 
     /// <summary>
     /// The port PostgreSQL listens on inside the container.
@@ -32,7 +32,7 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
     /// <summary>
     /// The mapped port on the host machine (assigned after container starts).
     /// </summary>
-    public int MappedPort { get; private set; }
+    private int MappedPort { get; set; }
 
     /// <summary>
     /// Initializes the fixture and builds the container configuration.

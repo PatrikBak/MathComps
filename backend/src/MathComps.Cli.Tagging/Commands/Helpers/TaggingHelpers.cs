@@ -59,15 +59,15 @@ public static class TaggingHelpers
         var trimmed = aiResponse.Trim();
 
         // Kill the json marker start
-        if (trimmed.StartsWith("```json"))
+        if (trimmed.StartsWith("```json", StringComparison.Ordinal))
             trimmed = trimmed[7..].TrimStart();
 
         // Kill markdown start
-        else if (trimmed.StartsWith("```"))
+        else if (trimmed.StartsWith("```", StringComparison.Ordinal))
             trimmed = trimmed[3..].TrimStart();
 
         // Remove closing markdown markers
-        if (trimmed.EndsWith("```"))
+        if (trimmed.EndsWith("```", StringComparison.Ordinal))
             trimmed = trimmed[..^3].TrimEnd();
 
         // Trim again
