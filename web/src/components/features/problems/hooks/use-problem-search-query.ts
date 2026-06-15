@@ -33,8 +33,6 @@ type ProblemSearchInfiniteData = {
     pageSize: number
     /** The total number of problems matching the search criteria. */
     totalCount: number
-    /** The total number of pages available. */
-    totalPages: number
   }
   /** The updated filter options based on the current search results. */
   updatedOptions: FilterOptionsWithCounts | null
@@ -345,11 +343,11 @@ function useProblemSearchInfinite(
 
     // Determine the next page number based on current data
     getNextPageParam: (lastPage) => {
-      // Get the problem slugs from the last page
-      const { page, totalPages } = lastPage.problems
+      // Derive whether more pages remain from the counts the backend sends
+      const { page, pageSize, totalCount } = lastPage.problems
 
-      // Return next page number if more pages exist, otherwise undefined to stop pagination
-      return page < totalPages ? page + 1 : undefined
+      // More pages remain while the items seen so far fall short of the total
+      return page * pageSize < totalCount ? page + 1 : undefined
     },
 
     // Only run if filters are provided and enabled
