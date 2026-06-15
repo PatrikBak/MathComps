@@ -129,9 +129,11 @@ public record VerdictError(
 /// </summary>
 public enum ProblemHalf
 {
+    // ReSharper disable once UnusedMember.Global
     /// <summary>The problem statement.</summary>
     Statement,
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>The problem solution.</summary>
     Solution
 }

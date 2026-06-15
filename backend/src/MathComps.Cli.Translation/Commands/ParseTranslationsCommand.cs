@@ -89,7 +89,7 @@ public class ParseTranslationsCommand(
             items: textsToProcess,
             progressDescription: "Parsing translations...",
             getItemDescription: text => $"{text.ProblemSlug} ({text.Language} {text.DocumentType})",
-            processItem: async (textDto, index, cancellationToken) =>
+            processItem: async (textDto, _, _) =>
             {
                 // Check if we have a manually fixed version from issues file
                 var rawText = existingIssues.TryGetValue(textDto.ProblemTextId, out var issue)

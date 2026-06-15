@@ -62,11 +62,10 @@ public sealed class R2Uploader : IFileUploader, IDisposable
             FilePath = localFilePath,
             // R2 does not support streaming SigV4 payload signing
             DisablePayloadSigning = true,
+            // Short fresh window + long stale-while-revalidate so edits propagate within
+            // a minute while keeping the cache useful for steady-state reads.
+            Headers = { CacheControl = "public, max-age=60, stale-while-revalidate=86400" },
         };
-
-        // Short fresh window + long stale-while-revalidate so edits propagate within
-        // a minute while keeping the cache useful for steady-state reads.
-        request.Headers.CacheControl = "public, max-age=60, stale-while-revalidate=86400";
 
         // Determine the content type based on file extension
         var extension = Path.GetExtension(localFilePath).ToLowerInvariant();

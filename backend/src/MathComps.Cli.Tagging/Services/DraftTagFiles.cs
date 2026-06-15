@@ -138,7 +138,8 @@ public static class DraftTagFiles
         var metaPath = Path.Combine(folder, "_meta.yaml");
         var mapping = File.ReadAllText(metaPath).FromYaml<Dictionary<string, object>>();
 
-        // Pull the language field, failing when it's absent, and normalize it.
+        // Pull the language field, failing when it's absent or YAML-null, and normalize it.
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         return !mapping.TryGetValue("language", out var language) || language is null
             ? throw new InvalidOperationException($"'{metaPath}' is missing the 'language' field.")
             : language.ToString()!.Trim().ToLowerInvariant();

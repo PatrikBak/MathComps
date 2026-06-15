@@ -102,7 +102,7 @@ public class GenerateEmbeddingsCommand(
             batches,
             "Generating embeddings in batchees...",
             getItemDescription: batch => ProgressHelper.NiceBatchDescription(batch, problem => problem.Slug.ToUpperInvariant()),
-            processItem: async (batch, index, cancellationToken) =>
+            processItem: async (batch, _, _) =>
             {
                 try
                 {

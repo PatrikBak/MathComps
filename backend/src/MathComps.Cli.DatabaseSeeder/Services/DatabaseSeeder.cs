@@ -188,7 +188,7 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
             items: parsedProblems,
             progressDescription: "Processing problems...",
             getItemDescription: problem => problem.RawProblem.Id,
-            processItem: async (parsedProblem, index, token) =>
+            processItem: async (parsedProblem, _, token) =>
             {
                 #region Gather problem data
 
@@ -240,9 +240,12 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
 
                 #region Handle images
 
+                // Capture the year before parsedProblem is reassigned below, so the closure stays stable.
+                var olympiadYear = parsedProblem.RawProblem.OlympiadYear;
+
                 // Configure image processing for this problem
                 var imageConfig = new ImageProcessingConfig(
-                    ImageSourceResolver: imageId => SkmoImageHelper.FindImageSourcePath(imageId, parsedProblem.RawProblem.OlympiadYear),
+                    ImageSourceResolver: imageId => SkmoImageHelper.FindImageSourcePath(imageId, olympiadYear),
                     OutputFileName: (_, counter) => $"{problemSlug}-{counter}.svg",
                     PersistImage: (sourcePath, destinationFileName) =>
                     {
@@ -312,7 +315,8 @@ public class DatabaseSeeder(MathCompsDbContext dbContext) : IDatabaseSeeder
         // Find problems in the database that are no longer in the JSON file.
         var orphanedProblemSlugs = (await dbContext.Problems
             // Only from the specified years, if specified
-            .Where(problem => years.Length == 0 || years.Contains(problem.RoundInstance.Season.EditionNumber))
+            .Where(problem =>
+                years.Length == 0 || Enumerable.Contains(years, problem.RoundInstance.Season.EditionNumber))
             // Slug as an id
             .Select(problem => problem.Slug)
             // Evaluate

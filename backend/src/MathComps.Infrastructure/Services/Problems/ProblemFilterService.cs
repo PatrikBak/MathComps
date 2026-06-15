@@ -296,7 +296,7 @@ public class ProblemFilterService(
                 options.UserId != null && data.problem.Likes.Any(like => like.UserId == options.UserId),
 
                 // Marked
-                options.UserId != null && data.problem.MarkStatuses.Any(markStatus => markStatus.UserId == options.UserId),
+                options.UserId != null && data.problem.MarkStatuses.Any(mark => mark.UserId == options.UserId),
 
                 // LikeCount
                 data.problem.Likes.Count,
@@ -374,10 +374,10 @@ public class ProblemFilterService(
             problems = markStatus switch
             {
                 MarkStatusFilter.Marked => problems.Where(problem =>
-                    problem.MarkStatuses.Any(markStatus => markStatus.UserId == userId.Value)),
+                    problem.MarkStatuses.Any(mark => mark.UserId == userId.Value)),
 
                 MarkStatusFilter.Unmarked => problems.Where(problem =>
-                    problem.MarkStatuses.All(markStatus => markStatus.UserId != userId.Value)),
+                    problem.MarkStatuses.All(mark => mark.UserId != userId.Value)),
 
                 _ => throw new InvalidOperationException("Invalid mark status filter.")
             };
@@ -702,10 +702,10 @@ public class ProblemFilterService(
         // Organize competition data into hierarchical structure
         var competitions = competitionData
             // Group by competition first
-            .GroupBy(competitionData => new
+            .GroupBy(row => new
             {
-                competitionData.CompetitionSlug,
-                competitionData.CompetitionSortOrder,
+                row.CompetitionSlug,
+                row.CompetitionSortOrder,
             })
             // Sort competitions by predefined sort order
             .OrderBy(competitionGroup => competitionGroup.Key.CompetitionSortOrder)

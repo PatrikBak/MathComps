@@ -20,9 +20,6 @@ public class InteractiveSimilarityManagerCommand(
     IProblemLookupService problemLookupService) : InteractiveCommandHelper
 {
     /// <inheritdoc/>
-    protected override string ApplicationName => "Similarity Manager";
-
-    /// <inheritdoc/>
     protected override string ApplicationDescription => "Interactive similarity management for MathComps problems";
 
     /// <inheritdoc/>
@@ -249,8 +246,10 @@ public class InteractiveSimilarityManagerCommand(
         AnsiConsole.MarkupLine("");
     }
 
-    /// <inheritdoc/>
-    protected override void ShowHelp()
+    /// <summary>
+    /// Prints the available interactive commands and their usage.
+    /// </summary>
+    private static void ShowHelp()
     {
         AnsiConsole.MarkupLine("[bold]Available Commands:[/]");
         AnsiConsole.MarkupLine("");

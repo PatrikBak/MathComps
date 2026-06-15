@@ -23,6 +23,8 @@ public class SimilarityCalculationSettings
     /// Maps competition composite slugs to a numeric cluster ID for grouping similar competitions.
     /// </summary>
     [Required]
+    // Populated by the configuration binder, never mutated in code.
+    // ReSharper disable once CollectionNeverUpdated.Global
     public required Dictionary<string, double> CompetitionClusterMap { get; set; }
 
     /// <summary>

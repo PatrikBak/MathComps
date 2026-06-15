@@ -12,11 +12,6 @@ namespace MathComps.Shared.Cli.Commands;
 public abstract class InteractiveCommandHelper : AsyncCommand
 {
     /// <summary>
-    /// Gets the application name displayed in the startup banner.
-    /// </summary>
-    protected abstract string ApplicationName { get; }
-
-    /// <summary>
     /// Gets the description displayed in the startup banner.
     /// </summary>
     protected abstract string ApplicationDescription { get; }
@@ -104,11 +99,10 @@ public abstract class InteractiveCommandHelper : AsyncCommand
     /// <summary>
     /// Parses user input into command components while handling quoted strings.
     /// Supports both quoted and unquoted arguments, preserving spaces within quotes.
-    /// This method can be overridden by derived classes if different parsing behavior is needed.
     /// </summary>
     /// <param name="input">Raw command string from user.</param>
     /// <returns>Array of parsed command components.</returns>
-    protected virtual string[] ParseCommand(string input)
+    private static string[] ParseCommand(string input)
     {
         // Handle empty or whitespace-only input.
         if (string.IsNullOrWhiteSpace(input))
@@ -119,26 +113,16 @@ public abstract class InteractiveCommandHelper : AsyncCommand
         // The quoted string pattern uses a capture group to extract content without quotes.
         var matches = Regex.Matches(input, @"""([^""]*)""|[^\s]+");
 
-        // Extract matched values: use capture group for quoted strings, full match for unquoted tokens.
-        return [.. matches.Select(match =>
-        {
-            // If the match has a captured group (quoted string), use it; otherwise use the full match.
-            return match.Groups[1].Success ? match.Groups[1].Value : match.Value;
-        })];
+        // Extract matched values: use the capture group for quoted strings, the full match for unquoted tokens.
+        return [.. matches.Select(match => match.Groups[1].Success ? match.Groups[1].Value : match.Value)];
     }
-
-    /// <summary>
-    /// Helper method to display help information. Derived classes should override
-    /// this method to provide their specific command help.
-    /// </summary>
-    protected abstract void ShowHelp();
 
     /// <summary>
     /// Helper method to handle unknown commands with consistent error messaging.
     /// Can be used by derived classes in their command dispatch logic.
     /// </summary>
     /// <param name="unknownCommand">The command that was not recognized.</param>
-    protected virtual void HandleUnknownCommand(string unknownCommand)
+    protected static void HandleUnknownCommand(string unknownCommand)
         // Just log by default
         => AnsiConsole.MarkupLine($"[red]Unknown command: '{Markup.Escape(unknownCommand)}'[/]. Type 'help' for available commands.");
 }

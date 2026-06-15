@@ -105,9 +105,9 @@ public class TagDraftCommand(
             "Tagging draft problems...",
             getItemDescription: problem => $"p{problem.Index}",
             numThreads: Concurrency,
-            processItem: (problem, index, cancellationToken) => TagProblemAsync(
+            processItem: (problem, _, cancellationToken) => TagProblemAsync(
                 problem, statementCandidates, techniqueCandidates, candidateBySlug, cancellationToken),
-            handleResult: async (result, problem, index, cancellationToken) =>
+            handleResult: async (result, problem, _, cancellationToken) =>
             {
                 // A failed problem leaves its sidecar's 'tags:' key absent so a re-run retries just that one.
                 if (!result.Succeeded)

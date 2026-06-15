@@ -109,13 +109,11 @@ public static class ProgressHelper
             .AutoRefresh(enabled: false)
             // Fancy things to display
             .Columns(
-            [
                 new SpinnerColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
                 new RemainingTimeColumn(),
-                new TaskDescriptionColumn(),
-            ])
+                new TaskDescriptionColumn())
             .StartAsync(async progressContext =>
             {
                 // Create progress task

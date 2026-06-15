@@ -46,10 +46,11 @@ public static class ServiceCollectionExtensions
         // (see https://www.npgsql.org/efcore/mapping/enum.html?tabs=with-connection-string%2Cwith-datasource)
         services.AddDbContextFactory<MathCompsDbContext>(options =>
             options.UseNpgsql(connectionString,
-                options => options.MapEnum<TagType>("tag_type")
-                                  .MapEnum<DocumentType>("document_type")
-                                  .MapEnum<Language>("language")
-                                  .MapEnum<CommentStatus>("comment_status")
+                npgsqlOptions => npgsqlOptions
+                    .MapEnum<TagType>("tag_type")
+                    .MapEnum<DocumentType>("document_type")
+                    .MapEnum<Language>("language")
+                    .MapEnum<CommentStatus>("comment_status")
             )
         );
 

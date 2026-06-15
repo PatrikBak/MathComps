@@ -25,7 +25,7 @@ public class UserManager(
         var now = DateTime.UtcNow;
 
         // Create a user
-        var user = new User
+        var userEntity = new User
         {
             ExternalId = userDto.ExternalId,
             DisplayName = userDto.DisplayName,
@@ -37,7 +37,7 @@ public class UserManager(
 
         // This cool little library compiles this onto a native upsert
         await dbContext.Users
-            .Upsert(user)
+            .Upsert(userEntity)
             .On(user => user.ExternalId)
             .Exclude(user => new { user.CreatedAt, user.Id })
             .RunAsync(cancellationToken);

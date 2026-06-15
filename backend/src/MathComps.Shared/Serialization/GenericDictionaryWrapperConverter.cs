@@ -59,13 +59,6 @@ public class GenericDictionaryWrapperConverter<TRecord> : JsonConverter<TRecord>
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, TRecord value, JsonSerializerOptions options)
     {
-        // Null values are written as null (deep)
-        if (value == null)
-        {
-            writer.WriteNullValue();
-            return;
-        }
-
         // Get dictionary data
         var dictionary = _dataProperty.GetValue(value);
 

@@ -380,9 +380,13 @@ public class GenericDictionaryWrapperConverterTests
     /// </summary>
     private record TestRecordWithoutConstructor
     {
+        /// <summary>
+        /// The dictionary the converter would target — but no constructor accepts it, so it stays empty.
+        /// </summary>
         public ImmutableDictionary<string, int> Data { get; }
 
-        // Only this constructor exists - it doesn't take the dictionary parameter
+        // Only this constructor exists - it doesn't take the dictionary parameter.
+        // ReSharper disable once UnusedParameter.Local
         public TestRecordWithoutConstructor(string _)
         {
             Data = [];

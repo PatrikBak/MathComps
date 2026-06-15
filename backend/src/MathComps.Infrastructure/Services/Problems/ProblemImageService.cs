@@ -16,7 +16,7 @@ public class ProblemImageService(IDbContextFactory<MathCompsDbContext> dbContext
 
         // Query image mappings for this problem
         var mappings = await context.ProblemImages
-            .Where(image => image.ProblemId == problemId && image.OriginalId != null)
+            .Where(image => image.ProblemId == problemId)
             .Select(image => new { image.OriginalId, image.ContentId })
             .ToListAsync();
 

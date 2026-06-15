@@ -27,5 +27,6 @@ public record ParseFailureDto(
     /// <summary>
     /// Parameterless constructor for YAML deserialization.
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public ParseFailureDto() : this(Guid.Empty, Guid.Empty, "", default, default, "", "") { }
 }
