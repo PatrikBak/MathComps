@@ -124,13 +124,19 @@ public class DraftValidationPipeline(
         var half = resolution.DocumentType.ToString().ToLowerInvariant();
         var slug = resolution.Slug;
 
-        // Only a second original blocks; everything else is a routine outcome the report already records.
+        // A second original or a translation-only drop onto a missing problem blocks; everything else is a routine
+        // outcome the report already records.
         return resolution.Action switch
         {
             DraftTextAction.SecondOriginal => new VerdictError(
                 ManifestMeta.FileName, Half: null, Line: null, Col: null, "original-conflict",
                 $"problem '{slug}' {half} already has an original in a different language — importing as "
                 + "original would create a second original (forbidden)", VerdictSeverity.Error),
+
+            DraftTextAction.NoOriginalForNewProblem => new VerdictError(
+                ManifestMeta.FileName, Half: null, Line: null, Col: null, "no-original-new-problem",
+                $"problem '{slug}' has no original-language body and does not exist yet — a translation-only drop "
+                + "requires the problem to already exist", VerdictSeverity.Error),
 
             // Adds, unchanged re-imports and intentional in-place overwrites are all expected — nothing to flag.
             DraftTextAction.AddOriginal or DraftTextAction.AddTranslation

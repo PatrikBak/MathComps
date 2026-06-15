@@ -239,12 +239,6 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-body 1`
       "rule": "missing-body",
       "severity": "error",
     },
-    {
-      "file": "p1.sk.md",
-      "half": null,
-      "rule": "missing-original",
-      "severity": "error",
-    },
   ],
   "ok": false,
   "problemCount": 1,
@@ -295,29 +289,6 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-meta-fi
   "problemLanguages": [
     [
       "sk",
-    ],
-  ],
-  "problemOrders": [
-    1,
-  ],
-}
-`;
-
-exports[`preflight-draft fixtures (verdict + snapshot) > invalid-missing-original 1`] = `
-{
-  "errors": [
-    {
-      "file": "p1.sk.md",
-      "half": null,
-      "rule": "missing-original",
-      "severity": "error",
-    },
-  ],
-  "ok": false,
-  "problemCount": 1,
-  "problemLanguages": [
-    [
-      "en",
     ],
   ],
   "problemOrders": [
@@ -724,6 +695,23 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-solution-link 1`]
   "problemLanguages": [
     [
       "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-translation-only 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "cs",
+      "en",
     ],
   ],
   "problemOrders": [

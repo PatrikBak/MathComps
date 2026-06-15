@@ -254,6 +254,48 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
+    /// A translation-only drop onto an existing problem (no original body) classifies each translation on its own —
+    /// a new language is a clean add, an existing one an in-place overwrite — and never flags a missing original,
+    /// since the stored original stays untouched.
+    /// </summary>
+    [Fact]
+    public Task A_translation_only_drop_onto_an_existing_problem_classifies_each_translation() => RunTestAsync(async service =>
+    {
+        // Czech and English translations of the seeded problem, with no Slovak original in the draft.
+        var preview = await PreviewAsync(service, Problem(1, Translation(Language.CS), Translation(Language.EN)));
+
+        // The Czech translation is a clean add — that language is new on the problem.
+        Assert.Equal(
+            DraftTextAction.AddTranslation, ResolutionFor(preview, DocumentType.Statement, Language.CS).Action);
+
+        // The English translation is an in-place overwrite — that language already exists.
+        Assert.Equal(
+            DraftTextAction.OverwriteTranslation, ResolutionFor(preview, DocumentType.Statement, Language.EN).Action);
+
+        // Nothing is flagged as a missing original — the stored Slovak original is left in place.
+        Assert.DoesNotContain(
+            preview.TextResolutions,
+            resolution => resolution.Action == DraftTextAction.NoOriginalForNewProblem);
+    });
+
+    /// <summary>
+    /// A translation-only drop onto a problem that doesn't exist yet is the forbidden no-original-new-problem case —
+    /// importing it would insert a problem with only translations and no canonical original.
+    /// </summary>
+    [Fact]
+    public Task A_translation_only_drop_onto_a_missing_problem_is_rejected() => RunTestAsync(async service =>
+    {
+        // Problem 3's slug ("74-csmo-a-iii-3") doesn't exist; the draft carries only translations, no original.
+        var preview = await PreviewAsync(service, Problem(3, Translation(Language.CS), Translation(Language.EN)));
+
+        // Exactly one resolution comes back — the whole problem is flagged once, not per-half.
+        var resolution = Assert.Single(preview.TextResolutions);
+
+        // And it's the no-original conflict — no existing original to attach the translations to.
+        Assert.Equal(DraftTextAction.NoOriginalForNewProblem, resolution.Action);
+    });
+
+    /// <summary>
     /// Re-importing the original in its own language with a different body overwrites the existing original in place,
     /// while the solution half — which the seeded problem lacks — is reported as a clean add.
     /// </summary>

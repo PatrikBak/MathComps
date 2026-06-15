@@ -56,7 +56,14 @@ public enum DraftTextAction
     OverwriteTranslation,
 
     /// <summary>A translation matches the existing same-language text byte-for-byte — importing changes nothing.</summary>
-    UnchangedTranslation
+    UnchangedTranslation,
+
+    /// <summary>
+    /// A problem carries no original-language body and its slug is absent from the DB — importing would insert a
+    /// problem whose every text is a translation, leaving it with no canonical original. A hard conflict: a
+    /// translation-only drop is only valid onto a problem that already exists.
+    /// </summary>
+    NoOriginalForNewProblem
 }
 
 /// <summary>
@@ -81,7 +88,9 @@ public record ProblemTextResolution(
 /// <param name="Entities">Exists-or-not for the competition, season and round, in that order.</param>
 /// <param name="TextResolutions">
 /// One entry per draft text variant that lands on an already-existing problem slug, classifying the outcome
-/// (clean add, in-place overwrite, or a second-original conflict). A net-new problem slug contributes nothing.
+/// (clean add, in-place overwrite, or a second-original conflict). A net-new problem slug contributes nothing —
+/// unless it carries no original body, the one net-new case worth flagging
+/// (<see cref="DraftTextAction.NoOriginalForNewProblem"/>).
 /// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,

@@ -46,7 +46,9 @@ Let $x \ne y$ be positive reals. Prove the inequality.
 By AM–GM, $a^2 + b^2 \ge 2ab$, and the claim follows.
 ```
 
-The problem number and language come from the filename. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original**; any others (`p1.en.md`, `p1.cs.md`) are **translations**. A translation may be statement-only, but it can only carry a solution if the original does too.
+The problem number and language come from the filename. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original**; any others (`p1.en.md`, `p1.cs.md`) are **translations**. A translation may be statement-only, but it can only carry a solution if the in-draft original does too.
+
+A draft may **omit the original-language file entirely** and carry only translations — a way to drop, say, `cs`/`en` translations onto a problem that already lives in the DB without re-importing its untouched original. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even when that file is absent; otherwise a translation gets marked as the original and collides with the stored one (a second original is forbidden). The preflight runs DB-offline so it can't see whether the target exists — the C# `validate` step is the gate: it rejects a no-original draft whose problem isn't already in the DB (`no-original-new-problem`). With no in-draft original, the "solution only if the original has one" check can't run, so a dropped translated solution is accepted on faith — make sure the stored original already has its own solution, or you'll orphan the translated one.
 
 ## Problem metadata — `pN.yaml`
 
