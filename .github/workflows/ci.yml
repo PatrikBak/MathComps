@@ -73,3 +73,46 @@ jobs:
         run: |
           git add data/handouts/ web/src/content/handouts/
           git diff --staged --exit-code
+
+  # ReSharper static analysis. main sits at a zero-finding baseline, so any finding here is new.
+  # Clear it by fixing the code, or — for a genuine tool blind spot — `// ReSharper disable once <RULE>`
+  # with a one-line reason. The jb version is pinned in backend/.config/dotnet-tools.json.
+  inspect:
+    name: Inspect
+    runs-on: ubuntu-latest
+    permissions:
+      # Lets the SARIF upload publish to the Security → Code scanning tab.
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+          cache: true
+          cache-dependency-path: backend/Directory.Packages.props
+
+      - run: dotnet restore backend/MathComps.sln
+
+      - name: Restore tools (jb)
+        working-directory: backend
+        run: dotnet tool restore
+
+      - name: Run inspectcode
+        working-directory: backend
+        # No --no-build: inspectcode restores and builds the solution itself, matching the local baseline.
+        run: dotnet jb inspectcode MathComps.sln --output=inspect.sarif --format=Sarif
+
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: backend/inspect.sarif
+
+      - name: Fail on any finding
+        run: |
+          count=$(jq '[.runs[].results[]] | length' backend/inspect.sarif)
+          echo "inspectcode findings: $count"
+          if [ "$count" -ne 0 ]; then
+            jq -r '.runs[].results[] | "::error::\(.ruleId) \(.locations[0].physicalLocation.artifactLocation.uri // "?"):\(.locations[0].physicalLocation.region.startLine // "?")"' backend/inspect.sarif
+            exit 1
+          fi
