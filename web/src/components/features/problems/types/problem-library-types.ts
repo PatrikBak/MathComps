@@ -82,7 +82,6 @@ export type FilterResponse = {
     page: number
     pageSize: number
     totalCount: number
-    totalPages: number
   }
   updatedOptions: FilterOptionsWithCounts | null
   listName: string | null
