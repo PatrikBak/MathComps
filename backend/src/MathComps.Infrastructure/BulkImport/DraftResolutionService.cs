@@ -94,9 +94,14 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
         IReadOnlyList<ExistingText>? existingTexts)
     {
         // A net-new slug collides with nothing — every half is the quiet path, so report none (and skip the image
-        // reads the body comparison would otherwise need).
+        // reads the body comparison would otherwise need). The one exception: a problem that carries at least one
+        // body but no original can't be inserted (it would have only translations, no canonical original), so flag
+        // that single case.
         if (existingTexts is null)
-            return [];
+            return problem.Texts is [var firstText, ..] && !problem.Texts.Any(text => text.Original)
+                ? [new ProblemTextResolution(
+                    slug, DocumentType.Statement, firstText.Language, DraftTextAction.NoOriginalForNewProblem)]
+                : [];
 
         // The image-ref → media-ref map the would-be markdown is rewritten against, sized off the draft's figures.
         var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);

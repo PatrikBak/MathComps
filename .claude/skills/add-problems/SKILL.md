@@ -5,7 +5,7 @@ description: Use this skill when adding a competition's problems to the site dat
 
 # Add problems (bulk-import draft)
 
-Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with every problem present in the original language + the wanted translations.** Never run `apply` — the user does that.
+Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with the wanted languages present.** A fresh problem needs its original language (plus any translations); a re-import onto a problem already in the DB may carry **translations only** (omit the original file — see "Translation-only drop" below). Never run `apply` — the user does that.
 
 `data/problems/` is **gitignored** (`data/problems/.gitignore` = `*`) — drafts are local staging input, never committed. The committable artifact is any taxonomy/code change.
 
@@ -23,6 +23,8 @@ my-draft/
 ```
 
 Problems are numbered from 1, contiguous. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original** (verbatim); the rest are translations.
+
+**Translation-only drop:** to add translations to a problem **already in the DB**, omit the original file and ship only the translation bodies (e.g. `p1.cs.md` + `p1.en.md`). Keep `_meta.yaml`'s `language` set to the problem's **true original language** even though that file is absent — otherwise a translation is marked as the original and collides with the stored one. `validate` rejects this (`no-original-new-problem`) if the problem doesn't already exist.
 
 ## Step 1 — Register the competition (only if its slug is new)
 

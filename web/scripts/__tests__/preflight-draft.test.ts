@@ -194,6 +194,18 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
+  it('accepts a translation-only drop with no original body', async () => {
+    const manifest = await loadFixture('valid-translation-only')
+    const [problem] = manifest.problems
+
+    // The draft's language is sk but only cs/en bodies are present, so every variant is a translation
+    expect(problem!.texts.map((text) => text.language)).toEqual(['cs', 'en'])
+    expect(problem!.texts.some((text) => text.original)).toBe(false)
+
+    // Omitting the original is no longer an error — the DB-aware validate step gates it instead
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
   it('unions a shared image across languages without an orphan warning', async () => {
     const manifest = await loadFixture('valid-shared-image-across-langs')
     expect(manifest.problems[0]!.images).toEqual(['fig.svg'])
@@ -363,12 +375,6 @@ describe('invalid drafts — specific issues', () => {
     const manifest = await loadFixture('invalid-missing-body')
     const error = findError(manifest, (entry) => entry.rule === 'missing-body')
     expect(error?.message).toContain('body')
-  })
-
-  it('flags a problem with no body in the original language', async () => {
-    const manifest = await loadFixture('invalid-missing-original')
-    const error = findError(manifest, (entry) => entry.rule === 'missing-original')
-    expect(error?.message).toContain('sk')
   })
 
   it('flags a body file with an unsupported language token', async () => {

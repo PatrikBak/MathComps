@@ -243,9 +243,8 @@ function groupProblemFiles(folderPath: string, errors: VerdictError[]): ProblemG
 
 /**
  * Parses one problem group into a {@link ManifestProblem}: its `pN.yaml`
- * metadata plus every `pN.<lang>.md` body as a text variant, flagging a missing
- * original, a translated solution with no original solution, and unresolved
- * images.
+ * metadata plus every `pN.<lang>.md` body as a text variant, flagging a
+ * translated solution with no original solution and unresolved images.
  *
  * @param folderPath - Path to the draft folder.
  * @param group - The problem's grouped files.
@@ -288,18 +287,9 @@ async function parseProblem(
     if (parsed !== null) parsedBodies.push(parsed)
   }
 
-  // The original is the variant in the draft's language; its absence is an error
+  // The variant in the draft's language, when present. A draft may omit it to drop translations onto a problem that
+  // already lives in the DB (its original stays untouched); whether that's allowed is gated downstream against the DB.
   const original = parsedBodies.find((entry) => entry.text.original)
-  if (original === undefined) {
-    errors.push(
-      problemIssue(
-        `p${group.order}.${originalLanguage}.md`,
-        null,
-        'missing-original',
-        `problem ${group.order} has no ${originalLanguage} body (the original language)`
-      )
-    )
-  }
 
   // A translated solution with no original solution to attach to would dangle
   if (original !== undefined && original.text.solutionMarkdown === null) {

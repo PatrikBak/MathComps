@@ -326,6 +326,12 @@ public class DraftApplyService(
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
+        // A net-new problem with no original would land with only translations and no canonical original — forbidden.
+        if (!problem.Texts.Any(text => text.Original))
+            throw new InvalidOperationException(
+                $"Refusing to insert '{slug}' with no original-language body — a translation-only drop requires the "
+                + "problem to already exist; validation should have rejected this draft.");
+
         // The new problem row.
         var newProblem = new Problem
         {
