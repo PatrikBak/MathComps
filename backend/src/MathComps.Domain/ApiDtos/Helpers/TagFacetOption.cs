@@ -1,4 +1,4 @@
-using MathComps.Shared;
+using MathComps.Domain.Tagging;
 
 namespace MathComps.Domain.ApiDtos.Helpers;
 

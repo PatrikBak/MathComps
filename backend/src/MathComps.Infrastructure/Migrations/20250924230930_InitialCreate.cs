@@ -1,6 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Pgvector;
+using MathComps.Domain.Tagging;
 
 #nullable disable
 

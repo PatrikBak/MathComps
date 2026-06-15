@@ -2,8 +2,8 @@ using MathComps.Cli.Translation.Dtos;
 using MathComps.Cli.Translation.Enums;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Cli.Translation.Services;
 

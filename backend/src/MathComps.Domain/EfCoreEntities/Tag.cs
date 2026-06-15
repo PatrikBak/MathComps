@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using MathComps.Shared;
+using MathComps.Domain.Tagging;
 
 namespace MathComps.Domain.EfCoreEntities;
 

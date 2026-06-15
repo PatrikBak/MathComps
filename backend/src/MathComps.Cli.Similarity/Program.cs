@@ -2,12 +2,12 @@ using MathComps.Cli.Similarity.Commands;
 using MathComps.Cli.Similarity.Services;
 using MathComps.Cli.Similarity.Settings;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("Similarities").Centered().Color(Color.Aqua));

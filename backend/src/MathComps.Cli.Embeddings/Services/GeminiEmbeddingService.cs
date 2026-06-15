@@ -1,8 +1,8 @@
 using MathComps.Infrastructure.Options;
-using MathComps.Shared;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json.Nodes;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.Embeddings.Services;
 

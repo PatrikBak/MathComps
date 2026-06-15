@@ -9,6 +9,9 @@ using MathComps.Infrastructure.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
+using MathComps.Domain.Localization;
+using MathComps.Shared.Linq;
+using MathComps.Shared.Extensions;
 namespace MathComps.Infrastructure.Services.Problems;
 
 /// <summary>

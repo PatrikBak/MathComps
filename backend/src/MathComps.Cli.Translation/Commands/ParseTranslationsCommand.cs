@@ -4,14 +4,15 @@ using MathComps.Cli.Translation.Enums;
 using MathComps.Cli.Translation.Services;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Problems;
-using MathComps.Shared;
-using MathComps.Shared.Cli;
 using MathComps.TexParser;
 using MathComps.TexParser.TexCleaner;
 using MathComps.TexParser.Types;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using MathComps.Shared.Cli.Progress;
+using MathComps.Shared.Serialization;
+using MathComps.Shared.Extensions;
 
 namespace MathComps.Cli.Translation.Commands;
 

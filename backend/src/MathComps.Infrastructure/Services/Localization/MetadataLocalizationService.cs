@@ -1,6 +1,10 @@
 using System.Collections.Immutable;
 using MathComps.Infrastructure.Constants;
-using MathComps.Shared.Localization;
+using MathComps.Domain.Taxonomy;
+using MathComps.Domain.Localization;
+using MathComps.Domain.Tagging;
+using MathComps.Domain.Resources;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Infrastructure.Services.Localization;
 

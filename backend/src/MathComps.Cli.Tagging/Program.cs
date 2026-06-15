@@ -2,13 +2,13 @@ using MathComps.Cli.Tagging.Commands;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 using System.Text;
+using MathComps.Shared.Cli.Commands;
 
 // Configure console encoding to properly handle UTF-8 characters (e.g., Slovak diacritics)
 // This is essential on Windows where the default console code page doesn't support UTF-8

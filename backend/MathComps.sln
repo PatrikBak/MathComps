@@ -47,6 +47,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.Tagging.Tests", "tests\MathComps.Cli.Tagging.Tests\MathComps.Cli.Tagging.Tests.csproj", "{C3F45202-8CEE-4242-9500-5CAC699EE21A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Domain.Tests", "tests\MathComps.Domain.Tests\MathComps.Domain.Tests.csproj", "{15336D2B-8911-4022-B8A9-F95310036403}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -297,11 +299,24 @@ Global
 		{C3F45202-8CEE-4242-9500-5CAC699EE21A}.Release|x64.Build.0 = Release|Any CPU
 		{C3F45202-8CEE-4242-9500-5CAC699EE21A}.Release|x86.ActiveCfg = Release|Any CPU
 		{C3F45202-8CEE-4242-9500-5CAC699EE21A}.Release|x86.Build.0 = Release|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Debug|x64.Build.0 = Debug|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Debug|x86.Build.0 = Debug|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Release|x64.ActiveCfg = Release|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Release|x64.Build.0 = Release|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Release|x86.ActiveCfg = Release|Any CPU
+		{15336D2B-8911-4022-B8A9-F95310036403}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C3F45202-8CEE-4242-9500-5CAC699EE21A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{15336D2B-8911-4022-B8A9-F95310036403} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

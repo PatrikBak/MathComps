@@ -2,12 +2,12 @@ using MathComps.Cli.Translation.Commands;
 using MathComps.Cli.Translation.Services;
 using MathComps.Cli.Translation.Settings;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("Translations").Centered().Color(Color.Aqua));

@@ -1,6 +1,6 @@
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Shared;
-using MathComps.Shared.Localization;
+using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 
 namespace MathComps.Infrastructure.Tests.Localization;
 

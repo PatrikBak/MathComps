@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Infrastructure.Storage;
 

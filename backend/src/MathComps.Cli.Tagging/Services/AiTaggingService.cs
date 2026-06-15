@@ -4,6 +4,8 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Integrations;
 using MathComps.Shared;
 using System.Collections.Immutable;
+using MathComps.Domain.Tagging;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.Tagging.Services;
 

@@ -1,7 +1,8 @@
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Shared;
-using MathComps.Shared.Localization;
+using MathComps.Domain.Taxonomy;
+using MathComps.Domain.Resources;
+using MathComps.Shared.Extensions;
 
 namespace MathComps.Cli.BulkImport.Validation;
 

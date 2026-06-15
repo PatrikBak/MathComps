@@ -1,7 +1,7 @@
 using MathComps.Cli.SkmoParser.Commands;
-using MathComps.Shared.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("SKMO Parser").Centered().Color(Color.Aqua));

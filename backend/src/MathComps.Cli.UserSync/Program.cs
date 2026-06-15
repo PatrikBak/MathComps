@@ -1,12 +1,12 @@
 using MathComps.Cli.UserSync.Commands;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("User Sync").Centered().Color(Color.Aqua));

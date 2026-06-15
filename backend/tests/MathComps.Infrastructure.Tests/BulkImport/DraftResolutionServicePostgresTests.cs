@@ -3,8 +3,8 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Shared;
 using Microsoft.Extensions.DependencyInjection;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Infrastructure.Tests.BulkImport;
 

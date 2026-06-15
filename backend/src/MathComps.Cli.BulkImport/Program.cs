@@ -2,12 +2,12 @@ using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header — suppressed under --json so stdout stays pure JSON.
 if (!args.Contains("--json"))

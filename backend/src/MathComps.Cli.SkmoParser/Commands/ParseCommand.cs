@@ -1,11 +1,13 @@
 using MathComps.Cli.SkmoParser.Parsing;
 using MathComps.Cli.SkmoParser.Rendering;
-using MathComps.Shared;
 using MathComps.TexParser.TexCleaner;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using MathComps.Shared.Extensions;
+using MathComps.Cli.SkmoParser.Paths;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.SkmoParser.Commands;
 

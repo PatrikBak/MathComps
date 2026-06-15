@@ -1,7 +1,7 @@
-using MathComps.Shared;
 using MathComps.TexParser.Types;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
+using MathComps.Cli.SkmoParser.Paths;
 
 namespace MathComps.Cli.SkmoParser.Parsing;
 

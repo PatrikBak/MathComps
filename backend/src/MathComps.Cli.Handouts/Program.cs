@@ -1,11 +1,12 @@
 using MathComps.Cli.Handouts.Commands;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Shared.Cli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
+using MathComps.Shared.DependencyInjection;
+using MathComps.Shared.Cli.Commands;
 
 // Fancy header
 AnsiConsole.Write(new FigletText("Handouts").Centered().Color(Color.Aqua));

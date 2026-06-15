@@ -8,8 +8,10 @@ using System.Text.RegularExpressions;
 using MathComps.TexParser.TexCleaner;
 using MathComps.TexParser;
 using MathComps.TexParser.Types;
-using MathComps.Shared;
 using Spectre.Console;
+using MathComps.Shared.Extensions;
+using MathComps.Cli.SkmoParser.Paths;
+using MathComps.Shared.Formatting;
 using TexParagraph = MathComps.TexParser.Types.Paragraph;
 using TexText = MathComps.TexParser.Types.Text;
 

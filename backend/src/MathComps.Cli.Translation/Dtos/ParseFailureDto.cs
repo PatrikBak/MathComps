@@ -1,5 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Shared;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Cli.Translation.Dtos;
 

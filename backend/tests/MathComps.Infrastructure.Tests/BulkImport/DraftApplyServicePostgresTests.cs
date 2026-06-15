@@ -6,10 +6,11 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Storage;
-using MathComps.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using static Microsoft.Extensions.Options.Options;
+using MathComps.Domain.Tagging;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Infrastructure.Tests.BulkImport;
 

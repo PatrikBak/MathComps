@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Globalization;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.BulkImport;
-using MathComps.Shared;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.BulkImport.Commands;
 

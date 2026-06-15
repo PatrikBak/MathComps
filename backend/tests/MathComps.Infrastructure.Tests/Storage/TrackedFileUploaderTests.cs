@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using MathComps.Infrastructure.Storage;
-using MathComps.Shared;
 using static Microsoft.Extensions.Options.Options;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Infrastructure.Tests.Storage;
 

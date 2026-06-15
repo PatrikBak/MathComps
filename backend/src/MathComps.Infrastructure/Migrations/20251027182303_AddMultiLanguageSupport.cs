@@ -1,6 +1,7 @@
 using System;
 using MathComps.Domain.EfCoreEntities;
 using Microsoft.EntityFrameworkCore.Migrations;
+using MathComps.Domain.Localization;
 
 #nullable disable
 

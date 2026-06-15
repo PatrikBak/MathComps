@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using MathComps.Shared;
 using MathComps.TexParser.TexCleaner;
 using MathComps.TexParser.Types;
+using MathComps.Shared.Extensions;
 
 namespace MathComps.TexParser;
 
