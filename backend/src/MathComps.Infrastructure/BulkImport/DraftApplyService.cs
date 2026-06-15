@@ -374,8 +374,8 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Reconciles an existing problem with the draft: refreshes its solution link, upserts each text by
-    /// <c>(document type, language)</c>, and reconciles its authors.
+    /// Reconciles an existing problem with the draft: refreshes its solution link when the draft carries one,
+    /// upserts each text by <c>(document type, language)</c>, and reconciles its authors.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with texts and authors loaded.</param>
@@ -394,9 +394,14 @@ public class DraftApplyService(
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // The solution link is the only language-invariant field a re-import may change.
-        var linkChanged = existing.SolutionLink != problem.SolutionLink;
-        existing.SolutionLink = problem.SolutionLink;
+        // The solution link is the only language-invariant field a re-import may change. A null link means the
+        // draft omitted the key — leave the stored link untouched, matching the authors/tags reconcilers.
+        var linkChanged = false;
+        if (problem.SolutionLink is { } solutionLink && existing.SolutionLink != solutionLink)
+        {
+            existing.SolutionLink = solutionLink;
+            linkChanged = true;
+        }
 
         // Upsert each variant's halves against the rows already present, noting whether any actually changed.
         var textsChanged = false;

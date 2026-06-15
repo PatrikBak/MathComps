@@ -275,6 +275,29 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A re-import that omits the <c>solutionLink:</c> key (null) leaves the stored link untouched — protecting a link
+    /// set by an earlier draft (or directly in the DB, e.g. by the SKMO scraper) from a link-less re-apply.
+    /// </summary>
+    [Fact]
+    public Task Absent_solution_link_leaves_existing_link_untouched() => RunTestAsync(async service =>
+    {
+        // Import the problem carrying a solution link.
+        var withLink = new DraftProblemContent(
+            1, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
+        await service.ApplyAsync(CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
+
+        // Re-import the identical text with no solutionLink key at all.
+        var second = await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // Nothing moved — the absent key is not a clear — and the link survives.
+        Assert.Equal(0, second.ProblemsUpdated);
+        Assert.Equal(1, second.ProblemsUnchanged);
+        await QueryAsync(async context =>
+            Assert.Equal("https://example.com/sol", (await context.Problems.SingleAsync()).SolutionLink));
+    });
+
+    /// <summary>
     /// A re-import that changes only the author set counts the problem as updated, even though the text body is
     /// identical — the authors moved.
     /// </summary>
