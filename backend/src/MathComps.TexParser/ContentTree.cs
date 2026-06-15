@@ -117,22 +117,22 @@ public static class ContentTree
             #region Simple containers with a single Content property.
 
             Paragraph paragraph => TraverseContainer(paragraph, paragraph.Content, state, transformer,
-                (paragraph, newContent) => paragraph with { Content = newContent }),
+                (node, newContent) => node with { Content = newContent }),
 
             BoldText bold => TraverseContainer(bold, bold.Content, state, transformer,
-                (bold, newContent) => bold with { Content = newContent }),
+                (node, newContent) => node with { Content = newContent }),
 
             ItalicText italic => TraverseContainer(italic, italic.Content, state, transformer,
-                (italic, newContent) => italic with { Content = newContent }),
+                (node, newContent) => node with { Content = newContent }),
 
             QuoteText quote => TraverseContainer(quote, quote.Content, state, transformer,
-                (quote, newContent) => quote with { Content = newContent }),
+                (node, newContent) => node with { Content = newContent }),
 
             Footnote footnote => TraverseContainer(footnote, footnote.Content, state, transformer,
-                (footnote, newContent) => footnote with { Content = newContent }),
+                (node, newContent) => node with { Content = newContent }),
 
             Link link => TraverseContainer(link, link.Content, state, transformer,
-                (link, newContent) => link with { Content = newContent }),
+                (node, newContent) => node with { Content = newContent }),
 
             #endregion
 

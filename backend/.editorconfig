@@ -152,12 +152,6 @@ dotnet_diagnostic.CA1008.severity = none
 # CA1515 — make public types internal; off (we decide accessibility ourselves)
 dotnet_diagnostic.CA1515.severity = none
 
-# EF scaffolds migrations with unused usings, block-scoped namespaces, and verbose initializers we don't touch.
-[**/Migrations/*.cs]
-dotnet_diagnostic.IDE0005.severity = none
-dotnet_diagnostic.IDE0161.severity = none
-dotnet_diagnostic.IDE0300.severity = none
-
 # ReSharper (jb inspectcode) suppressions for patterns this codebase uses intentionally.
 
 # ReSharper's unused-symbol inspections assume code constructs every type, but ours are built by frameworks
@@ -174,6 +168,18 @@ resharper_unused_auto_property_accessor_local_highlighting = none
 # EF entities stay settable for change-tracking; option/CLI-settings classes stay settable for the binder.
 resharper_property_can_be_made_init_only_global_highlighting = none
 resharper_auto_property_can_be_made_get_only_global_highlighting = none
+
+# 'with' on a record often touches every member; that's the idiomatic copy-and-update, not a smell.
+resharper_with_expression_modifies_all_members_highlighting = none
+
+# Sync I/O that has an async overload; off (single-threaded CLI tools and tests don't gain from async).
+resharper_method_has_async_overload_highlighting = none
+
+# EF scaffolds migrations with unused usings, block-scoped namespaces, and verbose initializers we don't touch.
+[**/Migrations/*.cs]
+dotnet_diagnostic.IDE0005.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.IDE0300.severity = none
 
 # Fluent builder extensions return the builder for chaining; ignoring that return is intentional.
 # Scoped to *Extensions.cs so the inspection still flags genuinely-ignored returns elsewhere.

@@ -546,7 +546,7 @@ public static class TexStringParser
         var styleCode = headMatch.Groups[1].Success ? headMatch.Groups[1].Value : "O";
 
         // Map the OpMaC style code to our own enum
-        if (!_texListStyleMap.TryGetValue(styleCode ?? "O", out var listStyleType))
+        if (!_texListStyleMap.TryGetValue(styleCode, out var listStyleType))
             throw new TexParserException($"Unhandled OpMac style code: {styleCode}");
 
         // Initialize a cursor to the position after the \begitems command.

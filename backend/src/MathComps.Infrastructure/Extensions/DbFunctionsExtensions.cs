@@ -19,6 +19,8 @@ public static class PostgresDbFunctions
     /// Requires the 'unaccent' PostgreSQL extension to be enabled in the database.
     /// </remarks>
     [DbFunction("immutable_unaccent", "public")]
+    // The argument is used in the translated SQL, not in this throwing body.
+    // ReSharper disable once UnusedParameter.Global
     public static string Unaccent(string text) =>
         // This method body will never execute; EF Core translates it to SQL.
         throw new NotSupportedException("This method is for use in EF Core queries only.");

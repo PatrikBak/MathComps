@@ -90,7 +90,7 @@ public class CalculateSimilaritiesCommand(
             problemsToProcess,
             "Processing problem similarities...",
             getItemDescription: problem => problem.Slug.ToUpperInvariant(),
-            processItem: async (problem, index, cancellationToken) =>
+            processItem: async (problem, _, cancellationToken) =>
             {
                 // Check if this problem already has similarity relationships and should be skipped.
                 if (settings.SkipProcessed && await databaseService.HasExistingSimilaritiesAsync(problemId: problem.Id, cancellationToken: cancellationToken))

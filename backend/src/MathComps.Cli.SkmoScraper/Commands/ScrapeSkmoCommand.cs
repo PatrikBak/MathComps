@@ -94,6 +94,8 @@ public class ScrapeSkmoCommand(ISkmoScraperService scraperService)
         {
             // Read existing content
             var existingJson = await File.ReadAllTextAsync(settings.OutputPath);
+            // FromJson can yield null when the file contains "null".
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
             var existingSolutions = existingJson.FromJson<List<ScrapedSolution>>() ?? [];
 
             // Log merge

@@ -55,18 +55,10 @@ public class SkmoDatabaseService(IDbContextFactory<MathCompsDbContext> contextFa
                 // So does the component
                 && problem.RoundInstance.Round.Competition.Slug == key.CompetitionSlug);
 
-        // If category is specified, filter by category slug
-        if (key.CategorySlug is not null)
-        {
-            // Include it in the filter
-            query = query.Where(problem => problem.RoundInstance.Round.Category!.Slug == key.CategorySlug);
-        }
-        // If no category is specified
-        else
-        {
-            // Only include problems without categories...
-            query = query.Where(problem => problem.RoundInstance.Round.Category == null);
-        }
+        // Filter by category slug when one is specified, otherwise restrict to problems without a category.
+        query = key.CategorySlug is not null
+            ? query.Where(problem => problem.RoundInstance.Round.Category!.Slug == key.CategorySlug)
+            : query.Where(problem => problem.RoundInstance.Round.Category == null);
 
         // If round is specified, filter by round slug
         if (key.RoundSlug is not null)

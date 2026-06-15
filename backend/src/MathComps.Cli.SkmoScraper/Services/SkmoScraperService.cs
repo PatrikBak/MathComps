@@ -233,7 +233,8 @@ public class SkmoScraperService(HttpClient httpClient) : ISkmoScraperService
                 // We'll try to parse the solution
                 string? solutionLink = null;
 
-                // If we have a link node, parse it
+                // If we have a link node, parse it (SelectSingleNode is null when nothing matched)
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (linkNode is not null)
                 {
                     // Get the href
@@ -293,7 +294,8 @@ public class SkmoScraperService(HttpClient httpClient) : ISkmoScraperService
 
             string? solutionLink = null;
 
-            // If we have a link node, parse it
+            // If we have a link node, parse it (SelectSingleNode is null when nothing matched)
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (linkNode is not null)
             {
                 // Get the link value

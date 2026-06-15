@@ -36,7 +36,7 @@ public static class TexImageProcessor
         var (updatedContent, finalState) = ContentTree.Traverse(
             text.Content,
             state,
-            (node, state) => ProcessNode(node, state, config)
+            (node, nodeState) => ProcessNode(node, nodeState, config)
         );
 
         // Reconstruct the text with transformed blocks.

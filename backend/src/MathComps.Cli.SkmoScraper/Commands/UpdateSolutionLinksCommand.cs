@@ -112,7 +112,7 @@ public class UpdateSolutionLinksCommand(ISkmoDatabaseService databaseService) : 
             solutionsToProcess,
             "Updating solution links...",
             getItemDescription: item => item.Slug,
-            processItem: async (item, index, cancellationToken) =>
+            processItem: async (item, _, _) =>
             {
                 // Update problems in the database with the solution link
                 var result = await databaseService.UpdateProblemsWithSolutionLinkAsync(item.Key, item.SolutionLink);

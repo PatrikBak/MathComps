@@ -154,18 +154,15 @@ public class TranslateProblemsCommand(
                 problemsToTranslate,
                 $"Translating to {targetLanguage}...",
                 getItemDescription: problem => problem.Slug.ToUpperInvariant(),
-                processItem: async (problem, index, cancellationToken) =>
-                {
-                    // Translate the problem in parallel
-                    return await TranslateProblem(
-                        problem,
-                        targetLanguage,
-                        settings.Scope,
-                        cancellationToken
-                    );
-                },
+                // Translate the problem in parallel
+                processItem: async (problem, _, cancellationToken) => await TranslateProblem(
+                    problem,
+                    targetLanguage,
+                    settings.Scope,
+                    cancellationToken
+                ),
                 numThreads: settings.NumThreads,
-                handleResult: async (translationResult, problem, index, cancellationToken) =>
+                handleResult: async (translationResult, _, _, _) =>
                 {
                     // If translation succeeded, save to database
                     await databaseService.UpsertTranslationAsync(translationResult);
