@@ -34,7 +34,7 @@ public static class DraftTagFiles
     /// The standalone comment line that separates a body's statement from its solution. Matches the bulk-import
     /// preflight's sentinel so both sides split a body identically.
     /// </summary>
-    public const string SolutionSentinel = "<!-- solution -->";
+    private const string SolutionSentinel = "<!-- solution -->";
 
     /// <summary>
     /// Splits a problem body into its statement and solution halves on the solution sentinel.

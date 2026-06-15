@@ -311,7 +311,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         var reply1_1 = await commentService.CreateCommentAsync(target, _user2Id, "Reply 1.1", root1.Id);
 
         // Reply 1.1.1 -> Reply 1.1
-        var reply1_1_1 = await commentService.CreateCommentAsync(target, _user1Id, "Reply 1.1.1", reply1_1.Id);
+        await commentService.CreateCommentAsync(target, _user1Id, "Reply 1.1.1", reply1_1.Id);
 
         // Reply 1.2 -> Root 1
         var reply1_2 = await commentService.CreateCommentAsync(target, _user1Id, "Reply 1.2", root1.Id);
@@ -320,7 +320,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         var root2 = await commentService.CreateCommentAsync(target, _user2Id, "Root 2");
 
         // Reply 2.1 -> Root 2
-        var reply2_1 = await commentService.CreateCommentAsync(target, _user1Id, "Reply 2.1", root2.Id);
+        await commentService.CreateCommentAsync(target, _user1Id, "Reply 2.1", root2.Id);
 
 
         // --- Retrieval & Verification ---

@@ -223,7 +223,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
 
             // Unhandled target type
             default:
-                throw new ArgumentOutOfRangeException(nameof(CommentTargetType), target.TargetType, "Invalid comment target type");
+                throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type");
         }
 
         // Save the comment
@@ -339,7 +339,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
 
             // Unhandled target type
             default:
-                throw new ArgumentOutOfRangeException(nameof(CommentTargetType), target.TargetType, "Invalid comment target type");
+                throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type");
         }
 
         // Save all changes
@@ -478,7 +478,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
                 "JOIN news_article_comments nc ON c.id = nc.comment_id JOIN news_articles n ON nc.news_article_id = n.id",
                 "n.content_id = @p0"
             ),
-            _ => throw new ArgumentOutOfRangeException(nameof(target.TargetType))
+            _ => throw new ArgumentOutOfRangeException(nameof(target))
         };
 
         // Build the SQL with the target-specific fragments

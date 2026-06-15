@@ -15,7 +15,7 @@ public static class SkmoImageHelper
     public static string? FindImageSourcePath(string texImageId, int olympiadYear)
     {
         // Replace explicit .pdf and .eps suffixes
-        if (texImageId.EndsWith(".pdf") || texImageId.EndsWith(".eps"))
+        if (texImageId.EndsWith(".pdf", StringComparison.Ordinal) || texImageId.EndsWith(".eps", StringComparison.Ordinal))
             texImageId = texImageId[..^4];
 
         // Image ids are used to locate names. They are already lower-cased so it

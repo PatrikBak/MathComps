@@ -45,6 +45,9 @@ public class GenericDictionaryWrapperConverterTests
 
     #region Serialization Tests
 
+    /// <summary>
+    /// Serializing a record emits only the wrapped dictionary's entries, dropping the record wrapper.
+    /// </summary>
     [Fact]
     public void Serialize_SimpleRecord_ShouldSerializeOnlyDictionaryData()
     {
@@ -65,6 +68,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Contains("\"key2\":2", json);
     }
 
+    /// <summary>
+    /// Serializing a record with enum-keyed dictionary values emits the enum names and their array values.
+    /// </summary>
     [Fact]
     public void Serialize_ComplexRecord_ShouldSerializeOnlyDictionaryData()
     {
@@ -86,6 +92,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Contains("\"Technique\":[\"induction\"]", json);
     }
 
+    /// <summary>
+    /// Serializing a record whose dictionary nests another dictionary emits the nested structure.
+    /// </summary>
     [Fact]
     public void Serialize_NestedRecord_ShouldSerializeOnlyDictionaryData()
     {
@@ -115,6 +124,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Contains("\"outer2\":{\"3\":true}", json);
     }
 
+    /// <summary>
+    /// Serializing a null record writes a JSON null.
+    /// </summary>
     [Fact]
     public void Serialize_NullRecord_ShouldSerializeNull()
     {
@@ -133,6 +145,9 @@ public class GenericDictionaryWrapperConverterTests
 
     #region Deserialization Tests
 
+    /// <summary>
+    /// Deserializing dictionary JSON reconstructs a simple record with its entries.
+    /// </summary>
     [Fact]
     public void Deserialize_SimpleRecord_ShouldCreateRecordFromDictionaryJson()
     {
@@ -150,6 +165,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Equal(2, record.Data["key2"]);
     }
 
+    /// <summary>
+    /// Deserializing dictionary JSON with enum keys reconstructs a record with the enum-keyed entries.
+    /// </summary>
     [Fact]
     public void Deserialize_ComplexRecord_ShouldCreateRecordFromDictionaryJson()
     {
@@ -167,6 +185,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Equal(new[] { "induction" }, record.Data[TagType.Technique]);
     }
 
+    /// <summary>
+    /// Deserializing nested dictionary JSON reconstructs a record with the nested dictionaries.
+    /// </summary>
     [Fact]
     public void Deserialize_NestedRecord_ShouldCreateRecordFromDictionaryJson()
     {
@@ -187,6 +208,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.True(record.Data["outer2"][3]);
     }
 
+    /// <summary>
+    /// Deserializing a JSON null yields a null record.
+    /// </summary>
     [Fact]
     public void Deserialize_NullJson_ShouldReturnNull()
     {
@@ -201,6 +225,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Null(record);
     }
 
+    /// <summary>
+    /// Deserializing an empty JSON object yields a record with an empty dictionary.
+    /// </summary>
     [Fact]
     public void Deserialize_EmptyDictionary_ShouldCreateRecordWithEmptyData()
     {
@@ -220,6 +247,9 @@ public class GenericDictionaryWrapperConverterTests
 
     #region Round-trip Tests
 
+    /// <summary>
+    /// Serializing then deserializing a simple record preserves its dictionary data.
+    /// </summary>
     [Fact]
     public void RoundTrip_SimpleRecord_ShouldPreserveData()
     {
@@ -240,6 +270,9 @@ public class GenericDictionaryWrapperConverterTests
         Assert.Equal(originalRecord.Data, deserializedRecord.Data);
     }
 
+    /// <summary>
+    /// Serializing then deserializing an enum-keyed record preserves its dictionary data.
+    /// </summary>
     [Fact]
     public void RoundTrip_ComplexRecord_ShouldPreserveData()
     {
@@ -264,6 +297,9 @@ public class GenericDictionaryWrapperConverterTests
 
     #region Error Handling Tests
 
+    /// <summary>
+    /// Constructing the converter for a record with no dictionary property throws.
+    /// </summary>
     [Fact]
     public void Constructor_RecordWithoutDictionaryProperty_ShouldThrowException()
     {
@@ -272,6 +308,9 @@ public class GenericDictionaryWrapperConverterTests
             new GenericDictionaryWrapperConverter<TestRecordWithoutDictionary>());
     }
 
+    /// <summary>
+    /// Constructing the converter for a record with more than one dictionary property throws.
+    /// </summary>
     [Fact]
     public void Constructor_RecordWithMultipleDictionaryProperties_ShouldThrowException()
     {
@@ -280,6 +319,9 @@ public class GenericDictionaryWrapperConverterTests
             new GenericDictionaryWrapperConverter<TestRecordWithMultipleDictionaries>());
     }
 
+    /// <summary>
+    /// Constructing the converter for a record lacking a constructor that takes the dictionary throws.
+    /// </summary>
     [Fact]
     public void Constructor_RecordWithoutMatchingConstructor_ShouldThrowException()
     {
@@ -289,6 +331,9 @@ public class GenericDictionaryWrapperConverterTests
             new GenericDictionaryWrapperConverter<TestRecordWithoutConstructor>());
     }
 
+    /// <summary>
+    /// Deserializing JSON that doesn't match the wrapped dictionary's shape throws a JsonException.
+    /// </summary>
     [Fact]
     public void Deserialize_InvalidJson_ShouldThrowJsonException()
     {
@@ -308,19 +353,19 @@ public class GenericDictionaryWrapperConverterTests
     /// <summary>
     /// Test record that doesn't have a <see cref="ImmutableDictionary{TKey, TValue}"/> property
     /// </summary>
-    public record TestRecordWithoutDictionary(string Name, int Value);
+    private record TestRecordWithoutDictionary(string Name, int Value);
 
     /// <summary>
     /// Test record with multiple <see cref="ImmutableDictionary{TKey, TValue}"/> properties
     /// </summary>
-    public record TestRecordWithMultipleDictionaries(
+    private record TestRecordWithMultipleDictionaries(
         ImmutableDictionary<string, int> Data1,
         ImmutableDictionary<string, string> Data2);
 
     /// <summary>
     /// Test record without a constructor that takes the <see cref="ImmutableDictionary{TKey, TValue}"/>
     /// </summary>
-    public record TestRecordWithoutConstructor
+    private record TestRecordWithoutConstructor
     {
         public ImmutableDictionary<string, int> Data { get; }
 

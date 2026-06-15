@@ -75,7 +75,7 @@ public class TranslateProblemsCommand(
         // A helper function to get lange string
         static string FormatLanguages(IEnumerable<Language> languages) =>
             // Format as "CZ, EN, ..."
-            languages.Select(language => language.ToString().ToUpper()).ToJoinedString(", ");
+            languages.Select(language => language.ToString().ToUpper()).ToJoinedString();
 
         // Determine which languages to translate
         List<Language> targetLanguages;
@@ -173,7 +173,7 @@ public class TranslateProblemsCommand(
         }
 
         // Confirm successful completion
-        AnsiConsole.MarkupLine($"[bold green]Translation complete.[/]");
+        AnsiConsole.MarkupLine("[bold green]Translation complete.[/]");
 
         return 0;
     }

@@ -501,10 +501,10 @@ public static class TexStringParser
     private static (MathTex mathBlock, int endIndex) ParseMathBlock(string sourceText, int startIndex)
     {
         // Verify that the block starts with '$$'.
-        if (startIndex + 1 < sourceText.Length && sourceText.AsSpan(startIndex, 2).SequenceEqual("$$"))
+        if (startIndex + 1 < sourceText.Length && sourceText.AsSpan(startIndex, 2) is "$$")
         {
             // Find the closing '$$' after the opening one.
-            var endIndex = sourceText.IndexOf("$$", startIndex + 2);
+            var endIndex = sourceText.IndexOf("$$", startIndex + 2, StringComparison.Ordinal);
 
             // If a closing '$$' is found.
             if (endIndex > 0)
@@ -1303,10 +1303,10 @@ public static class TexStringParser
         textContent = Regex.Replace(textContent, @"(?<!\\)~", "\u00A0");
 
         // Replace TeX-style triple dash with an em dash first so it is not partially eaten by the double-dash rule.
-        textContent = Regex.Replace(textContent, @"---", "\u2014");
+        textContent = Regex.Replace(textContent, "---", "\u2014");
 
         // Replace TeX-style double dash with an en dash.
-        textContent = Regex.Replace(textContent, @"--", "\u2013");
+        textContent = Regex.Replace(textContent, "--", "\u2013");
 
         // Replace TeX-style inline spaces
         textContent = Regex.Replace(textContent, @"\\,", " ");

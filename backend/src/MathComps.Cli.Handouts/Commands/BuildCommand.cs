@@ -180,7 +180,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         // Check if any files were found.
         if (inputFiles.Count == 0)
         {
-            AnsiConsole.MarkupLine($"[yellow]Warning:[/] No files found matching pattern(s) in the input directory.");
+            AnsiConsole.MarkupLine("[yellow]Warning:[/] No files found matching pattern(s) in the input directory.");
             return 0;
         }
 
@@ -664,7 +664,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             ContentTree.Map(section.Text.Content, node =>
             {
                 // Only Link nodes matter, and only those pointing at a local file (not an external URL)
-                if (node is Link link && !Regex.IsMatch(link.Url, @"^https?://", RegexOptions.IgnoreCase))
+                if (node is Link link && !Regex.IsMatch(link.Url, "^https?://", RegexOptions.IgnoreCase))
                     documentFileNames.Add(link.Url);
 
                 // Return the same reference to signal "no transformation"

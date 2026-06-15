@@ -12,7 +12,7 @@ public static class SkmoDataPaths
     /// Relative path to the SKMO data directory from the solution root.
     /// This is the base directory containing all SKMO-related data files.
     /// </summary>
-    public const string SkmoDataDirectory = "data/skmo";
+    private const string SkmoDataDirectory = "data/skmo";
 
     #endregion
 

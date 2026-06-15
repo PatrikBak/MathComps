@@ -15,7 +15,7 @@ public static class VerdictExtensions
     /// <param name="errors">Every issue collected across the preflight, registry and DB checks.</param>
     /// <returns>True when no error-severity issue is present.</returns>
     public static bool IsOk(this IEnumerable<VerdictError> errors) =>
-        !errors.Any(error => error.Severity == VerdictSeverity.Error);
+        errors.All(error => error.Severity != VerdictSeverity.Error);
 
     /// <summary>
     /// Orders issues deterministically: by file, then by source position, so the same draft always reports in the

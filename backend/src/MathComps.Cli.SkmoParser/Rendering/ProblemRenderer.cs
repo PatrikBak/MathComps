@@ -133,7 +133,7 @@ public static class ProblemRenderer
                     // Render the problems into the year-specific file
                     var currentKatexErrors = await BuildPageAndReturnExceptionsAsync(
                         [.. renderingResults.Select(result => (result.problem, result.renderedResult))],
-                        Path.Combine(config.HtmlOutputFolder, $"_all.html")
+                        Path.Combine(config.HtmlOutputFolder, "_all.html")
                     );
 
                     // Merge the errors
@@ -230,9 +230,6 @@ public static class ProblemRenderer
         // Are we currently in a list?
         var inList = false;
 
-        // Current style of the list
-        string currentStyle;
-
         // Scan line by line
         foreach (var line in lines)
         {
@@ -240,8 +237,8 @@ public static class ProblemRenderer
             var enumerateMatch = Regex.Match(line, @"^\s*\\begin\{enumerate\}\s*(\\alphatrue|)$");
             if (enumerateMatch.Success)
             {
-                // The first group will be the style...
-                currentStyle = enumerateMatch.Groups[1].Value switch
+                // Validate the declared style, but discard it — the first item's label decides the actual style
+                _ = enumerateMatch.Groups[1].Value switch
                 {
                     // Letters with parenthesis
                     "\\alphatrue" => "a",
@@ -268,7 +265,7 @@ public static class ProblemRenderer
                 if (!inList)
                 {
                     // Decide the style from the first label
-                    currentStyle = DetectStyleFromLabel(match.Groups[1].Value);
+                    var currentStyle = DetectStyleFromLabel(match.Groups[1].Value);
 
                     // Start the list
                     stringBuilder.Append($"\\begitems  \\style {currentStyle}\n");
@@ -347,25 +344,25 @@ public static class ProblemRenderer
         var headNode = HtmlNode.CreateNode("<head></head>");
 
         // Add the CSS link for KateX
-        headNode.AppendChild(HtmlNode.CreateNode(@$"
+        headNode.AppendChild(HtmlNode.CreateNode(@"
             <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css'>"
         ));
 
         // Add the link to our stylesheet
-        headNode.AppendChild(HtmlNode.CreateNode(@$"
+        headNode.AppendChild(HtmlNode.CreateNode(@"
             <link rel='stylesheet' href='styles.css'>"
         ));
 
         // Add KaTeX
-        headNode.AppendChild(HtmlNode.CreateNode(@$"
+        headNode.AppendChild(HtmlNode.CreateNode(@"
             <script src='https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js'></script>"
         ));
-        headNode.AppendChild(HtmlNode.CreateNode(@$"
+        headNode.AppendChild(HtmlNode.CreateNode(@"
             <script src='https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/auto-render.min.js'></script>"
         ));
 
         // For copying the TeX source easily
-        headNode.AppendChild(HtmlNode.CreateNode(@$"
+        headNode.AppendChild(HtmlNode.CreateNode(@"
             <script src='https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/copy-tex.min.js'></script>"
         ));
 
@@ -512,7 +509,7 @@ public static class ProblemRenderer
         var inlineBuffer = new List<ContentBlock>();
 
         // A helper to flush the inline buffer into a <p> tag if it has any content
-        void flushInlineBuffer()
+        void FlushInlineBuffer()
         {
             // If we have anything to flush...
             if (inlineBuffer.Count > 0)
@@ -553,7 +550,7 @@ public static class ProblemRenderer
             else if (block is TexParagraph paragraph)
             {
                 // Flush any pending content first to ensure separate paragraphs render as separate <p> tags
-                flushInlineBuffer();
+                FlushInlineBuffer();
 
                 // Add all of it to the inline buffer
                 inlineBuffer.AddRange(paragraph.Content);
@@ -562,7 +559,7 @@ public static class ProblemRenderer
             else
             {
                 // First, flush any pending inline content into its own <p> tag.
-                flushInlineBuffer();
+                FlushInlineBuffer();
 
                 // Then, render the block-level element itself.
                 switch (block)
@@ -589,7 +586,7 @@ public static class ProblemRenderer
         }
 
         // After the loop, flush any remaining content in the buffer.
-        flushInlineBuffer();
+        FlushInlineBuffer();
 
         // We have the built string
         return stringBuilder.ToString();
@@ -779,7 +776,7 @@ public static class ProblemRenderer
             var currentItemBlocks = list.Items[index - 1];
 
             // This variable will hold the final list of blocks to be rendered.
-            var contentToRender = currentItemBlocks.Count == 1 && currentItemBlocks[0] is TexParagraph paragraph
+            var contentToRender = currentItemBlocks is [TexParagraph paragraph]
                 ? paragraph.Content
 
                 // For all other cases (multiple blocks or a single non-paragraph block),

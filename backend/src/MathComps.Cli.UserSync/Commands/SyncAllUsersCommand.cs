@@ -58,7 +58,7 @@ public class SyncAllUsersCommand(
                     }
 
                     // Extract email from first email address
-                    var email = user.EmailAddresses?.FirstOrDefault()?.EmailAddressValue;
+                    var email = user.EmailAddresses.FirstOrDefault()?.EmailAddressValue;
 
                     // Create sync DTO
                     var dto = new UserSyncDto(

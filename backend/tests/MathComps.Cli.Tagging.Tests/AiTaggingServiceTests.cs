@@ -19,8 +19,8 @@ public class AiTaggingServiceTests
     /// </summary>
     private static readonly ImmutableArray<AiTagCandidate> _candidates =
     [
-        new AiTagCandidate("algebra", "Algebra", TagType.Area, "Algebra description"),
-        new AiTagCandidate("pigeonhole", "Pigeonhole Principle", TagType.Technique, "Pigeonhole description"),
+        new("algebra", "Algebra", TagType.Area, "Algebra description"),
+        new("pigeonhole", "Pigeonhole Principle", TagType.Technique, "Pigeonhole description"),
     ];
 
     /// <summary>

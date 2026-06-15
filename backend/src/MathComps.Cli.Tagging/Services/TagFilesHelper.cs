@@ -23,7 +23,7 @@ public static class TagFilesHelper
     /// The language used for tag names in LLM prompts.
     /// English is used because LLMs perform better with English vocabulary.
     /// </summary>
-    public const Language AiLanguage = Language.EN;
+    private const Language AiLanguage = Language.EN;
 
     /// <summary>
     /// Gets the approved tags keyed by their <see cref="AiLanguage"/> display name.
