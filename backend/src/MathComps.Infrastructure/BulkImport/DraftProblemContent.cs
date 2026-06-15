@@ -30,7 +30,10 @@ public record DraftTextContent(
 /// Author display names in declared order, or null when the draft omits an <c>authors:</c> key. Null leaves existing
 /// authors untouched; an empty array clears them; a populated array replaces them.
 /// </param>
-/// <param name="SolutionLink">External solution URL, or null when absent.</param>
+/// <param name="SolutionLink">
+/// External solution URL, or null when the draft omits a <c>solutionLink:</c> key. Null leaves an existing link
+/// untouched; a populated value sets it. 
+/// </param>
 /// <param name="Tags">
 /// Tag slugs to assign, or null when the draft omits a <c>tags:</c> key. Null leaves existing tags untouched; an
 /// empty array clears them; a populated array replaces them.

@@ -63,6 +63,8 @@ tags: # approved tag slugs; usually written by the tag-draft tool, hand-editable
 
 `authors` and `tags` share the same omit-vs-clear semantics on apply: an **absent** key leaves a problem's existing values untouched, an **empty** list (`authors: []` / `tags: []`) clears them, and a populated list replaces them. So a partial re-import — say, attaching only a solution — can leave both authors and tags alone by omitting their keys. Each tag slug must be in the approved vocabulary (`approved-tags.json`) — the C# validate step rejects unknown ones.
 
+`solutionLink` follows the same omit-leaves-untouched rule: an **absent** key keeps the stored link, a value sets it. Being a scalar it has no empty-list analogue, so a re-import never clears a link — that's done directly in the DB.
+
 ## Images
 
 Put assets in `images/` and reference them relatively. Sizing is optional:

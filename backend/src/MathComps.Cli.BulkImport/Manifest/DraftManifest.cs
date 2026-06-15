@@ -80,7 +80,10 @@ public record ManifestText(
 /// existing authors untouched; an empty array clears them; a populated array replaces them — so omit is distinct from
 /// clear.
 /// </param>
-/// <param name="SolutionLink">External solution URL, or null when absent.</param>
+/// <param name="SolutionLink">
+/// External solution URL, or null when the <c>pN.yaml</c> omits a <c>solutionLink:</c> key. Null leaves an existing
+/// link untouched; a populated value sets it. (A scalar has no empty-list analogue, so a re-import cannot clear it.)
+/// </param>
 /// <param name="Tags">
 /// Tag slugs to assign, or null when the <c>pN.yaml</c> omits a <c>tags:</c> key. Null leaves existing tags untouched;
 /// an empty array clears them; a populated array replaces them — so omit is distinct from clear.
