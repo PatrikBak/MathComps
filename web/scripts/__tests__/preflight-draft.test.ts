@@ -206,6 +206,26 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
+  it('accepts a translation-only subset with non-contiguous orders and no pN.yaml', async () => {
+    const manifest = await loadFixture('valid-translation-only-subset')
+
+    // The fixed problems sit at orders 2 and 5; the gap is preserved, not renumbered down to 1, 2
+    expect(manifest.problems.map((problem) => problem.order)).toEqual([2, 5])
+
+    // Every variant is a translation — no body is in the draft's original (sk) language
+    expect(manifest.problems.every((problem) => !problem.texts.some((text) => text.original))).toBe(
+      true
+    )
+
+    // pN.yaml is omitted, so authors/tags default to null (left untouched on apply)
+    expect(
+      manifest.problems.every((problem) => problem.authors === null && problem.tags === null)
+    ).toBe(true)
+
+    // Both relaxations (skip-contiguity, optional pN.yaml) leave the run clean
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
   it('unions a shared image across languages without an orphan warning', async () => {
     const manifest = await loadFixture('valid-shared-image-across-langs')
     expect(manifest.problems[0]!.images).toEqual(['fig.svg'])

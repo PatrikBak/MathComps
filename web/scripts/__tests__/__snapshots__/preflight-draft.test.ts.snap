@@ -720,6 +720,28 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-translation-only 
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-translation-only-subset 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 2,
+  "problemLanguages": [
+    [
+      "cs",
+      "en",
+    ],
+    [
+      "cs",
+      "en",
+    ],
+  ],
+  "problemOrders": [
+    2,
+    5,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > valid-translation-solution 1`] = `
 {
   "errors": [],

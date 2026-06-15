@@ -18,13 +18,13 @@ my-draft/
   _meta.yaml        # competition / category? / round? / season / date / language
   p1.<lang>.md      # statement, then an optional "<!-- solution -->" line, then the solution
   p1.<lang2>.md     # translations (statement-only allowed; solution only if the original has one)
-  p1.yaml           # authors / solutionLink / tags — all optional, but the file must exist
+  p1.yaml           # authors / solutionLink / tags — all optional; file required except on a translation-only drop
   images/           # referenced figures (flat): .svg / .png / .jpg / .jpeg / .webp, each < 2 MB
 ```
 
-Problems are numbered from 1, contiguous. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original** (verbatim); the rest are translations.
+Problems are numbered from 1, contiguous (a **translation-only drop** is the exception — see below). The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original** (verbatim); the rest are translations.
 
-**Translation-only drop:** to add translations to a problem **already in the DB**, omit the original file and ship only the translation bodies (e.g. `p1.cs.md` + `p1.en.md`). Keep `_meta.yaml`'s `language` set to the problem's **true original language** even though that file is absent — otherwise a translation is marked as the original and collides with the stored one. `validate` rejects this (`no-original-new-problem`) if the problem doesn't already exist.
+**Translation-only drop:** to add translations to a problem **already in the DB**, omit the original file and ship only the translation bodies (e.g. `p1.cs.md` + `p1.en.md`). Such a draft may also carry an **arbitrary subset of orders** (e.g. just `p3` + `p7`, no contiguity) and may **omit `pN.yaml`** entirely (with no sidecar, authors/tags/solutionLink default to "leave untouched"), so the draft holds exactly the problems being corrected. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even though that file is absent — otherwise a translation is marked as the original and collides with the stored one. `validate` rejects this (`no-original-new-problem`) if the problem doesn't already exist.
 
 ## Step 1 — Register the competition (only if its slug is new)
 
