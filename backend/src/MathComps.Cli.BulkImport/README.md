@@ -8,9 +8,9 @@ Both commands run the same checks, so a clean `validate` all but guarantees a cl
 
 1. **Preflight** — shells out to the `web/` TypeScript preflight (`npm run draft:preflight`), which reads the draft folder and reports any format, markdown or image-reference problems.
 2. **Registry check** — every competition / category / round slug in `_meta.yaml` must be registered in the shared taxonomy and carry a localized name in each locale.
-3. **DB preview** — a read-only look at what each problem would create, overwrite, or leave unchanged (it compares the would-be body against what's stored, so a no-op re-import isn't flagged as an overwrite).
+3. **DB preview** — a read-only look at what each problem would create, overwrite, or leave unchanged (it compares the would-be body against what's stored, so a no-op re-import isn't flagged as an overwrite). Being DB-aware, this is also where the safety checks the format preflight can't make live: the import must leave the round's problem orders contiguous (`1..N`, no gap — so a `p4` whose problem doesn't exist yet is rejected), a newly-created problem must carry a `pN.yaml` sidecar, and an original may not collide with a stored original in another language.
 
-`apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. New problems land unpublished pending review; a re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
+`apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. A re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
 
 Image uploads are deduplicated against a ledger kept beside this tool's sources (`.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
 
@@ -63,7 +63,7 @@ Aborts (exit `1`) if validation fails or the database is unreachable; exits `0` 
 ## Setup
 
 - **Node + npm** — the preflight runs the `web/` project's `draft:preflight` script, so `npm` must be on your PATH with `web/` dependencies installed.
-- **Database** — set the connection string in user secrets (see the [main backend README](../../../README.md)). `validate` degrades to a warning if the DB is unreachable; `apply` requires it.
+- **Database** — set the connection string in user secrets (see the [main backend README](../../../README.md)). Both commands need a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, and `apply` requires it.
 - **Cloudflare R2** (`apply` only) — image uploads need the `CloudflareR2` settings:
 
   ```bash

@@ -50,6 +50,11 @@ export type ManifestProblem = {
   /** 1-based position within the round, taken from the `pN.yaml` / `pN.<lang>.md` filenames. */
   order: number
   /**
+   * `true` when a `pN.yaml` sidecar file exists for this problem. A newly-created problem with no sidecar is
+   * flagged; a re-import may omit it (absent sidecar = leave the stored authors/tags/link untouched).
+   */
+  hasSidecar: boolean
+  /**
    * Author display names in declared order, or `null` when the `pN.yaml` omits an `authors:` key. An absent key
    * stays `null` (leave existing authors untouched) rather than defaulting to `[]` (clear) — omit and clear stay
    * distinct.

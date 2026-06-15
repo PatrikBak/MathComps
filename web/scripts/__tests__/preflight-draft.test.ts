@@ -202,7 +202,7 @@ describe('valid drafts — parsed manifest content', () => {
     expect(problem!.texts.map((text) => text.language)).toEqual(['cs', 'en'])
     expect(problem!.texts.some((text) => text.original)).toBe(false)
 
-    // Omitting the original is no longer an error — the DB-aware validate step gates it instead
+    // Omitting the original passes the format gate; whether the target exists is the DB-aware validate step's call
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
@@ -222,7 +222,33 @@ describe('valid drafts — parsed manifest content', () => {
       manifest.problems.every((problem) => problem.authors === null && problem.tags === null)
     ).toBe(true)
 
-    // Both relaxations (skip-contiguity, optional pN.yaml) leave the run clean
+    // The preflight checks format only; contiguity and pN.yaml presence are the DB-aware validate step's call, so a
+    // bare subset of orders passes the format gate cleanly
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('accepts a non-contiguous subset that carries originals', async () => {
+    const manifest = await loadFixture('valid-subset-with-originals')
+
+    // Problems sit at orders 1 and 3 (no order 2); the preflight leaves the gap for the DB-aware validate step to
+    // judge against what already exists
+    expect(manifest.problems.map((problem) => problem.order)).toEqual([1, 3])
+
+    // Unlike a translation-only drop, these carry their original-language body — yet the format gate still passes
+    expect(manifest.problems.every((problem) => problem.texts.some((text) => text.original))).toBe(
+      true
+    )
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('accepts a problem with bodies but no pN.yaml sidecar', async () => {
+    const manifest = await loadFixture('valid-no-problem-meta')
+    const [problem] = manifest.problems
+
+    // No pN.yaml, so hasSidecar is false and authors/tags stay null; whether a fresh problem may omit it is the
+    // DB-aware validate step's call, not the preflight's
+    expect(problem!.hasSidecar).toBe(false)
+    expect(problem!.authors).toBeNull()
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
@@ -385,12 +411,6 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.message).toContain('valid YAML')
   })
 
-  it('flags a problem with body files but no metadata file', async () => {
-    const manifest = await loadFixture('invalid-missing-problem-meta')
-    const error = findError(manifest, (entry) => entry.rule === 'missing-problem-meta')
-    expect(error?.message).toContain('metadata file')
-  })
-
   it('flags a problem with a metadata file but no body', async () => {
     const manifest = await loadFixture('invalid-missing-body')
     const error = findError(manifest, (entry) => entry.rule === 'missing-body')
@@ -425,12 +445,6 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.half).toBe('statement')
   })
 
-  it('flags non-contiguous problem numbering', async () => {
-    const manifest = await loadFixture('invalid-noncontiguous')
-    const error = findError(manifest, (entry) => entry.rule === 'problem-files')
-    expect(error?.message).toContain('contiguous')
-  })
-
   it('flags duplicate problem numbers', async () => {
     const manifest = await loadFixture('invalid-duplicate-order')
     const error = findError(manifest, (entry) => entry.message.includes('duplicate'))
@@ -443,10 +457,10 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.message).toContain('no problem files')
   })
 
-  it('flags a problem list that does not start at 1', async () => {
-    const manifest = await loadFixture('invalid-starts-at-two')
+  it('flags a problem numbered below 1', async () => {
+    const manifest = await loadFixture('invalid-zero-order')
     const error = findError(manifest, (entry) => entry.rule === 'problem-files')
-    expect(error?.message).toContain('p1.yaml')
+    expect(error?.message).toContain('≥ 1')
   })
 })
 

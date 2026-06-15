@@ -75,6 +75,10 @@ public record ManifestText(
 /// One draft problem: its language-invariant metadata plus one text variant per language (original first).
 /// </summary>
 /// <param name="Order">1-based position within the round, taken from the filenames.</param>
+/// <param name="HasSidecar">
+/// Whether a <c>pN.yaml</c> sidecar file exists for this problem. A newly-created problem with no sidecar is flagged;
+/// a re-import may omit it.
+/// </param>
 /// <param name="Authors">
 /// Author display names in declared order, or null when the <c>pN.yaml</c> omits an <c>authors:</c> key. Null leaves
 /// existing authors untouched; an empty array clears them; a populated array replaces them — so omit is distinct from
@@ -92,6 +96,7 @@ public record ManifestText(
 /// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record ManifestProblem(
     int Order,
+    bool HasSidecar,
     ImmutableArray<string>? Authors,
     string? SolutionLink,
     ImmutableArray<string>? Tags,

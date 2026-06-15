@@ -77,5 +77,5 @@ public class TagSlugValidatorTests
     /// <param name="tags">The tag slugs, or null for no <c>tags:</c> key.</param>
     /// <returns>The problem to validate.</returns>
     private static ManifestProblem ProblemWithTags(ImmutableArray<string>? tags) =>
-        new(1, [], null, tags, [], []);
+        new(1, HasSidecar: true, [], null, tags, [], []);
 }

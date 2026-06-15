@@ -3,6 +3,7 @@ using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Cli.BulkImport.Preflight;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Shared.Extensions;
 
 namespace MathComps.Cli.BulkImport.Validation;
 
@@ -83,6 +84,7 @@ public class DraftValidationPipeline(
             var problems = manifest.Problems
                 .Select(problem => new DraftProblemContent(
                     problem.Order,
+                    problem.HasSidecar,
                     problem.Authors,
                     problem.SolutionLink,
                     problem.Tags,
@@ -100,21 +102,38 @@ public class DraftValidationPipeline(
                 .Where(issue => issue is not null)
                 .Select(issue => issue!)
                 .ToList();
+
+            // Turn a gap the import would leave in the round into a blocking issue.
+            if (!preview.MissingProblemOrders.IsEmpty)
+            {
+                var missing = preview.MissingProblemOrders.ToJoinedString();
+                previewIssues.Add(new VerdictError(
+                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "round-contiguity",
+                    $"importing would leave the round non-contiguous — problem(s) {missing} missing from 1..N; "
+                    + "every problem must already exist or be imported so the round has no gaps",
+                    VerdictSeverity.Error));
+            }
+
+            // Hand back the preview and the issues it surfaced.
             return (preview, previewIssues);
         }
         catch (Exception exception)
         {
-            // No DB reachable — don't fail the whole dry run; note it and let the other results stand.
+            // No DB reachable — and the import's real safety (problem existence, contiguity, second-original) is all
+            // DB-aware, so a dry run that can't reach the DB can't vouch for the import. Fail closed: surface it as a
+            // hard error (the format and registry issues collected above still stand alongside it).
             return (null, [new VerdictError(
                 ManifestMeta.FileName, Half: null, Line: null, Col: null, "db-preview",
-                $"DB preview skipped: {exception.Message}", VerdictSeverity.Warning)]);
+                $"DB preview skipped (unreachable database) — validate needs a reachable DB: {exception.Message}",
+                VerdictSeverity.Error)]);
         }
     }
 
     /// <summary>
-    /// Turns one per-text DB resolution into an issue, or null when the outcome is routine. Only a second original
-    /// (a forbidden different-language original) blocks the import; adds, unchanged re-imports and intentional
-    /// in-place overwrites are routine outcomes the report records without alarm.
+    /// Turns one per-text DB resolution into an issue, or null when the outcome is routine. The blocking outcomes are
+    /// a second original (a forbidden different-language original), a translation-only drop onto a missing problem,
+    /// and a fresh problem with no metadata sidecar; adds, unchanged re-imports and intentional in-place overwrites
+    /// are routine outcomes the report records without alarm.
     /// </summary>
     /// <param name="resolution">The per-text resolution from the DB preview.</param>
     /// <returns>The blocking issue, or null for a routine outcome.</returns>
@@ -124,8 +143,7 @@ public class DraftValidationPipeline(
         var half = resolution.DocumentType.ToString().ToLowerInvariant();
         var slug = resolution.Slug;
 
-        // A second original or a translation-only drop onto a missing problem blocks; everything else is a routine
-        // outcome the report already records.
+        // The create-conflict outcomes block; everything else is a routine outcome the report already records.
         return resolution.Action switch
         {
             DraftTextAction.SecondOriginal => new VerdictError(
@@ -137,6 +155,11 @@ public class DraftValidationPipeline(
                 ManifestMeta.FileName, Half: null, Line: null, Col: null, "no-original-new-problem",
                 $"problem '{slug}' has no original-language body and does not exist yet — a translation-only drop "
                 + "requires the problem to already exist", VerdictSeverity.Error),
+
+            DraftTextAction.NewProblemMissingMetadata => new VerdictError(
+                ManifestMeta.FileName, Half: null, Line: null, Col: null, "missing-problem-meta",
+                $"problem '{slug}' would be created but carries no pN.yaml metadata file — a fresh problem must "
+                + "declare its metadata (only a re-import onto an existing problem may omit it)", VerdictSeverity.Error),
 
             // Adds, unchanged re-imports and intentional in-place overwrites are all expected — nothing to flag.
             DraftTextAction.AddOriginal or DraftTextAction.AddTranslation

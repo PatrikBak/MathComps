@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Globalization;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.BulkImport;
-using Spectre.Console;
 using Spectre.Console.Cli;
 using MathComps.Shared.Serialization;
 
@@ -58,16 +57,12 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
             return 1;
         }
 
-        // Apply needs a live database. Validate degrades an unreachable DB to a warning (a null preview), which
-        // passes the dry run but must block here — we won't start writing only to crash mid-way.
+        // A passing validation always carries a preview — the run aborts above whenever one couldn't be produced
+        // (an unusable taxonomy or an unreachable DB both fail the verdict). So a null here is an invariant
+        // violation, not a user error: refuse to write blind and let it bubble.
         if (outcome.Result.DbPreview is null)
-        {
-            AnsiConsole.MarkupLine(
-                "[red]Cannot apply:[/] the database preview was skipped (unreachable DB). "
-                + "Apply needs a live database connection.");
-
-            return 1;
-        }
+            throw new InvalidOperationException(
+                "Refusing to apply without a DB preview — a clean validation must produce one. This is a bug.");
 
         // Map the manifest onto the apply contract and perform the import.
         var meta = outcome.Manifest.Meta;
@@ -80,6 +75,7 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         var problems = outcome.Manifest.Problems
             .Select(problem => new DraftProblemContent(
                 problem.Order,
+                problem.HasSidecar,
                 problem.Authors,
                 problem.SolutionLink,
                 problem.Tags,
