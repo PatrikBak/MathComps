@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using MathComps.Cli.BulkImport.Validation;
 using Spectre.Console.Cli;
-using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.BulkImport.Commands;
 
@@ -23,11 +22,11 @@ public class ValidateCommand(DraftValidationPipeline pipeline)
     public class Settings : CommandSettings
     {
         /// <summary>
-        /// Path to the draft folder to validate.
+        /// Paths and/or globs selecting the draft folder(s) to validate.
         /// </summary>
-        [CommandArgument(0, "<folder>")]
-        [Description("Path to the draft folder to validate.")]
-        public required string Folder { get; set; }
+        [CommandArgument(0, "<folders>")]
+        [Description("Draft folder path(s) or glob(s) to validate. Example: ./my-draft OR 'data/problems/skmo-2025-*'")]
+        public required string[] Folders { get; set; }
 
         /// <summary>
         /// Emit the structured result as JSON instead of the human-readable report.
@@ -38,18 +37,20 @@ public class ValidateCommand(DraftValidationPipeline pipeline)
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
-    {
-        // Run the shared pipeline — preflight, registry-link, read-only DB preview, all issues aggregated.
-        var outcome = await pipeline.RunAsync(settings.Folder);
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
+        // Validate every matched folder; the runner owns the glob expansion, per-folder header, JSON array and tally.
+        await MultiFolderRunner.RunAsync(
+            settings.Folders, settings.Json, okLabel: "passed", failLabel: "failed",
+            async folder =>
+            {
+                // Run the shared pipeline — preflight, registry-link, read-only DB preview, all issues aggregated.
+                var outcome = await pipeline.RunAsync(folder);
 
-        // Emit machine-readable JSON, or the human report by default.
-        if (settings.Json)
-            Console.WriteLine(outcome.Result.ToJson());
-        else
-            ValidateReport.Render(outcome.Manifest.Meta, outcome.Result);
+                // Render the human report; JSON mode collects the result instead, emitted as the array element.
+                if (!settings.Json)
+                    ValidateReport.Render(outcome.Manifest.Meta, outcome.Result);
 
-        // Non-zero exit iff an error-severity issue exists.
-        return outcome.Result.Ok ? 0 : 1;
-    }
+                // The folder passes when no error-severity issue surfaced; its result is the payload either way.
+                return new FolderRunResult(outcome.Result.Ok, outcome.Result);
+            });
 }

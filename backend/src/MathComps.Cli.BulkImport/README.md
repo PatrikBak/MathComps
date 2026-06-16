@@ -35,6 +35,8 @@ my-draft/
 
 Run these from the repo root — the `--project` and folder paths are relative to your shell. (The `web/` preflight itself is located automatically, so the tool doesn't care which directory you launch it from.)
 
+Both commands take one or more draft folders, given as literal paths and/or globs (the glob's leaf selects sibling directories). One invocation can sweep a whole batch — each matched folder runs through the pipeline independently, in its own report block, with a closing tally.
+
 ### validate
 
 Dry-run a draft: run the checks and report issues. Writes nothing.
@@ -42,9 +44,10 @@ Dry-run a draft: run the checks and report issues. Writes nothing.
 ```bash
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./my-draft
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./my-draft --json
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate 'data/problems/skmo-2025-*'
 ```
 
-Exits `0` when clean, `1` when any error-severity issue is found.
+Exits `0` when every folder is clean, `1` when any folder has an error-severity issue.
 
 ### apply
 
@@ -52,13 +55,14 @@ Import a draft: validate first, then write to the database and upload images.
 
 ```bash
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply ./my-draft
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply 'data/problems/skmo-2025-*'
 ```
 
-Aborts (exit `1`) if validation fails or the database is unreachable; exits `0` on a successful import.
+Each folder is validated then applied in turn; a folder that fails validation writes nothing and the batch moves on to the rest. Exits `0` only when every folder imported, `1` if any failed.
 
 **Options** (both commands):
 
-- `--json` – Emit the structured result as JSON instead of the human-readable report.
+- `--json` – Emit the structured result as JSON instead of the human-readable report. With multiple folders it's a JSON array, one entry per folder.
 
 ## Setup
 
