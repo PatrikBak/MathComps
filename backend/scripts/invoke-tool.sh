@@ -5,11 +5,11 @@
 #
 # Usage: ./invoke-tool.sh [-e prod|staging] [-p "Profile"] <command> [args...]
 # Examples:
-#   ./invoke-tool.sh seed
+#   ./invoke-tool.sh sync-users
 #   ./invoke-tool.sh -e staging bulk-import validate ./my-draft
 #   ./invoke-tool.sh -e staging bulk-import validate 'data/problems/skmo-*'   # globs / many folders
 #   ./invoke-tool.sh -e prod bulk-import apply ./my-draft
-#   ./invoke-tool.sh seed -p "Seed (Skip Existing)"
+#   ./invoke-tool.sh embeddings -p "Regenerate"
 
 set -euo pipefail
 
@@ -27,7 +27,6 @@ Options:
   -p, --profile   Launch profile from launchSettings.json
 
 Commands:
-  seed           - Seed the database
   embeddings     - Generate embeddings
   sync-users     - Sync all users from Clerk
   bulk-import    - Import problem drafts (e.g. bulk-import apply ./my-draft)
@@ -173,7 +172,6 @@ run_tool() {
 # set +e so we can capture the tool's exit code and propagate it after the tunnel is closed.
 set +e
 case "$tool_command" in
-    seed)         run_tool "MathComps.Cli.DatabaseSeeder" ;;
     embeddings)   run_tool "MathComps.Cli.Embeddings" ;;
     sync-users)   run_tool "MathComps.Cli.UserSync" ;;
     bulk-import)  run_tool "MathComps.Cli.BulkImport" ;;

@@ -9,7 +9,7 @@ This is the foundational data processing tool for the MathComps project. It pars
 3.  **Validates TeX**: Checks for unrecognized TeX commands or KaTeX rendering errors and reports any issues found.
 4.  **Generates Final JSON**: Saves the final, clean data into `data/skmo/archive.parsed.json`.
 
-This output file is the primary input for the **Database Seeder**, which populates the application's database.
+This output file is the clean, structured JSON representation of the entire archive.
 
 **Note**: Solutions are not parsed yet. They contain thousands of custom TeX commands that would require extensive mapping work. Perhaps it will be handled later, so far we have solution links.
 

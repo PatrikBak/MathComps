@@ -18,16 +18,6 @@ public static class TexImageProcessor
     /// </summary>
     /// <param name="text">Parsed TeX content tree to scan.</param>
     /// <param name="config">Configuration for image processing including naming and output paths.</param>
-    /// <returns>Processed text and an immutable list of discovered images.</returns>
-    public static ImageProcessingResult Process(TexText text, ImageProcessingConfig config)
-        => Process(text, config, ImageProcessingState.Initial);
-
-    /// <summary>
-    /// Traverses the content of a <see cref="TexText"/> object, processing any images found.
-    /// Returns a new <see cref="TexText"/> instance with updated image references and a list of discovered image metadata.
-    /// </summary>
-    /// <param name="text">Parsed TeX content tree to scan.</param>
-    /// <param name="config">Configuration for image processing including naming and output paths.</param>
     /// <param name="state">Shared state for processing multiple texts with consistent numbering.</param>
     /// <returns>Processed text and an immutable list of discovered images.</returns>
     public static ImageProcessingResult Process(TexText text, ImageProcessingConfig config, ImageProcessingState state)

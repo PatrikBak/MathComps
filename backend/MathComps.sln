@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.BulkImport", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Shared.Cli", "src\MathComps.Shared.Cli\MathComps.Shared.Cli.csproj", "{D9AB0BBD-287E-4A63-8EE8-D976986F3AA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.DatabaseSeeder", "src\MathComps.Cli.DatabaseSeeder\MathComps.Cli.DatabaseSeeder.csproj", "{00BE12C1-4330-476B-BD13-D30119457EDF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.SkmoParser", "src\MathComps.Cli.SkmoParser\MathComps.Cli.SkmoParser.csproj", "{6248845A-3AE5-4AAC-A855-91A2F5EC544A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.TexParser", "src\MathComps.TexParser\MathComps.TexParser.csproj", "{D888A7AA-3BEC-4BC3-A4DC-B1355988BC46}"
@@ -125,18 +123,6 @@ Global
 		{D9AB0BBD-287E-4A63-8EE8-D976986F3AA6}.Release|x64.Build.0 = Release|Any CPU
 		{D9AB0BBD-287E-4A63-8EE8-D976986F3AA6}.Release|x86.ActiveCfg = Release|Any CPU
 		{D9AB0BBD-287E-4A63-8EE8-D976986F3AA6}.Release|x86.Build.0 = Release|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Debug|x64.Build.0 = Debug|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Debug|x86.Build.0 = Debug|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Release|x64.ActiveCfg = Release|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Release|x64.Build.0 = Release|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Release|x86.ActiveCfg = Release|Any CPU
-		{00BE12C1-4330-476B-BD13-D30119457EDF}.Release|x86.Build.0 = Release|Any CPU
 		{6248845A-3AE5-4AAC-A855-91A2F5EC544A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6248845A-3AE5-4AAC-A855-91A2F5EC544A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6248845A-3AE5-4AAC-A855-91A2F5EC544A}.Debug|x64.ActiveCfg = Debug|Any CPU

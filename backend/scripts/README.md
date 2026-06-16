@@ -27,17 +27,14 @@ Convenience scripts for working with the staging and production databases locall
 `invoke-tool.sh` handles the tunnel for you — one command, no separate tunnel step. It reuses an already-open tunnel if one is listening (see below), otherwise opens its own and closes it on exit:
 
 ```bash
-# Seed the production database (prod is the default environment)
-./invoke-tool.sh seed
+# Run a tool against the production database (prod is the default environment)
+./invoke-tool.sh sync-users
 
-# Seed staging instead
-./invoke-tool.sh -e staging seed
-
-# Other tools (use the default launch profile)
-./invoke-tool.sh embeddings
+# Run against staging instead
+./invoke-tool.sh -e staging sync-users
 
 # Use a specific launch profile
-./invoke-tool.sh seed -p "Seed (Skip Existing)"
+./invoke-tool.sh embeddings -p "Regenerate"
 
 # Import problem drafts into the database (one or more folders; globs allowed)
 ./invoke-tool.sh -e staging bulk-import validate ./my-draft              # dry-run, writes nothing
@@ -47,7 +44,7 @@ Convenience scripts for working with the staging and production databases locall
 
 Relative paths (like `./my-draft`) resolve against your current directory, not the tool's project directory.
 
-Available commands: `seed`, `embeddings`, `sync-users`, `bulk-import`.
+Available commands: `embeddings`, `sync-users`, `bulk-import`.
 
 ### Opening a standalone tunnel
 

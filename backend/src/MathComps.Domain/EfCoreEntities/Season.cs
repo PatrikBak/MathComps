@@ -45,13 +45,6 @@ public class Season
     public static int EditionFromStartYear(int startYear) => startYear - OlympiadBaseYear;
 
     /// <summary>
-    /// Converts an edition number (ročník) back to its season start year.
-    /// </summary>
-    /// <param name="editionNumber">The edition number (e.g. 74).</param>
-    /// <returns>The season start year (e.g. 2024).</returns>
-    public static int StartYearFromEdition(int editionNumber) => editionNumber + OlympiadBaseYear;
-
-    /// <summary>
     /// Display name of the season (e.g., "2024/2025").
     /// </summary>
     [NotMapped]
