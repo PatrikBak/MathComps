@@ -16,7 +16,7 @@ public static class RepoPaths
     /// <summary>
     /// The absolute path to the MathComps repository root.
     /// </summary>
-    public static string RepoRoot => _lazyRepoRoot.Value;
+    private static string RepoRoot => _lazyRepoRoot.Value;
 
     /// <summary>
     /// Combines repo-relative segments into an absolute path under the <see cref="RepoRoot"/>.
