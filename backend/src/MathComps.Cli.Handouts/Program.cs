@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 return await CliApp.Create<Program>("Handouts")
     .ConfigureServices((services, _) =>
     {
-        // The R2 uploader handout asset uploads build on, wrapped in the tracker that skips unchanged assets across
-        // runs; the ledger lives alongside the handout sources.
+        // The R2 uploader, wrapped in the tracker that skips unchanged assets across runs;
+        // the ledger lives alongside the handout sources.
         var handoutsLedgerPath = RepoPaths.Resolve("data/handouts", ".r2-uploads.json");
         services.AddStorage().AddTrackedFileUploader(handoutsLedgerPath);
 
