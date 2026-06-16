@@ -4,7 +4,7 @@ The main .NET Web API for the MathComps application. Provides endpoints for brow
 
 ## Setup
 
-For full setup — database configuration, migrations, and Clerk authentication — see the [main backend README](../../../README.md#getting-started).
+For full setup — database configuration, migrations, and Clerk authentication — see the [main backend README](../../README.md#getting-started).
 
 ## Running the API
 
@@ -32,7 +32,7 @@ The `appsettings.json` file contains settings for:
 
 This webhook receives events from Clerk to synchronize user data with the local database. It handles user creation, updates, and deletion events.
 
-**Configuration:** Set the webhook secret using user secrets (see [Backend README](../../../README.md#5-configure-clerk-authentication))
+**Configuration:** Set the webhook secret using user secrets (see [Backend README](../../README.md#5-configure-clerk-authentication))
 
 **Events handled:**
 

@@ -150,7 +150,7 @@ dotnet ef migrations add <MigrationName> --startup-project ../MathComps.Api
 
 ### 4. Configure Gemini API (Optional)
 
-For AI-powered tools (tagging, translation, embeddings), set up your Gemini API key:
+For AI-powered tools (tagging, embeddings), set up your Gemini API key:
 
 ```bash
 # From the backend directory

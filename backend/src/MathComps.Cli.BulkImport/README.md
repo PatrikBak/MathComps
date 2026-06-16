@@ -18,7 +18,7 @@ Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/RE
 
 ## Draft folder
 
-A folder of plain files — one round's problems plus their images. Full authoring spec: [the draft format reference](../../../../web/scripts/PREFLIGHT_README.md).
+A folder of plain files — one round's problems plus their images. Full authoring spec: [the draft format reference](../../../web/scripts/PREFLIGHT_README.md).
 
 ```
 my-draft/
@@ -62,7 +62,7 @@ Each folder is validated then applied in turn; a folder that fails validation wr
 ## Setup
 
 - **Node + npm** — the preflight runs the `web/` project's `draft:preflight` script, so `npm` must be on your PATH with `web/` dependencies installed.
-- **Database** — set the connection string in user secrets (see the [main backend README](../../../README.md)). Both commands need a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, and `apply` requires it.
+- **Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Both commands need a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, and `apply` requires it.
 - **Cloudflare R2** (`apply` only) — image uploads need the `CloudflareR2` settings:
 
   ```bash
