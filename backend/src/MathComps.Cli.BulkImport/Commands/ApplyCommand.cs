@@ -3,7 +3,6 @@ using System.Globalization;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.BulkImport;
 using Spectre.Console.Cli;
-using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.BulkImport.Commands;
 
@@ -26,11 +25,11 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
     public class Settings : CommandSettings
     {
         /// <summary>
-        /// Path to the draft folder to import.
+        /// Paths and/or globs selecting the draft folder(s) to import.
         /// </summary>
-        [CommandArgument(0, "<folder>")]
-        [Description("Path to the draft folder to import.")]
-        public required string Folder { get; set; }
+        [CommandArgument(0, "<folders>")]
+        [Description("Draft folder path(s) or glob(s) to import. Example: ./my-draft OR 'data/problems/skmo-2025-*'")]
+        public required string[] Folders { get; set; }
 
         /// <summary>
         /// Emit the structured result as JSON instead of the human-readable report.
@@ -41,31 +40,47 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
+        // Import every matched folder; the runner owns the glob expansion, per-folder header, JSON array and tally.
+        await MultiFolderRunner.RunAsync(
+            settings.Folders, settings.Json, okLabel: "applied", failLabel: "failed",
+            folder => ApplyFolderAsync(folder, settings.Json));
+
+    /// <summary>
+    /// Validates then imports a single draft folder, rendering its report unless in JSON mode. Validation runs
+    /// first — apply never mutates a draft it hasn't checked — so a folder that fails validation writes nothing.
+    /// </summary>
+    /// <param name="folder">The draft-folder path to import.</param>
+    /// <param name="json">Whether to skip the human report and let the caller emit the JSON payload instead.</param>
+    /// <returns>The folder's success flag plus its JSON payload — an <see cref="ApplyResult"/> when imported, the
+    /// validation result when it failed.</returns>
+    private async Task<FolderRunResult> ApplyFolderAsync(string folder, bool json)
     {
         // Validate first with the shared pipeline — apply never mutates a draft it hasn't checked.
-        var outcome = await pipeline.RunAsync(settings.Folder);
+        var outcome = await pipeline.RunAsync(folder);
 
-        // Abort on any error: render the issues exactly as validate would, and write nothing.
+        // Abort this folder on any error: surface the issues exactly as validate would, and write nothing.
         if (!outcome.Result.Ok)
         {
-            if (settings.Json)
-                Console.WriteLine(outcome.Result.ToJson());
-            else
+            // Render the issues for humans; JSON mode carries the same result as the folder's payload.
+            if (!json)
                 ValidateReport.Render(outcome.Manifest.Meta, outcome.Result);
 
-            return 1;
+            // This folder failed — its validation result is the payload.
+            return new FolderRunResult(Ok: false, outcome.Result);
         }
 
         // A passing validation always carries a preview — the run aborts above whenever one couldn't be produced
         // (an unusable taxonomy or an unreachable DB both fail the verdict). So a null here is an invariant
-        // violation, not a user error: refuse to write blind and let it bubble.
+        // violation, not a user error: refuse to write blind and fail this folder loudly.
         if (outcome.Result.DbPreview is null)
             throw new InvalidOperationException(
                 "Refusing to apply without a DB preview — a clean validation must produce one. This is a bug.");
 
-        // Map the manifest onto the apply contract and perform the import.
+        // The folder's taxonomy from the manifest.
         var meta = outcome.Manifest.Meta;
+
+        // Build the apply target from that taxonomy.
         var target = new DraftTarget(meta.Competition, meta.Category, meta.Round, meta.Season.Year);
 
         // The folder date is a validated YYYY-MM-DD; parse it for the round-instance.
@@ -85,21 +100,19 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
             .ToList();
 
         // The image refs resolve against the draft folder; use its absolute path.
-        var folder = Path.GetFullPath(settings.Folder);
+        var folderPath = Path.GetFullPath(folder);
 
         // Validation passed — perform the import.
-        var applied = await apply.ApplyAsync(target, date, problems, folder);
+        var appliedOutcome = await apply.ApplyAsync(target, date, problems, folderPath);
 
         // Pair the apply outcome with the warning-only issues the run proceeded past.
-        var result = new ApplyResult(applied, outcome.Result.Issues);
+        var result = new ApplyResult(appliedOutcome, outcome.Result.Issues);
 
-        // Emit machine-readable JSON, or the human report by default.
-        if (settings.Json)
-            Console.WriteLine(result.ToJson());
-        else
+        // Render the human report; JSON mode carries this result as the folder's payload.
+        if (!json)
             ApplyReport.Render(meta, result);
 
-        // A completed import.
-        return 0;
+        // A completed import — the ApplyResult is the folder's payload.
+        return new FolderRunResult(Ok: true, result);
     }
 }
