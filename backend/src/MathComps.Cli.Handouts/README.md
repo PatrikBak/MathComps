@@ -29,9 +29,7 @@ dotnet user-secrets set "CloudflareR2:SecretAccessKey" "<your-secret-key>"
 
 ## How to Run
 
-```bash
-cd backend/src/MathComps.Cli.Handouts
-```
+Runs from any directory — the `<patterns>` are matched against the handout sources in `data/handouts` (not your working directory), and the tool finds its config and repo data from where the binary lives. The examples below use `dotnet run` from the tool's own folder; to run from elsewhere (e.g. the repo root), add `--project backend/src/MathComps.Cli.Handouts`.
 
 ### Build All Slovak Handouts
 

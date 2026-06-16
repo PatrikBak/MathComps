@@ -62,10 +62,10 @@ Optional fields, only when applicable, inserted in this order after `id`: `"publ
 
 ### 3. Run the Handouts CLI
 
-From `backend/src/MathComps.Cli.Handouts/`:
+From the repo root:
 
 ```bash
-dotnet run -- <base>.*.tex
+dotnet run --project backend/src/MathComps.Cli.Handouts -- <base>.*.tex
 ```
 
 Scope the glob to this handout. Always upload (do not pass `--skip-upload`). Exit code 0 = success.

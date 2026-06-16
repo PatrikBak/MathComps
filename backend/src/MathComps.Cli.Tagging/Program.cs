@@ -23,6 +23,7 @@ var services = new ServiceCollection();
 
 // Configuration is built manually to support both appsettings.json and user secrets.
 var configuration = new ConfigurationBuilder()
+    .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json", optional: false)
     .AddUserSecrets<Program>(optional: true)
     .AddEnvironmentVariables()

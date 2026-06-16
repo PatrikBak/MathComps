@@ -6,6 +6,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 using MathComps.Shared.DependencyInjection;
+using MathComps.Shared.Cli;
 using MathComps.Shared.Cli.Commands;
 
 // Fancy header
@@ -16,6 +17,7 @@ var services = new ServiceCollection();
 
 // Configuration is built manually to support appsettings.json, user secrets, and env vars.
 var configuration = new ConfigurationBuilder()
+    .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json", optional: false)
     .AddUserSecrets<Program>(optional: true)
     .AddEnvironmentVariables()
@@ -26,7 +28,7 @@ services.AddSingleton<IConfiguration>(configuration);
 
 // The R2 uploader handout asset uploads build on, wrapped in the tracker that skips unchanged assets across runs;
 // the ledger lives alongside the handout sources.
-var handoutsLedgerPath = Path.Combine("../../../data/handouts", ".r2-uploads.json");
+var handoutsLedgerPath = RepoPaths.Resolve("data/handouts", ".r2-uploads.json");
 services.AddStorage().AddTrackedFileUploader(handoutsLedgerPath);
 
 // Register the lazy service provider so that Lazy<T> can be injected
