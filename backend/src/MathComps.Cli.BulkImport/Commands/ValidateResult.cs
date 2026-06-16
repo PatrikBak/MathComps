@@ -6,7 +6,7 @@ namespace MathComps.Cli.BulkImport.Commands;
 
 /// <summary>
 /// The structured result of a <c>validate</c> run — the manifest's verdict augmented with the registry and DB
-/// findings, plus the create-vs-reuse preview. The shape <c>--json</c> serializes.
+/// findings, plus the create-vs-reuse preview.
 /// </summary>
 /// <param name="Issues">Every issue across preflight, registry and DB checks, in display order.</param>
 /// <param name="DbPreview">The read-only create-vs-reuse preview, or null when the DB wasn't consulted.</param>
