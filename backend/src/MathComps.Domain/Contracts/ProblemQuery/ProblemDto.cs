@@ -15,7 +15,6 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="Tags">Associated tags with type categorization.</param>
 /// <param name="Authors">Associated authors.</param>
 /// <param name="SimilarProblems">Recommended similar problems and their similarity scores.</param>
-/// <param name="Images">The collection of images associated with this problem.</param>
 /// <param name="SolutionLink">Optional external link identifier to the solution (short code/URL key).</param>
 /// <param name="Liked">Whether the current user has liked this problem.</param>
 /// <param name="Marked">Whether the current user has marked this problem.</param>
@@ -30,7 +29,6 @@ public record ProblemDto(
     ImmutableList<TagDto> Tags,
     ImmutableList<LabeledSlug> Authors,
     ImmutableList<SimilarProblemDto> SimilarProblems,
-    ImmutableList<ProblemImageDto> Images,
     string? SolutionLink,
     bool Liked,
     bool Marked,

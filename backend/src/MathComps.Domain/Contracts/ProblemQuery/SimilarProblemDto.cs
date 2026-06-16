@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using MathComps.Domain.Localization;
 
 namespace MathComps.Domain.Contracts.ProblemQuery;
@@ -12,12 +11,10 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="StatementLanguage">Language of the returned statement
 /// (may differ from requested language when fallback to original occurs).</param>
 /// <param name="SimilarityScore">Similarity score in the range [0, 1].</param>
-/// <param name="Images">Associated images with dimensions and scaling metadata.</param>
 public record SimilarProblemDto(
     string Slug,
     ProblemSource Source,
     string StatementMarkdown,
     Language StatementLanguage,
-    double SimilarityScore,
-    ImmutableList<ProblemImageDto> Images
+    double SimilarityScore
 );

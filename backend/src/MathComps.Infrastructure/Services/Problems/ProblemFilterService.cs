@@ -264,29 +264,8 @@ public class ProblemFilterService(
                             .Select(text => text.Language)
                             .First(),
 
-                        similarProblem.SimilarityScore,
-                        similarProblem.SimilarProblem.Images
-                            // Project to ProblemImageDto
-                            .Select(image => new ProblemImageDto(
-                                image.ContentId,
-                                image.Width,
-                                image.Height,
-                                image.Scale
-                            ))
-                            // Evaluate
-                            .ToImmutableList()
+                        similarProblem.SimilarityScore
                     ))
-                    // Evaluate
-                    .ToImmutableList(),
-
-                // Images
-                data.problem.Images
-                    // Project to ProblemImageDto
-                    .Select(image => new ProblemImageDto(
-                        image.ContentId,
-                        image.Width,
-                        image.Height,
-                        image.Scale))
                     // Evaluate
                     .ToImmutableList(),
 

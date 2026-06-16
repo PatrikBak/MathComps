@@ -60,11 +60,6 @@ public class Problem
     public ICollection<ProblemAuthor> ProblemAuthors { get; } = [];
 
     /// <summary>
-    /// The collection of images associated with this problem.
-    /// </summary>
-    public ICollection<ProblemImage> Images { get; } = [];
-
-    /// <summary>
     /// Associated tags via the ordered join entity. This includes all tags processed
     /// by the LLM, even the rejected ones (i.e. ones with goodness of fit &lt; 0.5).
     /// </summary>

@@ -46,9 +46,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Similarity links between problems.</summary>
     public DbSet<ProblemSimilarity> ProblemSimilarities => Set<ProblemSimilarity>();
 
-    /// <summary>Physical images associated with problems.</summary>
-    public DbSet<ProblemImage> ProblemImages => Set<ProblemImage>();
-
     /// <summary>Embeddings for problems.</summary>
     public DbSet<ProblemEmbedding> ProblemEmbeddings => Set<ProblemEmbedding>();
 
@@ -289,11 +286,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .WithMany(ri => ri.Problems)
              .HasForeignKey(p => p.RoundInstanceId);
 
-            e.HasMany(p => p.Images)
-             .WithOne(i => i.Problem)
-             .HasForeignKey(i => i.ProblemId)
-             .OnDelete(DeleteBehavior.Cascade);
-
             e.HasMany(p => p.Likes)
              .WithOne(l => l.Problem)
              .HasForeignKey(l => l.ProblemId)
@@ -402,17 +394,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemText
-
-        #region ProblemImage
-
-        modelBuilder.Entity<ProblemImage>(e =>
-        {
-            e.HasIndex(i => new { i.ProblemId, i.ContentId })
-             .IsUnique()
-             .HasDatabaseName("ux_problem_image_problem_content_id");
-        });
-
-        #endregion
 
         #region ProblemAuthor (ordered join)
 

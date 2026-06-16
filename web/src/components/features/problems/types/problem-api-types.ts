@@ -38,14 +38,6 @@ export type SimilarProblem = {
   source: ProblemSource
   statementMarkdown: string
   similarityScore: number
-  images: ProblemImage[]
-}
-
-type ProblemImage = {
-  contentId: string
-  width: string
-  height: string
-  scale: number
 }
 
 export type Problem = {
@@ -56,7 +48,6 @@ export type Problem = {
   tags: TagDto[]
   authors: LabeledSlug[]
   similarProblems: SimilarProblem[]
-  images: ProblemImage[]
   liked: boolean
   marked: boolean
   likeCount: number
