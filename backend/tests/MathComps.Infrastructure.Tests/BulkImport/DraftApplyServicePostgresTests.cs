@@ -276,7 +276,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A re-import that omits the <c>solutionLink:</c> key (null) leaves the stored link untouched — protecting a link
-    /// set by an earlier draft (or directly in the DB, e.g. by the SKMO scraper) from a link-less re-apply.
+    /// set by an earlier draft (or directly in the DB) from a link-less re-apply.
     /// </summary>
     [Fact]
     public Task Absent_solution_link_leaves_existing_link_untouched() => RunTestAsync(async service =>
