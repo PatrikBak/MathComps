@@ -5,7 +5,7 @@ namespace MathComps.Cli.BulkImport.Validation;
 
 /// <summary>
 /// Validates each problem's draft tag slugs against the approved vocabulary. The <c>tags:</c> list is hand-editable on
-/// the localhost-render review step, so the by-construction guarantee from <c>tag-draft</c> can be voided by a typo;
+/// the localhost-render review step, so the by-construction guarantee from the Tagging CLI can be voided by a typo;
 /// this is the authoritative gate that a slug exists before apply turns it into a row. Runs in C# (not the Node
 /// preflight) because the vocabulary resolver lives in <c>MathComps.Shared</c>.
 /// </summary>
