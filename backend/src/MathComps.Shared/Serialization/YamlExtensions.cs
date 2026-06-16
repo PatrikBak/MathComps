@@ -23,6 +23,8 @@ public static class YamlExtensions
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .Build();
 
+    // Symmetric serialize half of the ToYaml/FromYaml YAML helper; only FromYaml has a caller today.
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Serializes an object to a YAML string.
     /// </summary>

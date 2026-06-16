@@ -29,7 +29,6 @@ Options:
 Commands:
   seed           - Seed the database
   embeddings     - Generate embeddings
-  translations   - Run translation assistant
   sync-users     - Sync all users from Clerk
   bulk-import    - Import problem drafts (e.g. bulk-import apply ./my-draft)
 EOF
@@ -176,7 +175,6 @@ set +e
 case "$tool_command" in
     seed)         run_tool "MathComps.Cli.DatabaseSeeder" ;;
     embeddings)   run_tool "MathComps.Cli.Embeddings" ;;
-    translations) run_tool "MathComps.Cli.Translation" ;;
     sync-users)   run_tool "MathComps.Cli.UserSync" ;;
     bulk-import)  run_tool "MathComps.Cli.BulkImport" ;;
     *) echo "Unknown command: $tool_command" >&2; usage; exit 1 ;;

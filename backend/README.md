@@ -38,13 +38,13 @@ The API supports multiple languages via the `Accept-Language` HTTP header. The f
 
 **Problem translations:**
 
-Problem statements and solutions are stored in the `problem_texts` table with per-language entries. The original language is marked, and AI-generated translations are created using the [Translation Assistant CLI](src/MathComps.Cli.Translation/README.md). The API returns problem text in the requested language, falling back to the original if unavailable.
+Problem statements and solutions are stored in the `problem_texts` table with per-language entries. The original language is marked, and translations are authored as per-language draft content and applied via [bulk-import](src/MathComps.Cli.BulkImport/README.md). The API returns problem text in the requested language, falling back to the original if unavailable.
 
 **Adding a new language:**
 
 1. Create `metadata.{locale}.json` with translated competition/round names
 2. Update `SupportedLanguages` in the codebase
-3. Run the Translation Assistant to generate problem translations
+3. Author the problem translations for the new locale and apply them via bulk-import
 4. The API will automatically serve content based on `Accept-Language`
 
 ## Getting Started
@@ -207,7 +207,6 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 ### AI-Powered Tools
 
 - **[Tagging Assistant](src/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization with Gemini
-- **[Translation Assistant](src/MathComps.Cli.Translation/README.md)** – AI-powered problem translation with Gemini
 - **[Embeddings CLI](src/MathComps.Cli.Embeddings/README.md)** – Gemini-based vector embedding generator
 - **[Similarity System](src/MathComps.Cli.Similarity/README.md)** – Problem similarity calculation using embeddings + tags and other things
 
