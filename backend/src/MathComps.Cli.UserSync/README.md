@@ -29,4 +29,4 @@ The sync is **idempotent** - running it multiple times is safe and will simply u
 
 ## Setup
 
-Before running, ensure your Clerk secret key is configured. See the [main backend README](../../../README.md) for setup instructions.
+Before running, ensure your Clerk secret key is configured. See the [main backend README](../../README.md) for setup instructions.

@@ -76,7 +76,7 @@ dotnet run -- interactive
 
 ### Configuration
 
-For database connection setup, see the [main backend README](../../../README.md) for setup instructions.
+For database connection setup, see the [main backend README](../../README.md) for setup instructions.
 
 ### Prerequisites
 

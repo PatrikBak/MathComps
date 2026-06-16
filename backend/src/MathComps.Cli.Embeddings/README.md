@@ -47,7 +47,7 @@ dotnet run -- -n 100 --model gemini-embedding-001 --batch-size 50
 
 ### Configuration
 
-For database connection setup, see the [main backend README](../../../README.md) for setup instructions.
+For database connection setup, see the [main backend README](../../README.md) for setup instructions.
 
 ### Gemini API Key
 
