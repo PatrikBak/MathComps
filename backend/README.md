@@ -11,8 +11,8 @@ All projects live flat under `src/`, grouped by their `MathComps.*` names:
 - **`src/MathComps.Domain`**, **`src/MathComps.TexParser`** – Domain models and parsing logic
 - **`src/MathComps.Infrastructure`** – Database, EF Core, and data access
   - **`Resources/`** – Shared metadata files (e.g., `approved-tags.json`, `metadata.*.json`)
-- **`src/MathComps.Shared`**, **`src/MathComps.Shared.Cli`** – Shared utilities and common code
-  - **`ResourcePaths.cs`** – Centralized paths to shared resources
+- **`src/MathComps.Shared`**, **`src/MathComps.Shared.Cli`** – Shared utilities and CLI bootstrap
+  - **`MathComps.Shared.Cli`** – `CliApp` host bootstrap, `CliRunner`, and `RepoPaths` (lets the CLI tools run from any directory)
 - **`src/MathComps.Cli.*`** – CLI tools for data processing (see below)
 
 ### Shared Resources
@@ -43,7 +43,7 @@ Problem statements and solutions are stored in the `problem_texts` table with pe
 **Adding a new language:**
 
 1. Create `metadata.{locale}.json` with translated competition/round names
-2. Update `SupportedLanguages` in the codebase
+2. Add the locale to the `Language` enum (`src/MathComps.Domain/Localization/Language.cs`)
 3. Author the problem translations for the new locale and apply them via bulk-import
 4. The API will automatically serve content based on `Accept-Language`
 

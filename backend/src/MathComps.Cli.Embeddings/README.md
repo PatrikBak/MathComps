@@ -76,8 +76,7 @@ This dual-type approach optimizes for both search queries and document retrieval
 
 Embeddings are stored in the `problem_embeddings` table with the following structure:
 
-- `problem_id`: Foreign key to the problem
-- `document_type`: Either `ProblemStatement` or `ProblemWithSolution`
+- `problem_text_id`: Foreign key to the problem text being embedded (its `document_type` is `Statement` or `Solution`)
 - `embedding_type`: The task type used (either `RETRIEVAL_QUERY` or `RETRIEVAL_DOCUMENT`)
 - `model_name`: The model that generated the embedding (e.g., `gemini-embedding-001`)
 - `embedding`: The vector embedding (1536 dimensions)

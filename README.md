@@ -71,7 +71,7 @@ The application uses two separate Clerk webhooks to handle different responsibil
   - **Event**: `email.created`
   - **Purpose**: Intercepts Clerk's email requests to send custom-branded verification emails (signup, password reset) via Resend.
 
-- **Backend (`/api/webhooks/clerk`)**: Handles **User Synchronization**.
+- **Backend (`/webhooks/clerk`)**: Handles **User Synchronization**.
   - **Events**: `user.created`, `user.updated`, `user.deleted`
   - **Purpose**: Syncs Clerk user data to the local PostgreSQL database for relational data integrity.
 

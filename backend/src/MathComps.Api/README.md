@@ -28,7 +28,7 @@ The `appsettings.json` file contains settings for:
 
 ### Clerk User Synchronization
 
-**Endpoint:** `POST /api/webhooks/clerk`
+**Endpoint:** `POST /webhooks/clerk`
 
 This webhook receives events from Clerk to synchronize user data with the local database. It handles user creation, updates, and deletion events.
 
@@ -56,4 +56,4 @@ cd backend
 npx localtunnel --port 5000
 ```
 
-This will give you a public URL (e.g., `https://random-name.loca.lt`) that you can use in the Clerk Dashboard webhook settings. Configure the webhook endpoint as `https://your-url.loca.lt/api/webhooks/clerk`.
+This will give you a public URL (e.g., `https://random-name.loca.lt`) that you can use in the Clerk Dashboard webhook settings. Configure the webhook endpoint as `https://your-url.loca.lt/webhooks/clerk`.
