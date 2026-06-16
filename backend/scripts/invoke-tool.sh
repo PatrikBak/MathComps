@@ -28,7 +28,6 @@ Options:
 
 Commands:
   seed           - Seed the database
-  update-links   - Update solution links
   embeddings     - Generate embeddings
   translations   - Run translation assistant
   sync-users     - Sync all users from Clerk
@@ -176,7 +175,6 @@ run_tool() {
 set +e
 case "$tool_command" in
     seed)         run_tool "MathComps.Cli.DatabaseSeeder" ;;
-    update-links) run_tool "MathComps.Cli.SkmoScraper" update-solution-links ;;
     embeddings)   run_tool "MathComps.Cli.Embeddings" ;;
     translations) run_tool "MathComps.Cli.Translation" ;;
     sync-users)   run_tool "MathComps.Cli.UserSync" ;;

@@ -202,7 +202,7 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 - **[SKMO Parser](src/MathComps.Cli.SkmoParser/README.md)** – Parses raw `.tex` archive into structured JSON
 - **[Database Seeder](src/MathComps.Cli.DatabaseSeeder/README.md)** – Populates database from parsed JSON
-- **[SKMO Scraper](src/MathComps.Cli.SkmoScraper/README.md)** – Scrapes solution links from SKMO website and updates database with these links
+- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Validates and applies problem-draft folders to the database
 
 ### AI-Powered Tools
 
@@ -214,87 +214,6 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 ### Content Tools
 
 - **[Handouts Parser](src/MathComps.Cli.Handouts/README.md)** – Converts `.tex` handouts to `.json` for frontend
-
-## Adding New Problems
-
-Step-by-step workflow for adding new SKMO problems. All `Invoke-Tool` commands assume you're in `backend/scripts/` with the DB tunnel open.
-
-### 1. Add to Archive
-
-Edit the correct `.tex` file in `data/skmo/Archive/<year>/`:
-
-- `zadania.tex` for problem statements
-- `riesenia.tex` for solutions
-
-### 2. Parse the Archive
-
-```powershell
-# From backend/src/MathComps.Cli.SkmoParser
-dotnet run -c Release
-```
-
-### 3. Seed the Database
-
-```powershell
-.\Invoke-Tool.ps1 seed --skip-existing
-```
-
-### 4. Generate Translations
-
-```powershell
-.\Invoke-Tool.ps1 translations translate --count 100
-```
-
-Translates to all languages (EN, CZ) by default.
-
-### 5. Parse Translations
-
-```powershell
-.\Invoke-Tool.ps1 translations parse --count 100 --scope StatementsOnly
-```
-
-Parses the raw TeX in translations to generate structured content. If any translations fail to parse, they are written to `Output/parse-issues.yaml`. To fix: edit the file and rerun.
-
-### 6. Generate Embeddings
-
-```powershell
-.\Invoke-Tool.ps1 embeddings
-```
-
-### 7. Generate Tags
-
-```powershell
-.\Invoke-Tool.ps1 tagging
-```
-
-### 8. Veto Tags (Optional)
-
-```powershell
-.\Invoke-Tool.ps1 tagging -Profile "Veto Tags"
-```
-
-Useful when tagging many problems, as manual adjustments can be tedious.
-
-### 9. Manual Tag Adjustment
-
-```powershell
-.\Invoke-Tool.ps1 tagging interactive
-```
-
-### 10. Scrape SKMO Links (If Needed)
-
-If new solution PDFs are available on the SKMO website (using the correct year):
-
-```powershell
-# From backend/src/MathComps.Cli.SkmoScraper
-dotnet run -c Release -- scrape --start-year 75 --end-year 75
-```
-
-### 11. Update Solution Links
-
-```powershell
-.\Invoke-Tool.ps1 update-links
-```
 
 ## Deployment
 
