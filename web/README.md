@@ -22,7 +22,7 @@ A Next.js application for browsing and searching mathematical competition proble
 - **`src/lib/`** – Shared utilities (email, metadata, etc.)
 - **`src/stores/`** – Zustand state stores
 - **`src/types/`** – TypeScript type definitions
-- **`messages/`** – Locale JSON files (en.json, sk.json)
+- **`messages/`** – Locale JSON files (cs.json, en.json, sk.json)
 
 ## Getting Started
 

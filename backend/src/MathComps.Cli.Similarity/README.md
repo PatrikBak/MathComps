@@ -65,7 +65,7 @@ Starts an interactive session to manually manage similarity relationships.
 dotnet run -- interactive
 ```
 
-- **Commands**: List, view, or remove similarity relationships.
+- **Commands**: List, remove, or clear similarity relationships.
 
 ## Setup
 
