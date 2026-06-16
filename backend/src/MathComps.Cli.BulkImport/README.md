@@ -12,9 +12,9 @@ Both commands run the same checks, so a clean `validate` all but guarantees a cl
 
 `apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. A re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
 
-Image uploads are deduplicated against a ledger kept beside this tool's sources (`.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
+Image uploads are deduplicated against a ledger kept beside the draft sources (`data/problems/.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
 
-Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/README.md)'s `tag-draft` writes a `tags:` list into each `pN.yaml`, which `apply` turns into the problem's tags. Run it *before* `validate`, so the preflight checks the slugs.
+Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/README.md) writes a `tags:` list into each `pN.yaml`, which `apply` turns into the problem's tags. Run it *before* `validate`, so the preflight checks the slugs.
 
 ## Draft folder
 

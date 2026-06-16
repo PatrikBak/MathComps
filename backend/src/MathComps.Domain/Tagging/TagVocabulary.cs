@@ -30,7 +30,7 @@ public record LocalizedTagsByCategory(
 
 /// <summary>
 /// The single home for the approved tag vocabulary: loads <c>approved-tags.json</c> and resolves a slug to its
-/// <see cref="TagType"/>. Shared across the bulk-import preflight, apply, and the <c>tag-draft</c> command so the
+/// <see cref="TagType"/>. Shared across the bulk-import preflight, apply, and the Tagging CLI so the
 /// "is this an approved slug, and what category is it?" rule lives in exactly one place.
 /// </summary>
 public static class TagVocabulary

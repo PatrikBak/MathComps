@@ -68,7 +68,7 @@ One per problem, shared across its languages. Every field is optional:
 authors:
   - Jaromír Šimša
 solutionLink: https://example.com/p1 # external solution URL
-tags: # approved tag slugs; usually written by the tag-draft tool, hand-editable
+tags: # approved tag slugs; usually written by the Tagging CLI, hand-editable
   - algebra
   - am-gm-inequality
 ```

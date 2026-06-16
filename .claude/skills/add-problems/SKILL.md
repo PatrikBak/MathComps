@@ -89,7 +89,7 @@ Then **verify parity yourself** (don't trust the agents): per problem, assert or
 Tag the problems before validating, so the preflight checks the slugs:
 
 ```bash
-dotnet run --project backend/src/MathComps.Cli.Tagging -- tag-draft ./data/problems/my-draft
+dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-draft
 ```
 
 This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo one, delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Gemini:ApiKey` in that project's user secrets; skip this step if the key isn't set (`apply` leaves existing tags untouched when a problem has no `tags:` key).

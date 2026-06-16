@@ -3,7 +3,7 @@ using MathComps.Cli.Tagging.Services;
 namespace MathComps.Cli.Tagging.Tests;
 
 /// <summary>
-/// Tests the pure draft-file helpers <c>tag-draft</c> relies on: the body split feeds the model, the skip rule drives
+/// Tests the pure draft-file helpers the Tagging CLI relies on: the body split feeds the model, the skip rule drives
 /// the resumable re-run, and the block/append formatting is what lands in a sidecar — each can silently corrupt a
 /// draft if it drifts.
 /// </summary>

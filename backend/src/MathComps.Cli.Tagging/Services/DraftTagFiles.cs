@@ -24,7 +24,7 @@ public record DraftTag(string Slug, float Fitness, string? Justification);
 public record DraftProblemFiles(int Index, string BodyPath, string YamlPath);
 
 /// <summary>
-/// Reads and writes the draft files that <c>tag-draft</c> touches — discovering problems, splitting a body into
+/// Reads and writes the draft files the Tagging CLI touches — discovering problems, splitting a body into
 /// statement and solution, and appending a <c>tags:</c> block to a sidecar without disturbing its other keys. The
 /// string-to-string helpers are pure so the body split, the skip rule, and the block formatting are unit-testable.
 /// </summary>
@@ -127,7 +127,7 @@ public static class DraftTagFiles
     }
 
     /// <summary>
-    /// Reads the draft's original language from <c>_meta.yaml</c> — the language whose body files <c>tag-draft</c>
+    /// Reads the draft's original language from <c>_meta.yaml</c> — the language whose body files the Tagging CLI
     /// sends to the model.
     /// </summary>
     /// <param name="folder">The draft folder.</param>

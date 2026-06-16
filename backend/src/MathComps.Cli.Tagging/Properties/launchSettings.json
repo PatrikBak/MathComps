@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "Tag Draft": {
-      "commandName": "Project",
-      "workingDirectory": ".",
-      "commandLineArgs": "tag-draft ../../../data/problems/my-draft"
-    }
-  }
-}
