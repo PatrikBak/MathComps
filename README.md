@@ -60,7 +60,6 @@ MathComps/
 │       ├── i18n/              # Internationalization
 │       └── lib/               # Utilities
 └── data/                      # Raw data files
-    ├── skmo/                  # SKMO competition data
     └── handouts/              # TeX handouts
 ```
 
