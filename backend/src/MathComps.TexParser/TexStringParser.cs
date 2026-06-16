@@ -9,15 +9,9 @@ using MathComps.Shared.Extensions;
 namespace MathComps.TexParser;
 
 /// <summary>
-/// A class used for parsing PlainTeX...It can handle to handle two things:
-/// <list type="number">
-/// <item>Parsing handouts represent <see cref="Document"/> via the method 
-/// <see cref="ParseDocument(string, TeXCleanerRules, Func{string, string}?)"/></item>
-/// <item>Parsing math problems represent as <see cref="Text"/> via the method 
-/// <see cref="ParseText(string, TeXCleanerRules, Func{string, string}?)"/></item>
-/// </list>
-/// Both these method work with <see cref="TeXCleanerRules"/> and are able to find
-/// 'unknown' commands. 
+/// A class used for parsing PlainTeX handouts represented as a <see cref="Document"/> via the method
+/// <see cref="ParseDocument(string, TeXCleanerRules, Func{string, string}?)"/>, which works with
+/// <see cref="TeXCleanerRules"/> and is able to find 'unknown' commands.
 /// During parsing, lots of stuff is going on, special commands/behavours is as follows:
 /// <list type="bullet">
 /// <item><c>\\sec Title</c> and <c>\\secc Title</c> define sections; the title is the rest of the line.</item>
@@ -133,36 +127,6 @@ public static class TexStringParser
 
         // We're done
         return new(document, unknownCommands);
-    }
-
-    /// <summary>
-    /// Parses a fragment of TeX content into a structured <see cref="Text"/> object. It also identifies any TeX 
-    /// commands not present in the provided list of known macros taken from <paramref name="rules"/>.
-    /// </summary>
-    /// <param name="content">The raw TeX string fragment to be parsed.</param>
-    /// <param name="rules">A set of rules for preprocessing the TeX, which includes known macros.</param>
-    /// <param name="postprocess">An optional function for extra custom processing before parsing.</param>
-    /// <returns>A <see cref="TexParserResult{T}"/> with the parsed <see cref="Text"/> object and any unknown commands.</returns>
-    public static TexParserResult<Text> ParseText(string content, TeXCleanerRules rules, Func<string, string>? postprocess = null)
-    {
-        // Apply rules
-        content = rules.ApplyToRawTex(content);
-
-        // No comments
-        content = CleanTex(content);
-
-        // Optional postprocessing step
-        if (postprocess != null)
-            content = postprocess(content);
-
-        // Parse the content
-        var blocks = ParseContentBlocks(content);
-
-        // Find unknown commands
-        var unknownCommands = FindCommands(blocks).Except(rules.KnownMacros);
-
-        // We're done
-        return new(new Text([.. blocks]), unknownCommands);
     }
 
     #endregion

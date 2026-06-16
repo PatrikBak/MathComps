@@ -55,15 +55,6 @@ jobs:
           ConnectionStrings__DefaultConnection: Host=ci;Database=ci;Username=ci;Password=ci
         run: dotnet ef migrations has-pending-model-changes --project src/MathComps.Infrastructure/MathComps.Infrastructure.csproj --startup-project src/MathComps.Infrastructure/MathComps.Infrastructure.csproj
 
-      - name: Regenerate archive JSON
-        working-directory: backend/src/MathComps.Cli.SkmoParser
-        run: dotnet run --configuration Release --no-build
-
-      - name: Verify archive JSON unchanged (run SkmoParser locally if this fails)
-        run: |
-          git add data/skmo/archive.parsed.json
-          git diff --staged --exit-code
-
       - name: Regenerate handout JSONs
         working-directory: backend/src/MathComps.Cli.Handouts
         # --skip-asy/compile/upload: Hard to ensure in CI, the author better run the CLI manually 😬

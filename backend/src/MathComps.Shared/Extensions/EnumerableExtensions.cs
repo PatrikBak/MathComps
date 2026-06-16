@@ -6,19 +6,6 @@ namespace MathComps.Shared.Extensions;
 public static class EnumerableExtensions
 {
     /// <summary>
-    /// Performs the passed action on each element of the enumerable.
-    /// </summary>
-    /// <typeparam name="T">The type of the elements of the enumerable.</typeparam>
-    /// <param name="enumerable">The enumerable on which we're calling this function.</param>
-    /// <param name="action">The action to be performed on each element.</param>
-    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
-    {
-        // Simply apply the action on each element
-        foreach (var element in enumerable)
-            action(element);
-    }
-
-    /// <summary>
     /// A fluent version of the <see cref="string.Join(string?, IEnumerable{string?})"/> method.
     /// </summary>
     /// <typeparam name="T">The type of the elements of the enumerable.</typeparam>
