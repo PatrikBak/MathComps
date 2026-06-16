@@ -2,57 +2,36 @@ using MathComps.Cli.Similarity.Commands;
 using MathComps.Cli.Similarity.Services;
 using MathComps.Cli.Similarity.Settings;
 using MathComps.Infrastructure.Extensions;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Spectre.Console;
-using Spectre.Console.Cli;
-using Spectre.Console.Cli.Extensions.DependencyInjection;
 using MathComps.Shared.Cli.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
-// Fancy header
-AnsiConsole.Write(new FigletText("Similarities").Centered().Color(Color.Aqua));
+// Bootstrap the tool and run the requested command.
+return await CliApp.Create<Program>("Similarities")
+    .ConfigureServices((services, configuration) =>
+    {
+        // Make sure DI can resolve DbContext
+        services.AddMathCompsDbContext(configuration);
 
-// We'll use DI
-var services = new ServiceCollection();
+        // The interactive manager reads through the problem lookup service
+        services.AddProblemServices();
 
-// Configuration is built manually to support both appsettings.json and user secrets.
-var configuration = new ConfigurationBuilder()
-    .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.json", optional: false)
-    .AddUserSecrets<Program>(optional: true)
-    .AddEnvironmentVariables()
-    .Build();
+        // Bind similarity calculation settings
+        services.AddOptions<SimilarityCalculationSettings>()
+            .Bind(configuration.GetSection(SimilarityCalculationSettings.SectionName))
+            .ValidateDataAnnotations();
 
-// Register configuration for dependency injection.
-services.AddSingleton<IConfiguration>(configuration);
+        // Database operations are encapsulated in a dedicated service with scoped lifetime.
+        services.AddScoped<ISimilarityDatabaseService, SimilarityDatabaseService>();
 
-// Make sure DI can resolve DbContext
-services.AddMathCompsDbContext(configuration);
+        // Problem data service for loading problems from database in batches.
+        services.AddScoped<IProblemDataService, ProblemDataService>();
 
-// The interactive manager reads through the problem lookup service
-services.AddProblemServices();
-
-// Bind similarity calculation settings
-services.AddOptions<SimilarityCalculationSettings>()
-    .Bind(configuration.GetSection(SimilarityCalculationSettings.SectionName))
-    .ValidateDataAnnotations();
-
-// Database operations are encapsulated in a dedicated service with scoped lifetime.
-services.AddScoped<ISimilarityDatabaseService, SimilarityDatabaseService>();
-
-// Problem data service for loading problems from database in batches.
-services.AddScoped<IProblemDataService, ProblemDataService>();
-
-// Unified problem similarity service for comprehensive similarity calculation.
-services.AddScoped<IProblemSimilarityService, ProblemSimilarityService>();
-
-// Start the app with DI
-using var registrar = new DependencyInjectionRegistrar(services);
-
-// Run the app using our custom runner
-return await CliRunner.RunAsync(new CommandApp<CalculateSimilaritiesCommand>(registrar), args, config =>
-{
-    // Commands
-    config.AddCommand<CalculateSimilaritiesCommand>("calculate-similarities");
-    config.AddCommand<InteractiveSimilarityManagerCommand>("interactive");
-});
+        // Unified problem similarity service for comprehensive similarity calculation.
+        services.AddScoped<IProblemSimilarityService, ProblemSimilarityService>();
+    })
+    .RunAsync<CalculateSimilaritiesCommand>(args, config =>
+    {
+        // The default batch calculation and its interactive REPL sibling.
+        config.AddCommand<CalculateSimilaritiesCommand>("calculate-similarities");
+        config.AddCommand<InteractiveSimilarityManagerCommand>("interactive");
+    });
