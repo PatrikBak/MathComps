@@ -27,30 +27,22 @@ public class ValidateCommand(DraftValidationPipeline pipeline)
         [CommandArgument(0, "<folders>")]
         [Description("Draft folder path(s) or glob(s) to validate. Example: ./my-draft OR 'data/problems/skmo-2025-*'")]
         public required string[] Folders { get; set; }
-
-        /// <summary>
-        /// Emit the structured result as JSON instead of the human-readable report.
-        /// </summary>
-        [CommandOption("--json")]
-        [Description("Emit the structured result as JSON instead of a human-readable report.")]
-        public bool Json { get; set; }
     }
 
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
-        // Validate every matched folder; the runner owns the glob expansion, per-folder header, JSON array and tally.
+        // Validate every matched folder; the runner owns the glob expansion, per-folder header and tally.
         await MultiFolderRunner.RunAsync(
-            settings.Folders, settings.Json, okLabel: "passed", failLabel: "failed",
+            settings.Folders, okLabel: "passed", failLabel: "failed",
             async folder =>
             {
                 // Run the shared pipeline — preflight, registry-link, read-only DB preview, all issues aggregated.
                 var outcome = await pipeline.RunAsync(folder);
 
-                // Render the human report; JSON mode collects the result instead, emitted as the array element.
-                if (!settings.Json)
-                    ValidateReport.Render(outcome.Manifest.Meta, outcome.Result);
+                // Render the report.
+                ValidateReport.Render(outcome.Manifest.Meta, outcome.Result);
 
-                // The folder passes when no error-severity issue surfaced; its result is the payload either way.
-                return new FolderRunResult(outcome.Result.Ok, outcome.Result);
+                // The folder passes when no error-severity issue surfaced.
+                return outcome.Result.Ok;
             });
 }

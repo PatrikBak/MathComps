@@ -43,7 +43,6 @@ Dry-run a draft: run the checks and report issues. Writes nothing.
 
 ```bash
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./my-draft
-dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./my-draft --json
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate 'data/problems/skmo-2025-*'
 ```
 
@@ -59,10 +58,6 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply 'data/problem
 ```
 
 Each folder is validated then applied in turn; a folder that fails validation writes nothing and the batch moves on to the rest. Exits `0` only when every folder imported, `1` if any failed.
-
-**Options** (both commands):
-
-- `--json` – Emit the structured result as JSON instead of the human-readable report. With multiple folders it's a JSON array, one entry per folder.
 
 ## Setup
 

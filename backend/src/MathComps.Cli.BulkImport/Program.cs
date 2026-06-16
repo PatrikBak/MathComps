@@ -9,9 +9,8 @@ using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 using MathComps.Shared.Cli.Commands;
 
-// Fancy header — suppressed under --json so stdout stays pure JSON.
-if (!args.Contains("--json"))
-    AnsiConsole.Write(new FigletText("Bulk Import").Centered().Color(Color.Aqua));
+// Fancy header.
+AnsiConsole.Write(new FigletText("Bulk Import").Centered().Color(Color.Aqua));
 
 // We'll use DI
 var services = new ServiceCollection();
