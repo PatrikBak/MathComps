@@ -11,11 +11,9 @@ Use this tool when you need to force-sync user data from Clerk to the database. 
 
 ## Usage
 
-```bash
-# Navigate to the tool's directory
-cd backend/src/MathComps.Cli.UserSync
+Runs from any directory — it doesn't depend on the working directory. The example uses `dotnet run` from the tool's own folder; to run from elsewhere (e.g. the repo root), add `--project backend/src/MathComps.Cli.UserSync`.
 
-# Run the sync
+```bash
 dotnet run
 ```
 

@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using MathComps.Shared.Serialization;
 using MathComps.Shared.Extensions;
 using MathComps.Shared.Diagnostics;
+using MathComps.Shared.Cli;
 
 namespace MathComps.Cli.Handouts.Commands;
 
@@ -151,13 +152,18 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         // We take handout .tex sources from here
-        var inputDirectory = new DirectoryInfo("../../../data/handouts");
+        var inputDirectory = new DirectoryInfo(RepoPaths.Resolve("data/handouts"));
 
         // ..And their images from here
         var imagesDirectory = new DirectoryInfo(Path.Combine(inputDirectory.FullName, "Images"));
 
         // ..And output jsons for the web rendered here
-        var jsonOutputDirectory = new DirectoryInfo("../../../web/src/content/handouts");
+        var jsonOutputDirectory = new DirectoryInfo(RepoPaths.Resolve("web/src/content/handouts"));
+
+        // Anchor a relative error-log path beside the handout sources so it lands there no matter the CWD.
+        var errorLogPath = Path.IsPathRooted(settings.ErrorLog)
+            ? settings.ErrorLog
+            : Path.Combine(inputDirectory.FullName, settings.ErrorLog);
 
         // Resolve the uploader...We don't need it if we're skipping uploads. Resolving it loads the upload ledger,
         // so a skipped run touches neither R2 config nor the ledger file.
@@ -236,10 +242,10 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
                     skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules);
 
                     // Compile the main handout
-                    await CompileTexFileAsync(inputFile, inputDirectory, settings.Compiler, settings.ErrorLog);
+                    await CompileTexFileAsync(inputFile, inputDirectory, settings.Compiler, errorLogPath);
 
                     // Compile the skeleton
-                    await CompileTexFileAsync(skeletonFile, inputDirectory, settings.Compiler, settings.ErrorLog);
+                    await CompileTexFileAsync(skeletonFile, inputDirectory, settings.Compiler, errorLogPath);
                 }
 
                 // Process images and prepare uploads (images + linked documents share this queue)
@@ -552,7 +558,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         var handoutSlug = ToHandoutSlug(sourceFileName);
 
         // Source directory for handout images
-        var handoutsDirectory = "../../../data/handouts/Images";
+        var handoutsDirectory = RepoPaths.Resolve("data/handouts/Images");
 
         // In .tex sources images are referenced as "<name>.pdf" because pdfcsplain embeds
         // PDFs. The web frontend wants SVGs, which sit alongside the PDFs on disk

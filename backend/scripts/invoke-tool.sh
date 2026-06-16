@@ -89,20 +89,6 @@ require_var DB_NAME
 require_var DB_USERNAME
 require_var DB_PASSWORD
 
-# Absolutise any passthrough arg that points at an existing path, while we're still in
-# the user's CWD — the dispatcher cd's into the project dir before running dotnet, after
-# which a relative path (e.g. a draft folder) would resolve against the wrong place.
-if [ "${#rest[@]}" -gt 0 ]; then
-    for index in "${!rest[@]}"; do
-        argument="${rest[$index]}"
-        if [ -d "$argument" ]; then
-            rest[$index]="$(cd "$argument" && pwd)"
-        elif [ -f "$argument" ]; then
-            rest[$index]="$(cd "$(dirname "$argument")" && pwd)/$(basename "$argument")"
-        fi
-    done
-fi
-
 # Point every tool's DB connection at the tunneled remote database.
 export ConnectionStrings__DefaultConnection="Host=localhost;Port=$DB_TUNNEL_PORT;Database=$DB_NAME;Username=$DB_USERNAME;Password=$DB_PASSWORD"
 
@@ -145,18 +131,19 @@ else
     done
 fi
 
-# Run a tool: cd into its project, then dotnet run with a profile, no args, or passthrough args.
+# Run a tool with dotnet run against its project, with a profile, no args, or passthrough args.
+# We run from the user's CWD so relative path args resolve against it; each tool finds its own
+# config and repo data from its assembly location.
 run_in() {
     # Absolute path to the tool's project directory.
     local project_dir="$1"
     shift
-    cd "$project_dir"
     if [ -n "$profile" ]; then
-        dotnet run -c Release --launch-profile "$profile"
+        dotnet run -c Release --project "$project_dir" --launch-profile "$profile"
     elif [ "$#" -eq 0 ]; then
-        dotnet run -c Release
+        dotnet run -c Release --project "$project_dir"
     else
-        dotnet run -c Release -- "$@"
+        dotnet run -c Release --project "$project_dir" -- "$@"
     fi
 }
 

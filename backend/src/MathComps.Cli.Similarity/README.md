@@ -38,12 +38,7 @@ Each candidate is then scored based on a weighted combination of signals defined
 
 ## Command Reference
 
-All commands must be run from the tool's directory as it uses relative paths to access configuration files.
-
-```bash
-# Navigate to the tool's directory
-cd backend/src/MathComps.Cli.Similarity
-```
+Runs from any directory — it finds its config and data from where the binary lives, not the working directory. The examples below use `dotnet run` from the tool's own folder; to run from elsewhere (e.g. the repo root), add `--project backend/src/MathComps.Cli.Similarity`.
 
 ### **calculate-similarities**
 

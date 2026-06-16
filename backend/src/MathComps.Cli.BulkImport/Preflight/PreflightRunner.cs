@@ -1,4 +1,5 @@
 using MathComps.Cli.BulkImport.Manifest;
+using MathComps.Shared.Cli;
 using MathComps.Shared.Diagnostics;
 using MathComps.Shared.Serialization;
 
@@ -28,7 +29,7 @@ public static class PreflightRunner
         var draftFolderAbsolute = Path.GetFullPath(draftFolder);
 
         // Locate the web/ directory (where package.json defines the draft:preflight script).
-        var webDirectory = LocateWebDirectory();
+        var webDirectory = RepoPaths.Resolve("web");
 
         // One subprocess for the whole folder; --silent keeps npm's own banner off stdout so it's pure JSON.
         var result = await ProcessRunner.RunAsync(
@@ -50,32 +51,5 @@ public static class PreflightRunner
                 $"--- stdout ---\n{result.Stdout}\n--- stderr ---\n{result.Stderr}",
                 exception);
         }
-    }
-
-    /// <summary>
-    /// Walks up from the running assembly's directory to find the repository's <c>web/</c> folder, identified by
-    /// its <c>package.json</c>. Resolving from the assembly location keeps this independent of the working
-    /// directory the CLI happens to be launched from.
-    /// </summary>
-    /// <returns>The absolute path to the <c>web/</c> directory.</returns>
-    private static string LocateWebDirectory()
-    {
-        // Start at the bin directory the CLI runs from and climb toward the repo root.
-        for (var directory = new DirectoryInfo(AppContext.BaseDirectory);
-             directory != null;
-             directory = directory.Parent)
-        {
-            // The repo root is the first ancestor whose web/ subfolder carries a package.json.
-            var candidate = Path.Combine(directory.FullName, "web");
-
-            // Found it — hand back the web/ directory.
-            if (File.Exists(Path.Combine(candidate, "package.json")))
-                return candidate;
-        }
-
-        // No ancestor had a web/package.json — the CLI is being run from outside the repo.
-        throw new InvalidOperationException(
-            $"Could not locate the repository's web/ directory above '{AppContext.BaseDirectory}'. " +
-            "Run the CLI from within the MathComps repository.");
     }
 }

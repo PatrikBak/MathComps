@@ -20,12 +20,9 @@ This tool generates embeddings for problem statements and solutions using the Ge
 
 ## Usage
 
-All commands must be run from the tool's directory as it uses relative paths to access configuration files.
+Runs from any directory — it finds its config and data from where the binary lives, not the working directory. The examples below use `dotnet run` from the tool's own folder; to run from elsewhere (e.g. the repo root), add `--project backend/src/MathComps.Cli.Embeddings`.
 
 ```bash
-# Navigate to the tool's directory
-cd backend/src/MathComps.Cli.Embeddings
-
 # Generate embeddings for 5 problems
 dotnet run -- -n 5
 
