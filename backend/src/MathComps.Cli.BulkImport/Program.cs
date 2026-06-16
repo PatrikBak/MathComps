@@ -2,6 +2,7 @@ using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Shared.Cli;
 using MathComps.Shared.Cli.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,11 +19,9 @@ return await CliApp.Create<Program>("Bulk Import")
         // The read-only DB-resolution service backing the preview
         services.AddBulkImport();
 
-        // Resolve the ledger path from the assembly location (bin/<config>/<tfm> ⇒ up three to the project dir) so the
-        // dedupe ledger is found beside this tool's sources regardless of the working directory.
-        var projectDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
-        var uploadLedgerPath = Path.Combine(projectDirectory, ".r2-uploads.json");
-        // The R2 uploader the import builds on, wrapped in the tracker that skips images already on R2 across re-applies.
+        // The R2 uploader, wrapped in the tracker that skips images already on R2 across re-applies;
+        // the ledger lives beside the draft sources.
+        var uploadLedgerPath = RepoPaths.Resolve("data/problems", ".r2-uploads.json");
         services.AddStorage().AddTrackedFileUploader(uploadLedgerPath);
 
         // The apply service that writes a resolved draft to the database.

@@ -1,2 +1,0 @@
-# Per-machine upload-dedup ledger (key → source mtime); local state, never committed.
-.r2-uploads.json
