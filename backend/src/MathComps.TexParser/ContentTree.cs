@@ -62,6 +62,9 @@ public static class ContentTree
         return (result, state);
     }
 
+    // Pure transform whose return rounds out the Traverse/Map API; the current Handouts callers use it as a
+    // visitor and discard the rebuilt tree.
+    // ReSharper disable once UnusedMethodReturnValue.Global
     /// <summary>
     /// Simplified overload for pure transformations that don't need to accumulate state.
     /// </summary>

@@ -103,7 +103,6 @@ public static class ServiceCollectionExtensions
         // Problem catalog DB services
         services.TryAddScoped<IProblemFilterService, ProblemFilterService>();
         services.TryAddScoped<IProblemLookupService, ProblemLookupService>();
-        services.TryAddScoped<IProblemImageService, ProblemImageService>();
 
         // Builder pattern
         return services;

@@ -35,7 +35,6 @@ Convenience scripts for working with the staging and production databases locall
 
 # Other tools (use the default launch profile)
 ./invoke-tool.sh embeddings
-./invoke-tool.sh translations
 
 # Use a specific launch profile
 ./invoke-tool.sh seed -p "Seed (Skip Existing)"
@@ -48,7 +47,7 @@ Convenience scripts for working with the staging and production databases locall
 
 Relative paths (like `./my-draft`) resolve against your current directory, not the tool's project directory.
 
-Available commands: `seed`, `embeddings`, `translations`, `sync-users`, `bulk-import`.
+Available commands: `seed`, `embeddings`, `sync-users`, `bulk-import`.
 
 ### Opening a standalone tunnel
 
