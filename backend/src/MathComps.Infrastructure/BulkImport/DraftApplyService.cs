@@ -247,21 +247,33 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Get-or-creates the round-instance by (round, season), setting the draft's date on a fresh row.
+    /// Get-or-creates the round-instance by (round, season), setting the draft's date on a fresh row and refreshing a
+    /// stale one: an existing instance whose stored date differs from the draft's is updated in place so a corrected
+    /// <c>_meta</c> date actually lands, matching how the authors/tags reconcilers bring stored rows into line.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="roundId">The round's id.</param>
     /// <param name="seasonId">The season's id.</param>
     /// <param name="date">The round-instance date from <c>_meta</c>.</param>
-    /// <returns>The entity and whether it was reused or created.</returns>
+    /// <returns>The entity and whether it was reused unchanged, updated in place, or created.</returns>
     private static async Task<(RoundInstance Entity, ResolutionAction Action)> GetOrCreateRoundInstanceAsync(
         MathCompsDbContext context, Guid roundId, Guid seasonId, DateOnly date)
     {
-        // Reuse the existing round-instance when present (its date is left as-is).
+        // The existing round-instance for this (round, season), or null when net-new.
         var existing = await context.RoundInstances.FirstOrDefaultAsync(
             instance => instance.RoundId == roundId && instance.SeasonId == seasonId);
+
+        // Found it — reuse it when the date already matches, otherwise refresh the stale date in place.
         if (existing is not null)
-            return (existing, ResolutionAction.Reuse);
+        {
+            // Already carries the draft's date — reuse it untouched.
+            if (existing.Date == date)
+                return (existing, ResolutionAction.Reuse);
+
+            // The stored date is stale — overwrite it in place (the tracked entity flushes on save) and report it.
+            existing.Date = date;
+            return (existing, ResolutionAction.Update);
+        }
 
         // Otherwise create it with the draft's date.
         var created = new RoundInstance { RoundId = roundId, SeasonId = seasonId, Date = date };

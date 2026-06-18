@@ -5,24 +5,28 @@ using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
-/// Whether a taxonomy entity the draft references already exists (so it would be reused) or is missing (so it
-/// would need creating).
+/// What resolving a taxonomy entity the draft references does to it: reuse it unchanged, update it in place when a
+/// field differs, or create it when it is absent.
 /// </summary>
 public enum ResolutionAction
 {
-    /// <summary>The entity already exists in the DB and would be reused.</summary>
+    /// <summary>The entity already exists in the DB and is reused unchanged.</summary>
     Reuse,
+
+    /// <summary>The entity already exists but a field differs from the draft, so it is updated in place.</summary>
+    Update,
 
     /// <summary>The entity is absent and would need to be created.</summary>
     Create
 }
 
 /// <summary>
-/// The exists-or-not outcome for a single taxonomy entity the draft references.
+/// The resolution outcome for a single taxonomy entity the draft references.
 /// </summary>
-/// <param name="EntityKind">The kind of entity (<c>competition</c>, <c>season</c>, <c>round</c>).</param>
+/// <param name="EntityKind">The kind of entity (<c>competition</c>, <c>category</c>, <c>round</c>, <c>season</c>,
+/// <c>round-instance</c>).</param>
 /// <param name="Identifier">The lookup key — a slug, composite slug, or year.</param>
-/// <param name="Action">Whether the entity already exists (reuse) or would need creating.</param>
+/// <param name="Action">What resolving it does — reuse unchanged, update in place, or create.</param>
 public record EntityResolution(
     string EntityKind,
     string Identifier,
