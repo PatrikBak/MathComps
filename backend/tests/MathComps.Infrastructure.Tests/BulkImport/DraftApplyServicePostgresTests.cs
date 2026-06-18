@@ -226,6 +226,31 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Re-applying a draft whose <c>_meta</c> date was corrected updates the round-instance's stored date in place:
+    /// the round-instance reports the update action and the row's date moves to the draft's new value.
+    /// </summary>
+    [Fact]
+    public Task Re_applying_with_a_changed_date_updates_the_round_instance() => RunTestAsync(async service =>
+    {
+        // Import the problem under the original round date.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // Re-import the identical draft under a corrected, later date.
+        var correctedDate = new DateOnly(2024, 4, 1);
+        var second = await service.ApplyAsync(
+            CsmoTarget(), correctedDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // The round-instance reports the date update distinctly from the quiet reuse path.
+        var roundInstance = second.Entities.Single(entity => entity.EntityKind == "round-instance");
+        Assert.Equal(ResolutionAction.Update, roundInstance.Action);
+
+        // The stored date actually moved to the corrected value.
+        await QueryAsync(async context =>
+            Assert.Equal(correctedDate, (await context.RoundInstances.SingleAsync()).Date));
+    });
+
+    /// <summary>
     /// Re-importing an image-bearing problem unchanged is recognised as a no-op: the rewritten body reproduces
     /// exactly, so the text reports unchanged and the problem doesn't count as updated.
     /// </summary>

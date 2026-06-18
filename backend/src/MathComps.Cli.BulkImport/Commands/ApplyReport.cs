@@ -31,8 +31,8 @@ public static class ApplyReport
         AnsiConsole.MarkupLine("\n[bold]Taxonomy[/]:");
         foreach (var entity in result.Applied.Entities)
         {
-            // Create is the noteworthy case; reuse is the quiet, expected path.
-            var color = entity.Action == ResolutionAction.Create ? "yellow" : "blue";
+            // Create and update both mutate the DB (noteworthy, yellow); reuse is the quiet, expected path (blue).
+            var color = entity.Action == ResolutionAction.Reuse ? "blue" : "yellow";
             var action = entity.Action.ToString().ToLowerInvariant();
             AnsiConsole.MarkupLine($"  [{color}]{action}[/] {entity.EntityKind} {Escape(entity.Identifier)}");
         }
