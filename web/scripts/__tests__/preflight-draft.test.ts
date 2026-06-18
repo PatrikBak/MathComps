@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest'
 import { isOk, preflightDraft } from '../preflight-draft-core'
 import { narrowMeta } from '../preflight-draft-meta'
 import {
+  collectDisallowedImageRefParams,
   collectImageNames,
   hasLeadingFrontmatter,
   parseProblemMeta,
@@ -350,6 +351,16 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.severity).toBe('error')
     expect(error?.message).toContain('fig.svg')
     expect(error?.message).toContain('fig.png')
+  })
+
+  it('flags a hand-sized image ref (width/height belong to the figure, not the ref)', async () => {
+    const manifest = await loadFixture('invalid-image-ref-param')
+    const error = findError(manifest, (entry) => entry.rule === 'image-ref-param')
+    expect(error?.severity).toBe('error')
+    expect(error?.file).toBe('p1.sk.md')
+    expect(error?.message).toContain('width')
+    expect(error?.message).toContain('height')
+    expect(error?.message).toContain('bare')
   })
 
   it('flags broken math in the statement half', async () => {
@@ -746,5 +757,51 @@ describe('collectImageNames', () => {
 
     // Only the real images/ references survive; the code-fenced and external ones do not, and duplicates collapse
     expect(collectImageNames(markdown)).toEqual(['a.svg'])
+  })
+})
+
+describe('collectDisallowedImageRefParams', () => {
+  it('flags width/height/scale and typo params, but never inline or bare refs', () => {
+    const markdown = [
+      '![bare](images/a.svg)',
+      '![inline](images/b.svg?inline=true)',
+      '![sized](images/c.svg?width=400&height=300)',
+      '![scaled](images/d.svg?scale=50)',
+      '![typo](images/e.svg?widht=400)',
+    ].join('\n\n')
+
+    // Bare and inline-only refs raise nothing; width/height, scale, and the typo each surface their params
+    expect(collectDisallowedImageRefParams(markdown)).toEqual([
+      { ref: 'images/c.svg?width=400&height=300', params: ['width', 'height'] },
+      { ref: 'images/d.svg?scale=50', params: ['scale'] },
+      { ref: 'images/e.svg?widht=400', params: ['widht'] },
+    ])
+  })
+
+  it('keeps inline but still flags a disallowed param sharing the same ref', () => {
+    // A ref mixing the one legal param with a forbidden one — only the forbidden name is reported
+    expect(collectDisallowedImageRefParams('![x](images/f.svg?inline=true&scale=50)')).toEqual([
+      { ref: 'images/f.svg?inline=true&scale=50', params: ['scale'] },
+    ])
+  })
+
+  it('matches the allowlist case-sensitively, like the renderer', () => {
+    // The renderer reads lowercase param names, so an off-case "Inline" is not the legal param — flag it
+    expect(collectDisallowedImageRefParams('![x](images/g.svg?Inline=true)')).toEqual([
+      { ref: 'images/g.svg?Inline=true', params: ['Inline'] },
+    ])
+  })
+
+  it('leaves external images and code-fenced look-alikes alone', () => {
+    const markdown = [
+      '![ext](https://example.com/c.png?width=200&height=100)',
+      '',
+      '```',
+      '![fenced](images/x.svg?width=10&height=10)',
+      '```',
+    ].join('\n')
+
+    // The import never stamps external images, and a fenced ref isn't a real image node
+    expect(collectDisallowedImageRefParams(markdown)).toEqual([])
   })
 })

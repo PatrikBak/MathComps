@@ -22,6 +22,13 @@ export const SUPPORTED_IMAGE_EXTENSIONS = ['.svg', '.png', '.jpg', '.jpeg', '.we
 /** Per-image size ceiling, in MB. Figures ship unoptimized, so oversized scans must be downscaled. */
 export const MAX_IMAGE_MB = 2
 
+/**
+ * The only query param a problem image ref may carry — inline display. `width`/`height` are auto-derived
+ * from the figure's intrinsic size on import, and `scale` has no role on a problem image, so any other
+ * param is an authoring error.
+ */
+const ALLOWED_IMAGE_REF_PARAMS = ['inline']
+
 /** HTML-comment line that separates a problem's statement from its solution. */
 const SOLUTION_SENTINEL = '<!-- solution -->'
 
@@ -58,6 +65,14 @@ const EMPTY_PROBLEM_META: ProblemMeta = { authors: null, solutionLink: null, tag
 
 /** A processor used only to parse markdown into an mdast tree for image discovery. */
 const imageRefProcessor = unified().use(remarkParse)
+
+/** A draft-local image ref that carries a query param the author isn't allowed to write. */
+export type DisallowedImageRefParams = {
+  /** The image ref exactly as written, e.g. `images/fig.svg?width=400&height=300`. */
+  ref: string
+  /** The disallowed query param names found on it (everything but `inline`), in first-seen order. */
+  params: string[]
+}
 
 /**
  * Narrows an unknown value to a plain object.
@@ -245,4 +260,41 @@ export function collectImageNames(markdown: string): string[] {
 
   // Dedupe while preserving first-seen order
   return [...new Set(names)]
+}
+
+/**
+ * Collects the draft-local image refs that carry a disallowed query param. A problem ref must be bare
+ * except for `?inline=`: the figure's `width`/`height` are auto-derived on import and `scale` has no
+ * role on a problem image, so anything else (`width`, `height`, `scale`, a typo) is an authoring error.
+ * External (`http(s)`) images are skipped — the import never stamps them.
+ *
+ * @param markdown - The markdown half to scan.
+ *
+ * @returns One entry per offending ref, each with its disallowed param names.
+ */
+export function collectDisallowedImageRefParams(markdown: string): DisallowedImageRefParams[] {
+  // Parse to a tree so only genuine image nodes are considered
+  const tree = imageRefProcessor.parse(markdown)
+  const offending: DisallowedImageRefParams[] = []
+
+  // Only `image` nodes survive parsing, so code-fenced look-alikes never reach here
+  visit(tree, 'image', (node) => {
+    // Split the path from the query
+    const [refPath, query] = node.url.split('?', 2)
+
+    // Only disk-relative refs under images/ that carry a query are ours to police
+    if (!refPath?.startsWith(IMAGE_REF_PREFIX) || query === undefined) return
+
+    // The query's param names, deduped
+    const names = [...new Set([...new URLSearchParams(query).keys()])]
+
+    // Drop the one param an author may legally write; anything left is disallowed
+    const disallowed = names.filter((name) => !ALLOWED_IMAGE_REF_PARAMS.includes(name))
+
+    // Record the ref (as written) and its offending params when any survive
+    if (disallowed.length > 0) offending.push({ ref: node.url, params: disallowed })
+  })
+
+  // The offending refs in first-seen order
+  return offending
 }

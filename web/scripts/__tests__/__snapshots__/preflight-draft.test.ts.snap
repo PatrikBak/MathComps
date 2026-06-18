@@ -161,6 +161,29 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-empty-statement
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-image-ref-param 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.sk.md",
+      "half": null,
+      "rule": "image-ref-param",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > invalid-image-stem-collision 1`] = `
 {
   "errors": [
