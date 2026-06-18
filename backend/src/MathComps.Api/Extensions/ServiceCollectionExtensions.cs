@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.RateLimiting;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.RateLimiting;
 using MathComps.Api.Constants;
 using System.Text.RegularExpressions;
@@ -20,27 +21,69 @@ public static class ServiceCollectionExtensions
         // Configure policies
         services.AddRateLimiter(options =>
         {
-            // General API rate limiting
-            options.AddFixedWindowLimiter(RateLimiterPolicies.ApiRateLimit, rateLimiterOptions =>
-            {
-                rateLimiterOptions.PermitLimit = 60;
-                rateLimiterOptions.Window = TimeSpan.FromMinutes(1);
-                rateLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                rateLimiterOptions.QueueLimit = 10;
-            });
+            // Reject over-limit requests with 429 (Too Many Requests)
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-            // More restrictive limit for search endpoints (heavier operations)
-            options.AddFixedWindowLimiter(RateLimiterPolicies.SearchRateLimit, rateLimiterOptions =>
-            {
-                rateLimiterOptions.PermitLimit = 20;
-                rateLimiterOptions.Window = TimeSpan.FromMinutes(1);
-                rateLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                rateLimiterOptions.QueueLimit = 5;
-            });
+            // General API rate limiting, one bucket per caller
+            options.AddPolicy(RateLimiterPolicies.ApiRateLimit, PartitionByCaller(permitLimit: 60, queueLimit: 10));
+
+            // More restrictive limit for search endpoints (heavier operations), one bucket per caller
+            options.AddPolicy(RateLimiterPolicies.SearchRateLimit, PartitionByCaller(permitLimit: 20, queueLimit: 5));
         });
 
         // Return the services for chaining
         return services;
+    }
+
+    /// <summary>
+    /// Builds a per-caller fixed-window rate limiting partitioner keyed on the request's client IP.
+    /// </summary>
+    /// <param name="permitLimit">Requests allowed per caller within the window.</param>
+    /// <param name="queueLimit">Requests held per caller once the limit is hit before rejection.</param>
+    /// <returns>A partitioner producing one fixed-window limiter per client IP.</returns>
+    private static Func<HttpContext, RateLimitPartition<string>> PartitionByCaller(int permitLimit, int queueLimit)
+    {
+        // Partition each request by its client so the limit applies per visitor
+        return httpContext => RateLimitPartition.GetFixedWindowLimiter(
+            // Key on the caller's IP, collapsed to a stable per-client value
+            partitionKey: ClientPartitionKey(httpContext.Connection.RemoteIpAddress),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permitLimit,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = queueLimit,
+            });
+    }
+
+    /// <summary>
+    /// Derives a stable per-client rate-limiting key from a request's remote address.
+    /// </summary>
+    /// <param name="address">The client address, or <c>null</c> when it can't be determined.</param>
+    /// <returns>
+    /// The IPv4 address verbatim, the /64 network prefix for IPv6, or <c>unknown</c> when there is no
+    /// address.
+    /// </returns>
+    private static string ClientPartitionKey(IPAddress? address)
+    {
+        // No address — bucket every such request together
+        if (address is null)
+            return "unknown";
+
+        // Unwrap IPv4-mapped IPv6 so a mapped client keys the same as its plain IPv4 form
+        if (address.IsIPv4MappedToIPv6)
+            address = address.MapToIPv4();
+
+        // A single IPv4 address already identifies one client
+        if (address.AddressFamily != AddressFamily.InterNetworkV6)
+            return address.ToString();
+
+        // An IPv6 client controls a whole /64, so collapse to that prefix to stop address rotation
+        var bytes = address.GetAddressBytes();
+        // Zero the host half, keeping only the /64 network prefix
+        Array.Clear(bytes, 8, 8);
+        // Rebuild the address from the masked prefix and use it as the key
+        return new IPAddress(bytes).ToString();
     }
 
     /// <summary>
