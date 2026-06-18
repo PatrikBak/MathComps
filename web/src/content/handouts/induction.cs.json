@@ -6413,7 +6413,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\begin{gather*}\n(1+\\sqrt{2})^{n+1} = (a\\sqrt{2}+b)(1+\\sqrt{2}) = \\cr\n= (2a+b)\\sqrt{2}+(a+b).\n\\end{gather*}",
+                  "text": "\\begin{gather*}\n(1+\\sqrt{2})^{n+1} = (a\\sqrt{2}+b)(1+\\sqrt{2}) = \\cr\n= (a+b)\\sqrt{2}+(2a+b).\n\\end{gather*}",
                   "isDisplay": true
                 },
                 {
