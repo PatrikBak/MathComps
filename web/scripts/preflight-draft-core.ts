@@ -15,6 +15,7 @@ import type { MetaResult } from './preflight-draft-meta'
 import { FALLBACK_META, META_FILENAME, metaIssue, narrowMeta } from './preflight-draft-meta'
 import {
   asMessage,
+  collectDisallowedImageRefParams,
   collectImageNames,
   hasLeadingFrontmatter,
   IMAGE_REF_PREFIX,
@@ -453,6 +454,27 @@ async function parseBody(
         )
       )
     }
+  })
+
+  // Collect refs carrying a query param other than ?inline= across both halves — width/height are auto-derived on
+  // import and scale has no role here, so anything else would corrupt the stored URL.
+  const disallowedRefs = [
+    ...collectDisallowedImageRefParams(statement),
+    ...(solution !== null ? collectDisallowedImageRefParams(solution) : []),
+  ]
+  disallowedRefs.forEach((entry) => {
+    // Flag each as a blocking error, steering the author back to a bare ref
+    errors.push(
+      problemIssue(
+        body.file,
+        null,
+        'image-ref-param',
+        `image "${entry.ref}" sets ${entry.params.join('/')} on the ref; leave a problem image ref bare ` +
+          `(only ?inline=true is allowed) — apply auto-derives width/height from the figure's intrinsic size, so ` +
+          `resize the figure itself (SVG: root width/height keeping the viewBox; raster: resize the pixels). ` +
+          `scale isn't used on problem images. See the add-problems skill's "Sizing figures" note.`
+      )
+    )
   })
 
   // Assemble the text variant, halves kept verbatim

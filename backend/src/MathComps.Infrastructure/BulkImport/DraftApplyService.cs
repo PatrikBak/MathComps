@@ -293,7 +293,7 @@ public class DraftApplyService(
     /// <param name="draftFolder">The draft folder the relative refs resolve against.</param>
     /// <returns>The relative-ref → media-ref replacements for the markdown rewrite, plus how many images this
     /// problem actually uploaded versus skipped as unchanged.</returns>
-    private async Task<(Dictionary<string, string> Replacements, int Uploaded, int Skipped)> UploadProblemImagesAsync(
+    private async Task<(Dictionary<string, ResolvedImageRef> Replacements, int Uploaded, int Skipped)> UploadProblemImagesAsync(
         DraftProblemContent problem, string slug, string draftFolder)
     {
         // The same ref map the markdown rewrite consumes, derived (slug + intrinsic dims) without any upload.
@@ -333,7 +333,7 @@ public class DraftApplyService(
         DraftProblemContent problem,
         string slug,
         Guid roundInstanceId,
-        IReadOnlyDictionary<string, string> replacements,
+        IReadOnlyDictionary<string, ResolvedImageRef> replacements,
         IDictionary<string, Author> authorsCache,
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
@@ -407,7 +407,7 @@ public class DraftApplyService(
         MathCompsDbContext context,
         Problem existing,
         DraftProblemContent problem,
-        IReadOnlyDictionary<string, string> replacements,
+        IReadOnlyDictionary<string, ResolvedImageRef> replacements,
         IDictionary<string, Author> authorsCache,
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)

@@ -158,7 +158,7 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
     private static IEnumerable<ProblemTextResolution> ClassifyHalves(
         string slug,
         DraftTextContent text,
-        IReadOnlyDictionary<string, string> replacements,
+        IReadOnlyDictionary<string, ResolvedImageRef> replacements,
         IReadOnlyList<ExistingText> existingTexts)
     {
         // The statement half — classified against its rewritten body.

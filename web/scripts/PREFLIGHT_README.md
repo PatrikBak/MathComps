@@ -79,14 +79,14 @@ tags: # approved tag slugs; usually written by the Tagging CLI, hand-editable
 
 ## Images
 
-Put assets in `images/` and reference them relatively. Sizing is optional:
+Put assets in `images/` and reference them with a **bare** ref:
 
 ```markdown
-![figure](images/diagram.svg) # fluid
-![figure](images/diagram.svg?width=400&height=300) # fixed intrinsic size
+![figure](images/diagram.svg) # the figure's intrinsic size is the on-screen size
+![equals](images/eq.svg?inline=true) # the one legal query param — flows inline with the text
 ```
 
-`width`/`height` are positive integers and must be given together; `?inline=true` renders inline with surrounding text; `?scale=50` shrinks to a percentage. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error). Two images in one problem can't share a name (e.g. `fig.svg` and `fig.png`) — they'd collide on one stored key.
+A ref is bare except for an optional `?inline=true` (inline display). `apply` auto-derives `width`/`height` from the figure's own intrinsic dimensions and stamps them on import — so to resize a figure, change the figure itself (an SVG's root `width`/`height` keeping its `viewBox`, or a raster's pixels), never the ref. Writing `width`/`height`/`scale`/any other query param on a ref is a preflight **error** (`image-ref-param`): hand-written dimensions are meaningless (`apply` overrides them) and `scale` has no role on a problem image. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error). Two images in one problem can't share a name (e.g. `fig.svg` and `fig.png`) — they'd collide on one stored key.
 
 ## Markdown & math checks
 
@@ -95,7 +95,7 @@ Each half runs through the same pipeline the site renders with. The preflight re
 - **Math delimiters** — an odd number of unescaped `$` is an error.
 - **Parse** — malformed markdown or directives.
 - **KaTeX** — every `$…$` / `$$…$$` must render.
-- **Images** — every `images/…` reference must resolve, be a supported format (SVG/PNG/JPEG/WebP), stay under 2 MB, and not share a stem with another image in the same problem.
+- **Images** — every `images/…` reference must resolve, be a supported format (SVG/PNG/JPEG/WebP), stay under 2 MB, carry no query param other than `?inline=` (`width`/`height`/`scale` are rejected), and not share a stem with another image in the same problem.
 
 ## Running the check
 
