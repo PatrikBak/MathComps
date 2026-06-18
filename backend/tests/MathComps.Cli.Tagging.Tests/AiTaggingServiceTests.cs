@@ -1,6 +1,7 @@
 using MathComps.Cli.Tagging.Services;
-using MathComps.Infrastructure.Options;
-using MathComps.Infrastructure.Services.Integrations;
+using MathComps.Cli.Tagging.Settings;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Collections.Immutable;
 using MathComps.Domain.Tagging;
@@ -8,9 +9,10 @@ using MathComps.Domain.Tagging;
 namespace MathComps.Cli.Tagging.Tests;
 
 /// <summary>
-/// Tests the database-free tagging core through its public passes with a mocked model: the generate pass fills the
-/// prompt and maps the model's name-keyed response back to draft slugs (surfacing names outside the vocabulary), and
-/// the veto pass keeps only the slugs the model approves.
+/// Tests the database-free tagging core through its public passes with a mocked chat client: the generate pass puts
+/// the candidates in the system message and the problem in the user message, then maps the model's list response
+/// back to draft slugs (surfacing names outside the vocabulary), and the veto pass keeps only the slugs the model
+/// approves.
 /// </summary>
 public class AiTaggingServiceTests
 {
@@ -30,47 +32,56 @@ public class AiTaggingServiceTests
     public async Task SuggestTags_returns_empty_without_calling_the_model_when_there_are_no_candidates()
     {
         // A model that fails the test if it is ever called.
-        var gemini = new Mock<IGeminiService>(MockBehavior.Strict);
-        var service = new AiTaggingService(gemini.Object);
+        var chatClient = new Mock<IChatClient>(MockBehavior.Strict);
+        var service = CreateService(chatClient.Object);
 
         // Suggest with an empty candidate set.
-        var result = await service.SuggestTagsAsync("statement", null, [], ModelConfig("ignored"));
+        var result = await service.SuggestTagsAsync("statement", null, [], "ignored");
 
         // Nothing proposed, nothing unknown, no call made.
         Assert.Empty(result.TagsBySlug);
         Assert.Empty(result.UnknownNames);
-        gemini.VerifyNoOtherCalls();
+        chatClient.VerifyNoOtherCalls();
     }
 
     /// <summary>
-    /// The generate pass substitutes the statement, solution, and candidate names into the prompt's placeholders.
+    /// The generate pass puts the candidate vocabulary in the system message and the problem in the user message.
     /// </summary>
     [Fact]
-    public async Task SuggestTags_substitutes_the_problem_and_candidates_into_the_prompt()
+    public async Task SuggestTags_splits_candidates_into_system_and_the_problem_into_user()
     {
-        // A prompt template exercising every placeholder, written to a real file the service reads.
+        // A prompt template with the candidate slot, written to a real file the service reads.
         var promptPath = Path.GetTempFileName();
-        await File.WriteAllTextAsync(promptPath, "S:{problem_statement} X:{problem_solution} T:{candidate_tags}");
+        await File.WriteAllTextAsync(promptPath, "INSTRUCTIONS T:{candidate_tags}");
 
         try
         {
-            // Capture the user prompt the service sends, answering with one known tag so the call completes.
-            var capturedUserPrompt = "";
-            var gemini = new Mock<IGeminiService>();
-            gemini
-                .Setup(model => model.GenerateContentAsync(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Callback<string, string, string, int, CancellationToken>((_, _, userPrompt, _, _) => capturedUserPrompt = userPrompt)
-                .ReturnsAsync(/*lang=json,strict*/ """{ "Algebra": { "GoodnessOfFit": 0.9, "Justification": "clearly algebra" } }""");
+            // Capture the messages the service sends, answering with one known tag so the call completes.
+            IReadOnlyList<ChatMessage> capturedMessages = [];
+            var chatClient = new Mock<IChatClient>();
+            chatClient
+                .Setup(client => client.GetResponseAsync(
+                    It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions?>(), It.IsAny<CancellationToken>()))
+                .Callback<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
+                    (messages, _, _) => capturedMessages = [.. messages])
+                .ReturnsAsync(new ChatResponse(new ChatMessage(ChatRole.Assistant,
+                    /*lang=json,strict*/
+                    """{ "tags": [ { "name": "Algebra", "goodnessOfFit": 0.9, "justification": "clearly algebra" } ] }""")));
 
             // Run the generate pass.
-            var service = new AiTaggingService(gemini.Object);
-            await service.SuggestTagsAsync("the statement", "the solution", _candidates, ModelConfig(promptPath));
+            var service = CreateService(chatClient.Object);
+            await service.SuggestTagsAsync("the statement", "the solution", _candidates, promptPath);
 
-            // The statement and solution were substituted and the candidate names were sent.
-            Assert.Contains("S:the statement", capturedUserPrompt);
-            Assert.Contains("X:the solution", capturedUserPrompt);
-            Assert.Contains("Algebra", capturedUserPrompt);
+            // The system message carries the instructions and the substituted candidate names.
+            var systemMessage = capturedMessages.Single(message => message.Role == ChatRole.System).Text;
+            Assert.Contains("INSTRUCTIONS", systemMessage);
+            Assert.Contains("Algebra", systemMessage);
+
+            // The user message carries just the problem — statement and solution, no candidates.
+            var userMessage = capturedMessages.Single(message => message.Role == ChatRole.User).Text;
+            Assert.Contains("PROBLEM: the statement", userMessage);
+            Assert.Contains("SOLUTION: the solution", userMessage);
+            Assert.DoesNotContain("Algebra", userMessage);
         }
         finally
         {
@@ -88,13 +99,14 @@ public class AiTaggingServiceTests
     {
         // The model returns one known name and one it invented.
         var response = /*lang=json,strict*/ """
-            { "Algebra": { "GoodnessOfFit": 0.9, "Justification": "clearly algebra" },
-              "Made Up Tag": { "GoodnessOfFit": 0.8, "Justification": "not in the vocabulary" } }
+            { "tags": [
+                { "name": "Algebra", "goodnessOfFit": 0.9, "justification": "clearly algebra" },
+                { "name": "Made Up Tag", "goodnessOfFit": 0.8, "justification": "not in the vocabulary" } ] }
             """;
 
         // Run the generate pass against the stubbed model.
         var result = await RunWithStubbedModelAsync(response,
-            (service, promptPath) => service.SuggestTagsAsync("statement", null, _candidates, ModelConfig(promptPath)));
+            (service, promptPath) => service.SuggestTagsAsync("statement", null, _candidates, promptPath));
 
         // The known name is keyed by slug; the invented one is reported, not kept.
         Assert.Equal(["algebra"], result.TagsBySlug.Keys);
@@ -110,21 +122,22 @@ public class AiTaggingServiceTests
     {
         // The model approves one proposed tag and rejects the other.
         var response = /*lang=json,strict*/ """
-            { "Algebra": { "Approved": true, "Reason": "" },
-              "Pigeonhole Principle": { "Approved": false, "Reason": "does not apply" } }
+            { "tags": [
+                { "name": "Algebra", "approved": true, "justification": "" },
+                { "name": "Pigeonhole Principle", "approved": false, "justification": "does not apply" } ] }
             """;
 
         // Run the veto pass against the stubbed model.
         var approved = await RunWithStubbedModelAsync(response,
-            (service, promptPath) => service.VetoTagsAsync("statement", "solution", _candidates, ModelConfig(promptPath)));
+            (service, promptPath) => service.VetoTagsAsync("statement", "solution", _candidates, promptPath));
 
         // Only the approved slug survives.
         Assert.Equal(["algebra"], approved);
     }
 
     /// <summary>
-    /// Runs a tagging pass against a model stubbed to return <paramref name="cannedResponse"/>, using a throwaway
-    /// prompt template so the service's prompt-file read succeeds.
+    /// Runs a tagging pass against a chat client stubbed to return <paramref name="cannedResponse"/>, using a
+    /// throwaway prompt template so the service's prompt-file read succeeds.
     /// </summary>
     /// <typeparam name="TResult">The pass's result type.</typeparam>
     /// <param name="cannedResponse">The raw JSON the stubbed model returns.</param>
@@ -135,19 +148,19 @@ public class AiTaggingServiceTests
     {
         // A throwaway prompt template the pass can read.
         var promptPath = Path.GetTempFileName();
-        await File.WriteAllTextAsync(promptPath, "{problem_statement} {problem_solution} {candidate_tags}");
+        await File.WriteAllTextAsync(promptPath, "{candidate_tags}");
 
         try
         {
             // A model that always answers with the canned response.
-            var gemini = new Mock<IGeminiService>();
-            gemini
-                .Setup(model => model.GenerateContentAsync(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(cannedResponse);
+            var chatClient = new Mock<IChatClient>();
+            chatClient
+                .Setup(client => client.GetResponseAsync(
+                    It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ChatResponse(new ChatMessage(ChatRole.Assistant, cannedResponse)));
 
             // Run the pass against the configured service.
-            return await pass(new AiTaggingService(gemini.Object), promptPath);
+            return await pass(CreateService(chatClient.Object), promptPath);
         }
         finally
         {
@@ -157,10 +170,15 @@ public class AiTaggingServiceTests
     }
 
     /// <summary>
-    /// Builds a model config pointing at a prompt file, with the model and budget irrelevant to these tests.
+    /// Builds the tagging service over a chat client, with reasoning left off — these tests don't exercise it.
     /// </summary>
-    /// <param name="promptPath">The prompt template path.</param>
-    /// <returns>A model config for the call.</returns>
-    private static AiModelConfig ModelConfig(string promptPath) =>
-        new() { Model = "test-model", SystemPromptPath = promptPath, ThinkingBudget = 0 };
+    /// <param name="chatClient">The chat client backing the passes.</param>
+    /// <returns>The configured tagging service.</returns>
+    private static AiTaggingService CreateService(IChatClient chatClient) =>
+        new(chatClient, Options.Create(new OpenRouterSettings
+        {
+            BaseUrl = "https://example.test/v1",
+            Model = "test-model",
+            ApiKey = "test-key",
+        }));
 }

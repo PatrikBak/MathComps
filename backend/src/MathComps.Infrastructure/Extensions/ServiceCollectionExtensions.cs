@@ -5,7 +5,6 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
-using MathComps.Infrastructure.Services.Integrations;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
@@ -125,31 +124,6 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IUserProblemService, UserProblemService>();
         services.TryAddScoped<IUserListService, UserListService>();
         services.TryAddScoped<ICommentService, CommentService>();
-
-        // Builder pattern
-        return services;
-    }
-
-    /// <summary>
-    /// Registers the Gemini service and its settings, on an HttpClient whose timeout is driven by the service's
-    /// CancellationToken rather than the handler.
-    /// </summary>
-    /// <param name="services">The service collection to add the Gemini service to.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddGemini(this IServiceCollection services)
-    {
-        // Gemini API settings
-        services.AddOptions<GeminiSettings>()
-            .BindConfiguration(GeminiSettings.SectionName)
-            .Validate(options => options.TimeoutSeconds > 0, $"{nameof(GeminiSettings.TimeoutSeconds)} must be > 0.")
-            .ValidateDataAnnotations();
-
-        // Gemini service with HttpClient
-        services.AddHttpClient<IGeminiService, GeminiService>(client =>
-        {
-            // Set infinite timeout on HttpClient so the timeout is controlled by CancellationToken in the service
-            client.Timeout = Timeout.InfiniteTimeSpan;
-        });
 
         // Builder pattern
         return services;

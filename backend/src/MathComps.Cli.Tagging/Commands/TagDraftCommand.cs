@@ -6,34 +6,40 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Diagnostics;
 using MathComps.Domain.Tagging;
+using MathComps.Shared.Cli;
 using MathComps.Shared.Serialization;
-using MathComps.Shared.Cli.Progress;
 
 namespace MathComps.Cli.Tagging.Commands;
 
 /// <summary>
-/// Tags a bulk-import draft in place: for each untagged problem it runs Gemini over the original-language statement
-/// (Area/Goal/Type) and solution (Technique), prunes the proposals with a second AI veto pass, and writes the
-/// surviving slugs into the problem's <c>pN.yaml</c> sidecar. The draft — not the database — is the source of truth,
-/// so <c>apply</c> later replays the same tags identically to every environment.
+/// Tags a bulk-import draft in place: for each untagged problem it runs the model over the configured-language
+/// statement (Area/Goal/Type) and solution (Technique), prunes the proposals with a second AI veto pass, and writes
+/// the surviving slugs into the problem's <c>pN.yaml</c> sidecar. The draft — not the database — is the source of
+/// truth, so <c>apply</c> later replays the same tags identically to every environment.
 /// </summary>
 /// <param name="taggingService">The database-free generate/veto core.</param>
-/// <param name="settings">The four Gemini passes and the fit floor.</param>
+/// <param name="settings">The four prompt passes and the fit floor.</param>
+/// <param name="openRouterSettings">The backend connection — read only to name the model in the run header.</param>
+/// <param name="usageReader">Reads the key's spend, sampled before and after the run to price it.</param>
 [Description("""
-    Tag a bulk-import draft folder in place. For every problem whose pN.yaml has no 'tags:' key, Gemini proposes
+    Tag a bulk-import draft folder in place. For every problem whose pN.yaml has no 'tags:' key, the model proposes
     tags from the approved vocabulary (statement → Area/Goal/Type, solution → Technique), a veto pass prunes them,
     and the survivors are written as a bare slug list into pN.yaml. Problems that already have a 'tags:' key are
-    left untouched, so a re-run only fills in the gaps. Names the model proposes outside the vocabulary are written
-    to 'tag-suggestions.json' for review, never into a sidecar.
+    left untouched, so a re-run only fills in the gaps — pass --retag to redo every problem, overwriting its tags.
+    Names the model proposes outside the vocabulary are written to 'tag-suggestions.json' for review, never into a
+    sidecar.
 """)]
 public class TagDraftCommand(
     IAiTaggingService taggingService,
-    IOptions<TagDraftSettings> settings)
+    IOptions<TagDraftSettings> settings,
+    IOptions<OpenRouterSettings> openRouterSettings,
+    IOpenRouterUsageReader usageReader)
     : AsyncCommand<TagDraftCommand.Settings>
 {
     /// <summary>
-    /// How many problems to tag concurrently. A one-time import is a few dozen problems at up to four Gemini calls
+    /// How many problems to tag concurrently. A one-time import is a few dozen problems at up to four model calls
     /// each, so a small fixed fan-out keeps well clear of model rate limits without needing a knob.
     /// </summary>
     private const int Concurrency = 4;
@@ -42,6 +48,12 @@ public class TagDraftCommand(
     /// The name of the review file collecting tag names the model proposed outside the approved vocabulary.
     /// </summary>
     private const string SuggestionsFileName = "tag-suggestions.json";
+
+    /// <summary>
+    /// The body language to tag against. Always English — the translations come from stronger models than the
+    /// source-language originals.
+    /// </summary>
+    private const string TaggingLanguage = "en";
 
     /// <summary>
     /// The command arguments.
@@ -54,6 +66,13 @@ public class TagDraftCommand(
         [CommandArgument(0, "<folder>")]
         [Description("Path to the draft folder to tag.")]
         public required string Folder { get; set; }
+
+        /// <summary>
+        /// Whether to re-tag every problem, overwriting existing tags, instead of skipping the already-tagged ones.
+        /// </summary>
+        [CommandOption("--retag")]
+        [Description("Re-tag every problem, overwriting existing tags (default skips problems that already have tags).")]
+        public bool Retag { get; set; }
     }
 
     /// <inheritdoc/>
@@ -66,9 +85,6 @@ public class TagDraftCommand(
             AnsiConsole.MarkupLineInterpolated($"[red]Draft folder not found:[/] {folder}");
             return 1;
         }
-
-        // Tags are generated against the draft's original language — the one whose body files we send to the model.
-        var language = DraftTagFiles.ReadOriginalLanguage(folder);
 
         // Build the full candidate set from the approved vocabulary.
         var vocabulary = TagFilesHelper.GetTagsForAi();
@@ -83,9 +99,9 @@ public class TagDraftCommand(
         // Index by slug for category lookup and veto-candidate rebuilding.
         var candidateBySlug = allCandidates.ToImmutableDictionary(candidate => candidate.Slug);
 
-        // Discover the problems and keep only the ones the skip rule says still need tagging.
-        var problems = DraftTagFiles.DiscoverProblems(folder, language)
-            .Where(NeedsTagging)
+        // Discover the problems. Re-tagging takes them all; otherwise the skip rule keeps only the untagged ones.
+        var problems = DraftTagFiles.DiscoverProblems(folder, TaggingLanguage)
+            .Where(problem => commandSettings.Retag || NeedsTagging(problem))
             .ToImmutableArray();
 
         // Nothing left to do — everything is already tagged.
@@ -95,57 +111,132 @@ public class TagDraftCommand(
             return 0;
         }
 
-        // Collect the out-of-vocabulary proposals across all problems for the review file (written under the
-        // synchronized result handler, so a plain dictionary is safe).
+        // Out-of-vocabulary proposals across all problems, for the review file.
         var suggestions = new Dictionary<string, SortedSet<string>>();
 
-        // Tag the problems concurrently, writing each sidecar as its result lands.
-        await ProgressHelper.ExecuteWithProgressInParallelAsync(
+        // How many problems finished successfully.
+        var taggedCount = 0;
+
+        // Guards the two accumulators above — the tagging loop writes them concurrently.
+        var resultLock = new Lock();
+
+        // Announce the run: how many problems, against which model, in which language.
+        AnsiConsole.MarkupLineInterpolated(
+            $"\n[green]Tagging {problems.Length} problem(s) on {openRouterSettings.Value.Model} ({TaggingLanguage})...[/]");
+
+        // Warn when re-tagging so overwriting existing tags is never a surprise.
+        if (commandSettings.Retag)
+            AnsiConsole.MarkupLine("[yellow]Re-tagging — existing tags on these problems will be overwritten.[/]");
+
+        // Sample the key's spend now; the post-run sample minus this one prices the round.
+        var creditsBefore = await TryReadCreditsUsedAsync();
+
+        // Time the whole run.
+        var runStopwatch = Stopwatch.StartNew();
+
+        // Tag the problems concurrently. Each problem streams its own per-pass log; we write its sidecar as soon as
+        // it finishes (distinct files, so no lock) and fold its tally + proposals in under the result lock.
+        await Parallel.ForEachAsync(
             problems,
-            "Tagging draft problems...",
-            getItemDescription: problem => $"p{problem.Index}",
-            numThreads: Concurrency,
-            processItem: (problem, _, cancellationToken) => TagProblemAsync(
-                problem, statementCandidates, techniqueCandidates, candidateBySlug, cancellationToken),
-            handleResult: async (result, problem, _, cancellationToken) =>
+            new ParallelOptions { MaxDegreeOfParallelism = Concurrency },
+            async (problem, cancellationToken) =>
             {
-                // A failed problem leaves its sidecar's 'tags:' key absent so a re-run retries just that one.
+                // Run the full generate → veto pipeline for this problem.
+                var result = await TagProblemAsync(
+                    problem, statementCandidates, techniqueCandidates, candidateBySlug, cancellationToken);
+
+                // A failure is already logged inside; skip writing a sidecar so a re-run retries just this one.
                 if (!result.Succeeded)
-                {
-                    AnsiConsole.MarkupLineInterpolated($"[red]p{problem.Index} failed — left untagged for a re-run.[/]");
                     return;
-                }
 
                 // Read the sidecar's existing keys (authors / solutionLink).
                 var existing = File.Exists(problem.YamlPath)
                     ? await File.ReadAllTextAsync(problem.YamlPath, cancellationToken)
                     : string.Empty;
 
-                // Append the tags block beneath them.
+                // Drop any prior tags block (a no-op unless re-tagging) so we never write a second one.
+                var withoutTags = DraftTagFiles.StripTagsBlock(existing);
+
+                // Append the fresh tags block beneath the remaining keys.
                 var block = DraftTagFiles.BuildTagsBlock(result.Tags);
                 await File.WriteAllTextAsync(
-                    problem.YamlPath, DraftTagFiles.AppendTagsBlock(existing, block), cancellationToken);
+                    problem.YamlPath, DraftTagFiles.AppendTagsBlock(withoutTags, block), cancellationToken);
 
-                // Remember any names the model invented outside the vocabulary, tagged by their source problem.
-                foreach (var name in result.UnknownNames)
+                // Fold this problem's result into the shared state.
+                lock (resultLock)
                 {
-                    // Start a fresh source set the first time a name shows up.
-                    if (!suggestions.TryGetValue(name, out var sources))
-                        suggestions[name] = sources = [];
+                    // Count it as tagged.
+                    taggedCount++;
 
-                    // Record this problem as one that proposed it.
-                    sources.Add($"p{problem.Index}");
+                    // File each out-of-vocabulary name under the problem that proposed it.
+                    foreach (var name in result.UnknownNames)
+                    {
+                        // Start a fresh source set the first time a name shows up.
+                        if (!suggestions.TryGetValue(name, out var sources))
+                            suggestions[name] = sources = [];
+
+                        // Record this problem as one that proposed it.
+                        sources.Add($"p{problem.Index}");
+                    }
                 }
             });
 
-        // Surface any out-of-vocabulary proposals for the human to approve into approved-tags.json.
+        // Write any out-of-vocabulary proposals to the review file for the human to vet.
         await WriteSuggestionsAsync(folder, suggestions);
 
-        // Report how many problems were tagged.
-        AnsiConsole.MarkupLineInterpolated($"[green]Tagged {problems.Length} problem(s).[/]");
+        // Report how many problems were tagged and how long the whole run took.
+        AnsiConsole.MarkupLineInterpolated(
+            $"[green]Tagged {taggedCount}/{problems.Length} problem(s) in {runStopwatch.Elapsed.TotalSeconds:0.0}s.[/]");
+
+        // Price the round from the spend delta, when the before-sample came back.
+        if (creditsBefore is not null)
+            await ReportRoundCostAsync(creditsBefore.Value);
 
         // Done.
         return 0;
+    }
+
+    /// <summary>
+    /// Reads the key's spend again and reports this round's cost as the delta over the pre-run sample, plus the
+    /// key's all-time spend for context. The figure is approximate — OpenRouter settles a request's cost slightly
+    /// after the response, so the last calls may not be counted yet.
+    /// </summary>
+    /// <param name="creditsBefore">The credits-used reading taken before the run started.</param>
+    private async Task ReportRoundCostAsync(decimal creditsBefore)
+    {
+        // A failed post-run sample leaves nothing to subtract; the helper already logged why.
+        var creditsAfter = await TryReadCreditsUsedAsync();
+        if (creditsAfter is null)
+            return;
+
+        // The spend over the run is what this round cost; one credit is one US dollar.
+        var roundCost = creditsAfter.Value - creditsBefore;
+
+        // Print the round cost alongside the key's all-time spend for context.
+        var costLine =
+            $"[green]This round cost ≈${roundCost:0.0000} " +
+            $"(OpenRouter credits used all-time: ${creditsAfter.Value:0.00}).[/]";
+        AnsiConsole.MarkupLine(costLine);
+    }
+
+    /// <summary>
+    /// Reads the key's all-time credits-used counter, returning null (and logging a note) when the call fails —
+    /// cost reporting must never abort a tagging run that otherwise succeeded.
+    /// </summary>
+    /// <returns>The credits the key has spent, or null when the reading couldn't be taken.</returns>
+    private async Task<decimal?> TryReadCreditsUsedAsync()
+    {
+        try
+        {
+            // Ask OpenRouter for the key's current spend.
+            return await usageReader.GetCreditsUsedAsync();
+        }
+        catch (Exception exception)
+        {
+            // Note the failure but let the run stand — its tags are already written.
+            CliLog.Line($"[yellow]Couldn't read OpenRouter usage: {Markup.Escape(exception.Message)}[/]");
+            return null;
+        }
     }
 
     /// <summary>
@@ -191,24 +282,30 @@ public class TagDraftCommand(
         ImmutableDictionary<string, AiTagCandidate> candidateBySlug,
         CancellationToken cancellationToken)
     {
+        // Time the whole problem so the completion summary can show where the seconds went.
+        var problemStopwatch = Stopwatch.StartNew();
+
         try
         {
-            // Read the original-language body.
+            // Read the problem body.
             var body = await File.ReadAllTextAsync(problem.BodyPath, cancellationToken);
 
             // Split it into statement and solution.
             var (statement, solution) = DraftTagFiles.SplitStatementAndSolution(body);
 
             // Generate pass over the statement (Area/Goal/Type).
-            var statementResult = await taggingService.SuggestTagsAsync(
-                statement, null, statementCandidates, settings.Value.GenerateStatement, cancellationToken);
+            var (statementResult, generateStatementTime) = await RunPassAsync(problem.Index, "generate statement",
+                () => taggingService.SuggestTagsAsync(
+                    statement, null, statementCandidates, settings.Value.GenerateStatement, cancellationToken));
 
             // Generate pass over the solution (Technique) — skipped when statement-only, so a Technique tag never
             // lands on a problem without a solution.
-            var solutionResult = solution is null
-                ? new SuggestTagsResult([], [])
-                : await taggingService.SuggestTagsAsync(
-                    statement, solution, techniqueCandidates, settings.Value.GenerateSolution, cancellationToken);
+            var solutionResult = new SuggestTagsResult([], []);
+            var generateSolutionTime = TimeSpan.Zero;
+            if (solution is not null)
+                (solutionResult, generateSolutionTime) = await RunPassAsync(problem.Index, "generate solution",
+                    () => taggingService.SuggestTagsAsync(
+                        statement, solution, techniqueCandidates, settings.Value.GenerateSolution, cancellationToken));
 
             // Combine the proposals and keep only those that clear the fit floor before the veto pass.
             var proposed = statementResult.TagsBySlug
@@ -220,16 +317,21 @@ public class TagDraftCommand(
             var statementSurvivors = SurvivorsForVeto(proposed, candidateBySlug, technique: false);
             var techniqueSurvivors = SurvivorsForVeto(proposed, candidateBySlug, technique: true);
 
-            // Veto pass: the statement tags review against the statement, the technique tags against the solution.
-            var approved = (await taggingService.VetoTagsAsync(
-                    statement, null, statementSurvivors, settings.Value.VetoStatement, cancellationToken))
-                .Union(solution is null
-                    ? []
-                    : await taggingService.VetoTagsAsync(
+            // Veto pass over the statement's Area/Goal/Type survivors, against the statement.
+            var (approvedStatement, vetoStatementTime) = await RunPassAsync(problem.Index, "veto statement",
+                () => taggingService.VetoTagsAsync(
+                    statement, null, statementSurvivors, settings.Value.VetoStatement, cancellationToken));
+
+            // Veto pass over the Technique survivors, against the solution — skipped when statement-only.
+            var approvedTechnique = ImmutableHashSet<string>.Empty;
+            var vetoSolutionTime = TimeSpan.Zero;
+            if (solution is not null)
+                (approvedTechnique, vetoSolutionTime) = await RunPassAsync(problem.Index, "veto solution",
+                    () => taggingService.VetoTagsAsync(
                         statement, solution, techniqueSurvivors, settings.Value.VetoSolution, cancellationToken));
 
             // Order the survivors by category (Area → Type → Goal → Technique) then slug for a stable, readable list.
-            var tags = approved
+            var tags = approvedStatement.Union(approvedTechnique)
                 .OrderBy(slug => CategoryRank(candidateBySlug[slug].Type))
                 .ThenBy(slug => slug, StringComparer.Ordinal)
                 .Select(slug => new DraftTag(slug, proposed[slug].GoodnessOfFit, proposed[slug].Justification))
@@ -241,15 +343,49 @@ public class TagDraftCommand(
                 .Distinct()
                 .ToImmutableArray();
 
+            // Completion summary: total time, the generate/veto breakdown, and how many tags survived.
+            CliLog.Line($"[green]p{problem.Index} ✓[/] {problemStopwatch.Elapsed.TotalSeconds:0.0}s — " +
+                $"gen {(generateStatementTime + generateSolutionTime).TotalSeconds:0.0}s " +
+                $"(stmt {generateStatementTime.TotalSeconds:0.0} / sol {generateSolutionTime.TotalSeconds:0.0}), " +
+                $"veto {(vetoStatementTime + vetoSolutionTime).TotalSeconds:0.0}s " +
+                $"(stmt {vetoStatementTime.TotalSeconds:0.0} / sol {vetoSolutionTime.TotalSeconds:0.0}) " +
+                $"→ {tags.Length} tag(s)");
+
             // Hand back the survivors and any unknown names for the caller to write.
             return new ProblemTagResult(Succeeded: true, tags, unknownNames);
         }
         catch (Exception exception)
         {
-            // Any failure (transport, malformed response) leaves the problem untagged for a clean re-run.
-            AnsiConsole.MarkupLineInterpolated($"[red]p{problem.Index}: {exception.Message}[/]");
+            // Log why this problem failed, escaping the message so markup chars in it can't break the line.
+            var reason = Markup.Escape(exception.Message);
+            CliLog.Line($"[red]p{problem.Index} failed after {problemStopwatch.Elapsed.TotalSeconds:0.0}s:[/] {reason}");
+
+            // A failure (transport, malformed response) leaves the problem untagged so a re-run retries just this one.
             return new ProblemTagResult(Succeeded: false, [], []);
         }
+    }
+
+    /// <summary>
+    /// Runs one model pass, logging a start line first (so a pass left sitting with no follow-up visibly marks where
+    /// a problem is waiting) and returning its result alongside how long the call took.
+    /// </summary>
+    /// <typeparam name="TResult">The pass's result type.</typeparam>
+    /// <param name="problemIndex">The problem number, for the log prefix.</param>
+    /// <param name="passLabel">A short name for the pass, e.g. "veto statement".</param>
+    /// <param name="pass">The pass to run and time.</param>
+    /// <returns>The pass's result and its elapsed time.</returns>
+    private static async Task<(TResult Result, TimeSpan Elapsed)> RunPassAsync<TResult>(
+        int problemIndex, string passLabel, Func<Task<TResult>> pass)
+    {
+        // Announce the pass starting.
+        CliLog.Line($"[grey]p{problemIndex}[/] → {passLabel}…");
+
+        // Time just this model call.
+        var stopwatch = Stopwatch.StartNew();
+        var result = await pass();
+
+        // Hand back the result alongside how long it took.
+        return (result, stopwatch.Elapsed);
     }
 
     /// <summary>

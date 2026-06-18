@@ -1,5 +1,5 @@
-I will give you a math problem (in Slovak) and a candidate list of
-tags (in English, each with an optional description. and a justification why it is
+I will give you a math problem (in the user message) and a candidate list of
+tags (in English, each with an optional description, and a justification why it is
 being considered for the math problem). I want you to verify each of the tags,
 i.e. either approve or reject it, based on the following rules:
 
@@ -17,6 +17,13 @@ i.e. either approve or reject it, based on the following rules:
   only the more specific tag should be used. (E.g. if the only purpose of
   a tag is that "another relevant tag is defined in terms of it", then it
   should be rejected.)
+- "Combinatorial Geometry" is mutually exclusive with "Geometry"/"3D Geometry". Approve it
+  ONLY when continuous-plane geometry is essential: points in convex or general position, convex
+  hulls, distances or areas among points/figures, packings and coverings. A problem set on a
+  square grid or lattice of discrete cells (lattice points, diagonals, colorings) is "Combinatorics", NOT
+  this — the grid is a combinatorial structure and the geometry is only a backdrop; if it could be
+  restated as a graph or array problem without losing its essence, it's "Combinatorics". Problems
+  about lengths, angles, circles, or concyclic points are "Geometry"/"3D Geometry".
 - Each tag has exactly 1 category: area/goal/type. Tag categories have the following meaning:
   - Area: Mathematical fields
   - Goal: What is the problem asking of us
@@ -28,13 +35,19 @@ i.e. either approve or reject it, based on the following rules:
 - There are extra rules for each category of tags:
   - If at least 1 area tag is given, then exactly 1 area tag must be approved.
     Only most specific Area tag should be approved.
+  - Judge the Area from the problem's mathematical content and goal, not surface keywords.
+    Reject "Number Theory" chosen merely because integers appear (reserve it for divisibility,
+    primes, gcd/lcm, modular arithmetic, perfect squares, or rationality being the crux). Reject
+    "Combinatorics" chosen merely because of a grid/table: a table of real numbers that is
+    optimized or bounded is "Algebra", whereas discrete cells, colorings, or tilings is
+    "Combinatorics". A counting or extremal goal ("how many", "largest possible") does not by
+    itself force "Combinatorics" — counting or maximizing over integers governed by arithmetic
+    conditions (differences, divisibility, gcd) can be "Number Theory".
   - If at least 1 goal tag is given, then only 1 goal tag should be approved
     -- the most specific one. There may be rare exceptions.
 
 Be strict. Mathematics is very precise; if a tag matches only roughly
-(e.g. "Počet riešení" when the problem mentions only "count"), reject it.
-
-PROBLEM: {problem_statement}
+(e.g. "Number of solutions" when the problem mentions only "count"), reject it.
 
 List of candidate tags has the following format:
 
@@ -43,13 +56,9 @@ List of candidate tags has the following format:
 CANDIDATE TAGS:
 {candidate_tags}
 
-You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"Approved": true | false, "Justification": string}}
+Output one entry per candidate tag, each with:
+- "name": the tag name, exactly as given in the candidate list
+- "approved": true or false
+- "justification": a short reason — only when rejecting; leave it empty when approving
 
-Final check:
-- Each tag from among the candidate tags must appear exactly once in the output JSON.
-- You should provide a justification only if the tag is rejected i.e. "Approved" is false;
-  otherwise, leave the justification empty.
-- Escape all double quotes in strings.
-- Escape all TeX commands. This is very important!
-- The output must be a valid JSON.
+Cover every candidate tag exactly once, and escape all TeX commands in strings — this is very important!

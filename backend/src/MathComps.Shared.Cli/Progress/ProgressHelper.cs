@@ -52,37 +52,8 @@ public static class ProgressHelper
     }
 
     /// <summary>
-    /// Executes an operation on a collection of items in parallel with progress tracking and synchronized result handling.
-    /// Best for parallel operations where processing produces a result that needs to be handled in a thread-safe manner.
-    /// </summary>
-    /// <typeparam name="TItem">The type of items to process.</typeparam>
-    /// <typeparam name="TResult">The type of result returned by the processing function.</typeparam>
-    /// <param name="items">The collection of items to process.</param>
-    /// <param name="progressDescription">The description to display above the progress bar.</param>
-    /// <param name="getItemDescription">Function to get a description of the item for progress display.</param>
-    /// <param name="processItem">The async function to process each item (can run in parallel).</param>
-    /// <param name="numThreads">Maximum degree of parallelism (number of threads).</param>
-    /// <param name="handleResult">Optional async function to handle the result (runs in synchronized section with semaphore).</param>
-    public static async Task ExecuteWithProgressInParallelAsync<TItem, TResult>(
-        IReadOnlyList<TItem> items,
-        string progressDescription,
-        Func<TItem, string> getItemDescription,
-        Func<TItem, int, CancellationToken, Task<TResult>> processItem,
-        int numThreads,
-        Func<TResult, TItem, int, CancellationToken, Task>? handleResult = null)
-    {
-        // Use the universal helper
-        await ExecuteWithProgressCoreAsync(
-            items,
-            progressDescription,
-            getItemDescription,
-            parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = numThreads },
-            processItemAsync: processItem,
-            handleResultAsync: handleResult);
-    }
-
-    /// <summary>
-    /// Core implementation shared by both execute with progress functions.
+    /// Core progress loop: processes each item under the given parallelism, then handles its result in a
+    /// semaphore-synchronized section.
     /// </summary>
     /// <typeparam name="TItem">The type of items to process.</typeparam>
     /// <typeparam name="TResult">The type of result returned by the processing function.</typeparam>
