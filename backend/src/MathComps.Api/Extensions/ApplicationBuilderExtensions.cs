@@ -16,10 +16,19 @@ public static class ApplicationBuilderExtensions
     public static IApplicationBuilder ConfigureSecurityPipeline(this IApplicationBuilder app, IWebHostEnvironment environment)
     {
         // Respect reverse proxy headers when hosted behind a proxy
-        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        var forwardedHeadersOptions = new ForwardedHeadersOptions
         {
             ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-        });
+        };
+
+        // Default trust is loopback only; the proxy reaches us from the Docker bridge, so lift the
+        // allowlist. Safe because the API port is closed to the host, so the proxy is the only ingress,
+        // and the default ForwardLimit of 1 reads the rightmost (proxy-appended) entry — unspoofable.
+        forwardedHeadersOptions.KnownIPNetworks.Clear();
+        forwardedHeadersOptions.KnownProxies.Clear();
+
+        // Apply the forwarded headers so RemoteIpAddress is the real client
+        app.UseForwardedHeaders(forwardedHeadersOptions);
 
         // Enforce HSTS for production
         if (environment.IsProduction())
@@ -30,6 +39,10 @@ public static class ApplicationBuilderExtensions
         {
             // No need to index API
             context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
+
+            // Friendly invite for anyone scripting against the API
+            context.Response.Headers.Append("X-Api-Contact",
+                "If you'd like to use our API, it would be very kind if you dropped us an email at contact@mathcomps.fun");
 
             // Prevent clickjacking attacks
             context.Response.Headers.Append("X-Frame-Options", "DENY");
