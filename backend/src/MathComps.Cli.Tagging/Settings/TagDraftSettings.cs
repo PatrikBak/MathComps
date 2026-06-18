@@ -1,10 +1,10 @@
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Infrastructure.Options;
 
 namespace MathComps.Cli.Tagging.Settings;
 
 /// <summary>
-/// Settings for the <see cref="Commands.TagDraftCommand"/> command — the four Gemini passes plus the fit floor.
+/// Settings for the <see cref="Commands.TagDraftCommand"/> command — the prompt template for each of the four
+/// passes and the fit floor.
 /// </summary>
 public class TagDraftSettings
 {
@@ -14,24 +14,24 @@ public class TagDraftSettings
     public const string SectionName = "TagDraftSettings";
 
     /// <summary>
-    /// Generate pass over the statement (Area/Goal/Type tags).
+    /// Prompt path for the generate pass over the statement (Area/Goal/Type tags).
     /// </summary>
-    public required AiModelConfig GenerateStatement { get; set; }
+    public required string GenerateStatement { get; set; }
 
     /// <summary>
-    /// Generate pass over the solution (Technique tags).
+    /// Prompt path for the generate pass over the solution (Technique tags).
     /// </summary>
-    public required AiModelConfig GenerateSolution { get; set; }
+    public required string GenerateSolution { get; set; }
 
     /// <summary>
-    /// Veto pass reviewing the statement's proposed Area/Goal/Type tags.
+    /// Prompt path for the veto pass reviewing the statement's proposed Area/Goal/Type tags.
     /// </summary>
-    public required AiModelConfig VetoStatement { get; set; }
+    public required string VetoStatement { get; set; }
 
     /// <summary>
-    /// Veto pass reviewing the solution's proposed Technique tags.
+    /// Prompt path for the veto pass reviewing the solution's proposed Technique tags.
     /// </summary>
-    public required AiModelConfig VetoSolution { get; set; }
+    public required string VetoSolution { get; set; }
 
     /// <summary>
     /// Generate-pass fitness floor: only slugs scoring at least this reach the veto pass, so marginal guesses never

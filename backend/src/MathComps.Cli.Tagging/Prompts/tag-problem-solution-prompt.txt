@@ -1,5 +1,5 @@
 Classify a math problem using only tags from the JSON below ("CANDIDATE TAGS").
-The tag names are in English, while the problem and solution are in Slovak. The format of
+The problem and its solution are provided in the user message. The tag names are in English. The format of
 the JSON is as follows:
 
 {[tag]: {"description": string}}
@@ -9,22 +9,14 @@ where the description is optional (it can be an empty string).
 CANDIDATE TAGS:
 {candidate_tags}
 
-PROBLEM: {problem_statement}
-SOLUTION: {problem_solution}
-
-{already_assigned_tags_text}
-
 Rules:
 - Use ONLY candidate tags (exact spelling, case-insensitive match). Do not create new tags.
 - Any number of tags may be approved, but they must be relevant. Each tag must be somehow related to the solution.
 - Do not suggest tags just because they are mentioned in the solution; only suggest tags that represent a significant step in the solution.
 
-You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"GoodnessOfFit": float, "Justification": string}}
+Output one entry per candidate tag, each with:
+- "name": the tag name, exactly as given in the candidate list
+- "goodnessOfFit": a real number between 0 and 1 (0 = no fit, 1 = perfect fit)
+- "justification": a short reason for the score
 
-Final check:
-- Each tag from among the candidate tags must appear exactly once in the output JSON.
-- The field "GoodnessOfFit" must be a real number between 0 and 1, representing how good of a fit the tag is (0 = no fit, 1 = perfect fit).
-- Escape all double quotes in strings.
-- Escape all TeX commands. This is very important!
-- The output must be a valid JSON.
+Cover every candidate tag exactly once, and escape all TeX commands in strings — this is very important!

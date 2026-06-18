@@ -1,5 +1,5 @@
 Classify a math problem using only tags from the JSON below ("CANDIDATE TAGS").
-The tag names are in English, while the problem statement is in Slovak. The format of
+The problem statement is provided in the user message. The tag names are in English. The format of
 the JSON is as follows:
 
 {[tag]: {"category": string, "description": string}}
@@ -15,25 +15,20 @@ where 'category' is the category of the tag, and the description is optional
 CANDIDATE TAGS:
 {candidate_tags}
 
-PROBLEM: {problem_statement}
-
-{already_assigned_tags_text}
-
 Rules:
 - Use ONLY candidate tags (exact spelling, case-insensitive match). Do not create new tags.
-- Exactly 1 Area tag must be selected (approved) - prefer the most specific (e.g., "Kombinatorická geometria" not "Geometria" + "Kombinatorika").
+- Exactly 1 Area tag must be selected (approved) - prefer the most specific (e.g., "Combinatorial Geometry" not "Geometry" + "Combinatorics").
+- Choose the Area from the problem's mathematical content and the nature of its goal, NOT from surface keywords. Integers or whole numbers appearing does NOT by itself mean "Number Theory" — reserve that for when divisibility, primes, gcd/lcm, modular arithmetic, perfect squares, or rationality is the crux. Real numbers, equations, inequalities, polynomials, functions, sequences, or optimizing/evaluating an expression point to "Algebra". A grid, table, or board is only a container: real-number entries that are optimized or bounded make the problem "Algebra", whereas discrete cells, colorings, tilings, or counting make it "Combinatorics". A counting or extremal goal ("how many", "largest possible") points to "Combinatorics" only when discrete configurations or arrangements are what is being counted; it does NOT override the content — counting or maximizing over integers governed by arithmetic conditions (differences, divisibility, gcd) can be "Number Theory".
+- "Combinatorial Geometry" is mutually exclusive with "Geometry"/"3D Geometry". Use it ONLY when continuous-plane geometry is essential: points in convex or general position, convex hulls, distances or areas among points/figures, packings and coverings. A problem set on a square grid or lattice of discrete cells (lattice points, diagonals, colorings) is "Combinatorics", NOT this — the grid is a combinatorial structure and the geometry is only a backdrop; if it could be restated as a graph or array problem without losing its essence, it's "Combinatorics". Problems about lengths, angles, circles, or concyclic points are "Geometry"/"3D Geometry".
 - Any number of Type tags may be approved, but they must be relevant.
 - For most problems there should be exactly 1 approved Goal tag. Prefer the most specific Goal tag.
 - Each tag must trivially follow from the problem statement, i.e., there must be no non-trivial inference. Otherwise, it could give away a part of the solution, which we want to avoid.
 - If there are two tags from the same category such that one is more specific than the other, only the more specific tag should be used. (E.g., if the only purpose of
   a tag is that "another relevant tag is defined in terms of it", then it should be rejected.)
 
-You must output a JSON (and only this JSON) with the following format:
-{[tag]: {"GoodnessOfFit": float, "Justification": string}}
+Output one entry per candidate tag, each with:
+- "name": the tag name, exactly as given in the candidate list
+- "goodnessOfFit": a real number between 0 and 1 (0 = no fit, 1 = perfect fit)
+- "justification": a short reason for the score
 
-Final check:
-- Each tag from among the candidate tags must appear exactly once in the output JSON.
-- The field "GoodnessOfFit" must be a real number between 0 and 1, representing how good of a fit the tag is (0 = no fit, 1 = perfect fit).
-- Escape all double quotes in strings. 
-- Escape all TeX commands. This is very important!
-- The output must be a valid JSON
+Cover every candidate tag exactly once, and escape all TeX commands in strings — this is very important!

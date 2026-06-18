@@ -116,4 +116,56 @@ public class DraftTagFilesTests
     [Fact]
     public void AppendTagsBlock_writes_a_standalone_block_when_there_is_no_sidecar() =>
         Assert.Equal("tags: []\n", DraftTagFiles.AppendTagsBlock("", "tags: []"));
+
+    /// <summary>
+    /// Stripping removes a trailing tags block, leaving the keys above it untouched.
+    /// </summary>
+    [Fact]
+    public void StripTagsBlock_removes_a_trailing_block_and_keeps_prior_keys() =>
+        Assert.Equal(
+            "authors:\n  - A",
+            DraftTagFiles.StripTagsBlock("authors:\n  - A\ntags:\n  - algebra # fit 1.0\n  - geometry # fit 0.9\n"));
+
+    /// <summary>
+    /// An explicit empty list is a one-line block and is stripped just the same.
+    /// </summary>
+    [Fact]
+    public void StripTagsBlock_removes_an_empty_list_block() =>
+        Assert.Equal("authors:\n  - A", DraftTagFiles.StripTagsBlock("authors:\n  - A\ntags: []\n"));
+
+    /// <summary>
+    /// With no tags key the yaml comes back untouched.
+    /// </summary>
+    [Fact]
+    public void StripTagsBlock_is_a_no_op_without_a_tags_key() =>
+        Assert.Equal("authors:\n  - A\n", DraftTagFiles.StripTagsBlock("authors:\n  - A\n"));
+
+    /// <summary>
+    /// A tags block sitting above other keys is removed without taking the later keys with it.
+    /// </summary>
+    [Fact]
+    public void StripTagsBlock_keeps_keys_that_follow_the_block() =>
+        Assert.Equal(
+            "authors:\n  - A\nsolutionLink: \"x\"",
+            DraftTagFiles.StripTagsBlock("tags:\n  - algebra # fit 1.0\nauthors:\n  - A\nsolutionLink: \"x\""));
+
+    /// <summary>
+    /// Stripping then re-appending — the re-tag round-trip — leaves exactly one tags block.
+    /// </summary>
+    [Fact]
+    public void StripTagsBlock_then_append_yields_a_single_block()
+    {
+        // A sidecar already carrying tags from a prior run.
+        var existing = "authors:\n  - A\ntags:\n  - old-tag # fit 1.0\n";
+
+        // Strip the old block.
+        var stripped = DraftTagFiles.StripTagsBlock(existing);
+
+        // Append a freshly built one beneath the surviving keys.
+        var result = DraftTagFiles.AppendTagsBlock(
+            stripped, DraftTagFiles.BuildTagsBlock([new DraftTag("new-tag", 1.0f, null)]));
+
+        // Only the new block remains beneath the preserved keys.
+        Assert.Equal("authors:\n  - A\ntags:\n  - new-tag # fit 1.0\n", result);
+    }
 }

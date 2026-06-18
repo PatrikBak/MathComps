@@ -47,7 +47,7 @@
     },
     {
       "slug": "combinatorial-geometry",
-      "description": "This tag is mutually exclusive with the tags 'Geometria' and '3D geometria'. Example terms: convex hulls, packings, tessellations, topology, etc. Make sure that the problem does not fall under (synthetic) geometry; e.g., if it deals with lengths, angles, areas, collinearity, concyclic points, etc., then it's likely a better fit for 'Geometria' or '3D geometria'. Also, if a problem is tagged with this, it should also fall under the area of 'Kombinatorika' (though it shouldn't be tagged as such, due to being less specific).",
+      "description": "This tag is mutually exclusive with the tags 'Geometry' and '3D Geometry'. Example terms: convex hulls, packings, tessellations, topology, etc. Make sure that the problem does not fall under (synthetic) geometry; e.g., if it deals with lengths, angles, areas, collinearity, concyclic points, etc., then it's likely a better fit for 'Geometry' or '3D Geometry'. Also, if a problem is tagged with this, it should also fall under the area of 'Combinatorics' (though it shouldn't be tagged as such, due to being less specific).",
       "names": {
         "SK": "Kombinatorická geometria",
         "EN": "Combinatorial Geometry",
@@ -74,7 +74,7 @@
     },
     {
       "slug": "number-theory",
-      "description": "Associated with natural numbers/integers, divisibility, rationality/irrationality, etc.",
+      "description": "Associated with natural numbers/integers, divisibility, rationality/irrationality, etc. The presence of integers alone is NOT enough — let the goal decide. Choose Number Theory only when the goal is genuinely number-theoretic (e.g. proving a value is a perfect square, divisible, or itself an integer), even when posed as an algebraic equation. If the goal is to count or to maximize the size of a set, it is Combinatorics; if to prove an inequality, it is Algebra — even when the objects are integers.",
       "names": {
         "SK": "Teória čísel",
         "EN": "Number Theory",
@@ -94,7 +94,7 @@
   "goal": [
     {
       "slug": "prove-equivalence",
-      "description": "The objective is to prove equivalence of two propositions. This is usually more specific than 'Všeobecný dôkaz', so use only this tag if both are applicable.",
+      "description": "The objective is to prove equivalence of two propositions. This is usually more specific than 'Prove General Statement', so use only this tag if both are applicable.",
       "names": {
         "SK": "Dôkaz ekvivalencie",
         "EN": "Prove Equivalence",
@@ -148,7 +148,7 @@
     },
     {
       "slug": "geometric-construction",
-      "description": "The task is to construct some geometric object (e.g., a point with some properties) using only certain tools (e.g., compass and straightedge). Implies the area tag 'Geometria' or '3D geometria'. Prefer this over 'Nájdi riešenie' if applicable.",
+      "description": "The task is to construct some geometric object (e.g., a point with some properties) using only certain tools (e.g., compass and straightedge). Implies the area tag 'Geometry' or '3D Geometry'. Prefer this over 'Find Solution' if applicable.",
       "names": {
         "SK": "Geometrická konštrukcia",
         "EN": "Geometric Construction",
@@ -157,7 +157,7 @@
     },
     {
       "slug": "find-solution",
-      "description": "The objective is to construct some object (it is not enough to merely prove existence). This is more specific than 'Dôkaz existencie', so use only this tag if both are applicable. Do not award this if 'Geometrická konštrukcia' could be awarded.",
+      "description": "The objective is to construct some object (it is not enough to merely prove existence). This is more specific than 'Prove Existence', so use only this tag if both are applicable. Do not award this if 'Geometric Construction' could be awarded.",
       "names": {
         "SK": "Nájdi riešenie",
         "EN": "Find Solution",
@@ -166,7 +166,7 @@
     },
     {
       "slug": "find-solution-if-exists",
-      "description": "The objective is to find out if there is a solution, and if there is a solution, find one. This can only be applied to problems where it is not clear whether a solution exists. This is more specific than the tag 'Existuje riešenie?' so use only this tag if both are applicable.",
+      "description": "The objective is to find out if there is a solution, and if there is a solution, find one. This can only be applied to problems where it is not clear whether a solution exists. This is more specific than the tag 'Does Solution Exist?' so use only this tag if both are applicable.",
       "names": {
         "SK": "Nájdi riešenie, ak existuje",
         "EN": "Find Solution If Exists",
@@ -175,7 +175,7 @@
     },
     {
       "slug": "optimization-problem",
-      "description": "Problem where we are looking for a 'best' / minimal / maximal solution according to some metric. For example, in combinatorics, it could be about the smallest number of steps to reach some outcome. In algebra, it could be about minimizing some formula. This is more specific than 'Konštrukčná úloha' (since we are asking for best solution, whereas in constructive problems we are asking only for some solution) -- so if both are applicable, use only this tag.",
+      "description": "Problem where we are looking for a 'best' / minimal / maximal solution according to some metric. For example, in combinatorics, it could be about the smallest number of steps to reach some outcome. In algebra, it could be about minimizing some formula. This is more specific than 'Find Solution' (since we are asking for best solution, whereas in constructive problems we are asking only for some solution) -- so if both are applicable, use only this tag.",
       "names": {
         "SK": "Optimalizačná úloha",
         "EN": "Optimization Problem",
@@ -202,7 +202,7 @@
     },
     {
       "slug": "drawing-strategy",
-      "description": "The objective is, given a game (usually with 2 players), prove that a certain player can play such that they cannot lose, no matter what the other players are doing. Implies the area tag 'Kombinatorika' or 'Kombinatorická geometria'.",
+      "description": "The objective is, given a game (usually with 2 players), prove that a certain player can play such that they cannot lose, no matter what the other players are doing. Implies the area tag 'Combinatorics' or 'Combinatorial Geometry'.",
       "names": {
         "SK": "Remizujúca stratégia",
         "EN": "Drawing Strategy",
@@ -211,7 +211,7 @@
     },
     {
       "slug": "winning-strategy",
-      "description": "The objective is, given a game (usually with 2 players), determine which player has the winning strategy / prove that a given player has a winning strategy. Implies the area tag 'Kombinatorika' or 'Kombinatorická geometria'.",
+      "description": "The objective is, given a game (usually with 2 players), determine which player has the winning strategy / prove that a given player has a winning strategy. Implies the area tag 'Combinatorics' or 'Combinatorial Geometry'.",
       "names": {
         "SK": "Víťazná stratégia",
         "EN": "Winning Strategy",
@@ -348,7 +348,7 @@
     },
     {
       "slug": "game",
-      "description": "",
+      "description": "Award only to combinatorial game problems — typically two players alternating moves (occasionally a solitaire process) — where the task is to determine a winning or drawing strategy, so the Goal is 'Winning Strategy' or 'Drawing Strategy'. Do not award just because the words 'game' or 'play' appear; there must be an actual game whose strategy is analyzed.",
       "names": {
         "SK": "Hra",
         "EN": "Game",
@@ -555,7 +555,7 @@
     },
     {
       "slug": "permutation",
-      "description": "Award only to problems that deal with a permutation of a sequence of objects. Do not award just because a problem involves determining an order of something; the word 'order' (poradie) alone is not enough.",
+      "description": "Award only to problems that deal with a permutation of a sequence of objects. Do not award just because a problem involves determining an order of something; the word 'order' alone is not enough. Pairing or partitioning a set into pairs or groups is a matching, not a permutation.",
       "names": {
         "SK": "Permutácia",
         "EN": "Permutation",
@@ -591,7 +591,7 @@
     },
     {
       "slug": "right-triangle",
-      "description": "",
+      "description": "Award only to problems that are explicitly about a right triangle (one is given, or is the central object of the configuration). Do not award just because a right angle or perpendicular lines appear somewhere in the figure.",
       "names": {
         "SK": "Pravouhlý trojuholník",
         "EN": "Right Triangle",
@@ -600,7 +600,7 @@
     },
     {
       "slug": "mean",
-      "description": "Here we mean an arithmetic or geometric mean, not the diameter of a circle, which is also 'priemer' in Slovak.",
+      "description": "Here we mean an arithmetic or geometric mean, not a circle's diameter.",
       "names": {
         "SK": "Priemer",
         "EN": "Mean",
@@ -654,7 +654,7 @@
     },
     {
       "slug": "square",
-      "description": "If the problem involves a square grid, use the 'Mriežka' tag instead of this one.",
+      "description": "If the problem involves a square grid, use the 'Grid' tag instead of this one.",
       "names": {
         "SK": "Štvorec",
         "EN": "Square",
@@ -663,7 +663,7 @@
     },
     {
       "slug": "system-of-equations",
-      "description": "Use this tag when there is an explicit system of at least two equations in the statement. Do not use both this tag and 'Rovnica'.",
+      "description": "Use this tag when there is an explicit system of at least two simultaneous equations in the statement. A recurrence relation (a single equation parameterized over an index, defining a sequence) is NOT a system — use 'Recurrence Sequence' for that. Do not use both this tag and 'Equation'.",
       "names": {
         "SK": "Sústava rovníc",
         "EN": "System of Equations",

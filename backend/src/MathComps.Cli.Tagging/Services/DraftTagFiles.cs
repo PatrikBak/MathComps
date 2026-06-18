@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using MathComps.Shared.Extensions;
 using MathComps.Shared.Serialization;
 
 namespace MathComps.Cli.Tagging.Services;
@@ -127,29 +128,46 @@ public static class DraftTagFiles
     }
 
     /// <summary>
-    /// Reads the draft's original language from <c>_meta.yaml</c> — the language whose body files the Tagging CLI
-    /// sends to the model.
+    /// Removes a top-level <c>tags:</c> block from a sidecar's yaml, leaving every other key untouched — the
+    /// re-tag path strips the old block before writing the fresh one so the sidecar never ends up with two. Drops
+    /// the <c>tags:</c> line and the indented (and blank) lines that follow it, resuming at the next top-level key.
+    /// A no-op when there is no <c>tags:</c> key.
     /// </summary>
-    /// <param name="folder">The draft folder.</param>
-    /// <returns>The lowercase locale code (e.g. <c>sk</c>).</returns>
-    public static string ReadOriginalLanguage(string folder)
+    /// <param name="yamlText">The sidecar's current contents.</param>
+    /// <returns>The yaml without its <c>tags:</c> block.</returns>
+    public static string StripTagsBlock(string yamlText)
     {
-        // Parse the folder-level metadata.
-        var metaPath = Path.Combine(folder, "_meta.yaml");
-        var mapping = File.ReadAllText(metaPath).FromYaml<Dictionary<string, object>>();
+        // Nothing to strip from an empty sidecar.
+        if (string.IsNullOrWhiteSpace(yamlText))
+            return yamlText;
 
-        // Pull the language field, failing when it's absent or YAML-null, and normalize it.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        return !mapping.TryGetValue("language", out var language) || language is null
-            ? throw new InvalidOperationException($"'{metaPath}' is missing the 'language' field.")
-            : language.ToString()!.Trim().ToLowerInvariant();
+        // Work line by line, normalizing CRLF.
+        var lines = yamlText.Replace("\r\n", "\n").Split('\n');
+
+        // Find the top-level tags key; a leading-whitespace "tags:" is nested and doesn't count.
+        var tagsIndex = Array.FindIndex(lines, line => line.StartsWith("tags:", StringComparison.Ordinal));
+
+        // No tags block — hand the yaml back unchanged.
+        if (tagsIndex == -1)
+            return yamlText;
+
+        // Start scanning right after the tags line.
+        var resumeIndex = tagsIndex + 1;
+
+        // Walk past the block's indented and blank continuation lines, stopping at the next top-level key.
+        while (resumeIndex < lines.Length
+            && (lines[resumeIndex].Length == 0 || char.IsWhiteSpace(lines[resumeIndex][0])))
+            resumeIndex++;
+
+        // Rejoin the keys above the block with whatever top-level keys followed it.
+        return lines.Take(tagsIndex).Concat(lines.Skip(resumeIndex)).ToJoinedString("\n");
     }
 
     /// <summary>
-    /// Discovers the draft's problems by their original-language body files, in ascending problem order.
+    /// Discovers the draft's problems by their body files in the given language, in ascending problem order.
     /// </summary>
     /// <param name="folder">The draft folder.</param>
-    /// <param name="language">The original language code from <see cref="ReadOriginalLanguage"/>.</param>
+    /// <param name="language">The locale code of the body files to discover (e.g. <c>en</c>).</param>
     /// <returns>The problems' body and sidecar paths.</returns>
     public static ImmutableArray<DraftProblemFiles> DiscoverProblems(string folder, string language)
     {
