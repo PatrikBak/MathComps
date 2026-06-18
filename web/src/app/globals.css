@@ -234,42 +234,46 @@ input[type='checkbox']:focus:not(:focus-visible) {
 
 /*
   Custom list marker styles. Class names match the kebab-case AST style
-  identifiers verbatim. bullet and number-dot get no override — they use
-  the default <ul>/<ol> markers.
+  identifiers verbatim. The marker label is drawn with a ::before counter
+  rather than ::marker content — Safari only partially honors `content` on
+  ::marker, so a generated ::before is the portable way to get the parens.
+  bullet and number-dot get no override — they use the default markers.
 */
-.list-style-number-parens {
-  list-style-type: decimal;
-}
-.list-style-number-parens > li::marker {
-  content: '(' counter(list-item, decimal) ')\00a0\00a0';
-}
 
-.list-style-lower-roman-parens {
-  list-style-type: lower-roman;
-}
-.list-style-lower-roman-parens > li::marker {
-  content: '(' counter(list-item, lower-roman) ')\00a0\00a0';
-}
-
-.list-style-upper-roman {
-  list-style-type: upper-roman;
-}
-.list-style-upper-roman > li::marker {
-  content: counter(list-item, upper-roman) ':\00a0\00a0';
-}
-
-.list-style-lower-alpha-parens {
-  list-style-type: lower-alpha;
-}
-.list-style-lower-alpha-parens > li::marker {
-  content: '(' counter(list-item, lower-alpha) ')\00a0\00a0';
-}
-
+/* Drop the native marker and start a list-scoped counter */
+.list-style-number-parens,
+.list-style-lower-roman-parens,
+.list-style-upper-roman,
+.list-style-lower-alpha-parens,
 .list-style-upper-alpha-parens {
-  list-style-type: upper-alpha;
+  list-style: none;
+  counter-reset: list-marker;
 }
-.list-style-upper-alpha-parens > li::marker {
-  content: '(' counter(list-item, upper-alpha) ')\00a0\00a0';
+
+/* Each item bumps the counter */
+.list-style-number-parens > li,
+.list-style-lower-roman-parens > li,
+.list-style-upper-roman > li,
+.list-style-lower-alpha-parens > li,
+.list-style-upper-alpha-parens > li {
+  counter-increment: list-marker;
+}
+
+/* Paint the label as "<value>)  " per style */
+.list-style-number-parens > li::before {
+  content: counter(list-marker, decimal) ')\00a0\00a0';
+}
+.list-style-lower-roman-parens > li::before {
+  content: counter(list-marker, lower-roman) ')\00a0\00a0';
+}
+.list-style-upper-roman > li::before {
+  content: counter(list-marker, upper-roman) ')\00a0\00a0';
+}
+.list-style-lower-alpha-parens > li::before {
+  content: counter(list-marker, lower-alpha) ')\00a0\00a0';
+}
+.list-style-upper-alpha-parens > li::before {
+  content: counter(list-marker, upper-alpha) ')\00a0\00a0';
 }
 
 /*
