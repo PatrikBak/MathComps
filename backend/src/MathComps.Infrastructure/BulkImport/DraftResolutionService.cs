@@ -4,6 +4,7 @@ using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
+using MathComps.Infrastructure.Services.Localization;
 
 namespace MathComps.Infrastructure.BulkImport;
 
@@ -16,7 +17,10 @@ namespace MathComps.Infrastructure.BulkImport;
 /// round's full set of problem orders to check that the import would leave the round contiguous.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
-public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IDraftResolutionService
+/// <param name="metadata">The registry, source of the structural sort orders the preview reconciles against.</param>
+public class DraftResolutionService(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IMetadataLocalizationService metadata) : IDraftResolutionService
 {
     /// <inheritdoc/>
     public async Task<DraftDbPreview> PreviewAsync(
@@ -91,8 +95,63 @@ public class DraftResolutionService(IDbContextFactory<MathCompsDbContext> dbCont
             .Where(order => !postImportOrders.Contains(order))
             .ToImmutableArray();
 
-        // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, and the round's gaps.
-        return new DraftDbPreview(resolutions, textResolutions, missingProblemOrders);
+        // The taxonomy rows apply would renumber to match the registry, plus any row the registry can't place.
+        var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, target);
+
+        // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, the round's gaps,
+        // and the sort-order reconciliation apply would perform.
+        return new DraftDbPreview(
+            resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans);
+    }
+
+    /// <summary>
+    /// Previews the sort-order reconciliation apply would perform: which stored competition, category and round rows
+    /// the registry would renumber, and which rows carry a slug the registry no longer knows. Read-only.
+    /// </summary>
+    /// <param name="context">The read-only context.</param>
+    /// <param name="target">The draft taxonomy, which scopes the round comparison to its competition.</param>
+    /// <returns>The renumbering apply would perform, and the unregistered (orphan) rows blocking it.</returns>
+    private async Task<(ImmutableArray<SortOrderChange> Changes, ImmutableArray<TaxonomyOrphan> Orphans)>
+        PreviewSortOrderAsync(MathCompsDbContext context, DraftTarget target)
+    {
+        // The registry order lookups for each family, returning null for a slug the registry doesn't carry.
+        var (competitionOrderOf, categoryOrderOf, roundOrderOf) =
+            TaxonomyResequencer.RegistryOrders(metadata.Shared, target.CompetitionSlug);
+
+        // The stored competition and category rows, global sort-order spaces.
+        var competitions = await context.Competitions.AsNoTracking()
+            .Select(competition => new { competition.Slug, competition.SortOrder }).ToListAsync();
+        var categories = await context.Categories.AsNoTracking()
+            .Select(category => new { category.Slug, category.SortOrder }).ToListAsync();
+
+        // The target competition's stored rounds, the only round space this draft can shift.
+        var rounds = await context.Rounds.AsNoTracking()
+            .Where(round => round.Competition.Slug == target.CompetitionSlug)
+            .Select(round => new { round.Slug, round.SortOrder }).ToListAsync();
+
+        // The renumbering each family needs; rounds repeat a slug across categories, so collapse equal changes.
+        var changes = TaxonomyResequencer.ComputeChanges(
+                TaxonomyKind.Competition, [.. competitions.Select(row => (row.Slug, row.SortOrder))], competitionOrderOf)
+            .Concat(TaxonomyResequencer.ComputeChanges(
+                TaxonomyKind.Category, [.. categories.Select(row => (row.Slug, row.SortOrder))], categoryOrderOf))
+            .Concat(TaxonomyResequencer.ComputeChanges(
+                TaxonomyKind.Round, [.. rounds.Select(row => (row.Slug, row.SortOrder))], roundOrderOf))
+            .Distinct()
+            .ToImmutableArray();
+
+        // The rows the registry can't place — a non-empty slug (the default round's empty slug is legitimate) with no
+        // registry position. Reported by kind; the round slug repeats across categories, so collapse equal orphans.
+        var orphans = competitions.Where(row => competitionOrderOf(row.Slug) is null)
+            .Select(row => new TaxonomyOrphan(TaxonomyKind.Competition, row.Slug))
+            .Concat(categories.Where(row => categoryOrderOf(row.Slug) is null)
+                .Select(row => new TaxonomyOrphan(TaxonomyKind.Category, row.Slug)))
+            .Concat(rounds.Where(row => row.Slug != "" && roundOrderOf(row.Slug) is null)
+                .Select(row => new TaxonomyOrphan(TaxonomyKind.Round, row.Slug)))
+            .Distinct()
+            .ToImmutableArray();
+
+        // The reconciliation preview.
+        return (changes, orphans);
     }
 
     /// <summary>

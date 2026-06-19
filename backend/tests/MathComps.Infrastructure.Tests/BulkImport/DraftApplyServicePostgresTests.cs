@@ -828,6 +828,203 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Registering a competition in the middle of the registry array shifts the later competitions' positions; apply
+    /// re-sequences the existing rows out of the way first, so the new competition lands without colliding with a
+    /// stored sort order.
+    /// </summary>
+    [Fact]
+    public Task Inserting_a_competition_mid_array_resequences_the_later_competitions() => RunTestAsync(async service =>
+    {
+        // Seed the competitions as they stood before "tst" entered the registry — csmo/memo/imo as a contiguous block.
+        await QueryAsync(async context =>
+        {
+            // The pre-insertion rows, at the orders the registry then dictated.
+            context.Competitions.AddRange(
+                new Competition { Slug = "csmo", SortOrder = 1 },
+                new Competition { Slug = "memo", SortOrder = 2 },
+                new Competition { Slug = "imo", SortOrder = 3 });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a tst problem — tst sits at registry order 2, the slot memo currently holds.
+        var result = await service.ApplyAsync(
+            new DraftTarget("tst", null, "d1", 2024), RoundDate,
+            [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Every competition, the new one included, now carries its registry order.
+        await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
+        {
+            // Check each competition in the final taxonomy.
+            foreach (var slug in new[] { "csmo", "tst", "memo", "imo" })
+            {
+                // The stored row.
+                var competition = await context.Competitions.SingleAsync(entity => entity.Slug == slug);
+
+                // It sits at its registry position.
+                Assert.Equal(metadata.Shared.CompetitionSortOrder(slug), competition.SortOrder);
+            }
+        });
+
+        // The renumbering is reported, memo and imo each shifted up by one.
+        Assert.Contains(new SortOrderChange(TaxonomyKind.Competition, "memo", 2, 3), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange(TaxonomyKind.Competition, "imo", 3, 4), result.SortOrderChanges);
+    });
+
+    /// <summary>
+    /// A non-monotone drift — two competitions in swapped order — is reconciled by the park-then-renumber two-phase,
+    /// which a naive in-place renumber couldn't do without transiently colliding on the unique sort-order index.
+    /// </summary>
+    [Fact]
+    public Task A_swapped_pair_of_competitions_is_resequenced() => RunTestAsync(async service =>
+    {
+        // Seed csmo and memo with their orders swapped relative to the registry (registry puts them at 1 and 3).
+        await QueryAsync(async context =>
+        {
+            // The swapped rows.
+            context.Competitions.AddRange(
+                new Competition { Slug = "csmo", SortOrder = 3 },
+                new Competition { Slug = "memo", SortOrder = 1 });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a csmo problem — apply reconciles the whole competition space before touching the draft's taxonomy.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Both rows now sit at their registry orders, the swap untangled.
+        await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
+        {
+            // csmo dropped to its registry order.
+            var csmo = await context.Competitions.SingleAsync(entity => entity.Slug == "csmo");
+            Assert.Equal(metadata.Shared.CompetitionSortOrder("csmo"), csmo.SortOrder);
+
+            // memo rose to its registry order.
+            var memo = await context.Competitions.SingleAsync(entity => entity.Slug == "memo");
+            Assert.Equal(metadata.Shared.CompetitionSortOrder("memo"), memo.SortOrder);
+        });
+    });
+
+    /// <summary>
+    /// Re-sequencing generalizes to a competition's rounds: a round shifted up in the registry is renumbered on apply.
+    /// </summary>
+    [Fact]
+    public Task Inserting_a_round_mid_array_resequences_the_competition_rounds() => RunTestAsync(async service =>
+    {
+        // Seed csmo with two category-a rounds as they stood before "s"/"ii" entered — i and iii as a contiguous block.
+        await QueryAsync(async context =>
+        {
+            // The owning competition and category.
+            var csmo = new Competition { Slug = "csmo", SortOrder = 1 };
+            var categoryA = new Category { Slug = "a", SortOrder = 1 };
+            context.Competitions.Add(csmo);
+            context.Categories.Add(categoryA);
+
+            // The two rounds at their pre-insertion orders.
+            context.Rounds.AddRange(
+                new Round
+                {
+                    CompetitionId = csmo.Id,
+                    CategoryId = categoryA.Id,
+                    Slug = "i",
+                    CompositeSlug = "csmo-a-i",
+                    SortOrder = 1
+                },
+                new Round
+                {
+                    CompetitionId = csmo.Id,
+                    CategoryId = categoryA.Id,
+                    Slug = "iii",
+                    CompositeSlug = "csmo-a-iii",
+                    SortOrder = 2
+                });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a csmo/a/iii problem — apply reconciles csmo's rounds before reusing the round.
+        var result = await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Round iii now carries its registry order, shifted up from the stored 2.
+        await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
+        {
+            // The stored round.
+            var roundIii = await context.Rounds.SingleAsync(entity => entity.CompositeSlug == "csmo-a-iii");
+
+            // It sits at its registry position among csmo's rounds.
+            Assert.Equal(metadata.Shared.Competition("csmo").RoundSortOrder("iii"), roundIii.SortOrder);
+        });
+
+        // The renumbering is reported.
+        Assert.Contains(new SortOrderChange(TaxonomyKind.Round, "iii", 2, 4), result.SortOrderChanges);
+    });
+
+    /// <summary>
+    /// Re-sequencing generalizes to categories: a category shifted up in the registry is renumbered on apply.
+    /// </summary>
+    [Fact]
+    public Task Inserting_a_category_mid_array_resequences_the_later_categories() => RunTestAsync(async service =>
+    {
+        // Seed categories a and c as they stood before "b" entered — a contiguous a/c block.
+        await QueryAsync(async context =>
+        {
+            // The two categories at their pre-insertion orders.
+            context.Categories.AddRange(
+                new Category { Slug = "a", SortOrder = 1 },
+                new Category { Slug = "c", SortOrder = 2 });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a csmo/a/iii problem — apply reconciles the whole category space before reusing category a.
+        var result = await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Category c now carries its registry order, shifted up from the stored 2.
+        await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
+        {
+            // The stored category.
+            var categoryC = await context.Categories.SingleAsync(entity => entity.Slug == "c");
+
+            // It sits at its registry position.
+            Assert.Equal(metadata.Shared.CategorySortOrder("c"), categoryC.SortOrder);
+        });
+
+        // The renumbering is reported.
+        Assert.Contains(new SortOrderChange(TaxonomyKind.Category, "c", 2, 3), result.SortOrderChanges);
+    });
+
+    /// <summary>
+    /// Applying onto a DB that already agrees with the registry renumbers nothing.
+    /// </summary>
+    [Fact]
+    public Task A_registry_consistent_db_is_not_resequenced() => RunTestAsync(async service =>
+    {
+        // Seed a competition already at its registry order.
+        await QueryAsync(async context =>
+        {
+            // The registry-consistent row.
+            context.Competitions.Add(new Competition { Slug = "csmo", SortOrder = 1 });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a csmo problem onto the consistent DB.
+        var result = await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Nothing drifted, so nothing was re-sequenced.
+        Assert.Empty(result.SortOrderChanges);
+    });
+
+    /// <summary>
     /// Reads the author names credited on the single test problem, in ordinal order.
     /// </summary>
     /// <param name="context">The query context.</param>

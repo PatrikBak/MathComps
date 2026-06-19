@@ -35,6 +35,10 @@ public class DraftApplyService(
         // One tracking context for the whole run.
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
+        // Reconcile the taxonomy sort orders with the registry before creating anything, so a mid-list insertion
+        // frees the slot the new entity will claim instead of colliding with an existing row's stored order.
+        var sortOrderChanges = await ResequenceTaxonomyAsync(context, target);
+
         // The composite slug keys both the round lookup and every problem slug, so derive it once.
         var compositeRoundSlug = TaxonomySlugs.ComposeRoundSlug(
             target.CompetitionSlug, target.CategorySlug, target.RoundSlug);
@@ -129,7 +133,48 @@ public class DraftApplyService(
         // The run summary.
         return new DraftApplyResult(
             entities.ToImmutable(), appliedTexts.ToImmutable(),
-            problemsInserted, problemsUpdated, problemsUnchanged, imagesUploaded, imagesSkipped);
+            problemsInserted, problemsUpdated, problemsUnchanged, imagesUploaded, imagesSkipped,
+            sortOrderChanges);
+    }
+
+    /// <summary>
+    /// Brings the taxonomy sort orders this draft can shift back in line with the registry before any new row is
+    /// created: the global competition and category spaces, plus the target competition's rounds. Each family is
+    /// renumbered with the two-phase, never-transiently-colliding update in <see cref="TaxonomyResequencer"/>.
+    /// </summary>
+    /// <param name="context">The tracking write context.</param>
+    /// <param name="target">The draft taxonomy, which scopes the round renumbering to its competition.</param>
+    /// <returns>Every row renumbered, collapsed so a round slug shared across categories reports once.</returns>
+    private async Task<ImmutableArray<SortOrderChange>> ResequenceTaxonomyAsync(
+        MathCompsDbContext context, DraftTarget target)
+    {
+        // The registry order lookups for each family, returning null for a slug the registry doesn't carry.
+        var (competitionOrderOf, categoryOrderOf, roundOrderOf) =
+            TaxonomyResequencer.RegistryOrders(metadata.Shared, target.CompetitionSlug);
+
+        // The tracked rows in each family this draft can shift; a net-new competition has no rounds yet.
+        var competitions = await context.Competitions.ToListAsync();
+        var categories = await context.Categories.ToListAsync();
+        var rounds = await context.Rounds
+            .Where(round => round.Competition.Slug == target.CompetitionSlug).ToListAsync();
+
+        // Renumber each family to the registry, collecting what moved.
+        var changes = ImmutableArray.CreateBuilder<SortOrderChange>();
+        changes.AddRange(await TaxonomyResequencer.ResequenceAsync(
+            context, TaxonomyKind.Competition, competitions,
+            competition => competition.Slug, competition => competition.SortOrder,
+            (competition, order) => competition.SortOrder = order, competitionOrderOf));
+        changes.AddRange(await TaxonomyResequencer.ResequenceAsync(
+            context, TaxonomyKind.Category, categories,
+            category => category.Slug, category => category.SortOrder,
+            (category, order) => category.SortOrder = order, categoryOrderOf));
+        changes.AddRange(await TaxonomyResequencer.ResequenceAsync(
+            context, TaxonomyKind.Round, rounds,
+            round => round.Slug, round => round.SortOrder,
+            (round, order) => round.SortOrder = order, roundOrderOf));
+
+        // A round slug repeats across categories, so collapse equal changes for the report.
+        return [.. changes.Distinct()];
     }
 
     /// <summary>
