@@ -92,6 +92,40 @@ public record ProblemTextResolution(
     DraftTextAction Action);
 
 /// <summary>
+/// A taxonomy family whose sort order the registry defines and apply reconciles.
+/// </summary>
+public enum TaxonomyKind
+{
+    /// <summary>A competition — a global sort-order space.</summary>
+    Competition,
+
+    /// <summary>A category — a global sort-order space.</summary>
+    Category,
+
+    /// <summary>A round — a per-competition sort-order space.</summary>
+    Round
+}
+
+/// <summary>
+/// One existing taxonomy row whose stored sort order no longer matches its registry position — applying the draft
+/// renumbers it from <see cref="FromOrder"/> to <see cref="ToOrder"/> to bring the DB back in line with
+/// <c>metadata.shared.json</c>.
+/// </summary>
+/// <param name="Kind">The kind of taxonomy entity.</param>
+/// <param name="Slug">The entity's slug (a round's plain slug).</param>
+/// <param name="FromOrder">The sort order currently stored.</param>
+/// <param name="ToOrder">The sort order the registry dictates.</param>
+public record SortOrderChange(TaxonomyKind Kind, string Slug, int FromOrder, int ToOrder);
+
+/// <summary>
+/// An existing taxonomy row whose slug is absent from <c>metadata.shared.json</c> — the registry can't place it,
+/// so its sort order can't be reconciled and apply would risk a collision. A hard error.
+/// </summary>
+/// <param name="Kind">The kind of taxonomy entity.</param>
+/// <param name="Slug">The unregistered slug.</param>
+public record TaxonomyOrphan(TaxonomyKind Kind, string Slug);
+
+/// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
 /// would need creating, and — for every text variant whose problem slug already exists — what the import would do
 /// to it given that text's language and originality. Produced by querying only — no rows written.
@@ -108,7 +142,17 @@ public record ProblemTextResolution(
 /// orders already in the DB and the draft's orders. Empty when the round would be contiguous; non-empty flags an
 /// import that would leave (or create) a gap-numbered round.
 /// </param>
+/// <param name="SortOrderChanges">
+/// The existing competition, category and round rows whose stored sort order applying the draft would renumber to
+/// match the registry — empty when the DB already agrees with <c>metadata.shared.json</c>.
+/// </param>
+/// <param name="Orphans">
+/// The existing competition, category and round rows whose slug is absent from <c>metadata.shared.json</c> — empty
+/// in the normal case; non-empty blocks the import.
+/// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<ProblemTextResolution> TextResolutions,
-    ImmutableArray<int> MissingProblemOrders);
+    ImmutableArray<int> MissingProblemOrders,
+    ImmutableArray<SortOrderChange> SortOrderChanges,
+    ImmutableArray<TaxonomyOrphan> Orphans);

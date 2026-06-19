@@ -58,6 +58,19 @@ public static class ApplyReport
         var skipped = result.Applied.ImagesSkipped > 0 ? $", {result.Applied.ImagesSkipped} skipped" : "";
         AnsiConsole.MarkupLine($"\n[bold]Images[/]: {result.Applied.ImagesUploaded} uploaded{skipped}");
 
+        // The sort-order reconciliation this run performed to match the registry — only shown when something moved.
+        if (!result.Applied.SortOrderChanges.IsEmpty)
+        {
+            // The re-sequencing header.
+            AnsiConsole.MarkupLine("\n[bold]Re-sequenced[/]:");
+
+            // One line per renumbered row.
+            foreach (var change in result.Applied.SortOrderChanges)
+                AnsiConsole.MarkupLine(
+                    $"  [yellow]{change.Kind.ToString().ToLowerInvariant()} {Escape(change.Slug)}[/] "
+                    + $"{change.FromOrder}→{change.ToOrder}");
+        }
+
         // Any non-blocking warnings the run proceeded through (e.g. overwrites of live texts).
         RenderWarnings(result.Warnings);
 

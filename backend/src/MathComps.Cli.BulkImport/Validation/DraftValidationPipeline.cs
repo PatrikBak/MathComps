@@ -114,6 +114,14 @@ public class DraftValidationPipeline(
                     VerdictSeverity.Error));
             }
 
+            // A stored taxonomy row the registry can't place blocks the import — its sort order can't be reconciled,
+            // and leaving it risks the very collision the re-sequencing exists to prevent.
+            foreach (var orphan in preview.Orphans)
+                previewIssues.Add(new VerdictError(
+                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "taxonomy-orphan",
+                    $"{orphan.Kind.ToString().ToLowerInvariant()} '{orphan.Slug}' exists in the DB but not in "
+                    + "metadata.shared.json — register it (or remove the row) before importing", VerdictSeverity.Error));
+
             // Hand back the preview and the issues it surfaced.
             return (preview, previewIssues);
         }

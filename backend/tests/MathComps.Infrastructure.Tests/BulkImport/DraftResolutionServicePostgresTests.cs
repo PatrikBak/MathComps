@@ -3,6 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MathComps.Domain.Localization;
 
@@ -21,9 +22,14 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     : PostgresTestBase<IDraftResolutionService>(fixture)
 {
     /// <inheritdoc/>
-    protected override void ConfigureServices(IServiceCollection services) =>
-        // Register the bulk-import module the test resolves from
+    protected override void ConfigureServices(IServiceCollection services)
+    {
+        // The bulk-import module the test resolves from.
         services.AddBulkImport();
+
+        // The metadata registry the resolution service reconciles sort orders against.
+        services.AddLocalization();
+    }
 
     /// <summary>
     /// The slug of the one seeded text problem — it carries a Slovak original statement and an English statement
@@ -488,6 +494,82 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
 
         // The reproduced body matches the stored one, so the re-import is unchanged.
         Assert.Equal(DraftTextAction.UnchangedOriginal, ResolutionFor(preview, DocumentType.Statement).Action);
+    });
+
+    /// <summary>
+    /// The preview reports the sort-order reconciliation apply would perform: the seeded memo competition and the
+    /// seeded csmo round iii both drifted from their registry positions, so each is reported as a renumbering.
+    /// </summary>
+    [Fact]
+    public Task The_preview_reports_the_sort_order_reconciliation() => RunTestAsync(async service =>
+    {
+        // Preview a draft against the seeded round — the reconciliation is global, not specific to this draft.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // The seeded memo competition sits at 2 but the registry puts it at 3.
+        Assert.Contains(new SortOrderChange(TaxonomyKind.Competition, "memo", 2, 3), preview.SortOrderChanges);
+
+        // The seeded csmo round iii sits at 1 but the registry puts it at 4.
+        Assert.Contains(new SortOrderChange(TaxonomyKind.Round, "iii", 1, 4), preview.SortOrderChanges);
+    });
+
+    /// <summary>
+    /// A stored competition whose slug the registry doesn't carry is surfaced as an orphan — its sort order can't be
+    /// reconciled, so the preview flags it for the pipeline to block on.
+    /// </summary>
+    [Fact]
+    public Task An_unregistered_competition_is_flagged_as_an_orphan() => RunTestAsync(async service =>
+    {
+        // Seed a competition whose slug is absent from the registry.
+        await QueryAsync(async context =>
+        {
+            // The unregistered row.
+            context.Competitions.Add(new Competition { Id = Guid.NewGuid(), Slug = "notacomp", SortOrder = 99 });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Preview a draft — the orphan scan is global, not specific to this draft.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // The unregistered competition is reported as an orphan.
+        Assert.Contains(new TaxonomyOrphan(TaxonomyKind.Competition, "notacomp"), preview.Orphans);
+    });
+
+    /// <summary>
+    /// A stored round whose slug the registry doesn't carry is surfaced as an orphan — without it a removed round
+    /// slug squatting on a registry sort order would pass validate and then collide on apply.
+    /// </summary>
+    [Fact]
+    public Task An_unregistered_round_is_flagged_as_an_orphan() => RunTestAsync(async service =>
+    {
+        // Seed a round under the seeded csmo competition whose slug is absent from csmo's registry round list.
+        await QueryAsync(async context =>
+        {
+            // The owning competition.
+            var csmo = await context.Competitions.SingleAsync(competition => competition.Slug == "csmo");
+
+            // The unregistered round hanging off it.
+            context.Rounds.Add(new Round
+            {
+                Id = Guid.NewGuid(),
+                CompetitionId = csmo.Id,
+                Slug = "zz",
+                CompositeSlug = "csmo-a-zz",
+                SortOrder = 9,
+                IsDefault = false
+            });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Preview a csmo draft — the round orphan scan is scoped to the target competition.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // The unregistered round is reported as an orphan.
+        Assert.Contains(new TaxonomyOrphan(TaxonomyKind.Round, "zz"), preview.Orphans);
     });
 
     /// <summary>

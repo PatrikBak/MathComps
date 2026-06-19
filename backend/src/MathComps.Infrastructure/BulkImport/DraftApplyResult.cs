@@ -45,6 +45,8 @@ public record AppliedText(
 /// <param name="ProblemsUnchanged">How many existing problems matched the draft exactly, so nothing was written.</param>
 /// <param name="ImagesUploaded">How many images were pushed to remote storage.</param>
 /// <param name="ImagesSkipped">How many images were skipped because their bytes were already on remote storage.</param>
+/// <param name="SortOrderChanges">The existing taxonomy rows this run renumbered to match the registry — empty when
+/// the DB already agreed with <c>metadata.shared.json</c>.</param>
 public record DraftApplyResult(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<AppliedText> Texts,
@@ -52,4 +54,5 @@ public record DraftApplyResult(
     int ProblemsUpdated,
     int ProblemsUnchanged,
     int ImagesUploaded,
-    int ImagesSkipped);
+    int ImagesSkipped,
+    ImmutableArray<SortOrderChange> SortOrderChanges);
