@@ -2,6 +2,35 @@ import katex from 'katex'
 
 import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 
+import { MATH_NOWRAP_CLASS, takeLeadingGlue, takeTrailingGlue } from './math-nowrap'
+
+/** A run of plain prose between formulas, awaiting HTML-escaping. */
+type TextSegment = {
+  /** The discriminator. */
+  kind: 'text'
+  /** The raw (unescaped) prose text. */
+  text: string
+}
+
+/** A rendered inline formula that still needs its hugging punctuation glued on. */
+type InlineMathSegment = {
+  /** The discriminator. */
+  kind: 'inlineMath'
+  /** The KaTeX-rendered inline HTML. */
+  html: string
+}
+
+/** A rendered display formula occupying its own line. */
+type DisplayMathSegment = {
+  /** The discriminator. */
+  kind: 'displayMath'
+  /** The KaTeX-rendered block HTML. */
+  html: string
+}
+
+/** One classified piece of split math content. */
+type ContentSegment = TextSegment | InlineMathSegment | DisplayMathSegment
+
 /**
  * Flattens a parsed inline content block back to its raw source string, wrapping
  * math nodes in `$...$` / `$$...$$` and recursing through paragraph/bold/italic
@@ -38,19 +67,24 @@ export function inlineBlockToMathSource(block: RawContentBlock | null | undefine
 /**
  * Renders a string containing inline ($...$) and display ($$...$$) LaTeX to HTML using KaTeX.
  *
- * - Inline math is rendered with displayMode=false
+ * - Inline math is rendered with displayMode=false, wrapped together with any
+ *   punctuation hugging it so a trailing period or leading bracket can't orphan
+ *   onto its own line (see {@link MATH_NOWRAP_CLASS})
  * - Display math is rendered with displayMode=true
  * - Plain text is HTML-escaped to avoid XSS
  */
 export function renderMathContentToHtml(content: string): string {
+  // Nothing to render for empty or non-string input
   if (!content || typeof content !== 'string') {
     return ''
   }
 
   try {
+    // Split on inline ($...$) and display ($$...$$) delimiters, keeping the matches
     const regex = /(\$\$[\s\S]*?\$\$|\$[^$\n]*?\$)/g
     const parts = content.split(regex)
 
+    // Escape text destined for raw HTML output (XSS-safe)
     const escapeHtml = (text: string) =>
       text
         .replace(/&/g, '&amp;')
@@ -59,6 +93,7 @@ export function renderMathContentToHtml(content: string): string {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;')
 
+    // Shared KaTeX options for both inline and display rendering
     const options: katex.KatexOptions = {
       throwOnError: false,
       displayMode: false,
@@ -68,35 +103,82 @@ export function renderMathContentToHtml(content: string): string {
       macros: {},
     }
 
-    const rendered: string[] = []
+    // Classify each split part into a typed segment, rendering math up front
+    const segments: ContentSegment[] = []
     for (const part of parts) {
+      // Skip the empty strings split() interleaves
       if (!part) continue
+
+      // Detect the delimiter shape
       const isDisplay = part.startsWith('$$') && part.endsWith('$$')
       const isInline = !isDisplay && part.startsWith('$') && part.endsWith('$')
+
+      // Display math ($$…$$) renders on its own line
       if (isDisplay) {
+        // Strip the $$ fence and any surrounding padding
         const body = part.slice(2, -2).trim()
         try {
-          rendered.push(katex.renderToString(body, { ...options, displayMode: true }))
-        } catch (error) {
-          console.warn('KaTeX display math rendering error:', error)
-          rendered.push(escapeHtml(part))
+          // Hand the body to KaTeX in display mode
+          const html = katex.renderToString(body, { ...options, displayMode: true })
+          segments.push({ kind: 'displayMath', html })
+        } catch {
+          // Fall back to showing the raw delimited source as text
+          segments.push({ kind: 'text', text: part })
         }
       } else if (isInline) {
+        // Inline math ($…$): strip the fences
         const body = part.slice(1, -1)
         try {
-          rendered.push(katex.renderToString(body, options))
-        } catch (error) {
-          console.warn('KaTeX inline math rendering error:', error)
-          rendered.push(escapeHtml(part))
+          // Render inline; the glue pass below adds the hugging punctuation
+          const html = katex.renderToString(body, options)
+          segments.push({ kind: 'inlineMath', html })
+        } catch {
+          // Fall back to showing the raw delimited source as text
+          segments.push({ kind: 'text', text: part })
         }
       } else {
-        rendered.push(escapeHtml(part))
+        // Plain prose between formulas
+        segments.push({ kind: 'text', text: part })
       }
     }
 
-    return rendered.join('')
-  } catch (error) {
-    console.error('Math rendering error:', error)
-    return content // Return original content if rendering fails
+    // Glue pass: pull the punctuation hugging each inline formula into a nowrap
+    // wrapper so a trailing period or leading bracket can't orphan to its own line
+    segments.forEach((segment, index) => {
+      // Only inline math needs the nowrap treatment
+      if (segment.kind !== 'inlineMath') return
+
+      // Pull the trailing run off the preceding text segment (e.g. an opening bracket)
+      let leadingGlue = ''
+      const previous = segments[index - 1]
+      if (previous?.kind === 'text') {
+        const split = takeTrailingGlue(previous.text)
+        leadingGlue = split.glue
+        previous.text = split.rest
+      }
+
+      // Pull the leading run off the following text segment (e.g. a trailing period)
+      let trailingGlue = ''
+      const next = segments[index + 1]
+      if (next?.kind === 'text') {
+        const split = takeLeadingGlue(next.text)
+        trailingGlue = split.glue
+        next.text = split.rest
+      }
+
+      // Wrap the formula plus its hugging punctuation in one nowrap span
+      segment.html =
+        `<span class="${MATH_NOWRAP_CLASS}">` +
+        `${escapeHtml(leadingGlue)}${segment.html}${escapeHtml(trailingGlue)}` +
+        `</span>`
+    })
+
+    // Assemble: escape text segments, emit math HTML verbatim
+    return segments
+      .map((segment) => (segment.kind === 'text' ? escapeHtml(segment.text) : segment.html))
+      .join('')
+  } catch {
+    // Hand back the unprocessed source so the caller still shows something
+    return content
   }
 }
