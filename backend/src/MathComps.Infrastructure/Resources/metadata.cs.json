@@ -24,6 +24,10 @@
       "shortName": "EGMO",
       "fullName": "European Girl's Mathematical Olympiad"
     },
+    "emo": {
+      "shortName": "EMO",
+      "fullName": "European Mathematical Olympiad"
+    },
     "tstc": {
       "shortName": "Výběrko CPSJ",
       "fullName": "Výběrové soustředění před CPSJ"
@@ -31,6 +35,10 @@
     "cpsj": {
       "shortName": "CPSJ",
       "fullName": "Czech-Polish-Slovak Junior Match"
+    },
+    "duogeo": {
+      "shortName": "DuoGeo",
+      "fullName": "DuoGeo"
     }
   },
   "rounds": {
@@ -185,6 +193,14 @@
     "tst-d5": {
       "shortName": "5. den",
       "fullName": "5. den"
+    },
+    "duogeo-zs": {
+      "shortName": "ZŠ",
+      "fullName": "Kategorie ZŠ"
+    },
+    "duogeo-ss": {
+      "shortName": "SŠ",
+      "fullName": "Kategorie SŠ"
     }
   },
   "categories": {

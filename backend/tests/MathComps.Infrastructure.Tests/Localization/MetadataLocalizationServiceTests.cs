@@ -27,8 +27,8 @@ public class MetadataLocalizationServiceTests
         // Pull just the slugs in their declared order.
         var slugs = _service.Shared.Competitions.Select(competition => competition.Slug);
 
-        // CSMO first … CPSJ last.
-        Assert.Equal(["csmo", "tst", "memo", "imo", "caps", "egmo", "tstc", "cpsj"], slugs);
+        // CSMO first … DuoGeo last.
+        Assert.Equal(["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo"], slugs);
     }
 
     /// <summary>
@@ -66,6 +66,7 @@ public class MetadataLocalizationServiceTests
     [InlineData("memo", new[] { "i", "t" })]
     [InlineData("cpsj", new[] { "i", "t" })]
     [InlineData("tst", new[] { "d1", "d2", "d3", "d4", "d5" })]
+    [InlineData("duogeo", new[] { "zs", "ss" })]
     public void Shared_category_less_competitions_have_rounds_but_no_categories(string slug, string[] rounds)
     {
         // Look up the competition by slug.
@@ -85,6 +86,7 @@ public class MetadataLocalizationServiceTests
     [InlineData("imo")]
     [InlineData("caps")]
     [InlineData("egmo")]
+    [InlineData("emo")]
     [InlineData("tstc")]
     public void Shared_default_round_competitions_have_no_categories_and_no_rounds(string slug)
     {
@@ -125,6 +127,9 @@ public class MetadataLocalizationServiceTests
     [InlineData(Language.EN, "memo", null, "i", "Individual", "Individual Round")]
     [InlineData(Language.EN, "memo", null, "t", "Team", "Team Round")]
     [InlineData(Language.EN, "tst", null, "d1", "Day 1", "Day 1")]
+    // DuoGeo's two school-level rounds.
+    [InlineData(Language.EN, "duogeo", null, "zs", "Elementary", "Elementary School")]
+    [InlineData(Language.SK, "duogeo", null, "ss", "SŠ", "Kategória SŠ")]
     // Slovak — category-dependent difference (Krajské vs Okresné kolo).
     [InlineData(Language.SK, "csmo", "a", "ii", "Krajské kolo", "Krajské kolo")]
     [InlineData(Language.SK, "csmo", "z5", "ii", "Okresné kolo", "Okresné kolo")]
@@ -162,6 +167,7 @@ public class MetadataLocalizationServiceTests
     [Theory]
     [InlineData(Language.EN, "imo", "IMO", "International Mathematical Olympiad")]
     [InlineData(Language.EN, "egmo", "EGMO", "European Girl's Mathematical Olympiad")]
+    [InlineData(Language.EN, "emo", "EMO", "European Mathematical Olympiad")]
     [InlineData(Language.SK, "caps", "CAPS", "Czech-Austrian-Polish-Slovak Match")]
     public void Default_round_falls_back_to_competition_name(
         Language language,
@@ -244,8 +250,12 @@ public class MetadataLocalizationServiceTests
         foreach (var round in new[] { "d1", "d2", "d3", "d4", "d5" })
             yield return ("tst", null, round);
 
+        // DuoGeo runs two school-level rounds.
+        foreach (var round in new[] { "zs", "ss" })
+            yield return ("duogeo", null, round);
+
         // Default-round competitions resolve via the null-round fallback.
-        foreach (var competition in new[] { "imo", "caps", "egmo", "tstc" })
+        foreach (var competition in new[] { "imo", "caps", "egmo", "emo", "tstc" })
             yield return (competition, null, null);
     }
 
