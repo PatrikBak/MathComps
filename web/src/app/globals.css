@@ -237,7 +237,7 @@ input[type='checkbox']:focus:not(:focus-visible) {
   identifiers verbatim. The marker label is drawn with a ::before counter
   rather than ::marker content — Safari only partially honors `content` on
   ::marker, so a generated ::before is the portable way to get the parens.
-  bullet and number-dot get no override — they use the default markers.
+  bullet and number-dot use native disc / decimal markers, set explicitly below.
 */
 
 /* Drop the native marker and start a list-scoped counter */
@@ -276,6 +276,26 @@ input[type='checkbox']:focus:not(:focus-visible) {
   content: counter(list-marker, upper-alpha) ')\00a0\00a0';
 }
 
+/* Native disc / decimal markers — the type is set explicitly since the global reset clears list-style */
+.list-style-bullet {
+  list-style-type: disc;
+}
+.list-style-number-dot {
+  list-style-type: decimal;
+}
+
+/* Hang the marker in a left gutter so wrapped lines align under the text, not under the marker.
+   Covers the native-marker lists — Tailwind list-disc / list-decimal and the bullet / number-dot
+   directive styles — at any nesting depth; the renderer tags every list `list-inside`, which this
+   overrides. */
+.math-typography ul.list-disc,
+.math-typography ol.list-decimal,
+.math-typography .list-style-bullet,
+.math-typography .list-style-number-dot {
+  list-style-position: outside;
+  padding-left: 1.3em;
+}
+
 /*
   Math/serif typography. Compact base size; the .math-prose modifier opts
   into the larger fluid size and prose-width cap for long-form reading.
@@ -285,6 +305,7 @@ input[type='checkbox']:focus:not(:focus-visible) {
   font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.05rem);
   line-height: 1.7;
   text-rendering: optimizeLegibility;
+  hyphens: none;
 }
 
 /* Larger fluid serif with capped width */
@@ -340,6 +361,14 @@ input[type='checkbox']:focus:not(:focus-visible) {
 /* Inline math overflow handling for mobile */
 .math-inline {
   display: inline;
+  white-space: nowrap;
+}
+
+/* Glues rendered inline math to the punctuation hugging it on either side, so a
+   period/comma after a formula — or a bracket before one — can't orphan onto its
+   own line. KaTeX's inline-block base is an atomic inline that otherwise invites
+   a soft-wrap break on both sides of the formula. */
+.math-nowrap {
   white-space: nowrap;
 }
 
@@ -426,10 +455,14 @@ input[type='checkbox']:focus:not(:focus-visible) {
   font-variant-numeric: tabular-nums;
 }
 
-/* Slightly comfier paragraph wrapping (Chrome/Safari support) */
+/* Comfier prose wrapping — but not in paragraphs with inline math, where WebKit's pretty mishandles
+   the atomic (nowrap) math spans and orphans the word before an equation onto its own line. */
 @supports (text-wrap: pretty) {
   .math-typography p {
     text-wrap: pretty;
+  }
+  .math-typography p:has(.katex) {
+    text-wrap: auto;
   }
 }
 

@@ -11,6 +11,7 @@ import remarkRehype from 'remark-rehype'
 import type { PluggableList } from 'unified'
 import { unified } from 'unified'
 
+import { rehypeMathNowrap } from '../plugins/rehype-math-nowrap'
 import { remarkImageParams } from '../plugins/remark-image-params'
 import { remarkInlineQuote } from '../plugins/remark-inline-quote'
 import { remarkListStyle } from '../plugins/remark-list-style'
@@ -83,12 +84,15 @@ export const remarkPlugins: PluggableList = [
  * Rehype plugins shared by `<Markdown>` and the headless validator.
  * `rehype-raw` parses any embedded HTML, `rehype-sanitize` enforces the
  * custom schema, then `rehype-katex` renders math. Sanitize runs BEFORE
- * KaTeX so KaTeX's own attribute output is not stripped.
+ * KaTeX so KaTeX's own attribute output is not stripped. Finally,
+ * `rehype-math-nowrap` wraps the rendered inline math so punctuation can't
+ * orphan to the next line.
  */
 export const rehypePlugins: PluggableList = [
   rehypeRaw,
   [rehypeSanitize, sanitizeSchema],
   rehypeKatex,
+  rehypeMathNowrap,
 ]
 
 /**
@@ -119,6 +123,7 @@ function createValidationProcessor() {
     .use(rehypeRaw)
     .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeKatex)
+    .use(rehypeMathNowrap)
     .use(rehypeStringify)
 }
 
