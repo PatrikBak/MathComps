@@ -50,6 +50,11 @@
       "rounds": []
     },
     {
+      "slug": "emo",
+      "categories": null,
+      "rounds": []
+    },
+    {
       "slug": "egmo",
       "categories": null,
       "rounds": []
@@ -65,6 +70,14 @@
       "rounds": [
         "i",
         "t"
+      ]
+    },
+    {
+      "slug": "duogeo",
+      "categories": null,
+      "rounds": [
+        "zs",
+        "ss"
       ]
     }
   ],

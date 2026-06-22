@@ -1,5 +1,20 @@
 [
   {
+    "id": "w69sBX8IsHshJKp9aGud5",
+    "slug": "archive-update-emo-duogeo",
+    "title": {
+      "sk": "Väčšia aktualizácia archívu",
+      "en": "Major Archive Update",
+      "cs": "Větší aktualizace archivu"
+    },
+    "date": "2026-06-22",
+    "category": "archive",
+    "cover": {
+      "kind": "icon",
+      "name": "trophy"
+    }
+  },
+  {
     "id": "GHQXMtHbpbtUPDtz2jmYs",
     "slug": "kombinatoricke-hry",
     "title": {
