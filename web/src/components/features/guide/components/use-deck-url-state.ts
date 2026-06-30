@@ -1,9 +1,8 @@
 import { useSearchParams } from 'next/navigation'
 import { useLocale } from 'next-intl'
-import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { type Locale, ROUTES } from '@/i18n/i18n'
-import { useRouter } from '@/i18n/navigation'
+import { type Locale } from '@/i18n/i18n'
 
 import { GUIDE_PAGES, type GuidePage } from '../content/guide-content-types'
 import { EMPTY_FILTERS, type GuideFilters } from '../content/guide-filters'
@@ -28,8 +27,8 @@ export type DeckUrlState = {
 /**
  * Owns the guide deck's source of truth: the active page and every page's filters live in the URL,
  * backed by an in-session memory so switching back to a page restores its filters. Navigation scrolls
- * the deck up to its sticky top, then writes the new view to the URL as a non-urgent transition so
- * paging stays snappy.
+ * the deck up to its sticky top, then writes the new view to the URL via the History API, without a
+ * server navigation.
  *
  * @param scrollToStickyTop - Glides the deck's top flush beneath the site header (upward only).
  *
@@ -40,10 +39,6 @@ export function useDeckUrlState(scrollToStickyTop: () => void): DeckUrlState {
   const searchParams = useSearchParams()
   // The active locale (drives localized URL encoding)
   const locale = useLocale() as Locale
-  // Router for writing the page/filter state back to the URL
-  const router = useRouter()
-  // Mark URL writes as non-urgent so paging stays snappy under load
-  const [, startTransition] = useTransition()
 
   // Decode the active page + its filters from the URL
   const urlState = useMemo(
@@ -77,11 +72,13 @@ export function useDeckUrlState(scrollToStickyTop: () => void): DeckUrlState {
     (page: GuidePage, filters: GuideFilters) => {
       // Encode to a localized query string (empty when pristine)
       const queryString = encodeDeckState({ page, filters }, locale)
-      const url = queryString ? `${ROUTES.GUIDE}?${queryString}` : ROUTES.GUIDE
-      // Replace without scrolling or polluting history
-      startTransition(() => router.replace(url, { scroll: false }))
+      // Build the target URL, swapping only the query onto the current localized path
+      const path = window.location.pathname
+      const url = queryString ? `${path}?${queryString}` : path
+      // Write it via the History API, not the router, to avoid an RSC refetch on every navigation
+      window.history.replaceState(null, '', url)
     },
-    [locale, router]
+    [locale]
   )
 
   // Navigate the deck to a page index — an instant swap, scrolled up to the sticky top
