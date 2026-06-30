@@ -9,7 +9,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { getDisplayDomain } from '@/components/shared/utils/url-utils'
 
 import { InternationalCard } from '../components/guide-card-adapters'
-import { SCHOOL_LEVEL_BORDER_COLORS, SCHOOL_LEVEL_COLORS } from '../content/guide-colors'
+import { SCHOOL_LEVEL_COLORS, SCHOOL_LEVEL_PANEL_COLORS } from '../content/guide-colors'
 import { GUIDE_CONTENT } from '../content/guide-content'
 import type { Country, SchoolLevel } from '../content/guide-content-types'
 import { BulletList } from '../layout/BulletList'
@@ -66,7 +66,7 @@ function OrganizationLink({ href, country, name, accent }: OrganizationLinkProps
  * Props for the {@link CategoryCard} component.
  */
 type CategoryCardProps = {
-  /** The school level this category targets (drives the title color + border accent). */
+  /** The school level this category targets (drives the title color + panel tint). */
   level: SchoolLevel
   /** The card title. */
   title: string
@@ -75,17 +75,12 @@ type CategoryCardProps = {
 }
 
 /**
- * A category card (elementary / high school) with a level-colored title and left-border accent.
+ * A category card (elementary / high school) with a level-colored title and a faint level tint.
  */
 function CategoryCard({ level, title, items }: CategoryCardProps) {
-  // The level-colored card: a title over its bullets
+  // The level-tinted card: a title over its bullets
   return (
-    <div
-      className={cn(
-        'rounded-r-xl border border-l-4 border-foreground/10 bg-surface/40 p-4 sm:p-5',
-        SCHOOL_LEVEL_BORDER_COLORS[level]
-      )}
-    >
+    <div className={cn('rounded-xl border p-4 sm:p-5', SCHOOL_LEVEL_PANEL_COLORS[level])}>
       <GuideHeading level="h3" className={cn('mb-3', SCHOOL_LEVEL_COLORS[level])}>
         {title}
       </GuideHeading>

@@ -15,11 +15,11 @@ export const SCHOOL_LEVEL_COLORS = {
 } as const satisfies Record<SchoolLevel, string>
 
 /**
- * Left-border accent color per school level.
+ * Panel tint (border + background) per school level.
  */
-export const SCHOOL_LEVEL_BORDER_COLORS = {
-  elementary: ACCENT_COLOR_MAP.blue.borderLeft,
-  highSchool: ACCENT_COLOR_MAP.amber.borderLeft,
+export const SCHOOL_LEVEL_PANEL_COLORS = {
+  elementary: `${ACCENT_COLOR_MAP.blue.panelBorder} ${ACCENT_COLOR_MAP.blue.panelBg}`,
+  highSchool: `${ACCENT_COLOR_MAP.amber.panelBorder} ${ACCENT_COLOR_MAP.amber.panelBg}`,
 } as const satisfies Record<SchoolLevel, string>
 
 /**
