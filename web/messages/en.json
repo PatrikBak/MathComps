@@ -374,7 +374,6 @@
   },
   "handouts": {
     "aria": {
-      "handoutComments": "Handout comments",
       "openHandout": "Open handout: {title}"
     },
     "environments": {

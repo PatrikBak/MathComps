@@ -1,12 +1,10 @@
 import { FileText, Lock, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { CommentCountPill } from '@/components/features/comments/components/CommentCountPill'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
-import { ANCHORS, getLocalizedAnchor, type Locale, ROUTES } from '@/i18n/i18n'
+import { type Locale, ROUTES } from '@/i18n/i18n'
 
 import { joinAuthors } from '../../shared/utils/string-utils'
 import type { HandoutMetadata, ReadyHandoutMetadata } from './handout-metadata-types'
@@ -44,7 +42,7 @@ function CategoryTab({ category }: CategoryTabProps) {
 type ReadyHandoutCardProps = {
   /** The ready handout to display */
   handout: ReadyHandoutMetadata
-  /** Localized category name shown on the top tab */
+  /** Localized category name */
   category: string
   /** Current locale */
   locale: Locale
@@ -52,11 +50,12 @@ type ReadyHandoutCardProps = {
 
 /**
  * Card for a ready handout: a full-card overlay link to the detail page, a category
- * tab on the top border, a generic source badge, author, and a comment count pill.
+ * tab on the top border, a source badge, and the author.
  */
 export function ReadyHandoutCard({ handout, category, locale }: ReadyHandoutCardProps) {
-  // Translations for aria labels and source badge fallback
+  // Translations for the open-handout aria label
   const tAria = useTranslations('handouts.aria')
+  // Translations for the source badge label
   const tStyles = useTranslations('handouts.styles')
 
   // Extract localized title and slug
@@ -87,7 +86,7 @@ export function ReadyHandoutCard({ handout, category, locale }: ReadyHandoutCard
         <span className="block line-clamp-2 lg:line-clamp-1 text-base sm:text-lg font-medium transition-colors leading-tight sm:leading-normal text-foreground/85 group-hover:text-foreground">
           <MathRendererClient content={title} />
         </span>
-        {/* Source badge + author on the same line; wraps if the badge runs long */}
+        {/* Source badge + author */}
         <p className="mt-1 sm:mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground">
           <HandoutStyleBadge source={handout.source} label={tStyles(handout.source)} />
           <span className="inline-flex items-center gap-1.5">
@@ -95,23 +94,6 @@ export function ReadyHandoutCard({ handout, category, locale }: ReadyHandoutCard
             <span className="truncate">{joinAuthors(handout.authors, 2)}</span>
           </span>
         </p>
-      </div>
-
-      {/* Actions */}
-      <div className="ml-auto flex items-center gap-2 sm:gap-4 relative z-10 shrink-0">
-        {/* Comment count - link to detail comments section */}
-        <AppLink
-          href={`${ROUTES.HANDOUTS}/${slug}#${getLocalizedAnchor(ANCHORS.COMMENTS, locale)}`}
-          className={cn(
-            'flex items-center gap-2 h-8 sm:h-9 md:h-10 px-2.5 sm:px-4 rounded-xl border border-foreground/10 bg-foreground/5 transition-all duration-200',
-            ACCENT_COLOR_MAP.indigo.hoverBg,
-            ACCENT_COLOR_MAP.indigo.hoverBorder,
-            ACCENT_COLOR_MAP.indigo.hoverGlow
-          )}
-          aria-label={tAria('handoutComments')}
-        >
-          <CommentCountPill targetId={handout.id} />
-        </AppLink>
       </div>
     </div>
   )
@@ -123,7 +105,7 @@ export function ReadyHandoutCard({ handout, category, locale }: ReadyHandoutCard
 type PlannedHandoutCardProps = {
   /** The planned handout to display */
   handout: HandoutMetadata
-  /** Localized category name shown on the top tab */
+  /** Localized category name */
   category: string
   /** Current locale */
   locale: Locale
