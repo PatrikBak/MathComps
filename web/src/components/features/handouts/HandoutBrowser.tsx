@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-import { CommentCountProvider } from '@/components/features/comments/components/CommentCountContext'
 import type { Locale } from '@/i18n/i18n'
 
 import {
@@ -22,7 +21,7 @@ import { type CategoryOption, HandoutFilters } from './HandoutFilters'
 type HandoutWithCategory = {
   /** The handout itself */
   handout: HandoutMetadata
-  /** Stable locale-independent key for the category (from section.categoryKey) */
+  /** Stable locale-independent key for the category */
   categoryKey: string
   /** Localized display label for the category */
   categoryLabel: string
@@ -32,7 +31,7 @@ type HandoutWithCategory = {
  * Props for the {@link HandoutBrowser} component.
  */
 type HandoutBrowserProps = {
-  /** Locale-filtered handout sections from the server */
+  /** Locale-filtered handout sections */
   sections: HandoutSection[]
   /** Current locale */
   locale: Locale
@@ -42,8 +41,9 @@ type HandoutBrowserProps = {
  * Top-level client wrapper for the handouts list that handles filtering too.
  */
 export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
-  // Translations for the planned heading and empty state
+  // Translations for the filter chips and empty state
   const tFilters = useTranslations('handouts.filters')
+  // Translations for the planned-section heading
   const t = useTranslations('handouts')
 
   // Flatten sections into individual handouts, each carrying its category.
@@ -95,16 +95,12 @@ export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
     return true
   }
 
-  // Split into ready and planned (after filter); preserve JSON order within each
+  // Ready handouts that pass the filter, in JSON order
   const readyMatches = allHandouts.filter((item) => isReadyHandout(item.handout) && matches(item))
+  // Planned handouts that pass the filter, in JSON order
   const plannedMatches = allHandouts.filter(
     (item) => !isReadyHandout(item.handout) && matches(item)
   )
-
-  // Collect all ready handout ids for batched comment counts
-  const handoutIds = readyMatches
-    .map((item) => (isReadyHandout(item.handout) ? item.handout.id : null))
-    .filter((id): id is string => id !== null)
 
   // Empty state when nothing matches
   const hasNothing = readyMatches.length === 0 && plannedMatches.length === 0
@@ -132,12 +128,12 @@ export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
           {tFilters('empty')}
         </p>
       ) : (
-        <CommentCountProvider targetType="Handout" targetIds={handoutIds}>
+        <>
           {/* Ready cards grid */}
           {readyMatches.length > 0 && (
             <ul role="list" className="grid gap-y-6 sm:gap-y-8 gap-x-4 md:grid-cols-2">
               {readyMatches.map((item) => {
-                // This should not be possible
+                // Re-apply the type guard so the card receives a ready handout
                 if (!isReadyHandout(item.handout)) return null
 
                 return (
@@ -160,8 +156,8 @@ export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
                 {t('plannedHeading')}
               </h2>
               <ul role="list" className="grid gap-y-6 sm:gap-y-8 gap-x-4 md:grid-cols-2">
-                {plannedMatches.map((item, i) => (
-                  <li key={`${item.categoryKey}-${i}`}>
+                {plannedMatches.map((item, index) => (
+                  <li key={`${item.categoryKey}-${index}`}>
                     <PlannedHandoutCard
                       handout={item.handout}
                       category={item.categoryLabel}
@@ -172,7 +168,7 @@ export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
               </ul>
             </div>
           )}
-        </CommentCountProvider>
+        </>
       )}
     </div>
   )

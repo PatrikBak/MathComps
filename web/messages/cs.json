@@ -374,7 +374,6 @@
   },
   "handouts": {
     "aria": {
-      "handoutComments": "Komentáře k materiálu",
       "openHandout": "Otevřít materiál: {title}"
     },
     "environments": {
