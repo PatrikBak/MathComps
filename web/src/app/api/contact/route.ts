@@ -1,18 +1,22 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import {
-  baseContactFormSchema,
-  getReasonLabelForAdmin,
-} from '@/components/features/contact/contactFormSchema'
+import { getReasonLabelForAdmin } from '@/components/features/contact/contact-reasons'
+import { baseContactFormSchema } from '@/components/features/contact/contact-schema'
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 import { withApiHandler } from '@/lib/api/api-handler'
 import { sendEmail } from '@/lib/email/email-sender'
 import { generateContactEmail } from '@/lib/email/notification-emails'
 
-// Honeypot field to catch bots
+/**
+ * Detects a tripped honeypot, the signal of a likely bot.
+ *
+ * @param body - The raw request body
+ *
+ * @returns Whether the submission looks like a bot
+ */
 function isLikelyBot(body: Record<string, unknown>): boolean {
-  // If the hidden honeypot field is filled, it's a bot
+  // A filled hidden honeypot field means a bot
   return body.website !== undefined && body.website !== ''
 }
 
@@ -36,7 +40,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   // Get translated reason label (in English for admin)
   const reasonLabel = await getReasonLabelForAdmin(validatedData.reason)
 
-  // Generate email HTML using unified template
+  // Build the notification email HTML
   const emailHtml = await generateContactEmail({
     name: validatedData.name,
     email: validatedData.email,
@@ -44,10 +48,10 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     message: validatedData.message,
   })
 
-  // The form is send to the contact email
+  // Resolve the contact inbox address
   const sendEmailTo = getRequiredEnv('NEXT_PUBLIC_CONTACT_EMAIL')
 
-  // Send email using shared utility to the contact email
+  // Send the notification email
   const result = await sendEmail({
     to: sendEmailTo,
     replyTo: validatedData.email,
@@ -55,7 +59,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     html: emailHtml,
   })
 
-  // Handle errors
+  // Surface a send failure
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: result.statusCode })
   }
