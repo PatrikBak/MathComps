@@ -24,29 +24,34 @@ export type AccentColor =
  * Resolved Tailwind classes for a single {@link AccentColor}.
  */
 type AccentColorClasses = {
-  /** Tailwind text-color class for icons, labels, and inline accents. */
+  /** Tailwind text-color class. */
   text: string
-  /** Tailwind background class for tinted pills, badges, and icon containers. */
+  /** Tailwind tinted background class. */
   bg: string
-  /** Tailwind group-hover text-color class for hover transitions. */
+  /** Tailwind left-border accent class. */
+  borderLeft: string
+  /** Tailwind faint background tint. */
+  panelBg: string
+  /** Tailwind panel border class. */
+  panelBorder: string
+  /** Tailwind group-hover text-color class. */
   groupHoverText: string
-  /** Tailwind hover background class for interactive surfaces. */
+  /** Tailwind hover background class. */
   hoverBg: string
-  /** Tailwind hover border class for interactive surfaces. */
+  /** Tailwind hover border class. */
   hoverBorder: string
-  /** Tailwind hover box-shadow class for glow effects on interactive surfaces. */
+  /** Tailwind hover box-shadow (glow) class. */
   hoverGlow: string
 }
 
-/**
- * Maps each {@link AccentColor} to the exact Tailwind classes used for
- * text (icons, labels), tinted backgrounds (badges, icon pills), and
- * group-hover text transitions.
- */
+/** Maps each {@link AccentColor} to its resolved {@link AccentColorClasses}. */
 export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   blue: {
     text: 'text-blue-400',
     bg: 'bg-blue-500/10',
+    borderLeft: 'border-l-blue-400',
+    panelBg: 'bg-blue-500/5',
+    panelBorder: 'border-blue-500/20',
     groupHoverText: 'group-hover:text-blue-400',
     hoverBg: 'hover:bg-blue-500/15',
     hoverBorder: 'hover:border-blue-400/20',
@@ -55,6 +60,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   indigo: {
     text: 'text-indigo-400',
     bg: 'bg-indigo-500/10',
+    borderLeft: 'border-l-indigo-400',
+    panelBg: 'bg-indigo-500/5',
+    panelBorder: 'border-indigo-500/20',
     groupHoverText: 'group-hover:text-indigo-400',
     hoverBg: 'hover:bg-indigo-500/15',
     hoverBorder: 'hover:border-indigo-400/20',
@@ -63,6 +71,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   orange: {
     text: 'text-orange-400',
     bg: 'bg-orange-500/10',
+    borderLeft: 'border-l-orange-400',
+    panelBg: 'bg-orange-500/5',
+    panelBorder: 'border-orange-500/20',
     groupHoverText: 'group-hover:text-orange-400',
     hoverBg: 'hover:bg-orange-500/15',
     hoverBorder: 'hover:border-orange-400/20',
@@ -71,6 +82,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   cyan: {
     text: 'text-cyan-400',
     bg: 'bg-cyan-500/10',
+    borderLeft: 'border-l-cyan-400',
+    panelBg: 'bg-cyan-500/5',
+    panelBorder: 'border-cyan-500/20',
     groupHoverText: 'group-hover:text-cyan-400',
     hoverBg: 'hover:bg-cyan-500/15',
     hoverBorder: 'hover:border-cyan-400/20',
@@ -79,6 +93,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   amber: {
     text: 'text-amber-400',
     bg: 'bg-amber-500/10',
+    borderLeft: 'border-l-amber-400',
+    panelBg: 'bg-amber-500/5',
+    panelBorder: 'border-amber-500/20',
     groupHoverText: 'group-hover:text-amber-400',
     hoverBg: 'hover:bg-amber-500/15',
     hoverBorder: 'hover:border-amber-400/20',
@@ -87,6 +104,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   emerald: {
     text: 'text-emerald-400',
     bg: 'bg-emerald-500/10',
+    borderLeft: 'border-l-emerald-400',
+    panelBg: 'bg-emerald-500/5',
+    panelBorder: 'border-emerald-500/20',
     groupHoverText: 'group-hover:text-emerald-400',
     hoverBg: 'hover:bg-emerald-500/15',
     hoverBorder: 'hover:border-emerald-400/20',
@@ -95,6 +115,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   sky: {
     text: 'text-sky-400',
     bg: 'bg-sky-500/10',
+    borderLeft: 'border-l-sky-400',
+    panelBg: 'bg-sky-500/5',
+    panelBorder: 'border-sky-500/20',
     groupHoverText: 'group-hover:text-sky-400',
     hoverBg: 'hover:bg-sky-500/15',
     hoverBorder: 'hover:border-sky-400/20',
@@ -103,6 +126,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   rose: {
     text: 'text-rose-400',
     bg: 'bg-rose-500/10',
+    borderLeft: 'border-l-rose-400',
+    panelBg: 'bg-rose-500/5',
+    panelBorder: 'border-rose-500/20',
     groupHoverText: 'group-hover:text-rose-400',
     hoverBg: 'hover:bg-rose-500/15',
     hoverBorder: 'hover:border-rose-400/20',
@@ -111,6 +137,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   red: {
     text: 'text-red-400',
     bg: 'bg-red-500/10',
+    borderLeft: 'border-l-red-400',
+    panelBg: 'bg-red-500/5',
+    panelBorder: 'border-red-500/20',
     groupHoverText: 'group-hover:text-red-400',
     hoverBg: 'hover:bg-red-500/15',
     hoverBorder: 'hover:border-red-400/20',
@@ -119,6 +148,9 @@ export const ACCENT_COLOR_MAP: Record<AccentColor, AccentColorClasses> = {
   purple: {
     text: 'text-purple-400',
     bg: 'bg-purple-500/10',
+    borderLeft: 'border-l-purple-400',
+    panelBg: 'bg-purple-500/5',
+    panelBorder: 'border-purple-500/20',
     groupHoverText: 'group-hover:text-purple-400',
     hoverBg: 'hover:bg-purple-500/15',
     hoverBorder: 'hover:border-purple-400/20',

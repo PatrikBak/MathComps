@@ -15,9 +15,10 @@ export function* validateLocalizedString(
   fieldName: string,
   context: string
 ): Generator<string> {
-  // Ensure non-empty value
+  // Bail when the whole value is missing
   if (!value) {
     yield `❌ Missing ${fieldName} for ${context}`
+    // Nothing more to check once it is missing
     return
   }
 
@@ -45,9 +46,10 @@ export function* validatePartialLocalizedString(
   context: string,
   locales: readonly Locale[]
 ): Generator<string> {
-  // Ensure non-empty value
+  // Bail when the whole value is missing
   if (!value) {
     yield `❌ Missing ${fieldName} for ${context}`
+    // Nothing more to check once it is missing
     return
   }
 
@@ -71,6 +73,7 @@ export function* validateDateFormat(date: string | undefined, context: string): 
   // Ensure non-empty and non-whitespace value
   if (!date || date.trim() === '') {
     yield `❌ Missing date for ${context}`
+    // No date means nothing else to validate
     return
   }
 
@@ -121,6 +124,50 @@ export function* validateRequiredArray(
 }
 
 /**
+ * Validates an optional link target: an absolute `http(s)` URL or an internal route path (leading
+ * `/`). An absent link passes — use {@link validateRequiredField} alongside when a link is mandatory.
+ *
+ * @param link - The link target to validate.
+ * @param fieldName - The name of the field being validated (for error messages).
+ * @param context - Description of the containing item (for error messages).
+ *
+ * @yields An error when a present link is neither a URL nor an internal route path.
+ */
+export function* validateOptionalLink(
+  link: string | undefined,
+  fieldName: string,
+  context: string
+): Generator<string> {
+  // Absent is fine; when present it must be a URL or an internal route path
+  if (link && !link.startsWith('http') && !link.startsWith('/')) {
+    yield `❌ Invalid ${fieldName} "${link}" for ${context}`
+  }
+}
+
+/**
+ * Validates that a value belongs to a closed set of allowed values — the runtime guard for a
+ * closed-union field the untyped JSON can't vouch for.
+ *
+ * @param value - The value to check.
+ * @param allowed - The closed set of permitted values.
+ * @param fieldName - The name of the field being validated (for error messages).
+ * @param context - Description of the containing item (for error messages).
+ *
+ * @yields An error when the value falls outside the allowed set.
+ */
+export function* validateMembership(
+  value: string,
+  allowed: readonly string[],
+  fieldName: string,
+  context: string
+): Generator<string> {
+  // Flag a value outside the closed set, naming what was allowed
+  if (!allowed.includes(value)) {
+    yield `❌ Unknown ${fieldName} "${value}" for ${context} (expected one of: ${allowed.join(', ')})`
+  }
+}
+
+/**
  * Checks for duplicate values in collections.
  *
  * @param values - Array of values to check.
@@ -141,6 +188,7 @@ export function* validateUniqueness<T>(
 
   // Check each value for duplicates
   for (const item of values) {
+    // Pull the value to compare
     const value = getValue(item)
 
     // Skip if the value is empty

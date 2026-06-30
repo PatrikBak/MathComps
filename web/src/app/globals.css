@@ -47,6 +47,9 @@
   /* Scroll offset for anchor links - must match header height + breathing room */
   --scroll-offset: 66px;
 
+  /* Exact sticky header height (no breathing room) - for elements that butt flush under the header */
+  --header-height: 56px;
+
   /* Toast base colors */
   --toast-success-bg: rgb(22 163 74 / 0.9);
   --toast-success-border: rgb(34 197 94 / 0.3);
@@ -73,6 +76,7 @@
 @media (min-width: 640px) {
   :root {
     --scroll-offset: 76px;
+    --header-height: 64px;
   }
 }
 
@@ -80,6 +84,7 @@
 @media (min-width: 768px) {
   :root {
     --scroll-offset: 84px;
+    --header-height: 72px;
   }
 }
 
@@ -87,6 +92,7 @@
 @media (min-width: 1024px) {
   :root {
     --scroll-offset: 96px;
+    --header-height: 80px;
   }
 }
 

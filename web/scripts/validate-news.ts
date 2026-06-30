@@ -18,9 +18,11 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import {
   validateDateFormat,
   validateLocalizedString,
+  validateMembership,
   validateRequiredField,
   validateUniqueness,
 } from '../src/lib/content-validation'
+import { runValidator, validateNoOrphans } from './validation-runner'
 
 /** Directory containing news content files */
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/news')
@@ -28,13 +30,12 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/news')
 /** Path to news.json */
 const INDEX_PATH = path.join(CONTENT_DIR, '../news.json')
 
-/** Directory served as static assets, holding the figure cover SVGs referenced by news.json */
+/** Public directory holding the figure cover SVGs. */
 const PUBLIC_DIR = path.join(process.cwd(), 'public')
 
 /**
  * Validates a news entry's cover. news.json is untyped at the JSON boundary, so a missing cover, a
- * misnamed icon, a dangling figure path, or an empty equation would otherwise only surface when the
- * card renders.
+ * misnamed icon, a dangling figure path, or an empty equation would otherwise go uncaught.
  *
  * @param cover - The cover to validate; required on every entry.
  * @param context - Description of the containing entry (for error messages).
@@ -45,6 +46,7 @@ function* validateCover(cover: NewsCover | undefined, context: string): Generato
   // Cover is mandatory
   if (!cover) {
     yield `❌ Missing cover for ${context}`
+    // Nothing more to check on a missing cover
     return
   }
 
@@ -65,7 +67,7 @@ function* validateCover(cover: NewsCover | undefined, context: string): Generato
       break
 
     case 'icon':
-      // The name must be one the registry can actually render
+      // The name must be a key in the icon registry
       if (!(cover.name in NEWS_ICONS)) {
         yield `❌ Unknown cover icon "${cover.name}" for ${context}`
       }
@@ -77,15 +79,19 @@ function* validateCover(cover: NewsCover | undefined, context: string): Generato
   }
 }
 
-/** Main validation logic */
-function validate(): boolean {
-  // We'll push errors into this array
+/**
+ * Validates the news content, collecting every error.
+ *
+ * @returns Every validation error found; empty when valid.
+ */
+function validate(): string[] {
+  // Collect errors here
   const errors: string[] = []
 
   // Ensure the news.json exists
   if (!fs.existsSync(INDEX_PATH)) {
-    console.error('❌ news.json not found')
-    return false
+    // Bail with the single fatal error
+    return ['❌ news.json not found']
   }
 
   // Parse the index file
@@ -113,7 +119,7 @@ function validate(): boolean {
 
   // Validate each entry
   for (const entry of entries) {
-    // A string for logging
+    // Human-readable label for error messages
     const context = `news article "${entry.title?.[DEFAULT_LOCALE] || entry.slug || 'unknown'}"`
 
     // Validate required string fields
@@ -127,9 +133,10 @@ function validate(): boolean {
     // Validate date format
     errors.push(...validateDateFormat(entry.date, context))
 
-    // Validate the category is one of the known values (it drives the badge color)
-    if (entry.category && !NEWS_CATEGORIES.includes(entry.category)) {
-      errors.push(`❌ Unknown category "${entry.category}" for ${context}`)
+    // Validate the category is one of the known values (it drives the badge color); a missing one is
+    // already reported above, so only check membership when present
+    if (entry.category) {
+      errors.push(...validateMembership(entry.category, NEWS_CATEGORIES, 'category', context))
     }
 
     // Validate the cover (icon name registered, figure file present, equation non-empty)
@@ -137,6 +144,7 @@ function validate(): boolean {
 
     // Validate content files exist for all locales
     if (entry.slug) {
+      // One file per supported locale
       for (const locale of SUPPORTED_LOCALES) {
         // Construct the content file path
         const contentFile = `${entry.slug}.${locale}.mdx`
@@ -144,51 +152,39 @@ function validate(): boolean {
 
         // Check if the content file exists
         if (!fs.existsSync(contentPath)) {
+          // Record the missing file
           errors.push(`❌ Missing content file: ${contentFile} for ${context}`)
         }
       }
     }
   }
 
-  // Check for orphan content files (files not referenced in news.json)
-  const contentFiles = fs
-    .readdirSync(CONTENT_DIR)
-    .filter((file) => new RegExp(`^.+\\.(${SUPPORTED_LOCALES.join('|')})\\.mdx$`).test(file))
-
-  // Build set of expected content files
+  // Build the set of content files the index expects
   const expectedFiles = new Set<string>()
+  // Walk every entry
   for (const entry of entries) {
+    // Only entries with a slug expect content files
     if (entry.slug) {
+      // One expected file per supported locale
       for (const locale of SUPPORTED_LOCALES) {
         expectedFiles.add(`${entry.slug}.${locale}.mdx`)
       }
     }
   }
 
-  // Check for orphans
-  for (const file of contentFiles) {
-    if (!expectedFiles.has(file)) {
-      errors.push(`⚠️  Orphan content file not referenced in news.json: ${file}`)
-    }
-  }
+  // Flag any content file the index doesn't reference
+  errors.push(...validateNoOrphans(CONTENT_DIR, 'mdx', expectedFiles, 'news.json'))
 
-  // Print errors
-  for (const error of errors) {
-    console.error(error)
-  }
-
-  // Return valid if no errors
-  return errors.length === 0
+  // Hand back every collected error
+  return errors
 }
 
-// Run validation
-console.log('🔍 Validating news translations...\n')
-
-// Validate and exit
-if (validate()) {
-  console.log('✅ All news articles have complete translations!')
-  process.exit(0)
-} else {
-  console.log('\n⚠️  News validation failed.')
-  process.exit(1)
-}
+// Run the validator and exit with its status
+runValidator(
+  {
+    validating: 'news translations',
+    success: 'All news articles have complete translations!',
+    failure: 'News validation failed.',
+  },
+  validate
+)

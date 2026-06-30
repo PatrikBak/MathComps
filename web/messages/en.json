@@ -232,8 +232,61 @@
     "project": "Project"
   },
   "guide": {
+    "deck": {
+      "bucket": {
+        "programs": "Tool",
+        "studyTexts": "Handout",
+        "websites": "Web",
+        "youtube": "YouTube"
+      },
+      "clearFilters": "Clear filters",
+      "emptyState": "No results match the selected filters.",
+      "filters": {
+        "all": "All",
+        "bucket": "Type",
+        "country": "Country",
+        "kind": "Type",
+        "label": "Filters",
+        "level": "Level"
+      },
+      "kind": {
+        "individual": "Individual",
+        "team": "Team"
+      },
+      "next": "Next",
+      "noteLabel": "Note",
+      "pages": {
+        "getStarted": "How to start",
+        "olympiad": "Olympiad",
+        "other": "Other competitions",
+        "resources": "Resources",
+        "seminars": "Seminars",
+        "why": "Why competitions?"
+      },
+      "previous": "Previous",
+      "resourceAudience": {
+        "advanced": "for the advanced",
+        "beginner": "for beginners"
+      },
+      "resourceLevel": {
+        "advanced": "Advanced",
+        "beginner": "Beginner"
+      },
+      "search": {
+        "close": "to close",
+        "hint": "Results will appear here…",
+        "navigate": "to navigate",
+        "noResults": "No matches.",
+        "open": "Search the guide",
+        "openHint": "to open link",
+        "openLink": "Open link",
+        "placeholder": "Search competitions, seminars, resources…",
+        "reveal": "to go to it"
+      },
+      "tipLabel": "Tip"
+    },
     "hero": {
-      "description": "List of competitions and various useful links related to competition math, written from a Czech-Slovak perspective. The plan is to continuously update these sections with the best content.",
+      "description": "List of competitions and various useful links related to competition math, written from a Czech-Slovak perspective. If something's missing here, definitely <link>let us know</link>.",
       "title": "Competition Math Guide"
     },
     "schoolLevels": {
@@ -247,248 +300,76 @@
       "howToStart": {
         "description": "At the beginning, there are always many options on how to start. Then there are many options on how to progress. The following advice aims to help with this process.",
         "finalNote": {
-          "text": "The key is to enjoy the process. The world of competitions and seminars attracts many people and not everyone can be the best, but that doesn't mean it can't change everyone's life for the better 😊",
+          "text": "The key is to enjoy the process. The world of competitions and seminars attracts many people, and it can change the life of each of them for the better 😊",
           "title": "In conclusion"
-        },
-        "steps": {
-          "beginnings": {
-            "points": [
-              "Try correspondence seminars. They have problems suitable for beginners and provide feedback. Attend their camps where you'll learn, meet people, and have fun.",
-              "Look for math clubs at school or nearby. Ask your math teacher if they know of any.",
-              "Try solving problems with someone else, you can motivate and entertain each other.",
-              "Also find study materials for systematic learning, recommendations are just above."
-            ],
-            "title": "Beginnings are great because you improve quickly"
-          },
-          "training": {
-            "points": [
-              "Math needs to be actively trained, muscles aren't gained by watching exercise videos either. It's always better to try solving a problem independently first. The process of thinking, trying, and even failing helps the mind learn.",
-              "Only after some effort should you look at model solutions for problems you didn't solve. The brain learns more from them when it struggled beforehand.",
-              "Definitely also look at model solutions for problems you did solve, often you'll learn different approaches, maybe even more efficient ones.",
-              "Some prefer systematic materials and books, others prefer solving random problems. Ideally, combine things, experiment, and find what you enjoy most."
-            ],
-            "title": "Principles of good training"
-          }
         }
       },
       "mathOlympiad": {
         "and": "and",
-        "categoriesIntro": "The Mathematical Olympiad is divided into two main parts:",
-        "categoriesOutro": "category, each with its own grade levels and rounds.",
-        "competitions": {
-          "caps": {
-            "description": "Preparatory competition for IMO teams of participating countries",
-            "details": ["Same format as IMO", "Recently usually held at ISTA in Austria"]
-          },
-          "cpsj": {
-            "description": "Competition for the six best first-year high school students (and younger) from participating countries",
-            "details": [
-              "Qualification through special selection camp",
-              "In Czechia selection based on category A results, in Slovakia category C",
-              "Individual and team parts",
-              "Three-member teams (1 member from each country) randomly drawn"
-            ]
-          },
-          "egmo": {
-            "description": "Competition aimed at encouraging girls' participation in math competitions",
-            "details": [
-              "6 best female solvers from each country",
-              "Qualification through special selection camp",
-              "Invitation based on results of regional round category A",
-              "55+ countries (including non-European)",
-              "Same format as IMO"
-            ]
-          },
-          "imo": {
-            "description": "The most prestigious international olympiad",
-            "details": [
-              "6 best solvers from each country",
-              "100+ countries",
-              "2 competition days, each with 3 problems over 4.5 hours"
-            ]
-          },
-          "memo": {
-            "description": "Competition for the best future potential IMO participants",
-            "details": [
-              "6 best solvers not going to IMO, who may go next year",
-              "11+ countries",
-              "Individual and team parts"
-            ]
-          }
-        },
-        "description": "A competition in solving interesting mathematical problems for elementary and high schools, which starts with a home round and culminates in the most prestigious international mathematical olympiad",
+        "categoriesIntro": "It splits into two parts:",
+        "categoriesOutro": ", each with its own grade levels and rounds.",
+        "description": "The Mathematical Olympiad is a competition in solving interesting problems, open to elementary and high schoolers alike, with an emphasis on justifying your reasoning. Each year it starts with a home round and builds up to the most prestigious international contest of all,",
         "elementary": "elementary school",
         "elementaryCategories": {
           "point1": "Z5 – Z9 by elementary school grades (and corresponding grades of eight-year gymnasiums)",
           "point2": "Home and district rounds in each category",
-          "point3": "In category Z9, also regional round and in Czechia national round",
+          "point3": "In category Z9, also a regional and national round",
           "title": "Elementary categories"
         },
         "highSchool": "high school",
         "highSchoolCategories": {
           "point1": "C for 1st, B for 2nd, A for 3rd and 4th year (and corresponding grades of eight-year gymnasiums)",
           "point2": "Home, school, and regional rounds in each category",
-          "point3": "In category A, also national round, from which progression to selection camp is possible",
-          "point4": "From the selection camp, you can advance to <strong>international competitions</strong>",
-          "point5": "Fun multi-day events where math is only part of the program",
-          "point6": "Rotating host countries, trips to new places guaranteed",
+          "point3": "In category A, also a national round, from which you advance to a selection camp for <strong>international competitions</strong>",
           "selectionNote": "Both countries have different rules for advancement, in Slovakia there's also a qualification needed, see the competition website",
           "title": "High school categories"
         },
         "imoLink": "IMO",
+        "international": {
+          "features": [
+            "Week-long events with two days of math and the rest of the days full of trips and fun 🎉",
+            "The host country usually rotates, so you get to travel to many interesting places ✈️",
+            "A chance to meet people from all over the world who are just as into it 🤝"
+          ],
+          "hint": "Below are the ones Slovakia and Czechia take part in, details on clicking a card.",
+          "intro": "The biggest draw is the international competitions."
+        },
         "organizations": {
           "cz": "Czech MO",
           "sk": "Slovak MO"
         },
-        "otherCompetitions": "In addition, there are other events:",
-        "sharedTasks": "Czechia and Slovakia have shared problems but separate organizations",
+        "sharedTasks": "Czechia and Slovakia have shared problems but separate organizations:",
         "tip": "Don't be afraid to try solving higher categories, problems often don't require more complex knowledge and categories overlap. The best of the best often solved higher categories too."
       },
       "otherCompetitions": {
-        "description": "Besides the olympiad and seminars, there are many other competitions with various formats, mostly one-day fun events that you typically don't train for, but there's less pressure because of that 😌",
-        "individual": {
-          "description": "Individual competitions with a different format than the Mathematical Olympiad. All listed below require only the answer, which is how they differ from it."
-        },
-        "items": {
-          "attomat": "An online competition with answer-only problems",
-          "brloh": "A competition in solving mathematical-logical problems",
-          "duogeo": "A pairs competition in solving olympiad-style geometry",
-          "klokan": "A multiple-choice competition",
-          "logickaOlympiada": "A popular competition among mathematicians for obvious reasons",
-          "maks": "A competition where problems are solved at home and answers uploaded online",
-          "maso": "A competition with problems like Náboj, where answers unlock moves in a game",
-          "mathing": "An online competition with olympiad-style problems",
-          "mathrace": "An online competition with Náboj-style problems where software and programming is allowed",
-          "naboj": "The most popular team competition in our region with answer-only problems",
-          "pangea": "A competition similar to Math Kangaroo with themed problems",
-          "purpleComet": "An international Náboj-like competition with over 80 countries",
-          "pytagoriada": "A competition where speed and accuracy of answers matter"
-        },
-        "team": {
-          "description": "Team competitions are a great opportunity to have fun with friends. It's no surprise that they're popular and there are so many of them."
-        },
-        "titles": {
-          "attomat": "Attomat",
-          "brloh": "Brloh",
-          "duogeo": "DuoGeo",
-          "klokan": "Math Kangaroo",
-          "logickaOlympiada": "Logic Olympiad",
-          "maks": "Maks & Maksík",
-          "maso": "Maso",
-          "mathing": "Mathing",
-          "mathrace": "Mathrace",
-          "naboj": "Náboj & Náboj Junior",
-          "pangea": "Pangea",
-          "purpleComet": "Purple Comet",
-          "pytagoriada": "Pythagoreiad"
-        }
+        "description": "Besides the olympiad and seminars, there are many other competitions, both team and individual, in all sorts of formats, mostly one-day, fun, laid-back events 😌"
       },
       "resources": {
-        "description": "A brief list of the most important study/community resources from the world of competitive mathematics that are definitely worth knowing.",
-        "programs": {
-          "geogebra": "A fantastic tool for learning geometry or drawing graphs. A well-drawn diagram can make the difference in whether we see the solution or not, and <app>GeoGebra</app> can draw them precisely 📐.",
-          "overleaf": "Online environment for writing in LaTeX, which is the standard for mathematics. Contains tutorials for LaTeX beginners.",
-          "wolframalpha": "A fast and reliable tool for solving equations, factoring numbers, calculating sums, or even differentiation, integration, etc."
-        },
-        "studyTexts": {
-          "guidedProblems": "It's worth solving older MO home rounds, because guided and supplementary problems are released with them (with solutions/links), which is a good way to absorb a topic.",
-          "intro": "In this section, we'll summarize some study materials. The priority is to give beginners an overview of where they can turn.",
-          "kmsCollection": "Older but timeless material. Pleasant explanations and short introductions to all topics with many examples from the KMS seminar.",
-          "ourMaterials": "There aren't many publicly available materials for beginners with good explanations of ideas. Our materials on this site aim to fill this gap. The collection will grow over time.",
-          "praseLibrary": "A large collection of materials from the PraSe seminar. For self-study, the so-called series are very interesting - these are thematic texts.",
-          "sampleSolutions": "The easiest problems from <link>seminars</link>, or lower MO categories, are a good source. In seminars, solutions are written more in the style of how to approach problems, while in olympiad more in the style of how to write them once someone has figured it out.",
-          "titles": {
-            "guidedProblems": "Guided problems for MO home rounds",
-            "kmsCollection": "KMS collection",
-            "ourMaterials": "Our materials",
-            "praseLibrary": "PraSe library",
-            "sampleSolutions": "Sample solutions"
-          }
-        },
+        "description": "A brief list of the most important study/community resources that are definitely worth knowing.",
         "tips": {
-          "ai": "We all see that AI is getting better at math. It can be a quick helper when learning new things. Just be careful, as it's not always right and can make things up 🙃",
-          "footer": "You might be asking why this or that isn't here. It's mainly because this guide is written primarily for beginners, and overwhelming with materials right at the start may not be productive. Links to further study will gradually be added inside the materials on the site, or later a page with advanced guidance may appear, with a larger database. Anyway, there's really a lot in the PraSe library 😜."
-        },
-        "websites": {
-          "aops": "Probably the biggest and most important website about olympiad mathematics in the world. Forums, huge problem collections, articles, all in one place. A must know.",
-          "evanchen": "Personal website of a world-famous olympiad expert. Through his site, you can navigate to many of his materials and other resources and information.",
-          "mods": "A large international Discord server where you can discuss with people from all over the world. For over 2000 days, it has been running a problem of the day feature, with access to older problems by topic and difficulty rating."
-        },
-        "youtube": {
-          "3blue1brown": "Unique visual treatment of various topics from mathematics.",
-          "michaelpenn": "Solutions to competition problems from competitions around the world, explained on a blackboard.",
-          "mindyourdecisions": "Videos solving problems of all difficulties, from purely popularizing to interesting olympiad ones."
+          "ai": "We all see that AI is getting better at math. It can be a quick helper when learning new things. Just be careful, as it's not always right and can make things up 🙃"
         }
       },
       "seminars": {
-        "countries": {
-          "CZ": "Czech",
-          "INTERNATIONAL": "International",
-          "SK": "Slovak"
-        },
-        "description": "Correspondence seminars are an integral part of Czech-Slovak mathematical culture, which is reflected in their number.",
+        "description": "Correspondence seminars are an integral part of Czech-Slovak mathematical culture.",
         "features": [
-          "Solving problems at home and sending solutions by mail (hence the name), although now mostly online",
-          "Several series of problems during the year",
-          "Camps packed with fun and math as an essential part of seminars"
+          "Solving problems at home and sending solutions by mail (hence the name), although now mostly online ✉️",
+          "Several series of problems during the year 📝",
+          "Camps packed with fun and math as an essential part of them 🏕️"
         ],
-        "items": {
-          "iks": "Czech-Slovak seminar for solvers with ambition to succeed at international rounds",
-          "kokos": "For grades 6-9 of elementary school",
-          "malynar": "For grades 4-6 of elementary school",
-          "matik": "For grades 7-9 of elementary school",
-          "mbl": "Originally Polish, now international seminar with one round and one long camp",
-          "sezam": "For grades 7-9 of elementary school",
-          "sezamko": "For grades 4-6 of elementary school"
-        },
-        "levels": {
-          "elementary": {
-            "description": "There are really quite a few elementary school seminars. Most of them are generally for upper elementary, but they have scaled problems for everyone."
-          },
-          "highSchool": {
-            "description": "Two Slovak, two Czech, and one Czech-Slovak. In addition, many Czech-Slovak students also participate in MBL. There's really no shortage of fun."
-          }
-        },
         "tip": "Many people solve multiple seminars at the same time, both at elementary and high school level. It's also common for Slovaks to solve Czech seminars and vice versa. It's no coincidence that there's a big overlap between the best MO and seminar solvers 😉"
       },
       "whyCompetitions": {
-        "benefits": {
-          "career": {
-            "text": "People from the math competition environment are the most sought after for various positions requiring solving difficult problems, e.g. in AI, algorithmic trading etc. Thanks to acquired skills and contacts from the community they then easily obtain them.",
-            "title": "Great career opportunities"
-          },
-          "community": {
-            "text": "The environment of competitions and camps is very community-oriented and without it many would not even exist. Many people have found friends and partners for life in these communities.",
-            "title": "Community and friendship"
-          },
-          "logic": {
-            "text": "Math competitions develop the ability to analyze problems and find creative solutions. These skills are then transferable to all spheres of life, as problems need to be solved everywhere.",
-            "title": "Developing logical thinking"
-          },
-          "potential": {
-            "text": "Many people often don't know what their brain is capable of when it tries. Competitions provide a safe environment to test this, and for many are the beginning of their future journey for career and personal growth.",
-            "title": "Discovering potential"
-          }
-        },
         "description": "Math competitions are not just about competition and math 🙂."
       }
     },
     "titles": {
-      "competitions": "List of competitions",
       "howToStart": "How to start and continue",
       "mathOlympiad": "Mathematical Olympiad",
       "otherCompetitions": "Other competitions",
-      "otherCompetitionsIndividual": "Individual competitions",
-      "otherCompetitionsTeam": "Team competitions",
-      "programs": "Programs and tools",
       "resources": "Other links",
       "seminars": "Correspondence seminars",
-      "seminarsElementary": "Elementary school seminars",
-      "seminarsHighSchool": "High school seminars",
-      "studyTexts": "Study texts",
-      "websites": "Websites and communities",
-      "whyCompetitions": "Why math competitions?",
-      "youtube": "YouTube channels"
+      "whyCompetitions": "Why math competitions?"
     }
   },
   "handouts": {

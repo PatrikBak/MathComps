@@ -1,5 +1,20 @@
 [
   {
+    "id": "Gd5xK2mQ7pR9vT3nB8wYz",
+    "slug": "guide-redesign",
+    "title": {
+      "sk": "Rozcestník je teraz Sprievodca",
+      "en": "Guide reworked",
+      "cs": "Rozcestník přepracován"
+    },
+    "date": "2026-06-30",
+    "category": "development",
+    "cover": {
+      "kind": "icon",
+      "name": "route"
+    }
+  },
+  {
     "id": "w69sBX8IsHshJKp9aGud5",
     "slug": "archive-update-emo-duogeo",
     "title": {

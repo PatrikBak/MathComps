@@ -5,13 +5,12 @@ import { getRequiredEnv } from '@/components/shared/utils/env-utils'
  *
  * @returns The site URL with no trailing slash
  */
-export function getSiteUrl(): string {
+function getSiteUrl(): string {
   return getRequiredEnv('NEXT_PUBLIC_SITE_URL')
 }
 
 /**
  * Retrieves the public Cloudflare R2 URL from environment variables.
- * Used for serving handout assets (PDFs, images) from R2 storage.
  *
  * @returns The R2 public URL with no trailing slash
  */
@@ -29,11 +28,11 @@ export function getR2BaseUrl(): string {
  * @returns The full API URL for the endpoint
  */
 export function buildApiUrl(path: string): string {
-  // Get the base URL for any client-side API calls
+  // The backend API base URL
   const baseUrl = getRequiredEnv('NEXT_PUBLIC_API_URL')
 
-  // Production: use backend URL directly (no /api prefix on backend)
-  // Development: use /api prefix which Next.js rewrites to strip it
+  // Production: hit the backend URL directly
+  // Development: fall back to the /api prefix Next.js rewrites away
   return baseUrl ? `${baseUrl}${path}` : `/api${path}`
 }
 
@@ -55,13 +54,25 @@ export function getCanonicalUrl(path: string = ''): string {
 }
 
 /**
+ * Reduces a URL to its bare display domain — the hostname without the `www.` prefix, scheme, or path.
+ *
+ * @param href - The absolute URL to reduce.
+ *
+ * @returns The bare domain (e.g. `skmo.sk` from `https://www.skmo.sk/about`).
+ */
+export function getDisplayDomain(href: string): string {
+  // Parse out the hostname, then drop a leading www.
+  return new URL(href).hostname.replace(/^www\./, '')
+}
+
+/**
  * Checks if the given URL is an external link (i.e. a link to a different domain)
  *
  * @param href - The URL to check
  *
  * @returns True if the URL is external, false otherwise
  */
-export const isExternalHref = (href: string) => {
+export function isExternalHref(href: string): boolean {
   // scheme:// or //host, or common non-http schemes
   return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^(mailto|tel|sms|geo):/i.test(href)
 }
