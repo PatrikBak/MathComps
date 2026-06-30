@@ -1,22 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useDisclosure } from '@mantine/hooks'
 
-import { type ReasonOption } from './contactFormSchema'
+import { type ReasonOption } from './contact-reasons'
 import ContactModal from './ContactModal'
 
-interface ContactButtonProps {
+/**
+ * Props for {@link ContactButton}.
+ */
+type ContactButtonProps = {
+  /** Reason to pre-select when the modal opens */
   reason?: ReasonOption
+  /** The button's visible content */
   children: React.ReactNode
+  /** Class names for the trigger button */
   className?: string
 }
 
+/**
+ * A trigger that opens the contact modal, optionally pre-selecting a reason.
+ */
 export default function ContactButton({ reason, children, className }: ContactButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  // Modal open-state plus its open/close handlers
+  const [isModalOpen, { open: openModal, close: closeModal }] = useDisclosure(false)
 
-  const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
-
+  // Render the trigger and the modal it controls
   return (
     <>
       <button onClick={openModal} className={className}>
