@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react'
-import React from 'react'
+import React, { type ReactNode } from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -11,27 +11,21 @@ import { shortenYouTubeUrls } from '@/components/shared/utils/string-utils'
 type ExternalLinkButtonProps = {
   /** External destination URL. */
   href: string
-  /** Custom text to display instead of the URL. If not provided, the URL will be formatted and displayed. */
+  /** Label override; falls back to the formatted URL when absent. */
   customText?: string
+  /** Leading glyph; defaults to the external-link arrow (e.g. a flag for a national variant). */
+  icon?: ReactNode
 }
 
 /**
  * Reusable external link renderer for guide resources and competition links.
  */
-export function ExternalLinkButton({ href, customText }: ExternalLinkButtonProps) {
-  let displayText
+export function ExternalLinkButton({ href, customText, icon }: ExternalLinkButtonProps) {
+  // The label: the caller's text, else the URL stripped to a readable, YouTube-shortened form
+  const displayText =
+    customText || shortenYouTubeUrls(href.replace(/^https?:\/\//, '').replace(/\/$/, ''))
 
-  // Use custom text if provided...
-  if (customText) {
-    displayText = customText
-  } else {
-    // Otherwise extract readable display text from URL
-    displayText = href.replace(/^https?:\/\//, '').replace(/\/$/, '')
-
-    // Shorten YouTube links to show only the channel/video identifier
-    displayText = shortenYouTubeUrls(displayText)
-  }
-
+  // Render the link with the chosen glyph and display text
   return (
     <AppLink
       href={href}
@@ -41,7 +35,8 @@ export function ExternalLinkButton({ href, customText }: ExternalLinkButtonProps
         'inline-flex items-center gap-1.5 text-sm text-link no-underline transition-colors hover:text-link-hover sm:text-base'
       )}
     >
-      <ExternalLink size={13} />
+      {/* Leading glyph: the caller's, or the default external-link arrow */}
+      {icon ?? <ExternalLink size={13} />}
       {displayText}
     </AppLink>
   )

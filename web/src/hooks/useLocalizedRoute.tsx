@@ -5,23 +5,25 @@ import { createContext, type ReactNode, useContext } from 'react'
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
- * The value of the {@link LocalizedRouteContext}.
+ * The value of the {@link LocalizedRouteContext}. A route supplies whichever locale-specific URL
+ * parts it owns: a slug map (dynamic path segment) and/or a query-string translator.
  */
 type LocalizedRouteContextValue = {
   /** Map of locale to slug for the current content item */
-  slugTranslations: LocalizedString
+  slugTranslations?: LocalizedString
+  /** Re-expresses the query string from one locale's vocabulary into another's */
+  translateSearchParams?: (params: URLSearchParams, from: Locale, to: Locale) => string
 }
 
 /**
- * Context for pages with localized dynamic route segments (e.g., handouts).
- * Provides slug translations so the language switcher can navigate to the correct
- * localized URL when changing languages.
+ * Context for pages with localized dynamic route segments (e.g., handouts), so switching language
+ * can navigate to the correct localized URL.
  */
 const LocalizedRouteContext = createContext<LocalizedRouteContextValue | null>(null)
 
 /**
- * Hook to access slug translations for the current page.
- * Returns null if the current page doesn't have localized slugs.
+ * Hook to access the current page's localized-route context.
+ * Returns null when the page has no localized routing.
  */
 export function useLocalizedRoute(): LocalizedRouteContextValue | null {
   return useContext(LocalizedRouteContext)
@@ -34,6 +36,8 @@ export function useLocalizedRoute(): LocalizedRouteContextValue | null {
  * @param currentSlug - The current slug in the URL
  * @param targetLocale - The locale to get the slug for
  * @param translations - The slug translations map (or null if not available)
+ *
+ * @returns The target locale's slug, or the current slug when no translation exists
  */
 export function getTranslatedSlug(
   currentSlug: string,
@@ -44,11 +48,13 @@ export function getTranslatedSlug(
 }
 
 /**
- * Props for the LocalizedRouteProvider component.
+ * Props for the {@link LocalizedRouteProvider} component.
  */
 type LocalizedRouteProviderProps = {
   /** Slug translations for the current content item */
-  slugTranslations: LocalizedString
+  slugTranslations?: LocalizedString
+  /** Re-expresses the query string from one locale's vocabulary into another's */
+  translateSearchParams?: (params: URLSearchParams, from: Locale, to: Locale) => string
   /** Child components */
   children: ReactNode
 }
@@ -59,11 +65,13 @@ type LocalizedRouteProviderProps = {
  */
 export function LocalizedRouteProvider({
   slugTranslations,
+  translateSearchParams,
   children,
 }: LocalizedRouteProviderProps) {
+  // Provide this route's localized URL parts to the subtree
   return (
-    <LocalizedRouteContext.Provider value={{ slugTranslations }}>
+    <LocalizedRouteContext value={{ slugTranslations, translateSearchParams }}>
       {children}
-    </LocalizedRouteContext.Provider>
+    </LocalizedRouteContext>
   )
 }

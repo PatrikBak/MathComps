@@ -19,8 +19,8 @@ type LanguageSwitcherReturn = {
 /**
  * Hook to handle language switching logic.
  * Encapsulates getting the current locale and changing it while preserving the current path.
- * Supports localized slugs via {@link useLocalizedRoute} - if available, slugs are translated
- * to the target locale when switching languages.
+ * Supports localized routes via {@link useLocalizedRoute} - when available, the slug and any
+ * localized query tokens are re-expressed for the target locale on switch.
  */
 export function useLanguageSwitcher(): LanguageSwitcherReturn {
   // Determine the currently active locale
@@ -38,7 +38,7 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
   // Get the current route params (e.g., { slug: 'some-value' }) for dynamic routes
   const params = useParams()
 
-  // Get slug translations if available (for content pages with localized slugs)
+  // Get the page's localized-route context if it provides one (slug + query-token translators)
   const localizedRoute = useLocalizedRoute()
 
   /**
@@ -50,8 +50,9 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
   const changeLocale = (newLocale: Locale, onAfterChange?: () => void) => {
     // If the new locale is different from the current locale
     if (newLocale !== currentLocale) {
-      // Build translated params - translate slug if we have translations
+      // Start from the current route params
       const translatedParams = { ...params }
+      // Translate the slug to the target locale when the route carries a string one
       if (params.slug && typeof params.slug === 'string') {
         translatedParams.slug = getTranslatedSlug(
           params.slug,
@@ -60,8 +61,16 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
         )
       }
 
-      // Build the URL with query params preserved
-      const queryString = searchParams.toString()
+      // Preserve the query, re-expressing it for the new locale when the route owns a translator
+      // (the guide's deep-link tokens are localized); otherwise carry the params over verbatim
+      const queryString = localizedRoute?.translateSearchParams
+        ? localizedRoute.translateSearchParams(
+            new URLSearchParams(searchParams.toString()),
+            currentLocale,
+            newLocale
+          )
+        : searchParams.toString()
+      // Append the query to the path when there is one
       const urlWithParams = queryString ? `${pathname}?${queryString}` : pathname
 
       // Change it while preserving the current path, query parameters, and dynamic route params

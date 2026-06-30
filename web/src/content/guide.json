@@ -1,0 +1,1378 @@
+{
+  "benefits": [
+    {
+      "id": "potential",
+      "title": {
+        "sk": "Objavenie potenciálu",
+        "cs": "Objevení potenciálu",
+        "en": "Discovering potential"
+      },
+      "text": {
+        "sk": "Veľa ľudí často nevie, čoho je ich mozog schopný, keď sa snaží. Súťaže poskytujú bezpečné prostredie toto otestovať, a pre mnohých sú tak začiatkom ich budúcej cesty za kariérnym aj osobným rastom.",
+        "cs": "Mnoho lidí často neví, čeho je jejich mozek schopen, když se snaží. Soutěže poskytují bezpečné prostředí toto otestovat, a pro mnohé jsou tak začátkem jejich budoucí cesty za kariérním i osobním růstem.",
+        "en": "Many people often don't know what their brain is capable of when it tries. Competitions provide a safe environment to test this, and for many are the beginning of their future journey for career and personal growth."
+      }
+    },
+    {
+      "id": "logic",
+      "title": {
+        "sk": "Rozvoj logického myslenia",
+        "cs": "Rozvoj logického myšlení",
+        "en": "Developing logical thinking"
+      },
+      "text": {
+        "sk": "Matematické súťaže rozvíjajú schopnosť analýzy problémov a hľadania kreatívnych riešení. Tieto zručnosti sú potom prenesiteľné do všetkých sfér života, keďže problémy je treba riešiť všade.",
+        "cs": "Matematické soutěže rozvíjí schopnost analýzy problémů a hledání kreativních řešení. Tyto dovednosti jsou pak přenositelné do všech sfér života, jelikož problémy je třeba řešit všude.",
+        "en": "Math competitions develop the ability to analyze problems and find creative solutions. These skills are then transferable to all spheres of life, as problems need to be solved everywhere."
+      }
+    },
+    {
+      "id": "community",
+      "title": {
+        "sk": "Komunita a priateľstvo",
+        "cs": "Komunita a přátelství",
+        "en": "Community and friendship"
+      },
+      "text": {
+        "sk": "Prostrednie súťaží a sústredení je veľmi komunitne orientované a bez toho by mnohé ani neexistovali. Veľa ľudí si v týchto komunitách našlo priateľov a partnetov na celý život.",
+        "cs": "Prostředí soutěží a soustředění je velmi komunitně orientované a bez toho by mnohé ani neexistovaly. Mnoho lidí si v těchto komunitách našlo přátele a partnery na celý život.",
+        "en": "The environment of competitions and camps is very community-oriented and without it many would not even exist. Many people have found friends and partners for life in these communities."
+      }
+    },
+    {
+      "id": "career",
+      "title": {
+        "sk": "Veľké uplatnenie",
+        "cs": "Velké uplatnění",
+        "en": "Great career opportunities"
+      },
+      "text": {
+        "sk": "Ľudia z prostredia matematických súťaží sú tí najžiadanejší na rôzne pozície vyžadujúce riešenie ťažkých problémov, napr. v oblasti AI, algoritmického obchodovania atď. Vďaka nadobudnutým schopnostiam a kontaktom z komunity ich potom ľahko získavajú.",
+        "cs": "Lidé z prostředí matematických soutěží jsou ti nejžádanější na různé pozice vyžadující řešení těžkých problémů, např. v oblasti AI, algoritmického obchodování atd. Díky nabytým schopnostem a kontaktům z komunity je pak snadno získávají.",
+        "en": "People from the math competition environment are the most sought after for various positions requiring solving difficult problems, e.g. in AI, algorithmic trading etc. Thanks to acquired skills and contacts from the community they then easily obtain them."
+      }
+    }
+  ],
+  "internationalCompetitions": [
+    {
+      "id": "imo",
+      "acronym": "IMO",
+      "fullName": "International Mathematical Olympiad",
+      "links": [
+        {
+          "url": "https://www.imo-official.org/"
+        }
+      ],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Najprestížnejšia medzinárodná olympiáda",
+          "cs": "Nejprestižnější mezinárodní olympiáda",
+          "en": "The most prestigious international olympiad"
+        }
+      },
+      "details": [
+        {
+          "kind": "text",
+          "value": {
+            "sk": "6 najlepších riešiteľov z krajiny",
+            "cs": "6 nejlepších řešitelů ze země",
+            "en": "6 best solvers from each country"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "100 a viac krajín",
+            "cs": "100 a více zemí",
+            "en": "100+ countries"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "2 súťažné dni, každý má 3 príklady na 4 a pol hodiny",
+            "cs": "2 soutěžní dny, každý má 3 příklady na 4 a půl hodiny",
+            "en": "2 competition days, each with 3 problems over 4.5 hours"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Koná sa začiatkom júla",
+            "cs": "Koná se začátkem července",
+            "en": "Held in early July"
+          }
+        }
+      ]
+    },
+    {
+      "id": "memo",
+      "acronym": "MEMO",
+      "fullName": "Middle European Mathematical Olympiad",
+      "links": [
+        {
+          "url": "https://memo-official.org/"
+        }
+      ],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž pre najlepších budúcich potenciálnych IMO účastníkov",
+          "cs": "Soutěž pro nejlepší budoucí potenciální IMO účastníky",
+          "en": "Competition for the best future potential IMO participants"
+        }
+      },
+      "details": [
+        {
+          "kind": "text",
+          "value": {
+            "sk": "6 najlepších riešiteľov neidúcich na IMO, ktorí tam ale môžu ísť o rok",
+            "cs": "6 nejlepších řešitelů nejedoucích na IMO, kteří tam ale mohou jet za rok",
+            "en": "6 best solvers not going to IMO, who may go next year"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "10 a viac krajín",
+            "cs": "10 a více zemí",
+            "en": "10+ countries"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Individuálna časť má 4 úlohy, tímová 8, na obe je 5 hodín",
+            "cs": "Individuální část má 4 úlohy, týmová 8, na obě je 5 hodin",
+            "en": "Individual part has 4 problems, team part 8, 5 hours each"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Tímová časť je súťaž krajín",
+            "cs": "Týmová část je soutěž zemí",
+            "en": "The team part is a contest between countries"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Koná sa koncom augusta",
+            "cs": "Koná se koncem srpna",
+            "en": "Held in late August"
+          }
+        }
+      ]
+    },
+    {
+      "id": "egmo",
+      "acronym": "EGMO",
+      "fullName": "European Girls' Mathematical Olympiad",
+      "links": [
+        {
+          "url": "https://egmo.org/"
+        }
+      ],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž s cieľom povzbudiť účasť dievčat v matematických súťažiach",
+          "cs": "Soutěž s cílem povzbudit účast dívek v matematických soutěžích",
+          "en": "Competition aimed at encouraging girls' participation in math competitions"
+        }
+      },
+      "details": [
+        {
+          "kind": "text",
+          "value": {
+            "sk": "6 najlepších riešiteliek z krajiny",
+            "cs": "6 nejlepších řešitelek ze země",
+            "en": "6 best female solvers from each country"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Kvalifikácia cez špeciálne výberové sústredenie",
+            "cs": "Kvalifikace přes speciální výběrové soustředění",
+            "en": "Qualification through special selection camp"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Pozvánka naň na základe výsledkov krajského kola kategórie A",
+            "cs": "Pozvánka na něj na základě výsledků krajského kola kategorie A",
+            "en": "Invitation based on results of regional round category A"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "55 a viac krajín (aj neeurópske)",
+            "cs": "55 a více zemí (i neevropské)",
+            "en": "55+ countries (including non-European)"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Formát súťaže ako na IMO",
+            "cs": "Formát soutěže jako na IMO",
+            "en": "Same format as IMO"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Koná sa začiatkom apríla",
+            "cs": "Koná se začátkem dubna",
+            "en": "Held in early April"
+          }
+        }
+      ]
+    },
+    {
+      "id": "caps",
+      "acronym": "CAPS",
+      "fullName": "Czech Austrian Polish Slovak Match",
+      "links": [],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Prípravná súťaž pre IMO tímy účastných krajín",
+          "cs": "Přípravná soutěž pro IMO týmy účastnících se zemí",
+          "en": "Preparatory competition for IMO teams of participating countries"
+        }
+      },
+      "details": [
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Formát súťaže ako IMO",
+            "cs": "Formát soutěže jako IMO",
+            "en": "Same format as IMO"
+          }
+        },
+        {
+          "kind": "rich",
+          "value": {
+            "sk": "Posledné roky spravidla vo vedeckom inštitúte [ISTA](https://ista.ac.at/) v Rakúsku",
+            "cs": "Poslední roky zpravidla ve vědeckém institutu [ISTA](https://ista.ac.at/) v Rakousku",
+            "en": "Recently usually held at the [ISTA](https://ista.ac.at/) research institute in Austria"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Koná sa koncom júna",
+            "cs": "Koná se koncem června",
+            "en": "Held in late June"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cpsj",
+      "acronym": "CPSJ",
+      "fullName": "Czech-Polish-Slovak Junior Match",
+      "links": [],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž pre šiestich najlepších prvákov SŠ (a mladších) účastníckych krajín",
+          "cs": "Soutěž pro šest nejlepších prváků SŠ (a mladších) z účastnických zemí",
+          "en": "Competition for the six best first-year high school students (and younger) from participating countries"
+        }
+      },
+      "details": [
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Kvalifikácia cez špeciálne výberové sústredenie",
+            "cs": "Kvalifikace přes speciální výběrové soustředění",
+            "en": "Qualification through special selection camp"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "V Česku výber na základe výsledkov kategórie A, na Slovensku kategórie C",
+            "cs": "V Česku výběr na základě výsledků kategorie A, na Slovensku kategorie C",
+            "en": "In Czechia selection based on category A results, in Slovakia category C"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Individuálna časť má 5 úloh, tímová 6",
+            "cs": "Individuální část má 5 úloh, týmová 6",
+            "en": "Individual part has 5 problems, team part 6"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Trojčlenné tímy (1 člen z každej krajiny) a losované náhodne",
+            "cs": "Tříčlenné týmy (1 člen z každé země) a losované náhodně",
+            "en": "Three-member teams (1 member from each country) randomly drawn"
+          }
+        },
+        {
+          "kind": "text",
+          "value": {
+            "sk": "Koná sa koncom mája",
+            "cs": "Koná se koncem května",
+            "en": "Held in late May"
+          }
+        }
+      ]
+    }
+  ],
+  "otherCompetitions": [
+    {
+      "id": "naboj",
+      "title": {
+        "sk": "Náboj & Náboj Junior",
+        "cs": "Náboj & Náboj Junior",
+        "en": "Náboj & Náboj Junior"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Najpopulárnejšia tímová súťaž v našich končinách s úlohami na výsledok",
+          "cs": "Nejpopulárnější týmová soutěž v našich končinách s úlohami na výsledek",
+          "en": "The most popular team competition in our region with answer-only problems"
+        }
+      },
+      "links": [
+        {
+          "url": "https://math.naboj.org/",
+          "label": {
+            "kind": "text",
+            "value": {
+              "sk": "Stredná škola",
+              "cs": "Střední škola",
+              "en": "High school"
+            }
+          }
+        },
+        {
+          "url": "https://junior.naboj.org/",
+          "label": {
+            "kind": "text",
+            "value": {
+              "sk": "Základná škola",
+              "cs": "Základní škola",
+              "en": "Elementary school"
+            }
+          }
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["CZ", "SK", "INTERNATIONAL"],
+      "kind": "team"
+    },
+    {
+      "id": "duogeo",
+      "title": {
+        "sk": "DuoGeo",
+        "cs": "DuoGeo",
+        "en": "DuoGeo"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž dvojíc v riešení geometrie olympiádneho typu",
+          "cs": "Soutěž dvojic v řešení geometrie olympiádního typu",
+          "en": "A pairs competition in solving olympiad-style geometry"
+        }
+      },
+      "links": [
+        {
+          "url": "https://duogeo.cz/"
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["SK", "CZ", "PL"],
+      "kind": "team"
+    },
+    {
+      "id": "maso",
+      "title": {
+        "sk": "Maso",
+        "cs": "Maso",
+        "en": "Maso"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž s úlohami ako v Náboji, kde sa za výsleky odomykajú ťahy do hry",
+          "cs": "Soutěž s úlohami jako v Náboji, kde se za výsledky odemykají tahy do hry",
+          "en": "A competition with problems like Náboj, where answers unlock moves in a game"
+        }
+      },
+      "links": [
+        {
+          "url": "https://maso.mff.cuni.cz/"
+        }
+      ],
+      "levels": ["elementary"],
+      "countries": ["CZ"],
+      "kind": "team"
+    },
+    {
+      "id": "klokan",
+      "title": {
+        "sk": "Matematický klokan",
+        "cs": "Matematický klokan",
+        "en": "Math Kangaroo"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž s výberom z možností",
+          "cs": "Soutěž s výběrem z možností",
+          "en": "A multiple-choice competition"
+        }
+      },
+      "links": [
+        {
+          "url": "https://matematickyklokan.sk/",
+          "label": {
+            "kind": "country",
+            "country": "SK"
+          }
+        },
+        {
+          "url": "https://matematickyklokan.upol.cz/",
+          "label": {
+            "kind": "country",
+            "country": "CZ"
+          }
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["CZ", "SK"],
+      "kind": "individual"
+    },
+    {
+      "id": "pytagoriada",
+      "title": {
+        "sk": "Pytagoriáda",
+        "cs": "Pytagoriáda",
+        "en": "Pythagoreiad"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž, kde záleží na rýchlosti a správnosti výsledkov",
+          "cs": "Soutěž, kde záleží na rychlosti a správnosti výsledků",
+          "en": "A competition where speed and accuracy of answers matter"
+        }
+      },
+      "links": [
+        {
+          "url": "https://nivam.sk/olympiady-a-sutaze/pytagoriada/",
+          "label": {
+            "kind": "country",
+            "country": "SK"
+          }
+        },
+        {
+          "url": "https://www.pythagoriada.cz/",
+          "label": {
+            "kind": "country",
+            "country": "CZ"
+          }
+        }
+      ],
+      "levels": ["elementary"],
+      "countries": ["CZ", "SK"],
+      "kind": "individual"
+    },
+    {
+      "id": "pangea",
+      "title": {
+        "sk": "Pangea",
+        "cs": "Pangea",
+        "en": "Pangea"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž podobná Matematickému klokanovi s tematickými úlohami",
+          "cs": "Soutěž podobná Matematickému klokanovi s tematickými úlohami",
+          "en": "A competition similar to Math Kangaroo with themed problems"
+        }
+      },
+      "links": [
+        {
+          "url": "https://www.pangeasoutez.cz/"
+        }
+      ],
+      "levels": ["elementary"],
+      "countries": ["CZ"],
+      "kind": "individual"
+    },
+    {
+      "id": "attomat",
+      "title": {
+        "sk": "Attomat",
+        "cs": "Attomat",
+        "en": "Attomat"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Online súťaž s úlohami na výsledok",
+          "cs": "Online soutěž s úlohami na výsledek",
+          "en": "An online competition with answer-only problems"
+        }
+      },
+      "links": [
+        {
+          "url": "https://akcie.p-mat.sk/attomat/"
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["SK", "CZ"],
+      "kind": "individual"
+    },
+    {
+      "id": "maks",
+      "title": {
+        "sk": "Maks a Maksík",
+        "cs": "Maks a Maksík",
+        "en": "Maks & Maksík"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž, kde sa úlohy riešia doma a výsledky nahrávajú online",
+          "cs": "Soutěž, kde se úlohy řeší doma a výsledky nahrávají online",
+          "en": "A competition where problems are solved at home and answers uploaded online"
+        }
+      },
+      "links": [
+        {
+          "url": "https://talentida.sk/maksik/",
+          "label": {
+            "kind": "text",
+            "value": {
+              "sk": "Maksík (2.–4. ročník)",
+              "cs": "Maksík (2.–4. ročník)",
+              "en": "Maksík (grades 2–4)"
+            }
+          }
+        },
+        {
+          "url": "https://talentida.sk/maks/",
+          "label": {
+            "kind": "text",
+            "value": {
+              "sk": "MAKS (5.–9. ročník)",
+              "cs": "MAKS (5.–9. ročník)",
+              "en": "MAKS (grades 5–9)"
+            }
+          }
+        }
+      ],
+      "levels": ["elementary"],
+      "countries": ["SK"],
+      "kind": "individual"
+    },
+    {
+      "id": "logickaOlympiada",
+      "title": {
+        "sk": "Logická olympiáda",
+        "cs": "Logická olympiáda",
+        "en": "Logic Olympiad"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Zo zrejmých dôvodov populárna súťaž medzi matematikmi",
+          "cs": "Ze zřejmých důvodů populární soutěž mezi matematiky",
+          "en": "A popular competition among mathematicians for obvious reasons"
+        }
+      },
+      "links": [
+        {
+          "url": "https://www.logickaolympiada.cz",
+          "label": {
+            "kind": "country",
+            "country": "CZ"
+          }
+        },
+        {
+          "url": "https://www.logickaolympiada.sk/",
+          "label": {
+            "kind": "country",
+            "country": "SK"
+          }
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["SK", "CZ"],
+      "kind": "individual"
+    },
+    {
+      "id": "mathrace",
+      "title": {
+        "sk": "Mathrace",
+        "cs": "Mathrace",
+        "en": "Mathrace"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Online súťaž s úlohami ako v Náboji, kde možno používať softvér a programovať",
+          "cs": "Online soutěž s úlohami jako v Náboji, kde lze používat software a programovat",
+          "en": "An online competition with Náboj-style problems where software and programming is allowed"
+        }
+      },
+      "links": [
+        {
+          "url": "https://brkos.math.muni.cz/mathrace/"
+        }
+      ],
+      "levels": ["highSchool"],
+      "countries": ["CZ", "SK"],
+      "kind": "team"
+    },
+    {
+      "id": "mathing",
+      "title": {
+        "sk": "Mathing",
+        "cs": "Mathing",
+        "en": "Mathing"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Online súťaž s úlohami ako v olympiáde",
+          "cs": "Online soutěž s úlohami jako v olympiádě",
+          "en": "An online competition with olympiad-style problems"
+        }
+      },
+      "links": [
+        {
+          "url": "https://mathing.fme.vutbr.cz/"
+        }
+      ],
+      "levels": ["highSchool"],
+      "countries": ["CZ", "SK"],
+      "kind": "team"
+    },
+    {
+      "id": "brloh",
+      "title": {
+        "sk": "Brloh",
+        "cs": "Brloh",
+        "en": "Brloh"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Súťaž v riešení matematicko-logických úloh",
+          "cs": "Soutěž v řešení matematicko-logických úloh",
+          "en": "A competition in solving mathematical-logical problems"
+        }
+      },
+      "links": [
+        {
+          "url": "https://brloh.math.muni.cz/"
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["SK", "CZ"],
+      "kind": "individual"
+    },
+    {
+      "id": "purpleComet",
+      "title": {
+        "sk": "Purple Comet",
+        "cs": "Purple Comet",
+        "en": "Purple Comet"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Medzinárodná súťaž podobná Náboju s viac ako 80 krajinami",
+          "cs": "Mezinárodní soutěž podobná Náboji s více než 80 zeměmi",
+          "en": "An international Náboj-like competition with over 80 countries"
+        }
+      },
+      "links": [
+        {
+          "url": "https://purplecomet.org/"
+        }
+      ],
+      "levels": ["highSchool"],
+      "countries": ["INTERNATIONAL"],
+      "kind": "team"
+    }
+  ],
+  "seminars": [
+    {
+      "id": "kms",
+      "title": "KMS",
+      "links": [
+        {
+          "url": "https://kms.sk/"
+        }
+      ],
+      "level": "highSchool",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Bratislavský seminár organizovaný združením Trojsten",
+          "cs": "Bratislavský seminář pořádaný sdružením Trojsten",
+          "en": "Bratislava seminar organized by the Trojsten association"
+        }
+      }
+    },
+    {
+      "id": "strom",
+      "title": "Strom",
+      "links": [
+        {
+          "url": "https://strom.sk/strom"
+        }
+      ],
+      "level": "highSchool",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Košický seminár organizovaný združením STROM",
+          "cs": "Košický seminář pořádaný sdružením STROM",
+          "en": "Košice seminar organized by the STROM association"
+        }
+      }
+    },
+    {
+      "id": "prase",
+      "title": "PraSe",
+      "links": [
+        {
+          "url": "https://prase.cz/"
+        }
+      ],
+      "level": "highSchool",
+      "countries": ["CZ"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pražský seminár organizovaný Karlovou univerzitou",
+          "cs": "Pražský seminář pořádaný Univerzitou Karlovou",
+          "en": "Prague seminar organized by Charles University"
+        }
+      }
+    },
+    {
+      "id": "brkos",
+      "title": "BRKOS",
+      "links": [
+        {
+          "url": "https://brkos.math.muni.cz/"
+        }
+      ],
+      "level": "highSchool",
+      "countries": ["CZ"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Brniansky seminár organizovaný Masarykovou univerzitou",
+          "cs": "Brněnský seminář pořádaný Masarykovou univerzitou",
+          "en": "Brno seminar organized by Masaryk University"
+        }
+      }
+    },
+    {
+      "id": "iks",
+      "title": "iKS",
+      "links": [
+        {
+          "url": "https://iksko.org/"
+        }
+      ],
+      "level": "highSchool",
+      "countries": ["INTERNATIONAL"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Česko-slovenský seminár pre študentov s ambíciami uspieť na medzinárodných súťažiach",
+          "cs": "Česko-slovenský seminář pro studenty s ambicí uspět na mezinárodních soutěžích",
+          "en": "Czech-Slovak seminar for students with ambitions to succeed at international competitions"
+        }
+      }
+    },
+    {
+      "id": "mbl",
+      "title": "MBL",
+      "links": [
+        {
+          "url": "https://mathsbeyondlimits.eu/"
+        }
+      ],
+      "level": "highSchool",
+      "countries": ["INTERNATIONAL"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pôvodne poľský, dnes medzinárodný seminár s viacerými edíciami (MBL Poland, MBL Balkan atď.)",
+          "cs": "Původně polský, dnes mezinárodní seminář s několika edicemi (MBL Poland, MBL Balkan atd.)",
+          "en": "Originally Polish, now international seminar with several editions (MBL Poland, MBL Balkan, etc.)"
+        }
+      }
+    },
+    {
+      "id": "riesky",
+      "title": "Riešky",
+      "links": [
+        {
+          "url": "https://riesky.sk/"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 5.-9. ročník ZŠ, organizovaný študentmi Gymnázia Grösslingová v Bratislave (Gamča)",
+          "cs": "Pro 5.-9. ročník ZŠ, pořádaný studenty Gymnázia Grösslingová v Bratislavě (Gamča)",
+          "en": "For grades 5-9 of elementary school, run by students of the Grösslingová Gymnasium in Bratislava (Gamča)"
+        }
+      }
+    },
+    {
+      "id": "pikomat",
+      "title": "Pikomat",
+      "links": [
+        {
+          "url": "https://pikomat.sk/",
+          "label": {
+            "kind": "country",
+            "country": "SK"
+          }
+        },
+        {
+          "url": "https://pikomat.mff.cuni.cz/",
+          "label": {
+            "kind": "country",
+            "country": "CZ"
+          }
+        }
+      ],
+      "level": "elementary",
+      "countries": ["SK", "CZ"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 5.-9. ročník ZŠ; organizuje P-MAT (SK) a MFF UK (CZ)",
+          "cs": "Pro 5.-9. ročník ZŠ; pořádá P-MAT (SK) a MFF UK (CZ)",
+          "en": "For grades 5-9 of elementary school; run by P-MAT (SK) and MFF UK (CZ)"
+        }
+      }
+    },
+    {
+      "id": "sezam",
+      "title": "Sezam",
+      "links": [
+        {
+          "url": "https://www.sezam.sk/"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 7.-9. ročník ZŠ, organizovaný žilinskou pobočkou JSMF (Jednota slovenských matematikov a fyzikov)",
+          "cs": "Pro 7.-9. ročník ZŠ, pořádaný žilinskou pobočkou JSMF (Jednota slovenských matematiků a fyziků)",
+          "en": "For grades 7-9 of elementary school, run by the Žilina branch of JSMF (the Union of Slovak Mathematicians and Physicists)"
+        }
+      }
+    },
+    {
+      "id": "sezamko",
+      "title": "Sezamko",
+      "links": [
+        {
+          "url": "https://www.sezam.sk/sezamko/"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 4.-6. ročník ZŠ, organizovaný žilinskou pobočkou JSMF (Jednota slovenských matematikov a fyzikov)",
+          "cs": "Pro 4.-6. ročník ZŠ, pořádaný žilinskou pobočkou JSMF (Jednota slovenských matematiků a fyziků)",
+          "en": "For grades 4-6 of elementary school, run by the Žilina branch of JSMF (the Union of Slovak Mathematicians and Physicists)"
+        }
+      }
+    },
+    {
+      "id": "matik",
+      "title": "Matik",
+      "links": [
+        {
+          "url": "https://strom.sk/matik"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 7.-9. ročník ZŠ, organizovaný združením STROM",
+          "cs": "Pro 7.-9. ročník ZŠ, pořádaný sdružením STROM",
+          "en": "For grades 7-9 of elementary school, run by the STROM association"
+        }
+      }
+    },
+    {
+      "id": "malynar",
+      "title": "Malynár",
+      "links": [
+        {
+          "url": "https://strom.sk/malynar"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["SK"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 4.-6. ročník ZŠ, organizovaný združením STROM",
+          "cs": "Pro 4.-6. ročník ZŠ, pořádaný sdružením STROM",
+          "en": "For grades 4-6 of elementary school, run by the STROM association"
+        }
+      }
+    },
+    {
+      "id": "komar",
+      "title": "Komár",
+      "links": [
+        {
+          "url": "https://komar.math.muni.cz/"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["CZ"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 6.-9. ročník ZŠ, organizovaný študentmi Gymnázia Kpt. Jaroša v Brne",
+          "cs": "Pro 6.-9. ročník ZŠ, pořádaný studenty Gymnázia Kpt. Jaroše v Brně",
+          "en": "For grades 6-9 of elementary school, run by students of Kpt. Jaroš Gymnasium in Brno"
+        }
+      }
+    },
+    {
+      "id": "kokos",
+      "title": "KoKoS",
+      "links": [
+        {
+          "url": "http://kokos.gmk.cz/"
+        }
+      ],
+      "level": "elementary",
+      "countries": ["CZ"],
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Pre 6.-9. ročník ZŠ, organizovaný študentmi Gymnázia Mikuláša Koperníka v Bílovci",
+          "cs": "Pro 6.-9. ročník ZŠ, pořádaný studenty Gymnázia Mikuláše Koperníka v Bílovci",
+          "en": "For grades 6-9 of elementary school, run by students of Mikuláš Koperník Gymnasium in Bílovec"
+        }
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "ourMaterials",
+      "title": {
+        "sk": "Naše materiály",
+        "cs": "Naše materiály",
+        "en": "Our materials"
+      },
+      "links": [
+        {
+          "url": "/handouts"
+        }
+      ],
+      "bucket": "studyTexts",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Verejne dostupných materiálov pre začiatočníkov s dobrými vysvetleniami myšlienok nie je veľa. Naše materiály na tejto stránke majú ambíciu túto medzeru zaplniť. Priebežne sa ich zbierka bude rozrastať.",
+          "cs": "Veřejně dostupných materiálů pro začátečníky s dobrými vysvětleními myšlenek není mnoho. Naše materiály na této stránce mají ambici tuto mezeru zaplnit. Průběžně se jejich sbírka bude rozrůstat.",
+          "en": "There aren't many publicly available materials for beginners with good explanations of ideas. Our materials on this site aim to fill this gap. The collection will grow over time."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "kmsCollection",
+      "title": {
+        "sk": "KMS zbierka",
+        "cs": "KMS sbírka",
+        "en": "KMS collection"
+      },
+      "links": [
+        {
+          "url": "https://kms.sk/zbierka/"
+        }
+      ],
+      "bucket": "studyTexts",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Starší, ale nadčasový materiál. Príjemné zdôvodnenia a krátke úvody do všetkých tém s veľa príkladmi zo seminára KMS.",
+          "cs": "Starší, ale nadčasový materiál. Příjemná zdůvodnění a krátké úvody do všech témat s mnoha příklady ze semináře KMS.",
+          "en": "Older but timeless material. Pleasant explanations and short introductions to all topics with many examples from the KMS seminar."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "guidedProblems",
+      "title": {
+        "sk": "Návodné úlohy k domácim kolám MO",
+        "cs": "Návodné úlohy k domácím kolům MO",
+        "en": "Guided problems for MO home rounds"
+      },
+      "links": [],
+      "bucket": "studyTexts",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Oplatí sa riešiť si aj staršie domáceho kolá MO, lebo v rámci nich sa vydávajú návodné a doplňujúce úlohy (aj s riešenia/odkazmi na ne), čo je dobrý spôsob ako nasať nejakú tému.",
+          "cs": "Vyplatí se řešit si i starší domácí kola MO, protože v rámci nich se vydávají návodné a doplňující úlohy (i s řešeními/odkazy na ně), což je dobrý způsob jak nasát nějaké téma.",
+          "en": "It's worth solving older MO home rounds, because guided and supplementary problems are released with them (with solutions/links), which is a good way to absorb a topic."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "sampleSolutions",
+      "title": {
+        "sk": "Vzorové riešenia",
+        "cs": "Vzorová řešení",
+        "en": "Sample solutions"
+      },
+      "links": [],
+      "bucket": "studyTexts",
+      "description": {
+        "kind": "rich",
+        "value": {
+          "sk": "Najľahšie úlohy [seminárov](#seminars), prípadne nižších kategórii MO, sú dobrým zdrojom. V seminároch sú riešenia písané viac v štýle, ako na úlohy prísť, zatiaľ čo v olympiáde viac v štýle, ako ich napísať, keď už na to niekto prišiel.",
+          "cs": "Nejlehčí úlohy [seminářů](#seminars), případně nižších kategorií MO, jsou dobrým zdrojem. V seminářích jsou řešení psaná více ve stylu, jak na úlohy přijít, zatímco v olympiádě více ve stylu, jak je napsat, když už na to někdo přišel.",
+          "en": "The easiest problems from [seminars](#seminars), or lower MO categories, are a good source. In seminars, solutions are written more in the style of how to approach problems, while in olympiad more in the style of how to write them once someone has figured it out."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "mindyourdecisions",
+      "title": {
+        "sk": "MindYourDecisions",
+        "cs": "MindYourDecisions",
+        "en": "MindYourDecisions"
+      },
+      "links": [
+        {
+          "url": "https://www.youtube.com/@MindYourDecisions"
+        }
+      ],
+      "bucket": "youtube",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Videá s riešením úloh všetkých obtiažností, od priam popularizačných až po zaujímavé olympiádne.",
+          "cs": "Videa s řešením úloh všech obtížností, od přímo popularizačních až po zajímavé olympiádní.",
+          "en": "Videos solving problems of all difficulties, from purely popularizing to interesting olympiad ones."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "geogebra",
+      "title": {
+        "sk": "GeoGebra",
+        "cs": "GeoGebra",
+        "en": "GeoGebra"
+      },
+      "links": [
+        {
+          "url": "https://www.geogebra.org/"
+        }
+      ],
+      "bucket": "programs",
+      "description": {
+        "kind": "rich",
+        "value": {
+          "sk": "Fantastická pomôcka pri učení sa geometrie, prípadne nástroj na kreslenie grafov. Dobre narysovaný obrázok môže robiť rozdiel v tom, či riešenie vidíme alebo nie, no a GeoGebra ich vie rysovať <NoWrap>presne 📐</NoWrap>.",
+          "cs": "Fantastická pomůcka při učení se geometrie, případně nástroj pro kreslení grafů. Dobře narýsovaný obrázek může dělat rozdíl v tom, jestli řešení vidíme nebo ne, no a GeoGebra je umí rýsovat <NoWrap>přesně 📐</NoWrap>.",
+          "en": "A fantastic tool for learning geometry or drawing graphs. A well-drawn diagram can make the difference in whether we see the solution or not, and GeoGebra can draw them <NoWrap>precisely 📐</NoWrap>."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "wolframalpha",
+      "title": {
+        "sk": "WolframAlpha",
+        "cs": "WolframAlpha",
+        "en": "WolframAlpha"
+      },
+      "links": [
+        {
+          "url": "https://www.wolframalpha.com/"
+        }
+      ],
+      "bucket": "programs",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Rýchly a spoľahlivý nástroj na riešenie rovníc, rozkladanie čísel na súčin, počítanie súm, alebo aj derivovanie, integerovanie atď.",
+          "cs": "Rychlý a spolehlivý nástroj na řešení rovnic, rozkládání čísel na součin, počítání sum, nebo i derivování, integrování atd.",
+          "en": "A fast and reliable tool for solving equations, factoring numbers, calculating sums, or even differentiation, integration, etc."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "overleaf",
+      "title": {
+        "sk": "Overleaf",
+        "cs": "Overleaf",
+        "en": "Overleaf"
+      },
+      "links": [
+        {
+          "url": "https://www.overleaf.com/"
+        }
+      ],
+      "bucket": "programs",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Online prostriedie na písanie v LaTeX-u, čo je štandard pre matematiku. Obsahuje návody pre začiatočníkov na LaTeX samotný.",
+          "cs": "Online prostředí pro psaní v LaTeXu, což je standard pro matematiku. Obsahuje návody pro začátečníky na LaTeX samotný.",
+          "en": "Online environment for writing in LaTeX, which is the standard for mathematics. Contains tutorials for LaTeX beginners."
+        }
+      },
+      "level": "beginner"
+    },
+    {
+      "id": "aops",
+      "title": {
+        "sk": "AoPS",
+        "cs": "AoPS",
+        "en": "AoPS"
+      },
+      "fullName": "Art of Problem Solving",
+      "links": [
+        {
+          "url": "https://artofproblemsolving.com/"
+        }
+      ],
+      "bucket": "websites",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Asi najväčšia a najdôležitejšia stránka o olympiádnej matematike na svete. Fóra, obrovské zbierky úloh, články, všetko na jednom mieste. Nutnosť poznať.",
+          "cs": "Asi největší a nejdůležitější stránka o olympiádní matematice na světě. Fóra, obrovské sbírky úloh, články, vše na jednom místě. Nutnost znát.",
+          "en": "Probably the biggest and most important website about olympiad mathematics in the world. Forums, huge problem collections, articles, all in one place. A must know."
+        }
+      },
+      "level": "advanced"
+    },
+    {
+      "id": "3blue1brown",
+      "title": {
+        "sk": "3Blue1Brown",
+        "cs": "3Blue1Brown",
+        "en": "3Blue1Brown"
+      },
+      "links": [
+        {
+          "url": "https://www.youtube.com/c/3blue1brown"
+        }
+      ],
+      "bucket": "youtube",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Unikátne vizuálne spracovanie všemožných tém z matematiky.",
+          "cs": "Unikátní vizuální zpracování všemožných témat z matematiky.",
+          "en": "Unique visual treatment of various topics from mathematics."
+        }
+      },
+      "level": "advanced"
+    },
+    {
+      "id": "michaelpenn",
+      "title": {
+        "sk": "Michael Penn",
+        "cs": "Michael Penn",
+        "en": "Michael Penn"
+      },
+      "links": [
+        {
+          "url": "https://www.youtube.com/c/MichaelPennMath"
+        }
+      ],
+      "bucket": "youtube",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Vysvetlenia riešení súťažných úloh zo súťaží z celého sveta pred tabuľou.",
+          "cs": "Vysvětlení řešení soutěžních úloh ze soutěží z celého světa před tabulí.",
+          "en": "Solutions to competition problems from competitions around the world, explained on a blackboard."
+        }
+      },
+      "level": "advanced"
+    },
+    {
+      "id": "praseLibrary",
+      "title": {
+        "sk": "PraSe knižnica",
+        "cs": "PraSe knihovna",
+        "en": "PraSe library"
+      },
+      "links": [
+        {
+          "url": "https://prase.cz/knihovna/"
+        }
+      ],
+      "bucket": "studyTexts",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Veľká zbierka materiálov zo seminára PraSe. Na samostatné štúdium sú veľmi zaujímavé takzvané seriály, čo sú tematické texty.",
+          "cs": "Velká sbírka materiálů ze semináře PraSe. Pro samostatné studium jsou velmi zajímavé takzvané seriály, což jsou tematické texty.",
+          "en": "A large collection of materials from the PraSe seminar. For self-study, the so-called series, which are thematic texts, are very interesting."
+        }
+      },
+      "level": "advanced"
+    },
+    {
+      "id": "evanchen",
+      "title": {
+        "sk": "Evan Chen",
+        "cs": "Evan Chen",
+        "en": "Evan Chen"
+      },
+      "links": [
+        {
+          "url": "https://web.evanchen.cc/"
+        }
+      ],
+      "bucket": "websites",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Osobná stránka svetoznámeho olympiádneho experta. Cez jeho stránku sa možno preklikať na veľa nielen jeho materiálov alebo ďalších zdrojov a informácií.",
+          "cs": "Osobní stránka světoznámého olympiádního experta. Přes jeho stránku se lze proklikat na spoustu nejen jeho materiálů nebo dalších zdrojů a informací.",
+          "en": "Personal website of a world-famous olympiad expert. Through his site, you can navigate to many of his materials and other resources and information."
+        }
+      },
+      "level": "advanced"
+    },
+    {
+      "id": "mods",
+      "title": {
+        "sk": "MODS",
+        "cs": "MODS",
+        "en": "MODS"
+      },
+      "fullName": "Math Olympiad Discord Server",
+      "links": [
+        {
+          "url": "https://discord.gg/mods"
+        }
+      ],
+      "bucket": "websites",
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Veľký medzinárodný Discord server, kde možno diskutovať s ľuďmi z celého sveta. Už viac ako 2000 dní pripravuje rubriku úloha dňa, pričom je možné pristúpiť k starším úlohám podľa oblastí a hodnotení obtiažnosti.",
+          "cs": "Velký mezinárodní Discord server, kde lze diskutovat s lidmi z celého světa. Už více než 2000 dní připravuje rubriku úloha dne, přičemž je možné přistoupit ke starším úlohám podle oblastí a hodnocení obtížnosti.",
+          "en": "A large international Discord server where you can discuss with people from all over the world. For over 2000 days, it has been running a problem of the day feature, with access to older problems by topic and difficulty rating."
+        }
+      },
+      "level": "advanced"
+    }
+  ],
+  "steps": [
+    {
+      "id": "beginnings",
+      "title": {
+        "sk": "Začiatky sú skvelé, lebo človek sa rýchlo zlepšuje",
+        "cs": "Začátky jsou skvělé, protože člověk se rychle zlepšuje",
+        "en": "Beginnings are great because you improve quickly"
+      },
+      "points": [
+        {
+          "sk": "Vyskúšaj korešpondenčné semináre. Majú úlohy vhodné pre začiatočníkov a poskytujú spätnú väzbu. Zúčastni sa ich sústredení, kde sa naučíš, spoznáš a zabavíš.",
+          "cs": "Vyzkoušej korespondenční semináře. Mají úlohy vhodné pro začátečníky a poskytují zpětnou vazbu. Zúčastni se jejich soustředění, kde se naučíš, poznáš lidi a zabavíš.",
+          "en": "Try correspondence seminars. They have problems suitable for beginners and provide feedback. Attend their camps where you'll learn, meet people, and have fun."
+        },
+        {
+          "sk": "Hľadaj matematické krúžky na škole alebo v okolí. Spýtaj sa svojho učiteľa matematiky, či o niečom nevie.",
+          "cs": "Hledej matematické kroužky na škole nebo v okolí. Zeptej se svého učitele matematiky, jestli o něčem neví.",
+          "en": "Look for math clubs at school or nearby. Ask your math teacher if they know of any."
+        },
+        {
+          "sk": "Skús riešenie úloh s niekým ďalším, môžete sa navzájom posúvať dopredu a spoločne baviť matikou.",
+          "cs": "Zkus řešení úloh s někým dalším, můžete se navzájem posouvat dopředu a společně se bavit matikou.",
+          "en": "Try solving problems with someone else, you can push each other forward and enjoy math together."
+        },
+        {
+          "sk": "Nájdi si tiež študijné materiály na systematické štúdium, odporúčania nájdeš o kúsok vyššie. Kombinuj to s riešením náhodných úloh.",
+          "cs": "Najdi si také studijní materiály pro systematické studium, doporučení najdeš o kousek výše. Kombinuj to s řešením náhodných úloh.",
+          "en": "Also find study materials for systematic learning, recommendations are just above. Combine it with solving random problems."
+        }
+      ]
+    },
+    {
+      "id": "training",
+      "title": {
+        "sk": "Princípy dobrého tréningu",
+        "cs": "Principy dobrého tréninku",
+        "en": "Principles of good training"
+      },
+      "points": [
+        {
+          "sk": "Matematiku treba aktívne trénovať, ani svaly sa nezískajú pozeraním videí o cvičení. Najprv vždy skús úlohu vyriešiť sám, proces premýšľania, skúšania a aj zlyhávania pomáha mysli učiť sa.",
+          "cs": "Matematiku je třeba aktivně trénovat, ani svaly se nezískají koukáním na videa o cvičení. Nejprve vždy zkus úlohu vyřešit sám, proces přemýšlení, zkoušení a i selhávání pomáhá mysli učit se.",
+          "en": "Math needs to be actively trained, muscles aren't gained by watching exercise videos either. Always try solving a problem on your own first, the process of thinking, trying, and even failing helps the mind learn."
+        },
+        {
+          "sk": "Až po troche snahy je treba pozrieť vzorové riešenie úloh, ktoré si nevyriešil. Mozog sa z nich viac naučí, keď sa predtým trápil.",
+          "cs": "Až po troše snahy je třeba se podívat na vzorové řešení úloh, které jsi nevyřešil. Mozek se z nich více naučí, když se předtím trápil.",
+          "en": "Only after some effort should you look at model solutions for problems you didn't solve. The brain learns more from them when it struggled beforehand."
+        },
+        {
+          "sk": "Určite ale pozri aj vzorové riešenia úloh, ktoré si vyriešil, častokrát sa naučíš iné postupy, možno aj efektívnejšie.",
+          "cs": "Určitě se ale podívej i na vzorová řešení úloh, které jsi vyřešil, častokrát se naučíš jiné postupy, možná i efektivnější.",
+          "en": "Definitely also look at model solutions for problems you did solve, often you'll learn different approaches, maybe even more efficient ones."
+        },
+        {
+          "sk": "Niekomu viac vyhovujú systematické materiály a knihy, niekomu riešenie náhodných úloh. Ideálne je veci kombinovať, experimentovať, a nájsť to, čo ťa baví najviac.",
+          "cs": "Někomu více vyhovují systematické materiály a knihy, někomu řešení náhodných úloh. Ideální je věci kombinovat, experimentovat a najít to, co tě baví nejvíce.",
+          "en": "Some prefer systematic materials and books, others prefer solving random problems. Ideally, combine things, experiment, and find what you enjoy most."
+        }
+      ]
+    }
+  ]
+}

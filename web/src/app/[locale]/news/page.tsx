@@ -46,14 +46,14 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/news')
  *
  * @returns Array of {@link NewsArticle} objects sorted by date (newest first).
  */
-export function getAllNewsArticles(locale: Locale): NewsArticle[] {
+function getAllNewsArticles(locale: Locale): NewsArticle[] {
   // Check if directory exists
   if (!fs.existsSync(CONTENT_DIR)) throw new Error(`Directory ${CONTENT_DIR} does not exist`)
 
   // Parse the news index
   const entries = newsIndex as unknown as NewsIndexEntry[]
 
-  // Build articles from index + locale-specific content
+  // Build an article per index entry
   const articles: NewsArticle[] = entries.map((entry) => {
     // Read locale-specific MDX file
     const mdxFile = `${entry.slug}.${locale}.mdx`
@@ -64,7 +64,7 @@ export function getAllNewsArticles(locale: Locale): NewsArticle[] {
       throw new Error(`Missing translation: ${mdxFile} for article "${entry.slug}"`)
     }
 
-    // Read MDX content (no frontmatter - just the body)
+    // Read the trimmed MDX body
     const content = fs.readFileSync(mdxPath, 'utf-8').trim()
 
     // Validate content exists
@@ -79,7 +79,7 @@ export function getAllNewsArticles(locale: Locale): NewsArticle[] {
       )
     }
 
-    // Return article data
+    // Assemble the article for this locale
     return {
       id: entry.id,
       title: entry.title[locale],

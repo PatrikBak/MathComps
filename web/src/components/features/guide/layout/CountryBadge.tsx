@@ -1,37 +1,28 @@
-import { cn } from '@/components/shared/utils/css-utils'
-
-import type { Country } from './FlagIcon'
+import type { Country } from '../content/guide-content-types'
 import { FlagIcon } from './FlagIcon'
 
 /**
- * Properties for the {@link CountryBadge} component.
+ * Props for the {@link CountryBadge} component.
  */
-type CountryBadgeProperties = {
-  /** List of countries to display. */
+type CountryBadgeProps = {
+  /** Countries to badge. */
   countries: Country[]
-  /** Size of the country flags. */
-  size?: 'sm' | 'md'
 }
 
 /**
  * Displays compact country flag badges next to each other.
  */
-export function CountryBadge({ countries, size = 'sm' }: CountryBadgeProperties) {
-  // Get the configuration based on the size
-  const config = {
-    sm: { height: 12, width: 18, gap: 'gap-1' },
-    md: { height: 16, width: 24, gap: 'gap-1.5' },
-  }[size]
-
+export function CountryBadge({ countries }: CountryBadgeProps) {
+  // Render a flag per country in a tight row
   return (
-    <div className={cn(`inline-flex items-center`, config.gap)}>
+    <div className="inline-flex items-center gap-1.5">
       {countries.map((country) => (
         <FlagIcon
           key={country}
           country={country}
           className="rounded-[2px]"
-          flagHeight={config.height}
-          flagWidth={config.width}
+          flagHeight={16}
+          flagWidth={24}
         />
       ))}
     </div>

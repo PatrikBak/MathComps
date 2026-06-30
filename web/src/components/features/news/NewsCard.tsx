@@ -2,6 +2,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
+import { disallowedBlockComponents } from '@/lib/mdx-card-components'
 
 import { NewsCardCover } from './NewsCardCover'
 import { NewsCategoryBadge } from './NewsCategoryBadge'
@@ -9,43 +10,22 @@ import { NewsDateLabel } from './NewsDateLabel'
 import type { NewsArticle } from './types'
 
 /**
- * Helper to create an error for disallowed MDX elements in news cards.
- *
- * @param element - The name of the disallowed element.
- *
- * @returns Never, throws an error.
- */
-function disallowedElement(element: string): never {
-  throw new Error(
-    `<${element}> is not allowed in news card content. ` +
-      `News cards only support paragraphs and inline elements (links, bold, italic, code).`
-  )
-}
-
-/**
- * Simplified MDX components for card content.
- * Only basic inline elements - no headings, lists, etc.
- * Throws errors for disallowed elements to catch issues at build time.
+ * MDX component map for card content: styled paragraph and inline elements only; block-level tags throw.
  */
 const cardMdxComponents = {
-  // Headings not allowed in card view
-  h1: () => disallowedElement('h1'),
-  h2: () => disallowedElement('h2'),
-  h3: () => disallowedElement('h3'),
-
-  // Paragraph
+  // Body text
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
     <p className="text-foreground/70 text-sm leading-relaxed" {...props} />
   ),
 
-  // Links - styled for cards
+  // Link
   a: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     // Ensure href is provided
     if (!href) {
       throw new Error('Link in news card is missing required href attribute.')
     }
 
-    // Let the AppLink handle navigation properly
+    // Render through AppLink
     return (
       <AppLink
         href={href}
@@ -57,23 +37,19 @@ const cardMdxComponents = {
     )
   },
 
-  // Inline formatting
+  // Bold
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
     <strong className="text-foreground font-semibold" {...props} />
   ),
+  // Italic
   em: (props: React.HTMLAttributes<HTMLElement>) => <em className="italic" {...props} />,
+  // Inline code
   code: (props: React.HTMLAttributes<HTMLElement>) => (
     <code className="bg-surface-inset/70 px-1 py-0.5 rounded text-xs text-brand-light" {...props} />
   ),
 
-  // Block elements not allowed in cards
-  ul: () => disallowedElement('ul'),
-  ol: () => disallowedElement('ol'),
-  blockquote: () => disallowedElement('blockquote'),
-  pre: () => disallowedElement('pre'),
-  hr: () => disallowedElement('hr'),
-  table: () => disallowedElement('table'),
-  img: () => disallowedElement('img'),
+  // Disallow headings and block elements
+  ...disallowedBlockComponents('news card content'),
 }
 
 /**
@@ -85,8 +61,7 @@ type NewsCardProps = {
 }
 
 /**
- * A single news article card.
- * Server-rendered with MDX content for SEO.
+ * A single news article card; renders the article's MDX body inline.
  */
 export function NewsCard({ article }: NewsCardProps) {
   return (
@@ -111,7 +86,7 @@ export function NewsCard({ article }: NewsCardProps) {
           {article.title}
         </h3>
 
-        {/* MDX Content - server-rendered for SEO */}
+        {/* MDX body */}
         <div className="flex-grow">
           <MDXRemote source={article.content} components={cardMdxComponents} />
         </div>

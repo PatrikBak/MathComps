@@ -3,13 +3,12 @@ import { createLucideIcon, type IconNode } from 'lucide-react'
 /**
  * Brand logos in lucide's outline style.
  *
- * lucide removed brand icons (GitHub, LinkedIn, YouTube, …) in v1, so they are
- * recreated here with {@link createLucideIcon} using the original ISC-licensed
- * outline paths. Built this way they are genuine {@link import('lucide-react').LucideIcon}
- * values — identical sizing, stroke, and a11y behavior to every other lucide icon,
- * so they stay visually consistent and remain assignable wherever a `LucideIcon` is expected.
+ * Each is built with {@link createLucideIcon} from the ISC-licensed lucide outline paths, so they are
+ * genuine {@link import('lucide-react').LucideIcon} values — identical sizing, stroke, and a11y behavior
+ * to every other lucide icon, and assignable wherever a `LucideIcon` is expected.
  */
 
+// GitHub outline path nodes
 const githubIconNode: IconNode = [
   [
     'path',
@@ -21,6 +20,7 @@ const githubIconNode: IconNode = [
   ['path', { d: 'M9 18c-4.51 2-5-2-7-2', key: 'github-tail' }],
 ]
 
+// LinkedIn outline path nodes
 const linkedinIconNode: IconNode = [
   [
     'path',
@@ -33,22 +33,8 @@ const linkedinIconNode: IconNode = [
   ['circle', { cx: '4', cy: '4', r: '2', key: 'linkedin-dot' }],
 ]
 
-const youtubeIconNode: IconNode = [
-  [
-    'path',
-    {
-      d: 'M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17',
-      key: 'youtube-screen',
-    },
-  ],
-  ['path', { d: 'm10 15 5-3-5-3z', key: 'youtube-play' }],
-]
-
 /** GitHub logo in lucide's outline style. */
 export const GithubIcon = createLucideIcon('github', githubIconNode)
 
 /** LinkedIn logo in lucide's outline style. */
 export const LinkedinIcon = createLucideIcon('linkedin', linkedinIconNode)
-
-/** YouTube logo in lucide's outline style. */
-export const YoutubeIcon = createLucideIcon('youtube', youtubeIconNode)

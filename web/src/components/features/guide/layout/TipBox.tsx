@@ -1,22 +1,24 @@
 import { cva, type VariantProps } from 'class-variance-authority'
-import { Info } from 'lucide-react'
+import { Heart, Lightbulb } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { TIP_BOX_VARIANTS } from '../guide-colors'
+import { TIP_BOX_VARIANTS } from '../content/guide-colors'
 import { GuideHeading } from './GuideHeading'
 import { GuideText } from './GuideText'
 
 /**
- * The styles for the tip box.
+ * Style variants for the {@link TipBox}.
  */
-const tipBoxVariants = cva('mt-4 rounded-lg border bg-gradient-to-br p-4 sm:mt-5 sm:p-5', {
+const tipBoxVariants = cva('mt-4 rounded-lg border p-4 sm:mt-5 sm:p-5', {
   variants: {
     variant: {
-      note: TIP_BOX_VARIANTS.note,
       tip: TIP_BOX_VARIANTS.tip,
+      brand: TIP_BOX_VARIANTS.brand,
     },
   },
   defaultVariants: {
@@ -25,18 +27,14 @@ const tipBoxVariants = cva('mt-4 rounded-lg border bg-gradient-to-br p-4 sm:mt-5
 })
 
 /**
- * Resolved visual scheme for a single {@link TipBox} variant
+ * Resolved visual scheme for a single {@link TipBox} variant.
  */
 type TipScheme = {
-  /** Tailwind text-color class applied to the leading icon. */
-  iconColor: string
-  /** Tailwind text-color class applied to the callout title. */
-  titleColor: string
-  /** Visible title label rendered inside the callout header. */
+  /** Accent text-color class. */
+  accentColor: string
+  /** Localized header label. */
   label: string
-  /** Extra layout / typography classes applied to the icon wrapper. */
-  iconLayoutClass: string
-  /** React node rendered as the leading icon (Lucide component or emoji). */
+  /** Leading header icon. */
   iconNode: React.ReactNode
 }
 
@@ -46,48 +44,53 @@ type TipScheme = {
 type TipBoxProps = VariantProps<typeof tipBoxVariants> & {
   /** Content displayed inside the callout body. */
   children: React.ReactNode
+  /** Optional header label overriding the variant default. */
+  label?: string
 }
 
 /**
  * Callout box for guide-specific tips and informational notes.
  */
-export default function TipBox({ children, variant }: TipBoxProps) {
-  // Resolve the visual scheme config tailored to the variant
+export default function TipBox({ children, variant, label }: TipBoxProps) {
+  // Deck label translations
+  const tDeck = useTranslations('guide.deck')
+
+  // Resolve the visual scheme for the variant
   const scheme = ((): TipScheme => {
+    // Branch on the variant
     switch (variant) {
-      case 'note':
-        // Return info block config
+      case 'brand':
+        // Brand block: brand accent, heart glyph (warm closing notes)
         return {
-          iconColor: ACCENT_COLOR_MAP.blue.text,
-          titleColor: ACCENT_COLOR_MAP.blue.text,
-          label: 'Info',
-          iconLayoutClass: 'mt-0.5',
-          iconNode: <Info size={20} />,
+          accentColor: 'text-brand-light',
+          label: tDeck('noteLabel'),
+          iconNode: <Heart size={20} />,
         }
       case 'tip':
-      default:
-        // Return warning block config
+      case undefined:
+      case null:
+        // Tip block: amber accent, lightbulb glyph (the default scheme)
         return {
-          iconColor: ACCENT_COLOR_MAP.amber.text,
-          titleColor: ACCENT_COLOR_MAP.amber.text,
-          label: 'Tip',
-          iconLayoutClass: 'text-xl font-bold',
-          iconNode: '💡',
+          accentColor: ACCENT_COLOR_MAP.amber.text,
+          label: tDeck('tipLabel'),
+          iconNode: <Lightbulb size={20} />,
         }
+      // A new variant must fail the build here
+      default:
+        return assertNever(variant)
     }
   })()
 
+  // Render the callout: accent icon, header, and body
   return (
     <div className={tipBoxVariants({ variant })}>
       <div className="flex items-start gap-3">
-        <div className={cn(scheme.iconColor, 'flex-shrink-0', scheme.iconLayoutClass)}>
-          {scheme.iconNode}
-        </div>
+        <div className={cn(scheme.accentColor, 'mt-0.5 flex-shrink-0')}>{scheme.iconNode}</div>
         <div className="flex-1 min-w-0">
-          <GuideHeading level="h4" className={cn('mb-1 text-sm sm:text-base', scheme.titleColor)}>
-            {scheme.label}
+          <GuideHeading level="h4" className={cn('mb-1 text-sm sm:text-base', scheme.accentColor)}>
+            {label ?? scheme.label}
           </GuideHeading>
-          <GuideText variant="small" color="subtle" as="div">
+          <GuideText variant="small" as="div" className="text-foreground/80">
             {children}
           </GuideText>
         </div>

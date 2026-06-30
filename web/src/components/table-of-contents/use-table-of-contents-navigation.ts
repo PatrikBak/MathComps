@@ -6,21 +6,16 @@ import type { TableOfContentsItem } from './table-of-contents-types'
 /**
  * Options for the table of contents navigation hook.
  */
-interface UseTableOfContentsNavigationOptions {
-  /** Array of navigation items to track */
+type UseTableOfContentsNavigationOptions = {
+  /** The navigation items. */
   items: TableOfContentsItem[]
 }
 
 /**
- * Custom hook that provides shared table of contents navigation logic.
- * Handles scroll-spy tracking and navigation clicks.
- *
- * Used by both desktop ({@link TableOfContents}) and mobile ({@link MobileTableOfContents})
- * components to avoid code duplication.
+ * A hook providing table-of-contents navigation: scroll-spy tracking and navigation clicks.
  */
 export function useTableOfContentsNavigation({ items }: UseTableOfContentsNavigationOptions) {
-  // Initialize our custom scroll-spy
-  // Use responsive scroll offset that adapts to header height
+  // Track the active section via scroll-spy, offset to clear the sticky header
   const activeIndex = useCustomScrollSpy({
     itemIds: items.map((item) => item.id),
     offset: useScrollOffset(),
@@ -40,12 +35,12 @@ export function useTableOfContentsNavigation({ items }: UseTableOfContentsNaviga
       // Update URL hash for deep-linking support
       window.history.pushState(null, '', `#${id}`)
 
-      // scrollIntoView respects CSS scroll-margin-top for header offset
+      // Smooth-scroll; CSS scroll-margin-top handles the header offset
       element.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
-  // The component's users need the current index + the click handler
+  // Expose the active index and the click handler
   return {
     activeIndex,
     handleNavigationClick,

@@ -20,11 +20,13 @@ import {
 } from '../src/components/features/handouts/handout-metadata-types'
 import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import {
+  validateMembership,
   validatePartialLocalizedString,
   validateRequiredArray,
   validateRequiredField,
   validateUniqueness,
 } from '../src/lib/content-validation'
+import { runValidator, validateNoOrphans } from './validation-runner'
 
 /** Directory containing handout content files */
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/handouts')
@@ -56,15 +58,19 @@ function getDisplayName(handout: { title: Record<string, string>; languages?: Lo
   return `handout "${handout.title[locale] ?? 'unknown'}"`
 }
 
-/** Main validation logic */
-function validate(): boolean {
-  // We'll push errors into this array
+/**
+ * Validates the handout content, collecting every error.
+ *
+ * @returns Every validation error found; empty when valid.
+ */
+function validate(): string[] {
+  // Collect errors here
   const errors: string[] = []
 
   // Ensure the handouts.json exists
   if (!fs.existsSync(INDEX_PATH)) {
-    errors.push('❌ handouts.json not found')
-    return false
+    // Bail with the single fatal error
+    return ['❌ handouts.json not found']
   }
 
   // Parse handouts.json
@@ -110,12 +116,9 @@ function validate(): boolean {
     )
   }
 
-  // Allowed source values
-  const allowedSources = new Set(HANDOUT_SOURCES)
-
   // Validate each section
   for (const section of sections) {
-    // A string for logging
+    // Human-readable section label for error messages
     const sectionContext = `section "${section.category[DEFAULT_LOCALE] || 'unknown'}"`
 
     // Validate that the section has a stable locale-independent key
@@ -150,7 +153,7 @@ function validate(): boolean {
 
       // Validate ready-specific fields
       if (isReadyHandout(handout)) {
-        // Safe cast
+        // isReadyHandout already narrowed; pin the ready type
         const readyHandout = handout as ReadyHandoutMetadata
 
         // Validate slug (only for declared languages)
@@ -180,14 +183,13 @@ function validate(): boolean {
         errors.push(...validateRequiredArray(readyHandout.authors, 'authors', handoutContext))
 
         // Validate source is one of the known values
-        if (!allowedSources.has(readyHandout.source)) {
-          errors.push(
-            `${handoutContext}: unknown source "${readyHandout.source}" (expected one of: ${[...allowedSources].join(', ')})`
-          )
-        }
+        errors.push(
+          ...validateMembership(readyHandout.source, HANDOUT_SOURCES, 'source', handoutContext)
+        )
 
-        // Validate content files exist for declared languages
+        // The content filename stem shared across locales
         const slug = getContentFileBasename(readyHandout)
+        // Every declared locale must have a matching content file
         for (const locale of requiredLocales) {
           // Construct the content file path
           const contentFile = `${slug}.${locale}.json`
@@ -195,6 +197,7 @@ function validate(): boolean {
 
           // Check if the content file exists
           if (!fs.existsSync(contentPath)) {
+            // Record the missing file
             errors.push(`❌ Missing content file: ${contentFile} for ${handoutContext}`)
           }
         }
@@ -202,18 +205,16 @@ function validate(): boolean {
     }
   }
 
-  // Check for orphan content files (files not referenced in handouts.json)
-  const contentFiles = fs
-    .readdirSync(CONTENT_DIR)
-    .filter((file) => new RegExp(`^.+\\.(${SUPPORTED_LOCALES.join('|')})\\.json$`).test(file))
-
-  // Build set of expected content files
+  // Build the set of content files the index expects (declared languages only)
   const expectedFiles = new Set<string>()
+  // Walk every handout in every section
   for (const section of sections) {
     for (const handout of section.handouts) {
+      // Only ready handouts have content files, and only for their declared languages
       if (isReadyHandout(handout)) {
-        // Only expect content files for declared languages
+        // The content filename stem
         const slug = getContentFileBasename(handout)
+        // One expected file per declared locale
         for (const locale of getHandoutLocales(handout)) {
           expectedFiles.add(`${slug}.${locale}.json`)
         }
@@ -221,30 +222,19 @@ function validate(): boolean {
     }
   }
 
-  // Check for orphans
-  for (const file of contentFiles) {
-    if (!expectedFiles.has(file)) {
-      errors.push(`⚠️  Orphan content file not referenced in handouts.json: ${file}`)
-    }
-  }
+  // Flag any content file the index doesn't reference
+  errors.push(...validateNoOrphans(CONTENT_DIR, 'json', expectedFiles, 'handouts.json'))
 
-  // Print errors
-  for (const error of errors) {
-    console.error(error)
-  }
-
-  // Return valid if no errors
-  return errors.length === 0
+  // Hand back every collected error
+  return errors
 }
 
-// Run validation
-console.log('🔍 Validating handout translations...\n')
-
-// Validate and exit
-if (validate()) {
-  console.log('✅ All handouts have complete translations!')
-  process.exit(0)
-} else {
-  console.log('\n❌ Handout validation failed.')
-  process.exit(1)
-}
+// Run the validator and exit with its status
+runValidator(
+  {
+    validating: 'handout translations',
+    success: 'All handouts have complete translations!',
+    failure: 'Handout validation failed.',
+  },
+  validate
+)

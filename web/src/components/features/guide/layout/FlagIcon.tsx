@@ -2,35 +2,18 @@ import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
-/**
- * Configuration for a country flag, without title (fetched from translations).
- */
-type CountryConfig = {
-  /** ISO code of the country */
-  code: string
-}
+import { type Country, COUNTRY_FLAG_CODES } from '../content/guide-content-types'
+
+/** Default flag height in pixels */
+const DEFAULT_FLAG_HEIGHT = 20
+
+/** Default flag width in pixels */
+const DEFAULT_FLAG_WIDTH = 28
 
 /**
- * Metadata for each country flag.
- * Uses `as const satisfies` to preserve literal key types for type-safe translations.
+ * Props for the {@link FlagIcon} component.
  */
-const COUNTRY_METADATA = {
-  SK: { code: 'sk' },
-  CZ: { code: 'cz' },
-  PL: { code: 'pl' },
-  EN: { code: 'gb' },
-  INTERNATIONAL: { code: 'un' },
-} as const satisfies Record<string, CountryConfig>
-
-/**
- * Type of a country flag.
- */
-export type Country = keyof typeof COUNTRY_METADATA
-
-/**
- * Properties for the {@link FlagIcon} component.
- */
-type FlagIconProperties = {
+type FlagIconProps = {
   /** Country whose flag to display */
   country: Country
   /** Additional CSS classes to apply */
@@ -42,26 +25,24 @@ type FlagIconProperties = {
 }
 
 /**
- * Displays country flags as SVG icons using the flag-icons library.
- * Pass an array of countries for maximum flexibility.
- * Supports any combination: single country, multiple countries, or international UN flag.
+ * A component that renders a country's flag icon, titled with the localized country name.
  */
 export function FlagIcon({
   country,
   className,
-  flagHeight = 20,
-  flagWidth = 28,
-}: FlagIconProperties) {
-  // Get country translations
+  flagHeight = DEFAULT_FLAG_HEIGHT,
+  flagWidth = DEFAULT_FLAG_WIDTH,
+}: FlagIconProps) {
+  // Localized country names
   const t = useTranslations('countries')
 
-  // Get the data for the country flag
-  const { code } = COUNTRY_METADATA[country]
+  // Get the ISO 3166 flag code for the country
+  const code = COUNTRY_FLAG_CODES[country]
 
-  // Get translated country name (type-safe since Country keys match translation keys)
+  // Localized country name for the title
   const title = t(country)
 
-  // Return the flag icon
+  // Render the flag as a styled span
   return (
     <span
       className={cn(`fi fi-${code}`, 'rounded-sm shadow-sm', className)}

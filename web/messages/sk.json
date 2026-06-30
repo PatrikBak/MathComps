@@ -232,9 +232,62 @@
     "project": "Projekt"
   },
   "guide": {
+    "deck": {
+      "bucket": {
+        "programs": "Nástroj",
+        "studyTexts": "Materiál",
+        "websites": "Web",
+        "youtube": "YouTube"
+      },
+      "clearFilters": "Zrušiť filtre",
+      "emptyState": "Žiadne výsledky nezodpovedajú zvoleným filtrom.",
+      "filters": {
+        "all": "Všetky",
+        "bucket": "Typ",
+        "country": "Krajina",
+        "kind": "Typ",
+        "label": "Filtre",
+        "level": "Úroveň"
+      },
+      "kind": {
+        "individual": "Individuálna",
+        "team": "Tímová"
+      },
+      "next": "Ďalšie",
+      "noteLabel": "Poznámka",
+      "pages": {
+        "getStarted": "Ako začať",
+        "olympiad": "Olympiáda",
+        "other": "Ostatné súťaže",
+        "resources": "Zdroje",
+        "seminars": "Semináre",
+        "why": "Prečo súťaže?"
+      },
+      "previous": "Predošlé",
+      "resourceAudience": {
+        "advanced": "pre pokročilých",
+        "beginner": "pre začiatočníkov"
+      },
+      "resourceLevel": {
+        "advanced": "Pokročilý",
+        "beginner": "Začiatočník"
+      },
+      "search": {
+        "close": "zavrieť",
+        "hint": "Tu sa objavia výsledky…",
+        "navigate": "navigovať",
+        "noResults": "Žiadne výsledky.",
+        "open": "Hľadať v sprievodcovi",
+        "openHint": "otvoriť odkaz",
+        "openLink": "Otvoriť odkaz",
+        "placeholder": "Hľadajte súťaže, semináre, materiály…",
+        "reveal": "prejsť na"
+      },
+      "tipLabel": "Tip"
+    },
     "hero": {
-      "description": "Zoznam súťaží a rôznych užitočných odkazov týkajúcich sa súťažnej matematiky. Plán je tieto sekcie priebežne dopĺňať o tie najlepšie veci.",
-      "title": "Rozcestník súťažnej matematiky"
+      "description": "Zoznam súťaží a rôznych užitočných odkazov týkajúcich sa súťažnej matematiky. Ak vám tu niečo chýba, určite <link>napíšte</link>.",
+      "title": "Sprievodca súťažnou matematikou"
     },
     "schoolLevels": {
       "elementary": "ZŠ",
@@ -247,248 +300,76 @@
       "howToStart": {
         "description": "Na začiatku je vždy veľa možností, ako začať. Potom je veľa možností, ako napredovať. Nasledovné rady majú za cieľ týmto procesom pomôcť.",
         "finalNote": {
-          "text": "Základom je baviť sa procesom. Svet súťaží a seminárov priťahuje veľa ľudí a všetci nemôžu byť najlepší, čo ale vôbec neznamená, že to všetkým nemôže zmeniť život k lepšiemu 😊",
+          "text": "Základom je baviť sa procesom. Svet súťaží a seminárov priťahuje veľa ľudí a každému z nich môže zmeniť život k lepšiemu 😊",
           "title": "Na záver"
-        },
-        "steps": {
-          "beginnings": {
-            "points": [
-              "Vyskúšaj korešpondenčné semináre. Majú úlohy vhodné pre začiatočníkov a poskytujú spätnú väzbu. Zúčastni sa ich sústredení, kde sa naučíš, spoznáš a zabavíš.",
-              "Hľadaj matematické krúžky na škole alebo v okolí. Spýtaj sa svojho učiteľa matematiky, či o niečom nevie.",
-              "Skús riešenie úloh s niekým ďalším, môžete sa motivovať a baviť navzájom.",
-              "Nájdi si tiež študijné materiály na systematické štúdium, odporúčania nájdeš o kúsok vyššie."
-            ],
-            "title": "Začiatky sú skvelé, lebo človek sa rýchlo zlepšuje"
-          },
-          "training": {
-            "points": [
-              "Matematiku je treba aktívne trénovať, ani svaly sa nezískajú pozeraním na videá o cvičení. Vždy je lepšie najprv skúsiť úlohu riešiť samostatne. Proces premýšľania, skúšania a aj zlyhávania pomáha mysli učiť sa.",
-              "Až po troche snahy je treba pozrieť vzorové riešenie úloh, ktoré si nevyriešil. Mozog sa z nich viac naučí, keď sa predtým trápil.",
-              "Určite ale pozri aj vzorové riešenia úloh, ktoré si vyriešil, častokrát sa naučíš iné postupy, možno aj efektívnejšie.",
-              "Niekomu viac vyhovujú systematické materiály a knihy, niekomu riešenie náhodných úloh. Ideálne je veci kombinovať, experimentovať, a nájsť to, čo ťa baví najviac."
-            ],
-            "title": "Princípy dobrého tréningu"
-          }
         }
       },
       "mathOlympiad": {
         "and": "a",
-        "categoriesIntro": "Matematická olympiáda je rozdelená do dvoch hlavných častí:",
-        "categoriesOutro": "kategória, každá s vlastnými ročníkovými úrovňami a kolami.",
-        "competitions": {
-          "caps": {
-            "description": "Prípravná súťaž pre IMO tímy účastných krajín",
-            "details": ["Formát súťaže ako IMO", "Posledné roky spravidla na ISTA v Rakúsku"]
-          },
-          "cpsj": {
-            "description": "Súťaž pre šiestich najlepších prvákov SŠ (a mladších) účastníckych krajín",
-            "details": [
-              "Kvalifikácia cez špeciálne výberové sústredenie",
-              "V Česku výber na základe výsledkov kategórie A, na Slovensku kategórie C",
-              "Individuálna a tímová časť",
-              "Trojčlenné tímy (1 člen z každej krajiny) a losované náhodne"
-            ]
-          },
-          "egmo": {
-            "description": "Súťaž s cieľom povzbudiť účasť dievčat v matematických súťažiach",
-            "details": [
-              "6 najlepších riešiteliek z krajiny",
-              "Kvalifikácia cez špeciálne výberové sústredenie",
-              "Pozvánka naň na základe výsledkov krajského kola kategórie A",
-              "55 a viac krajín (aj neeurópske)",
-              "Formát súťaže ako na IMO"
-            ]
-          },
-          "imo": {
-            "description": "Najprestížnejšia medzinárodná olympiáda",
-            "details": [
-              "6 najlepších riešiteľov z krajiny",
-              "100 a viac krajín",
-              "2 súťažné dni, každý má 3 príklady na 4 a pol hodiny"
-            ]
-          },
-          "memo": {
-            "description": "Súťaž pre najlepších budúcich potenciálnych IMO účastníkov",
-            "details": [
-              "6 najlepších riešiteľov neidúcich na IMO, ktorí tam ale môžu ísť o rok",
-              "11 a viac krajín",
-              "Individuálna a tímová časť"
-            ]
-          }
-        },
-        "description": "Súťaž v riešení zaujímavých matematických úloh pre základné aj stredné školy, ktorá začína domácim kolom a vrcholí najprestížnejšou medzinárodnou matematickou olympiádou",
+        "categoriesIntro": "Delí sa na dve časti:",
+        "categoriesOutro": ", každá s vlastnými ročníkovými úrovňami a kolami.",
+        "description": "Matematická olympiáda je súťaž v riešení zaujímavých matematických úloh pre základné aj stredné školy s dôrazom na zdôvodňovanie postupu. Každý rok sa začína domácim kolom a vrcholí najprestížnejšou medzinárodnou súťažou,",
         "elementary": "základoškolská",
         "elementaryCategories": {
           "point1": "Z5 – Z9 podľa ročníkov ZŠ (a im zodpodevajúcich ročníkov osemročných gymnázií)",
           "point2": "V každej kategórii domáce a okresné kolá",
-          "point3": "V kategórii Z9 navyše krajské kolo a v Česku aj celoštátne",
+          "point3": "V kategórii Z9 navyše krajské a celoštátne kolo",
           "title": "ZŠ kategórie"
         },
         "highSchool": "stredoškolská",
         "highSchoolCategories": {
           "point1": "C pre 1., B pre 2., A pre 3. a 4. ročník (a im zodpovedajúce ročníky osemročných gymnázií)",
           "point2": "V každej kategórii domáce, školské a krajské kolo",
-          "point3": "V kategórii A navyše celoštátne kolo, z neho možný postup na výberové sústredenie",
-          "point4": "Z výberového sústredenia sa dá postúpiť na <strong>medzinárodné súťaže</strong>",
-          "point5": "Zábavné viacdňové udalosti, kde matika býva len časť programu",
-          "point6": "Striedanie hostiteľských krajín, výlety na nové miesta teda zaručené",
+          "point3": "V kategórii A navyše celoštátne kolo, z ktorého sa postupuje na výberové sústredenie na <strong>medzinárodné súťaže</strong>",
           "selectionNote": "Obe krajiny majú rôzne pravidlá pre postup, na Slovensku je k tomu treba ešte kvalifikáciu, viď stránka súťaže",
           "title": "SŠ kategórie"
         },
         "imoLink": "IMO",
+        "international": {
+          "features": [
+            "Týždňové zábavné akcie s dvoma dňami matiky a zvyšnými dňami plnými výletov a zábavy 🎉",
+            "Hostiteľské krajiny sa zvyknú striedať, takže sa dá precestovať veľa zaujímavých miest ✈️",
+            "Možnosť spoznať podobne nadšených ľudí z rôznych kútov sveta 🤝"
+          ],
+          "hint": "Nižšie nájdete zoznam tých, ktorých sa Slovensko a Česko zúčastňuje, detaily po kliknutí na kartu.",
+          "intro": "Najväčším lákadlom sú medzinárodné súťaže."
+        },
         "organizations": {
           "cz": "Česká MO",
           "sk": "Slovenská MO"
         },
-        "otherCompetitions": "Okrem toho sú tu ďalšie akcie:",
-        "sharedTasks": "Česko a Slovensko má spoločné úlohy, ale samostatné organizácie",
+        "sharedTasks": "Česko a Slovensko má spoločné úlohy, ale samostatné organizácie:",
         "tip": "Netreba sa báť skúsiť riešiť vyššie kategórie, úlohy často nevyžadujú zložitejšie znalosti a kategórie sa prelínajú. Najlepší z najlepších často riešili aj vyššie kategórie."
       },
       "otherCompetitions": {
-        "description": "Okrem olympiády a seminárov existuje mnoho ďalších súťaží s rôznymi formátmi, pričom väčšinou ide o jednodňové zábavné udalosti, na ktoré sa typicky netrénuje, ale o to menší nátlak na nich je 😌",
-        "individual": {
-          "description": "Individuálne súťaže, ktoré majú iný formát než matematická olympiáda. Všetky nižšie uvedené vyžadujú iba výsledok, čím sa od nej líšia."
-        },
-        "items": {
-          "attomat": "Online súťaž s úlohami na výsledok",
-          "brloh": "Súťaž v riešení matematicko-logických úloh",
-          "duogeo": "Súťaž dvojíc v riešení geometrie olympiádneho typu",
-          "klokan": "Súťaž s výberom z možností",
-          "logickaOlympiada": "Zo zrejmých dôvodov populárna súťaž medzi matematikmi",
-          "maks": "Súťaž, kde sa úlohy riešia doma a výsledky nahrávajú online",
-          "maso": "Súťaž s úlohami ako v Náboji, kde sa za výsleky odomykajú ťahy do hry",
-          "mathing": "Online súťaž s úlohami ako v olympiáde",
-          "mathrace": "Online súťaž s úlohami ako v Náboji, kde možno používať softvér a programovať",
-          "naboj": "Najpopulárnejšia tímová súťaž v našich končinách s úlohami na výsledok",
-          "pangea": "Súťaž podobná Matematickému klokanovi s tematickými úlohami",
-          "purpleComet": "Medzinárodná súťaž podobná Náboju s viac ako 80 krajinami",
-          "pytagoriada": "Súťaž, kde záleží na rýchlosti a správnosti výsledkov"
-        },
-        "team": {
-          "description": "Tímové súťaže sú skvelou príležitosťou na zábavu s kamarátmi. Nie je teda prekvapením, že sú populárne a že ich je toľko."
-        },
-        "titles": {
-          "attomat": "Attomat",
-          "brloh": "Brloh",
-          "duogeo": "DuoGeo",
-          "klokan": "Matematický klokan",
-          "logickaOlympiada": "Logická olympiáda",
-          "maks": "Maks a Maksík",
-          "maso": "Maso",
-          "mathing": "Mathing",
-          "mathrace": "Mathrace",
-          "naboj": "Náboj & Náboj Junior",
-          "pangea": "Pangea",
-          "purpleComet": "Purple Comet",
-          "pytagoriada": "Pytagoriáda"
-        }
+        "description": "Okrem olympiády a seminárov existuje mnoho ďalších súťaží, tímových aj individuálnych, s všemožnými formátmi, pričom väčšinou ide o jednodňové zábavné pohodové akcie 😌"
       },
       "resources": {
-        "description": "Stručný zoznam tých najdôležitejších študijných/komunitných zdrojov zo sveta súťažnej matematiky, ktoré sa určite oplatí poznať.",
-        "programs": {
-          "geogebra": "Fantastická pomôcka pri učení sa geometrie, prípadne nástroj na kreslenie grafov. Dobre narysovaný obrázok môže robiť rozdiel v tom, či riešenie vidíme alebo nie, no a <app>GeoGebra</app> ich vie rysovať presne 📐.",
-          "overleaf": "Online prostriedie na písanie v LaTeX-u, čo je štandard pre matematiku. Obsahuje návody pre začiatočníkov na LaTeX samotný.",
-          "wolframalpha": "Rýchly a spoľahlivý nástroj na riešenie rovníc, rozkladanie čísel na súčin, počítanie súm, alebo aj derivovanie, integerovanie atď."
-        },
-        "studyTexts": {
-          "guidedProblems": "Oplatí sa riešiť si aj staršie domáceho kolá MO, lebo v rámci nich sa vydávajú návodné a doplňujúce úlohy (aj s riešenia/odkazmi na ne), čo je dobrý spôsob ako nasať nejakú tému.",
-          "intro": "V tejto sekcii si zhrnieme niektoré študijné materiály. Priorita je poskytnúť začiatočníkom prehľad, kam sa môžu obrátiť.",
-          "kmsCollection": "Starší, ale nadčasový materiál. Príjemné zdôvodnenia a krátke úvody do všetkých tém s veľa príkladmi zo seminára KMS.",
-          "ourMaterials": "Verejne dostupných materiálov pre začiatočníkov s dobrými vysvetleniami myšlienok nie je veľa. Naše materiály na tejto stránke majú ambíciu túto medzeru zaplniť. Priebežne sa ich zbierka bude rozrastať.",
-          "praseLibrary": "Veľká zbierka materiálov zo seminára PraSe. Na samostatné štúdium sú veľmi zaujímavé takzvané seriály, čo sú tematické texty.",
-          "sampleSolutions": "Najľahšie úlohy <link>seminárov</link>, prípadne nižších kategórii MO, sú dobrým zdrojom. V seminároch sú riešenia písané viac v štýle, ako na úlohy prísť, zatiaľ čo v olympiáde viac v štýle, ako ich napísať, keď už na to niekto prišiel.",
-          "titles": {
-            "guidedProblems": "Návodné úlohy k domácim kolám MO",
-            "kmsCollection": "KMS zbierka",
-            "ourMaterials": "Naše materiály",
-            "praseLibrary": "PraSe knižnica",
-            "sampleSolutions": "Vzorové riešenia"
-          }
-        },
+        "description": "Stručný zoznam tých najdôležitejších študijných/komunitných zdrojov, ktoré sa určite oplatí poznať.",
         "tips": {
-          "ai": "Všetci vidíme, že AI sa v matike zlepšuje. Vie to byť rýchla pomôcka pri učení sa nových vecí. Len je treba mať sa na pozore, keďže ono to nemá vždy pravdu a vie si to povymýšľať kde-čo 🙃",
-          "footer": "Je možné, že sa pýtate, prečo tu nie je to a to. Je to najmä preto, že tento rozcestník je písaný najmä pre začiatočníkov, a zahltenie množstvom materiálov hneď v úvode nemusí byť produktívne. Priebežne budú pribúdať odkazy na ďalšie štúdium dovnútra materiálov na stránke, prípadne neskôr môže vzkninúť stránka s návodom pre pokročilých, kde bude väčšia databáza. Ono aj tak, v PraSe knižnici je toho fakt veľa 😜."
-        },
-        "websites": {
-          "aops": "Asi najväčšia a najdôležitejšia stránka o olympiádnej matematike na svete. Fóra, obrovské zbierky úloh, články, všetko na jednom mieste. Nutnosť poznať.",
-          "evanchen": "Osobná stránka svetoznámeho olympiádneho experta. Cez jeho stránku sa možno preklikať na veľa nielen jeho materiálov alebo ďalších zdrojov a informácií.",
-          "mods": "Veľký medzinárodný Discord server, kde možno diskutovať s ľuďmi z celého sveta. Už viac ako 2000 dní pripravuje rubriku úloha dňa, pričom je možné pristúpiť k starším úlohám podľa oblastí a hodnotení obtiažnosti."
-        },
-        "youtube": {
-          "3blue1brown": "Unikátne vizuálne spracovanie všemožných tém z matematiky.",
-          "michaelpenn": "Vysvetlenia riešení súťažných úloh zo súťaží z celého sveta pred tabuľou.",
-          "mindyourdecisions": "Videá s riešením úloh všetkých obtiažností, od priam popularizačných až po zaujímavé olympiádne."
+          "ai": "Všetci vidíme, že AI sa v matike zlepšuje. Vie to byť rýchla pomôcka pri učení sa nových vecí. Len je treba mať sa na pozore, keďže ono to nemá vždy pravdu a vie si to povymýšľať kde-čo 🙃"
         }
       },
       "seminars": {
-        "countries": {
-          "CZ": "České",
-          "INTERNATIONAL": "Medzinárodné",
-          "SK": "Slovenské"
-        },
-        "description": "Korešpondenčné semináre sú neoddeliteľnou súčasťou česko-slovenskej matematickej kultúry, čomu zodpovedá aj ich počet.",
+        "description": "Korešpondenčné semináre sú neoddeliteľnou súčasťou česko-slovenskej matematickej kultúry.",
         "features": [
-          "Riešenie úloh doma a zasielanie riešení poštou (odtiaľ názov), aj keď teraz už skôr online",
-          "Niekoľko sérií úloh počas roka",
-          "Sústredenia nabité zábavou a matikou ako neodmysliteľná súčasť seminárov"
+          "Riešenie úloh doma a zasielanie riešení poštou (odtiaľ názov), aj keď teraz už skôr online ✉️",
+          "Niekoľko sérií úloh počas roka 📝",
+          "Sústredenia nabité zábavou a matikou ako ich neodmysliteľná súčasť 🏕️"
         ],
-        "items": {
-          "iks": "Česko-slovenský seminár pre riešiteľov s ambíciou uspieť na medzinárodných kolách",
-          "kokos": "Pre 6.-9. ročník ZŠ",
-          "malynar": "Pre 4.-6. ročník ZŠ",
-          "matik": "Pre 7.-9. ročník ZŠ",
-          "mbl": "Pôvodne poľský, teraz už medzinárodný seminár s jedným kolom a jedným dlhým sústredením",
-          "sezam": "Pre 7.-9. ročník ZŠ",
-          "sezamko": "Pre 4.-6. ročník ZŠ"
-        },
-        "levels": {
-          "elementary": {
-            "description": "ZŠ seminárov je naozaj dosť. Väčšina z nich je pre všeobecne druhý stupeň ZŠ, pričom ale majú škálované príklady pre všetkých."
-          },
-          "highSchool": {
-            "description": "Dva slovenské, dva české a jeden česko-slovenský. Okrem toho veľa česko-slovenských študentov sa zúčastňuje aj MBL. O zábavu naozaj nie je núdza."
-          }
-        },
         "tip": "Veľa ľudí rieši súčasne viac seminárov, a to aj na ZŠ aj na SŠ. Je tiež bežné pre Slovákov riešiť české semináre a naopak. Nie je náhoda, že medzi najlepšími riešiteľmi MO a seminárov je veľký prekryv 😉"
       },
       "whyCompetitions": {
-        "benefits": {
-          "career": {
-            "text": "Ľudia z prostredia matematických súťaží sú tí najžiadanejší na rôzne pozície vyžadujúce riešenie ťažkých problémov, napr. v oblasti AI, algoritmického obchodovania atď. Vďaka nadobudnutým schopnostiam a kontaktom z komunity ich potom ľahko získavajú.",
-            "title": "Veľké uplatnenie"
-          },
-          "community": {
-            "text": "Prostrednie súťaží a sústredení je veľmi komunitne orientované a bez toho by mnohé ani neexistovali. Veľa ľudí si v týchto komunitách našlo priateľov a partnetov na celý život.",
-            "title": "Komunita a priateľstvo"
-          },
-          "logic": {
-            "text": "Matematické súťaže rozvíjajú schopnosť analýzy problémov a hľadania kreatívnych riešení. Tieto zručnosti sú potom prenesiteľné do všetkých sfér života, keďže problémy je treba riešiť všade.",
-            "title": "Rozvoj logického myslenia"
-          },
-          "potential": {
-            "text": "Veľa ľudí často nevie, čoho je ich mozog schopný, keď sa snaží. Súťaže poskytujú bezpečné prostredie toto otestovať, a pre mnohých sú tak začiatkom ich budúcej cesty za kariérnym aj osobným rastom.",
-            "title": "Objavenie potenciálu"
-          }
-        },
         "description": "Matematické súťaže nie sú len o súťažení a matematike 🙂."
       }
     },
     "titles": {
-      "competitions": "Zoznam súťaží",
       "howToStart": "Ako začať aj pokračovať",
       "mathOlympiad": "Matematická olympiáda",
       "otherCompetitions": "Ďalšie súťaže",
-      "otherCompetitionsIndividual": "Individuálne súťaže",
-      "otherCompetitionsTeam": "Tímové súťaže",
-      "programs": "Programy a nástroje",
       "resources": "Ďalšie odkazy",
       "seminars": "Korešpondenčné semináre",
-      "seminarsElementary": "ZŠ semináre",
-      "seminarsHighSchool": "SŠ semináre",
-      "studyTexts": "Študijné texty",
-      "websites": "Webstránky a komunity",
-      "whyCompetitions": "Prečo matematické súťaže?",
-      "youtube": "YouTube kanály"
+      "whyCompetitions": "Prečo matematické súťaže?"
     }
   },
   "handouts": {
@@ -562,10 +443,10 @@
     "hero": {
       "buttons": {
         "exploreArchive": "Preskúmať archív",
-        "exploreGuide": "Preskúmať rozcestník",
+        "exploreGuide": "Preskúmať sprievodcu",
         "exploreHandouts": "Preskúmať materiály"
       },
-      "description": "Prehľadný archív úloh, študijných materiálov a rozcestník užitočných zdrojov",
+      "description": "Prehľadný archív úloh, študijných materiálov a sprievodca užitočných zdrojov",
       "title": {
         "forMath": "pre Matematickú",
         "modernHome": "Moderný domov",
@@ -579,7 +460,7 @@
       },
       "guide": {
         "description": "Zoznam súťaží a seminárov spolu s odkazmi na rôzne nástroje užitočné pre žiakov aj učiteľov.",
-        "title": "Rozcestník"
+        "title": "Sprievodca"
       },
       "handouts": {
         "description": "Priebežne dopĺňané študijné texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.",
@@ -620,14 +501,14 @@
     },
     "guide": {
       "description": "Zoznam informácií o súťažiach a odkazy na rôzne užitočné veci zo sveta súťažnej matematiky.",
-      "title": "Rozcestník"
+      "title": "Sprievodca"
     },
     "handouts": {
       "description": "Priebežne pripravované texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.",
       "title": "Materiály"
     },
     "home": {
-      "description": "Prehľadný archív úloh, študijných materiálov a rozcestník užitočných zdrojov pre matematické olympiády.",
+      "description": "Prehľadný archív úloh, študijných materiálov a sprievodca užitočných zdrojov pre matematické olympiády.",
       "title": "MathComps - Moderný domov pre matematiku"
     },
     "login": {
@@ -651,14 +532,14 @@
       "title": "Profil"
     },
     "site": {
-      "description": "Platforma pre matematické súťaže s archívom úloh, učebnými materiálmi a rozcestníkom užitočných zdrojov.",
+      "description": "Platforma pre matematické súťaže s archívom úloh, učebnými materiálmi a sprievodcom užitočných zdrojov.",
       "keywords": "matematika, matematické súťaže, matematická olympiáda, matematické úlohy, matematické materiály, matematický archív"
     }
   },
   "navigation": {
     "about": "O projekte",
     "contact": "Kontakt",
-    "guide": "Rozcestník",
+    "guide": "Sprievodca",
     "handouts": "Materiály",
     "home": "Domov",
     "menuClose": "Zavrieť navigáciu",
