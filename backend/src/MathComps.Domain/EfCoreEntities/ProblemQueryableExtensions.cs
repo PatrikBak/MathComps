@@ -6,9 +6,9 @@ namespace MathComps.Domain.EfCoreEntities;
 public static class ProblemQueryableExtensions
 {
     /// <summary>
-    /// Applies the default sorting for problems: newest seasons first, then 
-    /// chronologically by event date, then by category (if any, otherwise by 
-    /// competition), and problem number.
+    /// Applies the default sorting for problems: newest seasons first, then
+    /// chronologically by event date, then by category (if any, otherwise by
+    /// competition), then by round order, and finally problem number.
     /// </summary>
     /// <param name="source">The source queryable of problems.</param>
     /// <returns>The queryable with default sorting applied.</returns>
@@ -22,6 +22,8 @@ public static class ProblemQueryableExtensions
             ? problem.RoundInstance.Round.Category.SortOrder
             // And when there is no category, just take the competition sort order
             : problem.RoundInstance.Round.Competition.SortOrder)
+        // Then by round order, so rounds sharing a date stay grouped instead of interleaving
+        .ThenBy(problem => problem.RoundInstance.Round.SortOrder)
         // Problem number within the round
         .ThenBy(problem => problem.Number);
 }
