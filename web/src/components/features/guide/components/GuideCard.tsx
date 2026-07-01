@@ -148,7 +148,10 @@ function TileShell(props: TileShellProps) {
           id={props.id}
           type="button"
           onClick={props.onClick}
-          className={cn(className, 'w-full cursor-pointer')}
+          className={cn(
+            className,
+            'w-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
+          )}
         >
           <Corner affordance={props.affordance} />
           {props.children}

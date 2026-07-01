@@ -36,7 +36,7 @@ export function MobileLanguageSwitcher({ onSelect }: MobileLanguageSwitcherProps
             onClick={() => changeLocale(locale, onSelect)}
             className={cn(
               'flex items-center justify-center gap-2 px-4 py-2 rounded-lg',
-              'text-sm transition-all duration-200',
+              'text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
               isActive
                 ? 'bg-foreground/10 text-foreground font-semibold'
                 : 'text-muted-foreground font-medium hover:text-foreground'

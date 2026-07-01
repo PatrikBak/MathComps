@@ -11,7 +11,7 @@ import { MobileLanguageSwitcher } from '@/components/layout/MobileLanguageSwitch
 import { UserInfoHeader } from '@/components/layout/UserInfoHeader'
 import { UserMenuItem } from '@/components/layout/UserMenuItem'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
-import { buttonVariants } from '@/components/shared/components/Button'
+import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
@@ -92,13 +92,14 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
             {/* Header with logo and close button */}
             <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 border-b border-foreground/10">
               <MathCompsLogo />
-              <button
+              <Button
+                variant="ghost"
                 onClick={onClose}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-focus"
                 aria-label={tNav('menuClose')}
+                className="h-10 w-10 p-0 rounded-full bg-foreground/5 hover:bg-foreground/10"
               >
                 <X className="h-6 w-6" />
-              </button>
+              </Button>
             </div>
 
             {/* Scrollable Content */}

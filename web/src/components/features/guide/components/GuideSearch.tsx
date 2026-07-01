@@ -79,7 +79,7 @@ export function GuideSearch({ isOpen, onOpenChange }: GuideSearchProps) {
         onClick={() => onOpenChange(true)}
         aria-label={t('open')}
         title={t('open')}
-        className="inline-grid h-8 w-8 shrink-0 place-items-center rounded-full border border-foreground/15 text-muted transition-colors hover:border-brand hover:text-foreground"
+        className="inline-grid h-8 w-8 shrink-0 place-items-center rounded-full border border-foreground/15 text-muted transition-colors hover:border-brand hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
         <Search size={16} />
       </button>
@@ -129,7 +129,7 @@ export function GuideSearch({ isOpen, onOpenChange }: GuideSearchProps) {
               <button
                 type="button"
                 onClick={() => reveal(entry)}
-                className="flex min-w-0 flex-1 items-start gap-3 px-3 py-2 text-left"
+                className="flex min-w-0 flex-1 items-start gap-3 px-3 py-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
               >
                 {/* Title + page tag, then the one-line description */}
                 <span className="flex min-w-0 flex-1 flex-col">
@@ -156,7 +156,7 @@ export function GuideSearch({ isOpen, onOpenChange }: GuideSearchProps) {
                   onClick={() => openLink(entry)}
                   aria-label={t('openLink')}
                   title={t('openLink')}
-                  className="flex shrink-0 items-center rounded-r-lg px-3 text-muted transition-colors hover:bg-foreground/10 hover:text-brand-light"
+                  className="flex shrink-0 items-center rounded-r-lg px-3 text-muted transition-colors hover:bg-foreground/10 hover:text-brand-light focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
                 >
                   <ArrowUpRight size={16} />
                 </button>

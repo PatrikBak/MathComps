@@ -1,5 +1,8 @@
 'use client'
 
+import { buttonVariants } from '@/components/shared/components/Button'
+import { cn } from '@/components/shared/utils/css-utils'
+
 /**
  * Visual fields shared by both variants of {@link ActionPill}.
  */
@@ -39,10 +42,8 @@ type ActionPillProps = ActionPillLinkProps | ActionPillButtonProps
  * Neutral pill chip that renders a single action — either as a link or as a button.
  */
 export function ActionPill(props: ActionPillProps) {
-  // Shared pill styling
-  const className =
-    'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/5 ' +
-    'border border-foreground/10 leading-5 hover:bg-foreground/10 transition-colors'
+  // Shared pill styling off the Button primitive's subtle look; px-4 overrides sm's px-3
+  const className = cn(buttonVariants({ variant: 'subtle', shape: 'pill', size: 'sm' }), 'px-4')
 
   // Icon plus uppercase muted label
   const content = (

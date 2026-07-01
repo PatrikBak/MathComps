@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react'
 
+import { Button } from '@/components/shared/components/Button'
+
 import type { GuidePage } from '../content/guide-content-types'
 import { useGuideDeck } from './guide-deck-context'
 
@@ -21,14 +23,11 @@ type DeckLinkProps = {
 export function DeckLink({ page, children }: DeckLinkProps) {
   // Grab the deck's page navigation
   const { goToPage } = useGuideDeck()
-  // A text link that switches the active deck page
+
+  // A text link that switches the active deck page; underline keeps the rest-state underline
   return (
-    <button
-      type="button"
-      onClick={() => goToPage(page)}
-      className="text-link underline transition-colors hover:text-link-hover"
-    >
+    <Button variant="link" className="underline" onClick={() => goToPage(page)}>
       {children}
-    </button>
+    </Button>
   )
 }
