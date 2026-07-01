@@ -104,21 +104,22 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
   // Reason options carrying their translated labels
   const translatedReasonOptions = useMemo(() => getTranslatedReasonOptions(tContact), [tContact])
 
-  // Seed name + email from the signed-in user, if any
+  // Seed name + email from the signed-in user, if any. We repurpose Clerk's
+  // firstName as the user's single display name, so the name field seeds from it.
   const { user, isLoaded } = useUser()
-  const fullName = user?.fullName ?? ''
+  const displayName = user?.firstName ?? ''
   const email = user?.primaryEmailAddress?.emailAddress ?? ''
 
-  // Reactive seed: name/email from Clerk, the rest empty until the user fills them.
+  // Reactive seed: display name + email from Clerk, the rest empty until the user fills them.
   const values = useMemo<ContactFormData>(
     () => ({
-      name: fullName,
+      name: displayName,
       email,
       reason: defaultReason as ReasonOption,
       message: '',
       website: '',
     }),
-    [fullName, email, defaultReason]
+    [displayName, email, defaultReason]
   )
 
   // Form state and helpers, validated against the schema
