@@ -29,7 +29,8 @@ type HeaderClientProps = {
  *
  * Layout: [Logo] --- [Centered Nav Links] --- [Language | User]
  *
- * @remarks **IMPORTANT**: If the header height changes, make sure to update --scroll-offset in globals.css for all breakpoints
+ * @remarks The header's height is owned by `--header-height` in globals.css; it drives this bar's
+ *   height and the derived `--scroll-offset`. Change the height there, in one place.
  */
 export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
   // Keep track of whether the mobile menu is open
@@ -41,7 +42,7 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
   return (
     <>
       <header className="sticky top-0 left-0 right-0 bg-background/95 z-50">
-        <nav className="max-w-7xl mx-auto flex items-center px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
+        <nav className="max-w-7xl mx-auto flex items-center px-3 sm:px-4 md:px-6 h-[var(--header-height)]">
           {/* Left: Logo */}
           <MathCompsLogo />
 

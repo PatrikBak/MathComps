@@ -44,11 +44,11 @@
   /* The fixed width of the problems sidebar */
   --problems-sidebar-width: 335px;
 
-  /* Scroll offset for anchor links - must match header height + breathing room */
-  --scroll-offset: 66px;
-
   /* Exact sticky header height (no breathing room) - for elements that butt flush under the header */
   --header-height: 56px;
+
+  /* Scroll offset for anchor links - the header height plus breathing room, derived so it can't drift */
+  --scroll-offset: calc(var(--header-height) + 12px);
 
   /* Toast base colors */
   --toast-success-bg: rgb(22 163 74 / 0.9);
@@ -75,7 +75,6 @@
 /* sm breakpoint */
 @media (min-width: 640px) {
   :root {
-    --scroll-offset: 76px;
     --header-height: 64px;
   }
 }
@@ -83,7 +82,6 @@
 /* md breakpoint */
 @media (min-width: 768px) {
   :root {
-    --scroll-offset: 84px;
     --header-height: 72px;
   }
 }
@@ -91,7 +89,6 @@
 /* lg breakpoint */
 @media (min-width: 1024px) {
   :root {
-    --scroll-offset: 96px;
     --header-height: 80px;
   }
 }
