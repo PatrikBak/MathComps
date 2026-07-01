@@ -2,10 +2,12 @@
 
 import { useUser } from '@clerk/nextjs'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AtSign, BookMarked, Loader2, type LucideIcon, MessageSquare, User } from 'lucide-react'
+import { AtSign, BookMarked, type LucideIcon, MessageSquare, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+
+import { Button } from '@/components/shared/components/Button'
 
 import SimpleSelect from '../../shared/SimpleSelect'
 import { cn } from '../../shared/utils/css-utils'
@@ -228,20 +230,9 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
       </div>
 
       {/* Submit */}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full flex items-center justify-center gap-2 rounded-lg py-3 px-6 text-sm font-medium bg-brand/40 border border-foreground/10 text-brand-foreground hover:bg-brand/60 hover:border-muted/60 hover:shadow-lg active:scale-[0.98] motion-reduce:active:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-inset transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-            {tContact('sending')}
-          </>
-        ) : (
-          tContact('sendMessage')
-        )}
-      </button>
+      <Button variant="primary" fullWidth type="submit" loading={isSubmitting}>
+        {isSubmitting ? tContact('sending') : tContact('sendMessage')}
+      </Button>
     </form>
   )
 }
