@@ -21,7 +21,7 @@ export function MobileLanguageSwitcher({ onSelect }: MobileLanguageSwitcherProps
   const { currentLocale, changeLocale } = useLanguageSwitcher()
 
   return (
-    <div className="self-start inline-flex items-stretch rounded-xl bg-foreground/5 border border-foreground/5 p-1 gap-0.5">
+    <div className="self-start inline-flex items-stretch gap-1">
       {SUPPORTED_LOCALES.map((locale) => {
         // Determine whether this locale is the active one
         const isActive = locale === currentLocale
@@ -38,7 +38,7 @@ export function MobileLanguageSwitcher({ onSelect }: MobileLanguageSwitcherProps
               'flex items-center justify-center gap-2 px-4 py-2 rounded-lg',
               'text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
               isActive
-                ? 'bg-foreground/10 text-foreground font-semibold'
+                ? 'bg-foreground/10 text-foreground font-semibold shadow-sm'
                 : 'text-muted-foreground font-medium hover:text-foreground'
             )}
             aria-pressed={isActive}
