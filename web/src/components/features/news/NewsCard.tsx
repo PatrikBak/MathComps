@@ -68,7 +68,7 @@ export function NewsCard({ article }: NewsCardProps) {
     <article className="bg-surface/50 border border-foreground/10 rounded-xl flex flex-col md:flex-row overflow-hidden">
       {/* Cover: a banner on mobile, a left panel on desktop */}
       <div className="h-40 md:h-auto md:w-52 shrink-0">
-        <NewsCardCover cover={article.cover} title={article.title} />
+        <NewsCardCover cover={article.cover} />
       </div>
 
       {/* Body */}
@@ -82,9 +82,9 @@ export function NewsCard({ article }: NewsCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="font-serif text-xl font-bold text-foreground leading-tight mb-2">
+        <h2 className="font-serif text-xl font-bold text-foreground leading-tight mb-2">
           {article.title}
-        </h3>
+        </h2>
 
         {/* MDX body */}
         <div className="flex-grow">

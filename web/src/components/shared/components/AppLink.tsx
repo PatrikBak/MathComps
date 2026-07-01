@@ -38,6 +38,11 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
    * Automatically adds `target="_blank"` and `rel="noopener noreferrer"` for security.
    */
   newTab?: boolean
+  /**
+   * Skip the default color/hover styling so the caller's className fully controls appearance.
+   * Use when the link carries its own color that must not shift to the default on hover.
+   */
+  plain?: boolean
 }
 
 /**
@@ -51,9 +56,11 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
  * Provides consistent styling and security defaults (`rel="noopener noreferrer"` for new tabs).
  */
 export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
-  ({ href, className, prefetch, newTab, external, ...rest }, ref) => {
-    // Apply default link styling with any custom classes
-    const classes = cn('text-muted hover:text-foreground transition-colors duration-300', className)
+  ({ href, className, prefetch, newTab, external, plain, ...rest }, ref) => {
+    // Apply the default link styling, unless the caller opts out to control appearance itself
+    const classes = plain
+      ? cn(className)
+      : cn('text-muted hover:text-foreground transition-colors duration-300', className)
 
     // Determine if this should behave as an external link:
     // - Explicitly marked as external, OR

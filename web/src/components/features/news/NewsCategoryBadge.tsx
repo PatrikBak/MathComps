@@ -1,7 +1,6 @@
 import { useTranslations } from 'next-intl'
 
-import { AppLink } from '@/components/shared/components/AppLink'
-import { cn } from '@/components/shared/utils/css-utils'
+import { Eyebrow } from '@/components/shared/components/Eyebrow'
 import { ROUTES } from '@/i18n/i18n'
 
 import { CATEGORY_COLORS } from './news-colors'
@@ -29,16 +28,10 @@ export function NewsCategoryBadge({ category }: NewsCategoryBadgeProps) {
   // Fetch the color scheme mapping for the category
   const scheme = CATEGORY_COLORS[category]
 
-  // Eyebrow styling: small uppercase letterspaced label in the category color
-  const className = cn(
-    'text-xs font-semibold uppercase tracking-wider',
-    scheme.text,
-    'hover:opacity-80 transition-opacity'
-  )
-
+  // A colored eyebrow link (the primitive owns the focus ring + tap area)
   return (
-    <AppLink href={href} className={className}>
+    <Eyebrow href={href} className={scheme.text}>
       {t(category)}
-    </AppLink>
+    </Eyebrow>
   )
 }

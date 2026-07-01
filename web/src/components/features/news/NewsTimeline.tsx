@@ -11,7 +11,9 @@ import {
 } from '@/components/features/comments/components/CommentCountContext'
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
+import { Button } from '@/components/shared/components/Button'
 import { CountBadge } from '@/components/shared/components/CountBadge'
+import { FilterEmptyState } from '@/components/shared/components/FilterEmptyState'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
@@ -71,10 +73,7 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
   const isEmpty = !isLoading && count === 0
 
   return (
-    <button
-      onClick={openComments}
-      className="w-fit flex items-center gap-3 py-1.5 px-3 -ml-3 text-muted hover:text-foreground hover:bg-surface/50 rounded-lg transition-colors"
-    >
+    <Button variant="ghost" onClick={openComments} className="w-fit gap-3 -ml-3">
       {isEmpty ? (
         // Empty: invite to comment, no count
         <MessageSquarePlus size={18} />
@@ -87,7 +86,7 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
         </div>
       )}
       <span className="text-sm font-medium">{isEmpty ? t('addComment') : t('comments')}</span>
-    </button>
+    </Button>
   )
 }
 
@@ -203,10 +202,11 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
     // Parse the date string into a Date object
     const date = new Date(dateString)
 
-    // Format day + month with locale-aware ordering
-    const dayMonth = format.dateTime(date, { day: 'numeric', month: 'numeric' })
+    // Format day + month with locale-aware ordering; it's a calendar date, so read it in UTC
+    // to avoid rolling back a day in western timezones
+    const dayMonth = format.dateTime(date, { day: 'numeric', month: 'numeric', timeZone: 'UTC' })
 
-    return { dayMonth, year: date.getFullYear().toString() }
+    return { dayMonth, year: date.getUTCFullYear().toString() }
   }
 
   return (
@@ -222,9 +222,10 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
           <button
             onClick={clearFilter}
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md text-white',
+              'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md',
               CATEGORY_COLORS[categoryFilter].bg,
-              'hover:opacity-80 transition-opacity'
+              CATEGORY_COLORS[categoryFilter].text,
+              'hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
             )}
           >
             {tCategories(categoryFilter)}
@@ -233,7 +234,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
         </div>
       )}
 
-      {filteredItems.length > 0 && (
+      {/* The feed, or an empty state when a category filter matches nothing */}
+      {filteredItems.length > 0 ? (
         <CommentCountProvider targetType="News" targetIds={articleIds}>
           <div className="flex flex-col">
             {visibleItems.map((item, index) => {
@@ -243,8 +245,21 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
               // Newest entry gets a lit dot; older ones a quiet hollow one
               const isNewest = index === 0
 
+              // Last visible entry: the rail stops here so it doesn't dangle below the final dot
+              const isLast = index === visibleItems.length - 1
+
+              // Entries past the initial window fade in when "older news" is revealed
+              const isRevealed = showAll && index >= INITIAL_VISIBLE
+
               return (
-                <div key={item.article.id} className="flex gap-0 md:gap-5">
+                <div
+                  key={item.article.id}
+                  className={cn(
+                    'flex gap-0 md:gap-5',
+                    isRevealed &&
+                      'animate-in fade-in slide-in-from-top-1 duration-300 motion-reduce:animate-none'
+                  )}
+                >
                   {/* Left rail with date + dot (desktop only) */}
                   <div className="hidden md:flex shrink-0 gap-3">
                     {/* Date */}
@@ -257,7 +272,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
 
                     {/* Rail line + dot */}
                     <div className="relative flex justify-center w-3">
-                      <div className="absolute top-2 bottom-0 w-px bg-foreground/10" />
+                      {!isLast && <div className="absolute top-2 bottom-0 w-px bg-foreground/10" />}
                       <div
                         className={cn(
                           'relative mt-1 w-3 h-3 rounded-full border-2',
@@ -285,15 +300,18 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
           {/* Reveal for older entries */}
           {hiddenCount > 0 && (
             <div className="flex justify-center pt-2">
-              <button
-                onClick={() => setShowAll(true)}
-                className="px-5 py-2 text-sm font-medium text-muted hover:text-foreground border border-foreground/10 hover:border-foreground/25 rounded-lg transition-colors"
-              >
+              <Button variant="secondary" onClick={() => setShowAll(true)}>
                 {t('showOlder')} ({hiddenCount})
-              </button>
+              </Button>
             </div>
           )}
         </CommentCountProvider>
+      ) : (
+        <FilterEmptyState
+          message={t('emptyState')}
+          resetLabel={t('clearFilter')}
+          onReset={clearFilter}
+        />
       )}
 
       {/* Comments Modal */}

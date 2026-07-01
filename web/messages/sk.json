@@ -557,7 +557,9 @@
       "handouts": "Materiály",
       "misc": "Rôzne"
     },
+    "clearFilter": "Zobraziť všetky novinky",
     "comments": "Komentáre",
+    "emptyState": "V tejto kategórii zatiaľ nie sú žiadne novinky.",
     "filtering": "Filtrujem:",
     "newerArticles": "Novšie články",
     "olderArticles": "Staršie články",
