@@ -76,3 +76,26 @@ export function isExternalHref(href: string): boolean {
   // scheme:// or //host, or common non-http schemes
   return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^(mailto|tel|sms|geo):/i.test(href)
 }
+
+/**
+ * Normalizes an App Router page's awaited `searchParams` (a plain record whose values may be a
+ * string, a repeated-key array, or absent) into a {@link URLSearchParams}, so server code can read
+ * the query with the same API the client uses.
+ *
+ * @param params - The awaited `searchParams` record from a page.
+ *
+ * @returns The query as {@link URLSearchParams} (repeated keys preserved, absent keys dropped).
+ */
+export function toUrlSearchParams(
+  params: Record<string, string | string[] | undefined>
+): URLSearchParams {
+  // Flatten each key into one [key, value] pair per value, dropping absent keys
+  const pairs = Object.entries(params).flatMap(([key, value]) => {
+    // A repeated query key arrives as an array: keep every value
+    if (Array.isArray(value)) return value.map((entry): [string, string] => [key, entry])
+    // A single value is one pair; an absent key contributes nothing
+    return value === undefined ? [] : [[key, value] as [string, string]]
+  })
+  // Assemble the query from the flattened pairs
+  return new URLSearchParams(pairs)
+}

@@ -323,6 +323,14 @@ export function GuideCard({ id, title, aside, description, meta, details, links 
         {/* The meta line; it leads the tile when there's no description, else rides the bottom */}
         {meta && <MetaRow lead={!description}>{meta}</MetaRow>}
       </TileShell>
+      {/* The detail bullets, mirrored into the page flow for crawlers. The visible copy lives in the
+          modal below, which renders in a portal that never server-renders, so on its own it would keep
+          this text out of the HTML */}
+      {hasDetails && (
+        <div className="sr-only">
+          <BulletList items={detailItems} />
+        </div>
+      )}
       {/* The detail/chooser modal */}
       {hasModal && (
         <Modal
