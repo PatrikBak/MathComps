@@ -695,7 +695,7 @@ export default function MultiSelectFacet({
                     return (
                       <div key={groupKey}>
                         <div
-                          className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-foreground border-b border-foreground/10 bg-surface sticky top-0 z-10 flex items-center gap-2 cursor-pointer"
+                          className="-mx-0.5 sm:-mx-1 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-foreground border-b border-foreground/10 bg-surface sticky top-0 z-10 flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                           role="button"
                           tabIndex={0}
                           onClick={() => toggleGroupCollapse(groupKey)}

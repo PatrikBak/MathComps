@@ -36,17 +36,16 @@ export default function AuthFormActions({
       {/* Forgot Password Link */}
       {screen === 'login-with-email' && (
         <div className="flex justify-end mt-2">
-          <button
-            type="button"
+          <Button
+            variant="link"
             onClick={(event) => {
               event.preventDefault()
               event.stopPropagation()
               onScreenSwitch('forgotten-password')
             }}
-            className="text-link font-medium hover:text-link-hover hover:underline transition-colors cursor-pointer text-sm"
           >
             {t('forgotPassword')}
-          </button>
+          </Button>
         </div>
       )}
 

@@ -7,7 +7,8 @@
 /**
  * Base styles applied to all TOC links (active and inactive).
  */
-export const TOC_LINK_BASE_STYLES = 'block rounded-md text-sm transition-all duration-200'
+export const TOC_LINK_BASE_STYLES =
+  'block rounded-md text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
 
 /**
  * Styles for the currently active (highlighted) TOC link.

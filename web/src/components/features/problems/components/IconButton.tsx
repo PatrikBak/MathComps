@@ -1,18 +1,33 @@
+import { Button } from '@/components/shared/components/Button'
+
+/**
+ * Props for the {@link IconButton} component.
+ */
 type IconButtonProps = {
+  /** The icon to render. */
   Icon: React.ElementType
+  /** Accessible label / tooltip. */
   title: string
+  /** Click handler; the surrounding card's click is suppressed. */
   onClick?: () => void
 }
 
+/**
+ * A compact ghost icon button for problem-card actions.
+ */
 export const IconButton = ({ Icon, title, onClick }: IconButtonProps) => (
-  <button
+  <Button
+    variant="ghost"
+    size="icon"
     title={title}
-    className="p-2 text-muted transition-colors rounded-md hover:text-foreground hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-    onClick={(e) => {
-      e.stopPropagation()
+    onClick={(event) => {
+      // Don't let the click bubble to the card behind it
+      event.stopPropagation()
+
+      // Run the action
       onClick?.()
     }}
   >
     <Icon size={18} />
-  </button>
+  </Button>
 )

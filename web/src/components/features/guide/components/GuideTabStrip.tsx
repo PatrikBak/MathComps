@@ -69,6 +69,7 @@ export function GuideTabStrip({
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm transition-colors',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
                   active
                     ? 'border-brand bg-brand/15 font-semibold text-foreground'
                     : 'border-foreground/15 text-muted hover:text-foreground'

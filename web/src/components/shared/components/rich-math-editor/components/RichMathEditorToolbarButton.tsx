@@ -26,7 +26,7 @@ export function ToolbarButton({ onClick, icon: Icon, text, title }: ToolbarButto
       onClick={onClick}
       onMouseDown={preventFocusLoss}
       title={title}
-      className="flex items-center justify-center gap-1.5 px-2 py-1 rounded transition-colors text-xs min-w-[28px] text-muted hover:text-foreground hover:bg-foreground/10"
+      className="flex items-center justify-center gap-1.5 px-2 py-1 rounded transition-colors text-xs min-w-[28px] text-muted hover:text-foreground hover:bg-foreground/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
     >
       {Icon && <Icon size={14} />}
       {text && <span className="font-mono font-semibold text-sm">{text}</span>}

@@ -237,7 +237,8 @@ export function EditableTextField({
     <div
       ref={containerRef}
       className={cn(
-        'cursor-pointer group w-full',
+        'cursor-pointer group w-full rounded-md',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
         isPulsing && 'animate-error-pulse',
         outerContainerClassName
       )}

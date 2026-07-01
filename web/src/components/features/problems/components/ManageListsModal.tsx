@@ -197,7 +197,8 @@ function SortableListRow({
       <button
         {...attributes}
         {...listeners}
-        className="w-5 h-7 flex items-center justify-center text-muted hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
+        aria-label={t('reorderList')}
+        className="w-5 h-7 flex items-center justify-center text-muted hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
         <GripVertical size={14} />
       </button>
@@ -226,7 +227,10 @@ function SortableListRow({
       <div className="sm:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-7 h-7 flex items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors">
+            <button
+              aria-label={t('listActions')}
+              className="w-7 h-7 flex items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            >
               <MoreVertical size={15} />
             </button>
           </DropdownMenuTrigger>
@@ -275,7 +279,7 @@ function SortableListRow({
       {list.isShared ? (
         <Popover className="relative hidden sm:block">
           <PopoverButton
-            className="w-7 h-7 flex items-center justify-center rounded-md text-link hover:text-link-hover hover:bg-foreground/5 transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-link hover:text-link-hover hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             title={t('shareList')}
           >
             <LinkIcon size={15} />
@@ -291,7 +295,7 @@ function SortableListRow({
                     handleCopyLink()
                     close()
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-foreground hover:bg-foreground/5 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-foreground hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 >
                   <LinkIcon size={14} />
                   {t('copyListLink')}
@@ -301,7 +305,7 @@ function SortableListRow({
                     handleStopSharing()
                     close()
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-error hover:bg-foreground/5 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-error hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 >
                   <X size={14} />
                   {t('unshareList')}
@@ -313,7 +317,7 @@ function SortableListRow({
       ) : (
         <button
           onClick={handleEnableSharing}
-          className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
+          className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           title={t('shareList')}
         >
           <Share2 size={15} />
@@ -323,7 +327,7 @@ function SortableListRow({
       {/* View button */}
       <button
         onClick={() => onView(list.contentId)}
-        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
+        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-foreground hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         title={t('viewList')}
       >
         <Eye size={15} />
@@ -332,7 +336,7 @@ function SortableListRow({
       {/* Delete button — opens confirm dialog */}
       <button
         onClick={() => onDelete(list)}
-        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-error hover:bg-foreground/5 transition-colors"
+        className="hidden sm:flex w-7 h-7 items-center justify-center rounded-md text-muted hover:text-error hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         title={t('deleteList')}
       >
         <Trash2 size={15} />
