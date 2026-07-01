@@ -10,7 +10,7 @@ import { cn } from '@/components/shared/utils/css-utils'
  * `primary` fills with the brand (violet); the focus ring stays on `focus` (indigo) so the
  * action color and the focus indicator never share a hue.
  */
-const buttonVariants = cva(
+export const buttonVariants = cva(
   [
     'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
     'transition-all duration-200 active:scale-[0.98] motion-reduce:active:scale-100',

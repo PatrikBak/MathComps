@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { type ReactNode, useCallback, useMemo, useRef } from 'react'
 
 import ContactButton from '@/components/features/contact/ContactButton'
+import { Eyebrow } from '@/components/shared/components/Eyebrow'
 import { Pager } from '@/components/shared/components/Pager'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -72,9 +73,9 @@ function ArrowButton({
         <Icon size={18} />
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="text-[11px] uppercase tracking-wide text-muted hyphens-none sm:text-xs">
+        <Eyebrow size="sm" className="text-muted hyphens-none">
           {kicker}
-        </span>
+        </Eyebrow>
         <span className="text-sm font-semibold leading-tight text-foreground hyphens-none sm:text-base">
           {label}
         </span>
