@@ -217,6 +217,11 @@
 \long\def\saferead#1{\ignorespaces#1}
 \long\def\safepar{\par\removelastskip}
 
+% Sentinel that \ifx-matches an empty (hint-only) solution/proof arg. \long so it compares
+% equal to the \long-defined stored arg macro when the body is empty, letting review mode
+% skip the dispatch instead of running \solutionDispatch off the end into \bye.
+\long\def\emptybody{}
+
 % Renders one answer line: the italic answer caption, the result, and a trailing paragraph break.
 \long\def\AnswerLine#1{{\em \captionAnswer:}\enskip\saferead{#1}\safepar}
 
@@ -319,8 +324,11 @@
 		\enskip\saferead{#2}\safepar%
 	}%
 	\ifReviewMode%
-		\def\solutionHeader{{\em \captionSolution.}\enskip}%
-		\solutionDispatch#3\solutionDispatchEnd\endblock%
+		\def\temp{#3}\ifx\temp\empty\else%
+			\def\solutionHeader{{\em \captionSolution.}\enskip}%
+			\solutionDispatch#3\solutionDispatchEnd%
+		\fi%
+		\endblock%
 	\fi%
 }
 
@@ -369,7 +377,7 @@
 		\enskip\saferead{#2}%
 	}%
 	\IfShowingTexts%
-    {\def\solutionHeader{{\em \captionSolution.}\enskip}\solutionDispatch#3\solutionDispatchEnd\endblock}%
+    {\def\temp{#3}\ifx\temp\empty\else\def\solutionHeader{{\em \captionSolution.}\enskip}\solutionDispatch#3\solutionDispatchEnd\fi\endblock}%
     {}%
 }
 
@@ -498,9 +506,11 @@
       \repeat%
       \safepar%
       % Expand the stored solution one level so \solutionDispatch can peek a leading \Answer
-      \def\solutionHeader{{\em \captionSolution.}\enskip}%
       \expandafter\let\expandafter\currentSolution\csname p\the\problems-solution\endcsname%
-      \expandafter\solutionDispatch\currentSolution\solutionDispatchEnd%
+      \ifx\currentSolution\emptybody\else%
+        \def\solutionHeader{{\em \captionSolution.}\enskip}%
+        \expandafter\solutionDispatch\currentSolution\solutionDispatchEnd%
+      \fi%
       \endblock%
     \fi%
   \fi%
