@@ -25,8 +25,6 @@ const PAPER: React.CSSProperties = {
 type NewsCardCoverProps = {
   /** The cover to render. */
   cover: NewsCover
-  /** The article title. */
-  title: string
 }
 
 /**
@@ -34,14 +32,15 @@ type NewsCardCoverProps = {
  * a hand-drawn handout figure, a KaTeX expression, or a line icon — all in dark
  * ink. Fills its container, which sizes it (a left panel on desktop, a banner on mobile).
  */
-export function NewsCardCover({ cover, title }: NewsCardCoverProps) {
+export function NewsCardCover({ cover }: NewsCardCoverProps) {
   // Resolve the content per cover kind; the cream-paper frame below is shared by every kind
   let content: React.ReactNode
   switch (cover.kind) {
     case 'figure':
       content = (
+        // The figure illustrates the article whose title sits right beside it, so it's decorative
         // eslint-disable-next-line @next/next/no-img-element -- raw SVG line art, no optimization wanted
-        <img src={cover.src} alt={title} className="max-h-full max-w-[86%]" />
+        <img src={cover.src} alt="" loading="lazy" className="max-h-full max-w-[86%]" />
       )
       break
 

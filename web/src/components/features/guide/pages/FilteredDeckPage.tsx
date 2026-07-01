@@ -1,7 +1,9 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
+import { FilterEmptyState } from '@/components/shared/components/FilterEmptyState'
+
 import { type FilterPillGroup } from '../components/guide-filter-model'
-import { GuideEmptyState } from '../components/GuideEmptyState'
 import { GuideFilterBar } from '../components/GuideFilterBar'
 import { PageHeader } from './DeckPrimitives'
 
@@ -38,6 +40,9 @@ export function FilteredDeckPage({
   children,
   footer,
 }: FilteredDeckPageProps) {
+  // Empty-state copy + reset label
+  const tDeck = useTranslations('guide.deck')
+
   // The intro, the filter bar, the body, then any footer
   return (
     <div>
@@ -45,7 +50,15 @@ export function FilteredDeckPage({
       <GuideFilterBar groups={filterGroups} />
 
       {/* Nothing matches? the empty state, otherwise the body */}
-      {isEmpty ? <GuideEmptyState onReset={onReset} /> : children}
+      {isEmpty ? (
+        <FilterEmptyState
+          message={tDeck('emptyState')}
+          resetLabel={tDeck('clearFilters')}
+          onReset={onReset}
+        />
+      ) : (
+        children
+      )}
 
       {footer}
     </div>

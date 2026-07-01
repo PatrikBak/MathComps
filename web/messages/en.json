@@ -557,7 +557,9 @@
       "handouts": "Materials",
       "misc": "Miscellaneous"
     },
+    "clearFilter": "Show all news",
     "comments": "Comments",
+    "emptyState": "No news in this category yet.",
     "filtering": "Filtering:",
     "newerArticles": "Newer articles",
     "olderArticles": "Older articles",
