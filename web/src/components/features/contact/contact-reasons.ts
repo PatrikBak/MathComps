@@ -1,4 +1,11 @@
-import { Heart, Lightbulb, type LucideIcon, MessageSquare, Users } from 'lucide-react'
+import {
+  Heart,
+  Lightbulb,
+  type LucideIcon,
+  MessageSquare,
+  MoreHorizontal,
+  Users,
+} from 'lucide-react'
 import { type Messages, type useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 
@@ -31,6 +38,7 @@ export const REASON_OPTIONS = {
   feedback: { labelKey: 'reasons.feedback', icon: MessageSquare },
   contentContribution: { labelKey: 'reasons.contentContribution', icon: Users },
   featureIdeas: { labelKey: 'reasons.featureIdeas', icon: Lightbulb },
+  other: { labelKey: 'reasons.other', icon: MoreHorizontal },
 } satisfies Record<string, ReasonConfig>
 
 /**
