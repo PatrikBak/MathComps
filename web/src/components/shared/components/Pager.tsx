@@ -1,5 +1,8 @@
+import { useMounted } from '@mantine/hooks'
 import useEmblaCarousel from 'embla-carousel-react'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+
+import { cn } from '@/components/shared/utils/css-utils'
 
 /**
  * Layout effect on the client (the height measurement below needs before-paint timing to avoid a
@@ -56,6 +59,9 @@ export function Pager({ slides, selectedIndex, onSelect }: PagerProps) {
 
   // The outer-wrapper height, pinned to the active slide
   const [height, setHeight] = useState<number | undefined>(undefined)
+
+  // True once mounted on the client; false during SSR + the first hydration render
+  const mounted = useMounted()
 
   // Adopt the active slide's height for the clipping wrapper
   const measure = useCallback((index: number) => {
@@ -135,7 +141,13 @@ export function Pager({ slides, selectedIndex, onSelect }: PagerProps) {
               ref={(element) => {
                 slideRefs.current[index] = element
               }}
-              className="min-w-0 flex-[0_0_100%]"
+              className={cn(
+                'min-w-0 flex-[0_0_100%]',
+                // Until Embla mounts, the flex track would size to the tallest slide; collapse the
+                // inactive ones (still in the DOM, so crawlable) so the pre-hydration paint takes the
+                // active slide's height
+                !mounted && index !== selectedIndex && 'max-h-0 overflow-hidden'
+              )}
               // Off-screen pages stay mounted (for SSR + height) but leave the tab order and AT tree
               aria-hidden={index !== selectedIndex || undefined}
               inert={index !== selectedIndex}

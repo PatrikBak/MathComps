@@ -13,7 +13,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useStickyScroll } from '@/hooks/use-sticky-scroll'
 
 import { GUIDE_PAGES, type GuidePage } from '../content/guide-content-types'
-import { type GuideFilters } from '../content/guide-filters'
+import { type GuideDeckState, type GuideFilters } from '../content/guide-filters'
 import { useGuideLabels } from '../content/guide-labels'
 import { GetStartedPage } from '../pages/GetStartedPage'
 import { OlympiadPage } from '../pages/OlympiadPage'
@@ -88,6 +88,8 @@ function ArrowButton({
  * Props for the {@link GuideDeck} component.
  */
 type GuideDeckProps = {
+  /** The view to open the deck on. */
+  initialState: GuideDeckState
   /** Pre-rendered rich resource descriptions, keyed by resource id. */
   richDescriptions: Record<string, ReactNode>
 }
@@ -96,7 +98,7 @@ type GuideDeckProps = {
  * The guide deck: a page-at-a-time pager (tabs + arrows + dots + swipe + keyboard) over six pages,
  * with the active page and its per-page filters reflected in the URL.
  */
-export function GuideDeck({ richDescriptions }: GuideDeckProps) {
+export function GuideDeck({ initialState, richDescriptions }: GuideDeckProps) {
   // Hero + page copy
   const tGuide = useTranslations('guide')
   // Deck chrome copy (the previous/next kickers)
@@ -117,9 +119,11 @@ export function GuideDeck({ richDescriptions }: GuideDeckProps) {
     [scrollToElement]
   )
 
-  // The URL-backed page + per-page filter memory and its navigation controls
-  const { selectedIndex, filtersForPage, goToIndex, goToPage, setPageFilters } =
-    useDeckUrlState(scrollToStickyTop)
+  // The active page + per-page filter memory and its navigation controls, seeded from the server
+  const { selectedIndex, filtersForPage, goToIndex, goToPage, setPageFilters } = useDeckUrlState(
+    initialState,
+    scrollToStickyTop
+  )
   // The open-card-modal registry, so arrow paging can stand down while a modal is up
   const { registerOpenModal, anyModalOpen } = useModalRegistry()
   // The pending deep-link reveal request (navigates, then flags the entity for its card)

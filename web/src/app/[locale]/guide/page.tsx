@@ -5,10 +5,12 @@ import { renderGuideRichDescriptions } from '@/components/features/guide/compone
 import { GuideDeck } from '@/components/features/guide/components/GuideDeck'
 import { GuideRouteProvider } from '@/components/features/guide/components/GuideRouteProvider'
 import { GUIDE_CONTENT } from '@/components/features/guide/content/guide-content'
+import { decodeDeckState } from '@/components/features/guide/content/guide-url'
 import Layout from '@/components/layout/Layout'
+import { toUrlSearchParams } from '@/components/shared/utils/url-utils'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
-import { withLocale } from '@/i18n/with-locale'
+import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { createPageMetadata } from '@/lib/metadata'
 
 /**
@@ -33,20 +35,46 @@ export async function generateMetadata({
 }
 
 /**
- * The guide page renders the interactive deck. The deck is a client component reading URL state,
- * so it sits behind a Suspense boundary (required for `useSearchParams`).
+ * Props for the {@link GuideDeckSection} segment.
  */
-export default withLocale(async function GuidePage({ locale }: { locale: Locale }) {
+type GuideDeckSectionProps = {
+  /** The active locale. */
+  locale: Locale
+  /** The request query. */
+  searchParams: PageProps['searchParams']
+}
+
+/**
+ * Decodes the deck's initial view from the request query and renders the deck. Kept as a nested async
+ * segment behind the page's Suspense boundary: reading `searchParams` streams the deck as a
+ * per-request dynamic hole (so every page's content lands in crawlable HTML) while the shell around it
+ * stays static.
+ */
+async function GuideDeckSection({ locale, searchParams }: GuideDeckSectionProps) {
+  // Read the request query as URLSearchParams, server-side
+  const query = toUrlSearchParams((await searchParams) ?? {})
+  // Decode the deck's initial view: active page + its filters
+  const initialState = decodeDeckState(query, locale)
+
   // Pre-render the rich descriptions for the active locale
   const richDescriptions = renderGuideRichDescriptions(GUIDE_CONTENT, locale)
 
-  // Render the deck shell, handing the pre-rendered descriptions to the client deck. The route
-  // provider wraps the layout so the navbar's language switcher can re-encode the deck's URL state.
+  // Hand the initial view + descriptions to the client deck
+  return <GuideDeck initialState={initialState} richDescriptions={richDescriptions} />
+}
+
+/**
+ * The guide page renders the interactive deck. Its initial view is decoded from the query
+ * server-side, so all six pages render into crawlable HTML.
+ */
+export default withLocale(async function GuidePage({ locale, searchParams }: PageProps) {
+  // Render the deck shell. The route provider wraps the layout so the navbar's language switcher can
+  // re-encode the deck's URL state; the deck itself decodes the query behind the Suspense boundary.
   return (
     <GuideRouteProvider>
       <Layout>
         <Suspense fallback={null}>
-          <GuideDeck richDescriptions={richDescriptions} />
+          <GuideDeckSection locale={locale} searchParams={searchParams} />
         </Suspense>
       </Layout>
     </GuideRouteProvider>

@@ -1,18 +1,17 @@
-import { useSearchParams } from 'next/navigation'
 import { useLocale } from 'next-intl'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { type Locale } from '@/i18n/i18n'
 
 import { GUIDE_PAGES, type GuidePage } from '../content/guide-content-types'
-import { EMPTY_FILTERS, type GuideFilters } from '../content/guide-filters'
-import { decodeDeckState, encodeDeckState } from '../content/guide-url'
+import { EMPTY_FILTERS, type GuideDeckState, type GuideFilters } from '../content/guide-filters'
+import { encodeDeckState } from '../content/guide-url'
 
 /**
- * The deck's URL-backed page + per-page filter memory, and the controls that mutate it.
+ * The deck's active page + per-page filter memory, and the controls that mutate it.
  */
 export type DeckUrlState = {
-  /** The active page's index, resolved from the URL. */
+  /** The active page's index. */
   selectedIndex: number
   /** A page's remembered filters (empty when that page was never touched). */
   filtersForPage: (page: GuidePage) => GuideFilters
@@ -25,47 +24,40 @@ export type DeckUrlState = {
 }
 
 /**
- * Owns the guide deck's source of truth: the active page and every page's filters live in the URL,
- * backed by an in-session memory so switching back to a page restores its filters. Navigation scrolls
- * the deck up to its sticky top, then writes the new view to the URL via the History API, without a
- * server navigation.
+ * Owns the guide deck's active page and every page's filters as local state, seeded from the
+ * server-decoded initial view, and backed by an in-session memory so switching back to a page
+ * restores its filters. Reading the URL server-side (not this hook) is what lets the deck render into
+ * crawlable HTML. Navigation scrolls the deck up to its sticky top, moves the active page, then
+ * mirrors the new view into the URL via the History API (a write-only reflection, never read back),
+ * so shareable/deep-link URLs still work without a server navigation.
  *
+ * @param initialState - The view to open the deck on.
  * @param scrollToStickyTop - Glides the deck's top flush beneath the site header (upward only).
  *
  * @returns The active index, a per-page filter lookup, and the navigation + filter controls.
  */
-export function useDeckUrlState(scrollToStickyTop: () => void): DeckUrlState {
-  // The live URL query (active page + filters live here)
-  const searchParams = useSearchParams()
+export function useDeckUrlState(
+  initialState: GuideDeckState,
+  scrollToStickyTop: () => void
+): DeckUrlState {
   // The active locale (drives localized URL encoding)
   const locale = useLocale() as Locale
 
-  // Decode the active page + its filters from the URL
-  const urlState = useMemo(
-    () => decodeDeckState(new URLSearchParams(searchParams.toString()), locale),
-    [searchParams, locale]
-  )
+  // The active page index, seeded from the initial view
+  const [selectedIndex, setSelectedIndex] = useState(() => GUIDE_PAGES.indexOf(initialState.page))
 
-  // Session memory of every page's filters (so switching back restores them), seeded from the URL
+  // Session memory of every page's filters (so switching back restores them), seeded from the initial view
   const [filtersByPage, setFiltersByPage] = useState<Record<GuidePage, GuideFilters>>(() => {
     // Start every page pristine
     const seeded = Object.fromEntries(GUIDE_PAGES.map((page) => [page, EMPTY_FILTERS])) as Record<
       GuidePage,
       GuideFilters
     >
-    // Then overlay the filters the URL arrived with onto its page
-    seeded[urlState.page] = urlState.filters
+    // Then overlay the filters the initial view arrived with onto its page
+    seeded[initialState.page] = initialState.filters
     // Hand the seeded map to useState as the initial value
     return seeded
   })
-
-  // Sync the active page's remembered filters from the URL (handles back/forward + deep links)
-  useEffect(() => {
-    setFiltersByPage((previous) => ({ ...previous, [urlState.page]: urlState.filters }))
-  }, [urlState])
-
-  // The active page index
-  const selectedIndex = GUIDE_PAGES.indexOf(urlState.page)
 
   // Write a page + its filters to the URL
   const pushUrl = useCallback(
@@ -91,10 +83,12 @@ export function useDeckUrlState(scrollToStickyTop: () => void): DeckUrlState {
       if (index === selectedIndex) return
       // Scroll up to the sticky tab bar so the new page starts at the top
       scrollToStickyTop()
+      // Move to the page
+      setSelectedIndex(index)
       // Restore that page's remembered filters
       const page = GUIDE_PAGES[index]
       const filters = filtersByPage[page] ?? EMPTY_FILTERS
-      // Push the new view
+      // Mirror the new view into the URL
       pushUrl(page, filters)
     },
     [pushUrl, scrollToStickyTop, selectedIndex, filtersByPage]
