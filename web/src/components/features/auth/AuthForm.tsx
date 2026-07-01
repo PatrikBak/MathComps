@@ -10,6 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { ROUTES } from '@/i18n/i18n'
@@ -414,6 +415,11 @@ export default function AuthForm() {
       case 'email-verification':
         handleEmailVerification(data as EmailVerificationFormData)
         break
+      // The hub is the landing screen, with no form to submit
+      case 'hub':
+        break
+      default:
+        assertNever(screen)
     }
   }
 

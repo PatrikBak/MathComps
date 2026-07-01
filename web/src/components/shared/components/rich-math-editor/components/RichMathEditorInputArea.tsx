@@ -3,6 +3,7 @@ import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isAllowedMimeType } from '@/lib/file-upload-utils'
 
@@ -388,9 +389,17 @@ export const RichMathEditorInputArea = forwardRef<
             applyTransform(() => pasteAction.result)
             break
 
+          // Upload + placeholder insertion already ran in processPaste; just
+          // proceed to the caret handling below
+          case 'image':
+            break
+
           case 'default':
             // Let the browser handle the paste normally
             return
+
+          default:
+            assertNever(pasteAction)
         }
 
         // Ensure visible caret after paste

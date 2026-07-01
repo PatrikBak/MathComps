@@ -2,6 +2,7 @@ import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown } from
 import { useLocale, useTranslations } from 'next-intl'
 import * as React from 'react'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
@@ -292,7 +293,7 @@ export default function MultiSelectFacet({
             }
 
             default:
-              throw new Error(`Unknown sort mode: ${sortMode}`)
+              return assertNever(sortMode)
           }
         })
       })
@@ -328,7 +329,7 @@ export default function MultiSelectFacet({
           }
 
           default:
-            throw new Error(`Unknown sort mode: ${sortMode}`)
+            return assertNever(sortMode)
         }
       })
     },
