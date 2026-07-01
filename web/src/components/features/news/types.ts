@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import type { LocalizedString } from '@/i18n/i18n'
 
 import type { NewsIconName } from './news-icons'
@@ -74,4 +76,14 @@ export type NewsArticle = Omit<NewsIndexEntry, 'slug' | 'title'> & {
   title: string
   /** MDX content body (rendered in cards). */
   content: string
+}
+
+/**
+ * A single entry in the news timeline: an article paired with its pre-rendered card.
+ */
+export type NewsTimelineItem = {
+  /** The entry's article. */
+  article: NewsArticle
+  /** The article's pre-rendered card. */
+  card: ReactNode
 }

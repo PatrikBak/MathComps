@@ -3,7 +3,7 @@
 import { MessageSquare, MessageSquarePlus, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useFormatter, useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   CommentCountProvider,
@@ -14,40 +14,18 @@ import { usePendingCommentTarget } from '@/components/features/comments/hooks/us
 import { Button } from '@/components/shared/components/Button'
 import { CountBadge } from '@/components/shared/components/CountBadge'
 import { FilterEmptyState } from '@/components/shared/components/FilterEmptyState'
+import { parseMember } from '@/components/shared/utils/collection-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
 import { CATEGORY_COLORS } from './news-colors'
-import { type NewsArticle, type NewsCategory } from './types'
+import { NEWS_CATEGORIES, type NewsArticle, type NewsTimelineItem } from './types'
 
 /**
  * How many entries to show before the "older news" reveal.
  */
 const INITIAL_VISIBLE = 8
-
-/**
- * A timeline date split into its day/month and year parts.
- */
-type TimelineDate = { dayMonth: string; year: string }
-
-/**
- * Validates and parses the category URL parameter.
- *
- * @param value The category value to validate.
- *
- * @returns The category if valid, otherwise null.
- */
-function parseCategory(value: string | null): NewsCategory | null {
-  // Guard against null
-  if (value === null) return null
-
-  // Guard against invalid categories
-  if (!Object.keys(CATEGORY_COLORS).includes(value)) return null
-
-  // Return the category
-  return value as NewsCategory
-}
 
 /**
  * Props for the {@link NewsCommentButton} component.
@@ -91,20 +69,10 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
 }
 
 /**
- * A single item in the news timeline, pairing article data with its rendered card.
- */
-type NewsTimelineItem = {
-  /** The article data for filtering and timeline display */
-  article: NewsArticle
-  /** The pre-rendered card component */
-  card: React.ReactNode
-}
-
-/**
  * Props for the {@link NewsTimeline} component.
  */
 type NewsTimelineProps = {
-  /** Array of timeline items containing article data and pre-rendered cards */
+  /** Every timeline entry — the full, unfiltered set. */
   items: NewsTimelineItem[]
 }
 
@@ -125,8 +93,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   // The navigation used to clear the category filter
   const router = useRouter()
 
-  // Parse and validate the category filter from the URL
-  const categoryFilter = parseCategory(useSearchParams().get('category'))
+  // The active category from the URL (null when absent or unrecognized = show everything)
+  const activeCategory = parseMember(useSearchParams().get('category'), NEWS_CATEGORIES)
 
   // Whether the older entries past the initial window are revealed
   const [showAll, setShowAll] = useState(false)
@@ -140,25 +108,19 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   // Extract article IDs for batch fetching comment counts
   const articleIds = items.map((item) => item.article.id)
 
-  // Ensure invalid categories are stripped out of the url
-  useEffect(() => {
-    if (categoryFilter === null) router.replace(ROUTES.NEWS)
-  }, [categoryFilter, router])
+  // The entries matching the active category (every article when there's no filter)
+  const filteredItems = activeCategory
+    ? items.filter((item) => item.article.category === activeCategory)
+    : items
 
-  // Filter items by category
-  const filteredItems = useMemo(() => {
-    // No filtering if no category is selected
-    if (!categoryFilter) return items
+  // How many entries show at rest, before the reader asks for older news
+  const restingCount = Math.min(INITIAL_VISIBLE, filteredItems.length)
 
-    // Otherwise filter by category
-    return items.filter((item) => item.article.category === categoryFilter)
-  }, [items, categoryFilter])
+  // The count on screen right now: all of them once the older entries are revealed
+  const visibleCount = showAll ? filteredItems.length : restingCount
 
-  // The slice currently shown — capped until the reader asks for older news
-  const visibleItems = showAll ? filteredItems : filteredItems.slice(0, INITIAL_VISIBLE)
-
-  // How many entries are still hidden behind the reveal
-  const hiddenCount = filteredItems.length - visibleItems.length
+  // How many entries are still tucked behind the reveal
+  const hiddenCount = filteredItems.length - visibleCount
 
   /**
    * Function to open the comments modal for an article
@@ -193,20 +155,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
 
   /** Function to clear the category filter */
   const clearFilter = () => {
-    // URL change will trigger a re-render cause we're parsing the category from the URL
+    // Drop the filter from the URL; the re-read then shows everything
     router.push(ROUTES.NEWS)
-  }
-
-  /** Function to format a date into its day/month and year parts */
-  const formatTimelineDate = (dateString: string): TimelineDate => {
-    // Parse the date string into a Date object
-    const date = new Date(dateString)
-
-    // Format day + month with locale-aware ordering; it's a calendar date, so read it in UTC
-    // to avoid rolling back a day in western timezones
-    const dayMonth = format.dateTime(date, { day: 'numeric', month: 'numeric', timeZone: 'UTC' })
-
-    return { dayMonth, year: date.getUTCFullYear().toString() }
   }
 
   return (
@@ -216,19 +166,19 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
       <h1 className="sr-only">{t('title')}</h1>
 
       {/* Filter indicator - appears when a category filter is active */}
-      {categoryFilter && (
+      {activeCategory && (
         <div className="flex items-center gap-2 mb-8">
           <span className="text-sm text-muted-foreground">{t('filtering')}</span>
           <button
             onClick={clearFilter}
             className={cn(
               'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md',
-              CATEGORY_COLORS[categoryFilter].bg,
-              CATEGORY_COLORS[categoryFilter].text,
+              CATEGORY_COLORS[activeCategory].bg,
+              CATEGORY_COLORS[activeCategory].text,
               'hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
             )}
           >
-            {tCategories(categoryFilter)}
+            {tCategories(activeCategory)}
             <X size={14} />
           </button>
         </div>
@@ -238,15 +188,28 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
       {filteredItems.length > 0 ? (
         <CommentCountProvider targetType="News" targetIds={articleIds}>
           <div className="flex flex-col">
-            {visibleItems.map((item, index) => {
-              // Day/month + year for the left rail (desktop)
-              const dateInfo = formatTimelineDate(item.article.date)
+            {filteredItems.map((item, index) => {
+              // Parse the entry's calendar date for the left rail (desktop)
+              const date = new Date(item.article.date)
+
+              // Day + month in locale order; read in UTC so western timezones don't roll back a day
+              const dayMonth = format.dateTime(date, {
+                day: 'numeric',
+                month: 'numeric',
+                timeZone: 'UTC',
+              })
+
+              // Four-digit year shown beneath it
+              const year = date.getUTCFullYear().toString()
 
               // Newest entry gets a lit dot; older ones a quiet hollow one
               const isNewest = index === 0
 
               // Last visible entry: the rail stops here so it doesn't dangle below the final dot
-              const isLast = index === visibleItems.length - 1
+              const isLast = index === visibleCount - 1
+
+              // Older entries stay in the DOM (crawlable) but hide via CSS until the reader reveals them
+              const isHidden = !showAll && index >= INITIAL_VISIBLE
 
               // Entries past the initial window fade in when "older news" is revealed
               const isRevealed = showAll && index >= INITIAL_VISIBLE
@@ -256,6 +219,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                   key={item.article.id}
                   className={cn(
                     'flex gap-0 md:gap-5',
+                    isHidden && 'hidden',
                     isRevealed &&
                       'animate-in fade-in slide-in-from-top-1 duration-300 motion-reduce:animate-none'
                   )}
@@ -265,9 +229,9 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                     {/* Date */}
                     <div className="w-14 pt-0.5 text-right">
                       <div className="text-sm font-semibold text-foreground tabular-nums">
-                        {dateInfo.dayMonth}
+                        {dayMonth}
                       </div>
-                      <div className="text-xs text-muted mt-0.5">{dateInfo.year}</div>
+                      <div className="text-xs text-muted mt-0.5">{year}</div>
                     </div>
 
                     {/* Rail line + dot */}
