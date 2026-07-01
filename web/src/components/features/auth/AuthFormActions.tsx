@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl'
 
-import AuthButton from './AuthButton'
+import { Button } from '@/components/shared/components/Button'
+
 import type { AuthScreen } from './AuthForm'
 
 /**
@@ -50,7 +51,7 @@ export default function AuthFormActions({
       )}
 
       {/* Submit Button */}
-      <AuthButton type="submit" disabled={loading} variant="primary" className="mt-8">
+      <Button variant="primary" fullWidth type="submit" disabled={loading} className="mt-8">
         {(() => {
           switch (screen) {
             case 'login-with-email':
@@ -69,10 +70,12 @@ export default function AuthFormActions({
               return t('continue')
           }
         })()}
-      </AuthButton>
+      </Button>
 
       {/* Back Button */}
-      <AuthButton
+      <Button
+        variant="secondary"
+        fullWidth
         type="button"
         onClick={(event) => {
           event.preventDefault()
@@ -80,11 +83,10 @@ export default function AuthFormActions({
           onBack()
         }}
         disabled={loading}
-        variant="secondary"
         className="mt-3"
       >
         {t('back')}
-      </AuthButton>
+      </Button>
     </>
   )
 }
