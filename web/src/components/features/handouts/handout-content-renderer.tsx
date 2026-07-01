@@ -15,6 +15,7 @@ import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { HIGHLIGHTED_PARAGRAPH_CLASSES } from './handout-colors'
@@ -40,9 +41,13 @@ function getListStyleClass(style: ListStyleType | null | undefined): string {
       return 'list-style-lower-alpha-parens'
     case 'UpperAlphaParens':
       return 'list-[upper-alpha]'
+    // A bullet list, and the fallback when no explicit style is set
     case 'Bullet':
-    default:
+    case null:
+    case undefined:
       return 'list-disc'
+    default:
+      return assertNever(style)
   }
 }
 
@@ -55,7 +60,7 @@ function getListStyleClass(style: ListStyleType | null | undefined): string {
  * @param block The content block to render.
  * @param imagesById Lookup of image metadata keyed by content ID, used to resolve dimensions.
  * @param imageMissingText Fallback text shown when an image block references a missing asset.
- * @returns The rendered React node for the block, or null for unknown block types.
+ * @returns The rendered React node for the block.
  */
 export function renderRawContentBlock(
   block: RawContentBlock,
@@ -281,7 +286,7 @@ export function renderRawContentBlock(
       return block.isInline ? image : <div className="my-4 flex justify-center">{image}</div>
     }
     default:
-      return null
+      return assertNever(block)
   }
 }
 

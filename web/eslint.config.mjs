@@ -64,6 +64,9 @@ const config = [
       sourceType: 'module',
       globals: { ...globals.browser, ...globals.node },
       parserOptions: {
+        // Type-aware linting: pull type info from the nearest tsconfig per file
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
         ecmaFeatures: {
           jsx: true,
         },
@@ -88,6 +91,14 @@ const config = [
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
+
+      // Fail the build when a switch over a union/enum misses a member. A bare
+      // default doesn't count as coverage, so every member needs its own case;
+      // a `default: assertNever(x)` guard stays legal on an already-exhaustive switch.
+      '@typescript-eslint/switch-exhaustiveness-check': [
+        'error',
+        { considerDefaultExhaustiveForUnions: false },
+      ],
     },
   },
   // App dir tweak - prefer default exports (except API routes)

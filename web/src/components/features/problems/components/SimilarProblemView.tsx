@@ -4,6 +4,7 @@ import { Link } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { useProblemPermalink } from '../hooks/use-problem-permalink'
@@ -118,7 +119,7 @@ export const SimilarProblemView = ({ view, problem }: SimilarProblemViewProps) =
         )
 
       default:
-        return null
+        return assertNever(view)
     }
   }
 

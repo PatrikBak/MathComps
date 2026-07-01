@@ -1,6 +1,7 @@
 import katex from 'katex'
 
 import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { MATH_NOWRAP_CLASS, takeLeadingGlue, takeTrailingGlue } from './math-nowrap'
 
@@ -58,9 +59,15 @@ export function inlineBlockToMathSource(block: RawContentBlock | null | undefine
     case 'bold':
     case 'italic':
       return block.content.map(inlineBlockToMathSource).join('')
-    // Other block types (links, lists, images, ...) are not expected in inline titles
-    default:
+    // Block-level and non-inline types don't appear in inline titles
+    case 'link':
+    case 'list':
+    case 'image':
+    case 'quote':
+    case 'footnote':
       return ''
+    default:
+      return assertNever(block)
   }
 }
 
