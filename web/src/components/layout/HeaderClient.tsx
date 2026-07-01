@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
 import UserMenu from '@/components/layout/UserMenu'
+import { Button } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/i18n/i18n'
 
@@ -61,14 +62,16 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
             </div>
 
             {/* Mobile Navigation Button */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => toggleMobileNavigationOpen()}
-              className="lg:hidden text-foreground p-2 rounded-lg hover:bg-foreground/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="lg:hidden text-foreground"
               aria-label={tNav('menuOpen')}
               aria-expanded={isMobileNavigationOpen}
             >
               <Menu width={24} height={24} />
-            </button>
+            </Button>
           </div>
         </nav>
       </header>

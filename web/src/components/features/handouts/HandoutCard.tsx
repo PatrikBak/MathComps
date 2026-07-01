@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl'
 
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { AppLink } from '@/components/shared/components/AppLink'
+import { Eyebrow } from '@/components/shared/components/Eyebrow'
 import { cn } from '@/components/shared/utils/css-utils'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 
@@ -23,16 +24,16 @@ type CategoryTabProps = {
  */
 function CategoryTab({ category }: CategoryTabProps) {
   return (
-    <span
+    <Eyebrow
+      size="sm"
       className={cn(
         'absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10',
         'px-2 sm:px-2.5 py-px rounded-md bg-background',
-        'text-[10px] sm:text-[11px] uppercase tracking-[0.15em] font-medium text-foreground/55',
-        'whitespace-nowrap'
+        'text-foreground/55 whitespace-nowrap'
       )}
     >
       {category}
-    </span>
+    </Eyebrow>
   )
 }
 

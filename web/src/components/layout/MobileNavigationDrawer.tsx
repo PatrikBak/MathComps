@@ -11,6 +11,7 @@ import { MobileLanguageSwitcher } from '@/components/layout/MobileLanguageSwitch
 import { UserInfoHeader } from '@/components/layout/UserInfoHeader'
 import { UserMenuItem } from '@/components/layout/UserMenuItem'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
+import { buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
@@ -132,7 +133,14 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
                     ) : (
                       <div className="pb-4 flex justify-center">
                         <LoginNavItem
-                          className="flex items-center justify-center w-full max-w-xs py-3 px-6 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:from-indigo-700 active:to-violet-700 transition-all shadow-lg shadow-violet-500/30"
+                          className={cn(
+                            buttonVariants({
+                              variant: 'primary',
+                              shape: 'pill',
+                              fullWidth: true,
+                            }),
+                            'max-w-xs'
+                          )}
                           onClick={onClose}
                         />
                       </div>
