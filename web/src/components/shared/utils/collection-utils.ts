@@ -27,3 +27,23 @@ export function invert<TKey extends string>(record: Record<TKey, string>): Map<s
   // Walk each key/value pair into the reverse map
   return new Map((Object.entries(record) as [TKey, string][]).map(([key, value]) => [value, key]))
 }
+
+/**
+ * Narrows a raw value to a member of an allowed set, or null when it matches none. Handy for trusting
+ * an external string (a URL query, a stored value) as a literal-union member before using it.
+ *
+ * @param value - The raw value to check; a missing value never matches.
+ * @param allowed - The permitted members.
+ *
+ * @returns The value typed as a member when it's in the set, otherwise null.
+ */
+export function parseMember<T extends string>(
+  value: string | null | undefined,
+  allowed: readonly T[]
+): T | null {
+  // A missing value matches nothing
+  if (value === null || value === undefined) return null
+
+  // Keep it only when it's an exact member of the set
+  return allowed.includes(value as T) ? (value as T) : null
+}

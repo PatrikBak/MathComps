@@ -1,10 +1,16 @@
 import fs from 'fs'
 import type { Metadata } from 'next'
+import { cacheLife } from 'next/cache'
 import path from 'path'
 import { Suspense } from 'react'
 
-import { NewsList } from '@/components/features/news/NewsList'
-import type { NewsArticle, NewsIndexEntry } from '@/components/features/news/types'
+import { NewsCard } from '@/components/features/news/NewsCard'
+import { NewsTimeline } from '@/components/features/news/NewsTimeline'
+import {
+  type NewsArticle,
+  type NewsIndexEntry,
+  type NewsTimelineItem,
+} from '@/components/features/news/types'
 import Layout from '@/components/layout/Layout'
 import newsIndex from '@/content/news.json'
 import type { Locale } from '@/i18n/i18n'
@@ -42,11 +48,17 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/news')
  * Get all news articles for a specific locale.
  * Reads metadata from news.json index and content from .{locale}.mdx files.
  *
+ * Cached: committed content only turns over on deploy, so the parsed articles are held for the longest
+ * profile and re-read once per locale rather than on every request.
+ *
  * @param locale - The locale to get articles for.
  *
  * @returns Array of {@link NewsArticle} objects sorted by date (newest first).
  */
-function getAllNewsArticles(locale: Locale): NewsArticle[] {
+async function getAllNewsArticles(locale: Locale): Promise<NewsArticle[]> {
+  'use cache'
+  cacheLife('max')
+
   // Check if directory exists
   if (!fs.existsSync(CONTENT_DIR)) throw new Error(`Directory ${CONTENT_DIR} does not exist`)
 
@@ -98,13 +110,25 @@ function getAllNewsArticles(locale: Locale): NewsArticle[] {
 }
 
 /**
- * The news list page.
+ * The news list page. The cached articles compile into the initial HTML so every post is crawlable;
+ * the category filter reads the URL and hydrates on top.
  */
-export default withLocale(async function NovinkyPage({ locale }) {
+export default withLocale(async function NovinkyPage({ locale }: { locale: Locale }) {
+  // Load the cached articles for this locale
+  const articles = await getAllNewsArticles(locale)
+
+  // Pair each article with its pre-rendered card
+  const items: NewsTimelineItem[] = articles.map((article) => ({
+    article,
+    card: <NewsCard key={article.id} article={article} />,
+  }))
+
+  // Render the timeline over every article; the category filter reads the URL, so it sits behind a
+  // Suspense boundary
   return (
     <Layout wider>
-      <Suspense>
-        <NewsList articles={getAllNewsArticles(locale)} />
+      <Suspense fallback={null}>
+        <NewsTimeline items={items} />
       </Suspense>
     </Layout>
   )
