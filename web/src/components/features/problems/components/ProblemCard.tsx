@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
 import { AppLink } from '@/components/shared/components/AppLink'
+import { Button } from '@/components/shared/components/Button'
 import { CountBadge } from '@/components/shared/components/CountBadge'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -247,9 +248,10 @@ export function ProblemCard({
         {/* Action icons */}
         <div className="flex items-center gap-1 sm:gap-2">
           {/* Mark toggle button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => toggleMark(problem.slug)}
-            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5"
             title={problem.marked ? tProblems('marks.unmark') : tProblems('marks.mark')}
           >
             <Check
@@ -260,12 +262,14 @@ export function ProblemCard({
               )}
               strokeWidth={problem.marked ? 3 : 2}
             />
-          </button>
+          </Button>
 
           {/* Like button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            className="pr-1 sm:pr-1.5"
             onClick={() => toggleLike(problem.slug)}
-            className="w-8 h-8 sm:w-9 sm:h-9 pr-1 sm:pr-1.5 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5"
             title={problem.liked ? tProblems('unlike') : tProblems('like')}
           >
             <CountBadge count={problem.likeCount} color="red" isHighlighted={problem.liked}>
@@ -277,12 +281,14 @@ export function ProblemCard({
                 )}
               />
             </CountBadge>
-          </button>
+          </Button>
 
           {/* Comments button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            className="pr-1 sm:pr-1.5"
             onClick={() => setIsCommentsOpen(true)}
-            className="w-8 h-8 sm:w-9 sm:h-9 pr-1 sm:pr-1.5 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5"
             title={tProblems('commentsButton')}
           >
             <CountBadge
@@ -292,19 +298,20 @@ export function ProblemCard({
             >
               <MessageSquare size={14} className="sm:!w-[18px] sm:!h-[18px]" />
             </CountBadge>
-          </button>
+          </Button>
 
           {/* Add to list */}
           <AddToListMenu problemSlug={problem.slug} onSelectList={onSelectList} />
 
           {/* Permalink sharing button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handlePermalinkCopy}
-            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5 text-muted hover:text-foreground"
             title={tProblems('share')}
           >
             <Link size={14} className="sm:!w-[18px] sm:!h-[18px]" />
-          </button>
+          </Button>
         </div>
       </div>
 

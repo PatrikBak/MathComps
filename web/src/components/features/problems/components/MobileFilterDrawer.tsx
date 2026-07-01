@@ -6,6 +6,8 @@ import { Filter, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
 
+import { Button } from '@/components/shared/components/Button'
+
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { SearchFilters } from './SearchFilters'
 
@@ -134,12 +136,9 @@ export const MobileFilterDrawer = ({
 
             {/* Apply Filters Footer */}
             <div className="flex-shrink-0 border-t border-foreground/10 p-3 sm:p-4 bg-surface">
-              <button
-                onClick={onClose}
-                className="w-full rounded-lg bg-brand/80 px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.98] transition-all"
-              >
+              <Button variant="primary" fullWidth onClick={onClose}>
                 {tFilters('apply')}
-              </button>
+              </Button>
             </div>
           </div>
         </Transition.Child>
@@ -163,22 +162,27 @@ export const MobileFilterButton = ({ onClick, activeFilterCount }: MobileFilterB
 
   // Render the button
   return (
-    <button
+    <Button
+      variant="secondary"
+      size="sm"
+      className="rounded-md px-2 min-[400px]:px-2.5"
       onClick={onClick}
-      className="inline-flex h-9 items-center gap-1.5 rounded-md border border-foreground/10 bg-surface px-2 min-[400px]:px-2.5 py-2 text-sm font-medium text-muted-foreground shadow-sm hover:bg-surface-hover hover:text-foreground focus:outline-none active:scale-[0.98] transition-transform"
       aria-label={
         activeFilterCount > 0
           ? tFilters('openWithCount', { count: activeFilterCount })
           : tFilters('open')
       }
     >
+      {/* Funnel icon */}
       <Filter className="h-4 w-4 flex-shrink-0" />
+      {/* Label appears once there's room */}
       <span className="hidden min-[500px]:inline">{tFilters('title')}</span>
+      {/* Active-filter count pill */}
       {activeFilterCount > 0 && (
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-focus text-xs font-medium text-focus-foreground flex-shrink-0">
           {activeFilterCount}
         </span>
       )}
-    </button>
+    </Button>
   )
 }
