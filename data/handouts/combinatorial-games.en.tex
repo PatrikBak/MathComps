@@ -1,0 +1,208 @@
+\input _template
+
+\setlanguage{EN}
+
+\Title{Combinatorial Games}
+
+\MathcompsLink{combinatorial-games}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+In~combinatorial games we usually decide which of~the two players has a winning strategy. We will show a few recurring ideas for this.
+
+\sec Techniques
+
+\begitems \style i
+\i We analyze the game from~the end: we sort positions into \textit{losing} (whoever is to move loses) and~\textit{winning}.
+\i We pair up cells or moves in advance, and~to each opponent's move we always reply with a move into the same pair.
+\i We look for a symmetry of~the board and~simply mirror the opponent's moves.
+\i We also \textit{steal a strategy} -- we assume the opponent has a winning strategy and~derive a contradiction -- we show that we could appropriate it for ourselves.
+\enditems
+
+\sec Problems
+
+\Problem{0}{}{
+    There are 1000 matches on the table and~two players take turns. On each turn a player removes 1~or 2~matches. Whoever makes the last move wins. Who has a winning strategy?
+}{
+    1000 is far too many; try to solve it step by step for 1, 2, 3, 4 matches...
+}{
+    Notice that for 1, 2 the first player wins, but for 3 they do not -- there every move of the player leads to a winning position for the opponent. How is it for 4, 5?
+}{
+    For 4 and 5 the move of 1 or 2, respectively, puts the second player into a losing position -- so these positions are winning. In general -- if every move from~position~$n$ leads only to winning positions, then $n$ is losing, otherwise it is winning. With~this observation let us continue listing which positions are winning and~which losing; how is it for 6, 7, 8?
+}{
+    The trick is to prove that the losing positions are exactly those divisible by 3. We can do this formally by induction.
+}{
+    \Answer{The first player wins.}
+
+    From small cases we form a hypothesis: with 1 or 2 matches the first player wins, with 3 they do not (every move of theirs hands the win to the opponent), with 4 and~5 they win again. It looks like the losing positions are exactly those with a number of matches divisible by three -- and~we will now prove this by induction. Position 0 is losing, because the player to~move has nothing left to remove. On the other hand positions 1 and 2 are winning.
+
+    If the number is divisible by three, then after removing 1 or 2 the number is left not divisible by three, so the opponent gets a winning position -- our position is therefore losing. Conversely, from~a number not divisible by three we can, by removing 1 or 2, leave a multiple of three, thereby putting the opponent into a losing position.
+
+    Since $1000 = 3\cdot 333 + 1$ is not divisible by three, the first player wins. On the first move they remove one match and~leave 999, and~then to each removal of~$k$ matches by the opponent they reply by removing $3-k$. This always leaves the opponent a multiple of three, until finally~0.
+}
+
+\Problem{0}{}{
+    Two players alternately name dates within a single year, starting from January~1. On each turn a player increases either the month or the day, but not both at once (for example, from January~10 they may go to, say, March~10 or to January~15). Whoever says December~31 first wins. Which player has a winning strategy?
+}{
+    We work backwards -- any day in December is great, because from it we can win. Is there any such day in November?
+}{
+    The idea is to notice that November~30 is great, because from there the opponent can only go to December~30, where we win (November~31 does not exist). This will be our target day in November. And what about October?
+}{
+    In October the day of certain loss will be 29 and~all higher days will be days of victory -- justify this. The idea is to continue like this through further months until we find a pattern.
+}{
+    \Answer{The first player wins.}
+
+    We work backwards. We call the player to move losing if, with correct play by the opponent, they lose.
+
+    Every day in~December is winning -- it suffices to say December~31 straight away. The first losing date is November~30: the only move from~it leads to December~30 (we cannot increase the day, and~November~31 does not exist), from~where the opponent wins. Similarly, October~29, September~28, and~so on are losing -- the losing days decrease by~one as the month decreases. This suggests the claim: \textit{the losing dates are exactly those in~which the day and~the ordinal number of~the month differ by~19} -- that is November~30, October~29, September~28, \dots, in~the $m$-th month the day $m+19$.
+
+    We verify the claim directly. From~a position with difference 19 every move spoils the property: increasing the day makes the difference grow above 19, increasing the month makes it drop below 19. Conversely, from~any other position we can set the difference to exactly 19 in a single move -- if it is smaller we increase the day, if it is larger we increase the month. Positions with difference 19 are therefore losing and~all others winning (even the target December~31 has difference 19 and~is the last one in the row).
+
+    The starting position January~1 has difference 0, so it is winning and~the first player wins. On the first move they go to January~20 (difference 19) and~then after each move of the opponent they return the difference to~19. The opponent thus never says December~31 first -- that is finally done by the first player.
+}
+
+\Problem{0}{}{
+    In~the top-left corner of an $8 \times 8$ chessboard stands a king. Two players take turns, and~on each turn a player moves the piece (by a legal chess move) to a square on which it has not yet stood. Whoever has nowhere to move loses. Which player has a winning strategy?
+}{
+    It would be ideal if for each square we knew exactly where we want to move -- then we would never run out of moves.
+}{
+    We pair up all the squares of the chessboard. It pays off to move according to these pairs.
+}{
+    \Answer{The first player wins.}
+
+    The first player wins. We would like to know in advance, for each square, where we will move from~it -- then we will never run out of moves. This leads us to the idea of pairing up the squares: we split the chessboard into 32 $1\times2$ dominoes (for example into all horizontal pairs). The first player first moves the king from~the corner square to its partner in~the same domino. Then to each move of the opponent they reply with a move to the other square of the domino the opponent has just entered.
+
+    Such a move is always possible: after each move of the first player the visited squares form complete dominoes, so when the opponent enters a new square, its partner in~the domino is still free and~adjacent to it (the king can move there). Sooner or later the opponent runs out of moves, and~thereby loses.
+}
+
+\Problem{0}{}{
+    Two players alternately place identical coins on a round table, where each must lie entirely on the table and~must not overlap any previously placed one (touching is allowed). Whoever has nowhere left to place another coin loses. Which of the players has a winning strategy?
+}{
+    Try to use the symmetry of the circle when looking for a suitable strategy that responds to the opponent's moves.
+}{
+    The trick is to first block the special position of the circle, namely the center. Can we now use the symmetry?
+}{
+    \Answer{The first player wins.}
+
+    The first player wins. They place the first coin exactly at the center of the table. Then to each coin of the opponent they reply with a coin placed centrally symmetric about the center of the table.
+
+    This symmetric position is always free and~lies entirely on the table: the table is centrally symmetric, so the image of the opponent's correctly placed coin is again a correct position. Moreover it cannot overlap the opponent's coin: its center is at least one coin diameter away from~the center of the table (otherwise it would overlap the central coin), so it is at least two diameters away from~its own image, which is exactly twice as far -- yet a gap smaller than one diameter would already suffice to overlap. After each move of the opponent the first player therefore has somewhere to move, and~so the opponent loses.
+}
+
+\Problem{0}{65-CSMO-C-II-4}{
+    Adam and~Barbora play with the fraction
+    $$
+    \frac{10a+b}{10c+d}
+    $$
+    the following four-move game: the players alternately replace any of the so-far undetermined letters $a, b, c, d$ with some digit from~1 to~9. Barbora wins if the resulting fraction equals either a whole number or a number with finitely many decimal places; otherwise Adam wins (for example when the fraction $\frac{11}{29}$ arises). If Adam starts, how should Barbora play to be guaranteed to win? If Barbora starts, can Adam be advised so that he always wins?
+}{
+    The second player has an advantage, because they can suitably react to the first player's moves. Try first to solve the case where they aim for the fraction to be a whole number.
+}{
+    The idea is that they make it equal to 1.
+}{
+    The harder part is when the second player aims for a repeating fraction. What typically spoils fractions and~makes them repeating?
+}{
+    The idea is that they make the denominator divisible by a suitable number, while ruling out that divisibility in the numerator.
+}{
+    \Answer{In~both cases the second player wins.}
+
+    \textit{If Adam starts.} Barbora can arrange for the resulting fraction to equal~1, which is a whole number, and~hence her win. It suffices for her to achieve $a=c$ and~$b=d$, since then $10a+b=10c+d$. She therefore plays \uv{symmetrically} about the fraction bar: when Adam fills in one of the letters $a,b$, she fills in the same digit into the partner $c,d$, and~vice versa. This guarantees $a=c$ and~$b=d$ after four moves.
+
+    \textit{If Barbora starts.} A fraction has a terminating expansion exactly when it can be reduced to a denominator composed only of twos and~fives. Adam spoils this if he gets another prime divisor into the denominator that cannot be cancelled -- most simply a three. So we advise him to arrange for the denominator $10c+d$ to be divisible by three, but the numerator $10a+b$ not; such a fraction then has an infinite repeating expansion and~Adam wins. Because $10a+b$ and~its digit sum $a+b$ give the same remainder upon division by three (and~similarly $10c+d$ and~$c+d$), it suffices for Adam to arrange for $c+d$ to be divisible by three and~$a+b$ not. He achieves this by suitably filling in the numerator or denominator after each of Barbora's two moves -- for example he arranges $a+b=10$ (not divisible by three) and~$c+d=9$ or~$12$ (divisible by three).
+}
+
+\Problem{0}{}{
+    Players $A$ and~$B$ alternately draw diagonals in a regular 2026-gon. A diagonal may be drawn only if it does not cross any of the previously drawn ones (a shared endpoint is not counted as a crossing). Whoever cannot move loses. Which of the players wins?
+}{
+    A regular n-gon is quite a symmetric thing; can we use this somehow? The trick is to make a good first move that helps us use this symmetry.
+}{
+    The trick is to draw a diagonal that splits it into symmetric parts. Suddenly we have completely symmetric halves.
+}{
+    \Answer{The first player~$A$ wins.}
+
+    The first player $A$ wins. First they draw the \uv{main} diagonal joining two opposite vertices (they exist, because 2026 is even); it splits the polygon into two congruent halves, symmetric about the line of this diagonal. Then $A$ replies to each diagonal of the opponent with its mirror image about this axis.
+
+    The strategy is correct: the opponent cannot draw a diagonal crossing the main one, because it is already drawn, so every diagonal of theirs lies entirely in one of the halves. In~particular none is symmetric with itself -- such a one would join a pair of mirror-conjugate vertices, would therefore lie in both halves and~cross the main diagonal. The mirror image of the opponent's diagonal therefore lies in the other half, is different from~it and~from~all previously drawn ones, and~crosses none of them (otherwise their images, that is the opponent's previous moves, would cross too). $A$ thus has a reply after each move of the opponent, and~so the opponent loses.
+}
+
+\Problem{1}{Chomp}{
+    Imagine a rectangular chocolate bar divided into at least two square pieces, with the top-left piece poisoned. Two players take turns. On each turn a player picks some piece and~eats it together with all pieces lying to the right and~below it -- that is, the whole rectangle whose top-left corner is the chosen piece. Whoever is forced to eat the poisoned top-left piece loses. Which player has a winning strategy?
+}{
+    The problem is fascinating in that we can prove one of the players has a winning strategy, but we do not know which -- specifically the first player. Try to think: what if the second player had such a strategy; could the first player exploit it?
+}{
+    We will show that the first player has a winning strategy -- if the second player had it, the first player can make a very simple move that practically does not change the game at all -- then he observes the second player's strategy. But since it did not change the game, why could he not use it himself?
+}{
+    The magic move is to break off a 1x1 piece at the bottom right. Convince yourself that this is entirely enough.
+}{
+    \Answer{The first player wins.}
+
+    The first player wins. We show this without being able to describe his strategy. Suppose, on the contrary, that the second player has a winning strategy. The first player then plays the \uv{magic} move -- he bites off only the bottom-right $1\times1$ piece. This produces some position to which the second player has (by assumption) a winning reply.
+
+    But the very same resulting position can also be reached by the first player right on his first move -- after all, every bite includes the bottom-right corner too, so any reply of the second player is at the same time a legal first move. The first player could therefore have appropriated it and~won himself, which is a contradiction. The winning strategy is therefore the first player's.
+}
+
+\Problem{1}{}{
+    Two players play a game by the rules of classical chess, with a single difference: the player to move always makes two moves in a row. Prove that the first player has a non-losing strategy, that is, they can guarantee themselves at least a draw.
+}{
+    We steal a strategy similarly to the Chomp problem. Chess, however, allows a draw, so in this way we guarantee the first player at least a non-loss, even though we do not know the concrete strategy.
+}{
+    Again we look for some neutral move that the first player can make at the start. For this we need to use that they may make two moves.
+}{
+    Suppose the opposite -- that the opponent $B$ of the first player $A$ has a winning strategy $S$. Player $A$ then plays a neutral double-move at the start: he moves a knight out and~immediately returns it. The board is again in the starting position, except that now $B$ is to move, as if they were starting the game.
+
+    Player $A$ now steps into the role of the second player and~from this moment plays according to strategy $S$. But with it he would win himself, which contradicts the fact that $B$ was supposed to have the winning strategy. So the opponent does not have a winning strategy; and~since chess is a finite game without chance, $A$ can guarantee himself at least a draw.
+}
+
+\Problem{1}{}{
+    Two players play a game in which they take turns. At the start we have the number 2. In~each step we add to it some proper divisor of it (a divisor smaller than itself). The goal is to obtain a number $\ge 2026$. Who has a winning strategy?
+}{
+    Think from the end: for which numbers would we surely win on the next move?
+}{
+    The key is to think about even numbers, since we can increase them by this procedure by a factor of one and~a half, which is quite a lot. The player who can secure them has an advantage.
+}{
+    The last realization is that the first player can secure even numbers. Work out how, and~also prove that this is enough for them.
+}{
+    \Answer{The first player~$A$ wins.}
+
+    The first player $A$ wins, and~the key is that he can arrange to always move from~an even number. To an even $m$ he can add its half and~thereby increase it by a factor of one and~a half; once he gets to move on an even $m\ge1352$, in a single move he jumps to $m+\frac m2 \ge \frac32\cdot1352 = 2028 \ge 2026$ and~wins. The numbers from~1352 on are exactly those from~which he can win in one move.
+
+    How does he secure even numbers? His first move is forced, $2\to3$ (the only proper divisor of two is~1). From then on he follows the rule of always leaving the opponent an odd number -- when he is to move on an even $m<1352$, he adds~1. The opponent $B$ then always adds a proper divisor of an odd number, which is odd, and~so after his move an even number arises again, which falls to $A$. The numbers keep growing all the while, so $A$ will eventually get to an even $m\ge1352$.
+
+    It remains to verify that $B$ does not win in the meantime. $A$ leaves the opponent only odd numbers smaller than 1352, that is at most 1351. To an odd $y$, $B$ can add at most its third (a proper divisor of an odd number is $\le y/3$), so he reaches at most $\frac43\cdot1351 = 1801 < 2026$. He therefore never reaches the goal.
+}
+
+\Problem{1}{70-CSMO-A-III-1}{
+    A fraction with 1010 cells in the numerator and~1011 cells in the denominator serves as the board for a two-player game.
+    $$
+    \frac{\square+\square+\cdots+\square}{\square+\square+\cdots+\square+\square}
+    $$
+    The players take turns. On each turn a player picks one of the numbers $1$, $2$, $\dots$, $2021$ and~inserts it into any empty cell. Each number may be used only once. The first player wins if, after all cells are filled, the value of the fraction differs from~the number 1 by less than $10^{-6}$. Otherwise the second player wins. Decide which of the players has a winning strategy.
+}{
+    It seems the fraction can take on terribly many values. But the idea of the game is to devise a way for one of the players to control this value well.
+}{
+    A simple way to control the value is to react suitably to the opponent's moves.
+}{
+    Show that the winning strategy belongs precisely to the first player. If we devise a good first move for him, he can carry out a suitable pairing of moves. The last thing left to work out is what that pairing looks like, so that he can control the value of the fraction well and~ideally make it small enough.
+}{
+    The first player starts with a one in the denominator -- this leaves an even count everywhere. All that remains is to find a pairing of the rest.
+}{
+    \Answer{The first player~$A$ wins.}
+
+    The first player $A$ wins. We will show that he can arrange for the denominator to be exactly 1 greater than the numerator.
+
+    First he inserts the number 1 into the denominator. Then whenever the opponent $B$ inserts a number $x$ into the fraction, player $A$ replies by inserting the number $2023-x$ into the same part of the fraction (numerator, respectively denominator) into which $B$ played. Why does this always work? After inserting the one into the denominator, both the numerator and~the denominator have an even number of free cells (1010 each), and~this property is preserved after each move of player $A$. So the opponent never fills the last free position of some part, and~thus $A$ always has somewhere to reply. And~the number $2023-x$ is available, because the numbers $2,3,\dots,2021$ split into pairs with the same sum 2023:
+    $$
+    \{2,2021\},\ \{3,2020\},\ \{4,2019\},\ \dots,\ \{1011,1012\}.
+    $$
+    On each of his moves $B$ thus \uv{starts} some pair and~$A$ immediately \uv{finishes} it.
+
+    After filling, the numerator has 1010 cells, that is 505 such pairs, and~its value is therefore $505\cdot2023$. The denominator, besides the one, also has 505 pairs, so its value is $505\cdot2023+1$. Since
+    $$
+    0 < 1 - \frac{505\cdot2023}{505\cdot2023+1} = \frac1{505\cdot2023+1} < \frac1{500\cdot2000} = 10^{-6},
+    $$
+    the value of the fraction differs from~1 by less than $10^{-6}$ and~the first player really does win.
+}
+
+\bye

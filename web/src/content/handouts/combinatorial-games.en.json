@@ -1,0 +1,1983 @@
+{
+  "document": {
+    "title": "Combinatorial Games",
+    "sections": [
+      {
+        "title": "Introduction",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "In\u00A0combinatorial games we usually decide which of\u00A0the two players has a winning strategy. We will show a few recurring ideas for this."
+                }
+              ],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Techniques",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We analyze the game from\u00A0the end: we sort positions into "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "losing"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " (whoever is to move loses) and\u00A0"
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "winning"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We pair up cells or moves in advance, and\u00A0to each opponent's move we always reply with a move into the same pair."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We look for a symmetry of\u00A0the board and\u00A0simply mirror the opponent's moves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We also "
+                      },
+                      {
+                        "type": "italic",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "steal a strategy"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " – we assume the opponent has a winning strategy and\u00A0derive a contradiction – we show that we could appropriate it for ourselves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "styleType": "LowerRomanParens"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Problems",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "There are 1000 matches on the table and\u00A0two players take turns. On each turn a player removes 1\u00A0or 2\u00A0matches. Whoever makes the last move wins. Who has a winning strategy?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "1000 is far too many; try to solve it step by step for 1, 2, 3, 4 matches..."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Notice that for 1, 2 the first player wins, but for 3 they do not – there every move of the player leads to a winning position for the opponent. How is it for 4, 5?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "For 4 and 5 the move of 1 or 2, respectively, puts the second player into a losing position – so these positions are winning. In general – if every move from\u00A0position\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " leads only to winning positions, then "
+                      },
+                      {
+                        "type": "math",
+                        "text": "n",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " is losing, otherwise it is winning. With\u00A0this observation let us continue listing which positions are winning and\u00A0which losing; how is it for 6, 7, 8?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The trick is to prove that the losing positions are exactly those divisible by 3. We can do this formally by induction."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "From small cases we form a hypothesis: with 1 or 2 matches the first player wins, with 3 they do not (every move of theirs hands the win to the opponent), with 4 and\u00A05 they win again. It looks like the losing positions are exactly those with a number of matches divisible by three – and\u00A0we will now prove this by induction. Position 0 is losing, because the player to\u00A0move has nothing left to remove. On the other hand positions 1 and 2 are winning."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If the number is divisible by three, then after removing 1 or 2 the number is left not divisible by three, so the opponent gets a winning position – our position is therefore losing. Conversely, from\u00A0a number not divisible by three we can, by removing 1 or 2, leave a multiple of three, thereby putting the opponent into a losing position."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1000 = 3\\cdot 333 + 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is not divisible by three, the first player wins. On the first move they remove one match and\u00A0leave 999, and\u00A0then to each removal of\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " matches by the opponent they reply by removing "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3-k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This always leaves the opponent a multiple of three, until finally\u00A00."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two players alternately name dates within a single year, starting from January\u00A01. On each turn a player increases either the month or the day, but not both at once (for example, from January\u00A010 they may go to, say, March\u00A010 or to January\u00A015). Whoever says December\u00A031 first wins. Which player has a winning strategy?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We work backwards – any day in December is great, because from it we can win. Is there any such day in November?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The idea is to notice that November\u00A030 is great, because from there the opponent can only go to December\u00A030, where we win (November\u00A031 does not exist). This will be our target day in November. And what about October?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "In October the day of certain loss will be 29 and\u00A0all higher days will be days of victory – justify this. The idea is to continue like this through further months until we find a pattern."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We work backwards. We call the player to move losing if, with correct play by the opponent, they lose."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Every day in\u00A0December is winning – it suffices to say December\u00A031 straight away. The first losing date is November\u00A030: the only move from\u00A0it leads to December\u00A030 (we cannot increase the day, and\u00A0November\u00A031 does not exist), from\u00A0where the opponent wins. Similarly, October\u00A029, September\u00A028, and\u00A0so on are losing – the losing days decrease by\u00A0one as the month decreases. This suggests the claim: "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "the losing dates are exactly those in\u00A0which the day and\u00A0the ordinal number of\u00A0the month differ by\u00A019"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " – that is November\u00A030, October\u00A029, September\u00A028, \\dots, in\u00A0the "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-th month the day "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+19",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We verify the claim directly. From\u00A0a position with difference 19 every move spoils the property: increasing the day makes the difference grow above 19, increasing the month makes it drop below 19. Conversely, from\u00A0any other position we can set the difference to exactly 19 in a single move – if it is smaller we increase the day, if it is larger we increase the month. Positions with difference 19 are therefore losing and\u00A0all others winning (even the target December\u00A031 has difference 19 and\u00A0is the last one in the row)."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The starting position January\u00A01 has difference 0, so it is winning and\u00A0the first player wins. On the first move they go to January\u00A020 (difference 19) and\u00A0then after each move of the opponent they return the difference to\u00A019. The opponent thus never says December\u00A031 first – that is finally done by the first player."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In\u00A0the top-left corner of an "
+                    },
+                    {
+                      "type": "math",
+                      "text": "8 \\times 8",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " chessboard stands a king. Two players take turns, and\u00A0on each turn a player moves the piece (by a legal chess move) to a square on which it has not yet stood. Whoever has nowhere to move loses. Which player has a winning strategy?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "It would be ideal if for each square we knew exactly where we want to move – then we would never run out of moves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We pair up all the squares of the chessboard. It pays off to move according to these pairs."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins. We would like to know in advance, for each square, where we will move from\u00A0it – then we will never run out of moves. This leads us to the idea of pairing up the squares: we split the chessboard into 32 "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\times2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dominoes (for example into all horizontal pairs). The first player first moves the king from\u00A0the corner square to its partner in\u00A0the same domino. Then to each move of the opponent they reply with a move to the other square of the domino the opponent has just entered."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Such a move is always possible: after each move of the first player the visited squares form complete dominoes, so when the opponent enters a new square, its partner in\u00A0the domino is still free and\u00A0adjacent to it (the king can move there). Sooner or later the opponent runs out of moves, and\u00A0thereby loses."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two players alternately place identical coins on a round table, where each must lie entirely on the table and\u00A0must not overlap any previously placed one (touching is allowed). Whoever has nowhere left to place another coin loses. Which of the players has a winning strategy?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Try to use the symmetry of the circle when looking for a suitable strategy that responds to the opponent's moves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The trick is to first block the special position of the circle, namely the center. Can we now use the symmetry?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins. They place the first coin exactly at the center of the table. Then to each coin of the opponent they reply with a coin placed centrally symmetric about the center of the table."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This symmetric position is always free and\u00A0lies entirely on the table: the table is centrally symmetric, so the image of the opponent's correctly placed coin is again a correct position. Moreover it cannot overlap the opponent's coin: its center is at least one coin diameter away from\u00A0the center of the table (otherwise it would overlap the central coin), so it is at least two diameters away from\u00A0its own image, which is exactly twice as far – yet a gap smaller than one diameter would already suffice to overlap. After each move of the opponent the first player therefore has somewhere to move, and\u00A0so the opponent loses."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "65-CSMO-C-II-4"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Adam and\u00A0Barbora play with the fraction"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{10a+b}{10c+d}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "the following four-move game: the players alternately replace any of the so-far undetermined letters "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, b, c, d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " with some digit from\u00A01 to\u00A09. Barbora wins if the resulting fraction equals either a whole number or a number with finitely many decimal places; otherwise Adam wins (for example when the fraction "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{11}{29}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " arises). If Adam starts, how should Barbora play to be guaranteed to win? If Barbora starts, can Adam be advised so that he always wins?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The second player has an advantage, because they can suitably react to the first player's moves. Try first to solve the case where they aim for the fraction to be a whole number."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The idea is that they make it equal to 1."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The harder part is when the second player aims for a repeating fraction. What typically spoils fractions and\u00A0makes them repeating?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The idea is that they make the denominator divisible by a suitable number, while ruling out that divisibility in the numerator."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In\u00A0both cases the second player wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "If Adam starts."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Barbora can arrange for the resulting fraction to equal\u00A01, which is a whole number, and\u00A0hence her win. It suffices for her to achieve "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", since then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b=10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". She therefore plays "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "symmetrically"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " about the fraction bar: when Adam fills in one of the letters "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a,b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", she fills in the same digit into the partner "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c,d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and\u00A0vice versa. This guarantees "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a=c",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "b=d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " after four moves."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "If Barbora starts."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " A fraction has a terminating expansion exactly when it can be reduced to a denominator composed only of twos and\u00A0fives. Adam spoils this if he gets another prime divisor into the denominator that cannot be cancelled – most simply a three. So we advise him to arrange for the denominator "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be divisible by three, but the numerator "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " not; such a fraction then has an infinite repeating expansion and\u00A0Adam wins. Because "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0its digit sum "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " give the same remainder upon division by three (and\u00A0similarly "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), it suffices for Adam to arrange for "
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to be divisible by three and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " not. He achieves this by suitably filling in the numerator or denominator after each of Barbora's two moves – for example he arranges "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a+b=10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (not divisible by three) and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "c+d=9",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " or\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "12",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (divisible by three)."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 0,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Players "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " alternately draw diagonals in a regular 2026-gon. A diagonal may be drawn only if it does not cross any of the previously drawn ones (a shared endpoint is not counted as a crossing). Whoever cannot move loses. Which of the players wins?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A regular n-gon is quite a symmetric thing; can we use this somehow? The trick is to make a good first move that helps us use this symmetry."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The trick is to draw a diagonal that splits it into symmetric parts. Suddenly we have completely symmetric halves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " wins. First they draw the "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "main"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " diagonal joining two opposite vertices (they exist, because 2026 is even); it splits the polygon into two congruent halves, symmetric about the line of this diagonal. Then "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " replies to each diagonal of the opponent with its mirror image about this axis."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The strategy is correct: the opponent cannot draw a diagonal crossing the main one, because it is already drawn, so every diagonal of theirs lies entirely in one of the halves. In\u00A0particular none is symmetric with itself – such a one would join a pair of mirror-conjugate vertices, would therefore lie in both halves and\u00A0cross the main diagonal. The mirror image of the opponent's diagonal therefore lies in the other half, is different from\u00A0it and\u00A0from\u00A0all previously drawn ones, and\u00A0crosses none of them (otherwise their images, that is the opponent's previous moves, would cross too). "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " thus has a reply after each move of the opponent, and\u00A0so the opponent loses."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Chomp"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Imagine a rectangular chocolate bar divided into at least two square pieces, with the top-left piece poisoned. Two players take turns. On each turn a player picks some piece and\u00A0eats it together with all pieces lying to the right and\u00A0below it – that is, the whole rectangle whose top-left corner is the chosen piece. Whoever is forced to eat the poisoned top-left piece loses. Which player has a winning strategy?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The problem is fascinating in that we can prove one of the players has a winning strategy, but we do not know which – specifically the first player. Try to think: what if the second player had such a strategy; could the first player exploit it?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We will show that the first player has a winning strategy – if the second player had it, the first player can make a very simple move that practically does not change the game at all – then he observes the second player's strategy. But since it did not change the game, why could he not use it himself?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The magic move is to break off a 1x1 piece at the bottom right. Convince yourself that this is entirely enough."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player wins. We show this without being able to describe his strategy. Suppose, on the contrary, that the second player has a winning strategy. The first player then plays the "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "magic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " move – he bites off only the bottom-right "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1\\times1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " piece. This produces some position to which the second player has (by assumption) a winning reply."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "But the very same resulting position can also be reached by the first player right on his first move – after all, every bite includes the bottom-right corner too, so any reply of the second player is at the same time a legal first move. The first player could therefore have appropriated it and\u00A0won himself, which is a contradiction. The winning strategy is therefore the first player's."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two players play a game by the rules of classical chess, with a single difference: the player to move always makes two moves in a row. Prove that the first player has a non-losing strategy, that is, they can guarantee themselves at least a draw."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "We steal a strategy similarly to the Chomp problem. Chess, however, allows a draw, so in this way we guarantee the first player at least a non-loss, even though we do not know the concrete strategy."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Again we look for some neutral move that the first player can make at the start. For this we need to use that they may make two moves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Suppose the opposite – that the opponent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " of the first player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has a winning strategy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " then plays a neutral double-move at the start: he moves a knight out and\u00A0immediately returns it. The board is again in the starting position, except that now "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is to move, as if they were starting the game."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " now steps into the role of the second player and\u00A0from this moment plays according to strategy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". But with it he would win himself, which contradicts the fact that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " was supposed to have the winning strategy. So the opponent does not have a winning strategy; and\u00A0since chess is a finite game without chance, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " can guarantee himself at least a draw."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two players play a game in which they take turns. At the start we have the number 2. In\u00A0each step we add to it some proper divisor of it (a divisor smaller than itself). The goal is to obtain a number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\ge 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Who has a winning strategy?"
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Think from the end: for which numbers would we surely win on the next move?"
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The key is to think about even numbers, since we can increase them by this procedure by a factor of one and\u00A0a half, which is quite a lot. The player who can secure them has an advantage."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The last realization is that the first player can secure even numbers. Work out how, and\u00A0also prove that this is enough for them."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " wins, and\u00A0the key is that he can arrange to always move from\u00A0an even number. To an even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " he can add its half and\u00A0thereby increase it by a factor of one and\u00A0a half; once he gets to move on an even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m\\ge1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", in a single move he jumps to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m+\\frac m2 \\ge \\frac32\\cdot1352 = 2028 \\ge 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0wins. The numbers from\u00A01352 on are exactly those from\u00A0which he can win in one move."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "How does he secure even numbers? His first move is forced, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\to3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (the only proper divisor of two is\u00A01). From then on he follows the rule of always leaving the opponent an odd number – when he is to move on an even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m<1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", he adds\u00A01. The opponent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " then always adds a proper divisor of an odd number, which is odd, and\u00A0so after his move an even number arises again, which falls to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The numbers keep growing all the while, so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " will eventually get to an even "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m\\ge1352",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It remains to verify that "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " does not win in the meantime. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leaves the opponent only odd numbers smaller than 1352, that is at most 1351. To an odd "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " can add at most its third (a proper divisor of an odd number is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\le y/3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), so he reaches at most "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac43\\cdot1351 = 1801 < 2026",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". He therefore never reaches the goal."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            },
+            {
+              "type": "problem",
+              "difficulty": 1,
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "70-CSMO-A-III-1"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A fraction with 1010 cells in the numerator and\u00A01011 cells in the denominator serves as the board for a two-player game."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{\\square+\\square+\\cdots+\\square}{\\square+\\square+\\cdots+\\square+\\square}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The players take turns. On each turn a player picks one of the numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\dots",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2021",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0inserts it into any empty cell. Each number may be used only once. The first player wins if, after all cells are filled, the value of the fraction differs from\u00A0the number 1 by less than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10^{-6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Otherwise the second player wins. Decide which of the players has a winning strategy."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "hints": [
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "It seems the fraction can take on terribly many values. But the idea of the game is to devise a way for one of the players to control this value well."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A simple way to control the value is to react suitably to the opponent's moves."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Show that the winning strategy belongs precisely to the first player. If we devise a good first move for him, he can carry out a suitable pairing of moves. The last thing left to work out is what that pairing looks like, so that he can control the value of the fraction well and\u00A0ideally make it small enough."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The first player starts with a one in the denominator – this leaves an even count everywhere. All that remains is to find a pairing of the rest."
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ]
+              ],
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " wins."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " wins. We will show that he can arrange for the denominator to be exactly 1 greater than the numerator."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "First he inserts the number 1 into the denominator. Then whenever the opponent "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " inserts a number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " into the fraction, player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " replies by inserting the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2023-x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " into the same part of the fraction (numerator, respectively denominator) into which "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " played. Why does this always work? After inserting the one into the denominator, both the numerator and\u00A0the denominator have an even number of free cells (1010 each), and\u00A0this property is preserved after each move of player "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". So the opponent never fills the last free position of some part, and\u00A0thus "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " always has somewhere to reply. And\u00A0the number "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2023-x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is available, because the numbers "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2,3,\\dots,2021",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " split into pairs with the same sum 2023:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\{2,2021\\},\\ \\{3,2020\\},\\ \\{4,2019\\},\\ \\dots,\\ \\{1011,1012\\}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On each of his moves "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " thus "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "starts"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " some pair and\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " immediately "
+                    },
+                    {
+                      "type": "quote",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "finishes"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " it."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "After filling, the numerator has 1010 cells, that is 505 such pairs, and\u00A0its value is therefore "
+                    },
+                    {
+                      "type": "math",
+                      "text": "505\\cdot2023",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The denominator, besides the one, also has 505 pairs, so its value is "
+                    },
+                    {
+                      "type": "math",
+                      "text": "505\\cdot2023+1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Since"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "0 < 1 - \\frac{505\\cdot2023}{505\\cdot2023+1} = \\frac1{505\\cdot2023+1} < \\frac1{500\\cdot2000} = 10^{-6},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "the value of the fraction differs from\u00A01 by less than "
+                    },
+                    {
+                      "type": "math",
+                      "text": "10^{-6}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and\u00A0the first player really does win."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

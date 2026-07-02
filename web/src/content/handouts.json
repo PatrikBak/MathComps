@@ -224,16 +224,21 @@
           "status": "ready",
           "source": "events",
           "id": "RZtGbqo7HslApJ1qgkOOB",
-          "languages": ["en"],
           "eventId": "emo2026camp",
           "slug": {
+            "sk": "pridavanie-bodov",
+            "cs": "pridavani-bodu",
             "en": "adding-points"
           },
           "title": {
+            "sk": "Pridávanie bodov do obrázka",
+            "cs": "Přidávání bodů do obrázku",
             "en": "Adding Points to the Picture"
           },
           "description": {
-            "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by 24 problems from national olympiads, MEMO, ISL, and IMO."
+            "sk": "Sprievodca technikou pridávania pomocných bodov v olympiádnej geometrii — stredy úsečiek, zrkadlové obrazy ortocentra, druhé priesečníky kružníc a ďalšie — nasledovaný úlohami z národných olympiád, MEMO, ISL a IMO.",
+            "cs": "Průvodce technikou přidávání pomocných bodů v olympiádní geometrii — středy úseček, zrcadlové obrazy ortocentra, druhé průsečíky kružnic a další — následovaný úlohami z národních olympiád, MEMO, ISL a IMO.",
+            "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by problems from national olympiads, MEMO, ISL, and IMO."
           },
           "authors": ["Patrik Bak"]
         },
@@ -263,15 +268,20 @@
           "status": "ready",
           "source": "events",
           "id": "lzP-IzGpwQ5igE6fNyZ6l",
-          "languages": ["en"],
           "slug": {
+            "sk": "rovnake-dotycnice",
+            "cs": "stejne-tecny",
             "en": "equal-tangents"
           },
           "title": {
+            "sk": "Rovnaké dotyčnice",
+            "cs": "Stejné tečny",
             "en": "Equal tangents"
           },
           "description": {
-            "en": "The technique of equal tangents in olympiad geometry — tangents from a point, incircle and excircle $s-a$ formulas, Pitot's theorem — applied to 17 problems including USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4, and Brianchon's theorem."
+            "sk": "Technika rovnakých dotyčníc v olympiádnej geometrii — dotyčnice z bodu, vzorce typu $s-a$ pre vpísanú a pripísanú kružnicu, Pitotova veta — aplikovaná na úlohy vrátane USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4 a Brianchonovej vety.",
+            "cs": "Technika stejných tečen v olympiádní geometrii — tečny z bodu, vzorce typu $s-a$ pro vepsanou a připsanou kružnici, Pitotova věta — aplikovaná na úlohy včetně USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4 a Brianchonovy věty.",
+            "en": "The technique of equal tangents in olympiad geometry — tangents from a point, incircle and excircle $s-a$ formulas, Pitot's theorem — applied to problems including USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4, and Brianchon's theorem."
           },
           "authors": ["Patrik Bak"]
         }
@@ -307,7 +317,6 @@
           "status": "ready",
           "source": "events",
           "id": "xT7kWqNv3Lm8RpYfHs2Jg",
-          "languages": ["sk", "cs"],
           "eventId": "okolo-naboje-2026",
           "slug": {
             "sk": "cifrovanie",
@@ -330,15 +339,20 @@
           "status": "ready",
           "source": "events",
           "id": "FWv-ivSDvsiD7HuULfBmT",
-          "languages": ["en"],
           "eventId": "emo2026camp",
           "slug": {
+            "sk": "inverzy-modulo-p",
+            "cs": "inverzy-modulo-p",
             "en": "inverses-mod-p"
           },
           "title": {
+            "sk": "Inverzy modulo $p$",
+            "cs": "Inverzy modulo $p$",
             "en": "Inverses Modulo $p$"
           },
           "description": {
+            "sk": "Malá teória multiplikatívnych inverzov modulo prvočíslo — existencia, pravidlá pre sčítanie a násobenie — aplikovaná na olympiádne úlohy vrátane Wilsonovej vety, Wolstenholmovej vety a IMO 2005.",
+            "cs": "Malá teorie multiplikativních inverzů modulo prvočíslo — existence, pravidla pro sčítání a násobení — aplikovaná na olympiádní úlohy včetně Wilsonovy věty, Wolstenholmovy věty a IMO 2005.",
             "en": "A small theory of multiplicative inverses modulo a prime — existence, addition, and multiplication rules — applied to olympiad problems including Wilson's theorem, Wolstenholme, and IMO 2005."
           },
           "authors": ["Patrik Bak"]
@@ -375,19 +389,20 @@
           "status": "ready",
           "source": "matikaCesku",
           "id": "_hM0pyx5ZnjFE9rcXKunr",
-          "languages": ["sk", "cs"],
-          "fileSlug": "combinatorial-games",
           "slug": {
             "sk": "kombinatoricke-hry",
-            "cs": "kombinatoricke-hry"
+            "cs": "kombinatoricke-hry",
+            "en": "combinatorial-games"
           },
           "title": {
             "sk": "Kombinatorické hry",
-            "cs": "Kombinatorické hry"
+            "cs": "Kombinatorické hry",
+            "en": "Combinatorial Games"
           },
           "description": {
             "sk": "Úvod do kombinatorických hier dvoch hráčov a hľadania víťazných stratégií. Pokrýva analýzu od konca, vyhrávajúce a prehrávajúce pozície, párovanie ťahov, symetriu a kradnutie stratégií.",
-            "cs": "Úvod do kombinatorických her dvou hráčů a hledání vítězných strategií. Pokrývá analýzu od konce, vyhrávající a prohrávající pozice, párování tahů, symetrii a kradení strategií."
+            "cs": "Úvod do kombinatorických her dvou hráčů a hledání vítězných strategií. Pokrývá analýzu od konce, vyhrávající a prohrávající pozice, párování tahů, symetrii a kradení strategií.",
+            "en": "An introduction to two-player combinatorial games and finding winning strategies. Covers working backwards, winning and losing positions, move pairing, symmetry, and strategy stealing."
           },
           "authors": ["Patrik Bak"]
         }

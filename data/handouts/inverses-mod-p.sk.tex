@@ -1,0 +1,182 @@
+\input _template
+
+\setlanguage{SK}
+
+\Title{Inverzy modulo $p$}
+
+\MathcompsLink{inverzy-modulo-p}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Predpokladáme znalosť kongruencií modulo prvočíslo~$p$. V tomto materiáli vybudujeme malú teóriu multiplikatívnych inverzov modulo~$p$ a použijeme ju na riešenie úloh.
+
+\sec Teória
+
+V celom materiáli $p$ označuje prvočíslo.
+
+\secc Opakovanie
+
+Voľne používame nasledujúce štandardné fakty o kongruenciách modulo~$p$:
+
+\begitems
+\i Kongruencie možno sčítať, odčítať a násobiť: ak $a \equiv b$ a $c \equiv d \pmod{p}$, tak $a \pm c \equiv b \pm d$ a $ac \equiv bd \pmod{p}$.
+\i Krátenie: ak $a \not\equiv 0 \pmod{p}$ a $ax \equiv ay \pmod{p}$, tak $x \equiv y \pmod{p}$.
+\i Pre ľubovoľné $a \not\equiv 0 \pmod{p}$ tvoria zvyšky $a, 2a, \ldots, (p-1)a$ permutáciu čísel $1, 2, \ldots, p-1$ modulo~$p$.
+\i Malá Fermatova veta: pre ľubovoľné $a \not\equiv 0 \pmod{p}$ platí $a^{p-1} \equiv 1 \pmod{p}$.
+\i Rád: rád prvku $a \not\equiv 0 \pmod{p}$ je najmenšie kladné celé číslo $d$ s $a^d \equiv 1 \pmod{p}$. Delí $p - 1$.
+\i Primitívny koreň: existuje $g \not\equiv 0 \pmod{p}$ rádu $p - 1$. Každé $a \not\equiv 0 \pmod{p}$ sa rovná $g^k$ pre nejaké $k$.
+\enditems
+
+\secc Inverzy
+
+\Theorem{Existencia a jednoznačnosť inverzu}{
+    Nech $a \not\equiv 0 \pmod{p}$. Potom existuje jednoznačný zvyšok $a^{-1} \pmod{p}$ s
+    $$a \cdot a^{-1} \equiv 1 \pmod{p}.$$
+    Namiesto $a^{-1}$ píšeme $\frac{1}{a}$ a namiesto $b \cdot a^{-1}$ píšeme $\frac{b}{a}$.
+}{}
+
+\Theorem{Inverzy sa sčítavajú ako zlomky}{
+    Nech $b, d \not\equiv 0 \pmod{p}$. Potom pre ľubovoľné $a, c$ platí
+    $$\frac{a}{b} + \frac{c}{d} \equiv a \cdot b^{-1} + c \cdot d^{-1} \equiv (ad + bc) \cdot (bd)^{-1} \equiv \frac{ad + bc}{bd} \pmod{p},$$
+    presne ako obyčajné zlomky.
+}{}
+
+\Theorem{Inverzy sa násobia ako zlomky}{
+    Nech $b, d \not\equiv 0 \pmod{p}$. Potom pre ľubovoľné $a, c$ platí
+    $$\frac{a}{b} \cdot \frac{c}{d} \equiv (a \cdot b^{-1}) \cdot (c \cdot d^{-1}) \equiv (ac) \cdot (bd)^{-1} \equiv \frac{ac}{bd} \pmod{p},$$
+    presne ako obyčajné zlomky.
+}{}
+
+\sec Úlohy
+
+Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlomkami modulo~$p$, akoby to boli obyčajné čísla. Sú zhruba zoradené podľa obtiažnosti.
+
+\Problem{0}{Wilson}{
+    Nech $p$ je prvočíslo. Dokážte, že
+    $$(p-1)! \equiv -1 \pmod{p}.$$
+}{
+    V súčine $1 \cdot 2 \cdots (p-1)$ sa pokúste spárovať činitele s ich inverzom. Ktoré čísla nemajú pár?
+}{
+    Čísla bez páru sú tie, ktoré spĺňajú $k \equiv 1/k \mod p$. Nájdite ich všetky.
+}{}
+
+\Problem{0}{}{
+    Nech $p$ je prvočíslo. Dokážte, že existujú celé čísla $a, b$, žiadne z nich deliteľné $p$, s $p \mid a^2 + b^2$ práve vtedy, keď $p = 2$ alebo $p \equiv 1 \pmod{4}$.
+}{
+    Podmienka $p \mid a^2 + b^2$ sa prepíše na $(a/b)^2 \equiv -1 \pmod{p}$. Otázka sa teda stane: pre ktoré prvočísla je $-1$ štvorec modulo~$p$?
+}{
+    Pre jeden smer umocnite vzťah $(a/b)^2 \equiv -1$ na $(p-1)/2$-hu. Ľavá strana sa stane $(a/b)^{p-1}$.
+}{
+    Na ľavú stranu aplikujte Malú Fermatovu vetu. Čo výsledná rovnica vynúti pre $p \mod 4$?
+}{
+    Pre opačný smer s $p \equiv 1 \pmod{4}$ potrebujete explicitnú odmocninu z $-1$ modulo~$p$. Prirodzený zdroj: Wilsonova veta, $(p-1)! \equiv -1 \pmod{p}$.
+}{
+    V súčine $(p-1)!$ spárujte $k$ s $p - k \equiv -k$. Ako vyzerá výsledok pre $p \equiv 1 \pmod{4}$?
+}{}
+
+\Problem{0}{}{
+    Nech $p \equiv 2 \pmod{3}$ je prvočíslo. Ukážte, že ak $p \mid a^2 + ab + b^2$, tak $p \mid a$ a $p \mid b$.
+}{
+    Všimnite si, že $a^3 - b^3 = (a - b)(a^2 + ab + b^2)$, takže $p \mid a^3 - b^3$. Predpokladajte pre spor, že $p \nmid b$. Je to podobné ako predošlá úloha.
+}{
+    Umocnite na $(p-2)/3$-tu, čo je kladné celé číslo, keďže $p \equiv 2 \pmod{3}$. Ľavá strana sa stane $(a/b)^{p-2}$.
+}{
+    Vynásobte obe strany $a/b$ a dostanete $(a/b)^{p-1} \equiv a/b \pmod{p}$. Aplikujte Malú Fermatovu vetu a dostanete $a \equiv b \pmod{p}$. Dosaďte to späť.
+}{}
+
+\Problem{0}{}{
+    Nech $p$ je prvočíslo a nech $0 \leq k \leq p-1$ je celé číslo. Dokážte, že
+    $$\binom{p-1}{k} \equiv (-1)^k \pmod{p}.$$
+}{
+    Rozpíšte kombinačné číslo ako $\binom{p-1}{k} = \frac{(p-1)(p-2) \cdots (p-k)}{k!}$.
+}{
+    Zredukujte každý činiteľ v čitateli modulo $p$: $p - j \equiv -j \pmod{p}$. Nezostáva nám niečo známe?
+}{}
+
+\Problem{0}{}{
+    Nech $p \geq 3$ je prvočíslo. Ukážte, že ak
+    $$\frac{1}{1} + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{p-1} = \frac{m}{n},$$
+    tak $p \mid m$.
+}{
+    Pri pohľade modulo~$p$ máme súčet inverzov všetkých možných nenulových hodnôt mod $p$.
+}{
+    Uvedomte si, že tento súčet je vlastne súčtom všetkých hodnôt od $1$ po $p-1$, nie nutne v tomto poradí.
+}{}
+
+\Problem{0}{IMO 2005}{
+    Určte všetky kladné celé čísla $n$, ktoré sú nesúdeliteľné s každým členom postupnosti
+    $$a_m = 2^m + 3^m + 6^m - 1, \quad m \geq 1.$$
+}{
+    Ukážte, že pre každé prvočíslo $p$ je nejaké $a_m$ deliteľné $p$. Potom je jediné platné $n$ číslo $n = 1$.
+}{
+    Malé prvočísla sú ľahké: $a_1 = 10$ ošetrí $p = 2, 5$ a $a_2 = 48$ ošetrí $p = 3$. Zamerajte sa na $p \geq 5$ a skúste zvoliť $m$ v závislosti od $p$ tak, aby sa štyri členy zoskupili.
+}{
+    Pre $p \geq 5$ vezmite $m = p - 2$. Potom $2^m \equiv 1/2$, $3^m \equiv 1/3$, $6^m \equiv 1/6 \pmod{p}$. Vypočítajte $a_{p-2} \pmod{p}$.
+}{}
+
+\Problem{0}{Poland}{
+    Nech $p > 3$ je prvočíslo s $p \equiv 2 \pmod{3}$ a nech $a_k = k^2 + k + 1$ pre $k = 1, 2, \ldots, p-1$. Dokážte, že
+    $$a_1 a_2 \cdots a_{p-1} \equiv 3 \pmod{p}.$$
+}{
+    Pre $k \neq 1$ rozložte $k^2 + k + 1 = \frac{k^3 - 1}{k - 1}$. Vyčleňte člen pre $k = 1$, ktorý prispieva~$3$.
+}{
+    Súčin sa stane $3 \cdot \frac{\prod_{k=2}^{p-1}(k^3 - 1)}{(p-2)!}$. Musíme vypočítať čitateľ a menovateľ mod~$p$ zvlášť.
+}{
+    Bolo by skvelé, keby súčin všetkých čísel $k^3-1$ bol vlastne niečo, čo vieme vypočítať.
+}{}
+
+\Problem{0}{Singapore 2012}{
+    Nech $p$ je nepárne prvočíslo. Dokážte, že
+    $$\sum_{i=1}^{(p-1)/2} i^{p-2} \equiv \frac{2 - 2^p}{p} \pmod{p}.$$
+}{
+    Keďže $i^{p-2} \equiv 1/i \pmod{p}$, ľavá strana je $\sum_{i=1}^{(p-1)/2} 1/i$. Teraz pracujte na pravej strane, aby ste dostali túto nápovedu.
+}{
+    Rozpíšte $2^p = (1+1)^p = \sum_{k=0}^{p} \binom{p}{k}$, takže $\frac{2^p - 2}{p} = \frac{1}{p} \sum_{k=1}^{p-1} \binom{p}{k}$.
+}{
+    Použite $\binom{p}{k} = \frac{p}{k} \binom{p-1}{k-1}$ na prepísanie každého sčítanca: $\frac{2^p - 2}{p} = \sum_{k=1}^{p-1} \frac{\binom{p-1}{k-1}}{k}$.
+}{
+    Na zjednodušenie aplikujte $\binom{p-1}{k-1} \equiv (-1)^{k-1} \pmod{p}$ z~predošlej úlohy.
+}{
+    Pravá strana sa zredukuje na $-\sum_{k=1}^{p-1} (-1)^{k-1}/k \pmod{p}$. Rozdeľte to na párne a nepárne $k$ a použite $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$ z~predošlej úlohy.
+}{}
+
+\Problem{0}{}{
+    Ukážte, že pre každé prvočíslo $p$ platí
+    $$\binom{2p}{p} \equiv 2 \pmod{p^2}.$$
+}{
+    Napíšte $\binom{2p}{p} = \frac{(2p)(2p-1)\cdots(p+1)}{p!}$. Vyčleňte činiteľ $2p$ v čitateli a $p$ v $p! = p \cdot (p-1)!$ a dostanete $\binom{2p}{p} = \frac{2 \prod_{k=1}^{p-1}(p+k)}{(p-1)!}$.
+}{
+    Rozložte každý člen čitateľa ako $p + k = k\bigl(1 + \frac{p}{k}\bigr)$, takže $\prod_{k=1}^{p-1}(p+k) = (p-1)! \cdot \prod_{k=1}^{p-1}\bigl(1 + \frac{p}{k}\bigr)$.
+}{
+    Rozpíšte $\prod\bigl(1 + \frac{p}{k}\bigr)$ modulo $p^2$: prežijú len konštantný a v $p$ lineárny člen, čo dá $1 + p \sum_{k=1}^{p-1} 1/k$.
+}{
+    Podľa úlohy 4 platí $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$, takže $p \sum 1/k \equiv 0 \pmod{p^2}$.
+}{}
+
+\Problem{0}{}{
+    Nech $p \geq 5$ je prvočíslo a nech $e$ je kladné celé číslo s $(p-1) \nmid e$. Ukážte, že ak
+    $$\frac{1}{1^e} + \frac{1}{2^e} + \frac{1}{3^e} + \cdots + \frac{1}{(p-1)^e} = \frac{m}{n},$$
+    tak $p \mid m$.
+}{
+    Tvrdenie je $\sum_{k=1}^{p-1} \frac{1}{k^e} \equiv 0 \pmod{p}$. Trik je hľadať $a$ také, že vynásobenie každého $k$ číslom $a$ premieša členy, ale preškáluje celý súčet.
+}{
+    Použite predpoklad $(p-1) \nmid e$ na nájdenie $a$ s $a^e \not\equiv 1 \pmod{p}$. Trik je uvažovať primitívny koreň.
+}{}
+
+\Problem{0}{Wolstenholme}{
+    Nech $p \geq 5$ je prvočíslo. Ukážte, že ak
+    $$\frac{1}{1} + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{p-1} = \frac{m}{n},$$
+    tak $p^2 \mid m$.
+}{
+    Spárujte $k$ s $p - k$.
+}{
+    To dá $\sum_{k=1}^{p-1} 1/k = p \sum_{k=1}^{(p-1)/2} 1/(k(p-k))$. Potrebujeme, aby pravý činiteľ bol deliteľný~$p$.
+}{
+    Modulo $p$ platí $1/(k(p-k)) \equiv -1/k^2$. Takže stačí, aby $\sum_{k=1}^{(p-1)/2} 1/k^2 \equiv 0 \pmod{p}$.
+}{
+    Všimnite si $(p-k)^2 \equiv k^2 \pmod{p}$, takže $\sum_{k=1}^{p-1} 1/k^2 = 2 \sum_{k=1}^{(p-1)/2} 1/k^2$. Vieme teraz použiť predošlú úlohu?
+}{}
+
+\bye
