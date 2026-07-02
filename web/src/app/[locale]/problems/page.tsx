@@ -24,7 +24,6 @@ export async function generateMetadata({
     locale: locale as Locale,
     namespace: 'metadata.problems',
     path: ROUTES.PROBLEMS,
-    type: 'article',
     useSection: true,
   })
 }

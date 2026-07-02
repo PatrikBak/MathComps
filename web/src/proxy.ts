@@ -40,7 +40,7 @@ export default clerkMiddleware(async (_auth, request) => {
 /** Paths the middleware should run on. */
 export const config = {
   matcher: [
-    // Skip Next.js internals, static files, and API routes
-    '/((?!_next|api|trpc|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Skip Next.js internals, static files (incl. robots.txt/sitemap.xml), and API routes
+    '/((?!_next|api|trpc|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|txt|xml|docx?|xlsx?|zip|webmanifest)).*)',
   ],
 }
