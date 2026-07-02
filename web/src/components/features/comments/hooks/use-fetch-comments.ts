@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useQuery } from '@tanstack/react-query'
 
 import { useApi } from '@/hooks/use-api'
+import { cachePolicy } from '@/lib/query-config'
 
 import type { CommentTarget } from '../api/comment-api-types'
 import { getComments } from '../api/comment-service'
@@ -46,8 +47,8 @@ export function useFetchComments(target: CommentTarget) {
     },
     // Wait for both API and auth to be ready before fetching
     enabled: api.state === 'ready' && isUserLoaded,
-    // Cache for 30 seconds
-    staleTime: 30 * 1000,
+    // Threads should reflect new replies quickly
+    ...cachePolicy.userData,
   })
 
   // Return query with proper loading state that accounts for initialization

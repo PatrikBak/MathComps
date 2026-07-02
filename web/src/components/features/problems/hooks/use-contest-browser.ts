@@ -37,8 +37,6 @@ function getQueryOptions(api: ApiState) {
       // Return the data if successful
       return response.data
     },
-    // Cache for 5 minutes since competition structure rarely changes
-    staleTime: 5 * 60 * 1000,
     // Only fetch when the API is ready
     enabled: api.state === 'ready',
   }

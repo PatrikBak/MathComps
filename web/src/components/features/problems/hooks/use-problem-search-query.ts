@@ -6,7 +6,6 @@ import { useApi } from '@/hooks/use-api'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
-import { CACHE_TIMING } from '../constants/timing-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
 import {
   isListAccessDeniedError,
@@ -180,9 +179,7 @@ export function useInitialFilterData(
         },
       }
     },
-    // Initial data rarely changes, so we can cache it aggressively
-    staleTime: CACHE_TIMING.staleTime,
-    gcTime: CACHE_TIMING.gcTime,
+    // Only run once enabled and the API is ready
     enabled: enabled && api.state === 'ready',
   })
 
@@ -250,8 +247,6 @@ export function useSingleProblem(
     },
     // Only run the query when enabled and we have a valid slug
     enabled: enabled && problemSlug !== null && api.state === 'ready',
-    // Individual problems change rarely, so we can cache them
-    staleTime: CACHE_TIMING.staleTime,
     // Use global retry defaults (infinite retries) EXCEPT for 404 errors (permanent failures)
     retry: (_failureCount, error) => {
       // Don't retry if this is a "Problem not found" error (permanent failure)
@@ -352,9 +347,6 @@ function useProblemSearchInfinite(
 
     // Only run if filters are provided and enabled
     enabled: enabled && filters !== null && api.state === 'ready',
-
-    // Don't refetch on window focus for search results (user intent is to adjust filters, not auto-refresh)
-    refetchOnWindowFocus: false,
 
     // Stop retrying on permanent list access errors
     retry: (_failureCount, error) => {
