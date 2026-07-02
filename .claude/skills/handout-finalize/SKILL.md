@@ -32,7 +32,7 @@ Then decide:
 
 - **`source` / `eventId`** — default `"source": "matikaCesku"` with no `eventId`. Only if the user says the handout was made for an event, set `"source": "events"` and `eventId` to the matching entry in the index's top-level `events` array (match by name; no match → ask the user whether to add the event).
 - **Category** — guess from the existing sections and the handout's topic. Hints: factoring/inequalities → Algebra; angles/triangles → Geometria; divisibility/primes → Teória čísel; counting/coloring/invariants → Kombinatorika; proof basics/induction → Všeobecné. If an existing `"status": "planned"` entry in any section matches the title, replace it in place and keep its section.
-- **Description per locale** — write one yourself from the `.tex` intro (`\sec Introduction` / `\sec Úvod`) and section headings. 1–3 sentences, SEO/OG-grade, matching the terse factual style of existing entries. Write each locale natively from that locale's .tex; do not machine-translate.
+- **Description per locale** — write one yourself from the `.tex` intro (`\sec Introduction` / `\sec Úvod`) and section headings. 1–3 sentences, SEO/OG-grade, matching the terse factual style of existing entries. Write each locale natively from that locale's .tex; do not machine-translate. Describe topics and techniques, never volatile facts that go stale — no problem counts ("24 problems"), no "N sections", etc.
 - **`languages`** — set to the locales that have a `.tex` file only if that is a strict subset of `sk`, `cs`, `en`. If all three exist, omit.
 - **`fileSlug`** — set to `<base>` only if there is no English `.tex`; otherwise omit.
 - **`public`** — omit unless the user has said the handout is unlisted.
