@@ -1,14 +1,4 @@
 /**
- * Cache timing constants for React Query.
- */
-export const CACHE_TIMING = {
-  /** How long data stays fresh before refetch (ms) */
-  staleTime: 10 * 60 * 1000, // 10 minutes
-  /** How long to keep unused data in cache (ms) */
-  gcTime: 30 * 60 * 1000, // 30 minutes
-} as const
-
-/**
  * Search timing constants.
  */
 export const SEARCH_TIMING = {

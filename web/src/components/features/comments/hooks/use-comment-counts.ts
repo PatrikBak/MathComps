@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useApi } from '@/hooks/use-api'
+import { cachePolicy } from '@/lib/query-config'
 
 import type { CommentTargetType } from '../api/comment-api-types'
 import { getCommentCounts } from '../api/comment-service'
@@ -45,8 +46,8 @@ export function useCommentCounts(targetType: CommentTargetType, targetIds: strin
     },
     // Only fetch if API is ready and there are targetIds
     enabled: api.state === 'ready' && targetIds.length > 0,
-    // Don't refetch too often, 1 minute as counts don't need to be super fresh
-    staleTime: 60 * 1000,
+    // Counts can lag a little
+    ...cachePolicy.counts,
   })
 
   // Ensure we report loading state when API is still initializing

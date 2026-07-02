@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useApi } from '@/hooks/use-api'
+import { cachePolicy } from '@/lib/query-config'
 
 import { getUserListsApiUrl } from '../services/user-list-api-urls'
 import type { UserListsResponse } from '../types/user-list-types'
@@ -55,8 +56,8 @@ export function useUserLists(): UseUserListsResult {
       // Return the data if successful
       return response.data
     },
-    // Cache for 30 seconds since lists change more often than contests
-    staleTime: 30_000,
+    // The user's own lists should reflect their edits quickly
+    ...cachePolicy.userData,
     // Only fetch when the API is ready (user is authenticated)
     enabled: api.state === 'ready',
   })
