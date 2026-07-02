@@ -1,0 +1,441 @@
+\input _template
+
+\let\angle\sphericalangle
+
+\setlanguage{CS}
+
+\Title{Přidávání bodů do obrázku}
+
+\MathcompsLink{pridavani-bodu}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Všichni známe základní metody řešení olympiádní geometrie, jako jsou
+
+\begitems
+\i počítání úhlů a tětivové čtyřúhelníky,
+\i shodnost a podobnost trojúhelníků,
+\i mocnost bodu a chordály.
+\enditems
+
+Jen kombinací těchto metod dokážeme vyřešit spoustu úloh. Ne vždy je však snadné přijít na to, kterou techniku použít. Obecné techniky, které nám pomáhají, jsou
+
+\begitems
+\i přeformulování zadání,
+\i rozpoznání známých dílčích tvrzení,
+\i eliminace bodů,
+\i přidávání bodů do obrázku.
+\enditems
+
+V tomto materiálu se zaměříme na to poslední a procvičíme si některé konkrétní situace, které se opakují v úlohách všech obtížností.
+
+\sec Obecné tipy
+
+\secc Rýsování obrázků
+
+Jednou z věcí, které mohou rozhodnout o tom, zda úlohu vyřešíte, nebo ne, je dobrý obrázek. Pár tipů:
+
+\begitems
+\i rýsujte velké obrázky,
+\i nerýsujte různostranné trojúhelníky jako rovnostranné,
+\i používejte rýsovací pomůcky,
+\i používejte dobře ořezané tužky a gumu,
+\i používejte barevné tužky (např. k označení úseček stejné délky),
+\i nerýsujte kružnice, dokud nemusíte --- pokud čtyři body leží na kružnici, stačí si to poznamenat stranou, nebo obarvit hrany tětivového čtyřúhelníku,
+\i při rýsování kolmice použijte místo trojúhelníku s ryskou dvě kružnice (mně to vždy dávalo přesnější výsledky),
+\i nerýsujte přímky a oblouky delší, než je nutné --- víc rušivých prvků znamená, že vidíte méně --- dvakrát si rozmyslete, než do obrázku přidáte přímku (nebo než ji zvýrazníte či obarvíte),
+\i pomocné čáry průběžně mažte,
+\i při rýsování přesného obrázku můžete použít tvrzení, které se snažíte dokázat, nebo dílčí tvrzení, která jste už objevili,
+\i překreslujte často (např. po přeformulování) a klidně rýsujte tentýž obrázek vícekrát (např. k ověřování hypotéz),
+\i pokud přesný obrázek nakreslit nejde (např. úloha má záludné implicitně definované body), narýsujte přesně tak velkou jeho část, jak jen dokážete,
+\i při rýsování trojúhelníku~$ABC$ umístěte horní vrchol tak, aby situace vypadala vizuálně symetricky (v dobře postavených úlohách je to vrchol~$A$),
+\i někdy je užitečné umístit neobvyklou přímku svisle nebo vodorovně (např. úhlopříčku čtyřúhelníku),
+\i nejprve načrtněte hrubý náčrt od ruky a pomůcky začněte používat až po krátkém seznámení se situací (pokud úlohu nevyřešíte už z náčrtu) --- to vám dá cit pro to, jak velký by obrázek měl být a kde začít rýsovat.
+\enditems
+
+\secc Jak přemýšlet při řešení úloh
+
+Jakmile dostaneme úlohu a nakreslíme obrázek, začneme analyzovat:
+
+\begitems
+\i Předpokládejme, že dokazované tvrzení platí. Můžeme z toho odvodit něco zajímavého?
+\i Které předpoklady o definovaných bodech jsme použili a které nedokážeme uchopit? Jsou to úhlové, nebo délkové podmínky?
+\i Co je na úloze nejhůř uchopitelné? Které body se zdají nejvíc libovolné?
+\i Představte si řešení. Z jakého dílčího tvrzení by tvrzení mohlo plynout?
+\i Které úhly určují konfiguraci? Které úhly dokážeme pomocí nich vyjádřit?
+\i Můžeme přeformulováním situace nějaký bod eliminovat?
+\enditems
+
+V praxi ne vždy přinese úspěch samotná analýza --- jinak by to bylo příliš snadné~\SlightSmile{} Stále si můžeme se situací pohrát:
+\begitems
+\i Naslepo počítejte nějaké úhly a uvidíte, co se stane. Všímejte si, jestli jsme náhodou nenašli tětivový čtyřúhelník nebo jinou zajímavou konfiguraci.
+\i Naslepo si zapište nějaké poměry (např. z podobných trojúhelníků) a zkuste je zkombinovat se známými rovnostmi délek. Všímejte si, jestli lze nově získané vztahy interpretovat jako podobnost dvou jiných trojúhelníků.
+\i Definujte nějaké pěkně vypadající body, které by mohly situaci vyjasnit nebo o ní odhalit něco zajímavého (to je právě to, co budeme v tomto materiálu procvičovat~\SlightSmile{}).
+\i Vyzkoušejte, jak situace vypadá ve zvláštních případech, nebo zkoumejte volné body v mezních polohách.
+\enditems
+
+Můžeme také tvořit hypotézy. Dobrá hypotéza je v obrovském množství případů klíčem k vyřešení těžkých úloh. Autoři úloh se ze všech sil snaží klíčová tvrzení skrýt a člověk je často prostě musí uhodnout. Dobře narýsovaný obrázek hádání usnadní. Metody hádání:
+
+\begitems
+\i Hádejte pěkné geometrické vlastnosti, nejčastěji tětivové čtyřúhelníky.
+\i Jakmile máme nějaký odhad, ověřte, zda v narýsovaném obrázku platí alespoň přibližně.
+\i Poté ověřte, zda ho dokážeme dokázat, klidně i s použitím dokazovaného tvrzení --- být si jistý je důležité.
+\i Předpokládejme, že uhodnuté tvrzení platí. Co bychom v naší situaci mohli odvodit? Možná bychom došli k něčemu, co obecně platit nemůže? Možná lze úlohu s jeho pomocí vyřešit v pár krocích?
+\i Používejte symetrickou úvahu --- pokud tohle platí, pak ze symetrie musí platit i něco dalšího\dots
+\i Pokud hypotézu neumíme dokázat ani vyvrátit, zapište ji do čistopisu slovy. Pokud platí a je podstatná, může přinést body.
+\enditems
+
+\sec Známá dílčí tvrzení
+
+V dnešních úlohách budeme potřebovat několik tvrzení, která jsou obecně velmi užitečná a stojí za to je umět použít přímo ve složitém obrázku. Zde je krátký seznam některých z nejdůležitějších, jež by nám mohly pomoci i při řešení úloh z tohoto materiálu:
+
+\Theorem{Základní úhly}{Nechť $ABC$ je ostroúhlý trojúhelník. Pak:
+
+\begitems
+\i je-li $H$ ortocentrum, pak $|\angle BHC| = 180^\circ - \alpha$,
+\i je-li $O$ střed opsané kružnice, pak $|\angle BOC| = 2\alpha$,
+\i je-li $I$ střed vepsané kružnice, pak $|\angle BIC| = 90^\circ + \frac\alpha2$,
+\i je-li $I_a$ střed kružnice připsané proti vrcholu~$A$, pak $|\angle BI_aC|=90^\circ-\frac\alpha2$.
+\enditems
+}{}
+
+\Theorem{Švrčkův bod}{Nechť $ABC$ je trojúhelník se středem vepsané kružnice~$I$ a $|AB|\neq|AC|$. Nechť~$I_a$ je střed kružnice připsané proti vrcholu~$A$. Pak se osa úhlu~$\angle BAC$ a osa úsečky~$BC$ protínají na kružnici opsané trojúhelníku~$ABC$ v bodě, který je středem úsečky~$II_a$ a zároveň středem kružnice opsané čtyřúhelníku $BICI_a$.}{}
+
+\Theorem{Anti-Švrčkův bod}{Nechť $ABC$ je trojúhelník s $|AB|\neq|AC|$. Nechť $I_b$ a~$I_c$ jsou po řadě střed kružnice připsané proti vrcholu~$B$ a proti vrcholu~$C$. Pak se vnější osa úhlu~$\angle BAC$ a osa úsečky~$BC$ protínají na kružnici opsané trojúhelníku~$ABC$ v bodě~$M$, který je středem úsečky~$I_bI_c$ a zároveň středem kružnice opsané čtyřúhelníku $BCI_bI_c$.}{}
+
+\Theorem{Spirální podobnost chodí po dvou}{Jsou-li trojúhelníky~$OBC$ a~$OB_0C_0$ podobné a souhlasně orientované, pak jsou podobné i trojúhelníky $OBB_0$ a $OCC_0$.}{}
+
+\Theorem{Zrcadlení ortocentra}{Nechť $ABC$ je trojúhelník s ortocentrem~$H$. Pak:
+\begitems
+\i zrcadlový obraz~$H$ podle přímky~$BC$ leží na kružnici opsané trojúhelníku~$ABC$,
+\i obraz~$H$ ve středové souměrnosti se středem ve středu úsečky~$BC$ leží na kružnici opsané trojúhelníku $ABC$ v bodě diametrálně protilehlém k~$A$.
+\enditems}{}
+
+\sec Přidávání bodů do obrázku
+
+Konečně a jsme u věci~\SlightSmile{} Při řešení úlohy se často stává, že nedokážeme pořádně uchopit nějakou hypotézu nebo dokazované tvrzení. Důvodem může být, že v obrázku chybí všechny body potřebné k vyřešení úlohy. Autoři úloh mají sklon skrývat klíčové body a tím dělat úlohy zajímavými a často mnohem těžšími. Umět přidat ty správné body je pravé umění. Pár obecných rad:
+
+\begitems
+\i Body přidáváme, abychom lépe pochopili nějakou hypotézu nebo dokazované tvrzení.
+\i Přidáváme body, které vytvářejí pěkné vlastnosti, jako je podobnost, tětivové čtyřúhelníky, rovnoběžnost, \dots
+\i Přidáváme body proto, abychom mohli odstranit jiné, hůř uchopitelné body.
+\enditems
+
+Existují opakující se situace, kde se vždycky vyplatí zvážit přidání nového bodu, když nic jiného nezabírá. V tomto materiálu procvičujeme zejména tyto:
+
+\begitems \style n
+
+\i Pokud jsou v úloze středy úseček, vyplatí se přidat další středy a vytvořit tak střední příčky.
+\i Pokud je v úloze střed úsečky, středová souměrnost podle tohoto středu vytvoří rovnoběžník.
+\i Pokud je v úloze pravoúhlý trojúhelník, vyplatí se doplnit ho na rovnoramenný trojúhelník.
+\i Pokud je v úloze ortocentrum, vyplatí se přemýšlet o jeho obrazech v zrcadlení podle strany nebo podle středu strany daného trojúhelníku.
+\i Pokud jsou v úloze rovnoběžné úsečky, vyplatí se zvážit stejnolehlosti, které zobrazí jednu úsečku na druhou, a zrcadlit skrz ně další body.
+\i Pokud dvě kružnice procházejí společným bodem, zajímavým bodem může být jejich druhý průsečík. Vytvoří přinejmenším chordálu.
+\i Někdy stačí protnout vhodné přímky, nebo vhodnou přímku a kružnici. Důvodů k tomu může být několik --- například se může objevit rovnoramenný trojúhelník nebo tětivový čtyřúhelník.
+
+\enditems
+
+Tento seznam má k úplnosti daleko, ale na dalších 24 úloh by měl stačit. Obecně platí, že při přidávání bodů do obrázku jsou možnosti téměř neomezené.
+
+\sec Úlohy
+
+Následující úlohy jsou zhruba čtyř typů:
+
+\begitems \style n
+\i Klíčovým krokem je přidání správného bodu; zbytek je snadný.
+\i Přidání je poměrně přímočaré, ale dotažení úlohy vyžaduje trochu práce.
+\i Před přidáním bodu je třeba situaci prozkoumat, což teprve přidání vnukne.
+\i Totéž jako výše, ale ani po takovém přidání to není snadné.
+\enditems
+
+\secc Standardní úlohy
+
+Následující úlohy jsou zhruba seřazeny podle obtížnosti a používají zhruba řečeno \uv{standardní} triky.
+
+\Problem{0}{}{
+    Pětiúhelník~$ABCDE$ má všechny vnitřní úhly stejné. Dokažte, že osa úsečky~$AB$, osa úsečky~$CD$ a osa úhlu~$DEA$ se protínají v jednom bodě.
+}{
+    Úloha o pěti bodech --- co víc si přát? Paradoxně to nejde bez přidávání bodů. Stejné úhly by měly něco napovědět.
+}{
+    Stejné úhly lze využít protnutím vhodných dvojic prodloužených stran, čímž vzniknou rovnoramenné trojúhelníky. Osy stran mají najednou úplně jiný význam.
+}{}
+
+\Problem{0}{}{
+    Uvnitř trojúhelníku~$ABC$, na jeho těžnici~$AM$, leží bod~$K$ takový, že $|CK|=|AB|$. Nechť~$L$ je průsečík přímek~$CK$ a~$AB$. Dokažte, že trojúhelník~$AKL$ je rovnoramenný.
+}{
+    Bod~$K$ na těžnici vypadá podivně. Každopádně musíme využít, že jde o těžnici, tedy že~$M$ je střed --- ideálně tak, aby nám to pomohlo lépe pochopit rovnost $|AB|=|CK|$.
+}{
+    Klíčem je zrcadlit~$A$ podle~$M$ do~$A'$, což dá bodu~$M$ silný význam, neboť rovnost~$|AB|=|CK|$ se najednou stane~$|A'C|=|CK|$.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABC$ je ostroúhlý trojúhelník s ortocentrem~$H$ a nechť~$M$ je střed~$BC$. Body~$P$ a~$Q$ leží po řadě na stranách~$AB$ a~$AC$ tak, že $P$, $H$, $Q$ leží na jedné přímce kolmé k~$MH$. Dokažte, že $|HP| = |HQ|$.
+}{
+    V úloze máme~$H$, střed~$BC$ a nějak hraje roli i přímka~$MH$. No, co si počneme s tím ortocentrem~\SlightSmile?
+}{
+    Je-li~$H'$ obraz~$H$ ve středové souměrnosti se středem~$M$, pak víme, že padne na kružnici opsanou trojúhelníku~$ABC$ do bodu protilehlého k~$A$. Objevily se nějaké tětivové čtyřúhelníky?
+}{}
+
+\Problem{0}{}{
+    Ve čtyřúhelníku~$ABCD$ svírá přímka spojující středy stran~$BC$ a~$AD$ stejné úhly s oběma úhlopříčkami. Dokažte, že úhlopříčky jsou stejně dlouhé.
+}{
+    Úhel mezi střední příčkou a úhlopříčkou čtyřúhelníku není něco, co bych vídal každý den. Klíčem bude zaměřit se na samotné středy. Co takhle přidat jeden nebo více dalších středů?
+}{
+    Dobrý střed, který přidat, je střed~$AB$ nebo~$CD$. Díky rovnoběžnosti plynoucí ze středních příček dokážeme podmínku ze zadání pěkně přeformulovat. Pak už to dorazíme.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2009}{
+    Nechť $ABCD$ je tětivový čtyřúhelník. Dokažte, že přímka spojující ortocentrum trojúhelníku~$ABC$ s ortocentrem trojúhelníku~$ABD$ je rovnoběžná s přímkou~$CD$.
+}{
+    Ortocentra jsou složité body, pokud narýsujeme všechny výšky. Takové kreslení hned zavrhněte. Jejich obrazy ve vhodných zrcadleních dají situaci lépe pochopit. Pomůže také přeformulovat, co vlastně dokazujeme, aby po zrcadlení ortocenter bylo tvrzení stále jasně vyslovitelné.
+}{
+    Nejprve stačí ukázat, že úsečka spojující ortocentra má stejnou délku jako~$CD$ (pak máme rovnoběžník). Toto zjištění nám dodá jistotu, že když tato ortocentra zrcadlíme podle osy, máme stále dobré tvrzení k dokázání, totiž rovnost dvou tětiv kružnice.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABCD$ je rovnoramenný lichoběžník s $AB \parallel CD$ vepsaný do kružnice se středem~$O$. Nechť~$H$ je ortocentrum trojúhelníku $ABD$ a nechť~$P$ je průsečík~$DH$ a~$AB$. Dokažte, že $CH \parallel OP$.
+}{
+    Máme ortocentrum. Nemusí být hned zřejmé, co s ním, ale co takhle zrcadlit ho podle něčeho?
+}{
+    Nechť~$H'$ je obraz~$H$ v zrcadlení podle~$AB$. Padne na kružnici opsanou čtyřúhelníku~$ABCD$. Teď obrázek obsahuje vše, co potřebujeme, a zbývá jen spojit pár faktů.
+}{}
+
+\Problem{0}{Polsko 2002}{
+    Nechť $ABCD$ je konvexní čtyřúhelník s $|AB|<|BC|$ a $|AD|<|CD|$. Body $P$ a~$Q$ leží po řadě na~$BC$ a~$CD$ tak, že $|BP|=|BA|$ a $|DQ|=|DA|$. Nechť~$M$ je střed~$PQ$. Dokažte, že pokud $|\angle BMD|=90^\circ$, pak je $ABCD$ tětivový čtyřúhelník.
+}{
+    Potřebujeme využít zvláštní podmínku $|\angle BMD|=90^\circ$. Bod~$M$ je střed úsečky, což už něco napovídá, a pravý úhel nápovědu jen zesiluje. Každopádně se vyplatí použít barevné tužky k označení úseček stejné délky.
+}{
+    Klíčem je zrcadlit řekněme~$D$ podle~$M$. Po označení všech stejných úseček vznikajících z výsledného rovnoběžníku a rovnoramenného trojúhelníku by vám mělo něco padnout do oka.
+}{}
+
+\Problem{0}{USA TST 2000}{
+    Nechť $ABCD$ je tětivový čtyřúhelník, jehož úhlopříčky se protínají v~$P$. Nechť~$K$ a~$L$ jsou po řadě paty kolmic z~$P$ na~$AB$ a~$CD$ a nechť~$M$ je střed strany~$AD$. Dokažte, že $|MK|=|ML|$.
+}{
+    Vyplatí se narýsovat úsečku~$AD$ vodorovně (nezvykle), což dá nejlepší obrázek (překreslete hned teď, pokud jste tak neudělali). I v novém obrázku nemusí být jasné, co se má stát. Střed~$AD$ nevypadá, že by se s ním dalo snadno pracovat. Možná potřebuje ke spolupráci nějaké další středy. Ideálně takové, které také souvisejí s body~$K$ a~$L$.
+}{
+    Klíčem jsou zbývající středy stran trojúhelníku~$ABP$. Pak se stane kouzlo a jsme jen pár snadných argumentů od řešení.
+}{}
+
+\Problem{0}{}{
+    Uvnitř rovnoběžníku $ABCD$ leží bod $P$, pro který platí $|\angle APB| + |\angle CPD| = 180^\circ$. Dokažte, že $|\angle PBC|=|\angle PDC|$.
+}{
+    Zkuste posunout bod~$P$ tak, aby podmínka na součet úhlů dávala smysl.
+}{
+    Klíčovým bodem je obraz bodu~$P$ v posunutí ve směru~$AC$ (nebo~$BC$); označme ho~$P'$. Pak máme tětivový čtyřúhelník $CP'DP$ i spoustu rovnoběžníků.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2026}{
+    Je dán konvexní šestiúhelník $ABCDEF$ takový, že $|AB| = |BC|$, $|CD| = |DE| \neq |AD|$, $|EF| = |FA|$, $|\angle BDC| + |\angle EDF| = |\angle FDB|$. Dokažte, že $|\angle CBA| + |\angle EDC| + |\angle AFE| = 360^\circ$.
+}{
+    Podmínka na součet úhlů je klíčová. Potřebujeme zavést bod, který podmínku na součet úhlů využije a udělá ji o něco smysluplnější.
+}{
+    Klíčovým bodem je zrcadlový obraz $C$ podle $BD$, nebo analogicky zrcadlový obraz $E$ podle $DF$. Je to týž bod. A je to vše, co potřebujeme.  Nezapomeňte využít nerovnostní část podmínky $|CD|=|DE| \neq |AD|$. Bez ní úloha neplatí.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2024}{
+    Bod $P$ ležící uvnitř konvexního čtyřúhelníku $ABCD$ splňuje rovnosti
+    $$|\angle PAD| = |\angle ADP| = |\angle CBP| = |\angle PCB| = |\angle CPD|.$$
+    Nechť $O$ je střed kružnice opsané trojúhelníku $CPD$. Dokažte, že $|OA| = |OB|$.
+}{
+    Úhly implikují rovnoběžné přímky. Napovídají správný tah vpřed.
+}{
+    Bodem, který zavést, je průsečík $X$ přímek $BC$ a $AD$, neboť $PCXD$ je teď rovnoběžník. Úlohu lze nyní vyřešit správným pohledem na to, co máme.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2011}{
+    Nechť $ABC$ je ostroúhlý trojúhelník, který není rovnostranný. Nechť~$P$ je pata výšky z~$A$ na stranu~$BC$, $H$ ortocentrum, $O$ střed opsané kružnice, $D$ průsečík polopřímky~$AO$ se stranou~$BC$ a~$E$ střed úsečky~$AD$. Dokažte, že přímka~$EP$ prochází středem úsečky~$OH$.
+}{
+    Situace je poměrně zamotaná a na první pohled toho zajímavého moc neobjevíme. Je v ní však bod~$H$, se kterým můžeme dělat všelijaké zajímavé věci. Která z nich se sem hodí?
+}{
+    Zrcadlete~$H$ podle~$BC$ a získáte~$H'$ ležící na kružnici opsané trojúhelníku~$ABC$. To znamená $|OA| = |OH'|$. Střed~$OH$ se také stane lépe uchopitelným.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABC$ je ostroúhlý trojúhelník vepsaný do kružnice~$k$. Tečna ke~$k$ v bodě~$A$ protíná přímku~$BC$ v~$P$. Nechť~$M$ je střed~$AP$ a nechť~$Q$ je druhý průsečík přímky~$MB$ s~$k$. Dokažte, že $|\angle PQA| = |\angle AQC|$.
+}{
+    Střed~$AP$ je zvláštní bod, který tak úplně nesedí. Ledaže bychom ho použili ke středové souměrnosti a přenesli tak jeden z úhlů, jejichž rovnost dokazujeme.
+}{
+    Dává smysl zrcadlit~$Q$ podle~$M$ a přenést úhel~$PQA$; ten se najednou rovná~$PQ'A$. Dokazované tvrzení nám pak po krátkém počítání úhlů řekne, co stačí ukázat.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABCD$ je lichoběžník s $AB \parallel CD$. Body $K$ a~$L$ leží po řadě na~$AB$ a~$CD$ tak, že $|AK| \cdot |CL| = |BK| \cdot |DL|$. Body $P$ a~$Q$ leží na~$KL$ tak, že $|\angle APB| = |\angle DCB|$ a $|\angle CQD|=|\angle CBA|$. Dokažte, že $B$, $C$, $P$, $Q$ leží na jedné kružnici.
+}{
+    Podmínka na polohy~$K$ a~$L$ je zajímavá. Její přepis do tvaru poměru napovídá, že v tom hraje roli nějaká stejnolehlost. Co takhle v ní něco dalšího zrcadlit?
+}{
+    Uvažte stejnolehlost zobrazující~$AB$ na $DC$; při ní se~$K$ zobrazí na~$L$. Zobrazíme-li při ní~$P$ na~$P'$, pak body $K$, $L$, $P$, $Q$, $P'$ všechny leží na jedné přímce. Úloha se promění v pěkné cvičení na počítání úhlů.
+}{}
+
+\Problem{0}{CPSJ 2019, soutěž družstev}{
+    Nechť $ABCD$ je tětivový čtyřúhelník. Body $K$, $L$, $M$, $N$ leží po řadě na stranách~$AB$, $BC$, $CD$, $DA$ tak, že $|\angle ADK| = |\angle BCK|$, $|\angle BAL| = |\angle CDL|$, $|\angle CBM| = |\angle DAM|$ a $|\angle DCN|=|\angle ABN|$. Dokažte, že $KM \perp LN$.
+}{
+    Narýsujte jen jeden bod, řekněme~$K$, a zkuste lépe pochopit zvláštní úhlovou podmínku, kterou je definován. Přidávání dalších bodů začne dávat smysl teprve tehdy, až něco objevíte.
+}{
+    V obrázku jen s bodem~$K$ lze počítáním úhlů dostat $|\angle BKC|=|\angle KDC|$. Přímka~$AB$ je tedy tečnou ke kružnici opsané trojúhelníku~$KCD$. To připomíná mocnost bodu --- stačí jen přidat bod, ze kterého ji počítáme. Jakmile je tohle jasné, můžeme dopojit zbývající body~$L$, $M$, $N$.
+}{}
+
+\Problem{0}{CAPS 2024, P4}{
+    Nechť $ABCD$ je čtyřúhelník takový, že $|AB| = |BC| = |CD|$. Na polopřímkách $CA$, $BD$ jsou po řadě body $X$, $Y$ takové, že $|BX| = |CY|$. Nechť $P$, $Q$, $R$, $S$ jsou po řadě středy úseček $BX$, $CY$, $XD$, $YA$. Dokažte, že body $P$, $Q$, $R$, $S$ leží na jedné kružnici.
+}{
+    Máme spoustu středů. Zrcadlíme, nebo zavádíme ještě další? Zde dává větší smysl to druhé.
+}{
+    Klíčovým bodem, který zavést, je střed~$XY$, neboť vytvoří spoustu středních příček. A ty dají jasnou cestu, co použít k důkazu toho, že body leží na kružnici.
+}{}
+
+\Problem{0}{}{
+    Úhlopříčky lichoběžníku~$ABCD$ s $AB \parallel CD$ se protínají v~$P$. Bod~$Q$ leží uvnitř trojúhelníku~$BCP$ tak, že $|\angle AQB|= |\angle CQD|$. Dokažte, že $|\angle DQP| = |\angle BAQ|$.
+}{
+    Bod~$Q$ je definován dost libovolně. Nezbývá než přidat nějaký další bod, který přinese smysluplnou strukturu. Sám lichoběžník dává docela dobrou nápovědu.
+}{
+    Zrcadlete~$Q$ ve stejnolehlosti se středem~$P$, která zobrazuje~$AB$ na~$CD$. Najednou se definice~$Q$ promění v něco smysluplného a odnikud máme vše, co potřebujeme --- jen to poskládáme dohromady.
+}{}
+
+\Problem{0}{IMO 2018, P1}{
+    Nechť $ABC$ je ostroúhlý trojúhelník s kružnicí opsanou $\Gamma$. Body $D$ a $E$ leží po řadě uvnitř stran $AB$ a $AC$, přičemž $|AD| = |AE|$. Osy úseček $BD$ a $CE$ protínají kratší oblouky $AB$ a $AC$ kružnice $\Gamma$ po řadě v bodech $F$ a $G$. Dokažte, že přímky $DE$ a $FG$ jsou rovnoběžné (nebo splývají).
+}{
+    Máme $|FB| = |FD|$, ale není jasné, jak to využít. Dává nám to stejné úhly $\angle FBD$ a $\angle FDB$. Zejména ten druhý vypadá osamoceně. Zkuste něco s něčím protnout a přenést tyto úhly někam jinam.
+}{
+    Klíčem je prodloužit úsečku $FD$ na tětivu $\Gamma$ a obdobně prodloužit $GE$ na druhé straně. Najednou dostaneme rovnoramenné trojúhelníky, které dobře souhrají s podmínkou $|AD| = |AE|$. Žádné další body nejsou potřeba --- stane se z toho cvičení na počítání úhlů.
+}{}
+
+\Problem{0}{IMO 2024, P1}{
+    Nechť $ABC$ je trojúhelník takový, že $|AB| < |AC| < |BC|$. Nechť $\omega$ je vepsaná kružnice trojúhelníku $ABC$ a $I$ její střed. Nechť $X$ je bod na přímce $BC$ různý od $C$ takový, že přímka procházející $X$ rovnoběžně s $AC$ se dotýká $\omega$. Podobně nechť $Y$ je bod na přímce $BC$ různý od $B$ takový, že přímka procházející $Y$ rovnoběžně s $AB$ se dotýká $\omega$. Přímka $AI$ protíná kružnici opsanou trojúhelníku $ABC$ podruhé v bodě $P \neq A$. Nechť $K$ a $L$ jsou po řadě středy stran $AC$ a $AB$. Dokažte, že $|\angle KIL| + |\angle YPX| = 180^\circ$.
+}{
+    S těmi rovnoběžnými přímkami máme skoro daný rovnoběžník.
+}{
+    Nechť~$Z$ je průsečík rovnoběžných přímek ze zadání --- pak s využitím stejnolehlosti se středem~$A$ a koeficientem~$2$ máme $|\angle KIL| = |\angle BZC|$. Ty ošklivé středy už nemáme, neboť dokazujeme jen $|\angle BZC| + |\angle YPX| = 180^\circ$.
+}{
+    Klíčem k dotažení úlohy je najít tětivové čtyřúhelníky. Ale aspoň nemusíme zavádět další body.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABC$ je ostroúhlý trojúhelník se středem~$M$ strany~$BC$. Nechť~$P \neq M$ je bod na straně~$BC$. Označme~$Q$ střed oblouku~$AC$ neobsahujícího~$P$ kružnice opsané trojúhelníku~$APC$. Podobně~$R$ je střed oblouku~$AB$ neobsahujícího~$P$ kružnice opsané trojúhelníku~$APB$. Dokažte, že $Q$, $M$, $P$, $R$ leží na jedné kružnici.
+}{
+    Nejproblematičtější bod je~$M$: jako středu mu chybí pěkné úhly kolem něj. Je třeba mu dát lepší význam. Dokazované tvrzení také napovídá, co chceme udělat.
+}{
+    Klíčem je zrcadlit řekněme~$R$ podle~$M$. Pak se vyplatí obarvit úsečky stejné délky; cílem je obarvit další dvojici. Nejsme daleko od kýženého konce.
+}{}
+
+\Problem{0}{IMO 2017, P4}{
+    Nechť~$R$ a~$S$ jsou různé body na kružnici~$k$ a nechť~$t$ značí tečnu ke~$k$ v bodě~$R$. Nechť~$R_0$ je obraz~$R$ ve středové souměrnosti se středem~$S$. Bod~$I$ je zvolen na kratším oblouku~$RS$ kružnice~$k$ tak, že kružnice~$k_0$ opsaná trojúhelníku~$ISR_0$ protíná~$t$ ve dvou různých bodech. Nechť~$A$ je společný bod~$k_0$ a~$t$ bližší k~$R$. Přímka~$AI$ protíná~$k$ znovu v~$J$. Dokažte, že $JR_0$ je tečnou ke~$k_0$.
+}{
+    Bod~$S$ je středem nějaké úsečky a to znemožňuje počítání úhlů. Přesto lze něco počítáním úhlů získat, což může napovědět, jak střed~$S$ použít k definici nového bodu.
+}{
+    Klíčem je objevit $AR_0 \parallel RJ$. To dává docela jasnou nápovědu: obraz~$J$ ve středové souměrnosti se středem~$S$ padne na~$AR_0$. Odtud to dorazíme --- máme vše potřebné pro počítání úhlů.
+}{}
+
+\Problem{0}{IMO 2013, P1}{
+    Nechť~$ABC$ je ostroúhlý trojúhelník s ortocentrem~$H$ a nechť~$W$ je bod na straně~$BC$. Označme~$M$ a~$N$ paty výšek z~$B$ a~$C$ v trojúhelníku~$ABC$. Nechť~$k_1$ je kružnice opsaná trojúhelníku~$BWN$ a nechť~$X$ je bod na~$k_1$ takový, že~$XW$ je průměrem~$k_1$. Analogicky nechť~$k_2$ je kružnice opsaná trojúhelníku~$CWM$ a nechť~$Y$ je bod na~$k_2$ takový, že~$YW$ je průměrem~$k_2$. Dokažte, že $X$, $Y$, $H$ leží na jedné přímce.
+}{
+    Úloha nás skoro vybízí, abychom definovali druhý průsečík kružnic~$k_1$ a~$k_2$. Ten je přirozeně propojí a můžeme také dobře využít jejich průměry.
+}{
+    Je-li~$T$ druhý průsečík~$k_1$ a~$k_2$, pak nám průměry dají pravé úhly, z nichž~$T$, $X$, $Y$ leží na jedné přímce. Důkaz toho, že~$H$ leží na téže přímce, lze přeformulovat jako kolmost. Nezeliminovali jsme náhodou~$X$ a~$Y$?
+}{}
+
+\Problem{0}{IMO 2014, P1}{
+    Na straně~$BC$ ostroúhlého trojúhelníku $ABC$ jsou zvoleny body~$P$ a~$Q$ tak, že $|\angle PAB| = |\angle ACB|$ a $|\angle QAC| = |\angle CBA|$. Body~$M$ a~$N$ leží po řadě na polopřímkách~$AP$ a~$AQ$ tak, že $|AP| = |PM|$ a $|AQ| = |QN|$. Dokažte, že přímky~$BM$ a~$CN$ se protínají na kružnici opsané trojúhelníku~$ABC$.
+}{
+    Body~$Q$ a~$P$ jsou po řadě středy~$AN$ a~$AM$. Tento fakt je sám o sobě těžké využít. Klíčem je definovat nějaké další středy. V nejlepším případě nám tyto středy pomohou eliminovat nepříliš přirozeně vypadající body~$M$ a~$N$.
+}{
+    Definujte středy~$J$ a~$K$ stran~$AC$ a~$AB$. Střední příčky nám dají $BM \parallel KP$ a $CN \parallel QJ$. Zbývá tedy ukázat, že úhel mezi úsečkami~$QJ$ a~$KP$ je $180^\circ - \alpha$. Zdá se, že jsme nepokročili, neboť úhly u těžnic jsou obecně ošklivé. V konfiguraci je však mnoho podobných trojúhelníků.
+}{}
+
+\Problem{0}{ISL 2012, G3}{
+    Nechť $ABC$ je ostroúhlý trojúhelník. Označme $D$, $E$, $F$ paty výšek po řadě z~$A$, $B$, $C$. Nechť~$I_1$ a~$I_2$ jsou po řadě středy vepsaných kružnic trojúhelníků~$BFD$ a~$CED$ a nechť~$O_1$ a~$O_2$ jsou po řadě středy kružnic opsaných trojúhelníkům~$AI_1B$ a~$AI_2C$. Dokažte, že $I_1I_2 \parallel O_1O_2$.
+}{
+    Body~$O_1$ a~$O_2$ vypadají opravdu uměle. A skutečně jsou. Oba lze eliminovat definováním nového bodu a přeformulováním rovnoběžnosti do něčeho jiného. I bez těchto podivných bodů v konfiguraci platí víc, než úloha uvádí, a není to úplně snadné vidět. Vyplatí se to uhodnout.
+}{
+    Nechť~$T$ je druhý průsečík našich dvou kružnic se středy~$O_1$ a~$O_2$. Chceme ukázat, že~$AT$ je kolmé na~$I_1I_2$. To stále není zadarmo. Pomůže uhodnout a dokázat, že $BCI_2I_1$ je tětivový čtyřúhelník.
+}{}
+
+\Problem{0}{MEMO 2012, T6}{
+    Nechť~$ABCD$ je konvexní čtyřúhelník, jehož žádné dvě strany nejsou rovnoběžné a $|\angle ABC| = |\angle CDA|$. Předpokládejme, že po dvou vzaté průsečíky os úhlů u sousedních vrcholů~$ABCD$ tvoří čtyřúhelník~$EFGH$. Nechť~$K$ je průsečík úhlopříček~$EFGH$. Dokažte, že průsečík přímek~$AB$ a~$CD$ leží na kružnici opsané trojúhelníku~$BKD$.
+}{
+    Úloha se rýsuje trochu neohrabaně. Nenechte se zastrašit. Nestandardní úhlová podmínka vypadá, že by mohla něco pěkného znamenat. Znamená --- stačí jen něco protnout. Co se týče os úhlů, nebojte se jich; dvě často implikují třetí a tady jich je spousta.
+}{
+    Nechť~$E$ leží na osách u~$A$ a~$B$, $F$ na osách u~$B$ a~$C$, $G$ na osách u~$C$ a~$D$ a~$H$ na osách u~$D$ a~$A$. Všechny body~$E$, $F$, $G$, $H$ jsou díky osám úhlů středy vepsaných nebo připsaných kružnic nějakých trojúhelníků. Každopádně body~$P$, $F$, $H$ a $Q$, $E$, $G$ leží na jedné přímce a tyto přímky jsou osy úhlů~$\angle CPB$ a~$\angle CQD$. Teď už jsme velmi blízko.
+}{}
+
+\Problem{0}{MEMO 2016, I3}{
+    Nechť~$ABC$ je ostroúhlý trojúhelník se středem opsané kružnice~$O$ a $|\angle BAC| > 45^\circ$. Bod~$P$ leží uvnitř něj tak, že $A$, $P$, $O$, $B$ leží na jedné kružnici a přímka~$BP$ je kolmá na~$CP$. Bod~$Q$ leží na úsečce~$BP$ tak, že~$AQ$ a~$PO$ jsou rovnoběžné. Dokažte, že $|\angle QCB| = |\angle PCO|$.
+}{
+    Je zřejmé, že v úloze něco chybí. Vyplatí se proto nejprve získat lepší obrázek situace přeformulováním tvrzení jako rovnosti nějakých jiných úhlů, ideálně takových, které lze vyjádřit pomocí základních úhlů~$ABC$. To může vnuknout přidání. Nezapomeňme, že úloha stále obsahuje známý indikátor potenciálně dobrých přidání: pravý úhel.
+}{
+    Tvrzení je ekvivalentní $|\angle PCQ|=|\angle OCB|$, což je ekvivalentní $|\angle BAC|=|\angle CQP|$. Takže zrcadlíme-li~$Q$ podle~$P$ do~$Q'$, stačí dokázat, že body leží na jedné kružnici. Ani to není zřejmé, ale v tomto bodě to lze dotáhnout.
+}{}
+
+\Problem{0}{MEMO 2017, I3}{
+    Je dán konvexní pětiúhelník $ABCDE$. Označme $P$ průsečík přímek~$CE$ a~$BD$. Dokažte, že pokud $|\angle PAD| = |\angle ACB|$ a $|\angle CAP| = |\angle EDA|$, pak~$P$ leží na přímce určené středy kružnic opsaných trojúhelníkům~$ABC$ a~$ADE$.
+}{
+    Když nevíme, co dělat, chvíli počítejte úhly. To by nám mělo umožnit najít v obrázku jednoduchou pěknou vlastnost, jež může vnuknout, co přidat.
+}{
+    Klíčem je objevit $BC \parallel DE$. Obrázek obsahuje průsečík~$CE$ a~$BD$. To může vnuknout přidání obrazu~$A$ ve stejnolehlosti zobrazující~$BC$ na~$DE$. Najednou se vše stane krásným.
+}{}
+
+\Problem{0}{IMO 2019, P2}{
+    V trojúhelníku~$ABC$ nechť~$B_1$ je bod na straně~$AC$ a~$C_1$ bod na straně~$AB$. Nechť $P$ a~$Q$ jsou body po řadě na úsečkách~$BB_1$ a~$CC_1$ tak, že přímka~$PQ$ je rovnoběžná s~$BC$. Nechť~$P_1$ je bod na přímce~$PC_1$ takový, že~$C_1$ leží ostře mezi~$P$ a~$P_1$ a $|\angle PP_1A|=|\angle CBA|$. Nechť~$Q_1$ je bod na přímce~$QB_1$ takový, že~$B_1$ leží ostře mezi~$Q$ a~$Q_1$ a $|\angle AQ_1Q|=|\angle ACB|$. Dokažte, že $P$, $Q$, $P_1$, $Q_1$ leží na jedné kružnici.
+}{
+    Cílem je přidat něco, co vyjasní zvláštní úhlovou podmínku pro~$P_1$ a~$Q_1$. Úloha však má příliš mnoho bodů a různé věci, které vypadají slibně, lze přidat bez valné pomoci --- například průsečík~$P_1P$ s~$BC$ nebo~$PQ$ s~$AB$ (zkuste to). Potíž s těmito průsečíky je, že sice dají tětivový čtyřúhelník, ale ten neposkytne žádné další užitečné úhly k přenesení. Je proto lepší protnout nějaké přímky s kružnicí tak, aby to do rovnosti~$|\angle PP_1A|=|\angle CBA|$ vneslo ještě jeden úhel.
+}{
+    Klíčovým kouzelným bodem je druhý průsečík přímky~$BB_1$ s kružnicí opsanou trojúhelníku~$ABC$, nazvěme ho~$C_2$. Díky němu dostaneme $|\angle CBA|=|\angle CC_2A|$, což kouzelně dá tětivový čtyřúhelník $C_1C_2P_1A$. Bod~$B_2$ definujeme analogicky. A věřte nebo ne, teď už je to jen středně těžká úloha na počítání úhlů.
+}{}
+
+\Problem{0}{IMO 2012, P5}{
+    V pravoúhlém trojúhelníku~$ABC$ s pravým úhlem u vrcholu~$A$ nechť~$D$ je pata výšky z~$A$. Nechť~$X$ je libovolný vnitřní bod úsečky~$AD$. Nechť~$K$ je bod na úsečce~$BX$ takový, že $|CK| = |CA|$. Podobně nechť~$L$ je bod na úsečce~$CX$ takový, že $|BL| = |BA|$. Označme~$M$ průsečík přímek~$BL$ a~$CK$. Dokažte, že $|MK| = |ML|$.
+}{
+    V konfiguraci nelze vidět nic smysluplného. Něco se tam skrývá --- ale není snadné vidět přesně co. Jednou z možností je zkusit udělat něco smysluplného s přímkami~$BX$ a~$CX$. Body~$K$ a~$L$ na nich leží a nevidíme, jak to využít. Jednou z možností je protnout je s něčím smysluplným.
+}{
+    Klíčovými body jsou průsečíky~$E$ a~$F$ přímek~$BX$ a~$CX$ s kružnicí nad průměrem~$BC$. Ani ty samotné nestačí --- ale další bod je docela přirozený: průsečík~$G$ přímek~$BF$ a~$CE$. Ten zřejmě leží na přímce~$AXD$ a~$X$ je ortocentrum trojúhelníku~$GBC$. Ačkoli se to tak nemusí zdát, úlohu lze nyní dotáhnout --- kombinací mocnosti bodu, obvodových úhlů a tětivových čtyřúhelníků. I v této fázi to není snadná úloha.
+}{}
+
+\secc Moje oblíbené
+
+Pár konstrukcí, které mi připadají obzvlášť rozkošné. Ne nutně nejtěžší úlohy zde \SlightSmile{}
+
+\Problem{0}{}{
+    Nechť $ABC$ je ostroúhlý trojúhelník. Body $X$, $Y$, $Z$ leží po řadě na výškách z $A$, $B$, $C$, uvnitř trojúhelníku, tak, že $A_{BCX} + A_{CAY} + A_{ABZ} = S_{ABC}$, kde $A_{PQR}$ značí obsah trojúhelníku $PQR$. Dokažte, že kružnice opsaná trojúhelníku $XYZ$ prochází ortocentrem trojúhelníku $ABC$.
+}{
+    Když máme součet obsahů, je lepší ho pěkně interpretovat. Jenže tyto trojúhelníky se nešikovně překrývají. Tak raději tyto obsahy \uv{přesuneme} jinam.
+}{
+    Trik je v tom, že je-li $X'$ libovolný bod na přímce procházející $X$ rovnoběžně s $BC$, pak $A_{BCX}=A_{BCX'}$. Na co nás to navádí?
+}{
+    Zřejmě dává smysl uvážit přímky rovnoběžné se stranami procházející našimi body a protnout je; zvolme přímku procházející $Y$ rovnoběžně s $AC$ a přímku procházející $Z$ rovnoběžně s $AB$ a nechme je protnout v $T$. Co teď říká podmínka na obsahy? Prakticky jsme u cíle.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABC$ je trojúhelník s obvodem $4$. Body $P$ a $Q$ leží po řadě na polopřímkách $AB$ a $AC$ tak, že $|AP| = |AQ| = 1$ a úsečky $BC$ a $PQ$ se protínají v bodě $X$. Dokažte, že jeden ze dvou trojúhelníků, na které $AX$ dělí trojúhelník $ABC$, má obvod $2$.
+}{
+    První trik je vzpomenout si na jedno obzvlášť pěkné místo, kde se v geometrii trojúhelníku objevuje obvod (nebo možná jeho polovina)?
+}{
+    Vzdálenost z $A$ k bodům dotyku kružnice připsané proti vrcholu $A$ je přesně polovina obvodu, tedy 2. A $|AP|=|AQ|=1$. Je to náhoda?
+}{
+    Není to náhoda (jinak bych se neptal). Přímka $DE$ je obrazem $A$-poláry kružnice připsané proti vrcholu $A$ ve stejnolehlosti se středem $A$ a koeficientem $1/2$. Co o této přímce víme?
+}{
+    Inu, tato přímka je chordálou $A$ a kružnice připsané proti vrcholu $A$! A $F$ na ní leží. Blížíme se.
+}{
+    Posledním bodem, který narýsovat, je bod dotyku připsané kružnice a $BC$. S využitím toho, že $F$ leží na této chordále, dostaneme nějaké pěkné stejné délky.
+}{}
+
+\Problem{0}{}{
+    Čtyřúhelník $ABCD$ splňuje $a + b = c + d$, kde $a, b, c, d$ jsou jeho délky stran. Nad každou z jeho stran jako průměrem je sestrojena kružnice. Dokažte, že existuje kružnice dotýkající se všech čtyř z nich.
+}{
+    Představte si kýženou kouzelnou kružnici a zkuste uhodnout, kde by mohl být její střed. Přemýšlejte, kde jsou středy našich čtyř Thaletových kružnic.
+}{
+    Střed kružnice bude středem některé úhlopříčky --- funguje jen jedna z nich, tak zkuste obě a nevzdávejte to.
+}{
+    Vzdálenosti z tohoto středu ke středům Thaletových kružnic plynou z věty o střední příčce. Zbývá spočítat kýžený poloměr a ověřit, že naše kouzelná podmínka ho zaručuje.
+}{}
+
+\Problem{0}{}{
+    Je-li do šestiúhelníku~$ABCDEF$ vepsána kružnice, pak úhlopříčky $AD$, $BE$, $CF$ procházejí jedním bodem.
+}{
+    Narýsujte tři kružnice tak, aby úhlopříčky $AD$, $BE$, $CF$ byly chordálami. Je to záludné.
+}{
+    Jedna z kružnic se dotýká polopřímek opačných k $BA$ a $DE$. Analogicky ostatní. Jediný trik je umístit je tak, aby chordály fungovaly. K tomu rozhodně potřebujeme využít vepsanou kružnici $ABCDEF$.
+}{}
+
+\DisplayHints
+
+\bye

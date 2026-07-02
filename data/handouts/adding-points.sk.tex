@@ -1,0 +1,441 @@
+\input _template
+
+\let\angle\sphericalangle
+
+\setlanguage{SK}
+
+\Title{Pridávanie bodov do obrázka}
+
+\MathcompsLink{pridavanie-bodov}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Všetci poznáme základné metódy riešenia olympiádnej geometrie, ako sú
+
+\begitems
+\i počítanie uhlov a~tetivové štvoruholníky,
+\i zhodnosť a~podobnosť trojuholníkov,
+\i mocnosť bodu a~chordály.
+\enditems
+
+Len ich kombináciou vieme vyriešiť mnoho úloh. Nie vždy je však ľahké prísť na to, ktorú techniku použiť. Všeobecné techniky, ktoré nám pomáhajú, sú
+
+\begitems
+\i preformulovanie zadania,
+\i rozpoznanie známych podtvrdení,
+\i eliminácia bodov,
+\i pridávanie bodov do obrázka.
+\enditems
+
+V~tomto materiáli sa zameriame na tú poslednú a~precvičíme si niekoľko konkrétnych situácií, ktoré sa opakujú v~úlohách všetkých úrovní obťažnosti.
+
+\sec Všeobecné tipy
+
+\secc Kreslenie obrázkov
+
+Jedna z~vecí, ktorá môže rozhodnúť o tom, či úlohu vyriešite alebo nie, je dobrý obrázok. Zopár tipov:
+
+\begitems
+\i kreslite veľké obrázky,
+\i nekreslite rôznostranné trojuholníky ako rovnostranné,
+\i používajte rysovacie pomôcky,
+\i používajte dobre zastrúhané ceruzky a~gumu,
+\i používajte farebné ceruzky (napr. na vyznačenie rovnako dlhých úsečiek),
+\i nekreslite kružnice, kým nemusíte --- ak štyri body ležia na kružnici, stačí si to poznačiť bokom, alebo zafarbiť hrany tetivového štvoruholníka,
+\i pri kreslení kolmice použite namiesto trojuholníka s~ryskou dve kružnice (mne to vždy dávalo presnejšie výsledky),
+\i nekreslite priamky a~oblúky dlhšie, než je nutné --- viac rušivých prvkov znamená, že vidíte menej --- dvakrát si rozmyslite, kým do obrázka nejakú priamku pridáte (alebo kým ju zvýrazníte či zafarbíte),
+\i pomocné čiary priebežne mažte,
+\i pri kreslení presného obrázka smiete použiť tvrdenie, ktoré sa snažíte dokázať, alebo podtvrdenia, ktoré ste už objavili,
+\i prekresľujte často (napr. po preformulovaní), pokojne ten istý obrázok nakreslite viackrát (napr. na overenie hypotéz),
+\i ak presný obrázok nakresliť nejde (napr. úloha má záludné implicitne definované body), nakreslite presne aspoň takú jeho časť, akú viete,
+\i pri kreslení trojuholníka~$ABC$ umiestnite horný vrchol tak, aby situácia vyzerala vizuálne symetricky (v~dobre postavených úlohách je to vrchol~$A$),
+\i niekedy je užitočné umiestniť nejakú netradičnú priamku zvisle alebo vodorovne (napr. uhlopriečku štvoruholníka),
+\i najprv nakreslite hrubý náčrt od ruky a~s~pomôckami začnite až po krátkom zoznámení sa so situáciou (pokiaľ úlohu nevyriešite už z~náčrtu) --- získate tak cit pre to, aký veľký má obrázok byť a~kde ho začať kresliť.
+\enditems
+
+\secc Ako rozmýšľať pri riešení úloh
+
+Keď dostaneme úlohu a~nakreslíme obrázok, začneme analyzovať:
+
+\begitems
+\i Predpokladajme, že tvrdenie, ktoré máme dokázať, platí. Vieme z~toho odvodiť niečo zaujímavé?
+\i Ktoré predpoklady o~definovaných bodoch sme použili a~ktoré nevieme uchopiť? Ide o~uhlové alebo dĺžkové podmienky?
+\i Ktorá časť úlohy sa dá najťažšie uchopiť? Ktoré body pôsobia najľubovoľnejšie?
+\i Predstavte si riešenie. Z~ktorého podtvrdenia by tvrdenie mohlo vyplynúť?
+\i Ktoré uhly určujú konfiguráciu? Ktoré uhly vieme pomocou nich vyjadriť?
+\i Vieme nejaký bod eliminovať preformulovaním situácie?
+\enditems
+
+V~praxi samotná analýza nie vždy prinesie úspech --- inak by to bolo príliš ľahké~\SlightSmile{} So situáciou sa dá ešte pohrať:
+\begitems
+\i Naslepo počítajte nejaké uhly a~pozerajte, čo sa stane. Všímajte si, či sme náhodou nenašli tetivový štvoruholník alebo inú zaujímavú konfiguráciu.
+\i Naslepo napíšte nejaké pomery (napr. z~podobných trojuholníkov) a~skúste ich kombinovať so známymi rovnosťami dĺžok. Všímajte si, či sa novozískané vzťahy dajú interpretovať ako podobnosť dvoch iných trojuholníkov.
+\i Definujte nejaké pekne vyzerajúce body, ktoré by mohli situáciu objasniť alebo o~nej prezradiť niečo zaujímavé (to je to, čo si v~tomto materiáli precvičíme~\SlightSmile{}).
+\i Skúste, ako situácia vyzerá v~špeciálnych prípadoch, alebo skúmajte voľné body v~limitných polohách.
+\enditems
+
+Môžeme si aj vytvárať hypotézy. Dobrá hypotéza je v~mnohých prípadoch kľúčom k~riešeniu ťažkých úloh. Autori úloh sa snažia zo všetkých síl kľúčové tvrdenia skryť a~človek ich často jednoducho musí uhádnuť. Dobre nakreslený obrázok hádanie uľahčuje. Metódy hádania:
+
+\begitems
+\i Hádajte pekné geometrické vlastnosti, najčastejšie tetivové štvoruholníky.
+\i Keď máme tip, overte, či v~nakreslenom obrázku platí aspoň približne.
+\i Potom overte, či ho vieme dokázať, hoci aj pomocou tvrdenia, ktoré máme dokázať --- byť si istý je dôležité.
+\i Predpokladajme, že uhádnuté tvrdenie platí. Čo by sme v~našej situácii vedeli odvodiť? Možno by sme dospeli k~niečomu, čo vo všeobecnosti platiť nemôže? Možno sa úloha dá pomocou neho vyriešiť v~pár krokoch?
+\i Používajte symetrické úvahy --- ak toto platí, tak zo symetrie musí platiť aj niečo iné\dots
+\i Ak hypotézu nevieme dokázať ani vyvrátiť, zapíšte ju do čistopisu slovne. Ak platí a~je podstatná, môže vyniesť body.
+\enditems
+
+\sec Známe podtvrdenia
+
+V~dnešných úlohách budeme potrebovať niekoľko tvrdení, ktoré sú vo všeobecnosti veľmi užitočné a~oplatí sa ich vedieť priamo použiť v~zložitom obrázku. Tu je krátky zoznam niektorých z~tých najdôležitejších, ktoré by nám mohli pomôcť aj pri riešení úloh z~tohto materiálu:
+
+\Theorem{Základné uhly}{Nech $ABC$ je ostrouhlý trojuholník. Potom:
+
+\begitems
+\i ak je $H$ ortocentrum, tak $|\angle BHC| = 180^\circ - \alpha$,
+\i ak je $O$ stred opísanej kružnice, tak $|\angle BOC| = 2\alpha$,
+\i ak je $I$ stred vpísanej kružnice, tak $|\angle BIC| = 90^\circ + \frac\alpha2$,
+\i ak je $I_a$ stred kružnice pripísanej oproti vrcholu~$A$, tak $|\angle BI_aC|=90^\circ-\frac\alpha2$.
+\enditems
+}{}
+
+\Theorem{Švrčkov bod}{Nech $ABC$ je trojuholník so stredom vpísanej kružnice~$I$ a~$|AB|\neq|AC|$. Nech~$I_a$ je stred kružnice pripísanej oproti vrcholu~$A$. Potom sa os uhla~$\angle BAC$ a~os úsečky~$BC$ pretnú na kružnici opísanej trojuholníku~$ABC$ v~bode, ktorý je stredom úsečky~$II_a$ a~zároveň stredom kružnice opísanej štvoruholníku $BICI_a$.}{}
+
+\Theorem{Anti-Švrčkov bod}{Nech $ABC$ je trojuholník s~$|AB|\neq|AC|$. Nech $I_b$ a~$I_c$ sú postupne stredy kružníc pripísaných oproti vrcholom~$B$ a~$C$. Potom sa vonkajšia os uhla~$\angle BAC$ a~os úsečky~$BC$ pretnú na kružnici opísanej trojuholníku~$ABC$ v~bode~$M$, ktorý je stredom úsečky~$I_bI_c$ a~zároveň stredom kružnice opísanej štvoruholníku $BCI_bI_c$.}{}
+
+\Theorem{Špirálna podobnosť chodí po dvoch}{Ak sú trojuholníky~$OBC$ a~$OB_0C_0$ podobné a~rovnako orientované, tak sú podobné aj trojuholníky $OBB_0$ a~$OCC_0$.}{}
+
+\Theorem{Zrkadlenie ortocentra}{Nech $ABC$ je trojuholník s~ortocentrom~$H$. Potom:
+\begitems
+\i zrkadlový obraz~$H$ podľa priamky~$BC$ leží na kružnici opísanej trojuholníku~$ABC$,
+\i zrkadlový obraz~$H$ podľa stredu úsečky~$BC$ leží na kružnici opísanej trojuholníku $ABC$ v~bode diametrálne protiľahlom k~$A$.
+\enditems}{}
+
+\sec Pridávanie bodov do obrázka
+
+Konečne sme pri veci~\SlightSmile{} Pri riešení úlohy sa často stáva, že nevieme poriadne uchopiť nejakú hypotézu alebo tvrdenie, ktoré máme dokázať. Dôvodom môže byť to, že v~obrázku chýbajú všetky body potrebné na vyriešenie úlohy. Autori úloh mávajú vo zvyku kľúčové body skrývať, a~tým úlohy robiť zaujímavými a~často oveľa ťažšími. Vedieť pridať tie správne body je pravé umenie. Zopár všeobecných rád:
+
+\begitems
+\i Body pridávame, aby sme lepšie porozumeli nejakej hypotéze alebo tvrdeniu, ktoré máme dokázať.
+\i Pridávame body, ktoré generujú pekné vlastnosti ako podobnosť, tetivové štvoruholníky, rovnobežnosť, \dots
+\i Pridávame body preto, aby sme mohli odstrániť iné, ťažšie uchopiteľné body.
+\enditems
+
+Existuje niekoľko opakujúcich sa situácií, keď sa vždy oplatí uvažovať o~pridaní nového bodu, keď nič iné nefunguje. V~tomto materiáli precvičujeme najmä tieto:
+
+\begitems \style n
+
+\i Ak sú v~úlohe stredy úsečiek, oplatí sa pridať ďalšie stredy, aby vznikli stredné priečky.
+\i Ak je v~úlohe stred úsečky, obraz v~stredovej súmernosti podľa tohto stredu vytvorí rovnobežník.
+\i Ak je v~úlohe pravouhlý trojuholník, oplatí sa doplniť ho na rovnoramenný trojuholník.
+\i Ak je v~úlohe ortocentrum, oplatí sa zamyslieť nad jeho obrazmi v~zrkadlení podľa strany alebo podľa stredu strany daného trojuholníka.
+\i Ak sú v~úlohe rovnobežné úsečky, oplatí sa uvažovať o~rovnoľahlostiach, ktoré zobrazia jednu úsečku na druhú, a~zrkadliť pomocou nich ďalšie body.
+\i Ak dve kružnice prechádzajú spoločným bodom, zaujímavým bodom môže byť ich druhý priesečník. Vytvorí aspoň chordálu.
+\i Niekedy stačí pretnúť vhodné priamky, alebo vhodnú priamku a~kružnicu. Dôvodov na to môže byť viacero --- napríklad sa môže objaviť rovnoramenný trojuholník alebo tetivový štvoruholník.
+
+\enditems
+
+Tento zoznam ani zďaleka nie je úplný, no na najbližších 24 úloh by mal stačiť. Vo všeobecnosti sú pri pridávaní bodov do obrázka možnosti takmer neobmedzené.
+
+\sec Úlohy
+
+Nasledujúce úlohy sú zhruba štyroch typov:
+
+\begitems \style n
+\i Kľúčovým krokom je pridanie správneho bodu; zvyšok je ľahký.
+\i Pridanie je pomerne priamočiare, ale dotiahnutie úlohy vyžaduje trochu práce.
+\i Pred pridaním bodu treba situáciu preskúmať, čo potom pridanie inšpiruje.
+\i To isté ako vyššie, no ani po takom pridaní to nie je ľahké.
+\enditems
+
+\secc Štandardné úlohy
+
+Nasledujúce úlohy sú zhruba usporiadané podľa obťažnosti a~používajú zhruba povedané \uv{štandardné} triky.
+
+\Problem{0}{}{
+    Päťuholník~$ABCDE$ má všetky vnútorné uhly rovnaké. Dokážte, že os úsečky~$AB$, os úsečky~$CD$ a~os uhla~$DEA$ sa pretínajú v~jednom bode.
+}{
+    Úloha o~piatich bodoch --- čo viac by si človek mohol priať? Paradoxne sa to nedá bez pridania bodov. Rovnaké uhly by mali niečo naznačovať.
+}{
+    Rovnaké uhly sa dajú využiť pretnutím vhodných dvojíc predĺžených strán, čím vzniknú rovnoramenné trojuholníky. Osi strán zrazu majú úplne iný význam.
+}{}
+
+\Problem{0}{}{
+    Vo vnútri trojuholníka~$ABC$, na jeho ťažnici~$AM$, sa nachádza bod~$K$ taký, že $|CK|=|AB|$. Nech~$L$ je priesečník priamok~$CK$ a~$AB$. Dokážte, že trojuholník~$AKL$ je rovnoramenný.
+}{
+    Bod~$K$ na ťažnici vyzerá zvláštne. V~každom prípade potrebujeme využiť fakt, že ide o~ťažnicu, čiže že~$M$ je stred --- ideálne spôsobom, ktorý nám pomôže lepšie pochopiť rovnosť $|AB|=|CK|$.
+}{
+    Kľúčom je zrkadliť~$A$ podľa~$M$ do~$A'$, čo dá bodu~$M$ silný význam, keďže rovnosť~$|AB|=|CK|$ sa zrazu stane~$|A'C|=|CK|$.
+}{}
+
+\Problem{0}{}{
+    Nech $ABC$ je ostrouhlý trojuholník s~ortocentrom~$H$ a~nech~$M$ je stred~$BC$. Body~$P$ a~$Q$ ležia postupne na stranách~$AB$ a~$AC$ tak, že $P$, $H$, $Q$ ležia na jednej priamke kolmej na~$MH$. Dokážte, že $|HP| = |HQ|$.
+}{
+    V~úlohe máme~$H$, stred~$BC$ a~nejakú úlohu hrá aj priamka~$MH$. Nuž, čo urobíme s~tým ortocentrom~\SlightSmile?
+}{
+    Ak~$H'$ je obraz~$H$ v~stredovej súmernosti podľa~$M$, tak vieme, že dopadne na kružnicu opísanú trojuholníku~$ABC$ do bodu protiľahlého k~$A$. Objavili sa nejaké tetivové štvoruholníky?
+}{}
+
+\Problem{0}{}{
+    V~štvoruholníku~$ABCD$ zviera priamka spájajúca stredy strán~$BC$ a~$AD$ rovnaké uhly s~obidvoma uhlopriečkami. Dokážte, že uhlopriečky sú rovnako dlhé.
+}{
+    Uhol medzi strednou priečkou a~uhlopriečkou štvoruholníka nie je niečo, čo by som vídal každý deň. Kľúčom bude zamerať sa na samotné stredy. Čo tak pridať jeden alebo viac ďalších stredov?
+}{
+    Dobrým stredom na pridanie je stred~$AB$ alebo~$CD$. Vďaka rovnobežnosti pochádzajúcej zo stredných priečok vieme podmienku zo zadania pekne preformulovať. Potom to už dorazíme.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2009}{
+    Nech $ABCD$ je tetivový štvoruholník. Dokážte, že priamka spájajúca ortocentrum trojuholníka~$ABC$ s~ortocentrom trojuholníka~$ABD$ je rovnobežná s~priamkou~$CD$.
+}{
+    Ortocentrá sú komplikované body, ak nakreslíme všetky výšky. Takú kresbu okamžite zavrhnite. Ich obrazy vo vhodných zrkadleniach dávajú lepšie pochopenie situácie. Pomáha tiež preformulovať to, čo vlastne dokazujeme, aby sme po zrkadlení ortocentier vedeli tvrdenie stále jasne vysloviť.
+}{
+    Po prvé, stačí ukázať, že úsečka spájajúca ortocentrá má rovnakú dĺžku ako~$CD$ (potom máme rovnobežník). Toto uvedomenie nám dodá istotu, že keď tieto ortocentrá zrkadlíme podľa osi, stále máme dobré tvrdenie na dokázanie, totiž rovnosť dvoch tetív kružnice.
+}{}
+
+\Problem{0}{}{
+    Nech $ABCD$ je rovnoramenný lichobežník s~$AB \parallel CD$ vpísaný do kružnice so stredom~$O$. Nech~$H$ je ortocentrum trojuholníka $ABD$ a~nech~$P$ je priesečník~$DH$ a~$AB$. Dokážte, že $CH \parallel OP$.
+}{
+    Máme ortocentrum. Nemusí byť hneď jasné, čo s~ním, ale čo tak zrkadliť ho podľa niečoho?
+}{
+    Nech~$H'$ je obraz~$H$ v~zrkadlení podľa~$AB$. Dopadne na kružnicu opísanú štvoruholníku~$ABCD$. Teraz obrázok obsahuje všetko, čo potrebujeme, a~zostáva už len pospájať pár faktov.
+}{}
+
+\Problem{0}{Poľsko 2002}{
+    Nech $ABCD$ je konvexný štvoruholník s~$|AB|<|BC|$ a~$|AD|<|CD|$. Body $P$ a~$Q$ ležia postupne na~$BC$ a~$CD$ tak, že $|BP|=|BA|$ a~$|DQ|=|DA|$. Nech~$M$ je stred~$PQ$. Dokážte, že ak $|\angle BMD|=90^\circ$, tak $ABCD$ je tetivový štvoruholník.
+}{
+    Potrebujeme využiť zvláštnu podmienku $|\angle BMD|=90^\circ$. Bod~$M$ je stred úsečky, čo už niečo naznačuje, a~pravý uhol tento náznak len posilňuje. V~každom prípade sa oplatí použiť farebné ceruzky na vyznačenie rovnako dlhých úsečiek.
+}{
+    Kľúčom je zrkadliť napríklad~$D$ podľa~$M$. Po vyznačení všetkých rovnakých úsečiek vznikajúcich z~výsledného rovnobežníka a~rovnoramenného trojuholníka by malo niečo padnúť do oka.
+}{}
+
+\Problem{0}{USA TST 2000}{
+    Nech $ABCD$ je tetivový štvoruholník, ktorého uhlopriečky sa pretínajú v~$P$. Nech~$K$ a~$L$ sú päty kolmíc z~$P$ na~$AB$ a~$CD$ a~nech~$M$ je stred strany~$AD$. Dokážte, že $|MK|=|ML|$.
+}{
+    Oplatí sa nakresliť úsečku~$AD$ vodorovne (netradične), čo dá najlepší obrázok (prekreslite hneď teraz, ak ste tak neurobili). Ani v~novom obrázku nemusí byť jasné, čo sa má stať. Stred~$AD$ nevyzerá jednoducho uchopiteľne. Možno potrebuje na spoluprácu nejaké ďalšie stredy. Ideálne také, ktoré súvisia aj s~bodmi~$K$ a~$L$.
+}{
+    Kľúčom sú zvyšné stredy strán trojuholníka~$ABP$. Potom sa udeje mágia a~od riešenia nás delí len pár ľahkých úvah.
+}{}
+
+\Problem{0}{}{
+    V~rovnobežníku $ABCD$ leží bod~$P$, pre ktorý platí $|\angle APB| + |\angle CPD| = 180^\circ$. Dokážte, že $|\angle PBC|=|\angle PDC|$.
+}{
+    Skúste posunúť bod~$P$ tak, aby podmienka na súčet uhlov dávala zmysel.
+}{
+    Kľúčovým bodom je obraz bodu~$P$ v~posunutí v~smere~$AC$ (alebo~$BC$); označme ho~$P'$. Potom máme tetivový štvoruholník $CP'DP$, ako aj množstvo rovnobežníkov.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2026}{
+    Je daný konvexný šesťuholník $ABCDEF$ taký, že $|AB| = |BC|$, $|CD| = |DE| \neq |AD|$, $|EF| = |FA|$, $|\angle BDC| + |\angle EDF| = |\angle FDB|$. Dokážte, že $|\angle CBA| + |\angle EDC| + |\angle AFE| = 360^\circ$.
+}{
+    Podmienka na súčet uhlov je kľúčová. Potrebujeme zaviesť~bod, ktorý využije podmienku na súčet uhlov a~urobí ju o~niečo zmysluplnejšou.
+}{
+    Kľúčovým bodom je zrkadlový obraz $C$ podľa priamky $BD$, alebo analogicky zrkadlový obraz $E$ podľa priamky $DF$. Je to ten istý bod. A~je to všetko, čo potrebujeme.  Nezabudnite využiť nerovnostnú časť podmienky $|CD|=|DE| \neq |AD|$. Bez nej úloha neplatí.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2024}{
+    Bod $P$ ležiaci vo vnútri konvexného štvoruholníka $ABCD$ spĺňa rovnosti
+    $$|\angle PAD| = |\angle ADP| = |\angle CBP| = |\angle PCB| = |\angle CPD|.$$
+    Nech $O$ je stred kružnice opísanej trojuholníku $CPD$. Dokážte, že $|OA| = |OB|$.
+}{
+    Uhly implikujú rovnobežné priamky. Naznačujú správny ťah vpred.
+}{
+    Bodom na zavedenie je priesečník $X$ priamok $BC$ a $AD$, keďže $PCXD$ je teraz rovnobežník. Úlohu teraz vieme vyriešiť so správnym pohľadom na to, čo máme.
+}{}
+
+\Problem{0}{Česko-slovenská olympiáda 2011}{
+    V~trojuholníku $ABC$, ktorý je ostrouhlý a~nie je rovnostranný, nech~$P$ je päta výšky z~$A$ na stranu~$BC$, $H$ ortocentrum, $O$ stred opísanej kružnice, $D$ priesečník polpriamky~$AO$ so stranou~$BC$ a~$E$ stred úsečky~$AD$. Dokážte, že priamka~$EP$ prechádza stredom úsečky~$OH$.
+}{
+    Situácia je pomerne zamotaná a~na prvý pohľad sa nedá objaviť veľa zaujímavého. Je v~nej však bod~$H$, s~ktorým vieme robiť rôzne zaujímavé veci. Ktorá z~nich sa sem hodí?
+}{
+    Zrkadlite~$H$ podľa~$BC$, čím získate~$H'$ ležiaci na kružnici opísanej trojuholníku~$ABC$. To znamená $|OA| = |OH'|$. Aj stred úsečky~$OH$ sa stane uchopiteľnejším.
+}{}
+
+\Problem{0}{}{
+    Nech $ABC$ je ostrouhlý trojuholník vpísaný do kružnice~$k$. Dotyčnica ku~$k$ v~bode~$A$ pretína priamku~$BC$ v~$P$. Nech~$M$ je stred~$AP$ a~nech~$Q$ je druhý priesečník priamky~$MB$ s~$k$. Dokážte, že $|\angle PQA| = |\angle AQC|$.
+}{
+    Stred~$AP$ je zvláštny bod, ktorý akosi nesedí. Iba že by sme ho použili na stredovú súmernosť, ktorou preneseme jeden z~uhlov, ktorých rovnosť dokazujeme.
+}{
+    Dáva zmysel zrkadliť~$Q$ podľa~$M$, aby sme preniesli uhol~$PQA$; zrazu sa rovná~$PQ'A$. Tvrdenie, ktoré máme dokázať, nám potom po krátkom počítaní uhlov povie, čo stačí ukázať.
+}{}
+
+\Problem{0}{}{
+    Nech $ABCD$ je lichobežník s~$AB \parallel CD$. Body $K$ a~$L$ ležia postupne na~$AB$ a~$CD$ tak, že $|AK| \cdot |CL| = |BK| \cdot |DL|$. Body $P$ a~$Q$ ležia na~$KL$ tak, že $|\angle APB| = |\angle DCB|$ a~$|\angle CQD|=|\angle CBA|$. Dokážte, že $B$, $C$, $P$, $Q$ ležia na jednej kružnici.
+}{
+    Podmienka na polohy~$K$ a~$L$ je zaujímavá. Jej prepis do tvaru pomeru naznačuje, že v~hre je nejaká rovnoľahlosť. Čo tak zrkadliť pomocou nej niečo ďalšie?
+}{
+    Uvažujte rovnoľahlosť zobrazujúcu~$AB$ na $DC$; pri nej sa~$K$ zobrazí na~$L$. Ak pri nej zobrazíme~$P$ na~$P'$, tak body $K$, $L$, $P$, $Q$, $P'$ všetky ležia na jednej priamke. Úloha sa zmení na pekné cvičenie z~počítania uhlov.
+}{}
+
+\Problem{0}{CPSJ 2019, súťaž družstiev}{
+    Nech $ABCD$ je tetivový štvoruholník. Body $K$, $L$, $M$, $N$ ležia postupne na stranách~$AB$, $BC$, $CD$, $DA$ tak, že $|\angle ADK| = |\angle BCK|$, $|\angle BAL| = |\angle CDL|$, $|\angle CBM| = |\angle DAM|$ a~$|\angle DCN|=|\angle ABN|$. Dokážte, že $KM \perp LN$.
+}{
+    Nakreslite len jeden bod, povedzme~$K$, a~skúste lepšie pochopiť zvláštnu uhlovú podmienku, ktorou je definovaný. Pridávanie ďalších bodov začne dávať zmysel až vtedy, keď niečo objavíte.
+}{
+    V~obrázku len s~bodom~$K$ vieme počítaním uhlov dostať $|\angle BKC|=|\angle KDC|$. Priamka~$AB$ je preto dotyčnicou ku kružnici opísanej~$KCD$. To pripomína mocnosť bodu --- treba len pridať bod, z~ktorého ju počítame. Keď je toto jasné, vieme pospájať zvyšné body~$L$, $M$, $N$.
+}{}
+
+\Problem{0}{CAPS 2024, P4}{
+    Nech $ABCD$ je štvoruholník taký, že $|AB| = |BC| = |CD|$. Na polpriamkach $CA$, $BD$ sú postupne body $X$, $Y$ také, že $|BX| = |CY|$. Nech $P$, $Q$, $R$, $S$ sú stredy úsečiek $BX$, $CY$, $XD$, $YA$. Dokážte, že body $P$, $Q$, $R$, $S$ ležia na jednej kružnici.
+}{
+    Máme veľa stredov. Zrkadlíme, alebo zavedieme ešte viac? Tu dáva viac zmyslu to druhé.
+}{
+    Kľúčovým bodom na zavedenie je stred~$XY$, keďže vytvorí veľa stredných priečok. A~tie dajú~jasnú cestu k~tomu, čo použiť na dôkaz toho, že body ležia na jednej kružnici.
+}{}
+
+\Problem{0}{}{
+    Uhlopriečky lichobežníka~$ABCD$ s~$AB \parallel CD$ sa pretínajú v~$P$. Bod~$Q$ leží vo vnútri trojuholníka~$BCP$ tak, že $|\angle AQB|= |\angle CQD|$. Dokážte, že $|\angle DQP| = |\angle BAQ|$.
+}{
+    Bod~$Q$ je definovaný pomerne ľubovoľne. Nezostáva než pridať nejaký ďalší bod, ktorý prinesie zmysluplnú štruktúru. Samotný lichobežník dáva celkom dobrý náznak.
+}{
+    Zrkadlite~$Q$ v~rovnoľahlosti so stredom~$P$, ktorá zobrazuje~$AB$ na~$CD$. Zrazu sa definícia~$Q$ zmení na niečo zmysluplné a~z~ničoho nič máme všetko, čo potrebujeme --- už to len pospájame.
+}{}
+
+\Problem{0}{IMO 2018, P1}{
+    Nech $ABC$ je ostrouhlý trojuholník s~opísanou kružnicou $\Gamma$. Body $D$ a $E$ ležia vo vnútri strán $AB$ a $AC$ tak, že $|AD| = |AE|$. Osi úsečiek $BD$ a $CE$ pretínajú kratšie oblúky $AB$ a $AC$ kružnice $\Gamma$ postupne v~bodoch $F$ a $G$. Dokážte, že priamky $DE$ a $FG$ sú rovnobežné (alebo splývajú).
+}{
+    Máme $|FB| = |FD|$, ale nie je jasné, ako to využiť. Dáva nám to rovnaké uhly $|\angle FBD|$ a $|\angle FDB|$. Najmä ten druhý vyzerá osamotene. Skúste pretnúť niečo s~niečím, aby ste tieto uhly niekam preniesli.
+}{
+    Kľúčom je predĺžiť úsečku $FD$ na tetivu $\Gamma$ a~podobne predĺžiť $GE$ na druhej strane. Zrazu dostaneme rovnoramenné trojuholníky, ktoré dobre interagujú s~podmienkou $|AD| = |AE|$. Ďalšie body netreba --- stane sa z~toho cvičenie z~počítania uhlov.
+}{}
+
+\Problem{0}{IMO 2024, P1}{
+    Nech $ABC$ je trojuholník taký, že $|AB| < |AC| < |BC|$. Nech $\omega$ je kružnica vpísaná trojuholníku $ABC$ a $I$ jej stred. Nech $X$ je bod na priamke $BC$ rôzny od $C$ taký, že priamka prechádzajúca bodom $X$ rovnobežne s~$AC$ sa dotýka $\omega$. Podobne nech $Y$ je bod na priamke $BC$ rôzny od $B$ taký, že priamka prechádzajúca bodom $Y$ rovnobežne s~$AB$ sa dotýka $\omega$. Priamka $AI$ pretína kružnicu opísanú trojuholníku $ABC$ druhýkrát v~bode $P \neq A$. Nech $K$ a $L$ sú stredy strán $AC$ a $AB$. Dokážte, že $|\angle KIL| + |\angle YPX| = 180^\circ$.
+}{
+    Tými rovnobežnými priamkami máme skoro daný rovnobežník.
+}{
+    Nech~$Z$ je priesečník rovnobežných priamok zo zadania --- potom pomocou rovnoľahlosti so stredom~$A$ a~koeficientom~$2$ máme, že $|\angle KIL| = |\angle BZC|$. Tie škaredé stredy už nemáme, lebo dokazujeme len $|\angle BZC| + |\angle YPX| = 180^\circ$.
+}{
+    Kľúčom k~dotiahnutiu úlohy je nájsť tetivové štvoruholníky. Ale aspoň netreba zavádzať viac bodov.
+}{}
+
+\Problem{0}{}{
+    Nech $ABC$ je ostrouhlý trojuholník so stredom~$M$ strany~$BC$. Nech~$P \neq M$ je bod na strane~$BC$. Označme~$Q$ stred oblúka~$AC$ neobsahujúceho~$P$ kružnice opísanej trojuholníku~$APC$. Podobne~$R$ je stred oblúka~$AB$ neobsahujúceho~$P$ kružnice opísanej trojuholníku~$APB$. Dokážte, že $Q, M, P, R$ ležia na jednej kružnici.
+}{
+    Najproblematickejším bodom je~$M$: ako stred nemá okolo seba pekné uhly. Treba mu dať lepší význam. Aj tvrdenie, ktoré máme dokázať, naznačuje, čo chceme urobiť.
+}{
+    Kľúčom je zrkadliť napríklad~$R$ podľa~$M$. Potom sa oplatí zafarbiť rovnako dlhé úsečky; cieľom je zafarbiť ďalšiu dvojicu. Od želaného konca nie sme ďaleko.
+}{}
+
+\Problem{0}{IMO 2017, P4}{
+    Nech~$R$ a~$S$ sú rôzne body na kružnici~$k$ a~nech~$t$ označuje dotyčnicu ku~$k$ v~bode~$R$. Nech~$R_0$ je zrkadlový obraz~$R$ podľa~$S$. Bod~$I$ je zvolený na kratšom oblúku~$RS$ kružnice~$k$ tak, že kružnica~$k_0$ opísaná trojuholníku~$ISR_0$ pretína~$t$ v~dvoch rôznych bodoch. Nech~$A$ je spoločný bod~$k_0$ a~$t$ bližší k~$R$. Priamka~$AI$ pretína~$k$ znova v~$J$. Dokážte, že $JR_0$ je dotyčnicou ku~$k_0$.
+}{
+    Bod~$S$ je stred nejakej úsečky a~to robí počítanie uhlov neuskutočniteľným. Napriek tomu sa niečo počítaním uhlov dá, čo môže naznačiť, ako pomocou stredu~$S$ definovať nový bod.
+}{
+    Kľúčom je objaviť $AR_0 \parallel RJ$. To dáva celkom jasný náznak: obraz~$J$ v~stredovej súmernosti podľa~$S$ dopadne na~$AR_0$. Odtiaľto to dorazíme --- na počítanie uhlov máme všetko potrebné.
+}{}
+
+\Problem{0}{IMO 2013, P1}{
+    Nech~$ABC$ je ostrouhlý trojuholník s~ortocentrom~$H$ a~nech~$W$ je bod na strane~$BC$. Označme~$M$ a~$N$ päty výšok z~$B$ a~$C$ v~trojuholníku~$ABC$. Nech~$k_1$ je kružnica opísaná trojuholníku~$BWN$ a~nech~$X$ je bod na~$k_1$ taký, že~$XW$ je priemer~$k_1$. Analogicky nech~$k_2$ je kružnica opísaná trojuholníku~$CWM$ a~nech~$Y$ je bod na~$k_2$ taký, že~$YW$ je priemer~$k_2$. Dokážte, že $X$, $Y$, $H$ ležia na jednej priamke.
+}{
+    Úloha nás takmer pozýva definovať druhý priesečník kružníc~$k_1$ a~$k_2$. To ich prirodzene poprepletá a~vieme tiež dobre využiť ich priemery.
+}{
+    Ak~$T$ je druhý priesečník~$k_1$ a~$k_2$, tak priemery nám dajú pravé uhly, z~ktorých~$T$, $X$, $Y$ ležia na jednej priamke. Dôkaz, že~$H$ tiež leží na tejto priamke, sa dá preformulovať ako kolmosť. Neeliminovali sme náhodou~$X$ a~$Y$?
+}{}
+
+\Problem{0}{IMO 2014, P1}{
+    Body~$P$ a~$Q$ sú zvolené na strane~$BC$ ostrouhlého trojuholníka $ABC$ tak, že $|\angle PAB| = |\angle ACB|$ a~$|\angle QAC| = |\angle CBA|$. Body~$M$ a~$N$ ležia postupne na polpriamkach~$AP$ a~$AQ$ tak, že $|AP| = |PM|$ a~$|AQ| = |QN|$. Dokážte, že priamky~$BM$ a~$CN$ sa pretínajú na kružnici opísanej trojuholníku~$ABC$.
+}{
+    Body~$Q$ a~$P$ sú stredy~$AN$ a~$AM$. Tento fakt sa sám o~sebe využíva ťažko. Kľúčom je definovať nejaké ďalšie stredy. V~najlepšom prípade nám tieto stredy pomôžu eliminovať nie práve prirodzene vyzerajúce body~$M$ a~$N$.
+}{
+    Definujte stredy~$J$ a~$K$ strán~$AC$ a~$AB$. Stredné priečky nám dajú $BM \parallel KP$ a~$CN \parallel QJ$. Takže treba ukázať, že uhol medzi úsečkami~$QJ$ a~$KP$ je $180^\circ - \alpha$. Zdá sa, že sme nepokročili, keďže uhly pri ťažniciach sú vo všeobecnosti škaredé. V~konfigurácii je však množstvo podobných trojuholníkov.
+}{}
+
+\Problem{0}{ISL 2012, G3}{
+    Nech $ABC$ je ostrouhlý trojuholník. Označme $D$, $E$, $F$ päty výšok z~$A$, $B$, $C$. Nech~$I_1$ a~$I_2$ sú stredy kružníc vpísaných trojuholníkom~$BFD$ a~$CED$ a~nech~$O_1$ a~$O_2$ sú stredy kružníc opísaných trojuholníkom~$AI_1B$ a~$AI_2C$. Dokážte, že $I_1I_2 \parallel O_1O_2$.
+}{
+    Body~$O_1$ a~$O_2$ vyzerajú naozaj umelo. Naozaj také aj sú. Oba sa dajú eliminovať definovaním nového bodu a~preformulovaním rovnobežnosti na niečo iné. Aj bez týchto zvláštnych bodov v~konfigurácii platí viac, než úloha tvrdí, a~nie je to celkom ľahko vidieť. Oplatí sa to uhádnuť.
+}{
+    Nech~$T$ je druhý priesečník našich dvoch kružníc so stredmi~$O_1$ a~$O_2$. Chceme ukázať, že~$AT$ je kolmé na~$I_1I_2$. To stále nie je zadarmo. Pomáha uhádnuť a~dokázať, že $BCI_2I_1$ je tetivový štvoruholník.
+}{}
+
+\Problem{0}{MEMO 2012, T6}{
+    Nech~$ABCD$ je konvexný štvoruholník, ktorého žiadne dve strany nie sú rovnobežné, a~$|\angle ABC| = |\angle CDA|$. Predpokladajme, že vzájomné priesečníky osí uhlov pri susedných vrcholoch~$ABCD$ tvoria štvoruholník~$EFGH$. Nech~$K$ je priesečník uhlopriečok~$EFGH$. Dokážte, že priesečník priamok~$AB$ a~$CD$ leží na kružnici opísanej trojuholníku~$BKD$.
+}{
+    Úlohu je trochu neohrabané kresliť. Nedajte sa zastrašiť. Neštandardná uhlová podmienka vyzerá, akoby mohla znamenať niečo pekné. Aj znamená --- treba len niečo pretnúť. Čo sa týka osí uhlov, nebojte sa ich; dve často implikujú tretiu a~tu ich je habadej.
+}{
+    Nech~$E$ leží na osiach uhlov pri~$A$ a~$B$, $F$ na osiach pri~$B$ a~$C$, $G$ na osiach pri~$C$ a~$D$ a~$H$ na osiach pri~$D$ a~$A$. Všetky body~$E$, $F$, $G$, $H$ sú stredy vpísaných alebo pripísaných kružníc nejakých trojuholníkov vďaka osiam uhlov. V~každom prípade body~$P$, $F$, $H$ a $Q$, $E$, $G$ ležia na jednej priamke a~tieto priamky sú osami uhlov~$\angle CPB$ a~$\angle CQD$. Sme už veľmi blízko.
+}{}
+
+\Problem{0}{MEMO 2016, I3}{
+    Nech~$ABC$ je ostrouhlý trojuholník so stredom opísanej kružnice~$O$ a~$|\angle BAC| > 45^\circ$. Bod~$P$ leží v~jeho vnútri tak, že $A$, $P$, $O$, $B$ ležia na jednej kružnici a~priamka~$BP$ je kolmá na~$CP$. Bod~$Q$ leží na úsečke~$BP$ tak, že~$AQ$ a~$PO$ sú rovnobežné. Dokážte, že $|\angle QCB| = |\angle PCO|$.
+}{
+    Je zjavné, že v~úlohe niečo chýba. Oplatí sa preto najprv získať lepší obraz situácie preformulovaním tvrdenia na rovnosť nejakých iných uhlov, ideálne takých, ktoré sa dajú vyjadriť pomocou základných uhlov~$ABC$. To môže inšpirovať pridanie. Nezabúdajme, že úloha stále obsahuje známy indikátor potenciálne dobrých pridaní: pravý uhol.
+}{
+    Tvrdenie je ekvivalentné s~$|\angle PCQ|=|\angle OCB|$, čo je ekvivalentné s~$|\angle BAC|=|\angle CQP|$. Takže ak zrkadlíme~$Q$ podľa~$P$ do~$Q'$, stačí dokázať, že body ležia na jednej kružnici. Ani to nie je zjavné, no v~tomto bode sa to dá dotiahnuť.
+}{}
+
+\Problem{0}{MEMO 2017, I3}{
+    V~konvexnom päťuholníku $ABCDE$ označme~$P$ priesečník priamok~$CE$ a~$BD$. Dokážte, že ak $|\angle PAD| = |\angle ACB|$ a~$|\angle CAP| = |\angle EDA|$, tak~$P$ leží na priamke určenej stredmi kružníc opísaných trojuholníkom~$ABC$ a~$ADE$.
+}{
+    Keď nevieme, čo robiť, chvíľu počítajme uhly. To by nám malo umožniť nájsť v~obrázku jednoduchú peknú vlastnosť, ktorá môže inšpirovať, čo pridať.
+}{
+    Kľúčom je objaviť $BC \parallel DE$. Obrázok obsahuje priesečník~$CE$ a~$BD$. To môže inšpirovať pridanie obrazu~$A$ v~rovnoľahlosti zobrazujúcej~$BC$ na~$DE$. Zrazu sa všetko stane krásnym.
+}{}
+
+\Problem{0}{IMO 2019, P2}{
+    V~trojuholníku~$ABC$ nech~$B_1$ je bod na strane~$AC$ a~$C_1$ bod na strane~$AB$. Nech $P$ a~$Q$ sú body na úsečkách~$BB_1$ a~$CC_1$ tak, že priamka~$PQ$ je rovnobežná s~$BC$. Nech~$P_1$ je bod na priamke~$PC_1$ taký, že~$C_1$ leží striktne medzi~$P$ a~$P_1$ a~$|\angle PP_1A|=|\angle CBA|$. Nech~$Q_1$ je bod na priamke~$QB_1$ taký, že~$B_1$ leží striktne medzi~$Q$ a~$Q_1$ a~$|\angle AQ_1Q|=|\angle ACB|$. Dokážte, že $P$, $Q$, $P_1$, $Q_1$ ležia na jednej kružnici.
+}{
+    Cieľom je pridať niečo, čo objasní zvláštnu uhlovú podmienku pre~$P_1$ a~$Q_1$. Úloha má však priveľa bodov a~rôzne veci, ktoré vyzerajú sľubne, sa dajú pridať bez väčšieho úžitku --- napríklad priesečník~$P_1P$ s~$BC$ alebo~$PQ$ s~$AB$ (skúste to). Problém s~týmito priesečníkmi je, že hoci dávajú tetivový štvoruholník, neposkytujú žiadne ďalšie užitočné uhly na prenesenie. Je preto lepšie pretnúť nejaké priamky s~kružnicou tak, aby to do rovnosti~$|\angle PP_1A|=|\angle CBA|$ prinieslo ešte jeden uhol.
+}{
+    Kľúčovým magickým bodom je druhý priesečník~$C_2$ priamky~$BB_1$ s~kružnicou opísanou trojuholníku~$ABC$. Vďaka nemu dostaneme $|\angle CBA|=|\angle CC_2A|$. Magicky tak vznikne tetivový štvoruholník~$C_1C_2P_1A$. Analogicky definujeme~$B_2$. A~verte či nie, teraz je to už len stredne ťažká úloha na počítanie uhlov.
+}{}
+
+\Problem{0}{IMO 2012, P5}{
+    V~pravouhlom trojuholníku~$ABC$ s~pravým uhlom pri vrchole~$A$ nech~$D$ je päta výšky z~$A$. Nech~$X$ je ľubovoľný vnútorný bod úsečky~$AD$. Nech~$K$ je bod na úsečke~$BX$ taký, že $|CK| = |CA|$. Podobne nech~$L$ je bod na úsečke~$CX$ taký, že $|BL| = |BA|$. Označme~$M$ priesečník priamok~$BL$ a~$CK$. Dokážte, že $|MK| = |ML|$.
+}{
+    V~konfigurácii nevidieť nič zmysluplné. Niečo je tam skryté --- no nie je ľahké vidieť, čo presne. Jednou možnosťou je skúsiť urobiť niečo zmysluplné s~priamkami~$BX$ a~$CX$. Body~$K$ a~$L$ na nich ležia a~nevidíme, ako to využiť. Jednou možnosťou je pretnúť ich s~niečím zmysluplným.
+}{
+    Kľúčovými bodmi sú priesečníky~$E$ a~$F$ priamok~$BX$ a~$CX$ s~kružnicou nad priemerom~$BC$. Ani tie samy osebe nestačia --- no ďalší bod je celkom prirodzený: priesečník~$G$ priamok~$BF$ a~$CE$. Zjavne leží na priamke~$AXD$ a~$X$ je ortocentrum trojuholníka~$GBC$. Hoci sa to tak nemusí zdať, úloha sa teraz dá dotiahnuť --- kombináciou mocnosti bodu, obvodových uhlov a~tetivových štvoruholníkov. Ani v~tomto štádiu to nie je ľahká úloha.
+}{}
+
+\secc Moje obľúbené
+
+Zopár konštrukcií, ktoré mi prídu obzvlášť rozkošné. Nie nutne najťažšie úlohy tu \SlightSmile{}
+
+\Problem{0}{}{
+    Nech $ABC$ je ostrouhlý trojuholník. Body $X$, $Y$, $Z$ ležia postupne na výškach z $A$, $B$, $C$, vo vnútri trojuholníka, tak, že $A_{BCX} + A_{CAY} + A_{ABZ} = S_{ABC}$, kde $A_{PQR}$ označuje obsah trojuholníka $PQR$. Dokážte, že kružnica opísaná trojuholníku $XYZ$ prechádza ortocentrom trojuholníka $ABC$.
+}{
+    Keď máme súčet obsahov, je lepšie ho pekne interpretovať. Tieto trojuholníky sa však neohrabane prekrývajú. Tak radšej tieto obsahy \uv{presuňme} inam.
+}{
+    Trik je v~tom, že ak $X'$ je ľubovoľný bod na priamke prechádzajúcej bodom $X$ rovnobežne s $BC$, tak $A_{BCX}=A_{BCX'}$. Na čo nás toto navádza?
+}{
+    Očividne dáva zmysel uvažovať priamky rovnobežné so stranami, prechádzajúce našimi bodmi, a~pretnúť ich; zvoľme priamku cez $Y$ rovnobežnú s $AC$ a~priamku cez $Z$ rovnobežnú s $AB$ a~nechajme ich pretnúť v $T$. Čo hovorí obsahová podmienka teraz? Sme prakticky pri cieli.
+}{}
+
+\Problem{0}{}{
+    Nech $ABC$ je trojuholník s~obvodom $4$. Body $P$ a $Q$ ležia postupne na polpriamkach $AB$ a $AC$ tak, že $|AP| = |AQ| = 1$ a~úsečky $BC$ a $PQ$ sa pretínajú v~bode $X$. Dokážte, že jeden z~dvoch trojuholníkov, na ktoré $AX$ delí trojuholník $ABC$, má obvod $2$.
+}{
+    Prvý trik je spomenúť si na jedno obzvlášť pekné miesto, kde sa v~geometrii trojuholníka vyskytuje obvod (alebo azda jeho polovica)?
+}{
+    Vzdialenosť z $A$ do dotykových bodov kružnice pripísanej oproti vrcholu $A$ je presne polovica obvodu, teda 2. A~$|AP|=|AQ|=1$. Je to náhoda?
+}{
+    Nie je to náhoda (inak by som sa nepýtal). Priamka $DE$ je obrazom $A$-poláry kružnice pripísanej oproti vrcholu $A$ v~rovnoľahlosti so stredom $A$ a~koeficientom $1/2$. Čo o~tejto priamke vieme?
+}{
+    Nuž, táto priamka je chordálou $A$ a~kružnice pripísanej oproti vrcholu $A$! A~$F$ na nej leží. Blížime sa.
+}{
+    Posledným bodom na nakreslenie je dotykový bod pripísanej kružnice a $BC$. Využitím faktu, že $F$ leží na tejto chordále, dostaneme nejaké pekné rovnosti dĺžok.
+}{}
+
+\Problem{0}{}{
+    Štvoruholník $ABCD$ spĺňa $a + b = c + d$, kde $a, b, c, d$ sú dĺžky jeho strán. Nad každou z~jeho strán ako priemerom sú zostrojené kružnice. Dokážte, že existuje kružnica dotýkajúca sa všetkých štyroch z~nich.
+}{
+    Predstavte si želanú magickú kružnicu a~skúste uhádnuť, kde by mohol byť jej stred. Zamyslite sa nad tým, kde sú stredy našich štyroch Tálesových kružníc.
+}{
+    Stredom kružnice bude stred jednej z~uhlopriečok --- funguje len jedna z~nich, tak skúste obe a~nevzdávajte sa.
+}{
+    Vzdialenosti z~tohto stredu do stredov Tálesových kružníc vyplývajú z~vety o~strednej priečke. Zostáva vypočítať želaný polomer a~overiť, že naša magická podmienka ho zaručuje.
+}{}
+
+\Problem{0}{}{
+    Ak je do šesťuholníka~$ABCDEF$ vpísaná kružnica, tak sa uhlopriečky~$AD$, $BE$, $CF$ pretínajú v~jednom bode.
+}{
+    Nakreslite tri kružnice tak, aby uhlopriečky $AD$, $BE$, $CF$ boli chordálami. Je to záludné.
+}{
+    Jedna z~kružníc sa dotýka polpriamok opačných k $BA$ a $DE$. Analogicky ostatné. Jediný trik je umiestniť ich tak, aby chordály fungovali. Na to určite potrebujeme použiť kružnicu vpísanú šesťuholníku $ABCDEF$.
+}{}
+
+\DisplayHints
+
+\bye

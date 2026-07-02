@@ -1,0 +1,302 @@
+\input _template
+
+\setlanguage{SK}
+
+\Title{Rovnaké dotyčnice}
+
+\MathcompsLink{rovnake-dotycnice}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+V tomto letáku si ukážeme užitočnosť riešiteľskej techniky nazývanej \textit{rovnaké dotyčnice}. Opiera sa o~tie najzrejmejšie fakty, no úlohy, ktoré sa ňou dajú vyriešiť, môžu byť poriadne neintuitívne, a~preto sa budeme veľa venovať základom.
+
+\sec Teória
+
+\textit{Dohoda.} V celom tomto letáku, keď je $ABC$ trojuholník, píšeme $a = |BC|$, $b = |CA|$, $c = |AB|$ pre dĺžky jeho strán a~$s = \frac{a + b + c}{2}$ pre polovicu jeho obvodu.
+
+\Theorem{}{
+    Nech je daná kružnica a~z bodu $A$ vedieme k~nej dve dotyčnice. Dotykové body označme $X$, $Y$. Potom $|AX| = |AY|$.
+
+    \Image{equal-tangents-two-from-point.pdf}
+}{}
+
+\Theorem{}{
+    Nech $p$ a~$q$ sú spoločné vonkajšie dotyčnice dvoch kružníc $k_1$ a~$k_2$. Predpokladajme, že $p$ sa dotýka $k_1$ v~$A$ a~$k_2$ v~$B$ a~$q$ sa ich dotýka v~$C$ a~$D$. Potom $|AB| = |CD|$.
+
+    \Image{equal-tangents-external-equal.pdf}
+}{}
+
+\Theorem{}{
+    V predchádzajúcom nastavení predpokladajme naviac, že $k_1$ a~$k_2$ sú disjunktné, a~nech $r$ je spoločná vnútorná dotyčnica kružníc $k_1$ a~$k_2$, ktorá pretína $p$ v~$X$ a~$q$ v~$Y$. Potom $|XY| = |AB|$.
+
+    \Image{equal-tangents-internal-equals-external.pdf}
+}{}
+
+\Theorem{}{
+    Vpísaná kružnica trojuholníka $ABC$ sa dotýka strán $BC$, $CA$, $AB$ v~bodoch $D$, $E$, $F$. Potom $|AE| = |AF| = s - a = \frac{b + c - a}{2}$ a~podobne pre ostatné dva vrcholy.
+
+    \Image{equal-tangents-incircle.pdf}
+}{}
+
+\Theorem{}{
+    Nech $ABC$ je pravouhlý trojuholník s~pravým uhlom pri vrchole $C$ a~nech $r$ je polomer jeho vpísanej kružnice. Potom
+    $$
+    r = s - c = \frac{a + b - c}{2}.
+    $$
+
+    \Image{equal-tangents-right-inradius.pdf}
+}{}
+
+\Theorem{}{
+    Nech sa kružnica pripísaná trojuholníku $ABC$ oproti vrcholu $A$ dotýka priamok $BC$, $CA$, $AB$ v~bodoch $D$, $E$, $F$. Potom $|AE| = |AF| = s = \frac{a + b + c}{2}$.
+
+    \Image{equal-tangents-excircle-from-a.pdf}
+}{}
+
+\Theorem{}{
+    V predchádzajúcom nastavení platí $|BD| = |BF| = s - c = \frac{a + b - c}{2}$ a~$|CD| = |CE| = s - b = \frac{a + c - b}{2}$.
+
+    \Image{equal-tangents-excircle-from-b-c.pdf}
+}{}
+
+\Theorem{}{
+    V predchádzajúcom nastavení sú body, v~ktorých sa vpísaná kružnica trojuholníka $ABC$ a~táto pripísaná kružnica dotýkajú priamky $BC$, symetrické podľa stredu strany $BC$.
+
+    \Image{equal-tangents-excircle-symmetry.pdf}
+}{}
+
+\Definition{Dotyčnicový štvoruholník}{
+    Štvoruholník sa nazýva \textit{dotyčnicový}, ak má vpísanú kružnicu, teda kružnicu dotýkajúcu sa všetkých jeho štyroch strán.
+
+    \Image{equal-tangents-pitot.pdf}
+}
+
+\Theorem{Pitotova veta}{
+    Konvexný štvoruholník $ABCD$ je dotyčnicový práve vtedy, keď $|AB| + |CD| = |BC| + |AD|$.
+}{}
+
+\sec Úlohy
+
+\Problem{0}{DuoGeo 2025}{
+    V trojuholníku $ABC$ nech $D$ je päta výšky z~vrcholu $C$, pričom $D$ leží na úsečke $AB$. Predpokladajme, že $|AC| + |BC|$ spolu s~priemermi vpísaných kružníc trojuholníkov $ADC$ a~$BDC$ dávajú v~súčte $26$ a~že $|CD| = 6$. Nájdite obsah trojuholníka $ABC$.
+}{
+    Jeden zo vzorcov, ktoré treba poznať, hovorí, ako vypočítať polomer vpísanej kružnice pravouhlého trojuholníka; v~našej úlohe máme ich dvojnásobky.
+}{
+    Ak je polomer vpísanej kružnice trojuholníka $ACD$ rovný $r_1$ a~polomer vpísanej kružnice trojuholníka $BCD$ je $r_2$, tak $2r_1=(|AD|+|CD|-|AC|)$ a~$2r_2=(|BD|+|CD|-|BC|)$. Ich sčítanie a~trochu úprav by nám mali dať posledný chýbajúci kúsok do výpočtu obsahu.
+}{}
+
+\Problem{0}{MO 61-C-II-3}{
+    Nech $E$ je stred strany $CD$ rovnobežníka $ABCD$, ktorý spĺňa $2\cdot|AB| = 3\cdot|BC|$. Dokážte, že ak má štvoruholník $ABCE$ vpísanú kružnicu, tak sa táto kružnica dotýka strany $BC$ v~jej strede.
+}{
+    Ak $|AB|=a$, tak $|BC|=2a/3$, $|CE|=a/2$. Vieme, že $ABCE$ je dotyčnicový. Čo vieme vyjadriť ďalej?
+}{
+    Mali by sme dostať $|AE|=|AB|+|CE|-|BC|=a+a/2-2a/3=5a/6$. Čo ešte vieme vyjadriť pomocou $a$?
+}{
+    Zjavne $|AD|=|BC|=2a/3$ a~$|DE|=|CE|=a/2$. Poznáme všetky strany trojuholníka $ADE$ pomocou $a$. Nevyzerajú podozrivo? Jeden pekný trik, ktorý je pri práci so zlomkami vo všeobecnosti užitočný, je zbaviť sa ich škálovaním -- označme $a=6x$. Aké sú teraz strany?
+}{
+    Mali by sme dostať, že $|AD|=4x$, $|DE|=3x$ a~$|AE|=5x$, čiže skrytý pravouhlý trojuholník so stranami 3-4-5. Takže náš rovnobežník je vlastne obdĺžnik. Teraz by už malo byť ľahké úlohu dokončiť.
+}{}
+
+\Problem{0}{Náboj 2008}{
+    Nech $k$ je kružnica so stredom $S$ a~polomerom $1$ a~nech $P$ je bod s~$|PS| = 3$. Z~bodu $P$ vedieme dve dotyčnice ku $k$, ktoré sa jej dotýkajú v~bodoch $A$ a~$B$. Zvoľme ľubovoľný bod $T$ na kratšom oblúku $AB$ kružnice $k$ a~zostrojme dotyčnicu ku $k$ v~bode $T$. Táto dotyčnica pretína úsečky $AP$ a~$BP$ v~bodoch $X$ a~$Y$. Nájdite obvod trojuholníka $PXY$.
+}{
+    Naša kružnica má vzťah k~trojuholníku $PXY$, aký?
+}{
+    Je jeho kružnicou pripísanou oproti vrcholu $P$. To by nám malo dať dobrú predstavu, ako sa dá obvod $PXY$ interpretovať.
+}{
+    Pripomeňme si, že v~našich bežných konfiguráciách platí $|PA|=|PB|$, čo je polovica obvodu $PXY$. Takže stačí vypočítať $|PA|$.
+}{}
+
+\Problem{0}{}{
+    Nech $ABCD$ je dotyčnicový štvoruholník. Dokážte, že vpísané kružnice trojuholníkov $ABC$ a~$ADC$ sa dotýkajú uhlopriečky $AC$ v~tom istom bode.
+}{
+    Nech $X$ je dotykový bod vpísanej kružnice trojuholníka $ABC$ s~$AC$ a~$X'$ dotykový bod vpísanej kružnice trojuholníka $ADC$ s~$AC$. Stačí nám dokázať $|AX|=|AX'|$. Oba sú pekné výrazy.
+}{
+    Jediný trik je použiť vzorce typu $s-a$ v~trojuholníkoch $ABC$ a~$ADC$. Malo by nám zostať niečo, kde vieme použiť dotyčnicovosť.
+}{}
+
+\Problem{0}{MO 63-B-I-3}{
+    Na priamke $BC$ sú vyznačené tri body, v~ktorých sa pripísané kružnice trojuholníka $ABC$ dotýkajú tejto priamky; polohy samotných bodov $B$ a~$C$ nie sú dané. Nájdite bod, v~ktorom sa vpísaná kružnica trojuholníka $ABC$ dotýka priamky $BC$.
+}{
+    Nech sa kružnica pripísaná oproti vrcholu $C$ dotýka $BC$ v~$D$, pripísaná oproti $B$ v~$E$ a~pripísaná oproti $A$ v~$F$. Skús vyjadriť niektoré dĺžky pomocou našich vzorcov typu $s-a$.
+}{
+    Trik je uvedomiť si, že $|DB|=|CE|=s-a$. Čo to znamená? A~čo vieme o~$F$ a~o~dotykovom bode vpísanej kružnice?
+}{}
+
+\Problem{0}{}{
+    Ku vpísanej kružnici trojuholníka sú zostrojené tri dotyčnice, každá z~nich odrezáva pri jednom z~vrcholov menší trojuholník. Predpokladajme, že tieto menšie trojuholníky majú obvody $1$, $2$ a~$3$. Dokážte, že pôvodný trojuholník je pravouhlý.
+}{
+    Nech je náš trojuholník $ABC$. Začnime jednou dotyčnicou, ktorá odrezáva trojuholník $AXY$. Ak sa naň pozrieme, čím je preň vpísaná kružnica trojuholníka $ABC$?
+}{
+    Kľúčové je uvedomiť si, že vpísaná kružnica je pripísanou kružnicou trojuholníka $AXY$ oproti vrcholu $A$. Čo nám to hovorí o~hodnote jeho obvodu?
+}{
+    To nám dáva, že polovica obvodu $AXY$ je vlastne vzdialenosť od $A$ k~dotykovým bodom vpísanej kružnice na $AB$, $AC$, teda $s-a$.
+}{
+    Posledným krokom je vyriešiť $s-a=1/2$, $s-b=1$, $s-c=3/2$ pre $a$, $b$, $c$.
+}{}
+
+\Problem{0}{MO 54-A-S-2}{
+    Nech $ABCD$ je rovnobežník s~$|AB| > |BC|$. Nech $K$ a~$M$ sú body, v~ktorých sa vpísané kružnice trojuholníkov $ACD$ a~$ABC$ dotýkajú uhlopriečky $AC$, a~nech $L$ a~$N$ sú analogicky definované pre trojuholníky $BCD$ a~$ABD$ dotýkajúce sa uhlopriečky $BD$. Dokážte, že $KLMN$ je obdĺžnik.
+}{
+    Rovnobežník je symetrický podľa priesečníka uhlopriečok. Čo to znamená pre $KLMN$?
+}{
+    Pri symetrii rovnobežníka sa zobrazia aj vpísané kružnice, a~tak aj ich dotykové body. Teda ak $P$ je priesečník uhlopriečok, tak $|PK|=|PM|$ a~$|PN|=|PL|$. Čo to znamená a~čo zostáva ukázať?
+}{
+    Máme, že $KLMN$ je rovnobežník. Aby sme ukázali, že je to naozaj obdĺžnik, stačí ukázať, že jeho uhlopriečky sú rovnaké.
+}{
+    Pozrime sa na $KM$. Rovná sa $|AC|-|AK|-|CM|$. Vďaka symetrii je to $|AC|-2|AK|$. Ale $|AK|$ vieme vyjadriť pomocou našich vzorcov typu $s-a$.
+}{}
+
+\Problem{0}{MO 64-A-I-5}{
+    V trojuholníku $ABC$ nech $D$ je bod, v~ktorom sa vpísaná kružnica dotýka strany $BC$. Vpísaná kružnica trojuholníka $ABD$ sa dotýka strán $AB$ a~$BD$ v~bodoch $K$ a~$L$ a~vpísaná kružnica trojuholníka $ADC$ sa dotýka strán $DC$ a~$AC$ v~bodoch $M$ a~$N$. Dokážte, že body $K$, $L$, $M$, $N$ ležia na jednej kružnici.
+}{
+    Ak by naše body ležali na kružnici, čo by bolo jej stredom?
+}{
+    Pozri sa na osi úsečiek $KL$ a~$MN$. Čo sú a~kde sa pretínajú?
+}{
+    Vďaka $|BK|=|BL|$ a~$|CM|=|CN|$ musia byť osami uhlov pri $B$ a~$C$ v~trojuholníku $ABC$, takže by sa mali pretínať v~$I$. Preto zostáva dokázať, že $|IM|=|IL|$.
+}{
+    Keďže $D$ je dotykový bod vpísanej kružnice, platí $ID \perp BC$. Čo potrebujeme dokázať, aby sme dokázali $|IM|=|IL|$?
+}{
+    Posledným krokom je dokázať $|DM|=|DL|$. Ale to bude ľahké s~naším vzorcom typu $s-a$.
+}{
+    Stačí ukázať $(|BD|+|AD|-|AB|)/2=(|CD|+|AD|-|AC|)/2$. Ale $|BD|$, $|CD|$ vieme ľahko vypočítať pomocou $a$, $b$, $c$.
+}{}
+
+\Problem{0}{}{
+    Hovoríme, že štvoruholník $ABCD$ má pripísanú kružnicu oproti vrcholu $A$, ak je vpísaná do uhla $BAD$, dotýka sa priamok $BC$ a~$CD$ a~leží mimo štvoruholníka. Dokážte, že pre taký štvoruholník platí $|AB| + |CB| = |AD| + |CD|$.
+}{
+    Dotykové body kružnice s~$AB$, $BC$, $CD$, $DA$ označme $A'$, $B'$, $C'$, $D'$. Skús vyhodnotiť $|AB|+|BC|$ pomocou rovnakých dotyčníc.
+}{
+    Výpočet začína $|AB|+|BC|=|AA'|-|BA'|+|BC|$.
+}{
+    Nechajme $|AA'|$ nedotknuté a~urobme niečo s~$|BA'|$, čo nám pomôže využiť člen $+|BC|$.
+}{
+    Ďalší krok je $|BA'|=|BB'|=|BC|+|CB'|$. To dáva $|AB|+|BC|=|AA'|-|CB'|$. Teraz by $|AD|+|CD|$ malo dať niečo podobné.
+}{}
+
+\Problem{0}{MO 49-A-I-2}{
+    Nech $K$, $L$, $M$ sú vnútorné body strán $BC$, $CA$, $AB$ trojuholníka $ABC$, zvolené tak, že vpísané kružnice trojuholníkov $ABK$ a~$CAK$ sa dotýkajú zvonka, vpísané kružnice $BCL$ a~$ABL$ sa dotýkajú zvonka a~vpísané kružnice $CAM$ a~$BCM$ sa dotýkajú zvonka. Dokážte, že
+    $$
+    |BK| \cdot |CL| \cdot |AM| = |CK| \cdot |AL| \cdot |BM|.
+    $$
+}{
+    Najprv zabudni na $L$ a~$M$ a~nakresli len obrázok s~$K$. Dĺžku $|BK|$ vieme vyjadriť pomocou $a$, $b$, $c$ a~to bude všetko.
+}{
+    Nech~$D$ je spoločný dotykový bod. Dĺžku $|AD|$ vieme vyjadriť dvomi spôsobmi pomocou vzorca typu $s-a$ v~$ABK$ aj v~$AKC$. Porovnaj tieto výrazy.
+}{
+    Po ich porovnaní by sme mali dostať $|AD|=(c+|AK|-|BK|)/2$ z~$ABK$ a~$|AD|=(b+|AK|-|CK|)/2$ z~toho druhého. Polož ich do rovnosti a~použi aj $|BK|+|CK|$. Čo to dá pre $|BK|$?
+}{}
+
+\Problem{0}{}{
+    Na každej strane konvexného štvoruholníka sú zvolené dva body a~dvojice protiľahlých bodov sú spojené úsečkami tak, že sa spájajúce úsečky nekrížia. Pôvodný štvoruholník je tým rozdelený na deväť menších štvoruholníkov. Ukážte, že ak má každý zo štyroch rohových štvoruholníkov a~stredný štvoruholník vpísanú kružnicu, tak ju má aj pôvodný štvoruholník.
+
+    \Image{equal-tangents-checkerboard.pdf}
+}{
+    Potrebujeme dokázať $|AB|+|CD|=|BC|+|AD|$. Rohové kružnice označme $w_a, w_b, w_c, w_d$ (pomenované podľa najbližšieho vrcholu $ABCD$) a~strednú kružnicu $\omega$. Skús vyjadriť každú stranu $ABCD$ pomocou jednoduchších častí.
+}{
+    Strana $AB$ obsahuje dotyčnicový úsek z~$A$ ku $w_a$, dotyčnicový úsek z~$B$ ku $w_b$ a~časť medzi nimi. Tá celá stredná časť je len spoločná vonkajšia dotyčnica $w_a$ a~$w_b$ pozdĺž priamky $AB$. Rozlož zvyšné tri strany rovnako a~pomocou rovnakých dotyčníc zredukuj, čo potrebujeme dokázať.
+}{
+    Trik je v~tom, že dĺžka dotyčnice z~$A$ ku $w_a$ je súčasťou $AB$ aj $AD$, a~podobne pre ostatné rohy. Takže stačí dokázať niečo o~vonkajších dotyčniciach.
+}{
+    Nech $d(x,y)$ označuje dĺžku vonkajšej dotyčnice dvoch rohových kružníc pozdĺž tej strany $ABCD$, ktorej sa obe dotýkajú. Zostáva nám dokázať $d(w_a,w_b)+d(w_c,w_d)=d(w_b,w_c)+d(w_a,w_d)$. Aby sme to dosiahli, musíme tieto dĺžky nájsť inde než na stranách $ABCD$. Tu prichádza na scénu $\omega$.
+}{
+    Každá dvojica susediacich rohových kružníc sa dotýka aj jednej zo štyroch vnútorných úsečiek --- tej, ktorá ohraničuje okrajovú bunku zdieľanú týmito dvomi rohmi voči strednej bunke. Preneste každú zo štyroch vonkajších dotyčníc na zodpovedajúcu vnútornú úsečku pomocou rovnakých dotyčníc.
+}{
+    Na každej vnútornej úsečke teraz prenesená dotyčnica prechádza cez dva vrcholy strednej bunky, kde sa dotýka aj $\omega$. Rovnaké dotyčnice z~týchto vrcholov rozdelia každý prenesený kúsok na dve polovice, ktoré sa zhodujú s~polovicami na susediacich vnútorných úsečkách, presne tak, ako sa rohové dotyčnice zhodovali v~$A$, $B$, $C$, $D$ na vonkajšej hranici. Tie štyri kúsky sa potom po dvojiciach vyrušia a~sme hotoví.
+}{}
+
+\Problem{0}{}{
+    Nech $ABC$ je trojuholník s~polomerom vpísanej kružnice $r$ a~nech $\omega$ je kružnica s~polomerom $\rho < r$ vpísaná do uhla $BAC$. Druhé dotyčnice z~$B$ a~$C$ ku $\omega$ (iné než $AB$ a~$AC$) sa pretínajú v~bode $X$. Dokážte, že vpísaná kružnica trojuholníka $BCX$ sa dotýka vpísanej kružnice trojuholníka $ABC$.
+}{
+    Nech~$P$ je dotykový bod vpísanej kružnice trojuholníka $BCX$ s~$BC$. Chceme vyjadriť $|BP|$ pomocou $a$, $b$, $c$ (konkrétne dokázať $|BP|=s-b$).
+}{
+    Dotykové body vpísanej kružnice trojuholníka $BXC$ s~$BX$, $CX$ označme $K$, $L$ a~dotykové body $BX$ a~$CX$ s~$\omega$ ako $M$ a~$N$. Výpočet začína $|BP| = |BK| = |BM|-|KM|$.
+}{
+    Ďalší krok je uvedomiť si, že $|KM|=|LN|$ a~tiež $|BM|=|BW|$. To dáva $|BP| = |BW|-|LN|$. Dĺžka $|BW|$ je pekná, lebo je na strane $AB$. Ale $|LN|$ vieme tiež preniesť tam.
+}{
+    Všimni si $|LN|=|CN|-|CL| = |CV|-|CP|$. Takže máme $|BP|=|BW|-|CV|+|CP|$. Blížime sa.
+}{
+    Vezmi $|BW|=|AB|-|AW|$, $|CV|=|AC|-|AV|$, $|CP|=|BC|-|BP|$. Jeden jednoduchý krok od dokončenia.
+}{}
+
+\Problem{0}{USAMO 1991}{
+    Nech $D$ je bod na strane $BC$ trojuholníka $ABC$. Do trojuholníkov $BDA$ a~$DCA$ vpíšme kružnice. Ich spoločná vonkajšia dotyčnica iná než $BC$ pretína $AD$ v~bode $X$. Určte množinu bodov $X$, keď $D$ prebieha po strane $BC$.
+}{
+    Kľúčom je správna hypotéza -- uváž hraničné prípady, keď $D=B$ a~$D=C$. Nenaznačuje to niečo?
+}{
+    V špeciálnych prípadoch vychádza $|AX|$ rovnako, konkrétne rovné $s-a$. Možno je odpoveďou kružnica so stredom $A$ a~týmto polomerom?
+}{
+    Dotykové body vpísanej kružnice trojuholníka $ABD$ s~$BD$, $AB$ označme $P$, $R$; dotykové body vpísanej kružnice trojuholníka $ACD$ s~$CD$, $CA$ označme $Q$, $S$. Vieme, že chceme dokázať $|AX|=s-a$. Prvé zjednodušenie je použiť $|AX|=|AD|-|DX|$ a~spomenúť si na jednu z~viet, ktorá hovorí, čomu sa $|DX|$ rovná.
+}{
+    Máme $|DX|=|PQ|$, takže $|AX|=|AD|-|DX|=|AD|-|PQ|$. S~$|AD|$ už viac nespravíme, tak sa zamerajme na $|PQ|$.
+}{
+    Máme $|PQ| = |DP|+|DQ|$, a~teda $|AX| = |AD|-|DP|-|DQ|$. Ale to je v~poriadku. Čomu sa rovnajú $|PD|$ a~$|DQ|$?
+}{
+    Dĺžku $|DP|$ vieme vyjadriť pomocou vzorca typu $s-a$ v~$ABD$, podobne $|QD|$.
+}{}
+
+\Problem{1}{IMO 2021, P4}{
+    Nech $ABCD$ je dotyčnicový štvoruholník s~vpísanou kružnicou so stredom $I$ a~nech $\Omega$ je opísaná kružnica trojuholníka $AIC$. Predĺženia $BA$ a~$BC$ za body $A$ a~$C$ pretínajú $\Omega$ v~bodoch $X$ a~$Z$ a~predĺženia $AD$ a~$CD$ za bodom $D$ pretínajú $\Omega$ v~bodoch $Y$ a~$T$. Dokážte, že
+    $$
+    |AD| + |DT| + |TX| + |XA| = |CD| + |DY| + |YZ| + |ZC|.
+    $$
+}{
+    Máme dotyčnice, tak sa zdá, že vieme urobiť trochu mágie s~rovnakými dotyčnicami. Skoro, treba si niečo uvedomiť. Skús naslepo odvodzovať pekné vlastnosti.
+}{
+    Kľúčom je nájsť zhodné trojuholníky. Použi kružnicu prechádzajúcu bodmi $A, I, C, X, Y, T, Z$, aby si na to prišiel.
+}{
+    Nech $P, Q, R, S$ sú dotykové body vpísanej kružnice na $AB$, $BC$, $CD$, $DA$. Skús dokázať, že trojuholníky $IQZ$ a~$IRT$ sú zhodné.
+}{
+    Rovnosť uhlov pri $Z$ a~$T$ vieme dostať počítaním uhlov. Uhly pri $Q$ a~$R$ sú pravé, takže zhodnosť nasleduje. Existuje niekde inde podobná zhodnosť?
+}{
+    V skutočnosti aj $IPX$ a~$ISY$ sú zhodné. Tieto dve zhodnosti spolu dávajú rovnosti úsečiek potrebné na záverečný výpočet.
+}{}
+
+\Problem{1}{IMO Shortlist 2005, G1}{
+    Nech $ABC$ je trojuholník so stredom vpísanej kružnice $I$, ktorý spĺňa $|AC| + |BC| = 3|AB|$, a~nech $D$, $E$ sú body, v~ktorých sa vpísaná kružnica dotýka strán $BC$ a~$CA$. Nech $K$ a~$L$ sú obrazy bodov $D$ a~$E$ v~stredovej súmernosti podľa $I$. Dokážte, že body $A$, $B$, $K$, $L$ ležia na jednej kružnici.
+}{
+    Prvú nápovedu dostaneme po tom, ako nakreslíme dokonalý obrázok a~uvedomíme si, že $I$ leží na kružnici s~$A, B, K, L$. A~kružnica cez $AIB$ nám dá nápovedu, čo nakresliť ďalej: čím ešte prechádza?
+}{
+    Kružnica $A, I, B$ prechádza stredom kružnice pripísanej oproti $A$, teda $I_a$. Nakreslime teda kružnicu pripísanú oproti $A$.
+}{
+    Záhadná podmienka $|AC|+|BC|=3|AB|$ dáva väčší zmysel, keď zavedieme dotykové body kružnice pripísanej oproti $A$ s~$CB$ a~$CA$. Čas na trochu počítania s~rovnakými dotyčnicami.
+}{
+    Ukáž, že naša podmienka je ekvivalentná tomu, že $D$ je stredom $CD'$, podobne pre $E$. Aké sú dôsledky v~obrázku?
+}{
+    Zdôvodni, že $|I_aD'| = 2|ID|$. To konečne dáva nápovedu, čo robiť s~$K$. Teraz sme blízko k~dokončeniu.
+}{}
+
+\Problem{2}{}{
+    Nech $ABC$ je trojuholník s~obvodom $4$. Body $X$ a~$Y$ ležia na polpriamkach $AB$ a~$AC$ tak, že $|AX| = |AY| = 1$ a~úsečky $BC$ a~$XY$ sa pretínajú v~bode $F$. Dokážte, že jeden z~dvoch trojuholníkov, na ktoré $AF$ rozdelí trojuholník $ABC$, má obvod $2$.
+}{
+    Prvý trik je spomenúť si na jedno obzvlášť pekné miesto, kde sa v~geometrii trojuholníka nejako objavuje obvod. Určite sme ho v~tomto letáku videli.
+}{
+    Vzdialenosť od $A$ k~dotykovým bodom kružnice pripísanej oproti $A$ je presne polovica obvodu, teda 2. A~$|AX|=|AY|=1$. Je to náhoda?
+}{
+    Nech sa kružnica pripísaná oproti $A$ dotýka $AB$ a~$AC$ v~$D$ a~$E$. Máme $|AD|=|AE|=2$ a~$|AX|=|AY|=1$, a~tak je priamka $DE$ obrazom $A$-poláry kružnice pripísanej oproti $A$ v~rovnoľahlosti so stredom $A$ a~koeficientom $1/2$. Čo o~tejto priamke vieme?
+}{
+    Priamka $XY$ je chordála bodu $A$ a~kružnice pripísanej oproti $A$! A~$F$ na nej leží. Blížime sa.
+}{
+    Posledný bod, ktorý nakreslíme, je dotykový bod pripísanej kružnice a~$BC$. Použitím faktu, že $F$ leží na tejto chordále, dostaneme nejaké pekné rovnaké dĺžky.
+}{}
+
+\Problem{2}{Brianchonova veta}{
+    Ak je šesťuholník $ABCDEF$ opísaný kružnici (t.j. každá z~jeho šiestich strán sa dotýka kružnice), tak jeho tri hlavné uhlopriečky $AD$, $BE$, $CF$ sa pretínajú v~jednom bode.
+}{
+    Nakresli tri kružnice tak, aby uhlopriečky $AD$, $BE$, $CF$ boli chordály. Je to zákerné.
+}{
+    Jedna z~kružníc sa dotýka polpriamok opačných k~$BA$ a~$DE$. Analogicky ostatné. Jediný trik je umiestniť ich tak, aby chordály fungovali.
+}{
+    Skús ich umiestniť tak, aby dĺžky vonkajších dotyčníc ku každej kružnici a~vpísanej kružnici $ABCDEF$ boli rovnaké.
+}{}
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

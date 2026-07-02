@@ -1,0 +1,302 @@
+\input _template
+
+\setlanguage{CS}
+
+\Title{Stejné tečny}
+
+\MathcompsLink{stejne-tecny}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \textit{stejné tečny}. Opírá se o~ty nejzřejmější fakty, avšak úlohy, které se dají vyřešit jedině pomocí ní, mohou být hodně nezřejmé, a~proto se hodně zaměříme na základy.
+
+\sec Teorie
+
+\textit{Konvence.} V~celém tomto materiálu, kdykoli je $ABC$ trojúhelník, píšeme $a = |BC|$, $b = |CA|$, $c = |AB|$ pro délky jeho stran a~$s = \frac{a + b + c}{2}$ pro polovinu jeho obvodu.
+
+\Theorem{}{
+    Je dána kružnice a~z~bodu $A$ jsou k~ní vedeny dvě tečny. Body dotyku označme $X$, $Y$. Pak $|AX| = |AY|$.
+
+    \Image{equal-tangents-two-from-point.pdf}
+}{}
+
+\Theorem{}{
+    Nechť $p$ a~$q$ jsou společné vnější tečny dvou kružnic $k_1$ a~$k_2$. Předpokládejme, že $p$ se dotýká $k_1$ v~$A$ a~$k_2$ v~$B$ a~$q$ se jich dotýká v~$C$ a~$D$. Pak $|AB| = |CD|$.
+
+    \Image{equal-tangents-external-equal.pdf}
+}{}
+
+\Theorem{}{
+    V~předchozím nastavení navíc předpokládejme, že $k_1$ a~$k_2$ jsou disjunktní, a~nechť $r$ je společná vnitřní tečna kružnic $k_1$ a~$k_2$ protínající $p$ v~$X$ a~$q$ v~$Y$. Pak $|XY| = |AB|$.
+
+    \Image{equal-tangents-internal-equals-external.pdf}
+}{}
+
+\Theorem{}{
+    Vepsaná kružnice trojúhelníku $ABC$ se dotýká stran $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$. Pak $|AE| = |AF| = s - a = \frac{b + c - a}{2}$ a~podobně pro zbylé dva vrcholy.
+
+    \Image{equal-tangents-incircle.pdf}
+}{}
+
+\Theorem{}{
+    Nechť $ABC$ je pravoúhlý trojúhelník s~pravým úhlem při vrcholu $C$ a~nechť $r$ je poloměr jeho vepsané kružnice. Pak
+    $$
+    r = s - c = \frac{a + b - c}{2}.
+    $$
+
+    \Image{equal-tangents-right-inradius.pdf}
+}{}
+
+\Theorem{}{
+    Nechť se kružnice připsaná trojúhelníku $ABC$ proti vrcholu $A$ dotýká přímek $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$. Pak $|AE| = |AF| = s = \frac{a + b + c}{2}$.
+
+    \Image{equal-tangents-excircle-from-a.pdf}
+}{}
+
+\Theorem{}{
+    V~předchozím nastavení platí $|BD| = |BF| = s - c = \frac{a + b - c}{2}$ a~$|CD| = |CE| = s - b = \frac{a + c - b}{2}$.
+
+    \Image{equal-tangents-excircle-from-b-c.pdf}
+}{}
+
+\Theorem{}{
+    V~předchozím nastavení jsou body, ve kterých se vepsaná kružnice trojúhelníku $ABC$ a~tato připsaná kružnice dotýkají přímky $BC$, symetrické vzhledem ke~středu $BC$.
+
+    \Image{equal-tangents-excircle-symmetry.pdf}
+}{}
+
+\Definition{Tečnový čtyřúhelník}{
+    Čtyřúhelník nazýváme \textit{tečnový}, pokud má vepsanou kružnici, tj. kružnici dotýkající se všech jeho čtyř stran.
+
+    \Image{equal-tangents-pitot.pdf}
+}
+
+\Theorem{Pitotova věta}{
+    Konvexní čtyřúhelník $ABCD$ je tečnový právě tehdy, když $|AB| + |CD| = |BC| + |AD|$.
+}{}
+
+\sec Úlohy
+
+\Problem{0}{DuoGeo 2025}{
+    V~trojúhelníku $ABC$ nechť $D$ je pata výšky z~bodu $C$, přičemž $D$ leží na úsečce $AB$. Předpokládejme, že $|AC| + |BC|$ spolu s~průměry vepsaných kružnic trojúhelníků $ADC$ a~$BDC$ dávají v~součtu $26$ a~že $|CD| = 6$. Najděte obsah trojúhelníku $ABC$.
+}{
+    Jeden ze vzorců, které se hodí znát, je jak spočítat poloměr vepsané kružnice pravoúhlého trojúhelníku; v~naší úloze máme jejich dvojnásobky.
+}{
+    Je-li poloměr vepsané kružnice $ACD$ roven $r_1$ a~poloměr vepsané kružnice $BCD$ roven $r_2$, pak $2r_1=(|AD|+|CD|-|AC|)$ a~$2r_2=(|BD|+|CD|-|BC|)$. Sečtení a~trocha úprav by nám měly dát poslední chybějící kousek k~výpočtu obsahu.
+}{}
+
+\Problem{0}{MO 61-C-II-3}{
+    Nechť $E$ je střed strany $CD$ rovnoběžníku $ABCD$ splňujícího $2 \cdot |AB| = 3 \cdot |BC|$. Dokažte, že pokud má čtyřúhelník $ABCE$ vepsanou kružnici, pak se tato kružnice dotýká strany $BC$ v~jejím středu.
+}{
+    Je-li $|AB|=a$, pak $|BC|=2a/3$, $|CE|=a/2$. Víme, že $ABCE$ je tečnový. Co dalšího můžeme vyjádřit?
+}{
+    Měli bychom dostat $|AE|=|AB|+|CE|-|BC|=a+a/2-2a/3=5a/6$. Co dalšího dokážeme vyjádřit pomocí $a$?
+}{
+    Zřejmě $|AD|=|BC|=2a/3$ a~$|DE|=|CE|=a/2$. Známe všechny strany $ADE$ pomocí $a$. Nevypadají podezřele? Jeden pěkný trik, který se hodí při práci se zlomky, je zbavit se jich škálováním -- označme $a=6x$. Jaké jsou teď strany?
+}{
+    Měli bychom dostat, že $|AD|=4x$, $|DE|=3x$ a~$|AE|=5x$, skrytý pravoúhlý trojúhelník se stranami 3-4-5. Takže náš rovnoběžník je v~podstatě obdélník. Teď by už mělo být snadné úlohu dokončit.
+}{}
+
+\Problem{0}{Náboj 2008}{
+    Nechť $k$ je kružnice se středem $S$ a~poloměrem $1$ a~nechť $P$ je bod s~$|PS| = 3$. Z~bodu $P$ veďme dvě tečny ke~$k$, dotýkající se jí v~bodech $A$ a~$B$. Zvolme libovolný bod $T$ na kratším oblouku $AB$ kružnice $k$ a~veďme tečnu ke~$k$ v~$T$. Tato tečna protne úsečky $AP$ a~$BP$ v~bodech $X$ a~$Y$. Najděte obvod trojúhelníku $PXY$.
+}{
+    Naše kružnice má vztah k~trojúhelníku $PXY$, jaký?
+}{
+    Je to jeho $P$-připsaná kružnice. To by nám mělo dát dobrou představu, jak lze obvod $PXY$ interpretovat.
+}{
+    Připomeňme, že v~našich obvyklých konfiguracích platí $|PA|=|PB|$, což je polovina obvodu $PXY$. Stačí nám tedy spočítat $|PA|$.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABCD$ je tečnový čtyřúhelník. Dokažte, že vepsané kružnice trojúhelníků $ABC$ a~$ADC$ se dotýkají úhlopříčky $AC$ ve stejném bodě.
+}{
+    Nechť $X$ je bod dotyku vepsané kružnice $ABC$ s~$AC$ a~$X'$ bod dotyku vepsané kružnice $ADC$ s~$AC$. Stačí nám dokázat $|AX|=|AX'|$. Oba jsou pěkné výrazy.
+}{
+    Jediný trik je použít vzorce typu $s-a$ v~trojúhelnících $ABC$ a~$ADC$. Mělo by nám zůstat něco, kde můžeme využít tečnovost.
+}{}
+
+\Problem{0}{MO 63-B-I-3}{
+    Na přímce $BC$ jsou vyznačeny tři body, ve kterých se připsané kružnice trojúhelníku $ABC$ dotýkají této přímky; polohy samotných $B$ a~$C$ nejsou dány. Najděte bod, ve kterém se vepsaná kružnice $ABC$ dotýká přímky $BC$.
+}{
+    Nechť se $C$-připsaná kružnice dotýká $BC$ v~$D$, $B$-připsaná v~$E$ a~$A$-připsaná v~$F$. Zkuste vyjádřit nějaké délky pomocí našich vzorců typu $s-a$.
+}{
+    Trik je uvědomit si, že $|DB|=|CE|=s-a$. Co to znamená? A~co víme o~$F$ a~bodu dotyku vepsané kružnice?
+}{}
+
+\Problem{0}{}{
+    K~vepsané kružnici trojúhelníku jsou vedeny tři tečny, z~nichž každá odřízne u~jednoho z~vrcholů menší trojúhelník. Předpokládejme, že tyto menší trojúhelníky mají obvody $1$, $2$ a~$3$. Dokažte, že původní trojúhelník je pravoúhlý.
+}{
+    Nechť je náš trojúhelník $ABC$. Začněme s~jednou tečnou, jednou odřezávající trojúhelník $AXY$. Když se na to podíváme, čím je pro něj vepsaná kružnice $ABC$?
+}{
+    Klíčové zjištění je, že vepsaná kružnice je $A$-připsaná kružnice trojúhelníku $AXY$. Co nám to říká o~hodnotě jeho obvodu?
+}{
+    To nám dává, že polovina obvodu $AXY$ je v~podstatě vzdálenost z~$A$ k~bodům dotyku vepsané kružnice na $AB, AC$, tj. $s-a$.
+}{
+    Poslední krok je vyřešit $s-a=1/2$, $s-b=1$, $s-c=3/2$ pro $a, b, c$.
+}{}
+
+\Problem{0}{MO 54-A-S-2}{
+    Nechť $ABCD$ je rovnoběžník s~$|AB| > |BC|$. Nechť $K$ a~$M$ jsou body, ve kterých se vepsané kružnice trojúhelníků $ACD$ a~$ABC$ dotýkají úhlopříčky $AC$, a~nechť $L$ a~$N$ jsou definovány analogicky pro trojúhelníky $BCD$ a~$ABD$ dotýkající se úhlopříčky $BD$. Dokažte, že $KLMN$ je obdélník.
+}{
+    Rovnoběžník je symetrický vzhledem k~průsečíku úhlopříček. Co to znamená pro $KLMN$?
+}{
+    Při symetrii rovnoběžníku se zobrazí i~vepsané kružnice, a~tedy i~jejich body dotyku. Je-li tedy $P$ průsečík úhlopříček, pak $|PK|=|PM|$ a~$|PN|=|PL|$. Co to znamená a~co zbývá ukázat?
+}{
+    Máme, že $KLMN$ je rovnoběžník. Abychom ukázali, že je to skutečně obdélník, stačí ukázat, že jeho úhlopříčky jsou stejné.
+}{
+    Podívejme se na $KM$. Rovná se $|AC|-|AK|-|CM|$. Kvůli symetrii je to $|AC|-2|AK|$. Ale $|AK|$ lze vyjádřit pomocí našich vzorců typu $s-a$.
+}{}
+
+\Problem{0}{MO 64-A-I-5}{
+    V~trojúhelníku $ABC$ nechť $D$ je bod, ve kterém se vepsaná kružnice dotýká strany $BC$. Vepsaná kružnice trojúhelníku $ABD$ se dotýká stran $AB$ a~$BD$ po řadě v~bodech $K$ a~$L$ a~vepsaná kružnice trojúhelníku $ADC$ se dotýká stran $DC$ a~$AC$ po řadě v~bodech $M$ a~$N$. Dokažte, že body $K$, $L$, $M$, $N$ leží na jedné kružnici.
+}{
+    Kdyby naše body ležely na kružnici, jaký by byl její střed?
+}{
+    Podívejte se na osy úseček $KL$ a~$MN$. Co to je a~kde se protínají?
+}{
+    Kvůli $|BK|=|BL|$ a~$|CM|=|CN|$ to musí být osy úhlů při $B$ a~$C$ v~trojúhelníku $ABC$, takže by se měly protínat v~$I$. Zbývá tedy dokázat $|IM|=|IL|$.
+}{
+    Jelikož $D$ je bod dotyku vepsané kružnice, platí $ID \perp BC$. Abychom dokázali $|IM|=|IL|$, co potřebujeme dokázat?
+}{
+    Poslední krok je dokázat $|DM|=|DL|$. To ale bude snadné s~naším vzorcem typu $s-a$.
+}{
+    Stačí ukázat $(|BD|+|AD|-|AB|)/2=(|CD|+|AD|-|AC|)/2$. Ale $|BD|,|CD|$ umíme snadno spočítat pomocí $a,b,c$.
+}{}
+
+\Problem{0}{}{
+    Řekneme, že čtyřúhelník $ABCD$ má připsanou kružnici proti vrcholu $A$, pokud je vepsána do úhlu $BAD$, dotýká se přímek $BC$ a~$CD$ a~leží vně čtyřúhelníku. Dokažte, že pro takový čtyřúhelník platí $|AB| + |CB| = |AD| + |CD|$.
+}{
+    Body dotyku kružnice s~$AB$, $BC$, $CD$, $DA$ označme $A'$, $B'$, $C'$, $D'$. Zkuste vyhodnotit $|AB|+|BC|$ pomocí stejných tečen.
+}{
+    Výpočet začíná $|AB|+|BC|=|AA'|-|BA'|+|BC|$.
+}{
+    Ponechme $|AA'|$ nedotčené a~udělejme něco s~$|BA'|$, co nám pomůže využít člen $+|BC|$.
+}{
+    Další krok je $|BA'|=|BB'|=|BC|+|CB'|$. To dává $|AB|+|BC|=|AA'|-|CB'|$. Nyní by $|AD|+|CD|$ mělo dát něco podobného.
+}{}
+
+\Problem{0}{MO 49-A-I-2}{
+    Nechť $K$, $L$, $M$ jsou vnitřní body stran $BC$, $CA$, $AB$ po řadě trojúhelníku $ABC$, zvolené tak, že vepsané kružnice trojúhelníků $ABK$ a~$CAK$ se dotýkají zvenku, vepsané kružnice $BCL$ a~$ABL$ se dotýkají zvenku a~vepsané kružnice $CAM$ a~$BCM$ se dotýkají zvenku. Dokažte, že
+    $$
+    |BK| \cdot |CL| \cdot |AM| = |CK| \cdot |AL| \cdot |BM|.
+    $$
+}{
+    Nejprve zapomeňte na $L$ a~$M$ a~nakreslete jen obrázek s~$K$. Délku $|BK|$ lze vyjádřit pomocí $a,b,c$ a~to bude vše.
+}{
+    Nechť~$D$ je společný bod dotyku. Délku $|AD|$ lze vyjádřit dvěma způsoby pomocí vzorce typu $s-a$ v~$ABK$ i~$AKC$. Porovnejte tyto výrazy.
+}{
+    Po porovnání bychom měli dostat $|AD|=(c+|AK|-|BK|)/2$ z~$ABK$ a~$|AD|=(b+|AK|-|CK|)/2$ z~toho druhého. Položte je sobě rovny a~využijte také $|BK|+|CK|$. Co to řeší pro $|BK|$?
+}{}
+
+\Problem{0}{}{
+    Na každé straně konvexního čtyřúhelníku jsou zvoleny dva body a~dvojice protilehlých bodů jsou spojeny úsečkami tak, že se spojnice nekříží. Původní čtyřúhelník je tím rozdělen na devět menších čtyřúhelníků. Ukažte, že pokud každý ze čtyř rohových čtyřúhelníků a~středový čtyřúhelník má vepsanou kružnici, pak ji má i~původní čtyřúhelník.
+
+    \Image{equal-tangents-checkerboard.pdf}
+}{
+    Potřebujeme dokázat $|AB|+|CD|=|BC|+|AD|$. Rohové kružnice označme $w_a, w_b, w_c, w_d$ (pojmenované podle nejbližšího vrcholu $ABCD$) a~středovou kružnici $\omega$. Zkuste vyjádřit každou stranu $ABCD$ pomocí jednodušších částí.
+}{
+    Strana $AB$ obsahuje tečnovou úsečku z~$A$ ke~$w_a$, tečnovou úsečku z~$B$ ke~$w_b$ a~část mezi nimi. Ta celá prostřední část je jen společná vnější tečna kružnic $w_a$ a~$w_b$ podél přímky $AB$. Rozložte stejně další tři strany a~pomocí stejných tečen zredukujte to, co potřebujeme dokázat.
+}{
+    Trik je, že délka tečny z~$A$ ke~$w_a$ je částí jak $AB$, tak $AD$, a~podobně pro ostatní rohy. Takže stačí dokázat něco o~vnějších tečnách.
+}{
+    Nechť $d(x,y)$ značí délku vnější tečny dvou rohových kružnic podél té strany $ABCD$, kde se obě dotýkají. Zbývá nám dokázat $d(w_a,w_b)+d(w_c,w_d)=d(w_b,w_c)+d(w_a,w_d)$. K~tomu musíme tyto délky najít jinde než na stranách $ABCD$. Tady přichází ke~slovu $\omega$.
+}{
+    Každá dvojice sousedních rohových kružnic se také dotýká jedné ze čtyř vnitřních úseček --- té, která ohraničuje hranovou buňku sdílenou těmito dvěma rohy proti středové buňce. Přeneste každou ze čtyř vnějších tečen na odpovídající vnitřní úsečku pomocí stejných tečen.
+}{
+    Na každé vnitřní úsečce nyní přenesená tečna prochází dvěma vrcholy středové buňky, kde se $\omega$ také dotýká. Stejné tečny z~těchto vrcholů rozdělí každý přenesený kousek na dvě poloviny, které se shodují s~polovinami na sousedních vnitřních úsečkách, přesně jako se rohové tečny shodovaly v~$A, B, C, D$ na vnější hranici. Tyto čtyři kousky se pak po dvojicích vyruší a~jsme hotovi.
+}{}
+
+\Problem{0}{}{
+    Nechť $ABC$ je trojúhelník s~poloměrem vepsané kružnice $r$ a~nechť $\omega$ je kružnice o~poloměru $\rho < r$ vepsaná do úhlu $BAC$. Druhé tečny z~$B$ a~$C$ ke~$\omega$ (jiné než $AB$ a~$AC$) se protnou v~bodě $X$. Dokažte, že vepsaná kružnice trojúhelníku $BCX$ se dotýká vepsané kružnice trojúhelníku $ABC$.
+}{
+    Nechť~$P$ je bod dotyku vepsané kružnice $BCX$ s~$BC$. Chceme vyjádřit $|BP|$ pomocí $a,b,c$ (konkrétně dokázat $|BP|=s-b$).
+}{
+    Body dotyku vepsané kružnice $BXC$ s~$BX$, $CX$ označme $K$, $L$ a~body dotyku $BX$ a~$CX$ s~$\omega$ jako $M$ a~$N$. Výpočet začíná $|BP| = |BK| = |BM|-|KM|$.
+}{
+    Další krok je uvědomit si, že $|KM|=|LN|$ a~také $|BM|=|BW|$. To dává $|BP| = |BW|-|LN|$. Délka $|BW|$ je pěkná, protože je na straně $AB$. Ale $|LN|$ lze také přenést tam.
+}{
+    Všimněte si $|LN|=|CN|-|CL| = |CV|-|CP|$. Takže máme $|BP|=|BW|-|CV|+|CP|$. Blížíme se ke~konci.
+}{
+    Vezměte $|BW|=|AB|-|AW|$, $|CV|=|AC|-|AV|$, $|CP|=|BC|-|BP|$. Jeden jednoduchý krok od dokončení.
+}{}
+
+\Problem{0}{USAMO 1991}{
+    Nechť $D$ je bod na straně $BC$ trojúhelníku $ABC$. Do trojúhelníků $BDA$ a~$DCA$ vepišme kružnice. Jejich společná vnější tečna jiná než $BC$ protne $AD$ v~bodě $X$. Určete množinu bodů $X$, když se $D$ pohybuje po straně $BC$.
+}{
+    Klíčem je správná hypotéza -- uvažte krajní případy $D=B$ a~$D=C$. Nenapovídá to něco?
+}{
+    Ve speciálních případech vychází $|AX|$ stejné, konkrétně rovné $s-a$. Možná je odpověď kružnice se středem v~$A$ a~tímto poloměrem?
+}{
+    Body dotyku vepsané kružnice $ABD$ s~$BD,AB$ označme $P,R$; body dotyku vepsané kružnice $ACD$ s~$CD,CA$ označme $Q,S$. Víme, že chceme dokázat $|AX|=s-a$. První zjednodušení je použít $|AX|=|AD|-|DX|$ a~připomenout si jednu z~vět, která říká, čemu se $|DX|$ rovná.
+}{
+    Máme $|DX|=|PQ|$, takže $|AX|=|AD|-|DX|=|AD|-|PQ|$. S~$|AD|$ nemůžeme udělat víc, zaměřme se tedy na $|PQ|$.
+}{
+    Máme $|PQ| = |DP|+|DQ|$, a~tedy $|AX| = |AD|-|DP|-|DQ|$. To je ale v~pořádku. Čemu se rovnají $|PD|$ a~$|DQ|$?
+}{
+    Délku $|DP|$ lze vyjádřit pomocí vzorce typu $s-a$ v~$ABD$, podobně $|QD|$.
+}{}
+
+\Problem{1}{IMO 2021, P4}{
+    Nechť $ABCD$ je tečnový čtyřúhelník s~vepsanou kružnicí se středem $I$ a~nechť $\Omega$ je opsaná kružnice trojúhelníku $AIC$. Prodloužení $BA$ a~$BC$ za body $A$ a~$C$ protnou $\Omega$ po řadě v~$X$ a~$Z$ a~prodloužení $AD$ a~$CD$ za bod $D$ protnou $\Omega$ po řadě v~$Y$ a~$T$. Dokažte, že
+    $$
+    |AD| + |DT| + |TX| + |XA| = |CD| + |DY| + |YZ| + |ZC|.
+    $$
+}{
+    Máme tečny, takže to vypadá, že můžeme udělat trochu kouzel se stejnými tečnami. Skoro, něco si musíme uvědomit. Zkuste naslepo odvozovat pěkné vlastnosti.
+}{
+    Klíč je najít shodné trojúhelníky. Použijte kružnici procházející $A$, $I$, $C$, $X$, $Y$, $T$, $Z$, abyste na to přišli.
+}{
+    Nechť $P$, $Q$, $R$, $S$ jsou body dotyku vepsané kružnice na $AB$, $BC$, $CD$, $DA$ po řadě. Zkuste dokázat, že trojúhelníky $IQZ$ a~$IRT$ jsou shodné.
+}{
+    Rovnost úhlů při $Z$ a~$T$ můžeme dopočítat úhlením. Úhly při $Q$ a~$R$ jsou pravé, takže shodnost plyne. Je někde jinde podobná shodnost?
+}{
+    Ve skutečnosti jsou shodné i~$IPX$ a~$ISY$. Tyto dvě shodnosti dohromady dávají rovnosti úseček potřebné k~závěrečnému výpočtu.
+}{}
+
+\Problem{1}{IMO Shortlist 2005, G1}{
+    Nechť $ABC$ je trojúhelník se středem vepsané kružnice $I$ splňující $|AC| + |BC| = 3|AB|$ a~nechť $D$, $E$ jsou body, ve kterých se vepsaná kružnice dotýká stran $BC$ a~$CA$ po řadě. Nechť $K$ a~$L$ jsou obrazy $D$ a~$E$ v~souměrnosti podle $I$. Dokažte, že body $A$, $B$, $K$, $L$ leží na jedné kružnici.
+}{
+    První nápověda přijde poté, co nakreslíme dokonalý obrázek a~uvědomíme si, že $I$ leží na kružnici s~$A,B,K,L$. A~kružnice procházející $AIB$ nám dává vodítko, co nakreslit dál: čím dalším prochází?
+}{
+    Kružnice $A,I,B$ prochází středem $A$-připsané kružnice $I_a$. Nakresleme tedy $A$-připsanou kružnici.
+}{
+    Záhadná podmínka $|AC|+|BC|=3|AB|$ dá větší smysl, jakmile zavedeme body dotyku $A$-připsané kružnice s~$CB$ a~$CA$. Čas na trochu počítání se stejnými tečnami.
+}{
+    Ukažte, že naše podmínka je ekvivalentní tomu, že $D$ je střed $CD'$, podobně pro $E$. Jaké to má důsledky v~obrázku?
+}{
+    Zdůvodněte, že $|I_aD'| = 2|ID|$. To konečně dává vodítko, co dělat s~$K$. Teď jsme blízko dokončení.
+}{}
+
+\Problem{2}{}{
+    Nechť $ABC$ je trojúhelník s~obvodem $4$. Body $X$ a~$Y$ leží po řadě na polopřímkách $AB$ a~$AC$ tak, že $|AX| = |AY| = 1$ a~úsečky $BC$ a~$XY$ se protínají v~bodě $F$. Dokažte, že jeden ze dvou trojúhelníků, na které $AF$ rozdělí trojúhelník $ABC$, má obvod $2$.
+}{
+    První trik je vzpomenout si na jedno obzvlášť pěkné místo, kde se v~geometrii trojúhelníku nějak objevuje obvod. Určitě jsme ho v~tomto materiálu viděli.
+}{
+    Vzdálenost z~$A$ k~bodům dotyku $A$-připsané kružnice je přesně polovina obvodu, tedy 2. A~$|AX|=|AY|=1$. Je to náhoda?
+}{
+    Nechť se $A$-připsaná kružnice dotýká $AB$ a~$AC$ v~$D$ a~$E$. Máme $|AD|=|AE|=2$ a~$|AX|=|AY|=1$, a~tedy přímka $DE$ je obraz $A$-poláry $A$-připsané kružnice ve stejnolehlosti se středem v~$A$ a~koeficientem $1/2$. Co víme o~této přímce?
+}{
+    Přímka $XY$ je chordála bodu $A$ a~$A$-připsané kružnice! A~$F$ na ní leží. Blížíme se ke~konci.
+}{
+    Poslední bod, který nakreslíme, je bod dotyku připsané kružnice a~$BC$. Využitím faktu, že $F$ leží na této chordále, dostaneme nějaké pěkné stejné délky.
+}{}
+
+\Problem{2}{Brianchonova věta}{
+    Je-li šestiúhelník $ABCDEF$ opsaný kružnici (tj. každá z~jeho šesti stran se dotýká kružnice), pak jeho tři hlavní úhlopříčky $AD$, $BE$, $CF$ procházejí jedním bodem.
+}{
+    Nakreslete tři kružnice tak, aby úhlopříčky $AD$, $BE$, $CF$ byly chordály. Je to záludné.
+}{
+    Jedna z~kružnic se dotýká polopřímek opačných k~$BA$ a~$DE$. Analogicky ostatní. Jediný trik je umístit je tak, aby chordály fungovaly.
+}{
+    Zkuste je umístit tak, aby délky vnějších tečen ke~každé kružnici a~vepsané kružnici $ABCDEF$ byly stejné.
+}{}
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

@@ -1,0 +1,457 @@
+\input _template
+
+\setlanguage{EN}
+
+\Title{Digits}
+
+\MathcompsLink{digits}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+We will show the basic tips and~tricks used in~problems with digits.
+
+\sec Techniques
+
+\begitems \style i
+\i We write out a number $\overline{a_1a_2\dots a_n}$ using its decimal representation, e.g. $\overline{ab}=10a+b$ or $\overline{abc}=100a+10b+c$.
+\i A number with a sequence of digits $x$ followed by a sequence of digits $y$ of length $k$ is written as $x \cdot 10^k + y$, e.g. 4267 equals $42 \cdot 10^2 + 67$ for $k=2$.
+\i We think about how numbers are added/subtracted/multiplied in columns.
+\i We pay particular attention to remainders upon division by~3 or~9, since a number leaves the same remainder upon division by~3 or~9 as its digit sum.
+\i Another good criterion for remainders is $2^n$: a number leaves the same remainder upon division by $2^n$ as its last $n$ digits.
+\i And one more criterion: a number leaves the same remainder upon division by~11 as the sum of the digits in odd places minus the sum of the digits in even places (we count the parity from the right: the digit in the units place is in an odd place).
+\enditems
+
+\sec Problems
+
+\Problem{0}{}{
+	Determine all positive integers $n$ for which
+	$$
+	n+p(n)=70,
+	$$
+	where $p(n)$ denotes the product of all the digits of $n$.
+}{
+	The number~$n$ is clearly at most two-digit. Write $n=\overline{ab}$ and~rewrite the equation.
+}{
+	After rewriting we have $10a+b+ab=70$. The simplest way is to test the possible~$a$ -- there are not many options for it.
+}{
+	\Answer{$n=46$ and~$n=70$.}
+
+	Since $p(n)\ge 0$, we have $n\le 70$. For a one-digit~$n$ the equation would give $n+n=70$, i.e. $n=35$, which is not one-digit. So $n$ is two-digit. Write $n=\overline{ab}=10a+b$ with~$a\in\{1,\ldots,9\}$, $b\in\{0,\ldots,9\}$. The equation rewrites as
+	$$
+	10a+b+ab=70, \quad\hbox{that is}\quad b(a+1)=70-10a.
+	$$
+	For $a=1,2,\ldots,7$ we get in turn $b=30,\ 50/3,\ 10,\ 6,\ 20/6,\ 10/7,\ 0$. Now $b$ is a digit only for $a=4$ (which gives $n=46$) and~for $a=7$ (which gives $n=70$). We verify by substitution that $46+4\cdot 6=70$ and~$70+7\cdot 0=70$, so the solutions are $n=46$ and~$n=70$.
+}
+
+\Problem{0}{}{
+	A two-digit number $\overline{ab}$ is called \textit{inflatable} if, after adding 990 times a suitable one-digit number, we obtain a four-digit number of the form $\overline{axxb}$ with a nonzero digit~$x$. How many inflatable numbers are there?
+}{
+	Write down the definition of inflatability using the equation $\overline{ab}+990y=\overline{axxb}$, and manipulate it further.
+}{
+	We should arrive at the equation $9(y-a)=x$. But~$x$ is a nonzero digit, which does not leave us many options.
+}{
+	\Answer{$80$.}
+
+	Let $y$ denote the one-digit number such that we add $990y$. The inflatability condition says that
+	$$
+	\overline{ab}+990y=\overline{axxb},
+	$$
+	that is, $10a+b+990y=1000a+110x+b$. After rearranging we get
+	$$
+	9(y-a)=x.
+	$$
+	Since $x$ is a nonzero digit, the left-hand side must be a positive multiple of nine not exceeding~$9$, so necessarily $y-a=1$ and~$x=9$. For $a$ we have the options $1,2,\ldots,8$ ($a=9$ would give a two-digit $y$), and for~$b$ we can then choose any digit. There are therefore $8\cdot 10=80$ inflatable numbers.
+}
+
+\Problem{0}{}{
+	Find all four-digit numbers $\overline{abcd}$ with digit sum~12 such that $\overline{ab}-\overline{cd}=1$.
+}{
+	We have $\overline{ab}=\overline{cd}+1$. Try to look at the right-hand side as adding numbers in columns.
+}{
+	The idea is to consider two cases, $d=9$ and~$d\neq 9$. In~the first a carry occurs and in the second it does not. From the equation we immediately get expressions for the digits $a$ and $b$ in terms of $c$ and $d$, which we combine with the digit sum.
+}{
+	\Answer{$\overline{abcd}=2019$.}
+
+	From the equality $\overline{ab}-\overline{cd}=1$ we get $\overline{ab}=\overline{cd}+1$. Let us look at the right-hand side as classic column addition: to the number $\overline{cd}$ we add $1$. We consider two cases according to whether a carry occurs during the addition.
+
+	\textbf{Case $d\neq 9$.} No carry occurs, so $b=d+1$ and~$a=c$. From the digit sum
+	$$
+	a+b+c+d=2c+2d+1=12
+	$$
+	we get $2(c+d)=11$, which has no solution in integers.
+
+	\textbf{Case $d=9$.} A carry occurs, so $b=0$ and~$a=c+1$. The digit sum gives
+	$$
+	a+0+c+9=12,
+	$$
+	that is, $a+c=3$. Together with~$a=c+1$ we get $c=1$ and~$a=2$.
+
+	The only solution is $\overline{abcd}=2019$, and indeed $20-19=1$ and~$2+0+1+9=12$.
+}
+
+\Problem{0}{}{
+	Determine the smallest positive integer that can be inserted between the two-digit blocks $20$ and $16$ so that the resulting number is a multiple of $2016$.
+}{
+	Let us look at the remainder upon division by~$9$.
+}{
+	Since~$2016$ is divisible by~9, the digit sum of the inserted number must be divisible by~9, because the digit sum of $20$ and~$16$ is~$9$.
+}{
+	Try inserting $9, 18, \dots$ in turn. This can be done mechanically. You can, however, also use the divisibility rule for another nice divisor of~2016.
+}{
+	\Answer{$36$.}
+
+	The number $2016$ has digit sum~9, so it is divisible by~$9$, and hence the sought number must also be divisible by~$9$. By testing the first four options 9, 18, 27, 36 we find that $36$ works.
+
+	We can simplify this testing using the divisibility rule for~16, since $16 \mid 2016$. Indeed, the numbers $20916$, $201816$, $202716$ are not divisible by 16, judging by their last four digits.
+}
+
+\Problem{0}{}{
+	Find all three-digit numbers that are the sum of the factorials of their digits.
+}{
+	Such a number cannot have digits that are too large. What is the largest digit it can have?
+}{
+	We reason that the largest digit in the number can be 5. Must there even be one?
+}{
+	We reason that the digit~5 must necessarily be there. That already leaves few options, especially when we think about what the first digit can be.
+}{
+	\Answer{$145$.}
+
+	Let the sought number have digits $a$, $b$, $c$, where $a\ge 1$, i.e. $\overline{abc}=a!+b!+c!$. Since $7!=5040>999$, no digit can be $\ge 7$, so all digits are at most~$6$.
+
+	If a~$6$ appeared among the digits, then $a!+b!+c!\ge 6!=720$, and~therefore the first digit would have to be at least~$7$, which is a contradiction. So the largest digit is at most~$5$. Conversely, if all digits were at most~$4$, we would get
+	$$
+	a!+b!+c!\le 3\cdot 4!=72<100,
+	$$
+	which contradicts the number being three-digit. So at least one digit equals~$5$.
+
+	If all were 5, then we have $5!+5!+5!=360$, which does not work.
+
+	If we had two digits~5, then we have at most $5!+5!+4! \leq 264$, so $a \leq 2$.
+
+	Let us consider both options:
+	\begitems \style i
+	\i For $a=2$ the number is $\overline{2bc}\in[200,299]$. If $b=c=5$, the sum is $2+120+120=242\ne 255$. Otherwise exactly one of the digits $b$, $c$ equals~$5$ and the other is at most~$4$, so $b!+c!\le 120+24=144$ and the sum is $\le 146<200$, which is not possible.
+	\i It remains to consider $a=1$. Then $1+b!+c!$ should equal $\overline{1bc}$, where at least one of the digits $b$, $c$ is~$5$. We check the possible values for the other digit $d\in\{0,\ldots,5\}$: the sum $1+120+d!$ for $d=0,1,2,3,4,5$ comes out in turn as $122,\ 122,\ 123,\ 127,\ 145,\ 241$. The only value whose digits form the correct triple is $145$ (digits $1$, $4$, $5$).
+	\enditems
+
+	By substitution $1!+4!+5!=1+24+120=145$ we verify that it works. The only sought number is $145$.
+}
+
+\Problem{0}{}{
+	Find all four-digit numbers that are the perfect square of an integer and~at the same time have their first digit equal to the second and the third equal to the fourth.
+}{
+	Let us write our number as $\overline{aabb}$ and~write out what it equals.
+}{
+	We get $\overline{aabb}=11(100a+b)$. For this to be a square, we need $100a+b$ to be divisible by~11.
+}{
+	We have $100a+b=99a+(a+b)$, so necessarily $11 \mid a+b$. That already leaves few options.
+}{
+	\Answer{$7744=88^2$.}
+
+	The sought number has the form $\overline{aabb}$, where $a\in\{1,\dots,9\}$ and~$b\in\{0,\dots,9\}$. Let us write it out:
+	$$
+	\overline{aabb}=1100a+11b=11(100a+b).
+	$$
+	Since $11$ is prime, for this expression to be a perfect square, $11$ must also divide $100a+b$. Let us use that
+	$$
+	100a+b=99a+(a+b),
+	$$
+	and~so $11\mid a+b$. Because $a+b\in\{1,\dots,18\}$, the only option is $a+b=11$. Substituting, we get
+	$$
+	\overline{aabb}=11(100a+b)=11(99a+11)=11^2 (9a+1).
+	$$
+	We need $9a+1$ to be a perfect square of an integer. We verify in turn that for nonzero digits this happens only for $a=7$, which corresponds to $b=4$. The only number that works is $7744=88^2$.
+}
+
+\Problem{0}{}{
+	Find the largest prime composed of 10 distinct digits.
+}{
+	Look at the digit sum of our number.
+}{
+	\Answer{No such prime exists.}
+
+	A number composed of 10 distinct digits contains each of the digits $0,1,\ldots,9$ exactly once. Its digit sum is therefore
+	$$
+	0+1+2+\cdots+9=45,
+	$$
+	which is divisible by~$9$. So every such number is divisible by~$9$, and~since it is clearly greater than~$9$, it cannot be prime. Therefore no prime composed of 10 distinct digits exists.
+}
+
+\Problem{0}{}{
+	Explain why every palindrome with an even number of digits is divisible by~11.
+}{
+	Use the divisibility rule for~11.
+}{
+	A palindrome with~$2n$ digits has the form $\overline{a_1a_2\dots a_na_n\dots a_2a_1}$. By the divisibility rule for~$11$ it suffices to show that the alternating sum of the digits (counted from the right) is divisible by~$11$. Since it is a palindrome, each digit $a_i$ occurs exactly twice, once in an odd and~once in an even position from the right. The alternating sum is therefore
+	$$
+	(a_1+a_2+\cdots+a_n)-(a_n+\cdots+a_2+a_1)=0,
+	$$
+	which is divisible by~$11$.
+}
+
+\Problem{0}{}{
+	The number $123456789101112\dots 100$ is repeatedly replaced by its digit sum until we obtain a one-digit number. Which number is left?
+}{
+	It suffices to find the digit sum and use divisibility by~9.
+}{
+	To compute the digit sum of our number, let us think about how many times each digit occurs in our number.
+}{
+	\Answer{$1$.}
+
+	Recall that every positive integer leaves the same remainder upon division by nine as its digit sum. So by repeatedly replacing the number with its digit sum the remainder upon division by~$9$ does not change, and~the resulting one-digit number is exactly this remainder, with remainder~$0$ corresponding to nine.
+
+	So it suffices to determine, upon division by nine, the remainder of the number $N=123456789101112\dots 100$. The number $N$ was formed by concatenating the numbers from~$1$ to~$100$. If we omit~100, then each digit was used 20~times: 10~times in the tens place and~10~times in the units place -- the digit sum of such a number is $20(1+\cdots+9)=20 \cdot 45$, so it is divisible by~9. We still have~100, however, so the total remainder of our sum upon division by~9 is~1.
+}
+
+\Problem{0}{}{
+	Is there a number divisible by~11 composed of the digits 1, 2, 3, 4, 5 and 6 such that each is used exactly once?
+}{
+	We use the divisibility rule for~11 -- we want the difference of the sum of the digits in even places~$s_s$ and the sum in odd places~$s_l$ to be divisible by~11. Try to find the options for these sums.
+}{
+	We realize that $s_s+s_l$ is the digit sum of our number, so $1+2+3+4+5+6=21$. From this we find the options for the pairs $s_s$ and~$s_l$ and analyze them.
+}{
+	\Answer{No, no such number exists.}
+
+	We use the divisibility rule for~$11$: let $s_s$ denote the sum of the digits in even positions and~$s_l$ the sum of the digits in odd positions of the sought number. The number is divisible by~$11$ exactly when $11\mid s_l-s_s$.
+
+	Since each of the digits $1,2,3,4,5,6$ is used exactly once, we have
+	$$
+	s_s+s_l=1+2+3+4+5+6=21.
+	$$
+	The sum is odd, so the difference $s_l-s_s$ must also be odd, and~hence $s_l-s_s\neq 0$. Moreover, each of the sums $s_s$, $s_l$ is a sum of three distinct digits from~$\{1,2,3,4,5,6\}$, so both $s_s$ and $s_l$ are at least $1+2+3$ and at most $4+5+6$. From this $|s_l-s_s|\le 15-6=9<11$, so $11\nmid s_l-s_s$. Therefore the sought number does not exist.
+}
+
+\Problem{0}{}{
+	Think of a three-digit number that contains no zero and has its first and last digits different. Write it backwards and subtract the smaller number from the larger. If needed, pad the resulting number on the left with a zero to make it three-digit, write it backwards again, and add these two numbers. What is the smallest and~the largest number we could have gotten?
+}{
+	Let us write the number as $\overline{abc}$. What is left after the first operation?
+}{
+	In~the next step we have $|\overline{abc}-\overline{cba}|=99|a-c|$. Write out these possible numbers.
+}{
+	\Answer{It always comes out $1089$, so both the smallest and the largest is $1089$.}
+
+	Denote the number we thought of as $\overline{abc}$, where $a,c\in\{1,2,\dots,9\}$, $a\neq c$ and~$b\in\{0,1,\dots,9\}$. After the first operation we get
+	$$
+	|\overline{abc}-\overline{cba}|=|100a+10b+c-(100c+10b+a)|=99|a-c|.
+	$$
+	Since $|a-c|\in\{1,2,\dots,8\}$, the result of the first operation is one of the numbers
+	$$
+	99,\ 198,\ 297,\ 396,\ 495,\ 594,\ 693,\ 792.
+	$$
+	In the second step we pad each of them on the left to three digits (only $99$ we pad to $099$) and~add its backwards writing:
+	$$
+	\align
+	099+990&=1089,\cr
+	198+891&=1089,\cr
+	297+792&=1089,\cr
+	396+693&=1089,\cr
+	495+594&=1089,\cr
+	594+495&=1089,\cr
+	693+396&=1089,\cr
+	792+297&=1089.\cr
+	\endalign
+	$$
+	So in all cases the same number comes out, so both the smallest and largest possible number we could have gotten is $1089$.
+}
+
+\Problem{0}{}{
+	Find all numbers with first digit~6 such that removing it produces a number 25~times smaller.
+}{
+	Write the number as $6 \cdot 10^k + x$, where $k$ is the number of digits of~$x$.
+}{
+	Set up an equation from the statement: $6 \cdot 10^k + x = 25x$. From this express $x$ and~find for which $k$ the value $x$ is an integer.
+}{
+	\Answer{Infinitely many numbers: $625, 6250, 62500, \ldots$}
+
+	Denote the sought number as $6\cdot 10^k+x$, where $x$ is the number after removing the leading six and~$k$ is the number of its digits (including any leading zeros, i.e. $x<10^k$). The condition from the statement gives the equation
+	$$
+	6\cdot 10^k+x=25x,
+	$$
+	from which we express
+	$$
+	x=\frac{6\cdot 10^k}{24}=\frac{10^k}{4}.
+	$$
+	For $x$ to be an integer, $4\mid 10^k$ must hold, which happens exactly for $k\ge 2$. Then $x=25\cdot 10^{k-2}$ and~the sought number is
+	$$
+	6\cdot 10^k+25\cdot 10^{k-2}=625\cdot 10^{k-2}.
+	$$
+	So infinitely many numbers work: $625, 6250, 62500, \ldots$
+}
+
+\Problem{0}{}{
+	Prove that the number $\underbrace{44\dots4}_{n+1}\underbrace{88\dots8}_{n}9$ is, for every nonnegative integer~$n$, the square of a positive integer.
+}{
+	Let us write the number out using its decimal representation.
+}{
+	Recall that a number written as $k$ identical digits $c$ can be expressed as $c \cdot \frac{10^k - 1}{9}$. Do not forget to multiply each part of the number by the appropriate power of ten according to how many digits follow it.
+}{
+	In the final expression, look for a way to complete the number to a square. We should be left with the square of a fraction, which at first glance need not be a positive integer. It does, however, represent a number with a nice decimal notation.
+}{
+	Denote $N=\underbrace{44\dots4}_{n+1}\underbrace{88\dots8}_n 9$ and~write it out using its decimal notation. Recall that $\underbrace{cc\dots c}_k=c\cdot\frac{10^k-1}{9}$. The group of $(n+1)$ fours is followed by $n+1$ digits, the group of $n$ eights by one digit, and~at the end stands $9$, so
+	$$
+	N=4\cdot\frac{10^{n+1}-1}{9}\cdot 10^{n+1}+8\cdot\frac{10^n-1}{9}\cdot 10+9.
+	$$
+	Multiplying by nine we get
+	$$
+	9N=4\cdot 10^{n+1}(10^{n+1}-1)+80(10^n-1)+81.
+	$$
+	Since $-4\cdot 10^{n+1}+80\cdot 10^n=-40\cdot 10^n+80\cdot 10^n=4\cdot 10^{n+1}$, after expanding the brackets we get
+	$$
+	9N=4\cdot 10^{2n+2}+4\cdot 10^{n+1}+1=\bigl(2\cdot 10^{n+1}+1\bigr)^2.
+	$$
+	Then
+	$$
+	N=\(\frac{2\cdot 10^{n+1}+1}{3}\)^2.
+	$$
+	The number $2\cdot 10^{n+1}+1=2\underbrace{00\dots0}_n 1$ has digit sum~$3$, so it is divisible by three, so we have the square of a positive integer.
+
+	\Remark In fact, $\underbrace{66\dots6}_n 7\cdot 3=2\underbrace{00\dots0}_n 1$, so
+	$$
+	N=\bigl(\underbrace{66\dots6}_n 7\bigr)^2.
+	$$
+}
+
+\Problem{0}{}{
+	A positive integer $n$ is given. Determine the last digit of the number $n^2$, given that~7 is its second-to-last digit.
+}{
+	Write the number as $10x+y$, where $y$ is the last digit. What does $n^2$ look like?
+}{
+	We have $n^2=100x^2+20xy+y^2$. When can 7 be the second-to-last digit?
+}{
+	Analyze the effect of the individual terms of the sum $100x^2+20xy+y^2$ on the tens place.
+}{
+	The main idea is that $100x^2$ contributes nothing at all to the tens place and~$20xy$ contributes an even digit, so $y^2$ must have an odd digit in the tens place.
+}{
+	\Answer{$6$.}
+
+	Write $n=10x+y$, where $y\in\{0,1,\dots,9\}$ is the last digit of $n$. Then
+	$$
+	n^2=100x^2+20xy+y^2.
+	$$
+	The term $100x^2$ contributes nothing at all to the tens place and~the term $20xy=10\cdot(2xy)$ contributes the digit $2xy$ to the tens place, that is, an even digit. So the digit in the tens place of $n^2$ has the same parity as the digit in the tens place of $y^2$ (no carries from the units occur, since $y^2<100$ and~the units digit comes solely from $y^2$).
+
+	Since $7$ is odd, $y^2$ must have an odd digit in the tens place. Let us go through all the options:
+	$$
+	\align
+	y=0,1,2,3:&\quad y^2=0,1,4,9\quad\hbox{(tens digit $0$),}\cr
+	y=4:&\quad y^2=16\quad\hbox{(tens digit $1$),}\cr
+	y=5:&\quad y^2=25\quad\hbox{(tens digit $2$),}\cr
+	y=6:&\quad y^2=36\quad\hbox{(tens digit $3$),}\cr
+	y=7:&\quad y^2=49\quad\hbox{(tens digit $4$),}\cr
+	y=8:&\quad y^2=64\quad\hbox{(tens digit $6$),}\cr
+	y=9:&\quad y^2=81\quad\hbox{(tens digit $8$).}\cr
+	\endalign
+	$$
+	An odd tens digit is given only by $y=4$ and~$y=6$, and in both cases the last digit of $y^2$ equals $6$. So the last digit of the number $n^2$ is~$6$.
+}
+
+\Problem{1}{}{
+	Are there two distinct powers of two with the same number of digits, one of which could be obtained solely by rearranging the digits of the other?
+}{
+	Let us look at the remainder upon division by~$9$.
+}{
+	Let us examine the remainders of powers of~2 upon division by~9. The individual powers $2^1, 2^2, \dots$ are $2,4,8,7,5,1$ and~so~on. Under what conditions do $2^a$ and~$2^b$ leave the same remainder upon division by~9?
+}{
+	\Answer{No, no such pair exists.}
+
+	If $2^a$ and~$2^b$ were rearrangements of each other's digits, they would have the same digit sum, and~hence the same remainder upon division by~$9$. So it suffices to show that $2^a$ and $2^b$ leaving the same remainder upon division by 9 for $a\neq b$ leads to a contradiction with both numbers having the same number of digits.
+
+	The remainders of powers of two upon division by~$9$ form a periodic sequence
+	$$
+	2,\ 4,\ 8,\ 7,\ 5,\ 1,\ 2,\ 4,\ 8,\ 7,\ 5,\ 1,\ \dots
+	$$
+	with period~$6$, so we necessarily have $6\mid a-b$.
+
+	Without loss of generality let $a<b$. Then $b\ge a+6$, and~hence
+	$$
+	\frac{2^b}{2^a}\ge 2^6=64.
+	$$
+	But two numbers with the same number of digits have a ratio strictly less than~$10$, which is a contradiction.
+
+	So no such pair of powers of two exists.
+}
+
+\Problem{1}{}{
+	For which positive integers $n$ does there exist an $n$-digit number divisible by $5^n$ that has all digits odd?
+}{
+	Let us try to construct such numbers inductively.
+}{
+    Take a suitable number that has $n$ digits. Prove that appending a suitable odd digit to the front of the number gives a suitable number with~$n+1$ digits.
+}{
+	\Answer{For every positive integer~$n$.}
+
+	Let us proceed by induction on $n$. For $n=1$, $N_1=5$ works. Suppose we have an $n$-digit number $N_n$ with odd digits for which $5^n\mid N_n$, i.e. $N_n=5^n m$ for a suitable $m$. We will show that appending a suitable odd digit $d\in\{1,3,5,7,9\}$ to the front gives a suitable $(n+1)$-digit number $N_{n+1}=d\cdot 10^n+N_n$. We have
+	$$
+	N_{n+1}=d\cdot 10^n+5^n m=5^n(d\cdot 2^n+m),
+	$$
+	so we need $5\mid d\cdot 2^n+m$. Since $\{1,3,5,7,9\}\equiv\{1,3,0,2,4\}\pmod 5$ forms a complete residue system and~$\gcd(2^n,5)=1$, the values $d\cdot 2^n\pmod 5$ for $d\in\{1,3,5,7,9\}$ also run through all residues modulo~$5$. So exactly one $d$ satisfies the desired divisibility; the digit $d$ is odd and~nonzero, so $N_{n+1}$ is $(n+1)$-digit with odd digits and~divisible by $5^{n+1}$. This completes the induction, and~a suitable number exists for every positive integer~$n$.
+}
+
+\Problem{1}{}{
+	Consider the following process: We start with an arbitrary positive integer $a_1$ and~generate a sequence $a_1,a_2,\dots$ so that we obtain $a_{n+1}$ from~$a_n$ by appending a digit different from~9. Prove that this sequence will inevitably contain infinitely many composite numbers.
+}{
+	We proceed by contradiction. What if there were only finitely many composite numbers there? Think about which digits we are even able to append.
+}{
+	We certainly cannot append even digits and~5. That leaves 1, 3, 7. Try to rule out some of them.
+}{
+	The idea is to rule out 1 and~7. We can have only finitely many of these, because we would violate divisibility by~3. That leaves threes. Can we, after some point, have only those?
+}{
+	The trick for threes is to write the number as
+	$$
+	a\cdot 10^n + \underbrace{\overline{33\dots3}}_n=
+	a\cdot 10^n + \frac{10^n-1}{3}.
+	$$
+	We can also write the second part explicitly. Reason that it would suffice for $10^n-1$ to be divisible by~$3a$.
+}{
+	We proceed by contradiction. Suppose that from a certain point on all terms of the sequence are already primes. Let us look at which digit $d$ we can even append in this terminal phase. When we append a digit $d$ to a number $N$ we get $10N+d$. If $d$ is even, then $10N+d$ is even and~greater than~$2$, hence composite. If $d=5$, then $10N+d$ is divisible by five and~greater than~$5$, hence again composite. So we can append only digits from the set $\{1,3,7\}$.
+
+	Let us now examine the remainders upon division by three. Since $10N+d\equiv N+d\pmod 3$, appending the digit~$3$ does not change the remainder, whereas appending the digit~$1$ or~$7$ increases it by~$1$ modulo~$3$. But every term in the terminal phase is a prime greater than~$3$, so its remainder modulo~$3$ belongs to $\{1,2\}$ and~can never be~$0$. After two appendings of a one or a seven, however, the remainder would cyclically shift through~$0$, which is a contradiction. So in the terminal phase we can append a one or a seven only finitely many times, and~thus from a certain moment on we append exclusively threes.
+
+	Denote by $a$ the term of the sequence from which we already append only threes. The number $a$ is a prime greater than~$3$ and~its last digit belongs to $\{1,3,7\}$, so $a$ is coprime with~$10$. After $n$ appendings of a three we get the number
+	$$
+	a\cdot 10^n+\underbrace{\overline{33\dots3}}_n=a\cdot 10^n+\frac{10^n-1}{3}.
+	$$
+	It now suffices to find $n\ge 1$ for~which $3a\mid 10^n-1$. Since $\gcd(10,3a)=1$, by Euler's theorem it suffices to choose $n=\varphi(3a)$. For such $n$ we have $a\mid\frac{10^n-1}{3}$, and~at the same time $a\mid a\cdot 10^n$, so the whole number is divisible by~$a$ and~is clearly greater than~$a$. So it is composite, which is a contradiction.
+}
+
+\Problem{2}{}{
+	Prove that there exist infinitely many positive integers $n$ such that $n^2$ written in base four contains only the digits $1$ and~$2$.
+}{
+	Let us try to construct such numbers inductively. Previous ideas may have failed because squaring produced doublings of numbers, which for the digit~$2$ in base four causes a carry and~creates zeros.
+}{
+	Try to create a new number from~two copies of the previous one: $n_{k+1}=n_k(2^a+1)$. If you square this expression, you get $n_k^2(2^{2a}+2^{a+1}+1)$. How should $a$ be chosen so that the middle term turns into a pure power of four with no coefficient~$2$?
+}{
+	We prove a stronger claim: for every $k\ge 1$ there exists a number $n_k$ such that its square $n_k^2$ has, in base four, exactly $L_k$ digits, all from~$\{1,2\}$, with the first and~last digit always being~$1$.
+
+	As the base of the induction we take $n_1=5$. Its square is $25=121_4$, so the conditions are satisfied with length $L_1=3$, the number begins and ends with a one.
+
+	Suppose we have such a number $n_k$ whose square $n_k^2$ has, in base four, length~$L$. We construct the new number $n_{k+1}$ as follows:
+	$$
+	n_{k+1}=n_k\cdot(2^{2L-1}+1).
+	$$
+	After squaring we get
+	$$
+	n_{k+1}^2=n_k^2\cdot\bigl(2^{4L-2}+2\cdot 2^{2L-1}+1\bigr)=n_k^2\cdot\bigl(4^{2L-1}+4^L+1\bigr).
+	$$
+	Notice that thanks to the suitably chosen odd exponent the middle term $2\cdot 2^{2L-1}$ turned into $2^{2L}$, which is exactly $4^L$. The coefficient~$2$, which would cause unwanted carries in base four, has disappeared. So the expression is a sum of three copies of $n_k^2$ shifted in base four by~$0$, $L$ and~$2L-1$ positions to the left.
+
+	Let us look at how these three blocks overlap:
+	\begitems \style N
+	\i The first block (shift~$0$) occupies positions $0$ to $L-1$.
+	\i The second block (shift~$L$) occupies positions $L$ to $2L-1$.
+	\i The third block (shift $2L-1$) occupies positions $2L-1$ to $3L-2$.
+	\enditems
+	Between the first and~second blocks there is no gap (the second begins exactly where the first ends). The second and~third blocks overlap in exactly one position: $2L-1$. At this position we add the highest digit of the second block (which is the highest digit of $n_k^2$, i.e.~$1$) and~the lowest digit of the third block (which is the lowest digit of $n_k^2$, i.e.~$1$). Their sum is $1+1=2$, no carry arises.
+
+	All the other digits of the resulting number are the untouched digits from the copies of $n_k^2$, i.e. exclusively $1$ and~$2$. The resulting number has length $3L-1$, begins with the highest digit of the third block ($1$) and~ends with the lowest digit of the first block ($1$). This completes the induction step, and~infinitely many such numbers exist.
+}
+
+\DisplayExerciseSolutions
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye
