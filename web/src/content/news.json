@@ -1,5 +1,20 @@
 [
   {
+    "id": "ak190Hh-J9kNilSJ_7qPL",
+    "slug": "handouts-all-languages",
+    "title": {
+      "sk": "Materiály vo všetkých jazykoch",
+      "en": "Handouts in All Languages",
+      "cs": "Materiály ve všech jazycích"
+    },
+    "date": "2026-07-02",
+    "category": "handouts",
+    "cover": {
+      "kind": "icon",
+      "name": "languages"
+    }
+  },
+  {
     "id": "Gd5xK2mQ7pR9vT3nB8wYz",
     "slug": "guide-redesign",
     "title": {
