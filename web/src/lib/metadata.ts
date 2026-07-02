@@ -109,6 +109,20 @@ function resolveLocalizedPath(
 }
 
 /**
+ * Turns a resolved localized path into the URL suffix after the locale prefix.
+ * Collapses the home root so the locale URL carries no trailing slash (`/sk`, not `/sk/`),
+ * which the server would otherwise 308-redirect away.
+ *
+ * @param localizedPath - The resolved localized path (e.g. '/o-projekte' or '/').
+ *
+ * @returns The suffix to append after `/{locale}`.
+ */
+function toLocaleUrlSuffix(localizedPath: string): string {
+  // Home root becomes empty; every other path is used as-is
+  return localizedPath === '/' ? '' : localizedPath
+}
+
+/**
  * Builds the alternate language URLs for hreflang tags.
  * Dynamically generates URLs for all supported locales plus x-default.
  * Replaces [slug] placeholder with actual localized slug if translations are provided.
@@ -118,7 +132,7 @@ function resolveLocalizedPath(
  *
  * @returns An object mapping locale codes to full URLs for alternates.languages
  */
-function buildAlternateLanguages(
+export function buildAlternateLanguages(
   canonicalPath: string,
   slugTranslations?: Record<Locale, string>
 ): Record<string, string> {
@@ -137,11 +151,15 @@ function buildAlternateLanguages(
     if (localizedPath === undefined) continue
 
     // Build full URL with locale prefix
-    languages[locale] = `${siteUrl}/${locale}${localizedPath}`
+    languages[locale] = `${siteUrl}/${locale}${toLocaleUrlSuffix(localizedPath)}`
   }
 
-  // Add x-default pointing to default locale
-  languages['x-default'] = languages[DEFAULT_LOCALE]
+  // Collect the URLs that actually resolved
+  const resolvedUrls = Object.values(languages)
+  // Point x-default at the default locale, falling back to the first resolved alternate
+  if (resolvedUrls.length > 0) {
+    languages['x-default'] = languages[DEFAULT_LOCALE] ?? resolvedUrls[0]
+  }
 
   // Return the built map
   return languages
@@ -201,7 +219,7 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
   }
 
   // Generate canonical URL with locale prefix (e.g. https://site.com/sk/o-projekte)
-  const url = getCanonicalUrl(`/${locale}${localizedPath}`)
+  const url = getCanonicalUrl(`/${locale}${toLocaleUrlSuffix(localizedPath)}`)
 
   // Generate OG image URL
   const ogImage = `${getRequiredEnv('NEXT_PUBLIC_SITE_URL')}/og-image.png`
@@ -246,7 +264,6 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
       title: title || SITE_TITLE,
       description,
       images: [ogImage],
-      creator: SITE_NAME,
     },
 
     // Robots

@@ -166,6 +166,20 @@ function validate(): string[] {
           )
         )
 
+        // Reject slug keys for locales the handout isn't published in — a stray key would
+        // make hreflang advertise a detail URL that 404s (never rendered)
+        const strayLocales = Object.keys(readyHandout.slug).filter(
+          (locale) => !requiredLocales.includes(locale as Locale)
+        )
+        // One error per stray key
+        errors.push(
+          ...strayLocales.map(
+            (strayLocale) =>
+              `${handoutContext}: slug has key "${strayLocale}" not in its ` +
+              `languages [${requiredLocales.join(', ')}]`
+          )
+        )
+
         // Validate description (only for declared languages)
         errors.push(
           ...validatePartialLocalizedString(

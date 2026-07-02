@@ -52,15 +52,15 @@ describe('generatePageMetadata - canonical URL', () => {
     expect(metadata.alternates?.canonical).toBe(`${TEST_SITE_URL}/cs/o-projektu`)
   })
 
-  it('includes locale prefix for the home page', () => {
+  it('includes locale prefix without a trailing slash for the home page', () => {
     // Generate metadata for the Slovak home page
     const metadata = generatePageMetadata({
       locale: 'sk',
       path: '/',
     })
 
-    // Canonical should be /sk/ for the home page
-    expect(metadata.alternates?.canonical).toBe(`${TEST_SITE_URL}/sk/`)
+    // Canonical should be /sk (no trailing slash the server would 308 away)
+    expect(metadata.alternates?.canonical).toBe(`${TEST_SITE_URL}/sk`)
   })
 
   it('resolves slugs in dynamic routes correctly', () => {
@@ -134,5 +134,45 @@ describe('generatePageMetadata - hreflang alternates', () => {
     expect(languages['sk']).toBe(`${TEST_SITE_URL}/sk/materialy/faktorizacia`)
     expect(languages['en']).toBe(`${TEST_SITE_URL}/en/handouts/factorization`)
     expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs/materialy/faktorizace`)
+  })
+
+  it('emits trailing-slash-free home alternates with an x-default of the default locale', () => {
+    // Generate metadata for the home page
+    const metadata = generatePageMetadata({
+      locale: 'sk',
+      path: '/',
+    })
+
+    // Extract alternate languages
+    const languages = metadata.alternates?.languages as Record<string, string>
+
+    // Every home alternate should be the bare locale root, no trailing slash
+    expect(languages['sk']).toBe(`${TEST_SITE_URL}/sk`)
+    expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs`)
+    expect(languages['en']).toBe(`${TEST_SITE_URL}/en`)
+
+    // x-default should point to the default locale (sk)
+    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/sk`)
+  })
+
+  it('falls back x-default to the only resolved locale for a single-language handout', () => {
+    // Generate metadata for an English-only handout (no sk/cs slug)
+    const metadata = generatePageMetadata({
+      locale: 'en',
+      path: '/handouts/[slug]',
+      title: 'Adding Points',
+      slugTranslations: { en: 'adding-points' } as Record<Locale, string>,
+    })
+
+    // Extract alternate languages
+    const languages = metadata.alternates?.languages as Record<string, string>
+
+    // Only the English alternate resolves; sk/cs are absent
+    expect(languages['en']).toBe(`${TEST_SITE_URL}/en/handouts/adding-points`)
+    expect(languages['sk']).toBeUndefined()
+    expect(languages['cs']).toBeUndefined()
+
+    // x-default falls back to the English URL rather than an undefined sk URL
+    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/en/handouts/adding-points`)
   })
 })

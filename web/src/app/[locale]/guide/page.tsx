@@ -29,7 +29,6 @@ export async function generateMetadata({
     locale: locale as Locale,
     namespace: 'metadata.guide',
     path: ROUTES.GUIDE,
-    type: 'article',
     useSection: true,
   })
 }
