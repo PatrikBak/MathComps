@@ -21,7 +21,7 @@ export default function HeroSection() {
   const heroDescription = t('description')
 
   return (
-    <AnimatedSection className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `}>
+    <AnimatedSection eager className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `}>
       {/* Background Animations */}
       <ParticleSystem />
       <FloatingMath />

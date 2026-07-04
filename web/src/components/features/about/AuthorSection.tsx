@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { GithubIcon, LinkedinIcon } from '@/components/shared/components/brand-icons'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
+import { AUTHOR_GITHUB_URL, AUTHOR_LINKEDIN_URL, AUTHOR_PHOTO_PATH } from '@/constants/author'
 
 import AboutPanelSection from './layout/AboutPanelSection'
 
@@ -15,7 +16,7 @@ export const AuthorSection = () => {
       <div className="flex flex-col sm:flex-row items-start gap-8">
         <div className="flex-shrink-0 mx-auto sm:mx-0">
           <ImageWithLoader
-            src="/foto.jpg"
+            src={AUTHOR_PHOTO_PATH}
             alt={t('alt')}
             width={128}
             height={128}
@@ -34,7 +35,7 @@ export const AuthorSection = () => {
 
           <div className="flex items-center gap-4 sm:gap-6 pt-2">
             <AppLink
-              href="https://www.linkedin.com/in/patrik-bak-113385139"
+              href={AUTHOR_LINKEDIN_URL}
               className="text-muted hover:text-foreground transition-colors flex items-center gap-2"
               title="LinkedIn"
             >
@@ -43,7 +44,7 @@ export const AuthorSection = () => {
             </AppLink>
 
             <AppLink
-              href="https://github.com/patrikbak"
+              href={AUTHOR_GITHUB_URL}
               className="text-muted hover:text-foreground transition-colors flex items-center gap-2"
               title="GitHub"
             >

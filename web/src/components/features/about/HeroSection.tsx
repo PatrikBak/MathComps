@@ -9,7 +9,7 @@ export const HeroSection = () => {
   const t = useTranslations('about.hero')
 
   return (
-    <AnimatedSection className="text-center">
+    <AnimatedSection eager className="text-center">
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight text-balance">
         {t('title1')}
         <GradientText className="block">{t('title2')}</GradientText>

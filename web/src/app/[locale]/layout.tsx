@@ -5,10 +5,12 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { hasLocale, type Locale, NextIntlClientProvider } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { type ReactNode, Suspense } from 'react'
 
 import KatexSetup from '@/components/math/KatexSetup'
 import { AuthStoreSync } from '@/components/shared/auth/AuthStoreSync'
+import { JsonLd } from '@/components/shared/components/JsonLd'
 import ProgressBarProvider from '@/components/shared/providers/ProgressBarProvider'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { ToastProvider } from '@/components/shared/providers/ToastProvider'
@@ -17,6 +19,7 @@ import { getCanonicalUrl } from '@/components/shared/utils/url-utils'
 import { SITE_NAME, SITE_THEME_COLOR, SITE_TITLE } from '@/constants/og-metadata'
 import { DEFAULT_LOCALE, routing, SUPPORTED_LOCALES } from '@/i18n/i18n'
 import { generatePageMetadata, getSiteMetadata } from '@/lib/metadata'
+import { buildSiteJsonLd } from '@/lib/structured-data'
 
 /**
  * Root font configuration.
@@ -53,7 +56,6 @@ export async function generateMetadata({
 
     // Root layout specific overrides
     title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
-    keywords: siteMetadata.keywords,
     icons: { icon: '/icon.svg' },
     metadataBase: new URL(getCanonicalUrl()),
   }
@@ -101,16 +103,28 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
     notFound()
   }
 
-  // Return the HTML with our layout and 42 nested providers
-  // It's all wrapped in Suspense because unknown routes will
-  // need to be rendered dynamically and since we're rendering
-  // the header with auth state, we need to wait for Clerk to
-  // figure out if the user is logged in, server-side, so we are
-  // suspending the layout before it happens mhm. I guess it could
-  // be done better but who cares, this comment is already too long
+  // Locale-aware site metadata
+  const siteMetadata = await getSiteMetadata(locale)
+
+  // Localized author bio
+  const tAuthor = await getTranslations({ locale, namespace: 'about.author' })
+
+  // Here's the HTML: the JSON-LD rides up front (outside the Suspense, so it's
+  // always in the shell), then our layout and 42 nested providers under one
+  // Suspense, partly because unknown routes render dynamically, but mostly
+  // because the header shows auth state, so we wait for Clerk to figure out
+  // server-side whether you're logged in before the layout resolves. mhm.
+  // I guess it could be done better but who cares, this comment is already too long
   return (
     <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={cn(inter.className, 'antialiased')}>
+        <JsonLd
+          data={buildSiteJsonLd({
+            locale,
+            siteDescription: siteMetadata.description,
+            authorDescription: tAuthor('shortBio'),
+          })}
+        />
         <Suspense fallback={null}>
           <ClerkProvider>
             <QueryProvider>

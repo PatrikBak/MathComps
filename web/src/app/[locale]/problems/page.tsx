@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
+import { ProblemsIntroSection } from '@/components/features/problems/components/ProblemsIntroSection'
 import ProblemsLibrary from '@/components/features/problems/components/ProblemsLibrary'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
-import { withLocale } from '@/i18n/with-locale'
+import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { createPageMetadata } from '@/lib/metadata'
 
 /**
@@ -31,9 +32,10 @@ export async function generateMetadata({
 /**
  * Page component, no footer for it takes too much precious space.
  */
-export default withLocale(async function ProblemsPage() {
+export default withLocale(async function ProblemsPage({ locale }: PageProps) {
   return (
     <Layout displayFooter={false}>
+      <ProblemsIntroSection locale={locale} />
       <Suspense fallback={null}>
         <ProblemsLibrary />
       </Suspense>
