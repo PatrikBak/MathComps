@@ -1,6 +1,8 @@
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
+using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Services.Ai;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;

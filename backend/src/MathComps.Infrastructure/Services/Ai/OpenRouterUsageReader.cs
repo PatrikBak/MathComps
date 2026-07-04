@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
-using MathComps.Cli.Tagging.Settings;
+using MathComps.Infrastructure.Options;
 using MathComps.Shared.Serialization;
 using Microsoft.Extensions.Options;
 
-namespace MathComps.Cli.Tagging.Services;
+namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
 /// Implements <see cref="IOpenRouterUsageReader"/> by calling OpenRouter's key-info endpoint (<c>GET /key</c>)
@@ -32,7 +32,7 @@ public class OpenRouterUsageReader(HttpClient httpClient, IOptions<OpenRouterSet
         // The key-info endpoint sits next to the chat endpoint under the same base URL.
         var requestUri = $"{settings.Value.BaseUrl.TrimEnd('/')}/key";
 
-        // Authenticate with the same key the chat passes use.
+        // Authenticate with the same key the chat calls use.
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.Value.ApiKey);
 

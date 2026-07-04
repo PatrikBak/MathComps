@@ -1,4 +1,4 @@
-namespace MathComps.Cli.Tagging.Services;
+namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
 /// Reads spend figures for the configured OpenRouter API key.

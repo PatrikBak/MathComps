@@ -37,6 +37,7 @@
     <PackageVersion Include="Svix" Version="1.81.0" />
     <PackageVersion Include="Pgvector" Version="0.2.0" />
     <PackageVersion Include="Pgvector.EntityFrameworkCore" Version="0.2.0" />
+    <PackageVersion Include="Polly.Core" Version="8.7.0" />
     <PackageVersion Include="Spectre.Console" Version="0.51.1" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.51.1" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
