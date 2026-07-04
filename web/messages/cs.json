@@ -3,6 +3,7 @@
     "author": {
       "alt": "Profilová fotka Patrika Baka",
       "description": "Jmenuji se <strong>Patrik Bak</strong>. Jako bývalý trojnásobný účastník a dvojnásobný medailista na Mezinárodních matematických olympiádách (IMO), ale také autor mnoha soutěžních úloh (včetně dvou pro IMO), mám k olympiádní matematice hluboký vztah. Už delší dobu mě baví spojovat matematiku s programováním. Tento zájem v minulosti vedl k projektu <strong>GeoGen</strong>, nástroji pro automatické generování geometrických úloh. <strong>MathComps</strong> je dalším logickým krokem na této cestě – snahou vytvořit komplexní a moderní platformu pro komunitu matematické olympiády. Při jejím budování se opírám nejen o vlastní poznatky a zkušenosti, ale díky porozumění a podpoře mnoha skvělých lidí z komunity MO i o jejich připomínky a nápady.",
+      "shortBio": "Trojnásobný účastník a dvojnásobný medailista Mezinárodní matematické olympiády (IMO); autor soutěžních úloh a materiálů MathComps.",
       "title": "O autorovi"
     },
     "hero": {
@@ -496,7 +497,7 @@
   },
   "metadata": {
     "about": {
-      "description": "Zjistěte více o projektu MathComps, jeho příběhu, autorovi a technologiích.",
+      "description": "Příběh projektu MathComps: kdo ho tvoří, proč vznikl trojjazyčný archiv olympiádních úloh, studijních materiálů a rozcestníku zdrojů, a na čem je postavený.",
       "title": "O projektu"
     },
     "guide": {
@@ -516,7 +517,7 @@
       "title": "Přihlásit se"
     },
     "news": {
-      "description": "Nejnovější zprávy o tom, co se děje na webu.",
+      "description": "Co je nového na MathComps: nově zveřejněné materiály, přidané soutěže a sady úloh a vylepšení archivu, rozcestníku a nástrojů.",
       "title": "Novinky"
     },
     "privacy": {
@@ -532,8 +533,7 @@
       "title": "Profil"
     },
     "site": {
-      "description": "Platforma pro matematické soutěže s archivem úloh, učebními materiály a rozcestníkem užitečných zdrojů.",
-      "keywords": "matematika, matematické soutěže, matematická olympiáda, matematické úlohy, matematické materiály, matematický archiv"
+      "description": "Platforma pro matematické soutěže s archivem úloh, učebními materiály a rozcestníkem užitečných zdrojů."
     }
   },
   "navigation": {

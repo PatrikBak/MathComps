@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 import React, { useRef } from 'react'
 
 /**
@@ -13,17 +13,25 @@ type AnimatedSectionProps = {
   className?: string
   /** Optional anchor ID for scroll navigation */
   id?: string
+  /** Skip the entrance fade and render visible immediately */
+  eager?: boolean
 }
 
 /**
  * Animated section component using Framer Motion.
  */
-export default function AnimatedSection({ children, className, id }: AnimatedSectionProps) {
+export default function AnimatedSection({ children, className, id, eager }: AnimatedSectionProps) {
   // The ref for the section element
   const ref = useRef(null)
 
   // Use Framer Motion to detect when the section is in view
   const isInView = useInView(ref, { once: true })
+
+  // Whether the user asked to reduce motion
+  const prefersReducedMotion = useReducedMotion()
+
+  // Eager (above-the-fold) or reduced-motion sections render visible with no fade
+  const immediate = eager || Boolean(prefersReducedMotion)
 
   // The section will be told to be hidden or visible based on whether in view
   const variants = {
@@ -39,9 +47,9 @@ export default function AnimatedSection({ children, className, id }: AnimatedSec
       id={id}
       data-scroll-section
       variants={variants}
-      initial="hidden"
-      animate={isInView ? 'visible' : 'hidden'}
-      transition={{ duration: 1, ease: 'easeOut' }}
+      initial={immediate ? 'visible' : 'hidden'}
+      animate={immediate || isInView ? 'visible' : 'hidden'}
+      transition={immediate ? { duration: 0 } : { duration: 1, ease: 'easeOut' }}
     >
       {children}
     </motion.section>

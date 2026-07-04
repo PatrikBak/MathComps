@@ -2,8 +2,8 @@
  * Open Graph metadata constants.
  *
  * This file contains only static, non-locale-specific constants.
- * For locale-aware metadata (description, keywords), use the
- * `getSiteMetadata(locale)` function from `@/lib/metadata`.
+ * For the locale-aware description, use the
+ * `getSiteMetadata` function from `@/lib/metadata`.
  */
 
 /**

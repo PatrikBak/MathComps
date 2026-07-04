@@ -13,11 +13,15 @@ import {
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
 import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import Layout from '@/components/layout/Layout'
+import { JsonLd } from '@/components/shared/components/JsonLd'
+import { getCanonicalUrl } from '@/components/shared/utils/url-utils'
 import handoutIndex from '@/content/handouts.json'
 import { LocalizedRouteProvider } from '@/hooks/useLocalizedRoute'
 import { ANCHORS, getLocalizedAnchor, type Locale, ROUTES, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { resolveLocalizedPath } from '@/i18n/localized-paths'
 import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { generatePageMetadata } from '@/lib/metadata'
+import { buildBreadcrumbJsonLd } from '@/lib/structured-data'
 
 /** Typed access to the handout index */
 const index = handoutIndex as unknown as HandoutIndex
@@ -129,20 +133,42 @@ export default withLocale(async function RenderPage({
     },
   ]
 
+  // Nav labels for the breadcrumb trail
+  const tNav = await getTranslations({ locale, namespace: 'navigation' })
+
+  // Resolve the localized handouts-list path (/materialy, /handouts)
+  const handoutsPath = resolveLocalizedPath(ROUTES.HANDOUTS, locale)
+
+  // resolveLocalizedPath widens to undefined for an unresolved slug; a static route can't hit that
+  if (handoutsPath === undefined) {
+    throw new Error(`[Breadcrumb] Missing handouts path for locale '${locale}'.`)
+  }
+
+  // Breadcrumb trail Home > Handouts > this handout
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: tNav('home'), url: getCanonicalUrl(`/${locale}`) },
+    { name: tNav('handouts'), url: getCanonicalUrl(`/${locale}${handoutsPath}`) },
+    { name: handoutMeta.title[locale] },
+  ])
+
   return (
-    // The provider exposes slug translations for the language switcher
-    <LocalizedRouteProvider slugTranslations={handoutMeta.slug}>
-      <Layout tocItems={tableOfContentsItems}>
-        <HandoutDetail
-          handout={handoutData}
-          authors={handoutMeta.authors}
-          sectionMetadata={sectionMetadata}
-          slug={slug}
-          contentId={handoutMeta.id}
-          pdfFilenameStem={`${fileBasename}.${locale}`}
-          locale={locale}
-        />
-      </Layout>
-    </LocalizedRouteProvider>
+    <>
+      {/* Breadcrumb structured data */}
+      <JsonLd data={breadcrumbJsonLd} />
+      {/* The provider exposes slug translations for the language switcher */}
+      <LocalizedRouteProvider slugTranslations={handoutMeta.slug}>
+        <Layout tocItems={tableOfContentsItems}>
+          <HandoutDetail
+            handout={handoutData}
+            authors={handoutMeta.authors}
+            sectionMetadata={sectionMetadata}
+            slug={slug}
+            contentId={handoutMeta.id}
+            pdfFilenameStem={`${fileBasename}.${locale}`}
+            locale={locale}
+          />
+        </Layout>
+      </LocalizedRouteProvider>
+    </>
   )
 })

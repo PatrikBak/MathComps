@@ -3,6 +3,7 @@
     "author": {
       "alt": "Profile photo of Patrik Bak",
       "description": "My name is <strong>Patrik Bak</strong>. As a former three-time participant and two-time medalist at the International Mathematical Olympiads (IMO), but also the author of many competition problems (including two for the IMO), I have a deep relationship with Olympiad mathematics. I have long enjoyed combining mathematics with programming. This interest previously led to the <strong>GeoGen</strong> project, a tool for automatically generating geometric problems. <strong>MathComps</strong> is the next logical step on this path – an effort to create a comprehensive and modern platform for the mathematical olympiad community. In building it, I rely not only on my own knowledge and experience but also on feedback and ideas from many great people in the MO community.",
+      "shortBio": "Three-time International Mathematical Olympiad participant and two-time medalist; author of competition problems and the MathComps handouts.",
       "title": "About the author"
     },
     "hero": {
@@ -496,7 +497,7 @@
   },
   "metadata": {
     "about": {
-      "description": "Learn more about the MathComps project, its story, author, and technologies.",
+      "description": "The story behind MathComps: who builds it, why a trilingual archive of olympiad problems, study materials, and a resource guide exists, and how it's built.",
       "title": "About project"
     },
     "guide": {
@@ -516,7 +517,7 @@
       "title": "Sign in"
     },
     "news": {
-      "description": "Latest news about what's happening on the website.",
+      "description": "What's new on MathComps: newly published handouts, added competitions and problem sets, and improvements to the archive, guide, and tools.",
       "title": "News"
     },
     "privacy": {
@@ -532,8 +533,7 @@
       "title": "Profile"
     },
     "site": {
-      "description": "A platform for mathematical competitions with a problem archive, study materials, and a guide to useful resources.",
-      "keywords": "mathematics, math competitions, mathematical olympiad, math problems, math materials, math archive"
+      "description": "A platform for mathematical competitions with a problem archive, study materials, and a guide to useful resources."
     }
   },
   "navigation": {
