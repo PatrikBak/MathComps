@@ -10,6 +10,7 @@
     <AnalysisMode>Default</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- This UserSecretsId is shared by all projects in the solution -->
     <UserSecretsId>MathComps-5e6a7c60-3b41-4c8d-9e7f-9ad5b3c2a8e9</UserSecretsId>
