@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run its sole command.
 return await CliApp.Create<Program>("Embeddings")
+    .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {
         // HttpClient is registered for making HTTP requests to external APIs.

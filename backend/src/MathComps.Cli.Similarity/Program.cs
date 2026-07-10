@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run the requested command.
 return await CliApp.Create<Program>("Similarities")
+    .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {
         // Make sure DI can resolve DbContext

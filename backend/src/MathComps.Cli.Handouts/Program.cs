@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run its sole command.
 return await CliApp.Create<Program>("Handouts")
+    .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, _) =>
     {
         // The R2 uploader, wrapped in the tracker that skips unchanged assets across runs;

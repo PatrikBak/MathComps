@@ -1,6 +1,7 @@
 using MathComps.Cli.Tagging.Dtos;
 using System.Collections.Immutable;
 using MathComps.Domain.Tagging;
+using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Shared.Io;
 using MathComps.Shared.Serialization;
@@ -37,7 +38,7 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
         string statement,
         string? solution,
         IReadOnlyCollection<AiTagCandidate> candidates,
-        string promptPath,
+        ChatStepSettings step,
         CancellationToken cancellationToken = default)
     {
         // Nothing to ask about — return an empty result without burning a call.
@@ -51,7 +52,7 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
 
         // Run the call; the library binds the structured response for us.
         var response = await CallModelAsync<GeneratePassResponse>(
-            promptPath, statement, solution, payload.ToJson(), cancellationToken);
+            step, statement, solution, payload.ToJson(), cancellationToken);
 
         // Map the names back to slugs, keeping the few unknowns aside for the human.
         return MapFitnessesToSlugs(response.Tags, candidates);
@@ -62,7 +63,7 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
         string statement,
         string? solution,
         IReadOnlyCollection<AiTagCandidate> candidates,
-        string promptPath,
+        ChatStepSettings step,
         CancellationToken cancellationToken = default)
     {
         // Nothing proposed — nothing to veto.
@@ -76,7 +77,7 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
 
         // Run the call; the library binds the structured response for us.
         var response = await CallModelAsync<VetoPassResponse>(
-            promptPath, statement, solution, payload.ToJson(), cancellationToken);
+            step, statement, solution, payload.ToJson(), cancellationToken);
 
         // Keep only the slugs the model approved.
         return MapApprovalsToApprovedSlugs(response.Tags, candidates);
@@ -146,21 +147,21 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
     /// model cache that prefix across problems. The caller returns the reply bound to <typeparamref name="TResponse"/>.
     /// </summary>
     /// <typeparam name="TResponse">The structured shape to bind the model's reply into.</typeparam>
-    /// <param name="promptPath">Path to the prompt template for this pass.</param>
+    /// <param name="step">The prompt, model, and reasoning level this pass runs on.</param>
     /// <param name="statement">The problem statement.</param>
     /// <param name="solution">The problem solution, or null when statement-only.</param>
     /// <param name="candidateTagsJson">The candidate tags serialized for the prompt's <c>{candidate_tags}</c> slot.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The bound model response.</returns>
     private async Task<TResponse> CallModelAsync<TResponse>(
-        string promptPath,
+        ChatStepSettings step,
         string statement,
         string? solution,
         string candidateTagsJson,
         CancellationToken cancellationToken)
     {
         // The system message is the instructions plus the candidate vocabulary — constant per pass, hence cacheable.
-        var systemPrompt = (await AppFile.ReadAllTextAsync(promptPath, cancellationToken))
+        var systemPrompt = (await FileUtilities.ReadAppFileAsync(step.Prompt, cancellationToken))
             .Replace("{candidate_tags}", candidateTagsJson);
 
         // The user message is just the problem: the statement, plus the solution on the passes that review it.
@@ -168,7 +169,8 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
             ? $"PROBLEM: {statement}"
             : $"PROBLEM: {statement}\nSOLUTION: {solution}";
 
-        // Hand the prompts to the shared caller and return its bound reply.
-        return await chatCaller.CompleteAsync<TResponse>(systemPrompt, userPrompt, cancellationToken: cancellationToken);
+        // Hand the prompts to the shared caller on this pass's model and return its bound reply.
+        return await chatCaller.CompleteAsync<TResponse>(
+            systemPrompt, userPrompt, step.Model, step.ReasoningEffort, step.MaxOutputTokens, cancellationToken);
     }
 }

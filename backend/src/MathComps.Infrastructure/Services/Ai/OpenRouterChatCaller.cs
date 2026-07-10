@@ -2,55 +2,69 @@ using System.Text;
 using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
+using OpenAI;
 using Polly;
 using Polly.Retry;
+using ChatCompletion = OpenAI.Chat.ChatCompletion;
 using ChatCompletionOptions = OpenAI.Chat.ChatCompletionOptions;
 
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
-/// Implements <see cref="IOpenRouterChatCaller"/> over an <see cref="IChatClient"/> pointed at OpenRouter. Resolves the
-/// per-call model and reasoning level (falling back to the configured defaults), routes the model through
-/// <see cref="ChatOptions.ModelId"/>, patches the reasoning level onto the raw request body, and retries a handful of
-/// times because OpenRouter occasionally hands back an unparseable response and re-routes on the next try.
+/// Implements <see cref="IOpenRouterChatCaller"/> over an <see cref="OpenAIClient"/> pointed at OpenRouter. Derives a
+/// model-bound client per call, patches the reasoning level onto the raw request body, and retries a configured
+/// number of times because OpenRouter occasionally hands back an unparseable response and re-routes on the next try.
+/// A reply that hit the output-token cap is retried the same way. Each reply's billed cost is folded into the spend
+/// tally as it lands, retries included.
 /// </summary>
-/// <param name="chatClient">The chat client backing every call, bound to the configured default model.</param>
-/// <param name="settings">The OpenRouter connection settings, read for the default model and reasoning level.</param>
-public class OpenRouterChatCaller(IChatClient chatClient, IOptions<OpenRouterSettings> settings)
+/// <param name="openAIClient">The OpenRouter connection; each call derives its model-bound client from it.</param>
+/// <param name="spendTracker">The tally every reply's billed cost is folded into.</param>
+/// <param name="settings">The connection settings, carrying the retry count and delay the pipeline is built from.</param>
+public class OpenRouterChatCaller(
+    OpenAIClient openAIClient, IOpenRouterSpendTracker spendTracker, IOptions<OpenRouterSettings> settings)
     : IOpenRouterChatCaller
 {
     /// <summary>
-    /// How many times a failed call is re-issued before giving up; the first attempt plus these is the total tries.
+    /// The resilience pipeline every call runs through, re-issuing a failed call on any non-cancellation fault. A retry
+    /// count below one means no retries — the call runs once through an empty pipeline.
     /// </summary>
-    private const int MaxRetries = 3;
-
-    /// <summary>
-    /// The resilience pipeline every call runs through, re-issuing a failed call on any non-cancellation fault.
-    /// </summary>
-    private static readonly ResiliencePipeline _retryPipeline = new ResiliencePipelineBuilder()
-        .AddRetry(new RetryStrategyOptions
-        {
-            ShouldHandle = new PredicateBuilder().Handle<Exception>(exception => exception is not OperationCanceledException),
-            MaxRetryAttempts = MaxRetries,
-            BackoffType = DelayBackoffType.Linear,
-            Delay = TimeSpan.FromSeconds(1),
-            UseJitter = false,
-        })
-        .Build();
+    private readonly ResiliencePipeline _retryPipeline = settings.Value.MaxRetries < 1
+        ? ResiliencePipeline.Empty
+        : new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(
+                    exception => exception is not OperationCanceledException),
+                MaxRetryAttempts = settings.Value.MaxRetries,
+                BackoffType = DelayBackoffType.Linear,
+                Delay = settings.Value.RetryDelay,
+                UseJitter = false,
+            })
+            .Build();
 
     /// <inheritdoc/>
     public async Task<TResponse> CompleteAsync<TResponse>(
         string systemPrompt,
         string userPrompt,
-        string? model = null,
+        string model,
         string? reasoningEffort = null,
+        int? maxOutputTokens = null,
         CancellationToken cancellationToken = default)
     {
-        // Fall back to the configured default reasoning level when the call doesn't set its own.
-        var effort = reasoningEffort ?? settings.Value.ReasoningEffort;
+        // The model-bound client for this call, derived from the shared connection.
+        var chatClient = openAIClient.GetChatClient(model).AsIChatClient();
 
-        // Build the per-call options carrying the model override and reasoning level, or null when neither applies.
-        var options = BuildOptions(model, effort);
+        // The per-call options carry the output-token cap and the reasoning level when set; with neither, the request
+        // uses its default body.
+        var options = maxOutputTokens is null && string.IsNullOrWhiteSpace(reasoningEffort)
+            ? null
+            : new ChatOptions
+            {
+                MaxOutputTokens = maxOutputTokens,
+                RawRepresentationFactory = string.IsNullOrWhiteSpace(reasoningEffort)
+                    ? null
+                    : _ => BuildReasoningRepresentation(reasoningEffort),
+            };
 
         // The two messages: instructions as system, the input the model acts on as user.
         ChatMessage[] messages =
@@ -72,6 +86,22 @@ public class OpenRouterChatCaller(IChatClient chatClient, IOptions<OpenRouterSet
                     useJsonSchemaResponseFormat: true,
                     cancellationToken: retryToken);
 
+                // OpenRouter prices every reply in its raw body's usage; tally the figure before any verdict on the
+                // reply, so a rejected attempt still counts what it billed. Patch — the SDK's only sanctioned hook
+                // for fields it doesn't model, like this cost — is experimental only in that its shape may change in
+                // a future SDK, hence the suppression.
+#pragma warning disable SCME0001
+                if (response.RawRepresentation is ChatCompletion completion
+                    && completion.Patch.TryGetValue("$.usage.cost"u8, out decimal cost))
+                    spendTracker.Add(cost);
+#pragma warning restore SCME0001
+
+                // A Length finish means the reply hit the token cap before finishing; throw so the retry draws a
+                // fresh sample.
+                if (response.FinishReason == ChatFinishReason.Length)
+                    throw new InvalidOperationException(
+                        "The reply hit the output-token cap before finishing; raise MaxOutputTokens for this step.");
+
                 // Bind the reply to the response type; this throws — and so gets retried — when the body won't bind.
                 return response.Result;
             }, cancellationToken);
@@ -80,40 +110,8 @@ public class OpenRouterChatCaller(IChatClient chatClient, IOptions<OpenRouterSet
         {
             // Retries exhausted — surface the failure with context for the caller to log.
             throw new InvalidOperationException(
-                $"Chat model error after {MaxRetries + 1} attempts: {exception.Message}", exception);
+                $"Chat model error after {settings.Value.MaxRetries + 1} attempts: {exception.Message}", exception);
         }
-    }
-
-    /// <summary>
-    /// Builds the chat options for one call: the model override (when the caller routes to a specific model) and the
-    /// reasoning level (patched onto the raw body). Returns null when neither applies, so the request carries exactly
-    /// the body it would without this feature.
-    /// </summary>
-    /// <param name="model">The model to route to, or null to leave the client's default model in place.</param>
-    /// <param name="reasoningEffort">The reasoning level, or null to leave reasoning off.</param>
-    /// <returns>The per-call chat options, or null when there's nothing to set.</returns>
-    private static ChatOptions? BuildOptions(string? model, string? reasoningEffort)
-    {
-        // Whether a reasoning level is in play at all.
-        var hasReasoning = !string.IsNullOrWhiteSpace(reasoningEffort);
-
-        // Nothing to override — no options object, so the client sends its default model with no reasoning field.
-        if (model is null && !hasReasoning)
-            return null;
-
-        // Start a fresh options bag to carry whatever this call overrides.
-        var options = new ChatOptions();
-
-        // Route this call to a specific model when the caller overrides the client's default.
-        if (model is not null)
-            options.ModelId = model;
-
-        // Patch the reasoning object onto the outgoing body when a level is set.
-        if (hasReasoning)
-            options.RawRepresentationFactory = _ => BuildReasoningRepresentation(reasoningEffort!);
-
-        // Hand back the populated options.
-        return options;
     }
 
     /// <summary>
@@ -131,8 +129,7 @@ public class OpenRouterChatCaller(IChatClient chatClient, IOptions<OpenRouterSet
         // Start from a fresh OpenAI options bag the adapter will fill with the normal chat params.
         var options = new ChatCompletionOptions();
 
-        // Inject the top-level "reasoning" field the OpenAI SDK doesn't model natively. Patch is the SDK's sanctioned
-        // hook for unmodeled fields; experimental only in that its shape may change.
+        // Set the top-level "reasoning" field on the options' raw JSON body — via the experimental Patch hook.
 #pragma warning disable SCME0001
         options.Patch.Set("$.reasoning"u8, Encoding.UTF8.GetBytes(reasoningJson));
 #pragma warning restore SCME0001

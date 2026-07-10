@@ -1,5 +1,6 @@
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
+using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using Moq;
 using System.Collections.Immutable;
@@ -35,7 +36,8 @@ public class AiTaggingServiceTests
         var service = new AiTaggingService(chatCaller.Object);
 
         // Suggest with an empty candidate set.
-        var result = await service.SuggestTagsAsync("statement", null, [], "ignored");
+        var result = await service.SuggestTagsAsync(
+            "statement", null, [], new ChatStepSettings { Prompt = "ignored", Model = "test-model" });
 
         // Nothing proposed, nothing unknown, no call made.
         Assert.Empty(result.TagsBySlug);
@@ -62,14 +64,16 @@ public class AiTaggingServiceTests
             chatCaller
                 .Setup(caller => caller.CompleteAsync<GeneratePassResponse>(
                     It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-                .Callback<string, string, string?, string?, CancellationToken>(
-                    (system, user, _, _, _) => (capturedSystem, capturedUser) = (system, user))
+                    It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, string, string, string?, int?, CancellationToken>(
+                    (system, user, _, _, _, _) => (capturedSystem, capturedUser) = (system, user))
                 .ReturnsAsync(new GeneratePassResponse([new TagFitnessEntry("Algebra", 0.9f, "clearly algebra")]));
 
             // Run the generate pass.
             var service = new AiTaggingService(chatCaller.Object);
-            await service.SuggestTagsAsync("the statement", "the solution", _candidates, promptPath);
+            await service.SuggestTagsAsync(
+                "the statement", "the solution", _candidates,
+                new ChatStepSettings { Prompt = promptPath, Model = "test-model" });
 
             // The system message carries the instructions and the substituted candidate names.
             Assert.Contains("INSTRUCTIONS", capturedSystem);
@@ -103,7 +107,8 @@ public class AiTaggingServiceTests
 
         // Run the generate pass against the stubbed caller.
         var result = await RunPassWithStubAsync(response,
-            (service, promptPath) => service.SuggestTagsAsync("statement", null, _candidates, promptPath));
+            (service, promptPath) => service.SuggestTagsAsync(
+                "statement", null, _candidates, new ChatStepSettings { Prompt = promptPath, Model = "test-model" }));
 
         // The known name is keyed by slug; the invented one is reported, not kept.
         Assert.Equal(["algebra"], result.TagsBySlug.Keys);
@@ -126,7 +131,8 @@ public class AiTaggingServiceTests
 
         // Run the veto pass against the stubbed caller.
         var approved = await RunPassWithStubAsync(response,
-            (service, promptPath) => service.VetoTagsAsync("statement", "solution", _candidates, promptPath));
+            (service, promptPath) => service.VetoTagsAsync(
+                "statement", "solution", _candidates, new ChatStepSettings { Prompt = promptPath, Model = "test-model" }));
 
         // Only the approved slug survives.
         Assert.Equal(["algebra"], approved);
@@ -155,7 +161,7 @@ public class AiTaggingServiceTests
             chatCaller
                 .Setup(caller => caller.CompleteAsync<TResponse>(
                     It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+                    It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(cannedResponse);
 
             // Run the pass against the configured service.
