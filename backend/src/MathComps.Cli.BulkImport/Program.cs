@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run the requested command.
 return await CliApp.Create<Program>("Bulk Import")
+    .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {
         // Make sure DI can resolve DbContext — validate connects read-only for the create-vs-reuse preview.

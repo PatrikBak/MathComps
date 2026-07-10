@@ -9,10 +9,11 @@ using Spectre.Console.Cli.Extensions.DependencyInjection;
 namespace MathComps.Shared.Cli.Commands;
 
 /// <summary>
-/// Fluent bootstrap shared by every CLI tool: it renders the banner, builds the standard
-/// appsettings/user-secrets/environment configuration, wires up dependency injection, and hands the
-/// resulting command app to <see cref="CliRunner"/>. Tools supply only their banner text, their own
-/// service registrations, and their command list.
+/// Fluent bootstrap shared by every CLI tool: it renders the banner, builds configuration from the
+/// JSON config files the tool declares plus its user secrets and environment variables, wires up
+/// dependency injection, and hands the resulting command app to <see cref="CliRunner"/>. Tools supply
+/// their banner text, the config files they require, their own service registrations, and their command
+/// list.
 /// </summary>
 public sealed class CliApp
 {
@@ -31,6 +32,11 @@ public sealed class CliApp
     /// resolve connection strings.
     /// </summary>
     private readonly List<Action<IServiceCollection, IConfiguration>> _serviceConfigurators = [];
+
+    /// <summary>
+    /// The config files the tool requires, in the order they load.
+    /// </summary>
+    private readonly List<string> _requiredConfigFiles = [];
 
     /// <summary>
     /// Initializes a new bootstrap for a single tool.
@@ -64,6 +70,22 @@ public sealed class CliApp
     {
         // Defer the registration until run time, when the configuration exists.
         _serviceConfigurators.Add(configure);
+
+        // Allow the caller to keep chaining.
+        return this;
+    }
+
+    /// <summary>
+    /// Declares a JSON config file the tool requires. Each must be present — a missing one fails at startup rather
+    /// than surfacing later as an opaque binding error. May be called more than once; files load in call order, so a
+    /// later one overrides an earlier, and user secrets and env vars override them all.
+    /// </summary>
+    /// <param name="fileName">The config file's name, resolved against the tool's base directory.</param>
+    /// <returns>The bootstrap, for fluent chaining.</returns>
+    public CliApp RequireConfigFile(string fileName)
+    {
+        // Record the file; it's loaded when configuration is built.
+        _requiredConfigFiles.Add(fileName);
 
         // Allow the caller to keep chaining.
         return this;
@@ -121,11 +143,16 @@ public sealed class CliApp
         // Render the tool's banner.
         AnsiConsole.Write(new FigletText(_bannerText).Centered().Color(Color.Aqua));
 
-        // Build configuration from appsettings.json (optional), the tool's user secrets, and env vars.
-        // Anchoring on AppContext.BaseDirectory keeps this independent of the working directory.
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: true)
+        // Start from the tool's base directory so configuration is independent of the working directory.
+        var configurationBuilder = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory);
+
+        // Load each declared config file, required and in call order.
+        foreach (var configFile in _requiredConfigFiles)
+            configurationBuilder.AddJsonFile(configFile, optional: false);
+
+        // Layer the tool's user secrets and env vars on top.
+        var configuration = configurationBuilder
             .AddUserSecrets(_userSecretsAssembly, optional: true)
             .AddEnvironmentVariables()
             .Build();

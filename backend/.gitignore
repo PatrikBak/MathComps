@@ -102,5 +102,7 @@ venv.bak/
 .env.prod
 .env.staging
 
-# Overridden settings
-**/appsettings.*.json
+# Environment-specific settings overrides — may carry secrets. Other appsettings.*.json (shared defaults) are committed.
+**/appsettings.Development.json
+**/appsettings.Staging.json
+**/appsettings.Production.json

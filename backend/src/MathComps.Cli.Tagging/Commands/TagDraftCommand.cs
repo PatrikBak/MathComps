@@ -1,7 +1,6 @@
 using MathComps.Cli.Tagging.Dtos;
 using MathComps.Cli.Tagging.Services;
 using MathComps.Cli.Tagging.Settings;
-using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
@@ -22,9 +21,8 @@ namespace MathComps.Cli.Tagging.Commands;
 /// truth, so <c>apply</c> later replays the same tags identically to every environment.
 /// </summary>
 /// <param name="taggingService">The database-free generate/veto core.</param>
-/// <param name="settings">The four prompt passes and the fit floor.</param>
-/// <param name="openRouterSettings">The backend connection — read only to name the model in the run header.</param>
-/// <param name="usageReader">Reads the key's spend, sampled before and after the run to price it.</param>
+/// <param name="settings">The four tagging passes and the fit floor.</param>
+/// <param name="spendTracker">The round's spend tally for the cost report.</param>
 [Description("""
     Tag a bulk-import draft folder in place. For every problem whose pN.yaml has no 'tags:' key, the model proposes
     tags from the approved vocabulary (statement → Area/Goal/Type, solution → Technique), a veto pass prunes them,
@@ -36,8 +34,7 @@ namespace MathComps.Cli.Tagging.Commands;
 public class TagDraftCommand(
     IAiTaggingService taggingService,
     IOptions<TagDraftSettings> settings,
-    IOptions<OpenRouterSettings> openRouterSettings,
-    IOpenRouterUsageReader usageReader)
+    IOpenRouterSpendTracker spendTracker)
     : AsyncCommand<TagDraftCommand.Settings>
 {
     /// <summary>
@@ -122,16 +119,13 @@ public class TagDraftCommand(
         // Guards the two accumulators above — the tagging loop writes them concurrently.
         var resultLock = new Lock();
 
-        // Announce the run: how many problems, against which model, in which language.
+        // Announce the run: how many problems, in which language.
         AnsiConsole.MarkupLineInterpolated(
-            $"\n[green]Tagging {problems.Length} problem(s) on {openRouterSettings.Value.Model} ({TaggingLanguage})...[/]");
+            $"\n[green]Tagging {problems.Length} problem(s) ({TaggingLanguage})...[/]");
 
         // Warn when re-tagging so overwriting existing tags is never a surprise.
         if (commandSettings.Retag)
             AnsiConsole.MarkupLine("[yellow]Re-tagging — existing tags on these problems will be overwritten.[/]");
-
-        // Sample the key's spend now; the post-run sample minus this one prices the round.
-        var creditsBefore = await TryReadCreditsUsedAsync();
 
         // Time the whole run.
         var runStopwatch = Stopwatch.StartNew();
@@ -190,55 +184,11 @@ public class TagDraftCommand(
         AnsiConsole.MarkupLineInterpolated(
             $"[green]Tagged {taggedCount}/{problems.Length} problem(s) in {runStopwatch.Elapsed.TotalSeconds:0.0}s.[/]");
 
-        // Price the round from the spend delta, when the before-sample came back.
-        if (creditsBefore is not null)
-            await ReportRoundCostAsync(creditsBefore.Value);
+        // Price the round from its own spend tally; one credit is one US dollar.
+        AnsiConsole.MarkupLine($"[green]This round cost ${spendTracker.Total:0.0000}.[/]");
 
         // Done.
         return 0;
-    }
-
-    /// <summary>
-    /// Reads the key's spend again and reports this round's cost as the delta over the pre-run sample, plus the
-    /// key's all-time spend for context. The figure is approximate — OpenRouter settles a request's cost slightly
-    /// after the response, so the last calls may not be counted yet.
-    /// </summary>
-    /// <param name="creditsBefore">The credits-used reading taken before the run started.</param>
-    private async Task ReportRoundCostAsync(decimal creditsBefore)
-    {
-        // A failed post-run sample leaves nothing to subtract; the helper already logged why.
-        var creditsAfter = await TryReadCreditsUsedAsync();
-        if (creditsAfter is null)
-            return;
-
-        // The spend over the run is what this round cost; one credit is one US dollar.
-        var roundCost = creditsAfter.Value - creditsBefore;
-
-        // Print the round cost alongside the key's all-time spend for context.
-        var costLine =
-            $"[green]This round cost ≈${roundCost:0.0000} " +
-            $"(OpenRouter credits used all-time: ${creditsAfter.Value:0.00}).[/]";
-        AnsiConsole.MarkupLine(costLine);
-    }
-
-    /// <summary>
-    /// Reads the key's all-time credits-used counter, returning null (and logging a note) when the call fails —
-    /// cost reporting must never abort a tagging run that otherwise succeeded.
-    /// </summary>
-    /// <returns>The credits the key has spent, or null when the reading couldn't be taken.</returns>
-    private async Task<decimal?> TryReadCreditsUsedAsync()
-    {
-        try
-        {
-            // Ask OpenRouter for the key's current spend.
-            return await usageReader.GetCreditsUsedAsync();
-        }
-        catch (Exception exception)
-        {
-            // Note the failure but let the run stand — its tags are already written.
-            CliLog.Line($"[yellow]Couldn't read OpenRouter usage: {Markup.Escape(exception.Message)}[/]");
-            return null;
-        }
     }
 
     /// <summary>

@@ -12,7 +12,6 @@ using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -20,7 +19,6 @@ using Microsoft.Extensions.Options;
 using MathComps.Domain.Tagging;
 using MathComps.Domain.Localization;
 using OpenAI;
-using OpenAI.Chat;
 
 namespace MathComps.Infrastructure.Extensions;
 
@@ -244,44 +242,39 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the OpenRouter chat stack: the connection settings, one chat client bound to the default model, the
-    /// retrying structured-completion caller, and the spend reader. The API key is required (from user secrets); the
-    /// base URL and default model come from configuration.
+    /// Registers the OpenRouter chat stack: the connection settings, one shared chat client, the retrying
+    /// structured-completion caller, and the process's spend tally. The API key is required (from user secrets); the
+    /// base URL comes from configuration. Each call names its own model.
     /// </summary>
     /// <param name="services">The service collection to add the chat stack to.</param>
     /// <param name="configuration">The application configuration carrying the <c>OpenRouter</c> section.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddOpenRouterChat(this IServiceCollection services, IConfiguration configuration)
     {
-        // The connection: base URL + default model from appsettings, API key from user secrets.
+        // The connection: base URL from appsettings, API key from user secrets.
         services.AddOptions<OpenRouterSettings>()
             .Bind(configuration.GetSection(OpenRouterSettings.SectionName))
             .Validate(settings => !string.IsNullOrWhiteSpace(settings.ApiKey),
                 $"{OpenRouterSettings.SectionName}:{nameof(OpenRouterSettings.ApiKey)} is not configured. Set it in user secrets.")
             .ValidateDataAnnotations();
 
-        // One chat client for the whole run, pointed at OpenRouter's OpenAI-compatible endpoint and bound to the
-        // configured default model; a per-call model override rides on ChatOptions.ModelId.
+        // One connection for the whole run, pointed at OpenRouter's OpenAI-compatible endpoint.
         services.TryAddSingleton(serviceProvider =>
         {
             // Pull the connection settings.
             var settings = serviceProvider.GetRequiredService<IOptions<OpenRouterSettings>>().Value;
 
-            // Build the OpenAI client against OpenRouter's endpoint, bound to the configured default model.
-            var chatClient = new ChatClient(
-                settings.Model,
+            // Build the OpenAI client against OpenRouter's endpoint.
+            return new OpenAIClient(
                 new ApiKeyCredential(settings.ApiKey),
                 new OpenAIClientOptions { Endpoint = new Uri(settings.BaseUrl) });
-
-            // Expose it through the Microsoft.Extensions.AI abstraction the caller depends on.
-            return chatClient.AsIChatClient();
         });
 
         // The retrying structured-completion caller every chat consumer drives.
         services.TryAddSingleton<IOpenRouterChatCaller, OpenRouterChatCaller>();
 
-        // Reads the key's all-time spend so a run can report what it cost.
-        services.AddHttpClient<IOpenRouterUsageReader, OpenRouterUsageReader>();
+        // Tallies the process's own spend so a run can report exactly what it cost.
+        services.TryAddSingleton<IOpenRouterSpendTracker, OpenRouterSpendTracker>();
 
         // Builder pattern
         return services;

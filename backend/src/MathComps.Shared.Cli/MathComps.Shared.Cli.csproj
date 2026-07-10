@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MathComps.Infrastructure\MathComps.Infrastructure.csproj" />
     <ProjectReference Include="..\MathComps.Shared\MathComps.Shared.csproj" />
   </ItemGroup>
 
