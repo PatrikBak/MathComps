@@ -53,7 +53,7 @@ export function NewsCardCover({ cover }: NewsCardCoverProps) {
     case 'icon': {
       // A line icon
       const Icon = NEWS_ICONS[cover.name]
-      content = <Icon size={84} strokeWidth={0.5} className="text-slate-800" />
+      content = <Icon strokeWidth={0.5} className="size-14 text-slate-800 md:size-20" />
       break
     }
 
