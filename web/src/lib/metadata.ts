@@ -111,8 +111,8 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
   // Generate canonical URL with locale prefix (e.g. https://site.com/sk/o-projekte)
   const url = getCanonicalUrl(`/${locale}${toLocaleUrlSuffix(localizedPath)}`)
 
-  // Generate OG image URL
-  const ogImage = `${getRequiredEnv('NEXT_PUBLIC_SITE_URL')}/og-image.png`
+  // Generate the per-locale OG image URL
+  const ogImage = `${getRequiredEnv('NEXT_PUBLIC_SITE_URL')}/og-image.${locale}.png`
   const finalImageAlt = title ? `${title} - ${SITE_NAME}` : SITE_NAME
 
   // Build the page title (layout template will add site name automatically)
