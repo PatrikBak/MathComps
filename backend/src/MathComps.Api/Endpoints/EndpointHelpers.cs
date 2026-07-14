@@ -1,4 +1,5 @@
 using System.Globalization;
+using MathComps.Api.Constants;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Domain.Localization;
 
@@ -18,7 +19,7 @@ internal static class EndpointHelpers
     public static async Task<Guid?> GetUserIdAsync(HttpContext context, IUserManager userManager)
     {
         // Extract Clerk user ID from JWT claims
-        var userExternalId = context.User.FindFirst("sub")?.Value;
+        var userExternalId = context.User.FindFirst(ClerkClaims.Subject)?.Value;
 
         // If we have a user, get their internal ID
         return !string.IsNullOrEmpty(userExternalId)
