@@ -47,7 +47,7 @@ function NewsCommentButton({ articleId, openComments }: NewsCommentButtonProps) 
   // Get the count from the context
   const { count, isLoading } = useCommentCount(articleId)
 
-  // Once loaded, an empty thread shows a quiet "add a comment" invite
+  // Loaded, and the thread has no comments yet
   const isEmpty = !isLoading && count === 0
 
   return (
@@ -160,9 +160,8 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-6 py-10">
-      {/* Title stays in the DOM for SEO and screen readers; the running feed below makes it
-          visually redundant, so it's hidden to let content start right under the nav. */}
+    <div className="w-full max-w-4xl mx-auto px-6 pb-10">
+      {/* Kept in the DOM for SEO and screen readers, hidden visually */}
       <h1 className="sr-only">{t('title')}</h1>
 
       {/* Filter indicator - appears when a category filter is active */}
@@ -172,7 +171,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
           <button
             onClick={clearFilter}
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-md',
+              'inline-flex items-center gap-1.5 min-h-11 px-3 text-sm font-medium rounded-md',
               CATEGORY_COLORS[activeCategory].bg,
               CATEGORY_COLORS[activeCategory].text,
               'hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
@@ -202,7 +201,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
               // Four-digit year shown beneath it
               const year = date.getUTCFullYear().toString()
 
-              // Newest entry gets a lit dot; older ones a quiet hollow one
+              // The first entry is the newest
               const isNewest = index === 0
 
               // Last visible entry: the rail stops here so it doesn't dangle below the final dot
@@ -241,7 +240,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                         className={cn(
                           'relative mt-1 w-3 h-3 rounded-full border-2',
                           isNewest
-                            ? 'bg-focus-light border-focus-light'
+                            ? 'bg-brand-light border-brand-light'
                             : 'bg-background border-foreground/25'
                         )}
                       />

@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 
-import { ContributeSection } from '@/components/features/home/ContributeSection'
-import FeatureHighlights from '@/components/features/home/FeatureHighlightsSection'
+import AboutProjectSection from '@/components/features/home/AboutProjectSection'
+import DestinationsSection from '@/components/features/home/DestinationsSection'
 import HeroSection from '@/components/features/home/HeroSection'
-import SponsorshipSection from '@/components/features/home/SponsorshipSection'
-import VisionSection from '@/components/features/home/VisionSection'
+import LatestNewsSection from '@/components/features/home/LatestNewsSection'
+import UpcomingSection from '@/components/features/home/UpcomingSection'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
-import { withLocale } from '@/i18n/with-locale'
+import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { createPageMetadata } from '@/lib/metadata'
 
 /**
@@ -33,14 +33,14 @@ export async function generateMetadata({
 /**
  * Page component.
  */
-export default withLocale(async function Home() {
+export default withLocale(async function Home({ locale }: PageProps) {
   return (
     <Layout>
       <HeroSection />
-      <FeatureHighlights />
-      <VisionSection />
-      <ContributeSection />
-      <SponsorshipSection />
+      <DestinationsSection />
+      <UpcomingSection />
+      <LatestNewsSection locale={locale} />
+      <AboutProjectSection />
     </Layout>
   )
 })

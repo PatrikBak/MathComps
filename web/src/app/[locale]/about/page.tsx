@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 
 import { AuthorSection } from '@/components/features/about/AuthorSection'
 import { HeroSection } from '@/components/features/about/HeroSection'
-import { RoadmapSection } from '@/components/features/about/RoadmapSection'
+import { NextSection } from '@/components/features/about/NextSection'
 import { StorySection } from '@/components/features/about/StorySection'
-import TechnologiesSection from '@/components/features/about/TechnologiesSection'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
@@ -34,11 +33,14 @@ export async function generateMetadata({
 export default withLocale(async function AboutPage() {
   return (
     <Layout>
-      <HeroSection />
-      <StorySection />
-      <AuthorSection />
-      <RoadmapSection />
-      <TechnologiesSection />
+      <div className="mx-auto max-w-3xl pb-4 sm:pb-8">
+        <HeroSection />
+        <div className="mt-8 space-y-12 sm:mt-10 sm:space-y-16">
+          <StorySection />
+          <AuthorSection />
+          <NextSection />
+        </div>
+      </div>
     </Layout>
   )
 })

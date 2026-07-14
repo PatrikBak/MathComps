@@ -1,8 +1,8 @@
-import { useMediaQuery } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { useIsMobile } from '@/hooks/use-breakpoint'
 
 import { Modal } from '../../Modal'
 import { type EditorViewModel } from '../hooks/use-editor-model'
@@ -49,7 +49,7 @@ export function RichMathEditorExpandedModal({
   const tEditor = useTranslations('ui.editor')
 
   // Check if we're on mobile where we have editor and preview as tabs
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
 
   // Keep track of which view we're in on mobile
   const [mobileModalView, setMobileModalView] = useState<'editor' | 'preview'>('editor')

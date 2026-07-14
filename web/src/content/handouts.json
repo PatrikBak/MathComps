@@ -1,34 +1,4 @@
 {
-  "events": [
-    {
-      "id": "okolo-naboje-2026",
-      "name": {
-        "sk": "Okolo Náboje s PraSátkem 2026",
-        "cs": "Okolo Náboje s PraSátkem 2026",
-        "en": "Okolo Náboje s PraSátkem 2026"
-      },
-      "description": {
-        "sk": "Trojdňový matematický mimoškolský program pre stredoškolských študentov zúčastňujúcich sa súťaže Náboj v Prahe s návštevou Matfyzu, hrou po meste, výletom a prednáškami.",
-        "cs": "Třídenní matematický mimoškolský program pro středoškolské studenty účastnící se soutěže Náboj v Praze s návštěvou Matfyzu, hrou po městě, výletem a přednáškami.",
-        "en": "Three-day mathematical extracurricular program for secondary students competing in the Prague Náboj competition, featuring a campus visit, city game, excursion, and lectures."
-      },
-      "link": "https://prase.cz/okolo_naboje/"
-    },
-    {
-      "id": "emo2026camp",
-      "name": {
-        "sk": "EMO 2026 Camp",
-        "cs": "EMO 2026 Camp",
-        "en": "EMO 2026 Camp"
-      },
-      "description": {
-        "sk": "Prípravné sústredenie pre organizačné tímy súťaže EMO 2026 (European Mathematical Olympiad)",
-        "cs": "Přípravné soustředění pro organizační týmy soutěže EMO 2026 (European Mathematical Olympiad)",
-        "en": "Preparatory camp for the organizing teams of EMO 2026 (European Mathematical Olympiad)"
-      },
-      "link": "https://emo2026.lt/"
-    }
-  ],
   "sections": [
     {
       "categoryKey": "general",
@@ -39,8 +9,6 @@
       },
       "handouts": [
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "Kp2vR8mLqX3nYwTfJc6Db",
           "slug": {
             "sk": "zaklady-dokazov",
@@ -57,11 +25,10 @@
             "cs": "Základní přehled o tom, jak vypadají důkazy v matematice. Představíme přímý důkaz a důkaz sporem na příkladech z teorie čísel.",
             "en": "A fundamental overview of mathematical proofs. Covers direct proofs and proofs by contradiction with examples from number theory."
           },
+          "difficulty": 1,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "Wn4tLx7KqRm2YvPsJc8Fb",
           "slug": {
             "sk": "indukcia",
@@ -78,6 +45,7 @@
             "cs": "Matematická indukce od základů po úplnou indukci a Cauchyho důkaz AG nerovnosti. Aplikace na identity, nerovnosti, dělitelnost a číselné soustavy.",
             "en": "Mathematical induction from the basics to strong induction and Cauchy's proof of the AM-GM inequality. Applications to identities, inequalities, divisibility, and numeral systems."
           },
+          "difficulty": 1,
           "authors": ["Patrik Bak"]
         }
       ]
@@ -91,8 +59,6 @@
       },
       "handouts": [
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "RFj3E98fbinTsPJNbfBMm",
           "slug": {
             "sk": "rozklady-na-sucin",
@@ -109,11 +75,10 @@
             "cs": "Systematický úvod do rozkládání algebraických výrazů na součin. Pokrývá základní vzorce, postupné vytýkání a doplňování na čtverec s praktickými aplikacemi.",
             "en": "A systematic introduction to factoring algebraic expressions. Covers basic formulas, step-by-step extraction, and completing the square with practical applications."
           },
+          "difficulty": 1,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "_bNdll2TEiNb6fuho76K3",
           "slug": {
             "sk": "sustavy-rovnic",
@@ -130,11 +95,10 @@
             "cs": "Základní techniky řešení soutěžních soustav rovnic. Pokrývá odčítání, sčítání a uspořádání proměnných.",
             "en": "Basic techniques for solving competition-level systems of equations. Covers subtraction, addition, and variable ordering."
           },
+          "difficulty": 1,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "u15f7GlQS2wKSsuIKCz0c",
           "slug": {
             "sk": "uvod-do-nerovnosti",
@@ -151,11 +115,10 @@
             "cs": "Základní techniky řešení soutěžních nerovností. Pokrývá ekvivalentní úpravy, kladné čtverce, AM-GM nerovnost.",
             "en": "Basic techniques for solving competition-level inequalities. Covers equivalent transformations, positive squares, AM-GM inequality."
           },
+          "difficulty": 2,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "dafdGYRouX2XuyrXK-5Xf",
           "slug": {
             "sk": "vtipna-algebra",
@@ -172,11 +135,10 @@
             "cs": "Sbírka úloh, které využívají šikovné algebraické úpravy.",
             "en": "A collection of problems that use clever algebraic manipulations."
           },
+          "difficulty": 2,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "matikaCesku",
           "public": false,
           "id": "g1UHlmQc6GrEp0db0lGHs",
           "languages": ["cs"],
@@ -190,6 +152,7 @@
           "description": {
             "cs": "Úvod do aritmetického, geometrického a harmonického průměru s důkazy nerovností mezi nimi."
           },
+          "difficulty": 1,
           "authors": ["Káťa Danilina"]
         }
       ]
@@ -203,48 +166,6 @@
       },
       "handouts": [
         {
-          "status": "planned",
-          "source": "matikaCesku",
-          "title": {
-            "sk": "Uhly bez kružníc",
-            "cs": "Úhly bez kružnic",
-            "en": "Angles Without Circles"
-          }
-        },
-        {
-          "status": "planned",
-          "source": "matikaCesku",
-          "title": {
-            "sk": "Uhly na kružnici",
-            "cs": "Úhly na kružnici",
-            "en": "Angles on Circles"
-          }
-        },
-        {
-          "status": "ready",
-          "source": "events",
-          "id": "RZtGbqo7HslApJ1qgkOOB",
-          "eventId": "emo2026camp",
-          "slug": {
-            "sk": "pridavanie-bodov",
-            "cs": "pridavani-bodu",
-            "en": "adding-points"
-          },
-          "title": {
-            "sk": "Pridávanie bodov do obrázka",
-            "cs": "Přidávání bodů do obrázku",
-            "en": "Adding Points to the Picture"
-          },
-          "description": {
-            "sk": "Sprievodca technikou pridávania pomocných bodov v olympiádnej geometrii — stredy úsečiek, zrkadlové obrazy ortocentra, druhé priesečníky kružníc a ďalšie — nasledovaný úlohami z národných olympiád, MEMO, ISL a IMO.",
-            "cs": "Průvodce technikou přidávání pomocných bodů v olympiádní geometrii — středy úseček, zrcadlové obrazy ortocentra, druhé průsečíky kružnic a další — následovaný úlohami z národních olympiád, MEMO, ISL a IMO.",
-            "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by problems from national olympiads, MEMO, ISL, and IMO."
-          },
-          "authors": ["Patrik Bak"]
-        },
-        {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "ZgFNhI74gQeJl7cEMggw7",
           "languages": ["sk", "cs", "en"],
           "slug": {
@@ -262,11 +183,10 @@
             "cs": "Základy světa úhlů bez použití kružnic. Pokrývá vrcholové, souhlasné, střídavé a vedlejší úhly, součet úhlů v mnohoúhelníku a věty o shodnosti trojúhelníků.",
             "en": "Foundations of the world of angles without circles. Covers vertical, corresponding, alternate, and supplementary angles, the angle sum in polygons, and the triangle congruence theorems."
           },
+          "difficulty": 1,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "events",
           "id": "lzP-IzGpwQ5igE6fNyZ6l",
           "slug": {
             "sk": "rovnake-dotycnice",
@@ -283,6 +203,27 @@
             "cs": "Technika stejných tečen v olympiádní geometrii — tečny z bodu, vzorce typu $s-a$ pro vepsanou a připsanou kružnici, Pitotova věta — aplikovaná na úlohy včetně USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4 a Brianchonovy věty.",
             "en": "The technique of equal tangents in olympiad geometry — tangents from a point, incircle and excircle $s-a$ formulas, Pitot's theorem — applied to problems including USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4, and Brianchon's theorem."
           },
+          "difficulty": 2,
+          "authors": ["Patrik Bak"]
+        },
+        {
+          "id": "RZtGbqo7HslApJ1qgkOOB",
+          "slug": {
+            "sk": "pridavanie-bodov",
+            "cs": "pridavani-bodu",
+            "en": "adding-points"
+          },
+          "title": {
+            "sk": "Pridávanie bodov do obrázka",
+            "cs": "Přidávání bodů do obrázku",
+            "en": "Adding Points to the Picture"
+          },
+          "description": {
+            "sk": "Sprievodca technikou pridávania pomocných bodov v olympiádnej geometrii — stredy úsečiek, zrkadlové obrazy ortocentra, druhé priesečníky kružníc a ďalšie — nasledovaný úlohami z národných olympiád, MEMO, ISL a IMO.",
+            "cs": "Průvodce technikou přidávání pomocných bodů v olympiádní geometrii — středy úseček, zrcadlové obrazy ortocentra, druhé průsečíky kružnic a další — následovaný úlohami z národních olympiád, MEMO, ISL a IMO.",
+            "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by problems from national olympiads, MEMO, ISL, and IMO."
+          },
+          "difficulty": 3,
           "authors": ["Patrik Bak"]
         }
       ]
@@ -296,28 +237,7 @@
       },
       "handouts": [
         {
-          "status": "planned",
-          "source": "matikaCesku",
-          "title": {
-            "sk": "Deliteľnosť",
-            "cs": "Dělitelnost",
-            "en": "Divisibility"
-          }
-        },
-        {
-          "status": "planned",
-          "source": "matikaCesku",
-          "title": {
-            "sk": "Diofantické rovnice",
-            "cs": "Diofantické rovnice",
-            "en": "Diophantine Equations"
-          }
-        },
-        {
-          "status": "ready",
-          "source": "events",
           "id": "xT7kWqNv3Lm8RpYfHs2Jg",
-          "eventId": "okolo-naboje-2026",
           "slug": {
             "sk": "cifrovanie",
             "cs": "cifrovani",
@@ -333,13 +253,11 @@
             "cs": "Základní triky při práci s číslicemi. Pokrývá dekadický zápis, ciferné součty, kritéria dělitelnosti a jejich aplikace v soutěžních úlohách.",
             "en": "Basic techniques for working with digits. Covers decimal representation, digit sums, divisibility criteria, and their applications in competition problems."
           },
+          "difficulty": 1,
           "authors": ["Patrik Bak"]
         },
         {
-          "status": "ready",
-          "source": "events",
           "id": "FWv-ivSDvsiD7HuULfBmT",
-          "eventId": "emo2026camp",
           "slug": {
             "sk": "inverzy-modulo-p",
             "cs": "inverzy-modulo-p",
@@ -355,6 +273,7 @@
             "cs": "Malá teorie multiplikativních inverzů modulo prvočíslo — existence, pravidla pro sčítání a násobení — aplikovaná na olympiádní úlohy včetně Wilsonovy věty, Wolstenholmovy věty a IMO 2005.",
             "en": "A small theory of multiplicative inverses modulo a prime — existence, addition, and multiplication rules — applied to olympiad problems including Wilson's theorem, Wolstenholme, and IMO 2005."
           },
+          "difficulty": 3,
           "authors": ["Patrik Bak"]
         }
       ]
@@ -368,26 +287,6 @@
       },
       "handouts": [
         {
-          "status": "planned",
-          "source": "matikaCesku",
-          "title": {
-            "sk": "Ofarbovanie",
-            "cs": "Obarvování",
-            "en": "Coloring"
-          }
-        },
-        {
-          "status": "planned",
-          "source": "matikaCesku",
-          "title": {
-            "sk": "Invarianty",
-            "cs": "Invarianty",
-            "en": "Invariants"
-          }
-        },
-        {
-          "status": "ready",
-          "source": "matikaCesku",
           "id": "_hM0pyx5ZnjFE9rcXKunr",
           "slug": {
             "sk": "kombinatoricke-hry",
@@ -404,6 +303,7 @@
             "cs": "Úvod do kombinatorických her dvou hráčů a hledání vítězných strategií. Pokrývá analýzu od konce, vyhrávající a prohrávající pozice, párování tahů, symetrii a kradení strategií.",
             "en": "An introduction to two-player combinatorial games and finding winning strategies. Covers working backwards, winning and losing positions, move pairing, symmetry, and strategy stealing."
           },
+          "difficulty": 2,
           "authors": ["Patrik Bak"]
         }
       ]

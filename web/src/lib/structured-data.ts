@@ -13,6 +13,7 @@ import {
   AUTHOR_NAME,
   AUTHOR_PHOTO_PATH,
 } from '@/constants/author'
+import { MATHCOMPS_REPO_URL } from '@/constants/links'
 import { SITE_NAME } from '@/constants/og-metadata'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 import { resolveLocalizedPath } from '@/i18n/localized-paths'
@@ -20,7 +21,7 @@ import { resolveLocalizedPath } from '@/i18n/localized-paths'
 /**
  * The organization's own first-party profile (its source repository).
  */
-const ORGANIZATION_SAME_AS = ['https://github.com/PatrikBak/MathComps']
+const ORGANIZATION_SAME_AS = [MATHCOMPS_REPO_URL]
 
 /**
  * Inputs for {@link buildSiteJsonLd}.
@@ -57,7 +58,7 @@ export function buildSiteJsonLd({
   // Localized About path, where the author's bio lives (/o-projekte, /o-projektu, /about)
   const aboutPath = resolveLocalizedPath(ROUTES.ABOUT, locale)
 
-  // resolveLocalizedPath widens to undefined for an unresolved slug; a static route can't hit that
+  // {@link resolveLocalizedPath} widens to undefined for an unresolved slug; a static route can't hit that
   if (aboutPath === undefined) {
     throw new Error(`[JSON-LD] Missing about path for locale '${locale}'.`)
   }

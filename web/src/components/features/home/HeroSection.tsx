@@ -1,59 +1,38 @@
-import { FileText, GitBranch, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import FloatingMath from '@/components/animations/FloatingMath'
 import ParticleSystem from '@/components/animations/ParticleSystem'
-import TypingEffect from '@/components/animations/TypingEffect'
-import AnimatedSection from '@/components/shared/components/AnimatedSection'
-import { ROUTES } from '@/i18n/i18n'
 
-import GradientText from '../../shared/components/GradientText'
-import { HeroButton } from './HeroButton'
+import { HeroConstruction } from './hero-geometry/HeroConstruction'
 
 /**
- * Top landing page section.
+ * The landing hero: headline and subtitle beside a self-drawing geometric construction.
  */
 export default function HeroSection() {
-  // The translations for the hero section
+  // Copy for the hero
   const t = useTranslations('home.hero')
 
-  // The description used in the typing effect
-  const heroDescription = t('description')
-
   return (
-    <AnimatedSection eager className={`text-center sm:mt-2 md:mt-4 lg:mb-8 `}>
-      {/* Background Animations */}
+    <section className="relative overflow-hidden">
       <ParticleSystem />
       <FloatingMath />
 
-      {/* Content */}
-      <div className="px-4 max-w-4xl mx-auto relative z-10">
-        <h1 className="text-foreground font-black tracking-tight text-balance leading-[1] mb-4 sm:mb-6 lg:mb-8 text-[clamp(2rem,8vw,5.5rem)] hyphens-none">
-          <GradientText>{t('title.modernHome')}</GradientText> {t('title.forMath')}{' '}
-          <GradientText>{t('title.olympiad')}</GradientText>
-        </h1>
-        {/* Grid overlay trick: invisible text reserves height, typing effect renders on top */}
-        <div className="mt-4 sm:mt-6 lg:mt-8 text-base sm:text-xl lg:text-2xl text-muted max-w-2xl mx-auto leading-relaxed text-balance hyphens-none grid [&>*]:col-start-1 [&>*]:row-start-1">
-          <span className="invisible" aria-hidden="true">
-            {heroDescription}
-          </span>
-          <TypingEffect text={heroDescription} speed={25} />
+      <div className="relative z-10 mx-auto grid max-w-4xl items-center gap-8 px-4 pb-10 md:grid-cols-[1.35fr_1fr] md:gap-12 md:pb-16">
+        {/* Statement */}
+        <div className="text-center md:text-left">
+          <h1 className="text-balance text-[clamp(1.875rem,4.2vw,2.5rem)] font-bold leading-[1.05] tracking-tight text-foreground hyphens-none">
+            {t('title')}
+          </h1>
+          <p className="mx-auto mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg md:mx-0">
+            {t('subtitle')}
+          </p>
         </div>
 
-        <div className="mt-6 sm:mt-10 lg:mt-12 flex flex-col lg:flex-row gap-6 justify-center items-center text-nowrap pb-2 lg:pb-0">
-          <HeroButton href={ROUTES.PROBLEMS} variant="indigoPurple" icon={Search}>
-            {t('buttons.exploreArchive')}
-          </HeroButton>
-
-          <HeroButton href={ROUTES.HANDOUTS} variant="violetPink" icon={FileText}>
-            {t('buttons.exploreHandouts')}
-          </HeroButton>
-
-          <HeroButton href={ROUTES.GUIDE} variant="pinkRose" icon={GitBranch}>
-            {t('buttons.exploreGuide')}
-          </HeroButton>
+        {/* The construction, drawn in on load */}
+        <div className="flex justify-center text-brand-light">
+          <HeroConstruction className="h-64 w-64 md:h-80 md:w-80" />
         </div>
       </div>
-    </AnimatedSection>
+    </section>
   )
 }

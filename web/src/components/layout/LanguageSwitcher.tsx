@@ -69,7 +69,7 @@ export function LanguageSwitcher() {
           id="language-switcher-content"
           className={cn(
             'min-w-[140px] rounded-lg py-1.5',
-            'bg-surface/95 backdrop-blur-sm border border-foreground/10',
+            'bg-surface/25 backdrop-blur-md border border-foreground/10',
             'shadow-lg z-50',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
@@ -95,7 +95,7 @@ export function LanguageSwitcher() {
                   'flex items-center gap-2.5 px-3 py-2 text-sm',
                   'outline-none cursor-pointer transition-colors',
                   isActive
-                    ? cn('bg-focus/20 text-focus-foreground')
+                    ? 'bg-brand/20 text-foreground'
                     : 'text-muted-foreground hover:bg-surface/60 hover:text-foreground'
                 )}
                 onSelect={() => {
@@ -107,7 +107,7 @@ export function LanguageSwitcher() {
               >
                 <FlagIcon country={country} flagHeight={14} flagWidth={20} />
                 <span>{LOCALE_NAMES[locale]}</span>
-                {isActive && <span className="ml-auto text-focus text-xs">✓</span>}
+                {isActive && <span className="ml-auto text-brand-light text-xs">✓</span>}
               </DropdownMenu.Item>
             )
           })}

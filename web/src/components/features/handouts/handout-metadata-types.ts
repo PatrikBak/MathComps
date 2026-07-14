@@ -5,44 +5,16 @@ import type { Locale, LocalizedString } from '@/i18n/i18n'
  * Do not modify the structure without coordinating with the handout index JSON schema.
  */
 
-/**
- * All handout sources in their canonical display order.
- *
- * - `matikaCesku` — written for Matika Česku math circles and online course.
- * - `events` — originally used at events/camps; carries an `eventId` on ready handouts.
- */
-export const HANDOUT_SOURCES = ['matikaCesku', 'events'] as const
+/** The difficulty levels, low to high */
+export const HANDOUT_DIFFICULTY_LEVELS = [1, 2, 3] as const
+
+/** A handout's difficulty on the {@link HANDOUT_DIFFICULTY_LEVELS} scale */
+export type HandoutDifficulty = (typeof HANDOUT_DIFFICULTY_LEVELS)[number]
 
 /**
- * Origin/source of a handout. Drives the source badge on each card and the
- * source filter chip row on the listing page.
+ * A handout: a study material available with content.
  */
-export type HandoutSource = (typeof HANDOUT_SOURCES)[number]
-
-/**
- * Fields common to all handout statuses.
- */
-type HandoutMetadataBase = {
-  /** Origin of the handout (drives the source badge and filter row) */
-  source: HandoutSource
-  /** Localized display title shown in the handouts list */
-  title: LocalizedString
-}
-
-/**
- * A handout that is planned but not yet available.
- */
-type PlannedHandoutMetadata = HandoutMetadataBase & {
-  /** Discriminator */
-  status: 'planned'
-}
-
-/**
- * A handout that is fully available with content.
- */
-export type ReadyHandoutMetadata = HandoutMetadataBase & {
-  /** Discriminator */
-  status: 'ready'
+export type HandoutMetadata = {
   /** Permanent unique identifier (nanoid) for comments and references */
   id: string
   /** Subset of locales this handout is available in (defaults to all when absent) */
@@ -58,22 +30,13 @@ export type ReadyHandoutMetadata = HandoutMetadataBase & {
   title: LocalizedString
   /** Localized SEO/OG description for metadata */
   description: LocalizedString
+  /** Difficulty level, low to high */
+  difficulty: HandoutDifficulty
   /** List of author names (not localized - names stay as-is) */
   authors: string[]
-  /**
-   * ID of the event this handout was used at (matches an entry in the index `events` array
-   * in `handouts.json`). Currently unread by the UI but kept so the JSON data round-trips
-   * through the type and so future UI work can resurface it.
-   */
-  eventId?: string
   /** Whether the handout appears in the public listing (defaults to true when absent) */
   public?: boolean
 }
-
-/**
- * Union type representing any handout metadata.
- */
-export type HandoutMetadata = PlannedHandoutMetadata | ReadyHandoutMetadata
 
 /**
  * Groups handouts by a high-level category (e.g., Algebra, Geometry, etc.)
@@ -83,7 +46,7 @@ export type HandoutSection = {
   categoryKey: string
   /** Localized category name */
   category: LocalizedString
-  /** Array of handout entries in this category (planned or ready) */
+  /** Array of handout entries in this category */
   handouts: HandoutMetadata[]
 }
 
@@ -96,19 +59,16 @@ export type HandoutIndex = {
 }
 
 /**
- * Type guard to check if a handout is ready (has content).
- */
-export function isReadyHandout(handout: HandoutMetadata): handout is ReadyHandoutMetadata {
-  return handout.status === 'ready'
-}
-
-/**
- * Type guard to check if a handout is ready and publicly listed.
+ * Whether a handout appears in the public listing.
  * Handouts without an explicit `public` field are considered public.
+ *
+ * @param handout - The handout metadata to check.
+ *
+ * @returns True when the handout is publicly listed.
  */
-export function isPublicHandout(handout: HandoutMetadata): handout is ReadyHandoutMetadata {
-  // A handout is public when it is ready and not explicitly marked as non-public
-  return isReadyHandout(handout) && handout.public !== false
+export function isPublicHandout(handout: HandoutMetadata): boolean {
+  // A handout is public unless it is explicitly marked otherwise
+  return handout.public !== false
 }
 
 /**
@@ -121,13 +81,10 @@ export function isPublicHandout(handout: HandoutMetadata): handout is ReadyHando
  * @returns True if the handout is available in the given locale.
  */
 export function supportsLocale(handout: HandoutMetadata, locale: Locale): boolean {
-  // Planned handouts are always available in all locales
-  if (!isReadyHandout(handout)) return true
-
-  // Ready handouts without a languages restriction support all locales
+  // Without a languages restriction, the handout supports all locales
   if (!handout.languages) return true
 
-  // Check if the locale is in the declared languages list
+  // Otherwise the locale must be in the declared languages list
   return handout.languages.includes(locale)
 }
 
@@ -135,11 +92,11 @@ export function supportsLocale(handout: HandoutMetadata, locale: Locale): boolea
  * Returns the canonical base filename used for content JSON files.
  * Uses the explicit `fileSlug` if set, otherwise falls back to the English slug.
  *
- * @param handout - The ready handout metadata.
+ * @param handout - The handout metadata.
  *
  * @returns The base filename for content files (e.g., "factorization" or "means").
  */
-export function getContentFileBasename(handout: ReadyHandoutMetadata): string {
+export function getContentFileBasename(handout: HandoutMetadata): string {
   // Use the explicit fileSlug when provided (required for handouts without an English slug)
   return handout.fileSlug ?? handout.slug.en
 }

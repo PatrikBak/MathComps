@@ -1,10 +1,10 @@
 'use client'
 
-import { useMediaQuery } from '@mantine/hooks'
 import { Resizable } from 're-resizable'
 import { useEffect, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { useIsMobile } from '@/hooks/use-breakpoint'
 
 import { useEditorModel } from '../hooks/use-editor-model'
 import { RichMathEditorFooter } from './RichMathEditorFooter'
@@ -80,7 +80,7 @@ export function RichMathEditor({
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Check if we are on mobile where we might want to expand to modal
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
 
   // Auto-expand to modal on mobile
   useEffect(() => {

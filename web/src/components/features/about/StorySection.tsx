@@ -1,43 +1,26 @@
 import { useTranslations } from 'next-intl'
 
-import { AppLink } from '@/components/shared/components/AppLink'
+import AnimatedSection from '@/components/shared/components/AnimatedSection'
 
-import AboutPanelSection from './layout/AboutPanelSection'
+import { AboutProse } from './layout/AboutProse'
+import BeatLabel from './layout/BeatLabel'
 
+/**
+ * The "why" beat: the origin story and what the project is.
+ */
 export const StorySection = () => {
   // Translations for section
   const t = useTranslations('about.story')
 
   return (
-    <AboutPanelSection
-      id="mathcomps-story"
-      title={t('title')}
-      description={
-        <>
-          {t('text1')}
-          <br />
-          <br />
-          {t.rich('text2', {
-            strong: (chunks) => <strong>{chunks}</strong>,
-          })}
-          <br />
-          <br />
-          {t.rich('text3', {
-            link: (chunks) => (
-              <AppLink
-                href="https://www.wincent.com/"
-                newTab
-                className="text-muted-foreground hover:text-foreground hover:underline transition-colors duration-300"
-              >
-                {chunks}
-              </AppLink>
-            ),
-          })}
-          <br />
-          <br />
-          {t('text4')}
-        </>
-      }
-    ></AboutPanelSection>
+    <AnimatedSection id="mathcomps-story" eager>
+      <BeatLabel>{t('title')}</BeatLabel>
+      <AboutProse className="mt-5 space-y-5">
+        <p>{t('text1')}</p>
+        <p>{t('text2')}</p>
+        <p>{t('text3')}</p>
+        <p>{t('text4')}</p>
+      </AboutProse>
+    </AnimatedSection>
   )
 }

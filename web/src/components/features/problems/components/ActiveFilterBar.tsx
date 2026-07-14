@@ -1,8 +1,9 @@
-import { useMediaQuery } from '@mantine/hooks'
 import { Check, ChevronDown, ChevronUp, FilterX, Grid3X3, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
+
+import { useMinWidth } from '@/hooks/use-breakpoint'
 
 import {
   DropdownMenu,
@@ -88,7 +89,7 @@ export default function ActiveFiltersBar({
 
   // Sidebar is visible on the desktop viewports
   // Visibility is needed for instance to show the button to open the sidebar
-  const isSidebarVisible = useMediaQuery('(min-width: 1024px)')
+  const isSidebarVisible = useMinWidth('lg')
 
   // Contest browser modal state - synced with URL
   const contestBrowser = useContestBrowserModal()

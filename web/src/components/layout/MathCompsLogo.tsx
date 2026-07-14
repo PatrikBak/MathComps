@@ -9,7 +9,7 @@ import { cn } from '../shared/utils/css-utils'
  * Props for the {@link MathCompsLogo} component.
  */
 type MathCompsLogoProps = {
-  /* Optional class name to apply to the logo. */
+  /** Optional class name to apply to the logo. */
   className?: string
 }
 
@@ -41,7 +41,7 @@ export default function MathCompsLogo({ className }: MathCompsLogoProps) {
           priority
           unoptimized
         />
-        <span className="text-xl sm:text-2xl lg:text-3xl">
+        <span className="text-xl sm:text-2xl lg:text-3xl tracking-[-0.035em] hyphens-none">
           Math<span className="text-brand">Comps</span>
         </span>
       </span>
