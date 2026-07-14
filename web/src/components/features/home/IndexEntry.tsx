@@ -22,7 +22,7 @@ type LinkEntry = {
 }
 
 /**
- * A non-interactive entry whose title trails a bit of meta, such as a timing note.
+ * A non-interactive entry led by a small timing eyebrow, such as when the thing lands.
  */
 type StaticEntry = {
   /** Discriminates a static entry. */
@@ -33,7 +33,7 @@ type StaticEntry = {
   title: string
   /** A one-line description under the title. */
   description: string
-  /** Short note trailing the title, e.g. when the thing lands. */
+  /** Short timing note, e.g. when the thing lands. */
   meta: string
 }
 
@@ -50,7 +50,7 @@ type TitleRowVariant = {
   rowClass: string
   /** Color and hover treatment for the heading. */
   headingClass: string
-  /** The element trailing the heading: a hover chevron, or a scrap of meta. */
+  /** The element trailing the heading, such as a link's hover chevron. */
   trailing: ReactNode
 }
 
@@ -74,12 +74,12 @@ function titleRowVariant(props: IndexEntryProps): TitleRowVariant {
         ),
       }
 
-    // Static: a muted heading, with a scrap of meta trailing it
+    // Static: a muted heading, its timing note led as an eyebrow above
     case 'static':
       return {
-        rowClass: 'flex flex-wrap items-baseline gap-x-3 gap-y-1',
+        rowClass: 'flex items-center',
         headingClass: 'text-muted-foreground',
-        trailing: <span className="text-sm text-muted">{props.meta}</span>,
+        trailing: null,
       }
 
     // Some other kind — the union grew and this switch didn't
@@ -108,7 +108,7 @@ function TitleRow(props: IndexEntryProps) {
 
 /**
  * One line of the home page's typographic index: an inline icon, a bold title, and a description
- * beneath. Either a link or a static entry whose title trails a bit of meta.
+ * beneath. Either a link or a static entry led by a timing eyebrow.
  */
 export function IndexEntry(props: IndexEntryProps) {
   // The entry's lead icon component
@@ -122,6 +122,10 @@ export function IndexEntry(props: IndexEntryProps) {
 
       {/* Title row above the description */}
       <div className="min-w-0">
+        {/* Timing eyebrow */}
+        {props.kind === 'static' && (
+          <p className="mb-1 text-sm font-semibold text-brand-light">{props.meta}</p>
+        )}
         <TitleRow {...props} />
         <p className="mt-2 text-[15px] leading-relaxed text-muted">{props.description}</p>
       </div>

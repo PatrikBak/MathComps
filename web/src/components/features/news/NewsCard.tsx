@@ -66,9 +66,9 @@ type NewsCardProps = {
  */
 export function NewsCard({ article }: NewsCardProps) {
   return (
-    <SurfacePanel as="article" radius="xl" className="flex flex-col md:flex-row">
-      {/* Cover: a banner on mobile, a left panel on desktop */}
-      <div className="h-40 md:h-auto md:w-52 shrink-0">
+    <SurfacePanel as="article" radius="xl" className="flex flex-col sm:flex-row">
+      {/* Cover: a short banner on phones, a full-height side panel from tablets up */}
+      <div className="h-24 shrink-0 sm:h-auto sm:w-44 md:w-52">
         <NewsCardCover cover={article.cover} />
       </div>
 

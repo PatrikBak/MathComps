@@ -84,7 +84,7 @@ const SPONSOR_LOGOS: SponsorLogo[] = [
     logoUrl: '/sponsors/wincent-logo-white.svg',
     aspectRatio: '594.67 / 116.29',
     linkClassName: 'text-[#B49032] hover:text-[#B49032]/80',
-    spanClassName: 'w-[168px] opacity-90',
+    spanClassName: 'w-[132px] sm:w-[168px] opacity-90',
   },
   {
     href: GLOBAL_TALENT_FUND_URL,
@@ -94,7 +94,7 @@ const SPONSOR_LOGOS: SponsorLogo[] = [
     aspectRatio: '656 / 391',
     linkClassName: 'text-foreground/90 hover:text-foreground',
     // Scaled up via transform, leaving the layout box height untouched
-    spanClassName: 'h-14 scale-[1.2]',
+    spanClassName: 'h-11 scale-[1.2] sm:h-14',
   },
 ]
 
@@ -115,7 +115,7 @@ function SponsorLogoLink({
       newTab
       plain
       aria-label={label}
-      className={cn('inline-flex h-16 items-center transition-colors', linkClassName)}
+      className={cn('inline-flex h-12 items-center transition-colors sm:h-16', linkClassName)}
     >
       <span
         style={{
