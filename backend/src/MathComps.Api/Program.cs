@@ -1,3 +1,4 @@
+using MathComps.Api.Constants;
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
@@ -41,12 +42,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
 
             // Clerk tokens don't have an audience by default
-            ValidateAudience = false
+            ValidateAudience = false,
+
+            // The flat Role claim Clerk shapes from public_metadata drives RequireRole
+            RoleClaimType = ClerkClaims.RoleClaimType
         };
     });
 
-// Authorization to secure endpoints
-builder.Services.AddAuthorization();
+// Authorization to secure endpoints, with an admin-only policy
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole));
 
 // Basic observability
 builder.Services.AddLogging();

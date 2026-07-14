@@ -23,6 +23,9 @@ public static class EndpointExtensions
         // The authenticated user's problem lists
         app.MapUserListEndpoints();
 
+        // Admin-only endpoints, gated by the admin policy
+        app.MapAdminEndpoints();
+
         // Add health check endpoint for monitoring
         app.MapHealthChecks("/health");
 
