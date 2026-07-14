@@ -1,21 +1,20 @@
 import React from 'react'
 
 import { renderMathContentToHtml } from '@/components/math/utils/math-render'
+import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { NEWS_ICONS } from './news-icons'
 import { NewsEquationCover } from './NewsEquationCover'
 import type { NewsCover } from './types'
 
 /**
- * The shared cover surface: cream graph paper with faint ruling, echoing the
- * printed handouts. Every cover — figure, equation, or icon — sits on this in
- * dark "ink", so they read as the same kind of object: a notebook clipping.
+ * The shared cover background: a muted graph-paper fill with a faint grid ruling.
  */
 const PAPER: React.CSSProperties = {
-  backgroundColor: '#f4efe2',
+  backgroundColor: '#d5d2c8',
   backgroundImage:
-    'linear-gradient(rgba(20,30,60,.07) 1px, transparent 1px),' +
-    'linear-gradient(90deg, rgba(20,30,60,.07) 1px, transparent 1px)',
+    'linear-gradient(rgba(20,30,60,.06) 1px, transparent 1px),' +
+    'linear-gradient(90deg, rgba(20,30,60,.06) 1px, transparent 1px)',
   backgroundSize: '18px 18px',
 }
 
@@ -28,12 +27,11 @@ type NewsCardCoverProps = {
 }
 
 /**
- * The cover art for a news card. One material (cream paper), varied content:
- * a hand-drawn handout figure, a KaTeX expression, or a line icon — all in dark
- * ink. Fills its container, which sizes it (a left panel on desktop, a banner on mobile).
+ * The cover art for a news card: a figure, a KaTeX expression, or a line icon on the shared
+ * graph-paper background. Fills its container.
  */
 export function NewsCardCover({ cover }: NewsCardCoverProps) {
-  // Resolve the content per cover kind; the cream-paper frame below is shared by every kind
+  // Resolve the content per cover kind
   let content: React.ReactNode
   switch (cover.kind) {
     case 'figure':
@@ -53,11 +51,15 @@ export function NewsCardCover({ cover }: NewsCardCoverProps) {
     }
 
     case 'icon': {
-      // A line icon, drawn in the same dark ink as the figures
+      // A line icon
       const Icon = NEWS_ICONS[cover.name]
       content = <Icon size={84} strokeWidth={0.5} className="text-slate-800" />
       break
     }
+
+    // A new cover kind must declare its rendering
+    default:
+      assertNever(cover)
   }
 
   return (

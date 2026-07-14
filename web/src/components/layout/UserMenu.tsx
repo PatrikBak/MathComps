@@ -123,7 +123,7 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
           id="user-menu-content"
           className={cn(
             'w-full rounded-lg',
-            'bg-surface/95 backdrop-blur-sm border border-foreground/10',
+            'bg-surface/25 backdrop-blur-md border border-foreground/10',
             'shadow-lg',
             'overflow-hidden z-50',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',

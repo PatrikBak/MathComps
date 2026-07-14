@@ -5,17 +5,21 @@ import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
+ * The shared keyboard-focus ring: a 2px ring in the focus color, offset from the element.
+ */
+export const FOCUS_RING_CLASS =
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+
+/**
  * The app's button styles.
  *
- * `primary` fills with the brand (violet); the focus ring stays on `focus` (indigo) so the
- * action color and the focus indicator never share a hue.
+ * `primary` fills with the brand (violet); the focus ring stays on `focus` (indigo).
  */
 export const buttonVariants = cva(
   [
     'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
     'transition-all duration-200 active:scale-[0.98] motion-reduce:active:scale-100',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
-    'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+    FOCUS_RING_CLASS,
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
   ],
   {

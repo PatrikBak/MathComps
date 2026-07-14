@@ -7,6 +7,7 @@ import {
   MonitorSmartphone,
   MousePointerClick,
   Newspaper,
+  Palette,
   Route,
   SquareCheckBig,
   Tent,
@@ -25,6 +26,7 @@ export type NewsIconName =
   | 'languages'
   | 'arrow-down-up'
   | 'newspaper'
+  | 'palette'
   | 'route'
   | 'tent'
   | 'messages-square'
@@ -41,6 +43,7 @@ export const NEWS_ICONS: Record<NewsIconName, LucideIcon> = {
   languages: Languages,
   'arrow-down-up': ArrowDownUp,
   newspaper: Newspaper,
+  palette: Palette,
   route: Route,
   tent: Tent,
   'messages-square': MessagesSquare,

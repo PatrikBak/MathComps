@@ -1,5 +1,20 @@
 [
   {
+    "id": "eHmnKz6x9BTslXn3v8GiC",
+    "slug": "design-and-texts",
+    "title": {
+      "sk": "Aktualizácia textov a dizajnu",
+      "en": "Refreshed Design and Copy",
+      "cs": "Aktualizace textů a designu"
+    },
+    "date": "2026-07-14",
+    "category": "misc",
+    "cover": {
+      "kind": "icon",
+      "name": "palette"
+    }
+  },
+  {
     "id": "ak190Hh-J9kNilSJ_7qPL",
     "slug": "handouts-all-languages",
     "title": {

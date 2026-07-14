@@ -2,6 +2,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import React from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
+import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { disallowedBlockComponents } from '@/lib/mdx-card-components'
 
 import { NewsCardCover } from './NewsCardCover'
@@ -65,7 +66,7 @@ type NewsCardProps = {
  */
 export function NewsCard({ article }: NewsCardProps) {
   return (
-    <article className="bg-surface/50 border border-foreground/10 rounded-xl flex flex-col md:flex-row overflow-hidden">
+    <SurfacePanel as="article" radius="xl" className="flex flex-col md:flex-row">
       {/* Cover: a banner on mobile, a left panel on desktop */}
       <div className="h-40 md:h-auto md:w-52 shrink-0">
         <NewsCardCover cover={article.cover} />
@@ -91,6 +92,6 @@ export function NewsCard({ article }: NewsCardProps) {
           <MDXRemote source={article.content} components={cardMdxComponents} />
         </div>
       </div>
-    </article>
+    </SurfacePanel>
   )
 }

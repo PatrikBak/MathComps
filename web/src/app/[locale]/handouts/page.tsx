@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import type { HandoutIndex } from '@/components/features/handouts/handout-metadata-types'
 import {
   isPublicHandout,
-  isReadyHandout,
   supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
 import { HandoutBrowser } from '@/components/features/handouts/HandoutBrowser'
@@ -43,9 +42,9 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   // Load the handout data JSON
   const { sections } = handoutIndex as unknown as HandoutIndex
 
-  // Check for duplicate ids (only for ready handouts that have ids)
+  // Check for duplicate ids
   validateUniqueIds(
-    sections.flatMap((section) => section.handouts).filter(isReadyHandout),
+    sections.flatMap((section) => section.handouts),
     (handout) => handout.id,
     'handout'
   )
@@ -55,8 +54,7 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
     .map((section) => ({
       ...section,
       handouts: section.handouts.filter(
-        (handout) =>
-          supportsLocale(handout, locale) && (!isReadyHandout(handout) || isPublicHandout(handout))
+        (handout) => supportsLocale(handout, locale) && isPublicHandout(handout)
       ),
     }))
     .filter((section) => section.handouts.length > 0)
@@ -64,8 +62,11 @@ export default withLocale(async function HandoutsPage({ locale }: PageProps) {
   // Render the page with filtered handout data
   return (
     <Layout>
-      <HandoutsHero />
-      <HandoutBrowser sections={publicSections} locale={locale} />
+      {/* The intro over the topic sections */}
+      <div className="mx-auto max-w-4xl">
+        <HandoutsHero />
+        <HandoutBrowser sections={publicSections} locale={locale} />
+      </div>
     </Layout>
   )
 })

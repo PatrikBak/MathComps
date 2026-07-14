@@ -7,7 +7,6 @@ import type { HandoutData } from '@/components/features/handouts/handout-content
 import type { HandoutIndex } from '@/components/features/handouts/handout-metadata-types'
 import {
   getContentFileBasename,
-  isReadyHandout,
   supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
@@ -32,12 +31,12 @@ const index = handoutIndex as unknown as HandoutIndex
  * @returns Array of param objects containing locale and slug combinations
  */
 export async function generateStaticParams() {
-  // Collect all ready handouts across every section
-  const readyHandouts = index.sections.flatMap((section) => section.handouts).filter(isReadyHandout)
+  // Collect every handout across every section
+  const handouts = index.sections.flatMap((section) => section.handouts)
 
   // Emit one param object per valid locale + slug combination
   return SUPPORTED_LOCALES.flatMap((locale) =>
-    readyHandouts
+    handouts
       .filter((handout) => supportsLocale(handout, locale))
       .map((handout) => ({ locale, slug: handout.slug[locale]! }))
   )
@@ -61,12 +60,8 @@ export async function generateMetadata({
   // Search each section for the requested handout
   for (const section of index.sections) {
     for (const handout of section.handouts) {
-      // Check for a ready handout with a matching slug in the current locale
-      if (
-        isReadyHandout(handout) &&
-        supportsLocale(handout, locale) &&
-        handout.slug[locale] === slug
-      ) {
+      // Check for a handout with a matching slug in the current locale
+      if (supportsLocale(handout, locale) && handout.slug[locale] === slug) {
         // Load translations for the section label
         const tHandouts = await getTranslations({ locale, namespace: 'handouts.labels' })
 
@@ -101,7 +96,6 @@ export default withLocale(async function RenderPage({
   // Find the handout metadata by matching slug and locale
   const handoutMeta = index.sections
     .flatMap((section) => section.handouts)
-    .filter(isReadyHandout)
     .find((handout) => supportsLocale(handout, locale) && handout.slug[locale] === slug)
   if (!handoutMeta) notFound()
 

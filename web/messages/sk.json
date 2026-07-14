@@ -2,62 +2,26 @@
   "about": {
     "author": {
       "alt": "Profilová fotka Patrika Baka",
-      "description": "Volám sa <strong>Patrik Bak</strong>. Ako bývalý trojnásobný účastník a dvojnásobný medailista na Medzinárodných matematických olympiádach (IMO), ale aj autor množstva súťažných úloh (vrátane dvoch pre IMO), mám k olympiádnej matematike hlboký vzťah. Už dlhšie ma baví spájať matematiku s programovaním. Tento záujem v minulosti viedol k projektu <strong>GeoGen</strong>, nástroju na automatické generovanie geometrických úloh. <strong>MathComps</strong> je ďalším logickým krokom na tejto ceste – snahou vytvoriť komplexnú a modernú platformu pre komunitu matematickej olympiády. Pri jej budovaní sa opieram nielen o vlastné poznatky a skúsenosti, ale vďaka porozumeniu a podpore viacerých skvelých ľudí z komunity MO aj o ich pripomienky a nápady.",
+      "description": "Volám sa <strong>Patrik Bak</strong> a matematickou olympiádou dlhodobo žijem. Ako súťažiaci som bol trikrát na medzinárodnej matematickej olympiáde (IMO) a dvakrát som získal bronzovú medailu. Neskôr sa mi tam ako autorovi dostali dve úlohy. Taktiež ma baví prednášať a pomáhať s prípravou na súťaže iným. Okrem matematiky ma baví programovanie, a najmä keď tieto dve veci môžem spojiť, čo viedlo k projektu <link>GeoGen</link>, nástroju na automatické generovanie geometrických úloh. <strong>MathComps</strong> je ďalší priestor na sebarealizáciu v oboch týchto smeroch, pričom sa vytvorí niečo milé a užitočné pre matematickú komunitu 😀",
       "shortBio": "Trojnásobný účastník a dvojnásobný medailista Medzinárodnej matematickej olympiády (IMO); autor súťažných úloh a materiálov MathComps.",
       "title": "O autorovi"
     },
     "hero": {
-      "title1": "Vytvorené z nadšenia pre",
-      "title2": "matematiku"
+      "title": "Trochu viac o MathComps"
     },
-    "roadmap": {
-      "categories": {
-        "community": "Komunita",
-        "competitions": "Súťaže",
-        "content": "Obsah",
-        "tools": "Nástroje"
-      },
-      "description": "Toto je len začiatok projektu a v pláne je veľa nových funkcií.",
-      "features": {
-        "aiHints": "AI hinty k úlohám",
-        "aiPregrading": "AI predhodnotenie",
-        "archiveSKCZ": "Archív SK/CZ úloh",
-        "contributorPlatform": "Platforma pre prispievateľov",
-        "customLists": "Vlastné zoznamy úloh",
-        "discussions": "Diskusie k obsahu",
-        "exportPdfTex": "Export do PDF a TeX",
-        "filterFavorites": "Filtrovanie obľúbených úloh",
-        "foreignTasks": "Úlohy zo zahraničných súťaží",
-        "fullLocalization": "Plná lokalizácia (CZ/EN)",
-        "introTexts": "Úvodné študijné texty",
-        "leaderboards": "Rebríčky a medaily",
-        "likeTasks": "Lajkovanie úloh",
-        "moreTexts": "Doplnenie študijných textov",
-        "newsSection": "Sekcia s novinkami",
-        "officialTraining": "Oficiálne tréningové súťaže",
-        "personalizedRecs": "Personalizované odporúčania úloh",
-        "privateComps": "Možnosť súkromných súťaží",
-        "recommendSimilar": "Odporúčania podobných úloh",
-        "reportBugs": "Možnosť reportovať chyby",
-        "trackProgress": "Sledovanie progresu v riešení",
-        "trainingPlatform": "Platforma na tréningové súťaže",
-        "translationsCZEn": "Preklady úloh (CZ/EN)",
-        "userProfiles": "Používateľské profily"
-      },
-      "footer": "Tento zoznam sa bude v čase meniť, pokojne <link>prispejte svojimi nápadmi</link>.",
-      "implementedLabel": "Zelené funkcie sú už dostupné!",
-      "title": "Funkcionality"
+    "next": {
+      "registration": "Od apríla 2026 je MathComps zároveň registrovaným spolkom v Česku, MathComps z.s., IČO 249 37 924.",
+      "text1": "Moja dlhodobá vízia je mať viac interaktívnych nástrojov. Momentálne pracujem na tom, aby na MathComps boli AI funkcionality, keďže osobne som veľký nadšenec pre AI a na sebe vidím, ako mi pomáha pri učení sa nových vecí. Samozrejme mimo tieto vymoženosti by som rád pokračoval v aktualizovaní archívu, tvorbe a dopĺňaní materiálov a sprievodcu súťažami.",
+      "text2": "V ideálnom svete by som si vedel predstaviť pracovať na MathComps a súvisiacich aktivitách ako tvorba materiálov na plný úväzok. To mi posledný rok bolo v konečnom dôsledku umožnené kombináciou niekoľkých zdrojov príjmu: samotný web podporila na začiatku jeho vzniku firma <wincent>Wincent</wincent>, ďalej väčšina materiálov na stránke vznikla v rámci krúžkov <matika>Matika Česku</matika>, no a poslednou novinkou je podpora od <gtf>Global Talent Fund</gtf>, ktorý sponzoruje nadchádzajúce súťaže s AI feedbackom, ktoré budú k otestovaniu koncom leta.",
+      "text3": "Ak vás MathComps prípadne moje myšlienky zaujali a chceli by ste pomôcť, finančne alebo iným spôsobom, alebo sa len tak porozprávať, <link>napíšte mi</link>, každá správa poteší ☺️",
+      "title": "Čo bude ďalej"
     },
     "story": {
-      "text1": "Svet matematických súťaží je veľký, plný príkladov, zdrojov, materiálov. Nie je však žiadne miesto, ktoré by príjemne zjednocovalo to najlepšie a najmä začiatočníkom poskytovalo ľahkú cestu ako do sveta súťaží preniknúť a nestratiť sa.",
-      "text2": "Projekt <strong>MathComps</strong> sa zrodil s cieľom tento stav zmeniť – vytvoriť jedno miesto pre celú komunitu, kde bude všetko potrebné: prehľadný archív úloh, študijné materiály, diskusie k úlohám a súťažiam, personalizované učenie a podobne, fantázii sa medze nekladú.",
-      "text3": "Aktuálna verzia si vyžadovala veľa času a full-time zanietenie, ktoré by nebolo možné bez podpory nášho hlavného sponzora, firmy <link>Wincent</link>.",
-      "text4": "Založená bývalými mimoriadne úspešnými riešiteľmi Matematickej olympiády, má veľmi blízko k myšlienkam všestrannej podpory rozvoja matematických talentov. Týmto im patrí veľká vďaka.",
-      "title": "Prečo MathComps vznikol"
-    },
-    "technologies": {
-      "description": "Prehľad kľúčových technológií, ktoré poháňajú MathComps.",
-      "title": "Technológie"
+      "text1": "Dlhšie som si hovoril, že by bolo užitočné mať prehľadávateľný archív česko-slovenských úloh, keďže som v nich hľadal často a hľadať v stovkách PDF súboroch nie je zábava. Taktiež som sníval o tom, aké skvelé by bolo mať hľadanie podľa kľúčových slov, rýchlo si vyfiltrovať úlohy o postupnostiach a podobne.",
+      "text2": "Podobne je to so študijnými materiálmi, priebežne ich vždy nejaké tvorím (k prednáškam na akciách) a zostávajú neverejné, maximálne ako PDF súbory, ktoré nie sú najpraktickejšie, napr. sa v nich nedajú ľahko skrývať návody alebo riešenia a mať ich blízko zadaní, prípadne dobre zobraziť na mobile.",
+      "text3": "Okrem osobného hľadiska mi vždy prišlo, že jednotný web, na ktorom sa ľahko hľadajú úlohy a ktorý obsahuje študijné materiály, môže byť veľmi užitočný pre nováčikov hľadajúcich, čo tá olympiáda vlastne je a aké sú možnosti. Vítané by boli prípadne aj nejaké začiatočnícky prívetivé materiály, keďže samému mi takéto jednotné miesto chýbalo, kým som ešte bol študent hľadajúci všetko možné k súťažiam.",
+      "text4": "Na základe týchto motivácií vznikla aktuálna verzia webu, ktorá ponúka archív úloh, študijné materiály a sprievodcu pre začiatočníkov. Do budúcnosti toho bude viac a viac, nielen čo sa týka veľkosti archívu, počtu materiálov, ale aj nových funkcionalít 😇",
+      "title": "Prečo MathComps začal"
     }
   },
   "apiErrors": {
@@ -228,10 +192,7 @@
     }
   },
   "footer": {
-    "description": "Dlhodobobou víziou projektu je vytvoriť platformu pre začínajúcich i pokročilých riešiteľov matematických súťaží, ich tútorov a všetkých priaznivcov.",
-    "navigation": "Navigácia",
-    "privacy": "Súkromie a podmienky",
-    "project": "Projekt"
+    "privacy": "Súkromie a podmienky"
   },
   "guide": {
     "deck": {
@@ -376,7 +337,14 @@
   },
   "handouts": {
     "aria": {
+      "difficulty": "Náročnosť {level} z {max}",
       "openHandout": "Otvoriť materiál: {title}"
+    },
+    "difficulty": {
+      "label": "Legenda k náročnosti",
+      "level1": "1 - pre začiatočníkov (kategórie C a vyššie)",
+      "level2": "2 - stredne pokročilé (kategórie B a vyššie)",
+      "level3": "3 - pokročilé (kategória A)"
     },
     "environments": {
       "definition": "Definícia",
@@ -392,17 +360,10 @@
       },
       "theorem": "Tvrdenie"
     },
-    "filters": {
-      "empty": "Žiadne materiály nezodpovedajú aktuálnym filtrom.",
-      "sourceLabel": "Zdroj",
-      "topicLabel": "Téma"
-    },
     "hero": {
-      "eventsItem": "Materiály s označením <events></events> sú rôzne náhodné materiály použité na akciách, kde som prednášal. Postupne by som ich rád rozšíril na plnohodnotné materiály so sprievodnými textami a riešeniami. Taktiež by som tu rád doplnil materiály a zbierky úloh z minulosti, mám ich vcelku dosť 😇",
-      "intro": "Zoznam študijných materiálov, ktoré priebežne pripravujem. Momentálne sa tu nachádzajú materiály dvoch typov:",
-      "matikaCeskuItem": "Materiály s označením <matikaCesku></matikaCesku> sú pripravované pre krúžky, ktoré sa konajú naprieč Českou republikou, a taktiež online (jeden z nich vediem). Ak máte záujem, prehliadnite si ich <link>zoznam</link> a prihláste sa na niektorý z nich 🙂",
-      "outro": "Snáď sa vám budú páčiť a prídu vám užitočné. Určite mi napíšte komentár alebo <feedback>pošlite feedback</feedback>, ak nájdete chybu alebo máte návrhy na zlepšenie.",
-      "title": "Moje študijné materiály"
+      "body1": "Zoznam študijných materiálov, ktoré priebežne pripravujem k svojím prednáškam, ako aj študijné texty ku <link>krúžkom Matiky Česku</link>. Nie všetky materiály majú úlohy s riešeniami a ideálne by som chcel priebežne doplniť riešenia ku všetkým z nich.",
+      "outro": "Snáď sa vám budú páčiť a prídu vám užitočné. Určite mi napíšte komentár alebo <feedback>pošlite spätnú väzbu</feedback>, ak nájdete chybu. Taktiež mi neváhajte napísať, ak by ste radi prispeli svojím textom.",
+      "title": "Študijné materiály"
     },
     "labels": {
       "answer": "Výsledok",
@@ -416,83 +377,57 @@
       "proof": "Dôkaz",
       "sectionLabel": "Materiály",
       "solution": "Riešenie"
-    },
-    "plannedHeading": "Pripravujeme",
-    "styles": {
-      "events": "Z akcií",
-      "matikaCesku": "Matika Česku"
     }
   },
   "home": {
-    "contribute": {
-      "badge": "Otvorený projekt",
-      "content": {
-        "text": "Ak máte záujem prispievať materiálmi alebo inými užitočnými článkami, určite <link>sa ozvite</link>.",
-        "title": "Tvorba obsahu"
+    "about": {
+      "help": {
+        "code": "Projekt je <link>open-source</link> a pomoc na kóde je vítaná.",
+        "content": "Určite sa tiež <link>ozvite</link>, ak chcete prispieť obsahom.",
+        "feedback": "<link>Napíšte</link>, ak ste našli chybu alebo máte nápad na novú funkcionalitu."
       },
-      "description": "MathComps je otvorená platforma a každá pomoc je nesmierne cenná.",
-      "development": {
-        "text": "Ste programátor? Pozrite na <link>zdrojový kód na GitHube</link> a&nbsp;pokojne prispejte.",
-        "title": "Vývoj a kód"
-      },
-      "feedback": {
-        "text": "Našli ste chybu, máte nápad na funkciu alebo akýkoľvek iný postreh? <link>Napíšte</link>.",
-        "title": "Spätná väzba"
-      },
-      "title": "Prispejte svojím dielom"
+      "helpTitle": "Ako pomôcť",
+      "intro": "MathComps je neziskový projekt, ktorého cieľom je čo najviac pomôcť záujemcom o matematické súťaže, študentom aj učiteľom.",
+      "story": "Ak vás zaujíma, ako to celé vzniklo, <link>prečítajte si celý príbeh.</link>",
+      "supportNote": "Práca na MathComps stojí veľa času a úsilia a robiť ju na plný úväzok nejde bez finančnej podpory. Ak by ste mali záujem projekt podporiť, prípadne viete o niekom, kto by mohol, budem veľmi vďačný za <link>správu</link>. Projekt zatiaľ podporili:",
+      "title": "O projekte"
     },
-    "hero": {
-      "buttons": {
-        "exploreArchive": "Preskúmať archív",
-        "exploreGuide": "Preskúmať sprievodcu",
-        "exploreHandouts": "Preskúmať materiály"
-      },
-      "description": "Prehľadný archív úloh, študijných materiálov a sprievodca užitočných zdrojov",
-      "title": {
-        "forMath": "pre Matematickú",
-        "modernHome": "Moderný domov",
-        "olympiad": "olympiádu"
-      }
-    },
-    "highlights": {
+    "destinations": {
       "archive": {
-        "description": "Databáza súťažných úloh s možnosťou vyhľadávania podľa kľúčových slov a ďalších kritérií.",
+        "description": "Archív úloh s vyhľadávaním podľa kľúčových slov a ďalších kritérií.",
         "title": "Archív"
       },
       "guide": {
-        "description": "Zoznam súťaží a seminárov spolu s odkazmi na rôzne nástroje užitočné pre žiakov aj učiteľov.",
+        "description": "Prehľad súťaží, seminárov a užitočných odkazov.",
         "title": "Sprievodca"
       },
       "handouts": {
-        "description": "Priebežne dopĺňané študijné texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.",
+        "description": "Priebežne dopĺňané študijné texty a zbierky úloh.",
         "title": "Materiály"
       },
-      "title": "Všetko potrebné",
-      "titleGradient": "na jednom mieste"
+      "title": "Čo tu nájdeš"
     },
-    "sponsorship": {
-      "badge": "Neziskový projekt",
-      "becomeSponsor": "Staňte sa sponzorom",
-      "description": "MathComps je nezávislý neziskový projekt s cieľom zostať navždy úplne bezplatný pre všetkých. Každý príspevok pomôže naplniť cieľ venovať sa projektu naplno. Veľká vďaka patrí podpore, ktorá sa projektu dostala od nášho hlavného sponzora.",
-      "mainSponsor": "Hlavný sponzor projektu",
-      "title": "Podporte rozvoj platformy"
+    "hero": {
+      "figures": {
+        "euler": "Eulerova priamka",
+        "miquel": "Miquelov bod",
+        "ninePoint": "Kružnica deviatich bodov"
+      },
+      "shuffle": "Zobraziť inú konštrukciu",
+      "subtitle": "Archív súťažných úloh, študijných materiálov, užitočných zdrojov, a postupne viac a viac.",
+      "title": "Matematická olympiáda a veci okolo nej"
     },
-    "vision": {
-      "aiTools": {
-        "description": "Funkcie ako odporúčania úloh na mieru, spätná väzba k napísaným riešeniam, a podobne.",
-        "title": "AI nástroje"
+    "news": {
+      "seeAll": "Zobraziť všetky",
+      "title": "Novinky"
+    },
+    "upcoming": {
+      "comingSoon": "Koncom leta 2026",
+      "feature": {
+        "description": "Súťaže s prezentovaním riešenia umelej inteligencii, ktorá ho priamo v súťaži opravuje a necháva priestor ešte ho doladiť.",
+        "title": "Súťaže s umelou inteligenciou"
       },
-      "badge": "Kam smerujeme?",
-      "community": {
-        "description": "Priestor na diskutovanie o úlohách, materiáloch a novinkách vo svete súťažnej matematiky.",
-        "title": "Komunita"
-      },
-      "competitions": {
-        "description": "Pravidelné online súťaže s rebríčkom a s poloautomatizovaným bodovaním riešení.",
-        "title": "Súťaže"
-      },
-      "description": "MathComps je na začiatku svojej cesty. V hlave je kopa nápadov, ako tento projekt vylepšiť, aby priniesol čo najviac úžitku svetu matematických súťaží. Mimo zveľaďovania už vytvoreného, ďalšie myšlienky sú:",
-      "title": "Vízia do budúcnosti"
+      "title": "Čo sa chystá"
     }
   },
   "metadata": {
@@ -573,14 +508,11 @@
     "title": "Stránka sa nenašla"
   },
   "plurals": {
-    "available": "{count, plural, =1 {# dostupný} =2 {# dostupné} =3 {# dostupné} =4 {# dostupné} other {# dostupných}}",
-    "planned": "{count, plural, =1 {# plánovaný} =2 {# plánované} =3 {# plánované} =4 {# plánované} other {# plánovaných}}",
     "problems": "{count, plural, =1 {# úloha} =2 {# úlohy} =3 {# úlohy} =4 {# úlohy} other {# úloh}}",
-    "ready": "{count, plural, =1 {# hotový} =2 {# hotové} =3 {# hotové} =4 {# hotové} other {# hotových}}",
     "replies": "{count, plural, =1 {# odpoveď} =2 {# odpovede} =3 {# odpovede} =4 {# odpovede} other {# odpovedí}}"
   },
   "privacy": {
-    "lastUpdated": "Posledná aktualizácia: 7. decembra 2025",
+    "lastUpdated": "Posledná aktualizácia: 8. júla 2026",
     "sections": {
       "cookies": {
         "text": "Súbory cookies sú používané výhradne na funkcionality stránky (napr. udržanie prihlásenia). Nie sú postupované tretím stranám.",
@@ -590,6 +522,7 @@
         "content": "<strong>Obsah:</strong> Všetok tvoj obsah, ktorý vkladáš na stránku.",
         "intro": "Používame a ukladáme nasledujúce údaje:",
         "login": "<strong>Login:</strong> Email, meno, profilová fotka, prípadne prepojenie s Google/Discord/GitHub, ak sa prihlásiš cez ne.",
+        "processor": "Na prihlasovanie používame službu <link>Clerk</link>, ktorá tieto údaje ukladá a spracúva za nás.",
         "title": "2. Tvoje údaje"
       },
       "deletion": {
@@ -597,8 +530,8 @@
         "title": "4. Zmazanie účtu"
       },
       "intro": {
-        "ageRequirement": "Platforma je určená pre všetkých od 16 rokov. Ak máš menej, potrebuješ na používanie súhlas rodiča. Vytvorením účtu potvrdzu-ješ, že tieto podmienky spĺňaš.",
-        "operator": "Prevádzkovateľom je <strong>Patrik Bak</strong>, kontakt: <email></email>",
+        "ageRequirement": "Platforma je určená pre všetkých od 16 rokov. Ak máš menej, potrebuješ na používanie súhlas rodiča. Vytvorením účtu potvrdzuješ, že tieto podmienky spĺňaš.",
+        "operator": "Prevádzkovateľom je <strong>MathComps z.s.</strong>, IČO 249 37 924, zapísaný na Mestskom súde v Prahe (spisová značka L 81977), kontakt: <email></email>",
         "title": "1. Kto sme a pre koho je web"
       }
     },

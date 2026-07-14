@@ -1,14 +1,12 @@
 'use client'
 
-import React from 'react'
+import { useMounted, useReducedMotion } from '@mantine/hooks'
 import { createPortal } from 'react-dom'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
- * The styles for the floating math animation. Not sure if it's
- * the best approach to keep them here but I wanted to separate them
- * from the globals.css file cause they're too big.
+ * Global keyframes and per-layer styles for the floating-math field.
  */
 const FloatingMathStyles = () => (
   <style jsx global>{`
@@ -255,7 +253,7 @@ const FloatingMathStyles = () => (
 
     .floating-math.layer-1 {
       font-size: 2.5rem;
-      color: rgba(139, 92, 246, 0.25);
+      color: color-mix(in srgb, var(--color-brand) 25%, transparent);
       animation-name: floatPrimary;
       animation-duration: 10s;
       animation-iteration-count: infinite;
@@ -263,7 +261,7 @@ const FloatingMathStyles = () => (
     }
     .floating-math.layer-2 {
       font-size: 2rem;
-      color: rgba(167, 139, 250, 0.15);
+      color: color-mix(in srgb, var(--color-glow) 15%, transparent);
       animation-name: floatSecondary;
       animation-duration: 12s;
       animation-iteration-count: infinite;
@@ -271,7 +269,7 @@ const FloatingMathStyles = () => (
     }
     .floating-math.layer-3 {
       font-size: 1.5rem;
-      color: rgba(196, 181, 253, 0.12);
+      color: color-mix(in srgb, var(--color-brand-light) 12%, transparent);
       animation-name: floatTertiary;
       animation-duration: 14s;
       animation-iteration-count: infinite;
@@ -279,7 +277,7 @@ const FloatingMathStyles = () => (
     }
     .floating-math.layer-4 {
       font-size: 1.8rem;
-      color: rgba(139, 92, 246, 0.08);
+      color: color-mix(in srgb, var(--color-brand) 8%, transparent);
       animation-name: floatQuaternary;
       animation-duration: 13s;
       animation-iteration-count: infinite;
@@ -287,15 +285,15 @@ const FloatingMathStyles = () => (
     }
 
     .floating-math.highlight-number {
-      color: rgba(251, 113, 133, 0.15) !important;
+      color: color-mix(in srgb, var(--color-glow-warm) 15%, transparent) !important;
       font-weight: 600;
-      text-shadow: 0 0 10px rgba(251, 113, 133, 0.3);
+      text-shadow: 0 0 10px color-mix(in srgb, var(--color-glow-warm) 30%, transparent);
       animation-name: floatHighlight !important;
     }
     .floating-math.geometric {
-      color: rgba(34, 197, 94, 0.12) !important;
+      color: color-mix(in srgb, var(--color-glow-cool) 12%, transparent) !important;
       font-size: 1.2em !important;
-      text-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
+      text-shadow: 0 0 8px color-mix(in srgb, var(--color-glow-cool) 20%, transparent);
       animation-name: floatGeometric !important;
     }
 
@@ -341,7 +339,7 @@ const FloatingMathStyles = () => (
 type FloatingMathSymbolDef = {
   /** The symbol to display */
   symbol: string
-  /** The layer of the symbol  */
+  /** Which depth layer (1-4) the symbol sits in. */
   layer: 1 | 2 | 3 | 4
   /** The left position of the symbol, as a CSS value */
   left: string
@@ -473,20 +471,17 @@ const FloatingMathSymbol = ({
  * A fancy animation with symbols floating and flying and stuff.
  */
 export default function FloatingMath() {
-  // We'll keep track to see if we've mounted (i.e. not in a server-side render)
-  const [mounted, setMounted] = React.useState(false)
+  // True once mounted on the client (false during SSR)
+  const mounted = useMounted()
 
-  // When this runs, the component has mounted
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  // Whether the visitor asked for reduced motion
+  const reducedMotion = useReducedMotion()
 
-  // Force the component to return null if we're in a server-side render
-  if (!mounted) return null
+  // Render nothing during SSR or under reduced motion
+  if (!mounted || reducedMotion) return null
 
-  // Use the portal to avoid the math symbols affecting the layout of the page
-  // This fixed the problem with scrolling to a hash anchor - it would incorrectly
-  // calculate the scroll position of the anchor element (i.e. a section)
+  // Portal to the document body so the symbols stay out of the layout flow; an in-flow overlay throws
+  // off hash-anchor scroll-position math
   return createPortal(
     <>
       <FloatingMathStyles />

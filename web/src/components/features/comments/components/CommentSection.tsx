@@ -1,7 +1,6 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useMediaQuery } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 import { useCallback, useState } from 'react'
@@ -11,6 +10,7 @@ import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { hasValidContent } from '@/components/shared/components/rich-math-editor/utils/preprocessors'
 import { toggleSetItem } from '@/components/shared/utils/collection-utils'
+import { useIsMobile } from '@/hooks/use-breakpoint'
 
 import type { CommentTarget } from '../api/comment-api-types'
 import { useCreateComment } from '../hooks/use-create-comment'
@@ -48,7 +48,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
   // Check if we are on mobile (used for conditional UI behavior)
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
 
   // Fetch comments from API
   const { data: commentsDtos, isLoading, error } = useFetchComments(target)
