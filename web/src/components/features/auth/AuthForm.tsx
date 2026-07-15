@@ -2,9 +2,9 @@
 
 import { useSignIn, useSignUp, useUser } from '@clerk/nextjs'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSessionStorage } from '@mantine/hooks'
-import { useSearchParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useSessionStorage, useWindowEvent } from '@mantine/hooks'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
@@ -13,8 +13,8 @@ import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { ROUTES } from '@/i18n/i18n'
-import { useRouter } from '@/i18n/navigation'
+import { type Locale, ROUTES } from '@/i18n/i18n'
+import { getPathname } from '@/i18n/navigation'
 
 import { checkEmailExists } from './actions'
 import AuthFormActions from './AuthFormActions'
@@ -81,6 +81,8 @@ export default function AuthForm() {
 
   // Next.js router for navigation
   const router = useRouter()
+  // The active locale
+  const locale = useLocale() as Locale
   // Search params to get return URL from query string
   const searchParams = useSearchParams()
   // Clerk hook for sign-in operations
@@ -106,21 +108,32 @@ export default function AuthForm() {
   // Redirect logged-in users to the return URL or the profile page
   useEffect(() => {
     if (isUserLoaded && user) {
-      router.push(returnUrl || ROUTES.PROFILE)
+      // The stored URL is a raw locale-prefixed path, so push it through the plain router;
+      // only the canonical profile fallback needs the locale added
+      router.push(returnUrl || getPathname({ href: ROUTES.PROFILE, locale }))
     }
-  }, [isUserLoaded, user, router, returnUrl])
+  }, [isUserLoaded, user, router, returnUrl, locale])
 
   // Capture return URL on mount and persist in session storage for OAuth flows
   useEffect(() => {
     // Get return URL from query param (passed by LoginNavItem)
     const urlParam = searchParams.get('returnUrl')
 
-    // Use query param if available, otherwise default to profile
-    const determinedUrl = urlParam || ROUTES.PROFILE
+    // Use query param if available, otherwise the locale-prefixed profile page
+    const determinedUrl = urlParam || getPathname({ href: ROUTES.PROFILE, locale })
 
     // Store in session storage (persists through OAuth redirect cycle)
     setReturnUrl(determinedUrl)
-  }, [searchParams, setReturnUrl])
+  }, [searchParams, setReturnUrl, locale])
+
+  // Coming back from the OAuth provider via the browser's Back button restores this page from
+  // the back-forward cache with the pre-redirect state still live, so drop the spinner again
+  useWindowEvent('pageshow', (event) => {
+    // Only a bfcache restore revives stale state; a fresh load already starts spinner-off
+    if (event.persisted) {
+      setIsRedirecting(false)
+    }
+  })
 
   // Focus appropriate field when screen changes
   useEffect(() => {
