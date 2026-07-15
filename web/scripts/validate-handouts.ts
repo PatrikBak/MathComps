@@ -20,6 +20,7 @@ import {
 } from '../src/components/features/handouts/handout-metadata-types'
 import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import {
+  validateDateFormat,
   validatePartialLocalizedString,
   validateRequiredArray,
   validateRequiredField,
@@ -201,6 +202,21 @@ function validate(): string[] {
 
       // Validate authors
       errors.push(...validateRequiredArray(handout.authors, 'authors', handoutContext))
+
+      // Validate the publish date
+      errors.push(...validateDateFormat(handout.publishedAt, `${handoutContext} publishedAt`))
+
+      // Validate the update date
+      errors.push(...validateDateFormat(handout.updatedAt, `${handoutContext} updatedAt`))
+
+      // An update can't predate the publication
+      if (handout.publishedAt && handout.updatedAt && handout.updatedAt < handout.publishedAt) {
+        // Record the reversed dates
+        errors.push(
+          `❌ updatedAt "${handout.updatedAt}" precedes publishedAt "${handout.publishedAt}" ` +
+            `for ${handoutContext}`
+        )
+      }
 
       // Validate difficulty
       errors.push(...validateDifficulty(handout.difficulty, handoutContext))

@@ -26,7 +26,9 @@
             "en": "A fundamental overview of mathematical proofs. Covers direct proofs and proofs by contradiction with examples from number theory."
           },
           "difficulty": 1,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-01-28",
+          "updatedAt": "2026-06-13"
         },
         {
           "id": "Wn4tLx7KqRm2YvPsJc8Fb",
@@ -46,7 +48,9 @@
             "en": "Mathematical induction from the basics to strong induction and Cauchy's proof of the AM-GM inequality. Applications to identities, inequalities, divisibility, and numeral systems."
           },
           "difficulty": 1,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2025-10-15",
+          "updatedAt": "2026-06-18"
         }
       ]
     },
@@ -76,7 +80,9 @@
             "en": "A systematic introduction to factoring algebraic expressions. Covers basic formulas, step-by-step extraction, and completing the square with practical applications."
           },
           "difficulty": 1,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2025-10-15",
+          "updatedAt": "2026-06-13"
         },
         {
           "id": "_bNdll2TEiNb6fuho76K3",
@@ -96,7 +102,9 @@
             "en": "Basic techniques for solving competition-level systems of equations. Covers subtraction, addition, and variable ordering."
           },
           "difficulty": 1,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2025-10-15",
+          "updatedAt": "2026-06-13"
         },
         {
           "id": "u15f7GlQS2wKSsuIKCz0c",
@@ -116,7 +124,9 @@
             "en": "Basic techniques for solving competition-level inequalities. Covers equivalent transformations, positive squares, AM-GM inequality."
           },
           "difficulty": 2,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2025-10-15",
+          "updatedAt": "2026-06-13"
         },
         {
           "id": "dafdGYRouX2XuyrXK-5Xf",
@@ -136,7 +146,9 @@
             "en": "A collection of problems that use clever algebraic manipulations."
           },
           "difficulty": 2,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2025-10-15",
+          "updatedAt": "2026-07-13"
         },
         {
           "public": false,
@@ -153,7 +165,9 @@
             "cs": "Úvod do aritmetického, geometrického a harmonického průměru s důkazy nerovností mezi nimi."
           },
           "difficulty": 1,
-          "authors": ["Káťa Danilina"]
+          "authors": ["Káťa Danilina"],
+          "publishedAt": "2026-03-24",
+          "updatedAt": "2026-06-13"
         }
       ]
     },
@@ -184,7 +198,9 @@
             "en": "Foundations of the world of angles without circles. Covers vertical, corresponding, alternate, and supplementary angles, the angle sum in polygons, and the triangle congruence theorems."
           },
           "difficulty": 1,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-01-28",
+          "updatedAt": "2026-06-13"
         },
         {
           "id": "lzP-IzGpwQ5igE6fNyZ6l",
@@ -204,7 +220,9 @@
             "en": "The technique of equal tangents in olympiad geometry — tangents from a point, incircle and excircle $s-a$ formulas, Pitot's theorem — applied to problems including USAMO 1991, IMO Shortlist 2005 G1, IMO 2021 P4, and Brianchon's theorem."
           },
           "difficulty": 2,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-04-21",
+          "updatedAt": "2026-07-02"
         },
         {
           "id": "RZtGbqo7HslApJ1qgkOOB",
@@ -224,7 +242,9 @@
             "en": "A guide to the technique of adding auxiliary points in olympiad geometry — midpoints, reflections of orthocentres, second circle intersections, and more — followed by problems from national olympiads, MEMO, ISL, and IMO."
           },
           "difficulty": 3,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-04-21",
+          "updatedAt": "2026-07-02"
         }
       ]
     },
@@ -254,7 +274,9 @@
             "en": "Basic techniques for working with digits. Covers decimal representation, digit sums, divisibility criteria, and their applications in competition problems."
           },
           "difficulty": 1,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-05-06",
+          "updatedAt": "2026-07-02"
         },
         {
           "id": "FWv-ivSDvsiD7HuULfBmT",
@@ -274,7 +296,9 @@
             "en": "A small theory of multiplicative inverses modulo a prime — existence, addition, and multiplication rules — applied to olympiad problems including Wilson's theorem, Wolstenholme, and IMO 2005."
           },
           "difficulty": 3,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-04-22",
+          "updatedAt": "2026-07-02"
         }
       ]
     },
@@ -304,7 +328,9 @@
             "en": "An introduction to two-player combinatorial games and finding winning strategies. Covers working backwards, winning and losing positions, move pairing, symmetry, and strategy stealing."
           },
           "difficulty": 2,
-          "authors": ["Patrik Bak"]
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-06-10",
+          "updatedAt": "2026-07-02"
         }
       ]
     }

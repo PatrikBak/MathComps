@@ -34,6 +34,10 @@ export type HandoutMetadata = {
   difficulty: HandoutDifficulty
   /** List of author names (not localized - names stay as-is) */
   authors: string[]
+  /** Date the handout was first published (YYYY-MM-DD) */
+  publishedAt: string
+  /** Date the handout's content was last meaningfully changed (YYYY-MM-DD) */
+  updatedAt: string
   /** Whether the handout appears in the public listing (defaults to true when absent) */
   public?: boolean
 }
