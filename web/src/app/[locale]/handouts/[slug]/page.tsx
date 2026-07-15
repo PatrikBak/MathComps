@@ -20,7 +20,7 @@ import { ANCHORS, getLocalizedAnchor, type Locale, ROUTES, SUPPORTED_LOCALES } f
 import { resolveLocalizedPath } from '@/i18n/localized-paths'
 import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { generatePageMetadata } from '@/lib/metadata'
-import { buildBreadcrumbJsonLd } from '@/lib/structured-data'
+import { buildBreadcrumbJsonLd, buildHandoutJsonLd } from '@/lib/structured-data'
 
 /** Typed access to the handout index */
 const index = handoutIndex as unknown as HandoutIndex
@@ -145,10 +145,31 @@ export default withLocale(async function RenderPage({
     { name: handoutMeta.title[locale] },
   ])
 
+  // The localized detail path for this handout (slug substituted per locale)
+  const detailPath = resolveLocalizedPath(ROUTES.HANDOUT_DETAIL, locale, handoutMeta.slug)
+
+  // resolveLocalizedPath widens to undefined for an unresolved slug; this handout supports the locale
+  if (detailPath === undefined) {
+    throw new Error(`[JSON-LD] Missing handout detail path for locale '${locale}'.`)
+  }
+
+  // LearningResource structured data carrying authorship and published/updated dates
+  const handoutJsonLd = buildHandoutJsonLd({
+    locale,
+    url: getCanonicalUrl(`/${locale}${detailPath}`),
+    title: handoutMeta.title[locale],
+    description: handoutMeta.description[locale],
+    authors: handoutMeta.authors,
+    datePublished: handoutMeta.publishedAt,
+    dateModified: handoutMeta.updatedAt,
+  })
+
   return (
     <>
       {/* Breadcrumb structured data */}
       <JsonLd data={breadcrumbJsonLd} />
+      {/* Handout learning-resource structured data */}
+      <JsonLd data={handoutJsonLd} />
       {/* The provider exposes slug translations for the language switcher */}
       <LocalizedRouteProvider slugTranslations={handoutMeta.slug}>
         <Layout tocItems={tableOfContentsItems}>

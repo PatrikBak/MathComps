@@ -2,6 +2,8 @@ import type {
   BreadcrumbList,
   EducationalOrganization,
   Graph,
+  IdReference,
+  LearningResource,
   Person,
   WithContext,
 } from 'schema-dts'
@@ -92,6 +94,69 @@ export function buildSiteJsonLd({
   return {
     '@context': 'https://schema.org',
     '@graph': [organization, person],
+  }
+}
+
+/**
+ * Inputs for {@link buildHandoutJsonLd}.
+ */
+type HandoutJsonLdParams = {
+  /** The target locale, used as the resource's BCP-47 language. */
+  locale: Locale
+  /** The canonical URL of the handout detail page. */
+  url: string
+  /** The handout's localized title. */
+  title: string
+  /** The handout's localized description. */
+  description: string
+  /** The author names credited on the handout. */
+  authors: string[]
+  /** The date the handout was first published (YYYY-MM-DD). */
+  datePublished: string
+  /** The date the handout's content was last meaningfully changed (YYYY-MM-DD). */
+  dateModified: string
+}
+
+/**
+ * Builds a {@link https://schema.org/LearningResource | LearningResource} node for a handout: the
+ * schema.org type for study material, carrying its authors and the published/modified dates so search
+ * engines can surface authorship and freshness. Publisher points back at the site-wide organization
+ * node emitted in the root layout.
+ *
+ * @returns The LearningResource node to serialize into the page.
+ */
+export function buildHandoutJsonLd({
+  locale,
+  url,
+  title,
+  description,
+  authors,
+  datePublished,
+  dateModified,
+}: HandoutJsonLdParams): WithContext<LearningResource> {
+  // Root-anchored @ids of the site-wide organization and its founder nodes
+  const organizationId = getCanonicalUrl('/#organization')
+  const personId = getCanonicalUrl('/#person')
+
+  // Assemble the learning resource
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LearningResource',
+    name: title,
+    description,
+    url,
+    inLanguage: locale,
+    learningResourceType: 'handout',
+    datePublished,
+    dateModified,
+    // Freely readable, no paywall
+    isAccessibleForFree: true,
+    // The founder links to the shared Person node; any other author stays a bare Person
+    author: authors.map((name): Person | IdReference =>
+      name === AUTHOR_NAME ? { '@id': personId } : { '@type': 'Person', name }
+    ),
+    // The site behind the handout
+    publisher: { '@id': organizationId },
   }
 }
 
