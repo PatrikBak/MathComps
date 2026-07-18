@@ -18,6 +18,18 @@ public interface IProblemLookupService
     Task<Guid?> GetProblemIdBySlugAsync(string problemSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Retrieves the database ID for a problem given its slug, failing when no such problem exists.
+    /// </summary>
+    /// <param name="problemSlug">URL-safe problem identifier (will be normalized to lowercase).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The problem's database ID.</returns>
+    /// <exception cref="ProblemNotFoundException">When no problem matches the slug.</exception>
+    async Task<Guid> GetRequiredProblemIdBySlugAsync(string problemSlug, CancellationToken cancellationToken = default) =>
+        // Turn a lookup miss into a not-found failure
+        await GetProblemIdBySlugAsync(problemSlug, cancellationToken)
+            ?? throw new ProblemNotFoundException(problemSlug);
+
+    /// <summary>
     /// Retrieves problem metadata from a problem slug (which is unique per problem).
     /// </summary>
     /// <param name="problemSlug">URL-safe problem identifier (will be normalized to lowercase).</param>
@@ -25,3 +37,9 @@ public interface IProblemLookupService
     /// <returns>Problem lookup result containing slugs for competition, category, round, and season, or null if not found.</returns>
     Task<ProblemLookupResult?> GetProblemLookupDataAsync(string problemSlug, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Thrown when a problem slug matches no problem.
+/// </summary>
+/// <param name="slug">The slug that matched no problem.</param>
+public sealed class ProblemNotFoundException(string slug) : Exception($"Problem '{slug}' not found");

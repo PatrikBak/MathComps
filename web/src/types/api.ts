@@ -1,3 +1,5 @@
+import type { BackendErrorCode } from '@/types/backend-error-codes'
+
 /**
  * Base error structure for all API-related operations.
  */
@@ -22,6 +24,8 @@ type NetworkError = ApiErrorBase & {
   type: 'network'
   /** The HTTP status code returned by the server, if available */
   statusCode?: number
+  /** The backend's machine-readable failure code, or undefined when the response carried none */
+  errorCode: BackendErrorCode | undefined
 }
 
 /**
@@ -93,12 +97,7 @@ export type ApiResult<T, E = ApiCallError> = ApiSuccess<T> | ApiFailure<E>
  * @returns True if the error is a {@link NetworkError}, false otherwise.
  */
 export function isNetworkError(error: unknown): error is NetworkError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'type' in error &&
-    (error as { type: string }).type === 'network'
-  )
+  return typeof error === 'object' && error !== null && 'type' in error && error.type === 'network'
 }
 
 /**
@@ -109,12 +108,7 @@ export function isNetworkError(error: unknown): error is NetworkError {
  * @returns True if the error is a {@link ServerError}, false otherwise.
  */
 export function isServerError(error: unknown): error is ServerError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'type' in error &&
-    (error as { type: string }).type === 'server'
-  )
+  return typeof error === 'object' && error !== null && 'type' in error && error.type === 'server'
 }
 
 /**
@@ -126,9 +120,6 @@ export function isServerError(error: unknown): error is ServerError {
  */
 export function isValidationError(error: unknown): error is ValidationError {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'type' in error &&
-    (error as { type: string }).type === 'validation'
+    typeof error === 'object' && error !== null && 'type' in error && error.type === 'validation'
   )
 }

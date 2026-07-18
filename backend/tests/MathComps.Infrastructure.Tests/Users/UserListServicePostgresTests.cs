@@ -3,6 +3,7 @@ using MathComps.Domain.Contracts.UserLists;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -220,8 +221,8 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task UpdateListAsync_ThrowsWhenListNotFound() => RunTestAsync(async service =>
     {
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        // Act & Assert - the missing list is reported
+        await Assert.ThrowsAsync<ListNotFoundException>(
             () => service.UpdateListAsync(_user1Id, "nonexistent", "Name"));
     });
 
@@ -255,8 +256,8 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task DeleteListAsync_ThrowsWhenListNotFound() => RunTestAsync(async service =>
     {
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        // Act & Assert - the missing list is reported
+        await Assert.ThrowsAsync<ListNotFoundException>(
             () => service.DeleteListAsync(_user1Id, "nonexistent"));
     });
 
@@ -282,6 +283,20 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
         // Assert 2
         var response2 = await service.GetListsAsync(_user1Id);
         Assert.Equal(0, response2.Lists[0].ProblemCount);
+    });
+
+    /// <summary>
+    /// Verifies that adding a non-existent problem throws a not-found error.
+    /// </summary>
+    [Fact]
+    public Task AddProblemAsync_ThrowsWhenProblemMissing() => RunTestAsync(async service =>
+    {
+        // Arrange
+        var list = await service.CreateListAsync(_user1Id, "Test");
+
+        // Act & Assert - the missing problem is reported
+        await Assert.ThrowsAsync<ProblemNotFoundException>(
+            () => service.AddProblemAsync(_user1Id, list.ContentId, "no-such-problem"));
     });
 
     /// <summary>
@@ -335,8 +350,8 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
         // Arrange
         await service.CreateListAsync(_user1Id, "A");
 
-        // Act & Assert — pass a wrong content ID
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        // Act & Assert - the mismatch is reported
+        await Assert.ThrowsAsync<ListReorderMismatchException>(
             () => service.ReorderListsAsync(_user1Id, ["wrong-id"]));
     });
 
@@ -497,8 +512,8 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task SetSharingAsync_ThrowsWhenListNotFound() => RunTestAsync(async service =>
     {
-        // Act & Assert — non-existent list
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        // Act & Assert - the missing list is reported
+        await Assert.ThrowsAsync<ListNotFoundException>(
             () => service.SetSharingAsync(_user1Id, "nonexistent", enabled: true));
     });
 

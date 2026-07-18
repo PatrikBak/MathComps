@@ -3,6 +3,31 @@ import { useLocale } from 'next-intl'
 import { useCallback } from 'react'
 
 import type { ApiResult } from '@/types/api'
+import { BACKEND_ERROR_CODES, type BackendErrorCode } from '@/types/backend-error-codes'
+
+/**
+ * Reads the backend's machine-readable failure code from a problem response body, if present.
+ *
+ * @param response - The non-OK fetch response.
+ * @returns The failure code, or undefined when the body carries none or can't be parsed.
+ */
+async function readErrorCode(response: Response): Promise<BackendErrorCode | undefined> {
+  try {
+    // Problem responses are JSON
+    const body = await response.json()
+
+    // The code rides as a top-level extension member
+    const errorCode = (body as { errorCode?: unknown }).errorCode
+
+    // Only a code the frontend knows counts; an unknown or non-string value means none
+    return (BACKEND_ERROR_CODES as readonly string[]).includes(errorCode as string)
+      ? (errorCode as BackendErrorCode)
+      : undefined
+  } catch {
+    // A missing or non-JSON body just means no code
+    return undefined
+  }
+}
 
 /**
  * Type definition for the apiCall function.
@@ -17,18 +42,35 @@ import type { ApiResult } from '@/types/api'
 export type ApiCaller = <T>(endpoint: () => string, options?: RequestInit) => Promise<ApiResult<T>>
 
 /**
+ * The API client is still initializing (Clerk auth state not yet loaded).
+ */
+type ApiLoadingState = {
+  /** The discriminator */
+  state: 'loading'
+}
+
+/**
+ * The API client needs a signed-in user but none is present.
+ */
+type ApiUnauthenticatedState = {
+  /** The discriminator */
+  state: 'unauthenticated'
+}
+
+/**
+ * The API client is ready to issue requests.
+ */
+type ApiReadyState = {
+  /** The discriminator */
+  state: 'ready'
+  /** Makes an API call (authenticated if the user is signed in). */
+  apiCall: ApiCaller
+}
+
+/**
  * Represents the state of the API client.
  */
-export type ApiState =
-  | { state: 'loading' }
-  | { state: 'unauthenticated' }
-  | {
-      state: 'ready'
-      /**
-       * Makes an API call (authenticated if user is signed in).
-       */
-      apiCall: ApiCaller
-    }
+export type ApiState = ApiLoadingState | ApiUnauthenticatedState | ApiReadyState
 
 /**
  * Configuration options for the API client.
@@ -66,7 +108,7 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
      * @template T - The expected response data type
      * @param endpoint - A function that returns the API endpoint path
      * @param options - Optional fetch configuration (method, body, headers, etc.)
-     * @returns Promise that resolves to an ApiResult<T>
+     * @returns Promise that resolves to an {@link ApiResult<T>}
      */
     async <T>(endpoint: () => string, options: RequestInit = {}): Promise<ApiResult<T>> => {
       // Check if user is authenticated (if enforcement is enabled)
@@ -115,12 +157,16 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
 
         // Handle non-OK responses
         if (!response.ok) {
+          // Best-effort read of the problem body for the backend's machine-readable failure code
+          const errorCode = await readErrorCode(response)
+
           return {
             success: false,
             error: {
               type: 'network',
               message: `API request failed: ${response.statusText}`,
               statusCode: response.status,
+              errorCode,
             },
           }
         }

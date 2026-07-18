@@ -26,4 +26,14 @@ public interface IProblemFilterService
     Task<SeasonContestBrowserResult> GetContestsBySeasonAsync(Language language);
 }
 
+/// <summary>
+/// Thrown when a favorites-only filter is requested without an authenticated user.
+/// </summary>
+public sealed class FavoritesRequireAuthenticationException() : Exception("Cannot filter favorites without an authenticated user");
+
+/// <summary>
+/// Thrown when a mark-status filter is requested without an authenticated user.
+/// </summary>
+public sealed class MarkStatusRequiresAuthenticationException() : Exception("Cannot filter by mark status without an authenticated user");
+
 

@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.UserLists;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Problems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
@@ -11,8 +12,12 @@ namespace MathComps.Infrastructure.Services.Users;
 /// Service for managing user problem lists in the database.
 /// </summary>
 /// <param name="dbContext">The database context.</param>
+/// <param name="problemLookup">Resolves problem slugs to internal ids.</param>
 /// <param name="logger">The logger.</param>
-public class UserListService(MathCompsDbContext dbContext, ILogger<UserListService> logger) : IUserListService
+public class UserListService(
+    MathCompsDbContext dbContext,
+    IProblemLookupService problemLookup,
+    ILogger<UserListService> logger) : IUserListService
 {
     /// <inheritdoc />
     public async Task<UserListsResponse> GetListsAsync(Guid userId)
@@ -75,7 +80,7 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
             .Include(list => list.Items)
             .FirstOrDefaultAsync(list => list.UserId == userId && list.ContentId == contentId)
             // It must exist
-            ?? throw new InvalidOperationException($"List '{contentId}' not found");
+            ?? throw new ListNotFoundException(contentId);
 
         // Update only the display name (content ID stays stable)
         list.Name = newName.Trim();
@@ -98,7 +103,7 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
         var list = await dbContext.UserProblemLists
             .FirstOrDefaultAsync(list => list.UserId == userId && list.ContentId == contentId)
             // It must exist
-            ?? throw new InvalidOperationException($"List '{contentId}' not found");
+            ?? throw new ListNotFoundException(contentId);
 
         // Remove the list (cascade deletes items)
         dbContext.UserProblemLists.Remove(list);
@@ -111,14 +116,14 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
     /// <inheritdoc />
     public async Task AddProblemAsync(Guid userId, string contentId, string problemSlug)
     {
-        // Resolve slug to internal ID
-        var problemId = await ResolveProblemIdAsync(problemSlug);
+        // Resolve slug to internal ID (throws if the problem doesn't exist)
+        var problemId = await problemLookup.GetRequiredProblemIdBySlugAsync(problemSlug);
 
         // Find the list (verify ownership)
         var list = await dbContext.UserProblemLists
             .FirstOrDefaultAsync(list => list.UserId == userId && list.ContentId == contentId)
             // It must exist
-            ?? throw new InvalidOperationException($"List '{contentId}' not found");
+            ?? throw new ListNotFoundException(contentId);
 
         // Check if the problem is already in the list (idempotent)
         var alreadyExists = await dbContext.UserProblemListItems
@@ -146,14 +151,14 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
     /// <inheritdoc />
     public async Task RemoveProblemAsync(Guid userId, string contentId, string problemSlug)
     {
-        // Resolve slug to internal ID
-        var problemId = await ResolveProblemIdAsync(problemSlug);
+        // Resolve slug to internal ID (throws if the problem doesn't exist)
+        var problemId = await problemLookup.GetRequiredProblemIdBySlugAsync(problemSlug);
 
         // Find the list (verify ownership)
         var list = await dbContext.UserProblemLists
             .FirstOrDefaultAsync(list => list.UserId == userId && list.ContentId == contentId)
             // It must exist
-            ?? throw new InvalidOperationException($"List '{contentId}' not found");
+            ?? throw new ListNotFoundException(contentId);
 
         // Find the item to remove
         var item = await dbContext.UserProblemListItems
@@ -185,7 +190,7 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
 
         // Check for mismatches
         if (!existingIds.SetEquals(requestedIds))
-            throw new InvalidOperationException("The provided content IDs do not match the user's lists");
+            throw new ListReorderMismatchException();
 
         // Build a content-ID-to-position map for O(1) lookups
         var idOrder = contentIds
@@ -214,7 +219,7 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
             .Include(list => list.Items)
             .FirstOrDefaultAsync(list => list.UserId == userId && list.ContentId == contentId)
             // It must exist
-            ?? throw new InvalidOperationException($"List '{contentId}' not found");
+            ?? throw new ListNotFoundException(contentId);
 
         // Update sharing status
         list.IsShared = enabled;
@@ -249,23 +254,5 @@ public class UserListService(MathCompsDbContext dbContext, ILogger<UserListServi
         return isOwner || list.IsShared
             ? new ListAccessResult(ListAccessStatus.HasAccess, list.Name)
             : new ListAccessResult(ListAccessStatus.NoAccess);
-    }
-
-    /// <summary>
-    /// Resolves a problem slug to its internal database ID.
-    /// </summary>
-    /// <param name="problemSlug">The slug of the problem.</param>
-    /// <returns>The internal GUID of the problem.</returns>
-    /// <exception cref="InvalidOperationException">When no problem matches the slug.</exception>
-    private async Task<Guid> ResolveProblemIdAsync(string problemSlug)
-    {
-        // Look up the problem by slug
-        var problemId = await dbContext.Problems
-            .Where(problem => problem.Slug == problemSlug)
-            .Select(problem => (Guid?)problem.Id)
-            .FirstOrDefaultAsync();
-
-        // Ensure the problem exists
-        return problemId ?? throw new InvalidOperationException($"Problem '{problemSlug}' not found");
     }
 }

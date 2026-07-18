@@ -210,7 +210,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
                     .Select(problem => (Guid?)problem.Id)
                     .FirstOrDefaultAsync())
                     // It must exist
-                    ?? throw new InvalidOperationException($"Problem with id '{target.TargetId}' not found");
+                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
                 // Add a comment
                 dbContext.ProblemComments.Add(new ProblemComment
@@ -260,11 +260,11 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
         // Get the existing comment
         var existingComment = await dbContext.Comments.FirstOrDefaultAsync(comment => comment.Id == commentId)
             // It must exist
-            ?? throw new InvalidOperationException("Comment not found");
+            ?? throw new CommentNotFoundException();
 
         // Verify ownership
         if (existingComment.AuthorId != userId)
-            throw new UnauthorizedAccessException("Only the author can edit a comment");
+            throw new NotCommentAuthorException();
 
         // Create new version
         var newComment = new Comment
@@ -287,13 +287,13 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
         switch (target.TargetType)
         {
             case CommentTargetType.Handout:
-                // Get the handout's id (must exist since comment exists)
+                // Get the handout's id
                 var handoutId = (await dbContext.Handouts
                     .Where(handout => handout.ContentId == target.TargetId)
                     .Select(handout => (Guid?)handout.Id)
                     .FirstOrDefaultAsync())
                     // It must exist
-                    ?? throw new InvalidOperationException($"Handout with id '{target.TargetId}' not found");
+                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
                 // Add the comment to the handout
                 dbContext.HandoutComments.Add(new HandoutComment
@@ -304,13 +304,13 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
                 break;
 
             case CommentTargetType.News:
-                // Get the news article's id (must exist since comment exists)
+                // Get the news article's id
                 var newsArticleId = (await dbContext.NewsArticles
                     .Where(newsArticle => newsArticle.ContentId == target.TargetId)
                     .Select(newsArticle => (Guid?)newsArticle.Id)
                     .FirstOrDefaultAsync())
                     // It must exist
-                    ?? throw new InvalidOperationException($"News article with id '{target.TargetId}' not found");
+                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
                 // Add the comment to the news article
                 dbContext.NewsArticleComments.Add(new NewsArticleComment
@@ -321,13 +321,13 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
                 break;
 
             case CommentTargetType.Problem:
-                // Get the problem's id (must exist since comment exists)
+                // Get the problem's id
                 var problemId = (await dbContext.Problems
                     .Where(problem => problem.Slug == target.TargetId)
                     .Select(problem => (Guid?)problem.Id)
                     .FirstOrDefaultAsync())
                     // It must exist
-                    ?? throw new InvalidOperationException($"Problem with slug '{target.TargetId}' not found");
+                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
                 // Add the comment to the problem
                 dbContext.ProblemComments.Add(new ProblemComment
@@ -362,11 +362,11 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
         // Get the comment
         var comment = await dbContext.Comments.FirstOrDefaultAsync(comment => comment.Id == commentId)
             // It must exist
-            ?? throw new InvalidOperationException("Comment not found");
+            ?? throw new CommentNotFoundException();
 
         // Verify ownership
         if (comment.AuthorId != userId)
-            throw new UnauthorizedAccessException("Only the author can delete a comment");
+            throw new NotCommentAuthorException();
 
         // Soft-delete
         comment.Status = CommentStatus.Deleted;
@@ -389,7 +389,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
 
         // If the comment doesn't exist, we're sad
         if (!commentExists)
-            throw new InvalidOperationException("Comment not found");
+            throw new CommentNotFoundException();
 
         // Check if the user is the author of the comment
         var authorId = await dbContext.Comments
@@ -399,7 +399,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
 
         // If the user is the author, we're sad
         if (authorId == userId)
-            throw new InvalidOperationException("You cannot like your own comment");
+            throw new CannotLikeOwnCommentException();
 
         // Execute atomic toggle operation using a single SQL statement
         // This prevents race conditions by doing the entire operation atomically at the database level

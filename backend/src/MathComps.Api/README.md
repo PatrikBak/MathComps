@@ -24,6 +24,12 @@ The `appsettings.json` file contains settings for:
 - **Pagination** – Default and maximum page sizes for list endpoints
 - **Similarity** – Problem similarity thresholds and result limits
 
+## Error responses
+
+Business failures use RFC 9457 problem responses. Services (and endpoints) throw a plain, specific exception that lives next to the interface it comes from: `CommentNotFoundException`, `NotCommentAuthorException`, `ListNotFoundException`, and so on. The API layer owns all transport knowledge: `GlobalExceptionHandler` classifies each known exception into an HTTP status plus the machine-readable `errorCode` (e.g. `404` + `"CommentNotFound"`, `403` + `"NotCommentAuthor"`, `409` + `"CannotLikeOwnComment"`). The `ApiErrorCode` enum (`MathComps.Api.Errors`) is the source of truth for the codes and is mirrored to the frontend's `web/src/types/backend-error-codes.ts`, kept in lockstep by a parity test.
+
+Anything the handler doesn't recognize is an unexpected fault, returned as a bare `500` problem, with no stack trace or HTML.
+
 ## Webhooks
 
 ### Clerk User Synchronization

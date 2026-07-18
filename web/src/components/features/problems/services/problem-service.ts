@@ -223,8 +223,8 @@ export async function searchProblems(
           } as ListNotFoundError
         }
 
-        // 401 — the list is private and the user doesn't have access
-        if (error.statusCode === 401) {
+        // 403 — the list is private and the user doesn't have access
+        if (error.statusCode === 403) {
           return {
             type: 'LIST_ACCESS_DENIED',
             listContentId: filters.listContentId,

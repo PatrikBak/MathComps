@@ -34,7 +34,7 @@ export type ListNotFoundError = {
 }
 
 /**
- * Error thrown when the user does not have access to a private list (401).
+ * Error thrown when the user does not have access to a private list (403).
  */
 export type ListAccessDeniedError = {
   /** Discriminator */

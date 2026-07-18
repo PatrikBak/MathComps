@@ -88,16 +88,18 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddProblemServices(this IServiceCollection services)
     {
-        // The options for pagination
+        // The options for pagination, checked at startup so a bad max fails fast
         services.AddOptions<PaginationOptions>()
             .BindConfiguration(PaginationOptions.ConfigurationSectionName)
-            .Validate(options => options.MaxPageSize > 0, $"{nameof(PaginationOptions.MaxPageSize)} must be > 0.");
+            .Validate(options => options.MaxPageSize > 0, $"{nameof(PaginationOptions.MaxPageSize)} must be > 0.")
+            .ValidateOnStart();
 
-        // The options for similarity
+        // The options for similarity, checked at startup so bad thresholds fail fast
         services.AddOptions<SimilarityOptions>()
             .BindConfiguration(SimilarityOptions.ConfigurationSectionName)
             .Validate(options => options.MaxSimilarProblems >= 0, $"{nameof(SimilarityOptions.MaxSimilarProblems)} must >= 0.")
-            .Validate(options => options.MinSimilarityScore is >= 0 and <= 1, $"{nameof(SimilarityOptions.MinSimilarityScore)} must be between 0 and 1.");
+            .Validate(options => options.MinSimilarityScore is >= 0 and <= 1, $"{nameof(SimilarityOptions.MinSimilarityScore)} must be between 0 and 1.")
+            .ValidateOnStart();
 
         // The problem filter reads the metadata registry, so bring it along
         services.AddLocalization();
@@ -127,6 +129,9 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IUserProblemService, UserProblemService>();
         services.TryAddScoped<IUserListService, UserListService>();
         services.TryAddScoped<ICommentService, CommentService>();
+
+        // The list service resolves problem slugs, so make sure the lookup is available
+        services.TryAddScoped<IProblemLookupService, ProblemLookupService>();
 
         // Builder pattern
         return services;

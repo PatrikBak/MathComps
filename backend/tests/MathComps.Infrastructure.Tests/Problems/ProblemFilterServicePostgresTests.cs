@@ -591,7 +591,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var resultUser2Favorites = await service.FilterAsync(favoritesQuery with { UserId = user2Id });
 
         // Act 3: Query favorites for Anonymous (should throw)
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.FilterAsync(favoritesQuery));
+        await Assert.ThrowsAsync<FavoritesRequireAuthenticationException>(() => service.FilterAsync(favoritesQuery));
 
         // Act 4: Query all problems for User 1 (FavoritesOnly = false)
         var allProblemsQuery = favoritesQuery with { Query = favoritesQuery.Query with { FavoritesOnly = false } };
@@ -1873,4 +1873,43 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Submit changes
         await context.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// An out-of-range page request is clamped rather than trusted: the page size caps at the configured
+    /// maximum (the DoS guard) and a non-positive page number floors to the first page.
+    /// </summary>
+    [Fact]
+    public Task OutOfRangePagingIsClamped() => RunTestAsync(async service =>
+    {
+        // Arrange - ask for a wildly oversized page and a non-positive page number
+        var query = new ProblemFilterOptions(
+            new FilterQuery(
+                new FilterParameters(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or
+                ),
+                PageSize: 100_000,
+                PageNumber: 0,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act - run the filter with the out-of-range paging
+        var result = await service.FilterAsync(query);
+
+        // Assert - the page size is capped at the configured maximum
+        Assert.Equal(100, result.Problems.PageSize);
+
+        // Assert - the page number floors to the first page
+        Assert.Equal(1, result.Problems.Page);
+    });
 }

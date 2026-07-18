@@ -35,17 +35,11 @@ public class ProblemFilterService(
         // Convenient deconstruct
         var ((parameters, pageSize, pageNumber, favoritesOnly, listContentId, markStatus), userId, language) = options;
 
-        // Positive page numbers indexed from 1
-        if (pageNumber <= 0)
-            throw new ArgumentException($"Page number must be greater than 0, but was {pageNumber}");
+        // Clamp paging into the allowed range rather than trusting the client — page numbers start at 1
+        pageNumber = Math.Max(pageNumber, 1);
 
-        // Positive page sizes
-        if (pageSize <= 0)
-            throw new ArgumentException($"Page size must be greater than 0, but was {pageSize}");
-
-        // Not too large page sizes
-        if (pageSize > paginationOptions.Value.MaxPageSize)
-            throw new ArgumentException($"Page size {pageSize} exceeds maximum allowed {paginationOptions.Value.MaxPageSize}");
+        // Page size stays within [1, configured max]
+        pageSize = Math.Clamp(pageSize, 1, paginationOptions.Value.MaxPageSize);
 
         // PERFORMANCE OPTIMIZATION: Materialize text search results once
         // This ensures the expensive text search executes exactly once, not multiple times across facets
@@ -334,7 +328,7 @@ public class ProblemFilterService(
         {
             // Favorites require authentication
             if (!userId.HasValue)
-                throw new InvalidOperationException("Cannot filter favorites without an authenticated user.");
+                throw new FavoritesRequireAuthenticationException();
 
             // Filter by likes
             problems = problems.Where(problem =>
@@ -347,7 +341,7 @@ public class ProblemFilterService(
         {
             // Mark status filtering requires authentication
             if (!userId.HasValue)
-                throw new InvalidOperationException("Cannot filter by mark status without an authenticated user.");
+                throw new MarkStatusRequiresAuthenticationException();
 
             // Only marked or unmarked problems
             problems = markStatus switch
