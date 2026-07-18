@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl'
 import { preload } from 'react-dom'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
+import { DefenseChatTrigger } from '@/components/features/defense/components/DefenseChatTrigger'
 import type {
   Document,
   HandoutData,
@@ -14,6 +15,7 @@ import { getProblemImageUrl } from '@/components/features/problems/services/prob
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard, type DisclosurePanelProps } from './Cards'
@@ -27,6 +29,7 @@ import {
   HINT_TEXT_COLOR,
 } from './handout-colors'
 import { renderBlocks, renderRawContentBlock } from './handout-content-renderer'
+import { blockSequenceToMarkdown } from './handout-content-source'
 import { HandoutActions } from './HandoutActions'
 
 /**
@@ -100,6 +103,7 @@ function renderDifficultyStars(difficulty: number): React.ReactNode {
  * @param imagesById Lookup map of {@link HandoutImage}s keyed by content ID.
  * @param t Translator bound to the handouts namespace.
  * @param imageMissingText Fallback text for missing images.
+ * @param contentId The handout's content id.
  * @returns The rendered document tree wrapped in a math-styled container.
  */
 function renderDocumentSections(
@@ -107,7 +111,8 @@ function renderDocumentSections(
   sectionMetadata: SectionMetadata[],
   imagesById: Record<string, HandoutImage>,
   t: HandoutsTranslator,
-  imageMissingText: string
+  imageMissingText: string,
+  contentId: string
 ): React.ReactNode {
   // Translate the environment labels
   const localizedEnvironmentLabelByType: Record<HandoutEnvironmentType, string> = {
@@ -177,6 +182,55 @@ function renderDocumentSections(
               contentBlock.type === 'problem'
                 ? renderDifficultyStars(contentBlock.difficulty)
                 : null
+
+            // The hidden reasoning a defense is argued against, per environment: a theorem's proof,
+            // a problem's staged hints alongside its solution, or the worked solution for exercises
+            // and examples. Definitions hide nothing.
+            let defenseReference: RawContentBlock[]
+            let defenseHints: string[]
+            switch (contentBlock.type) {
+              case 'theorem':
+                // A theorem is defended by arguing its proof.
+                defenseReference = contentBlock.proof
+                defenseHints = []
+                break
+              case 'exercise':
+              case 'example':
+                // Exercises and examples are defended against their worked solution, no staged hints.
+                defenseReference = contentBlock.solution
+                defenseHints = []
+                break
+              case 'problem':
+                // A problem stages hints on the way to its solution.
+                defenseReference = contentBlock.solution
+                defenseHints = contentBlock.hints.map(blockSequenceToMarkdown)
+                break
+              case 'definition':
+                // Definitions have nothing hidden to defend.
+                defenseReference = []
+                defenseHints = []
+                break
+              default:
+                assertNever(contentBlock)
+            }
+
+            // Defense-chat trigger, offered wherever there's hidden reasoning to probe. Rendered for
+            // every viewer but admin-gated inside the (client) trigger, which keeps the handout page
+            // static; the reference it carries is already public on this page, so nothing secret ships.
+            const defenseTrigger =
+              defenseReference.length > 0 ? (
+                <DefenseChatTrigger
+                  problem={{
+                    // Keyed by the environment's stable identity (type + document-wide number), so
+                    // sessions survive locale switches and title edits
+                    key: `${contentId}-${contentBlock.type}-${environmentNumber}`,
+                    title: `${environmentBaseTitle} ${environmentNumber}`,
+                    statement: blockSequenceToMarkdown(contentBlock.body),
+                    hints: defenseHints,
+                    solution: blockSequenceToMarkdown(defenseReference),
+                  }}
+                />
+              ) : undefined
 
             // Composed card heading, e.g. "Theorem 3" or "Úloha 4**".
             const mainTitle = (
@@ -258,6 +312,8 @@ function renderDocumentSections(
                   })
                 }
                 break
+              default:
+                assertNever(contentBlock)
             }
 
             return (
@@ -268,6 +324,7 @@ function renderDocumentSections(
                   subtitle={subtitleBadge}
                   id={environmentId}
                   disclosures={disclosures}
+                  headerAction={defenseTrigger}
                 >
                   {renderBlocks(contentBlock.body, imagesById, imageMissingText)}
                 </CollapsibleCard>
@@ -359,7 +416,14 @@ export default function HandoutDetail({
       </header>
 
       {/* Math Sections */}
-      {renderDocumentSections(document, sectionMetadata, imagesById, t, imageMissingText)}
+      {renderDocumentSections(
+        document,
+        sectionMetadata,
+        imagesById,
+        t,
+        imageMissingText,
+        contentId
+      )}
 
       {/* Comments Section */}
       <ArticleSection

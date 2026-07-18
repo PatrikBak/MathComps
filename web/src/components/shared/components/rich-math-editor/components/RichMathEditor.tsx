@@ -20,11 +20,51 @@ import { RichMathEditorToolbar } from './RichMathEditorToolbar'
 export type RichMathEditorVariant = 'card' | 'inline'
 
 /**
+ * A toolbar entry that can be shown or hidden per editor instance.
+ */
+export type ToolbarItem =
+  | 'bold'
+  | 'italic'
+  | 'inlineMath'
+  | 'blockMath'
+  | 'symbols'
+  | 'numberedList'
+  | 'bulletList'
+  | 'quote'
+  | 'heading'
+  | 'link'
+  | 'spoiler'
+  | 'attachment'
+  | 'image'
+  | 'emoji'
+
+/**
+ * Which toolbar entries an editor shows. Every entry defaults to on, so an omitted or partial config
+ * leaves the full toolbar in place; set an entry to `false` to hide it.
+ */
+export type ToolbarConfig = Partial<Record<ToolbarItem, boolean>>
+
+/**
+ * Whether a toolbar entry is shown under a config, every entry defaulting to on.
+ *
+ * @param config - The editor's toolbar config, if any.
+ * @param item - The entry to check.
+ *
+ * @returns Whether the entry is shown.
+ */
+export function showsToolbarItem(config: ToolbarConfig | undefined, item: ToolbarItem): boolean {
+  // An omitted entry is on
+  return config?.[item] ?? true
+}
+
+/**
  * Props for the {@link RichMathEditor} component.
  */
 type RichMathEditorProps = {
   /** Visual variant of the editor */
   variant?: RichMathEditorVariant
+  /** Which toolbar entries to show; every entry defaults to on */
+  toolbar?: ToolbarConfig
   /** Current text value */
   value: string
   /** Callback when the text changes */
@@ -41,6 +81,8 @@ type RichMathEditorProps = {
   onSend?: () => void
   /** Callback when cancel button is clicked (shows cancel button when provided) */
   onCancel?: () => void
+  /** Callback that stops the in-flight submit. */
+  onStop?: () => void
   /** Auto-expand to modal on mobile (for replies on small screens) */
   autoExpandOnMobile?: boolean
   /** Whether the editor is in a loading state (e.g. sending) */
@@ -52,6 +94,7 @@ type RichMathEditorProps = {
  */
 export function RichMathEditor({
   variant = 'card',
+  toolbar,
   value,
   onChange,
   placeholder = '',
@@ -60,6 +103,7 @@ export function RichMathEditor({
   onValidChange,
   onSend,
   onCancel,
+  onStop,
   autoExpandOnMobile,
   isLoading = false,
 }: RichMathEditorProps) {
@@ -97,6 +141,10 @@ export function RichMathEditor({
   // Whether we're in mobile modal-only mode (no inline content)
   const isMobileModalOnly = autoExpandOnMobile && isMobile
 
+  // Whether this editor accepts image / attachment uploads
+  const allowImageUpload = showsToolbarItem(toolbar, 'image')
+  const allowAttachmentUpload = showsToolbarItem(toolbar, 'attachment')
+
   return (
     <>
       {/* Wrapper for inline editor - hidden on mobile when using modal-only mode */}
@@ -120,7 +168,7 @@ export function RichMathEditor({
               handleComponent={{
                 bottom: (
                   <div className="relative w-full h-1.5 cursor-ns-resize group/resizer flex justify-center -mb-1">
-                    <div className="w-12 h-1 bg-foreground/10 rounded-full transition-colors group-hover/resizer:bg-focus/50 mt-0.5" />
+                    <div className="w-12 h-1 bg-foreground/10 rounded-full transition-colors group-hover/resizer:bg-brand/50 mt-0.5" />
                   </div>
                 ),
               }}
@@ -129,6 +177,7 @@ export function RichMathEditor({
               {/* Toolbar */}
               <RichMathEditorToolbar
                 variant={variant}
+                config={toolbar}
                 onEdit={applyTransform}
                 onInsert={insertAtCursor}
                 onImageClick={openImagePicker}
@@ -144,6 +193,8 @@ export function RichMathEditor({
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 autoFocus={autoFocus}
+                allowImageUpload={allowImageUpload}
+                allowAttachmentUpload={allowAttachmentUpload}
                 containerClassName="flex-1 min-h-0"
                 className={cn('h-full', onSend && 'rounded-b-none')}
               />
@@ -158,6 +209,7 @@ export function RichMathEditor({
                   attachmentCount={state.metrics.attachmentCount}
                   onSend={onSend}
                   onCancel={onCancel}
+                  onStop={onStop}
                   isValid={state.isValid}
                   isLoading={isLoading}
                 />
@@ -172,9 +224,11 @@ export function RichMathEditor({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         viewModel={viewModel}
+        toolbarConfig={toolbar}
         placeholder={placeholder}
         onSend={onSend}
         onCancel={onCancel}
+        onStop={onStop}
         isLoading={isLoading}
       />
     </>

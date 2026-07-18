@@ -78,6 +78,8 @@ type CollapsibleCardProps = {
   disclosures?: DisclosurePanelProps[]
   /** Unique anchor ID for deep linking (e.g., "theorem-1"). */
   id: string
+  /** Optional control pinned to the trailing edge of the header row. */
+  headerAction?: React.ReactNode
 }
 
 /**
@@ -90,6 +92,7 @@ export function CollapsibleCard({
   children,
   disclosures,
   id,
+  headerAction,
 }: CollapsibleCardProps) {
   // Resolve the color scheme for this environment type
   const card = CARD_PALETTE[type]
@@ -125,6 +128,8 @@ export function CollapsibleCard({
               </span>
             )}
             {id && <CopyLinkButton slug={id} iconSize={16} className="ml-0" />}
+            {/* Trailing control */}
+            {headerAction && <div className="ml-auto">{headerAction}</div>}
           </div>
         )}
         {/* Card body content */}
@@ -132,8 +137,8 @@ export function CollapsibleCard({
           {children}
           {disclosures && disclosures.length > 0 && (
             <div className="mt-3 rounded-xl border border-foreground/10 divide-y divide-foreground/10 overflow-hidden">
-              {disclosures.map((d, i) => (
-                <DisclosurePanel key={i} {...d} />
+              {disclosures.map((disclosure, index) => (
+                <DisclosurePanel key={index} {...disclosure} />
               ))}
             </div>
           )}

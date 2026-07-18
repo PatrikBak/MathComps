@@ -11,6 +11,7 @@ import {
   SquareSlash,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { ComponentType } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
@@ -31,7 +32,12 @@ import {
   insertSpoiler,
   type TransformLabels,
 } from '../utils/transforms'
-import type { RichMathEditorVariant } from './RichMathEditor'
+import {
+  type RichMathEditorVariant,
+  showsToolbarItem,
+  type ToolbarConfig,
+  type ToolbarItem,
+} from './RichMathEditor'
 import { RichMathEditorEmojiPicker } from './RichMathEditorEmojiPicker'
 import { RichMathEditorLaTeXSymbolPicker } from './RichMathEditorLaTeXSymbolPicker'
 import { RichMathEditorOverflowMenu } from './RichMathEditorOverflowMenu'
@@ -43,6 +49,8 @@ import { ToolbarButton } from './RichMathEditorToolbarButton'
 type RichMathEditorToolbarProps = {
   /** Visual variant of the editor */
   variant: RichMathEditorVariant
+  /** Which toolbar entries to show; every entry defaults to on */
+  config?: ToolbarConfig
   /** When true, omits border styling (for use in containers that handle their own borders) */
   borderless?: boolean
   /** Function to apply a transform to the textarea content */
@@ -56,10 +64,23 @@ type RichMathEditorToolbarProps = {
 }
 
 /**
+ * A toolbar entry in the wide-only group.
+ */
+type WideToolbarItem = {
+  /** The icon shown for the entry. */
+  icon: ComponentType<{ size?: number }>
+  /** The entry's localized label / tooltip. */
+  label: string
+  /** Runs the entry's edit. */
+  onClick: () => void
+}
+
+/**
  * A toolbar for the {@link RichMathEditor} component.
  */
 export function RichMathEditorToolbar({
   variant,
+  config,
   borderless = false,
   onEdit,
   onInsert,
@@ -69,7 +90,10 @@ export function RichMathEditorToolbar({
   // Translations for editor
   const tEditor = useTranslations('ui.editor')
 
-  // Modifier key for keyboard-shortcut tooltips (⌘ on Mac, Ctrl elsewhere)
+  // Whether a toolbar entry is shown (every entry defaults to on)
+  const shows = (item: ToolbarItem) => showsToolbarItem(config, item)
+
+  // Modifier key symbol (⌘ on Mac, Ctrl elsewhere)
   const { isMac } = useDeviceCapabilities()
   const modifier = isMac ? '⌘' : 'Ctrl'
 
@@ -79,6 +103,48 @@ export function RichMathEditorToolbar({
     spoilerPlaceholder: tEditor('hiddenContentPlaceholder'),
     headingPlaceholder: tEditor('headingPlaceholder'),
   }
+
+  // The wide-only group, each entry present only when shown
+  const wideItems: (WideToolbarItem | false)[] = [
+    shows('numberedList') && {
+      icon: ListOrdered,
+      label: tEditor('numberedList'),
+      onClick: () => onEdit(applyNumberedList),
+    },
+    shows('bulletList') && {
+      icon: List,
+      label: tEditor('bulletList'),
+      onClick: () => onEdit(applyBulletList),
+    },
+    shows('quote') && {
+      icon: MessageSquareQuote,
+      label: tEditor('quote'),
+      onClick: () => onEdit(applyQuote),
+    },
+    shows('heading') && {
+      icon: Heading3,
+      label: tEditor('heading'),
+      onClick: () => onEdit((context) => insertHeading(context, transformLabels)),
+    },
+    shows('link') && {
+      icon: Link,
+      label: tEditor('link', { modifier }),
+      onClick: () => onEdit(insertLink),
+    },
+    shows('spoiler') && {
+      icon: SquareSlash,
+      label: tEditor('spoiler'),
+      onClick: () => onEdit((context) => insertSpoiler(context, transformLabels)),
+    },
+    shows('attachment') && {
+      icon: Paperclip,
+      label: tEditor('attachment'),
+      onClick: onAttachmentClick,
+    },
+  ]
+
+  // Just the shown entries
+  const overflowItems = wideItems.filter((item): item is WideToolbarItem => item !== false)
 
   return (
     <div
@@ -94,115 +160,70 @@ export function RichMathEditorToolbar({
       )}
     >
       {/* Core formatting: Bold, Italic */}
-      <ToolbarButton
-        onClick={() => onEdit(applyBold)}
-        icon={Bold}
-        title={tEditor('bold', { modifier })}
-      />
-      <ToolbarButton
-        onClick={() => onEdit(applyItalic)}
-        icon={Italic}
-        title={tEditor('italic', { modifier })}
-      />
+      {shows('bold') && (
+        <ToolbarButton
+          onClick={() => onEdit(applyBold)}
+          icon={Bold}
+          title={tEditor('bold', { modifier })}
+        />
+      )}
+      {shows('italic') && (
+        <ToolbarButton
+          onClick={() => onEdit(applyItalic)}
+          icon={Italic}
+          title={tEditor('italic', { modifier })}
+        />
+      )}
 
       {/* Math: $, $$, and symbol picker */}
-      <ToolbarButton
-        onClick={() => onEdit(applyInlineMath)}
-        text="$"
-        title={tEditor('inlineMath', { modifier })}
-      />
-      <ToolbarButton
-        onClick={() => onEdit(insertBlockMath)}
-        text="$$"
-        title={tEditor('blockMath')}
-      />
-      <RichMathEditorLaTeXSymbolPicker
-        onSymbolClick={(command, args) =>
-          onEdit((context) => insertLatexCommand(context, command, args))
-        }
-      />
+      {shows('inlineMath') && (
+        <ToolbarButton
+          onClick={() => onEdit(applyInlineMath)}
+          text="$"
+          title={tEditor('inlineMath', { modifier })}
+        />
+      )}
+      {shows('blockMath') && (
+        <ToolbarButton
+          onClick={() => onEdit(insertBlockMath)}
+          text="$$"
+          title={tEditor('blockMath')}
+        />
+      )}
+      {shows('symbols') && (
+        <RichMathEditorLaTeXSymbolPicker
+          onSymbolClick={(command, args) =>
+            onEdit((context) => insertLatexCommand(context, command, args))
+          }
+        />
+      )}
 
-      {/* Icons shown when container is wide enough */}
-      <div className="hidden @[480px]:flex items-center gap-0.5">
-        <ToolbarButton
-          onClick={() => onEdit(applyNumberedList)}
-          icon={ListOrdered}
-          title={tEditor('numberedList')}
-        />
-        <ToolbarButton
-          onClick={() => onEdit(applyBulletList)}
-          icon={List}
-          title={tEditor('bulletList')}
-        />
-        <ToolbarButton
-          onClick={() => onEdit(applyQuote)}
-          icon={MessageSquareQuote}
-          title={tEditor('quote')}
-        />
-        <ToolbarButton
-          onClick={() => onEdit((context) => insertHeading(context, transformLabels))}
-          icon={Heading3}
-          title={tEditor('heading')}
-        />
-        <ToolbarButton
-          onClick={() => onEdit(insertLink)}
-          icon={Link}
-          title={tEditor('link', { modifier })}
-        />
-        <ToolbarButton
-          onClick={() => onEdit((context) => insertSpoiler(context, transformLabels))}
-          icon={SquareSlash}
-          title={tEditor('spoiler')}
-        />
-        <ToolbarButton onClick={onAttachmentClick} icon={Paperclip} title={tEditor('attachment')} />
-      </div>
+      {/* Wide-only group, shown when the container is wide enough */}
+      {overflowItems.length > 0 && (
+        <div className="hidden items-center gap-0.5 @[480px]:flex">
+          {overflowItems.map((item) => (
+            <ToolbarButton
+              key={item.label}
+              onClick={item.onClick}
+              icon={item.icon}
+              title={item.label}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Image and emoji icons */}
-      <ToolbarButton onClick={onImageClick} icon={Image} title={tEditor('image')} />
-      <RichMathEditorEmojiPicker onEmojiClick={onInsert} />
+      {shows('image') && (
+        <ToolbarButton onClick={onImageClick} icon={Image} title={tEditor('image')} />
+      )}
+      {shows('emoji') && <RichMathEditorEmojiPicker onEmojiClick={onInsert} />}
 
-      {/* Overflow menu for narrow containers */}
-      <div className="@[480px]:hidden">
-        <RichMathEditorOverflowMenu
-          items={[
-            {
-              icon: ListOrdered,
-              label: tEditor('numberedList'),
-              onClick: () => onEdit(applyNumberedList),
-            },
-            {
-              icon: List,
-              label: tEditor('bulletList'),
-              onClick: () => onEdit(applyBulletList),
-            },
-            {
-              icon: MessageSquareQuote,
-              label: tEditor('quote'),
-              onClick: () => onEdit(applyQuote),
-            },
-            {
-              icon: Heading3,
-              label: tEditor('heading'),
-              onClick: () => onEdit((context) => insertHeading(context, transformLabels)),
-            },
-            {
-              icon: Link,
-              label: tEditor('link', { modifier }),
-              onClick: () => onEdit(insertLink),
-            },
-            {
-              icon: SquareSlash,
-              label: tEditor('spoiler'),
-              onClick: () => onEdit((context) => insertSpoiler(context, transformLabels)),
-            },
-            {
-              icon: Paperclip,
-              label: tEditor('attachment'),
-              onClick: onAttachmentClick,
-            },
-          ]}
-        />
-      </div>
+      {/* Overflow menu for the wide-only group on narrow containers */}
+      {overflowItems.length > 0 && (
+        <div className="@[480px]:hidden">
+          <RichMathEditorOverflowMenu items={overflowItems} />
+        </div>
+      )}
     </div>
   )
 }

@@ -40,6 +40,8 @@ type PasteHandlerParams = {
   context: EditContext
   /** Current scroll position of the textarea */
   scrollTop: number
+  /** Whether an image in the clipboard may be uploaded */
+  allowImageUpload: boolean
   /** Callback to update editor content */
   onChange: FileUploadParams['onChange']
   /** Callback to push new state to history */
@@ -69,6 +71,7 @@ export function processPaste({
   clipboardData,
   context,
   scrollTop,
+  allowImageUpload,
   onChange,
   pushState,
   getTextareaState,
@@ -82,8 +85,8 @@ export function processPaste({
   const items = Array.from(clipboardData.items)
   const imageItem = items.find((item) => item.type.startsWith('image/'))
 
-  // If image is found...
-  if (imageItem) {
+  // If image is found and this editor takes image uploads...
+  if (imageItem && allowImageUpload) {
     // ...try to get the image file
     const blob = imageItem.getAsFile()
 

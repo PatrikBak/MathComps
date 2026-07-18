@@ -193,7 +193,7 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             )
           },
           blockquote: ({ children }) => (
-            <blockquote className="border-l-2 border-focus/50 pl-3 my-2 text-muted italic">
+            <blockquote className="border-l-2 border-brand/50 pl-3 my-2 text-muted italic">
               {children}
             </blockquote>
           ),

@@ -23,6 +23,10 @@ type ModalProps = {
   className?: string
   /** Vertical alignment: 'center' (default) or 'top' (prevents layout shifts) */
   align?: 'center' | 'top'
+  /** Whether the panel carries its own inner padding; false lets content own its layout edge-to-edge */
+  padded?: boolean
+  /** Accessible name for the dialog when it renders its own header rather than a `title` */
+  ariaLabel?: string
 }
 
 /**
@@ -36,13 +40,15 @@ export function Modal({
   showCloseButton,
   className,
   align = 'center',
+  padded = true,
+  ariaLabel,
 }: ModalProps) {
   // Get translations for modal
   const tModal = useTranslations('ui.modal')
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" aria-label={ariaLabel} className="relative z-50" onClose={onClose}>
         {/* Backdrop with blur */}
         <TransitionChild
           as={Fragment}
@@ -75,7 +81,8 @@ export function Modal({
             >
               <DialogPanel
                 className={cn(
-                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 p-3 sm:p-6 text-left align-middle shadow-xl transition-all',
+                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl transition-all',
+                  padded && 'p-3 sm:p-6',
                   className
                 )}
               >

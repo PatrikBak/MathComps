@@ -167,6 +167,26 @@
     "PL": "Polsko",
     "SK": "Slovensko"
   },
+  "defense": {
+    "deleteSession": "Smazat konverzaci",
+    "deleteSessionMessage": "Tato konverzace se trvale odstraní.",
+    "deleteSessionTitle": "Smazat tuto konverzaci?",
+    "history": "Historie",
+    "historyTitle": "Tato úloha",
+    "jumpToLatest": "Přejít na nejnovější",
+    "newDefense": "Nová konverzace",
+    "opener": "Rád si s tebou popovídám o tvém řešení, nebo pokud jsi zaseknutý 😇",
+    "placeholder": "Napiš svou odpověď…",
+    "problemStrip": "Zadání úlohy",
+    "roles": {
+      "examiner": "Zkoušející",
+      "student": "Ty"
+    },
+    "sendError": "Tvou odpověď se nepodařilo odeslat.",
+    "thinking": "Zkoušející přemýšlí nad tvým krokem…",
+    "title": "Obhajoba řešení",
+    "transcriptLabel": "Průběh konverzace"
+  },
   "email": {
     "footer": {
       "privacy": "Soukromí a podmínky"
@@ -805,9 +825,8 @@
       "quote": "Citace",
       "searchEmoji": "Hledat emoji...",
       "sectionLinkCopied": "Odkaz na sekci byl zkopírován do schránky",
-      "shrink": "Zmenšit",
-      "shrinkEditor": "Zmenšit editor",
       "spoiler": "Skrytý text",
+      "stop": "Zastavit",
       "submit": "Odeslat",
       "submitShortcut": "Odeslat ({modifier} + Enter)",
       "unsupportedFileType": "Nepodporovaný typ souboru. Povolené: obrázky (PNG, JPEG, WebP, GIF) nebo přílohy (PDF, TXT, MD)",
