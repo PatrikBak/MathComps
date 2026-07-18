@@ -37,7 +37,7 @@ export function RichMathEditorSpoiler({ label, children }: RichMathEditorSpoiler
         aria-expanded={isOpen}
       >
         {isOpen ? (
-          <ChevronDown size={16} className="text-focus flex-shrink-0" />
+          <ChevronDown size={16} className="text-brand-light flex-shrink-0" />
         ) : (
           <ChevronRight size={16} className="text-muted flex-shrink-0" />
         )}

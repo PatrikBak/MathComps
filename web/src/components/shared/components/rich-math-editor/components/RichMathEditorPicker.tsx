@@ -38,7 +38,7 @@ export function RichMathEditorPicker({
             className={cn(
               'flex items-center gap-1.5 px-2 py-1 rounded transition-colors text-xs',
               open
-                ? 'text-focus bg-focus/10'
+                ? 'text-brand-light bg-brand/10'
                 : 'text-muted hover:text-foreground hover:bg-foreground/10'
             )}
           >

@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-breakpoint'
 
 import { Modal } from '../../Modal'
 import { type EditorViewModel } from '../hooks/use-editor-model'
+import { showsToolbarItem, type ToolbarConfig } from './RichMathEditor'
 import { RichMathEditorFooter } from './RichMathEditorFooter'
 import { RichMathEditorInputArea } from './RichMathEditorInputArea'
 import { RichMathEditorRenderer } from './RichMathEditorRenderer'
@@ -21,12 +22,16 @@ type RichMathEditorExpandedModalProps = {
   onClose: () => void
   /** Shared viewModel from the parent RichMathEditor */
   viewModel: EditorViewModel
+  /** Which toolbar entries to show; every entry defaults to on */
+  toolbarConfig?: ToolbarConfig
   /** Placeholder text shown when the editor is empty */
   placeholder: string
   /** Callback triggered when the send button is clicked */
   onSend?: () => void
   /** Callback triggered when the cancel button is clicked */
   onCancel?: () => void
+  /** Callback that stops the in-flight submit. */
+  onStop?: () => void
   /** Whether the editor is in a loading state */
   isLoading?: boolean
 }
@@ -40,9 +45,11 @@ export function RichMathEditorExpandedModal({
   isOpen,
   onClose,
   viewModel,
+  toolbarConfig,
   placeholder,
   onSend,
   onCancel,
+  onStop,
   isLoading = false,
 }: RichMathEditorExpandedModalProps) {
   // Get translations
@@ -83,7 +90,7 @@ export function RichMathEditorExpandedModal({
             className={cn(
               'flex-1 py-1.5 text-xs font-medium transition-colors',
               mobileModalView === 'editor'
-                ? 'text-focus border-b-2 border-focus'
+                ? 'text-brand-light border-b-2 border-brand-light'
                 : 'text-muted hover:text-foreground'
             )}
           >
@@ -95,7 +102,7 @@ export function RichMathEditorExpandedModal({
             className={cn(
               'flex-1 py-1.5 text-xs font-medium transition-colors',
               mobileModalView === 'preview'
-                ? 'text-focus border-b-2 border-focus'
+                ? 'text-brand-light border-b-2 border-brand-light'
                 : 'text-muted hover:text-foreground'
             )}
           >
@@ -117,6 +124,7 @@ export function RichMathEditorExpandedModal({
               {/* Toolbar */}
               <RichMathEditorToolbar
                 variant="card"
+                config={toolbarConfig}
                 borderless
                 onEdit={applyTransform}
                 onInsert={insertAtCursor}
@@ -133,6 +141,8 @@ export function RichMathEditorExpandedModal({
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
+                allowImageUpload={showsToolbarItem(toolbarConfig, 'image')}
+                allowAttachmentUpload={showsToolbarItem(toolbarConfig, 'attachment')}
                 containerClassName="flex-1 min-h-0 min-h-[200px]"
                 className="h-full"
                 autoFocus
@@ -173,7 +183,7 @@ export function RichMathEditorExpandedModal({
           <RichMathEditorFooter
             variant="card"
             borderless
-            modeConfig={{ mode: 'expanded', onShrink: onClose }}
+            modeConfig={{ mode: 'expanded' }}
             charCount={state.metrics.charCount}
             imageCount={state.metrics.imageCount}
             attachmentCount={state.metrics.attachmentCount}
@@ -181,10 +191,17 @@ export function RichMathEditorExpandedModal({
               onClose()
               onSend?.()
             }}
-            onCancel={() => {
-              onClose()
-              onCancel?.()
-            }}
+            onCancel={
+              // Only wire a cancel when there's a real one to run; otherwise the footer X would just
+              // close the modal, duplicating the header's close button
+              onCancel
+                ? () => {
+                    onClose()
+                    onCancel()
+                  }
+                : undefined
+            }
+            onStop={onStop}
             isValid={state.isValid}
             isLoading={isLoading}
           />

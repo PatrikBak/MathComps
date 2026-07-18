@@ -1,6 +1,7 @@
-import { Expand, Eye, Image, Paperclip, Send, Shrink, Type, X } from 'lucide-react'
+import { CornerDownLeft, Expand, Eye, Image, Paperclip, Square, Type, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
@@ -72,13 +73,10 @@ type InlineModeConfig = {
 
 /**
  * Mode configuration for the expanded modal view.
- * Shows a shrink button to return to inline view.
  */
 type ExpandedModeConfig = {
   /** The discriminator */
   mode: 'expanded'
-  /** Callback to shrink the editor from a modal */
-  onShrink?: () => void
 }
 
 /**
@@ -106,6 +104,8 @@ type RichMathEditorFooterProps = {
   onSend?: () => void
   /** Callback triggered when the cancel button is clicked */
   onCancel?: () => void
+  /** Callback that stops the in-flight submit. */
+  onStop?: () => void
   /** Whether the content is valid and the send button should be enabled */
   isValid: boolean
   /** Whether the editor is in a loading state */
@@ -125,13 +125,17 @@ export function RichMathEditorFooter({
   attachmentCount,
   onSend,
   onCancel,
+  onStop,
   isValid,
   isLoading = false,
 }: RichMathEditorFooterProps) {
   // Get translations
   const tEditor = useTranslations('ui.editor')
 
-  // Use existing device capabilities hook for OS detection
+  // Whether the in-flight submit can be stopped
+  const isStoppable = isLoading && Boolean(onStop)
+
+  // OS detection
   const { isMobileOS, isMac } = useDeviceCapabilities()
 
   // Compute whether we're over limits
@@ -158,7 +162,7 @@ export function RichMathEditorFooter({
         }[variant]
       )}
     >
-      {/* Column 1: Expand/Shrink + Metrics (can wrap) */}
+      {/* Column 1: Expand + Metrics (can wrap) */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         {/* Expand button */}
         {modeConfig.mode === 'inline' && modeConfig.onExpand && (
@@ -171,19 +175,6 @@ export function RichMathEditorFooter({
             <Expand size={12} />
             <span>{tEditor('expandWithPreview')}</span>
             <Eye size={12} />
-          </button>
-        )}
-
-        {/* Shrink button */}
-        {modeConfig.mode === 'expanded' && modeConfig.onShrink && (
-          <button
-            type="button"
-            onClick={modeConfig.onShrink}
-            className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors text-muted hover:text-foreground hover:bg-foreground/10 whitespace-nowrap"
-            title={tEditor('shrinkEditor')}
-          >
-            <Shrink size={12} />
-            <span className="hidden md:inline">{tEditor('shrink')}</span>
           </button>
         )}
 
@@ -237,40 +228,51 @@ export function RichMathEditorFooter({
               type="button"
               onClick={onCancel}
               className={cn(
-                'flex items-center justify-center rounded-lg transition-colors duration-200',
-                'w-8 h-8 sm:w-10 sm:h-10',
-                'bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground'
+                'flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200',
+                'bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground',
+                FOCUS_RING_CLASS
               )}
               title={tEditor('cancelEsc')}
             >
-              <X size={16} className="sm:hidden" />
-              <X size={18} className="hidden sm:block" />
+              <X size={18} />
             </button>
           )}
           <button
             type="button"
-            onClick={onSend}
-            disabled={!isValid || isLoading}
+            onClick={isStoppable ? onStop : onSend}
+            disabled={isStoppable ? false : !isValid || isLoading}
+            aria-label={isStoppable ? tEditor('stop') : tEditor('submit')}
             className={cn(
-              'flex items-center justify-center rounded-lg transition-colors duration-200',
-              'w-8 h-8 sm:w-10 sm:h-10',
-              isValid
-                ? 'bg-focus/10 text-focus hover:bg-focus/20 hover:text-focus/80'
-                : 'bg-foreground/5 text-muted cursor-not-allowed',
-              isLoading && 'cursor-wait opacity-90'
+              'flex h-9 min-w-9 items-center justify-center gap-1 rounded-md px-2.5',
+              'text-xs font-semibold transition-all duration-200',
+              'active:scale-95 motion-reduce:active:scale-100',
+              isValid || isStoppable
+                ? 'bg-brand/40 text-brand-foreground border border-brand-light/20 hover:bg-brand/60'
+                : 'bg-foreground/5 text-muted border border-transparent cursor-not-allowed',
+              isLoading && !isStoppable && 'cursor-wait opacity-90',
+              FOCUS_RING_CLASS
             )}
             title={
-              isMobileOS
-                ? tEditor('submit')
-                : tEditor('submitShortcut', { modifier: isMac ? '⌘' : 'Ctrl' })
+              isStoppable
+                ? tEditor('stop')
+                : isMobileOS
+                  ? tEditor('submit')
+                  : tEditor('submitShortcut', { modifier: isMac ? '⌘' : 'Ctrl' })
             }
           >
-            {isLoading ? (
-              <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 border-foreground/20 border-t-foreground" />
+            {isStoppable ? (
+              // In-flight: stop button
+              <Square size={13} className="fill-current" />
+            ) : isLoading ? (
+              <LoadingSpinner className="w-5 h-5 border-foreground/20 border-t-foreground" />
+            ) : isMobileOS ? (
+              // Touch: action label
+              tEditor('submit')
             ) : (
+              // Desktop: ⌘/Ctrl + Enter keycap
               <>
-                <Send size={16} className="sm:hidden" />
-                <Send size={18} className="hidden sm:block" />
+                <span>{isMac ? '⌘' : 'Ctrl'}</span>
+                <CornerDownLeft size={14} aria-hidden="true" />
               </>
             )}
           </button>

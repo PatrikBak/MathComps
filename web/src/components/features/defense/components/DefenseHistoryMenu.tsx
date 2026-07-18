@@ -1,0 +1,180 @@
+'use client'
+
+import { ChevronDown, History, Trash2 } from 'lucide-react'
+import { useFormatter, useTranslations } from 'next-intl'
+import { memo, useState } from 'react'
+
+import { Button, buttonVariants } from '@/components/shared/components/Button'
+import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/shared/components/DropdownMenu'
+import { cn } from '@/components/shared/utils/css-utils'
+
+import type { DefenseSession } from '../model/defense-types'
+
+/**
+ * Props for the {@link DefenseHistoryMenu}.
+ */
+type DefenseHistoryMenuProps = {
+  /** This problem's sessions, oldest first. */
+  sessions: DefenseSession[]
+  /** The id of the currently open session, if any. */
+  currentSessionId: string | null
+  /** Opens an existing session. */
+  onSelect: (session: DefenseSession) => void
+  /** Deletes a session. */
+  onDelete: (sessionId: string) => Promise<void>
+}
+
+/**
+ * Strips markdown/math markup to a rough plain-text preview of a turn.
+ *
+ * @param content - The turn's markdown/math source.
+ *
+ * @returns The plain-text preview.
+ */
+function toPreview(content: string): string {
+  // Drop math delimiters, LaTeX commands, and braces so the line reads as plain text
+  return content
+    .replace(/\$+/g, '')
+    .replace(/\\[a-zA-Z]+/g, '')
+    .replace(/[{}]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * The header's history control: a dropdown listing this problem's past defenses, each resumable or
+ * deletable, newest first. `modal={false}` keeps it from fighting the surrounding dialog's focus trap.
+ * Memoized so composer keystrokes don't re-render the session rows.
+ */
+export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
+  sessions,
+  currentSessionId,
+  onSelect,
+  onDelete,
+}: DefenseHistoryMenuProps) {
+  // Defense-surface copy
+  const t = useTranslations('defense')
+
+  // Locale-aware value formatter
+  const format = useFormatter()
+
+  // Whether the dropdown is open, controlled so a delete can close it before the confirm opens
+  const [isOpen, setIsOpen] = useState(false)
+
+  // The session awaiting delete confirmation, or null
+  const [sessionToDelete, setSessionToDelete] = useState<DefenseSession | null>(null)
+
+  // Newest session first
+  const ordered = [...sessions].reverse()
+
+  // Arms the confirmation for a session and steps out of the dropdown
+  const askToDelete = (session: DefenseSession) => {
+    // Close the dropdown so only the confirmation is on screen
+    setIsOpen(false)
+
+    // Remember which session the confirmation targets
+    setSessionToDelete(session)
+  }
+
+  // Deletes the armed session
+  const confirmDelete = async () => {
+    // Nothing armed
+    if (sessionToDelete === null) {
+      return
+    }
+
+    // Delete it
+    await onDelete(sessionToDelete.id)
+  }
+
+  return (
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
+        {/* Trigger. On mobile it collapses to an icon plus the count. */}
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-1.5')}
+            aria-label={t('history')}
+          >
+            <History size={15} className="sm:hidden" />
+            <span className="hidden sm:inline">{t('history')}</span>
+            <span className="grid min-w-[18px] place-items-center rounded-full bg-brand px-1 text-[11px] font-bold text-brand-foreground">
+              {sessions.length}
+            </span>
+            <ChevronDown size={14} className="hidden sm:inline" />
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-72">
+          {/* Heading over the list */}
+          <div className="px-2 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+            {t('historyTitle')}
+          </div>
+
+          {/* One row per session: resume by selecting it, delete by the overlaid control or the
+              Delete key on the focused row */}
+          {ordered.map((session) => (
+            <div key={session.id} className="relative">
+              {/* Resume the session by selecting the row */}
+              <DropdownMenuItem
+                onSelect={() => onSelect(session)}
+                onKeyDown={(event) => {
+                  // Delete on the focused row arms the confirmation, the keyboard path to the
+                  // pointer-only overlay control
+                  if (event.key === 'Delete') {
+                    event.preventDefault()
+                    askToDelete(session)
+                  }
+                }}
+                className={cn(
+                  'flex-col items-start gap-0.5 pr-12',
+                  session.id === currentSessionId && 'bg-brand/10'
+                )}
+              >
+                {/* When the session was started: its first turn's stamp */}
+                <span className="text-[11px] text-muted">
+                  {format.dateTime(new Date(session.turns[0].createdAt), {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })}
+                </span>
+                {/* A glimpse of the conversation */}
+                <span className="w-full truncate text-foreground">
+                  {toPreview(session.turns.find((turn) => turn.role === 'student')?.content ?? '')}
+                </span>
+              </DropdownMenuItem>
+
+              {/* Delete the session, overlaid so its click never reaches the row's resume */}
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t('deleteSession')}
+                onClick={() => askToDelete(session)}
+                className="absolute inset-y-0 right-0 h-auto w-11 rounded-md hover:bg-error/10 hover:text-error"
+              >
+                <Trash2 size={15} />
+              </Button>
+            </div>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Confirmation for a delete, kept outside the dropdown so it survives the menu closing */}
+      <ConfirmDialog
+        isOpen={sessionToDelete !== null}
+        onClose={() => setSessionToDelete(null)}
+        onConfirm={confirmDelete}
+        title={t('deleteSessionTitle')}
+        message={t('deleteSessionMessage')}
+        variant="danger"
+      />
+    </>
+  )
+})

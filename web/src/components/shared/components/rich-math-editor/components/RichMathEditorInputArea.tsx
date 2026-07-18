@@ -44,6 +44,10 @@ type RichMathEditorInputAreaProps = {
   onKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement>
   /** Placeholder text shown when the textarea is empty. */
   placeholder?: string
+  /** Whether image uploads (paste and drag-drop included) are available. */
+  allowImageUpload: boolean
+  /** Whether attachment uploads (drag-drop included) are available. */
+  allowAttachmentUpload: boolean
   /** Usage specific class name for the wrapper div */
   containerClassName?: string
 } & Omit<
@@ -71,6 +75,8 @@ export const RichMathEditorInputArea = forwardRef<
       onChange,
       onKeyDown,
       placeholder,
+      allowImageUpload,
+      allowAttachmentUpload,
       borderless,
       containerClassName,
       ...textareaProps
@@ -315,9 +321,9 @@ export const RichMathEditorInputArea = forwardRef<
         const file = acceptedFiles[0]
         if (!file) return
 
-        // Determine file type
-        const isImage = isAllowedMimeType(file.type, 'image')
-        const isAttachment = isAllowedMimeType(file.type, 'attachment')
+        // Determine file type, counting only the upload kinds this editor has enabled
+        const isImage = allowImageUpload && isAllowedMimeType(file.type, 'image')
+        const isAttachment = allowAttachmentUpload && isAllowedMimeType(file.type, 'attachment')
 
         // Reject unsupported file types
         if (!isImage && !isAttachment) {
@@ -331,7 +337,13 @@ export const RichMathEditorInputArea = forwardRef<
         // Upload the file (strip extension for images)
         uploadFileToEditor(file, isImage)
       },
-      [uploadFileToEditor, checkAndShowUploadLimitError, tEditor]
+      [
+        uploadFileToEditor,
+        checkAndShowUploadLimitError,
+        tEditor,
+        allowImageUpload,
+        allowAttachmentUpload,
+      ]
     )
 
     // Configure react-dropzone
@@ -344,6 +356,8 @@ export const RichMathEditorInputArea = forwardRef<
       noKeyboard: true,
       // Only accept one file at a time
       multiple: false,
+      // Disabled when no upload kind is enabled
+      disabled: !allowImageUpload && !allowAttachmentUpload,
     })
 
     /**
@@ -374,6 +388,7 @@ export const RichMathEditorInputArea = forwardRef<
           clipboardData: event.clipboardData,
           context: editContext,
           scrollTop: textarea.scrollTop,
+          allowImageUpload,
           onChange: handleValueChange,
           pushState: pushStateAfterUpload,
           getTextareaState,
@@ -408,6 +423,7 @@ export const RichMathEditorInputArea = forwardRef<
       [
         textareaRef,
         state.text,
+        allowImageUpload,
         handleValueChange,
         pushStateAfterUpload,
         getTextareaState,
@@ -471,18 +487,21 @@ export const RichMathEditorInputArea = forwardRef<
           onPaste={handlePaste}
           placeholder={placeholder}
           {...textareaProps}
+          // Let a HeadlessUI focus trap land here first, over its own dismiss controls
+          data-autofocus={textareaProps.autoFocus || undefined}
           className={cn(
-            'appearance-none w-full px-4 py-3 text-sm text-foreground font-mono outline-none transition-colors overflow-y-auto min-h-[120px] focus:ring-0 resize-none',
+            'appearance-none w-full px-4 py-3 text-sm text-foreground font-mono outline-none transition-colors overflow-y-auto min-h-[120px] resize-none',
+            'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/60',
             variantStyle,
-            isDragActive && 'bg-focus/10 border-focus/50',
+            isDragActive && 'bg-brand/10 border-brand/50',
             textareaProps.className
           )}
         />
 
         {/* Drag overlay indicator */}
         {isDragActive && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-focus/10 border-2 border-dashed border-focus rounded-lg pointer-events-none">
-            <span className="text-focus text-sm font-medium">{tEditor('dropToUpload')}</span>
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-brand/10 border-2 border-dashed border-brand rounded-lg pointer-events-none">
+            <span className="text-brand-light text-sm font-medium">{tEditor('dropToUpload')}</span>
           </div>
         )}
       </div>

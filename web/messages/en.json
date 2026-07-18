@@ -167,6 +167,26 @@
     "PL": "Poland",
     "SK": "Slovakia"
   },
+  "defense": {
+    "deleteSession": "Delete conversation",
+    "deleteSessionMessage": "This conversation will be permanently deleted.",
+    "deleteSessionTitle": "Delete this conversation?",
+    "history": "History",
+    "historyTitle": "This problem",
+    "jumpToLatest": "Jump to latest",
+    "newDefense": "New conversation",
+    "opener": "Happy to chat about your solution, or if you're stuck 😇",
+    "placeholder": "Type your reply…",
+    "problemStrip": "Problem statement",
+    "roles": {
+      "examiner": "Examiner",
+      "student": "You"
+    },
+    "sendError": "Your reply couldn't be sent.",
+    "thinking": "The examiner is thinking about your step…",
+    "title": "Defend your solution",
+    "transcriptLabel": "Conversation"
+  },
   "email": {
     "footer": {
       "privacy": "Privacy & Terms"
@@ -805,9 +825,8 @@
       "quote": "Quote",
       "searchEmoji": "Search emoji...",
       "sectionLinkCopied": "Section link copied to clipboard",
-      "shrink": "Shrink",
-      "shrinkEditor": "Shrink editor",
       "spoiler": "Hidden text",
+      "stop": "Stop",
       "submit": "Submit",
       "submitShortcut": "Submit ({modifier} + Enter)",
       "unsupportedFileType": "Unsupported file type. Allowed: images (PNG, JPEG, WebP, GIF) or attachments (PDF, TXT, MD)",
