@@ -36,25 +36,21 @@ public static class ProblemEndpoints
                 // Check if the user can access the list
                 var accessResult = await userListService.CheckListAccessAsync(userId, query.ListContentId);
 
-                // Handle all access scenarios
-                switch (accessResult.Status)
+                // Capture the accessible list's name, or fail with the mapped error
+                listName = accessResult.Status switch
                 {
+                    // User can access the list — its name rides on the response
+                    ListAccessStatus.HasAccess => accessResult.ListName,
+
                     // Bad list id
-                    case ListAccessStatus.NotFound:
-                        return Results.NotFound();
+                    ListAccessStatus.NotFound => throw new ListNotFoundException(query.ListContentId),
 
                     // User doesn't own this private list
-                    case ListAccessStatus.NoAccess:
-                        return Results.Unauthorized();
+                    ListAccessStatus.NoAccess => throw new ListAccessDeniedException(query.ListContentId),
 
-                    // User can access the list — capture the name for the response
-                    case ListAccessStatus.HasAccess:
-                        listName = accessResult.ListName;
-                        break;
-
-                    default:
-                        throw new InvalidOperationException("Unexpected ListAccessStatus");
-                }
+                    // The enum is closed; a new member is a bug
+                    _ => throw new InvalidOperationException("Unexpected ListAccessStatus")
+                };
             }
 
             // Detect language from Accept-Language header
@@ -89,11 +85,9 @@ public static class ProblemEndpoints
         app.MapGet("/problems/{slug}", async (string slug, HttpContext context, IUserManager userManager, IProblemLookupService lookupService, IProblemFilterService filterService) =>
         {
             // Get problem metadata to construct appropriate filters
-            var lookupResult = await lookupService.GetProblemLookupDataAsync(slug);
-
-            // This is sad
-            if (lookupResult == null)
-                return Results.NotFound(new { message = "Problem not found" });
+            var lookupResult = await lookupService.GetProblemLookupDataAsync(slug)
+                // It must exist
+                ?? throw new ProblemNotFoundException(slug);
 
             // Get user ID (optional)
             var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
@@ -147,15 +141,11 @@ public static class ProblemEndpoints
             if (userId == null)
                 return Results.Unauthorized();
 
-            // Get the internal problem ID
-            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug);
-
-            // Ensure the problem exists
-            if (problemId == null)
-                return Results.NotFound(new { message = "Problem not found" });
+            // Get the internal problem ID (throws if the problem doesn't exist)
+            var problemId = await problemLookupService.GetRequiredProblemIdBySlugAsync(slug);
 
             // Toggle like
-            await userProblemService.ToggleLikeAsync(userId.Value, problemId.Value);
+            await userProblemService.ToggleLikeAsync(userId.Value, problemId);
 
             // No reason to return anything?
             return Results.NoContent();
@@ -178,15 +168,11 @@ public static class ProblemEndpoints
             if (userId == null)
                 return Results.Unauthorized();
 
-            // Get the internal problem ID
-            var problemId = await problemLookupService.GetProblemIdBySlugAsync(slug);
-
-            // Ensure the problem exists
-            if (problemId == null)
-                return Results.NotFound(new { message = "Problem not found" });
+            // Get the internal problem ID (throws if the problem doesn't exist)
+            var problemId = await problemLookupService.GetRequiredProblemIdBySlugAsync(slug);
 
             // Toggle mark
-            await userProblemService.ToggleMarkAsync(userId.Value, problemId.Value);
+            await userProblemService.ToggleMarkAsync(userId.Value, problemId);
 
             // No reason to return anything?
             return Results.NoContent();

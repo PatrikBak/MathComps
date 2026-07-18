@@ -57,6 +57,10 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddLogging();
 builder.Services.AddHealthChecks();
 
+// RFC 9457 problem responses plus the last-resort handler for exceptions that escape the endpoints
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 // Configure JSON serialization for controllers/minimal APIs
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -105,6 +109,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 // The app configured
 var app = builder.Build();
+
+// Catch anything that escapes the endpoints and render it as a clean problem response (outermost)
+app.UseExceptionHandler();
 
 // Enable request localization (must be early in the pipeline)
 app.UseRequestLocalization();

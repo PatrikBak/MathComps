@@ -35,41 +35,49 @@ public static class ApplicationBuilderExtensions
             app.UseHsts();
 
         // Add security headers to protect against common attacks
-        app.Use(async (context, next) =>
+        app.Use((context, next) =>
         {
-            // No need to index API
-            context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
+            // Apply the headers at response start so they survive an exception handler that rewrites the
+            // response body (which clears eagerly-set headers, the way CORS relies on OnStarting too)
+            context.Response.OnStarting(() =>
+            {
+                // No need to index API
+                context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
 
-            // Friendly invite for anyone scripting against the API
-            context.Response.Headers.Append("X-Api-Contact",
-                "If you'd like to use our API, it would be very kind if you dropped us an email at contact@mathcomps.fun");
+                // Friendly invite for anyone scripting against the API
+                context.Response.Headers.Append("X-Api-Contact",
+                    "If you'd like to use our API, it would be very kind if you dropped us an email at contact@mathcomps.fun");
 
-            // Prevent clickjacking attacks
-            context.Response.Headers.Append("X-Frame-Options", "DENY");
+                // Prevent clickjacking attacks
+                context.Response.Headers.Append("X-Frame-Options", "DENY");
 
-            // Prevent MIME type sniffing attacks
-            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+                // Prevent MIME type sniffing attacks
+                context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
 
-            // Enable XSS protection (legacy but still useful)
-            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+                // Enable XSS protection (legacy but still useful)
+                context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
 
-            // Restrict referrer information for privacy
-            context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+                // Restrict referrer information for privacy
+                context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
 
-            // Content Security Policy - restrict resource loading
-            // Allow inline scripts for KaTeX math rendering
-            // Allow inline styles for math rendering
-            // Allow data URLs for SVG images
-            context.Response.Headers.Append("Content-Security-Policy",
-                "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline'; " +
-                "style-src 'self' 'unsafe-inline'; " +
-                "img-src 'self' data:; " +
-                "font-src 'self'; " +
-                "connect-src 'self'");
+                // Content Security Policy - restrict resource loading
+                // Allow inline scripts for KaTeX math rendering
+                // Allow inline styles for math rendering
+                // Allow data URLs for SVG images
+                context.Response.Headers.Append("Content-Security-Policy",
+                    "default-src 'self'; " +
+                    "script-src 'self' 'unsafe-inline'; " +
+                    "style-src 'self' 'unsafe-inline'; " +
+                    "img-src 'self' data:; " +
+                    "font-src 'self'; " +
+                    "connect-src 'self'");
+
+                // Headers are staged
+                return Task.CompletedTask;
+            });
 
             // Next task
-            await next();
+            return next();
         });
 
         // Return the app for chaining
@@ -83,7 +91,7 @@ public static class ApplicationBuilderExtensions
     /// <returns>The configured application builder for chaining.</returns>
     public static IApplicationBuilder ConfigureStandardPipeline(this IApplicationBuilder app)
     {
-        // Traefik handles HTTPS redirection; no need to do it in the app
+        // Traefik handles HTTPS redirection
 
         // We can take requests from the website
         app.UseCors("default");
@@ -91,8 +99,10 @@ public static class ApplicationBuilderExtensions
         // Enable rate limiting middleware
         app.UseRateLimiter();
 
-        // Enable authentication and authorization
+        // Enable authentication
         app.UseAuthentication();
+
+        // Enable authorization
         app.UseAuthorization();
 
         // Add request logging middleware for security monitoring

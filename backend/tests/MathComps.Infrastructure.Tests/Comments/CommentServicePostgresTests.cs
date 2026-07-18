@@ -207,6 +207,34 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Verifies that a user cannot like their own comment.
+    /// </summary>
+    [Fact]
+    public Task ToggleLikeAsync_ThrowsWhenLikingOwnComment() => RunTestAsync(async commentService =>
+    {
+        // Create comment
+        var comment = await commentService.CreateCommentAsync(
+            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
+            _user1Id,
+            "Test comment");
+
+        // Act & Assert - liking your own comment is rejected
+        await Assert.ThrowsAsync<CannotLikeOwnCommentException>(
+            () => commentService.ToggleLikeAsync(comment.Id, _user1Id));
+    });
+
+    /// <summary>
+    /// Verifies that liking a non-existent comment throws a not-found error.
+    /// </summary>
+    [Fact]
+    public Task ToggleLikeAsync_ThrowsWhenCommentMissing() => RunTestAsync(async commentService =>
+    {
+        // Act & Assert - the missing comment is reported
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.ToggleLikeAsync(Guid.NewGuid(), _user1Id));
+    });
+
+    /// <summary>
     /// Verifies that deleting a comment sets IsDeleted flag.
     /// </summary>
     [Fact]
@@ -244,8 +272,8 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             _user1Id,
             "Test comment");
 
-        // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+        // Act & Assert - the non-author is rejected
+        await Assert.ThrowsAsync<NotCommentAuthorException>(
             () => commentService.DeleteCommentAsync(comment.Id, _user2Id));
     });
 
@@ -416,8 +444,8 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             "Original content"
         );
 
-        // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+        // Act & Assert - the non-author is rejected
+        await Assert.ThrowsAsync<NotCommentAuthorException>(
             () => commentService.UpdateCommentAsync(target, comment.Id, _user2Id, "Hacked content"));
     });
 

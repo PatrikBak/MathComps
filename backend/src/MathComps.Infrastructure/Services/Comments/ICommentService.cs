@@ -61,3 +61,26 @@ public interface ICommentService
     /// <returns>A dictionary mapping target ids to comment counts.</returns>
     Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(CommentTargetType targetType, ImmutableList<string> targetIds);
 }
+
+/// <summary>
+/// Thrown when the referenced comment does not exist.
+/// </summary>
+public sealed class CommentNotFoundException() : Exception("Comment not found");
+
+/// <summary>
+/// Thrown when the content a comment is attached to does not exist.
+/// </summary>
+/// <param name="targetType">The kind of content the comment targets.</param>
+/// <param name="targetId">The identifier that matched no content.</param>
+public sealed class CommentTargetNotFoundException(CommentTargetType targetType, string targetId)
+    : Exception($"{targetType} target '{targetId}' not found");
+
+/// <summary>
+/// Thrown when the caller is not the author of the comment they tried to modify.
+/// </summary>
+public sealed class NotCommentAuthorException() : Exception("Only the author can modify this comment");
+
+/// <summary>
+/// Thrown when the caller tries to like their own comment.
+/// </summary>
+public sealed class CannotLikeOwnCommentException() : Exception("You cannot like your own comment");

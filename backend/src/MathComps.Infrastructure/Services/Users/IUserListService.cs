@@ -79,3 +79,20 @@ public interface IUserListService
     /// <returns>The access result indicating whether the list exists and is accessible.</returns>
     Task<ListAccessResult> CheckListAccessAsync(Guid? userId, string contentId);
 }
+
+/// <summary>
+/// Thrown when the referenced user list does not exist.
+/// </summary>
+/// <param name="contentId">The content id that matched no list.</param>
+public sealed class ListNotFoundException(string contentId) : Exception($"List '{contentId}' not found");
+
+/// <summary>
+/// Thrown when the user list exists but the caller may not access it.
+/// </summary>
+/// <param name="contentId">The content id of the inaccessible list.</param>
+public sealed class ListAccessDeniedException(string contentId) : Exception($"List '{contentId}' is not shared");
+
+/// <summary>
+/// Thrown when a reorder request's content ids do not match the user's lists exactly.
+/// </summary>
+public sealed class ListReorderMismatchException() : Exception("The provided content IDs do not match the user's lists");

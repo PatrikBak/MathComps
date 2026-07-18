@@ -32,46 +32,49 @@ import {
 } from './use-problem-search-query'
 
 /**
- * The return type of the `useProblemSearch` hook.
+ * The problem search state: loading flags, active filters, and the current result page.
+ */
+type ProblemSearchState = {
+  /** Whether the initial data or search results are currently loading. */
+  isPageLoading: boolean
+  /** Whether a search is happening in the background (e.g., while typing or filtering). */
+  isActiveSearchFetching: boolean
+  /** Whether a search with genuinely new filters is in progress (first fetch, no cached data). */
+  isBlankSlateLoading: boolean
+  /** Whether more results are being loaded (infinite scroll). */
+  isPaginationLoading: boolean
+  /** Whether the initial filter options and configuration have been loaded. */
+  hasInitialDataLoaded: boolean
+
+  /** The current active filters. */
+  filters: SearchFiltersState | null
+  /** The available options for filtering. */
+  filterOptions: FilterOptionsWithCounts | null
+  /** The base filter options loaded initially (without search adjustments). */
+  baseOptions: FilterOptionsWithCounts | null
+
+  /** The list of problem slugs currently displayed. */
+  problems: string[]
+  /** The total number of problems matching the current criteria. */
+  totalCount: number
+  /** Whether there are more pages of results available. */
+  hasMore: boolean
+  /** The current page number (always 1 in this infinite scroll implementation). */
+  currentPage: number
+
+  /** Error message if the search or initial load failed. */
+  error: string | null
+  /** When filtering by a list, the display name of that list. Null otherwise. */
+  listName: string | null
+}
+
+/**
+ * The return type of the {@link useProblemSearch} hook.
  * Encapsulates the entire state and actions available for the problem search feature.
  */
 type UseProblemSearchReturn = {
-  /**
-   * The current state of the problem search, including loading status, filters, and data.
-   */
-  state: {
-    /** Whether the initial data or search results are currently loading. */
-    isPageLoading: boolean
-    /** Whether a search is happening in the background (e.g., while typing or filtering). */
-    isActiveSearchFetching: boolean
-    /** Whether a search with genuinely new filters is in progress (first fetch, no cached data). */
-    isBlankSlateLoading: boolean
-    /** Whether more results are being loaded (infinite scroll). */
-    isPaginationLoading: boolean
-    /** Whether the initial filter options and configuration have been loaded. */
-    hasInitialDataLoaded: boolean
-
-    /** The current active filters. */
-    filters: SearchFiltersState | null
-    /** The available options for filtering. */
-    filterOptions: FilterOptionsWithCounts | null
-    /** The base filter options loaded initially (without search adjustments). */
-    baseOptions: FilterOptionsWithCounts | null
-
-    /** The list of problem slugs currently displayed. */
-    problems: string[]
-    /** The total number of problems matching the current criteria. */
-    totalCount: number
-    /** Whether there are more pages of results available. */
-    hasMore: boolean
-    /** The current page number (always 1 in this infinite scroll implementation). */
-    currentPage: number
-
-    /** Error message if the search or initial load failed. */
-    error: string | null
-    /** When filtering by a list, the display name of that list. Null otherwise. */
-    listName: string | null
-  }
+  /** The current state of the problem search, including loading status, filters, and data. */
+  state: ProblemSearchState
   /** Handler for updating the search filters. */
   handleFiltersChange: (newFilters: SearchFiltersState) => void
   /** Handler to load more results (infinite scroll). */
@@ -165,7 +168,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
   // Redirect to login if favorites were requested but user is not logged in
   // Note: lists are NOT guarded here because they can be publicly shared —
-  // the backend handles access control (200 for public, 401 for private)
+  // the backend handles access control (200 for public, 403 for private)
   useEffect(() => {
     // URL needs to be parsed and an auth-required feature was requested
     if (!urlParsingResult?.favoritesRequested) return
