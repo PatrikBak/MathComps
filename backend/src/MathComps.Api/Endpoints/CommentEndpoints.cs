@@ -12,13 +12,18 @@ namespace MathComps.Api.Endpoints;
 public static class CommentEndpoints
 {
     /// <summary>
+    /// Base path the comment routes derive from.
+    /// </summary>
+    private const string CommentsPath = "/comments";
+
+    /// <summary>
     /// Maps the <c>/comments</c> endpoints onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapCommentEndpoints(this IEndpointRouteBuilder app)
     {
         // Get threaded comments for a target (handout, problem, news)
-        app.MapGet("/comments", async (
+        app.MapGet(CommentsPath, async (
             CommentTargetType targetType,
             string targetId,
             IUserManager userManager,
@@ -26,7 +31,7 @@ public static class CommentEndpoints
             ICommentService commentService) =>
         {
             // Get user ID... might be null
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // Get the comments
             var comments = await commentService.GetCommentsAsync(
@@ -40,7 +45,7 @@ public static class CommentEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Get comment counts for multiple targets in bulk (useful for news feed or handout list)
-        app.MapPost("/comments/counts", async (
+        app.MapPost($"{CommentsPath}/counts", async (
             GetCommentCountsRequest request,
             ICommentService commentService) =>
         {
@@ -53,14 +58,14 @@ public static class CommentEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Create a new comment or reply
-        app.MapPost("/comments", async (
+        app.MapPost(CommentsPath, async (
             CreateCommentRequest request,
             HttpContext context,
             IUserManager userManager,
             ICommentService commentService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -74,13 +79,13 @@ public static class CommentEndpoints
                 request.ParentCommentId);
 
             // Return the created comment
-            return Results.Created($"/comments/{comment.Id}", comment);
+            return Results.Created($"{CommentsPath}/{comment.Id}", comment);
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Update (edit) a comment
-        app.MapPut("/comments/{id:guid}", async (
+        app.MapPut($"{CommentsPath}/{{id:guid}}", async (
             Guid id,
             UpdateCommentRequest request,
             HttpContext context,
@@ -88,7 +93,7 @@ public static class CommentEndpoints
             ICommentService commentService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -108,14 +113,14 @@ public static class CommentEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Soft-delete a comment
-        app.MapDelete("/comments/{id:guid}", async (
+        app.MapDelete($"{CommentsPath}/{{id:guid}}", async (
             Guid id,
             HttpContext context,
             IUserManager userManager,
             ICommentService commentService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -131,14 +136,14 @@ public static class CommentEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Toggle like on a comment
-        app.MapPost("/comments/{id:guid}/like", async (
+        app.MapPost($"{CommentsPath}/{{id:guid}}/like", async (
             Guid id,
             HttpContext context,
             IUserManager userManager,
             ICommentService commentService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)

@@ -17,8 +17,7 @@ const SAMPLE_PROBLEM: DefenseProblem = {
   key: 'p1',
   title: 'Sample',
   statement: 'Prove it.',
-  hints: [],
-  solution: 'Because.',
+  reference: 'Because.',
 }
 
 /** The examiner's opening line. */
@@ -69,6 +68,9 @@ class FakeBackend implements DefenseConversationServices {
   /** How many replies have been handed out, for distinct reply bodies. */
   private replyCount = 0
 
+  /** How many sessions have been minted, for distinct server-side ids. */
+  private sessionCount = 0
+
   /** @inheritdoc */
   submitTurn = async (request: DefenseTurnRequest): Promise<DefenseSession> => {
     // Register the call, held open until the test releases it
@@ -102,9 +104,9 @@ class FakeBackend implements DefenseConversationServices {
 
     // A first turn creates the session, opening on the examiner's greeting
     if (request.kind === 'start') {
-      // Assemble the new session under the id the request supplies
+      // Assemble the new session under a server-minted id
       const session: DefenseSession = {
-        id: request.id,
+        id: `session-${(this.sessionCount += 1)}`,
         problemKey: request.problemKey,
         turns: [...stampTurns([{ role: 'examiner', content: request.opener }]), ...newTurns],
       }
@@ -174,7 +176,6 @@ function makeModel(): ModelHarness {
   const model = new DefenseConversationModel({
     problem: SAMPLE_PROBLEM,
     opener: OPENER,
-    services: backend,
     onSessionsChanged: () => {
       changes += 1
     },
@@ -206,10 +207,10 @@ describe('DefenseConversationModel', () => {
 
   it('shows the student turn and the thinking indicator before the round-trip resolves', () => {
     // A fresh model
-    const { model } = makeModel()
+    const { model, backend } = makeModel()
 
     // Send a turn, leaving it unresolved
-    void model.send('my answer')
+    void model.send('my answer', backend)
 
     // The student turn and the indicator are already on screen
     const state = model.getSnapshot()
@@ -221,7 +222,7 @@ describe('DefenseConversationModel', () => {
   it('folds in the reply and opens the session when the round-trip resolves', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
 
     // Release the round-trip
@@ -241,7 +242,7 @@ describe('DefenseConversationModel', () => {
   it('appends to the same open session on a later turn', async () => {
     // A model with one completed turn
     const { model, backend } = makeModel()
-    const first = model.send('first')
+    const first = model.send('first', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -250,7 +251,7 @@ describe('DefenseConversationModel', () => {
     const sessionId = model.getSnapshot().currentSessionId
 
     // Send a second turn and let it land
-    const second = model.send('second')
+    const second = model.send('second', backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -270,10 +271,10 @@ describe('DefenseConversationModel', () => {
   it('refuses a second send while a turn is in flight and mints a single session', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const first = model.send('first')
+    const first = model.send('first', backend)
 
     // A second send inside that window, as a double-tap would fire, is refused
-    const second = await model.send('second')
+    const second = await model.send('second', backend)
     expect(second).toBe('busy')
 
     // No second round-trip started
@@ -293,7 +294,7 @@ describe('DefenseConversationModel', () => {
   it('stops an in-flight turn, reclaiming it and saving nothing', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     expect(backend.submitCalls).toHaveLength(1)
 
@@ -314,7 +315,7 @@ describe('DefenseConversationModel', () => {
   it('ignores a stop once the turn has settled', async () => {
     // A model whose turn has landed
     const { model, backend } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -330,7 +331,7 @@ describe('DefenseConversationModel', () => {
     // A model whose round-trip resolves even after an abort
     const { model, backend } = makeModel()
     backend.autoRejectOnAbort = false
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
 
     // Release the round-trip and stop in the same tick, before its continuation runs
@@ -349,7 +350,7 @@ describe('DefenseConversationModel', () => {
     // A model whose backend ignores the abort rather than rejecting on it
     const { model, backend } = makeModel()
     backend.autoRejectOnAbort = false
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
 
     // Arm a non-abort failure
@@ -369,8 +370,8 @@ describe('DefenseConversationModel', () => {
 
   it('does not clobber a fresh conversation when a session switch abandons an in-flight turn', async () => {
     // A model with a turn in flight
-    const { model } = makeModel()
-    const sent = model.send('answer')
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
     await flush()
 
     // Switch to a fresh conversation mid-flight
@@ -391,7 +392,7 @@ describe('DefenseConversationModel', () => {
     backend.failNextSubmit = true
 
     // Send into the failing round-trip
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
 
@@ -408,7 +409,7 @@ describe('DefenseConversationModel', () => {
   it('opens a stored session on resume', async () => {
     // A model with one completed session
     const { model, backend } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -431,7 +432,7 @@ describe('DefenseConversationModel', () => {
   it('abandons an in-flight turn when another session is resumed', async () => {
     // A model with a stored session and a second conversation whose turn is in flight
     const { model, backend } = makeModel()
-    const first = model.send('first')
+    const first = model.send('first', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -439,7 +440,7 @@ describe('DefenseConversationModel', () => {
 
     // A second conversation with its turn in flight
     model.startNew()
-    const second = model.send('second')
+    const second = model.send('second', backend)
     await flush()
 
     // Resume the first session mid-flight
@@ -456,7 +457,7 @@ describe('DefenseConversationModel', () => {
   it('ignores a re-resume of the open session from a stale snapshot', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -481,14 +482,14 @@ describe('DefenseConversationModel', () => {
   it('starts fresh when the open session is deleted', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
     const sessionId = model.getSnapshot().currentSessionId ?? ''
 
     // Delete the open session
-    await model.deleteSession(sessionId)
+    await model.deleteSession(sessionId, backend)
 
     // The conversation resets and the session is gone
     const state = model.getSnapshot()
@@ -500,7 +501,7 @@ describe('DefenseConversationModel', () => {
   it('leaves the open conversation untouched when a different session is deleted', async () => {
     // A model with one completed session
     const { model, backend } = makeModel()
-    const first = model.send('first')
+    const first = model.send('first', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -508,14 +509,14 @@ describe('DefenseConversationModel', () => {
 
     // A second completed session after a fresh start
     model.startNew()
-    const second = model.send('second')
+    const second = model.send('second', backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
     const secondId = model.getSnapshot().currentSessionId ?? ''
 
     // Delete the older, non-open session
-    await model.deleteSession(firstId)
+    await model.deleteSession(firstId, backend)
 
     // The open conversation stays, only the deleted session leaves the store
     expect(model.getSnapshot().currentSessionId).toBe(secondId)
@@ -525,7 +526,7 @@ describe('DefenseConversationModel', () => {
   it('requests a history refresh after a turn lands and after a delete', async () => {
     // A model with a completed, open session
     const { model, backend, changes } = makeModel()
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -535,7 +536,7 @@ describe('DefenseConversationModel', () => {
 
     // Delete the open session
     const sessionId = model.getSnapshot().currentSessionId ?? ''
-    await model.deleteSession(sessionId)
+    await model.deleteSession(sessionId, backend)
 
     // The delete asked the history to refresh again
     expect(changes()).toBe(2)
@@ -547,7 +548,7 @@ describe('DefenseConversationModel', () => {
     const start = model.getSnapshot().conversationEpoch
 
     // A send stays within the same conversation
-    const sent = model.send('answer')
+    const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent

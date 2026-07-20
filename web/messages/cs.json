@@ -168,9 +168,9 @@
     "SK": "Slovensko"
   },
   "defense": {
-    "deleteSession": "Smazat konverzaci",
+    "deleteSession": "Odebrat z historie",
     "deleteSessionMessage": "Tato konverzace se trvale odstraní.",
-    "deleteSessionTitle": "Smazat tuto konverzaci?",
+    "deleteSessionTitle": "Odebrat tuto konverzaci?",
     "history": "Historie",
     "historyTitle": "Tato úloha",
     "jumpToLatest": "Přejít na nejnovější",

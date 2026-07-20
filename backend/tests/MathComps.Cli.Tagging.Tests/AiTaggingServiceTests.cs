@@ -67,7 +67,8 @@ public class AiTaggingServiceTests
                     It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Callback<string, string, string, string?, int?, CancellationToken>(
                     (system, user, _, _, _, _) => (capturedSystem, capturedUser) = (system, user))
-                .ReturnsAsync(new GeneratePassResponse([new TagFitnessEntry("Algebra", 0.9f, "clearly algebra")]));
+                .ReturnsAsync(new ChatCallResult<GeneratePassResponse>(
+                    new GeneratePassResponse([new TagFitnessEntry("Algebra", 0.9f, "clearly algebra")]), ModelUsage.Zero));
 
             // Run the generate pass.
             var service = new AiTaggingService(chatCaller.Object);
@@ -162,7 +163,7 @@ public class AiTaggingServiceTests
                 .Setup(caller => caller.CompleteAsync<TResponse>(
                     It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(cannedResponse);
+                .ReturnsAsync(new ChatCallResult<TResponse>(cannedResponse, ModelUsage.Zero));
 
             // Run the pass against the configured service.
             return await pass(new AiTaggingService(chatCaller.Object), promptPath);

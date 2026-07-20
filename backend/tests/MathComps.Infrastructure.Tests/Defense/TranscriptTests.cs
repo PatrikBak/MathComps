@@ -1,6 +1,7 @@
-using MathComps.Cli.Examiner.Fixtures;
+using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Defense;
 
-namespace MathComps.Cli.Examiner.Tests;
+namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Tests the transcript model: parsing the <c>## Candidate</c> / <c>## Examiner</c> markdown into ordered turns,

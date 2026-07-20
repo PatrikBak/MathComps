@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using MathComps.Cli.Examiner.Dtos;
-using MathComps.Cli.Examiner.Engine;
 using MathComps.Cli.Examiner.Fixtures;
-using MathComps.Infrastructure.Services.Ai;
+using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Defense.Dtos;
+using MathComps.Infrastructure.Services.Defense.Engine;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -15,13 +15,12 @@ namespace MathComps.Cli.Examiner.Commands;
 /// <c>## Examiner</c> turn, and reports what the loop did and what the turn cost.
 /// </summary>
 /// <param name="examiner">The engine that runs the per-turn loop.</param>
-/// <param name="spendTracker">The process's running spend tally.</param>
 [Description("""
     Produce the examiner's next reply for a fixture folder and append it to transcript.md. The fixture's problem,
     reference, and transcript feed the loop; the reply is math-checked and leak-checked, and regenerated up to a cap
     if a check flags it. The transcript's last turn must be a '## Candidate' turn — the examiner replies to the candidate.
 """)]
-public class ExaminerTurnCommand(IExaminer examiner, IOpenRouterSpendTracker spendTracker)
+public class ExaminerTurnCommand(IExaminer examiner)
     : AsyncCommand<ExaminerTurnCommand.Settings>
 {
     /// <summary>
@@ -57,7 +56,7 @@ public class ExaminerTurnCommand(IExaminer examiner, IOpenRouterSpendTracker spe
         var stopwatch = Stopwatch.StartNew();
 
         // Run the loop to produce the next reply.
-        var outcome = await examiner.NextReplyAsync(fixture);
+        var outcome = await examiner.NextReplyAsync(fixture.Problem, fixture.Reference, fixture.Transcript);
 
         // Stop the clock before the follow-up I/O.
         stopwatch.Stop();
@@ -71,9 +70,8 @@ public class ExaminerTurnCommand(IExaminer examiner, IOpenRouterSpendTracker spe
         // Report what the loop did.
         Render(outcome, stopwatch.Elapsed);
 
-        // Price the turn from the process's spend tally; one credit is one US dollar. The tally is process-wide, and
-        // this command runs exactly one turn per process, so its total is this turn's cost.
-        AnsiConsole.MarkupLine($"[green]This turn cost ${spendTracker.Total:0.0000}.[/]");
+        // Price the turn from the outcome's own tally; one credit is one US dollar.
+        AnsiConsole.MarkupLine($"[green]This turn cost ${outcome.Usage.Cost:0.0000}.[/]");
 
         // Done.
         return 0;

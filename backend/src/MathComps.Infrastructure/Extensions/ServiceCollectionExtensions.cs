@@ -7,6 +7,8 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
+using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
@@ -53,6 +55,7 @@ public static class ServiceCollectionExtensions
                     .MapEnum<DocumentType>("document_type")
                     .MapEnum<Language>("language")
                     .MapEnum<CommentStatus>("comment_status")
+                    .MapEnum<TranscriptRole>("transcript_role")
             )
         );
 
@@ -280,6 +283,69 @@ public static class ServiceCollectionExtensions
 
         // Tallies the process's own spend so a run can report exactly what it cost.
         services.TryAddSingleton<IOpenRouterSpendTracker, OpenRouterSpendTracker>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the examiner: its per-step model configuration plus the engine that runs the generate → verify →
+    /// revise loop. When <c>Examiner:UseFake</c> is set, the zero-cost <see cref="FakeExaminer"/> is registered
+    /// instead of the real one, so the whole path can run without spending tokens. Assumes the OpenRouter chat stack
+    /// is registered (see <see cref="AddOpenRouterChat"/>).
+    /// </summary>
+    /// <param name="services">The service collection to add the examiner to.</param>
+    /// <param name="configuration">The application configuration carrying the <c>Examiner</c> section.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddExaminer(this IServiceCollection services, IConfiguration configuration)
+    {
+        // The examiner loop config: the model knob for each step plus the revision cap. Validated at startup —
+        // without ValidateOnStart, options validation is lazy and a broken section would only surface on the
+        // first turn.
+        services.AddOptions<ExaminerSettings>()
+            .Bind(configuration.GetSection(ExaminerSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The fake engine short-circuits the model calls for cost-free runs; the real one runs the loop.
+        var useFake = configuration.GetValue<bool>($"{ExaminerSettings.SectionName}:UseFake");
+
+        // Register whichever engine the flag selects, tolerating a double call (e.g. a host that wires the
+        // examiner directly and the defense feature) rather than stacking a duplicate registration.
+        if (useFake)
+            services.TryAddScoped<IExaminer>(_ => new FakeExaminer());
+        else
+            services.TryAddScoped<IExaminer, Examiner>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the defense feature: the examiner engine, the input/turn/spend caps, and the service that runs and
+    /// persists defense conversations. Assumes the OpenRouter chat stack is registered (see
+    /// <see cref="AddOpenRouterChat"/>).
+    /// </summary>
+    /// <param name="services">The service collection to add the defense feature to.</param>
+    /// <param name="configuration">The application configuration carrying the <c>Examiner</c> and
+    /// <c>DefenseLimits</c> sections.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddDefenseServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // The engine that produces the examiner's replies.
+        services.AddExaminer(configuration);
+
+        // The input, turn, and spend caps, validated at startup like the examiner's config.
+        services.AddOptions<DefenseLimits>()
+            .Bind(configuration.GetSection(DefenseLimits.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Serializes a user's concurrent turns; shared process-wide, so a singleton.
+        services.TryAddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();
+
+        // The service that runs and persists defense conversations.
+        services.TryAddScoped<IDefenseSessionService, DefenseSessionService>();
 
         // Builder pattern
         return services;

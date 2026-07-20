@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using MathComps.Cli.Examiner.Fixtures;
+using MathComps.Infrastructure.Services.Defense;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

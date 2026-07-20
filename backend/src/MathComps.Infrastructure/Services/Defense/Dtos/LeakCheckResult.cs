@@ -1,4 +1,4 @@
-namespace MathComps.Cli.Examiner.Dtos;
+namespace MathComps.Infrastructure.Services.Defense.Dtos;
 
 /// <summary>
 /// The leak-check step's verdict on whether the reply over-explains.

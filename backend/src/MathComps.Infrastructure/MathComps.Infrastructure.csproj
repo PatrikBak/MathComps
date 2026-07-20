@@ -12,6 +12,14 @@
     <None Update="appsettings.openrouter.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="appsettings.examiner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- Examiner prompt templates: Content (not None) so they flow to referencing projects' output (API + CLI). -->
+    <None Remove="Prompts\**\*.txt" />
+    <Content Include="Prompts\**\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

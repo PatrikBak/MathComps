@@ -1,5 +1,7 @@
+using MathComps.Api.Endpoints;
 using MathComps.Api.Errors;
 using MathComps.Infrastructure.Services.Comments;
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Diagnostics;
@@ -104,6 +106,15 @@ public sealed class GlobalExceptionHandler(
         CommentTargetNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.CommentTargetNotFound),
         ProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ProblemNotFound),
         ListNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ListNotFound),
+        DefenseSessionNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseSessionNotFound),
+
+        // Defense guardrails — the request or the user's usage is over a cap
+        DefenseMessageTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageTooLong),
+        DefenseMessageEmptyException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageEmpty),
+        // A maxed-out session permanently refuses more turns: a business-rule refusal, not a resolvable conflict
+        DefenseTurnLimitException => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.DefenseTurnLimit),
+        // The per-user daily spend ceiling clears at the next midnight, so retrying later succeeds: retry-after semantics
+        DefenseSpendLimitException => (StatusCodes.Status429TooManyRequests, ApiErrorCode.DefenseSpendLimit),
 
         // Forbidden actions — the caller is known, they're just not allowed
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),
@@ -118,6 +129,7 @@ public sealed class GlobalExceptionHandler(
         // Authentication required — the caller is anonymous and the view is gated
         FavoritesRequireAuthenticationException => (StatusCodes.Status401Unauthorized, ApiErrorCode.FavoritesRequireAuthentication),
         MarkStatusRequiresAuthenticationException => (StatusCodes.Status401Unauthorized, ApiErrorCode.MarkStatusRequiresAuthentication),
+        UserNotResolvedException => (StatusCodes.Status401Unauthorized, ApiErrorCode.UserNotResolved),
 
         // Not a known business failure — treat as an unexpected fault
         _ => null

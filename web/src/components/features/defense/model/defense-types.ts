@@ -29,7 +29,7 @@ export type StoredTurn = Turn & {
 export type DefenseSession = {
   /** Stable identifier. */
   id: string
-  /** The problem this defense is about (the problem's anchor slug). */
+  /** The problem this defense is about (the problem's stable key). */
   problemKey: string
   /** The conversation so far, oldest first. */
   turns: StoredTurn[]
@@ -39,30 +39,30 @@ export type DefenseSession = {
  * The problem a defense is held against, including the reference solution the examiner reasons from.
  */
 export type DefenseProblem = {
-  /** The problem's anchor slug. */
+  /** The problem's stable key. */
   key: string
   /** The problem's display title. */
   title: string
   /** The problem statement as markdown/math source. */
   statement: string
-  /** The published hints, each as markdown/math source. */
-  hints: string[]
-  /** The reference solution as markdown/math source. */
-  solution: string
+  /** The reference solution the examiner reasons from, as markdown/math source. */
+  reference: string
 }
 
 /**
- * A request to open a brand-new defense session with the student's first turn: the client supplies the
- * session id, and the backend seeds the session with the examiner's greeting, saves the turn, and
- * answers it in one round-trip.
+ * A request to open a brand-new defense session with the student's first turn: the backend mints the
+ * session (its id comes back on the response), seeds it with the examiner's greeting, saves the turn,
+ * and answers it in one round-trip. The problem and its reference ride along so the examiner can reason.
  */
 type StartDefenseTurnRequest = {
   /** Marks the request that opens a new session. */
   kind: 'start'
-  /** The id the new session is created under. */
-  id: string
-  /** The problem's anchor slug the new session is about. */
+  /** The problem's stable key the new session is about. */
   problemKey: string
+  /** The problem statement, seen by both sides. */
+  statement: string
+  /** The reference solution the examiner reasons from. */
+  reference: string
   /** The examiner's opening line, saved as the new session's first turn. */
   opener: string
   /** The student's turn as markdown/math source. */

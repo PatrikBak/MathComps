@@ -1,4 +1,4 @@
-namespace MathComps.Cli.Examiner.Dtos;
+namespace MathComps.Infrastructure.Services.Defense.Dtos;
 
 /// <summary>
 /// The math-check step's verdict on the claims the examiner's reply makes.

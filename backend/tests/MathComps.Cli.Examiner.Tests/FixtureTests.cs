@@ -1,4 +1,6 @@
 using MathComps.Cli.Examiner.Fixtures;
+using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Defense;
 
 namespace MathComps.Cli.Examiner.Tests;
 

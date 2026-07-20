@@ -21,8 +21,8 @@ type DefenseChatTriggerProps = {
 
 /**
  * The per-problem entry point to the defense chat: a small icon on the problem card that opens the
- * {@link DefenseModal}. Admin-gated on the client only, a visibility gate rather than a real access
- * boundary.
+ * {@link DefenseModal}. Admin-gated on the client (a visibility gate, not a real access boundary; the
+ * endpoint enforces the admin policy itself).
  */
 export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   // Defense-surface copy

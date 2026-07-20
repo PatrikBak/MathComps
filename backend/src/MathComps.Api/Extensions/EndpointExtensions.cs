@@ -23,6 +23,9 @@ public static class EndpointExtensions
         // The authenticated user's problem lists
         app.MapUserListEndpoints();
 
+        // AI-examiner defense conversations
+        app.MapDefenseEndpoints();
+
         // Admin-only endpoints, gated by the admin policy
         app.MapAdminEndpoints();
 

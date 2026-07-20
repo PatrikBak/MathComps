@@ -11,19 +11,24 @@ namespace MathComps.Api.Endpoints;
 public static class UserListEndpoints
 {
     /// <summary>
+    /// Base path the user-list routes derive from.
+    /// </summary>
+    private const string ListsPath = "/users/me/lists";
+
+    /// <summary>
     /// Maps the <c>/users/me/lists</c> endpoints onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapUserListEndpoints(this IEndpointRouteBuilder app)
     {
         // Get all lists for the authenticated user
-        app.MapGet("/users/me/lists", async (
+        app.MapGet(ListsPath, async (
             HttpContext context,
             IUserManager userManager,
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -39,14 +44,14 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Create a new user list
-        app.MapPost("/users/me/lists", async (
+        app.MapPost(ListsPath, async (
             CreateListRequest request,
             HttpContext context,
             IUserManager userManager,
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -56,13 +61,13 @@ public static class UserListEndpoints
             var list = await userListService.CreateListAsync(userId.Value, request.Name);
 
             // Return the created list
-            return Results.Created($"/users/me/lists/{list.ContentId}", list);
+            return Results.Created($"{ListsPath}/{list.ContentId}", list);
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Rename an existing user list
-        app.MapPatch("/users/me/lists/{contentId}", async (
+        app.MapPatch($"{ListsPath}/{{contentId}}", async (
             string contentId,
             UpdateListRequest request,
             HttpContext context,
@@ -70,7 +75,7 @@ public static class UserListEndpoints
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -86,14 +91,14 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Delete a user list
-        app.MapDelete("/users/me/lists/{contentId}", async (
+        app.MapDelete($"{ListsPath}/{{contentId}}", async (
             string contentId,
             HttpContext context,
             IUserManager userManager,
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -109,7 +114,7 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Add a problem to a user list
-        app.MapPost("/users/me/lists/{contentId}/problems/{problemSlug}", async (
+        app.MapPost($"{ListsPath}/{{contentId}}/problems/{{problemSlug}}", async (
             string contentId,
             string problemSlug,
             HttpContext context,
@@ -117,7 +122,7 @@ public static class UserListEndpoints
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -133,7 +138,7 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Remove a problem from a user list
-        app.MapDelete("/users/me/lists/{contentId}/problems/{problemSlug}", async (
+        app.MapDelete($"{ListsPath}/{{contentId}}/problems/{{problemSlug}}", async (
             string contentId,
             string problemSlug,
             HttpContext context,
@@ -141,7 +146,7 @@ public static class UserListEndpoints
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -157,14 +162,14 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Reorder all lists for the authenticated user
-        app.MapPut("/users/me/lists/order", async (
+        app.MapPut($"{ListsPath}/order", async (
             ReorderListsRequest request,
             HttpContext context,
             IUserManager userManager,
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -180,14 +185,14 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Enable public sharing for a list
-        app.MapPost("/users/me/lists/{contentId}/share", async (
+        app.MapPost($"{ListsPath}/{{contentId}}/share", async (
             string contentId,
             HttpContext context,
             IUserManager userManager,
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)
@@ -203,14 +208,14 @@ public static class UserListEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Disable public sharing for a list
-        app.MapDelete("/users/me/lists/{contentId}/share", async (
+        app.MapDelete($"{ListsPath}/{{contentId}}/share", async (
             string contentId,
             HttpContext context,
             IUserManager userManager,
             IUserListService userListService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // We must have a user
             if (userId == null)

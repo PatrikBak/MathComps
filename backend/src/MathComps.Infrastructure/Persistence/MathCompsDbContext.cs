@@ -88,6 +88,15 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Join table: problems in user lists.</summary>
     public DbSet<UserProblemListItem> UserProblemListItems => Set<UserProblemListItem>();
 
+    /// <summary>AI-examiner defense conversations.</summary>
+    public DbSet<DefenseSession> DefenseSessions => Set<DefenseSession>();
+
+    /// <summary>Turns within a defense conversation.</summary>
+    public DbSet<DefenseTurn> DefenseTurns => Set<DefenseTurn>();
+
+    /// <summary>Per-turn examiner spend.</summary>
+    public DbSet<DefenseSpend> DefenseSpends => Set<DefenseSpend>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -733,6 +742,52 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion UserProblemListItem
+
+        #region DefenseSession
+
+        modelBuilder.Entity<DefenseSession>(e =>
+        {
+            // Owner of the conversation, cascading so deleting a user drops their sessions.
+            e.HasOne(session => session.User)
+             .WithMany()
+             .HasForeignKey(session => session.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Turns belong to the session, cascading so deleting a session drops its turns.
+            e.HasMany(session => session.Turns)
+             .WithOne(turn => turn.Session)
+             .HasForeignKey(turn => turn.SessionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // A user's history for one problem is the list query, in creation order.
+            e.HasIndex(session => new { session.UserId, session.ProblemKey })
+             .HasDatabaseName("ix_defense_session_user_id_problem_key");
+        });
+
+        #endregion DefenseSession
+
+        #region DefenseTurn
+
+        modelBuilder.Entity<DefenseTurn>(e =>
+        {
+            // Turns read back in their explicit conversation order; unique so racing turns can't corrupt it.
+            e.HasIndex(turn => new { turn.SessionId, turn.Sequence })
+             .IsUnique()
+             .HasDatabaseName("ix_defense_turn_session_id_sequence");
+        });
+
+        #endregion DefenseTurn
+
+        #region DefenseSpend
+
+        modelBuilder.Entity<DefenseSpend>(e =>
+        {
+            // The per-user rolling spend query sums cost over a user's recent rows.
+            e.HasIndex(spend => new { spend.UserId, spend.CreatedAt })
+             .HasDatabaseName("ix_defense_spend_user_id_created_at");
+        });
+
+        #endregion DefenseSpend
     }
 
     #endregion OnModelCreating

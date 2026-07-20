@@ -169,8 +169,11 @@ public class AiTaggingService(IOpenRouterChatCaller chatCaller)
             ? $"PROBLEM: {statement}"
             : $"PROBLEM: {statement}\nSOLUTION: {solution}";
 
-        // Hand the prompts to the shared caller on this pass's model and return its bound reply.
-        return await chatCaller.CompleteAsync<TResponse>(
+        // Hand the prompts to the shared caller on this pass's model.
+        var result = await chatCaller.CompleteAsync<TResponse>(
             systemPrompt, userPrompt, step.Model, step.ReasoningEffort, step.MaxOutputTokens, cancellationToken);
+
+        // Return the bound reply, dropping the cost and token figures the tagging pass doesn't track.
+        return result.Value;
     }
 }

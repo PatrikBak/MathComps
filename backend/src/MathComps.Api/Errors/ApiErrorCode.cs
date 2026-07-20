@@ -54,5 +54,35 @@ public enum ApiErrorCode
     /// <summary>
     /// A mark-status filter was requested without an authenticated user.
     /// </summary>
-    MarkStatusRequiresAuthentication
+    MarkStatusRequiresAuthentication,
+
+    /// <summary>
+    /// The referenced defense session does not exist (or belongs to another user).
+    /// </summary>
+    DefenseSessionNotFound,
+
+    /// <summary>
+    /// A defense message or problem text exceeded its length cap.
+    /// </summary>
+    DefenseMessageTooLong,
+
+    /// <summary>
+    /// A defense message was blank.
+    /// </summary>
+    DefenseMessageEmpty,
+
+    /// <summary>
+    /// The defense conversation has reached its turn limit.
+    /// </summary>
+    DefenseTurnLimit,
+
+    /// <summary>
+    /// The user has reached their daily defense spend ceiling.
+    /// </summary>
+    DefenseSpendLimit,
+
+    /// <summary>
+    /// The request is authenticated but its caller could not be resolved to a user.
+    /// </summary>
+    UserNotResolved
 }

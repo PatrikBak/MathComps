@@ -29,6 +29,9 @@ public static class ServiceCollectionExtensions
 
             // More restrictive limit for search endpoints (heavier operations), one bucket per caller
             options.AddPolicy(RateLimiterPolicies.SearchRateLimit, PartitionByCaller(permitLimit: 20, queueLimit: 5));
+
+            // Tight limit for defense turns — each is several LLM calls, so bound bursts hard
+            options.AddPolicy(RateLimiterPolicies.DefenseTurnRateLimit, PartitionByCaller(permitLimit: 10, queueLimit: 2));
         });
 
         // Return the services for chaining
