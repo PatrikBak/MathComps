@@ -27,8 +27,8 @@ export type DefenseConversationState = {
 }
 
 /**
- * The backend calls the model drives. Injected, so the state machine can run against a controllable
- * fake.
+ * The backend calls the model drives, passed to each action so the state machine can run against a
+ * controllable fake.
  */
 export type DefenseConversationServices = {
   /** Advances the conversation by one turn: saves the student's turn and answers it in one round-trip. */
@@ -45,8 +45,6 @@ export type DefenseConversationModelOptions = {
   problem: DefenseProblem
   /** The examiner's opening line. */
   opener: string
-  /** The backend calls to drive. */
-  services: DefenseConversationServices
   /** Called after any write to the session store. */
   onSessionsChanged: () => void
 }
@@ -87,8 +85,8 @@ function draftTurn(role: TurnRole, content: string): Turn {
  * either lands whole (turn saved, reply shown) or fails whole (nothing saved, draft handed back).
  *
  * Framework-agnostic and observable: {@link subscribe} to changes and read {@link getSnapshot}. Its
- * backend calls are injected, so the concurrency around an in-flight turn is unit-testable against a
- * controllable fake.
+ * backend calls are passed to each action, so the concurrency around an in-flight turn is unit-testable
+ * against a controllable fake.
  */
 export class DefenseConversationModel {
   /** The problem being defended. */
@@ -96,9 +94,6 @@ export class DefenseConversationModel {
 
   /** The examiner's opening line. */
   private readonly opener: string
-
-  /** The backend calls. */
-  private readonly services: DefenseConversationServices
 
   /** Called after any write to the session store. */
   private readonly onSessionsChanged: () => void
@@ -113,15 +108,14 @@ export class DefenseConversationModel {
   private readonly listeners = new Set<() => void>()
 
   /**
-   * Builds the model over its injected services, seeded with a fresh, unsaved conversation.
+   * Builds the model, seeded with a fresh, unsaved conversation.
    *
-   * @param options - The problem, opener, services, and history callback the model runs on.
+   * @param options - The problem, opener, and history callback the model runs on.
    */
   constructor(options: DefenseConversationModelOptions) {
-    // Keep the injected problem, opener, and calls
+    // Keep the injected problem, opener, and history callback
     this.problem = options.problem
     this.opener = options.opener
-    this.services = options.services
     this.onSessionsChanged = options.onSessionsChanged
 
     // Seed a fresh conversation with the examiner's opener
@@ -164,10 +158,14 @@ export class DefenseConversationModel {
    * Sends a student turn and folds in the examiner's reply.
    *
    * @param content - The student turn's markdown/math source.
+   * @param services - The backend call to send the turn.
    *
    * @returns How the turn resolved.
    */
-  send = async (content: string): Promise<SendOutcome> => {
+  send = async (
+    content: string,
+    services: Pick<DefenseConversationServices, 'submitTurn'>
+  ): Promise<SendOutcome> => {
     // Deterministic guard against a double-tap: a second send that outruns the composer's Send/Stop
     // swap is refused here, so the double-tap lands a single turn
     if (this.currentRun !== null) {
@@ -187,13 +185,14 @@ export class DefenseConversationModel {
     // Show the student's turn and the examiner at work immediately
     this.setState({ turns: [...priorTurns, draftTurn('student', content)], isThinking: true })
 
-    // Open a new session under a freshly minted id, or append to the session already open
+    // Open a new session (the backend mints its id), or append to the session already open
     const request: DefenseTurnRequest =
       sessionId === null
         ? {
             kind: 'start',
-            id: crypto.randomUUID(),
             problemKey: this.problem.key,
+            statement: this.problem.statement,
+            reference: this.problem.reference,
             opener: this.opener,
             content,
             signal: run.controller.signal,
@@ -202,7 +201,7 @@ export class DefenseConversationModel {
 
     try {
       // One round-trip: save the turn and get back the updated session
-      const session = await this.services.submitTurn(request)
+      const session = await services.submitTurn(request)
 
       // A stop or switch superseded this run during the wait: drop the reply it no longer owns
       if (run.controller.signal.aborted || !this.ownsView(run)) {
@@ -306,8 +305,12 @@ export class DefenseConversationModel {
    * Deletes a session, dropping back to a fresh conversation when it was the open one.
    *
    * @param sessionId - The id of the session to delete.
+   * @param services - The backend call to remove the session.
    */
-  deleteSession = async (sessionId: string): Promise<void> => {
+  deleteSession = async (
+    sessionId: string,
+    services: Pick<DefenseConversationServices, 'deleteSession'>
+  ): Promise<void> => {
     // Deleting the open session leaves nothing to show, so drop to a fresh conversation up front: this
     // cancels its in-flight turn, and doing it before the await keeps a session switch during the
     // delete from being clobbered by a stale re-check afterwards
@@ -315,11 +318,13 @@ export class DefenseConversationModel {
       this.startNew()
     }
 
-    // Remove it from the store
-    await this.services.deleteSession(sessionId)
-
-    // The history changed
-    this.onSessionsChanged()
+    // Remove it from the store, refreshing the history either way: a failed delete leaves the session in
+    // place, so re-fetching restores it to the list rather than leaving a phantom removal on screen
+    try {
+      await services.deleteSession(sessionId)
+    } finally {
+      this.onSessionsChanged()
+    }
   }
 
   /**

@@ -43,7 +43,7 @@ public class OpenRouterChatCaller(
             .Build();
 
     /// <inheritdoc/>
-    public async Task<TResponse> CompleteAsync<TResponse>(
+    public async Task<ChatCallResult<TResponse>> CompleteAsync<TResponse>(
         string systemPrompt,
         string userPrompt,
         string model,
@@ -73,6 +73,10 @@ public class OpenRouterChatCaller(
             new(ChatRole.User, userPrompt),
         ];
 
+        // Every attempt's billing, summed across retries: a rejected attempt still billed, so the returned
+        // usage must count it too.
+        var accumulatedUsage = ModelUsage.Zero;
+
         try
         {
             // Run request and response-binding inside the retry boundary: a bad body fails at the bind, after the HTTP
@@ -86,15 +90,36 @@ public class OpenRouterChatCaller(
                     useJsonSchemaResponseFormat: true,
                     cancellationToken: retryToken);
 
-                // OpenRouter prices every reply in its raw body's usage; tally the figure before any verdict on the
-                // reply, so a rejected attempt still counts what it billed. Patch — the SDK's only sanctioned hook
-                // for fields it doesn't model, like this cost — is experimental only in that its shape may change in
-                // a future SDK, hence the suppression.
+                // What this call billed, left at zero unless the raw body exposes it below.
+                decimal cost = 0;
+                var promptTokens = 0;
+                var completionTokens = 0;
+
+                // OpenRouter's cost is read through Patch, the SDK's sanctioned hook for fields it doesn't model;
+                // SCME0001 marks Patch experimental (its shape may change in a later SDK), so the suppression is
+                // scoped to this block.
 #pragma warning disable SCME0001
-                if (response.RawRepresentation is ChatCompletion completion
-                    && completion.Patch.TryGetValue("$.usage.cost"u8, out decimal cost))
-                    spendTracker.Add(cost);
+
+                // RawRepresentation is the provider's native response behind the Microsoft.Extensions.AI abstraction,
+                // typed as object? — it's an OpenAI ChatCompletion only when that client answered directly. Put any
+                // other IChatClient in the pipeline (a test fake, or middleware that doesn't forward the raw body), or
+                // let the SDK hand back null, and it's a different type with no usage to read, so cost/tokens stay zero.
+                if (response.RawRepresentation is ChatCompletion completion)
+                {
+                    // OpenRouter prices the reply in its raw body's usage.
+                    if (completion.Patch.TryGetValue("$.usage.cost"u8, out decimal billed))
+                        cost = billed;
+
+                    // The token counts come straight off the completion's usage.
+                    promptTokens = completion.Usage?.InputTokenCount ?? 0;
+                    completionTokens = completion.Usage?.OutputTokenCount ?? 0;
+                }
 #pragma warning restore SCME0001
+
+                // Fold this attempt's billing into the running total before any verdict on the reply, so a rejected
+                // attempt still counts — in both the process-wide tally and the usage this call ultimately returns.
+                accumulatedUsage += new ModelUsage(cost, promptTokens, completionTokens);
+                spendTracker.Add(cost);
 
                 // A Length finish means the reply hit the token cap before finishing; throw so the retry draws a
                 // fresh sample.
@@ -102,8 +127,9 @@ public class OpenRouterChatCaller(
                     throw new InvalidOperationException(
                         "The reply hit the output-token cap before finishing; raise MaxOutputTokens for this step.");
 
-                // Bind the reply to the response type; this throws — and so gets retried — when the body won't bind.
-                return response.Result;
+                // Bind the reply to the response type (this throws — and so gets retried — when the body won't bind)
+                // and pair it with everything this call billed, retries included.
+                return new ChatCallResult<TResponse>(response.Result, accumulatedUsage);
             }, cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)

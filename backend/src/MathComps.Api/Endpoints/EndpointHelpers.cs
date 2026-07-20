@@ -1,32 +1,13 @@
 using System.Globalization;
-using MathComps.Api.Constants;
-using MathComps.Infrastructure.Services.Users;
 using MathComps.Domain.Localization;
 
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Shared helpers for the minimal-API endpoint groups — resolving the current user and request language.
+/// Shared helpers for the minimal-API endpoint groups.
 /// </summary>
 internal static class EndpointHelpers
 {
-    /// <summary>
-    /// Extracts the internal user ID from the HTTP context if a user is authenticated.
-    /// </summary>
-    /// <param name="context">The HTTP context containing user claims.</param>
-    /// <param name="userManager">User manager for resolving external to internal user IDs.</param>
-    /// <returns>The internal user ID if authenticated, otherwise null.</returns>
-    public static async Task<Guid?> GetUserIdAsync(HttpContext context, IUserManager userManager)
-    {
-        // Extract Clerk user ID from JWT claims
-        var userExternalId = context.User.FindFirst(ClerkClaims.Subject)?.Value;
-
-        // If we have a user, get their internal ID
-        return !string.IsNullOrEmpty(userExternalId)
-            ? await userManager.GetUserIdAsync(userExternalId)
-            : null;
-    }
-
     /// <summary>
     /// Gets the request language from the current thread culture.
     /// The RequestLocalization middleware sets CurrentCulture based on Accept-Language header.

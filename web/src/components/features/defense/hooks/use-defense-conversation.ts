@@ -1,13 +1,16 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, useSyncExternalStore } from 'react'
+import { useCallback, useState, useSyncExternalStore } from 'react'
 
+import { useApi } from '@/hooks/use-api'
 import { cachePolicy } from '@/lib/query-config'
 
 import {
   DefenseConversationModel,
+  type DefenseConversationServices,
   type DefenseConversationState,
+  type SendOutcome,
 } from '../model/defense-conversation-model'
 import type { DefenseProblem, DefenseSession } from '../model/defense-types'
 import { deleteSession, listSessions, submitTurn } from '../services/session-service'
@@ -15,7 +18,7 @@ import { deleteSession, listSessions, submitTurn } from '../services/session-ser
 /**
  * Builds the query key for the sessions held about a problem.
  *
- * @param problemKey - The anchor slug of the problem whose sessions the query holds.
+ * @param problemKey - The stable key of the problem whose sessions these are.
  *
  * @returns The query key.
  */
@@ -30,9 +33,13 @@ function sessionsQueryKey(problemKey: string) {
  * {@link DefenseConversationModel}, plus this problem's session history.
  */
 type UseDefenseConversationResult = DefenseConversationState &
-  Pick<DefenseConversationModel, 'send' | 'stop' | 'startNew' | 'resume' | 'deleteSession'> & {
+  Pick<DefenseConversationModel, 'stop' | 'startNew' | 'resume'> & {
     /** This problem's persisted sessions, oldest first. */
     sessions: DefenseSession[]
+    /** Sends a student turn and folds in the examiner's reply. */
+    send: (content: string) => Promise<SendOutcome>
+    /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
+    deleteSession: (sessionId: string) => Promise<void>
   }
 
 /**
@@ -57,10 +64,64 @@ export function useDefenseConversation(
   // Cache handle for the session history
   const queryClient = useQueryClient()
 
+  // The authenticated API client
+  const api = useApi({ requireAuth: true })
+
+  // The ready caller, or null while the client is still loading or the user is signed out. Stable across
+  // renders (memoized inside useApi), so it anchors the memoized callbacks below.
+  const apiCall = api.state === 'ready' ? api.apiCall : null
+
+  // The backend calls bound to the current caller, unwrapped to their data or a throw. Memoized on the
+  // caller so the send/delete callbacks keep a stable identity while the composer re-renders on keystrokes.
+  const buildServices = useCallback((): DefenseConversationServices => {
+    // The client must be ready (loaded and authenticated) to make a call
+    if (apiCall === null) throw new Error('API not ready')
+
+    // The two calls, each unwrapping its result
+    return {
+      submitTurn: async (request) => {
+        // Send the turn
+        const result = await submitTurn(apiCall, request)
+
+        // A failed call throws
+        if (!result.success) {
+          throw new Error(result.error.message)
+        }
+
+        // The session grown with the turn and the reply
+        return result.data
+      },
+      deleteSession: async (sessionId) => {
+        // Remove the session
+        const result = await deleteSession(apiCall, sessionId)
+
+        // A failed call throws
+        if (!result.success) {
+          throw new Error(result.error.message)
+        }
+      },
+    }
+  }, [apiCall])
+
   // This problem's persisted sessions, oldest first
   const sessionsQuery = useQuery({
     queryKey: sessionsQueryKey(problem.key),
-    queryFn: () => listSessions(problem.key),
+    queryFn: async () => {
+      // The client must be ready to fetch
+      if (apiCall === null) throw new Error('API not ready')
+
+      // Fetch the sessions
+      const result = await listSessions(apiCall, problem.key)
+
+      // A failed call throws
+      if (!result.success) {
+        throw new Error(result.error.message)
+      }
+
+      // The sessions
+      return result.data
+    },
+    enabled: apiCall !== null,
     // Sessions are the user's own recent activity
     ...cachePolicy.userData,
   })
@@ -71,7 +132,7 @@ export function useDefenseConversation(
       new DefenseConversationModel({
         problem,
         opener,
-        services: { submitTurn, deleteSession },
+        // Refresh the session history after any write
         onSessionsChanged: () =>
           queryClient.invalidateQueries({ queryKey: sessionsQueryKey(problem.key) }),
       })
@@ -81,14 +142,40 @@ export function useDefenseConversation(
   // the server-render snapshot
   const state = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot)
 
+  // Sends a student turn against the current caller. A not-ready client reports a failed turn rather than
+  // throwing. Stable across renders so a memoized child isn't re-rendered on every keystroke.
+  const send = useCallback(
+    async (content: string): Promise<SendOutcome> => {
+      // A not-ready client can't run the turn; report it as a failed turn rather than throwing
+      let services: DefenseConversationServices
+      try {
+        services = buildServices()
+      } catch {
+        return 'failed'
+      }
+
+      // Drive the turn against the ready services
+      return model.send(content, services)
+    },
+    [model, buildServices]
+  )
+
+  // Deletes a session against the current caller. Stable across renders, like {@link send}.
+  const removeSession = useCallback(
+    // buildServices() throws when the client isn't ready; inside an async callback that surfaces as a
+    // rejected promise the caller can handle, not a synchronous throw before the delete is even attempted
+    async (sessionId: string): Promise<void> => model.deleteSession(sessionId, buildServices()),
+    [model, buildServices]
+  )
+
   // The conversation state, this problem's history, and the controls that drive it
   return {
     ...state,
     sessions: sessionsQuery.data ?? [],
-    send: model.send,
+    send,
     stop: model.stop,
     startNew: model.startNew,
     resume: model.resume,
-    deleteSession: model.deleteSession,
+    deleteSession: removeSession,
   }
 }

@@ -15,6 +15,11 @@ namespace MathComps.Api.Endpoints;
 public static class ProblemEndpoints
 {
     /// <summary>
+    /// Base path the problem routes derive from.
+    /// </summary>
+    private const string ProblemsPath = "/problems";
+
+    /// <summary>
     /// Maps the <c>/problems</c> endpoints onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
@@ -22,10 +27,10 @@ public static class ProblemEndpoints
     {
         // The endpoint for doing problem archive filtering
         // Allows anonymous access but provides personalized data if authenticated
-        app.MapPost("/problems/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService, IUserListService userListService) =>
+        app.MapPost($"{ProblemsPath}/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService, IUserListService userListService) =>
         {
             // Get user ID (optional)
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // Track the list name for the response (populated when filtering by a specific list)
             string? listName = null;
@@ -69,7 +74,7 @@ public static class ProblemEndpoints
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
 
         // The endpoint for the contest browser - returns competitions grouped by season
-        app.MapGet("/problems/contests-by-season", async (IProblemFilterService problemService) =>
+        app.MapGet($"{ProblemsPath}/contests-by-season", async (IProblemFilterService problemService) =>
         {
             // Detect language from Accept-Language header
             var language = EndpointHelpers.GetRequestLanguage();
@@ -82,7 +87,7 @@ public static class ProblemEndpoints
 
         // The endpoint for getting the data for a filter
         // Allows anonymous access but provides personalized data if authenticated
-        app.MapGet("/problems/{slug}", async (string slug, HttpContext context, IUserManager userManager, IProblemLookupService lookupService, IProblemFilterService filterService) =>
+        app.MapGet($"{ProblemsPath}/{{slug}}", async (string slug, HttpContext context, IUserManager userManager, IProblemLookupService lookupService, IProblemFilterService filterService) =>
         {
             // Get problem metadata to construct appropriate filters
             var lookupResult = await lookupService.GetProblemLookupDataAsync(slug)
@@ -90,7 +95,7 @@ public static class ProblemEndpoints
                 ?? throw new ProblemNotFoundException(slug);
 
             // Get user ID (optional)
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // Get the filters state
             var filters = new FilterParameters(
@@ -127,7 +132,7 @@ public static class ProblemEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // The endpoint for toggling a like on a problem
-        app.MapPost("/problems/{slug}/like", async (
+        app.MapPost($"{ProblemsPath}/{{slug}}/like", async (
             string slug,
             HttpContext context,
             IUserManager userManager,
@@ -135,7 +140,7 @@ public static class ProblemEndpoints
             IUserProblemService userProblemService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // No user is very sus, let's say unauthorized
             if (userId == null)
@@ -154,7 +159,7 @@ public static class ProblemEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // The endpoint for toggling a mark on a problem
-        app.MapPost("/problems/{slug}/mark", async (
+        app.MapPost($"{ProblemsPath}/{{slug}}/mark", async (
             string slug,
             HttpContext context,
             IUserManager userManager,
@@ -162,7 +167,7 @@ public static class ProblemEndpoints
             IUserProblemService userProblemService) =>
         {
             // Get user ID
-            var userId = await EndpointHelpers.GetUserIdAsync(context, userManager);
+            var userId = await userManager.GetUserIdAsync(context);
 
             // No user is very sus, let's say unauthorized
             if (userId == null)

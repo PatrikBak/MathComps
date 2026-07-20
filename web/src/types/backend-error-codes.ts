@@ -13,6 +13,12 @@ export const BACKEND_ERROR_CODES = [
   'ListReorderMismatch',
   'FavoritesRequireAuthentication',
   'MarkStatusRequiresAuthentication',
+  'DefenseSessionNotFound',
+  'DefenseMessageTooLong',
+  'DefenseMessageEmpty',
+  'DefenseTurnLimit',
+  'DefenseSpendLimit',
+  'UserNotResolved',
 ] as const
 
 /** One of the backend's business-failure codes. */

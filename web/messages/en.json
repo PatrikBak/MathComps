@@ -168,9 +168,9 @@
     "SK": "Slovakia"
   },
   "defense": {
-    "deleteSession": "Delete conversation",
-    "deleteSessionMessage": "This conversation will be permanently deleted.",
-    "deleteSessionTitle": "Delete this conversation?",
+    "deleteSession": "Remove from history",
+    "deleteSessionMessage": "This conversation will be permanently removed.",
+    "deleteSessionTitle": "Remove this conversation?",
     "history": "History",
     "historyTitle": "This problem",
     "jumpToLatest": "Jump to latest",

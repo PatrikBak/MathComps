@@ -1,19 +1,19 @@
-using MathComps.Cli.Examiner.Dtos;
-using MathComps.Cli.Examiner.Engine;
-using MathComps.Cli.Examiner.Fixtures;
-using MathComps.Cli.Examiner.Settings;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
-using Microsoft.Extensions.Options;
+using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Defense.Dtos;
+using MathComps.Infrastructure.Services.Defense.Engine;
 using Moq;
-using ExaminerEngine = MathComps.Cli.Examiner.Engine.Examiner;
+using MsOptions = Microsoft.Extensions.Options.Options;
+using ExaminerEngine = MathComps.Infrastructure.Services.Defense.Engine.Examiner;
 
-namespace MathComps.Cli.Examiner.Tests;
+namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Tests the examiner loop's guard dispatch through its public entry point with a fake chat caller: both guards run on
 /// every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
-/// after the cap — and a revision carries the specific correction back to the generator.
+/// after the cap — a revision carries the specific correction back to the generator, and the turn sums the cost and
+/// tokens of every call it made.
 /// </summary>
 public class ExaminerLoopTests
 {
@@ -59,13 +59,13 @@ public class ExaminerLoopTests
         caller.SetupSequence(mock => mock.CompleteAsync<string>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("first reply.")
-            .ReturnsAsync("revised reply.");
+            .ReturnsAsync(Result("first reply."))
+            .ReturnsAsync(Result("revised reply."));
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2, not strictly less"))
-            .ReturnsAsync(new MathCheckResult(Holds: true, Correction: ""));
+            .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2, not strictly less")))
+            .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: ""));
 
         // Run the turn.
@@ -94,8 +94,8 @@ public class ExaminerLoopTests
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample"))
-            .ReturnsAsync(new LeakCheckResult(Leaks: false, WhatLeaked: ""));
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample")))
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "")));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -143,20 +143,20 @@ public class ExaminerLoopTests
         caller.SetupSequence(mock => mock.CompleteAsync<string>(
                 Capture.In(generatePrompts), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("first reply.")
-            .ReturnsAsync("revised reply.");
+            .ReturnsAsync(Result("first reply."))
+            .ReturnsAsync(Result("revised reply."));
 
         // The first attempt fails the math-check and leaks; the regenerate clears both.
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2"))
-            .ReturnsAsync(new MathCheckResult(Holds: true, Correction: ""));
+            .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2")))
+            .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample"))
-            .ReturnsAsync(new LeakCheckResult(Leaks: false, WhatLeaked: ""));
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample")))
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "")));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -174,6 +174,28 @@ public class ExaminerLoopTests
     }
 
     /// <summary>
+    /// The turn's outcome sums the cost and tokens of every model call it made — the generate step and both guards on a
+    /// clean turn — so a caller can price the turn from a single figure.
+    /// </summary>
+    [Fact]
+    public async Task Turn_sums_cost_and_tokens_across_all_calls()
+    {
+        // Each of the three calls a clean turn makes reports its own cost and token usage.
+        var caller = new Mock<IOpenRouterChatCaller>();
+        SetupStep(caller, "a reply.", cost: 0.01m, promptTokens: 100, completionTokens: 20);
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
+        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: ""), cost: 0.03m, promptTokens: 300, completionTokens: 40);
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // The outcome carries the summed spend and tokens of all three calls.
+        Assert.Equal(0.06m, outcome.Usage.Cost);
+        Assert.Equal(600, outcome.Usage.PromptTokens);
+        Assert.Equal(90, outcome.Usage.CompletionTokens);
+    }
+
+    /// <summary>
     /// The loop refuses a transcript whose last turn isn't the candidate's — there's nothing to reply to.
     /// </summary>
     [Fact]
@@ -183,18 +205,17 @@ public class ExaminerLoopTests
         var caller = new Mock<IOpenRouterChatCaller>(MockBehavior.Strict);
 
         // A transcript that ends on an examiner turn.
-        var fixture = new Fixture(
-            "problem", "reference",
-            Transcript.Parse("## Candidate\n\ndefense\n\n## Examiner\n\nquestion"));
+        var transcript = Transcript.Parse("## Candidate\n\ndefense\n\n## Examiner\n\nquestion");
 
         // Under throwaway settings, run the loop against it.
         await WithTempSettingsAsync(async settings =>
         {
             // Build the examiner over the strict caller.
-            var examiner = new ExaminerEngine(caller.Object, Options.Create(settings));
+            var examiner = new ExaminerEngine(caller.Object, MsOptions.Create(settings));
 
             // It throws instead of calling the model.
-            await Assert.ThrowsAsync<InvalidOperationException>(() => examiner.NextReplyAsync(fixture));
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => examiner.NextReplyAsync("problem", "reference", transcript));
 
             // The bool is ignored — the assertion is the point.
             return true;
@@ -202,19 +223,20 @@ public class ExaminerLoopTests
     }
 
     /// <summary>
-    /// Runs one turn of the loop against the fake caller over a minimal fixture awaiting the examiner, wiring the loop
-    /// to throwaway prompt templates.
+    /// Runs one turn of the loop against the fake caller over a minimal conversation awaiting the examiner, wiring the
+    /// loop to throwaway prompt templates.
     /// </summary>
     /// <param name="caller">The fake chat caller with its steps set up.</param>
     /// <returns>The turn's outcome.</returns>
     private static async Task<ExaminerTurnOutcome> RunAsync(Mock<IOpenRouterChatCaller> caller)
     {
-        // A minimal fixture whose transcript ends on a candidate turn.
-        var fixture = new Fixture("problem", "reference", Transcript.Parse("## Candidate\n\nmy defense"));
+        // A minimal transcript ending on a candidate turn.
+        var transcript = Transcript.Parse("## Candidate\n\nmy defense");
 
         // Run the loop under throwaway prompt templates and hand back its outcome.
-        return await WithTempSettingsAsync(
-            settings => new ExaminerEngine(caller.Object, Options.Create(settings)).NextReplyAsync(fixture));
+        return await WithTempSettingsAsync(settings =>
+            new ExaminerEngine(caller.Object, MsOptions.Create(settings))
+                .NextReplyAsync("problem", "reference", transcript));
     }
 
     /// <summary>
@@ -260,16 +282,35 @@ public class ExaminerLoopTests
     }
 
     /// <summary>
-    /// Sets the fake caller to answer any call binding to <typeparamref name="TResponse"/> with the given response.
+    /// Wraps a bound value in a chat-call result carrying the given cost and tokens, the shape the caller now returns.
+    /// </summary>
+    /// <typeparam name="TResponse">The response type the reply binds into.</typeparam>
+    /// <param name="value">The bound reply.</param>
+    /// <param name="cost">The cost the call reports.</param>
+    /// <param name="promptTokens">The prompt tokens the call reports.</param>
+    /// <param name="completionTokens">The completion tokens the call reports.</param>
+    /// <returns>The wrapped result.</returns>
+    private static ChatCallResult<TResponse> Result<TResponse>(
+        TResponse value, decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
+        new(value, new ModelUsage(cost, promptTokens, completionTokens));
+
+    /// <summary>
+    /// Sets the fake caller to answer any call binding to <typeparamref name="TResponse"/> with the given response,
+    /// carrying the given cost and tokens.
     /// </summary>
     /// <typeparam name="TResponse">The response type the step binds into.</typeparam>
     /// <param name="caller">The fake caller to configure.</param>
     /// <param name="response">The response it should return.</param>
-    private static void SetupStep<TResponse>(Mock<IOpenRouterChatCaller> caller, TResponse response) =>
+    /// <param name="cost">The cost the call reports.</param>
+    /// <param name="promptTokens">The prompt tokens the call reports.</param>
+    /// <param name="completionTokens">The completion tokens the call reports.</param>
+    private static void SetupStep<TResponse>(
+        Mock<IOpenRouterChatCaller> caller, TResponse response,
+        decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
         caller.Setup(mock => mock.CompleteAsync<TResponse>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(response);
+            .ReturnsAsync(Result(response, cost, promptTokens, completionTokens));
 
     /// <summary>
     /// Asserts how many times the fake caller was asked for a completion binding to <typeparamref name="TResponse"/>.

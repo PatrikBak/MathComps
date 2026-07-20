@@ -39,8 +39,3 @@ export const AUTH_RETURN_URL_STORAGE_KEY = 'auth_return_url'
  * when they were prompted to log in. Used to re-open the comment modal.
  */
 export const PENDING_COMMENT_TARGET_STORAGE_KEY = 'pending-comment-target'
-
-/**
- * Key used to store every problem's saved defense conversations.
- */
-export const DEFENSE_SESSIONS_STORAGE_KEY = 'defense-sessions'

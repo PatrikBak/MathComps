@@ -14,4 +14,9 @@ public static class RateLimiterPolicies
     /// Search-specific rate limiting policy for heavier database operations.
     /// </summary>
     public const string SearchRateLimit = "SearchRateLimit";
+
+    /// <summary>
+    /// Tight limit for defense turns, which each cost several LLM calls.
+    /// </summary>
+    public const string DefenseTurnRateLimit = "DefenseTurnRateLimit";
 }

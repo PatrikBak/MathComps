@@ -183,38 +183,32 @@ function renderDocumentSections(
                 ? renderDifficultyStars(contentBlock.difficulty)
                 : null
 
-            // The hidden reasoning a defense is argued against, per environment: a theorem's proof,
-            // a problem's staged hints alongside its solution, or the worked solution for exercises
-            // and examples. Definitions hide nothing.
+            // The hidden reasoning a defense is argued against: the worked solution for a problem, exercise,
+            // or example. Theorems and definitions yield none.
             let defenseReference: RawContentBlock[]
-            let defenseHints: string[]
             switch (contentBlock.type) {
-              case 'theorem':
-                // A theorem is defended by arguing its proof.
-                defenseReference = contentBlock.proof
-                defenseHints = []
-                break
               case 'exercise':
               case 'example':
-                // Exercises and examples are defended against their worked solution, no staged hints.
+                // Exercises and examples are defended against their worked solution.
                 defenseReference = contentBlock.solution
-                defenseHints = []
                 break
               case 'problem':
-                // A problem stages hints on the way to its solution.
+                // A problem is defended against its solution.
                 defenseReference = contentBlock.solution
-                defenseHints = contentBlock.hints.map(blockSequenceToMarkdown)
+                break
+              case 'theorem':
+                // Excluded: a proof-defense is a different examiner frame than the prompt targets
+                defenseReference = []
                 break
               case 'definition':
                 // Definitions have nothing hidden to defend.
                 defenseReference = []
-                defenseHints = []
                 break
               default:
                 assertNever(contentBlock)
             }
 
-            // Defense-chat trigger, offered wherever there's hidden reasoning to probe. Rendered for
+            // Defense-chat trigger, offered wherever there's a solution to defend. Rendered for
             // every viewer but admin-gated inside the (client) trigger, which keeps the handout page
             // static; the reference it carries is already public on this page, so nothing secret ships.
             const defenseTrigger =
@@ -222,12 +216,12 @@ function renderDocumentSections(
                 <DefenseChatTrigger
                   problem={{
                     // Keyed by the environment's stable identity (type + document-wide number), so
-                    // sessions survive locale switches and title edits
-                    key: `${contentId}-${contentBlock.type}-${environmentNumber}`,
+                    // sessions survive locale switches and title edits; the `handout:` prefix namespaces
+                    // it against other problem sources that share the correlation key
+                    key: `handout:${contentId}-${contentBlock.type}-${environmentNumber}`,
                     title: `${environmentBaseTitle} ${environmentNumber}`,
                     statement: blockSequenceToMarkdown(contentBlock.body),
-                    hints: defenseHints,
-                    solution: blockSequenceToMarkdown(defenseReference),
+                    reference: blockSequenceToMarkdown(defenseReference),
                   }}
                 />
               ) : undefined

@@ -1,9 +1,11 @@
-using MathComps.Infrastructure.Options;
+using System.ComponentModel.DataAnnotations;
 
-namespace MathComps.Cli.Examiner.Settings;
+namespace MathComps.Infrastructure.Options;
 
 /// <summary>
-/// Settings for the examiner loop: the model configuration for each of its three steps, plus the revision cap.
+/// Settings for the examiner loop: the model configuration for each of its three steps, plus the revision cap. The
+/// annotations make a missing <c>Examiner</c> section fail validation at startup rather than leaving a step null and
+/// faulting on the first turn.
 /// </summary>
 public class ExaminerSettings
 {
@@ -15,21 +17,25 @@ public class ExaminerSettings
     /// <summary>
     /// The generate step: writes the examiner's next reply to the candidate.
     /// </summary>
+    [Required]
     public required ChatStepSettings Generate { get; set; }
 
     /// <summary>
     /// The math-check step: finds the claims the reply makes and verifies each against the reference.
     /// </summary>
+    [Required]
     public required ChatStepSettings MathCheck { get; set; }
 
     /// <summary>
     /// The leak-check step: scans the reply, in the context of the whole transcript, for over-explaining.
     /// </summary>
+    [Required]
     public required ChatStepSettings LeakCheck { get; set; }
 
     /// <summary>
     /// How many times a flagged reply is regenerated before the last attempt ships regardless. The cap stops a
     /// stubborn flaw or noisy checker from looping forever.
     /// </summary>
+    [Range(0, int.MaxValue)]
     public required int MaxRevisions { get; set; }
 }

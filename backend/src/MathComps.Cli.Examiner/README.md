@@ -2,9 +2,9 @@
 
 Runs the AI **examiner**: an oral-exam examiner that probes a student's defense of a flawed olympiad solution, one turn at a time. Given a conversation so far, it produces the next examiner reply — a sharp Socratic challenge that presses the weak point without handing over the answer.
 
-The model is reached through [OpenRouter](https://openrouter.ai) (an OpenAI-compatible aggregator) via `Microsoft.Extensions.AI`, using the shared chat plumbing in `MathComps.Infrastructure`. Each step of the loop routes to its own model and reasoning level, set in `appsettings.json` — so a step is tuned independently of the others.
+The engine itself lives in `MathComps.Infrastructure` (`Services/Defense`) and is shared by two drivers: this CLI, which runs it over fixture folders, and the API, which runs and persists it as per-user defense conversations. The model is reached through [OpenRouter](https://openrouter.ai) (an OpenAI-compatible aggregator) via `Microsoft.Extensions.AI`, using the shared chat plumbing in `MathComps.Infrastructure`. Each step of the loop routes to its own model and reasoning level, set in `appsettings.examiner.json` — so a step is tuned independently of the others.
 
-No database. The examiner works entirely from fixture files.
+This CLI has no database of its own — it works entirely from fixture files. (Persistence is the API's concern, not the engine's.)
 
 ## How It Works
 
@@ -17,7 +17,7 @@ A turn is a small loop, not one call: the examiner writes a reply, two independe
 
 ### Per-step models
 
-Each step sets its own `Model`, `ReasoningEffort`, and `MaxOutputTokens` in `appsettings.json`, so you tune one without touching the others. The token cap bounds a runaway generation (a decoding loop otherwise burns to the model's output ceiling); a reply that hits the cap is retried inside the shared chat caller before the engine ever sees it. On thinking models the reasoning budget derives from the cap, so it also sets the step's thinking depth.
+Each step sets its own `Model`, `ReasoningEffort`, and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. The token cap bounds a runaway generation (a decoding loop otherwise burns to the model's output ceiling); a reply that hits the cap is retried inside the shared chat caller before the engine ever sees it. On thinking models the reasoning budget derives from the cap, so it also sets the step's thinking depth.
 
 - **Generate** — the examiner's voice, run on every turn. A strong model gives sharper challenges; because the guards check its output independently, its model is a pure quality dial, not a correctness one.
 - **Math-check** — a strong reasoning model. A false "holds" is the unrecoverable failure (the examiner would teach a falsehood), so this is the one place not to economize.
@@ -52,7 +52,7 @@ A fixture is a folder:
 - `reference.md` — the reference solution, in the examiner's context.
 - `transcript.md` — the conversation, alternating `## Candidate` / `## Examiner` blocks.
 
-The planted flaw is written to none of these — it lives only in the generator's working brief while it plays the candidate — so it can't reach the examiner's context, and a good examiner has to find it from the reasoning alone. Working fixtures live under `data/defense-fixtures/` (gitignored). The one committed example is `backend/tests/MathComps.Cli.Examiner.Tests/Fixtures/example/` — the format anchor and the test smoke target; it holds only an opening `## Candidate` seed, so it's a starting point for the loop, not a finished conversation to judge.
+The planted flaw is written to none of these — it lives only in the generator's working brief while it plays the candidate — so it can't reach the examiner's context, and a good examiner has to find it from the reasoning alone. Working fixtures live under `data/defense-fixtures/` (gitignored). The one committed example is `backend/tests/MathComps.Cli.Examiner.Tests/Fixtures/example/` — the format anchor; it holds only an opening `## Candidate` seed, so it's a starting point for the loop, not a finished conversation to judge.
 
 ### Skills
 
@@ -72,8 +72,8 @@ cd backend/src/MathComps.Cli.Examiner
 dotnet user-secrets set "OpenRouter:ApiKey" "..."
 ```
 
-Each step's model lives in `appsettings.json`; swap any `Model` to another id OpenRouter exposes to change backends.
+Each step's model lives in `appsettings.examiner.json`; swap any `Model` to another id OpenRouter exposes to change backends.
 
 ## AI prompts
 
-The three prompt templates live in [`Prompts/`](./Prompts): `generate.txt` (the examiner persona, filled with the problem, reference, and any revision note), `math-check.txt`, and `leak-check.txt`. Each becomes a step's system message; the user message is the conversation so far — for the two guards, with the proposed reply appended at the end.
+The three prompt templates live in the engine's [`Prompts/`](../MathComps.Infrastructure/Prompts) folder: `generate.txt` (the examiner persona, filled with the problem, reference, and any revision note), `math-check.txt`, and `leak-check.txt`. Each becomes a step's system message; the user message is the conversation so far — for the two guards, with the proposed reply appended at the end.

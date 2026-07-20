@@ -1,3 +1,4 @@
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Shared.Io;
 
 namespace MathComps.Cli.Examiner.Fixtures;

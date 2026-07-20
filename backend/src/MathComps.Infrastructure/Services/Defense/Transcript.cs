@@ -1,24 +1,9 @@
 using System.Collections.Immutable;
 using System.Text;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Shared.Extensions;
 
-namespace MathComps.Cli.Examiner.Fixtures;
-
-/// <summary>
-/// Who authored a transcript turn.
-/// </summary>
-public enum TranscriptRole
-{
-    /// <summary>
-    /// The student defending their solution.
-    /// </summary>
-    Candidate,
-
-    /// <summary>
-    /// The examiner probing it.
-    /// </summary>
-    Examiner,
-}
+namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// One turn of a defense conversation.
