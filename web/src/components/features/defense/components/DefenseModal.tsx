@@ -190,6 +190,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
         jumpLabel={t('jumpToLatest')}
         isThinking={isThinking}
         thinkingLabel={t('thinking')}
+        thinkingLongLabel={t('thinkingLong')}
       />
 
       {/* Composer */}

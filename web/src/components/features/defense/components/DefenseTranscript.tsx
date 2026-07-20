@@ -28,6 +28,8 @@ type DefenseTranscriptProps = {
   isThinking: boolean
   /** The examiner-voiced line shown while thinking. */
   thinkingLabel: string
+  /** The line explaining a long wait while thinking. */
+  thinkingLongLabel: string
 }
 
 /**
@@ -43,6 +45,7 @@ export function DefenseTranscript({
   jumpLabel,
   isThinking,
   thinkingLabel,
+  thinkingLongLabel,
 }: DefenseTranscriptProps) {
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
   const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail()
@@ -111,7 +114,7 @@ export function DefenseTranscript({
           ))}
 
           {/* The examiner working on its next reply */}
-          {isThinking && <ThinkingIndicator label={thinkingLabel} />}
+          {isThinking && <ThinkingIndicator label={thinkingLabel} longLabel={thinkingLongLabel} />}
         </div>
       </div>
 

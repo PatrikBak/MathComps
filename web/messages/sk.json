@@ -175,7 +175,7 @@
     "historyTitle": "Táto úloha",
     "jumpToLatest": "Skočiť na najnovšie",
     "newDefense": "Nová konverzácia",
-    "opener": "Rád sa s tebou pobavím o tvojom riešení alebo ak si zaseknutý 😇",
+    "opener": "Rád sa s tebou pobavím o tvojom riešení alebo ak potrebuješ poradiť 😇",
     "placeholder": "Napíš svoju odpoveď…",
     "problemStrip": "Zadanie úlohy",
     "roles": {
@@ -183,7 +183,8 @@
       "student": "Ty"
     },
     "sendError": "Tvoju odpoveď sa nepodarilo odoslať.",
-    "thinking": "Skúšajúci premýšľa nad tvojím krokom…",
+    "thinking": "Premýšľam",
+    "thinkingLong": "Premýšľam dôkladne",
     "title": "Obhajoba riešenia",
     "transcriptLabel": "Priebeh konverzácie"
   },
