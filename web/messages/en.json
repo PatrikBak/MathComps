@@ -183,7 +183,8 @@
       "student": "You"
     },
     "sendError": "Your reply couldn't be sent.",
-    "thinking": "The examiner is thinking about your step…",
+    "thinking": "Thinking",
+    "thinkingLong": "Thinking carefully",
     "title": "Defend your solution",
     "transcriptLabel": "Conversation"
   },
