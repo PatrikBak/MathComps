@@ -99,7 +99,7 @@ export function DefenseTranscript({
         role="log"
         aria-live="polite"
         aria-label={regionLabel}
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto overscroll-contain"
       >
         {/* The growing content the region follows */}
         <div ref={contentRef} className="flex flex-col gap-5 px-5 py-5">
