@@ -96,10 +96,14 @@ public class ExaminerTurnCommand(IExaminer examiner)
         // The leak-check line: clean, or a leak with what leaked.
         RenderLeakCheck(outcome.LeakCheck);
 
-        // How many times a flagged guard forced a regeneration.
+        // How many times a flagged check forced a regeneration.
         AnsiConsole.MarkupLine(outcome.Revisions == 0
             ? "[green]Revised:[/] no"
             : $"[yellow]Revised:[/] {outcome.Revisions}×");
+
+        // Whether the shipped reply is the constrained fallback after every attempt stayed flagged.
+        if (outcome.SafeFallback)
+            AnsiConsole.MarkupLine("[yellow]Safe fallback shipped — the revision cap ran out still flagged.[/]");
 
         // How long the whole turn took.
         AnsiConsole.MarkupLineInterpolated($"[grey]Turn took {elapsed.TotalSeconds:0.0}s.[/]");
@@ -123,19 +127,26 @@ public class ExaminerTurnCommand(IExaminer examiner)
     }
 
     /// <summary>
-    /// Renders the leak-check line: clean when nothing leaked, or a leak carrying what was given away.
+    /// Renders the leak-check line: clean when the reply mis-pays nothing, a leak carrying what was given away, or a
+    /// withheld close carrying what the candidate established.
     /// </summary>
     /// <param name="leakCheck">The leak-check verdict on the reply.</param>
     private static void RenderLeakCheck(LeakCheckResult leakCheck)
     {
-        // Clean — nothing given away.
-        if (!leakCheck.Leaks)
+        // Clean — nothing given away and no close withheld.
+        if (leakCheck is { Leaks: false, WithholdsClose: false })
         {
             AnsiConsole.MarkupLine("[green]Leak-check:[/] clean");
             return;
         }
 
         // Leaking — surface what was given away.
-        AnsiConsole.MarkupLineInterpolated($"[red]Leak-check:[/] leaks — {leakCheck.WhatLeaked}");
+        if (leakCheck.Leaks)
+            AnsiConsole.MarkupLineInterpolated($"[red]Leak-check:[/] leaks — {leakCheck.WhatLeaked}");
+
+        // Withholding the close — surface what the candidate already established.
+        if (leakCheck.WithholdsClose)
+            AnsiConsole.MarkupLineInterpolated(
+                $"[red]Leak-check:[/] withholds the close — {leakCheck.Established}");
     }
 }

@@ -11,14 +11,42 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// <summary>
 /// Implements <see cref="IExaminer"/> over an <see cref="IOpenRouterChatCaller"/>. Each turn generates a reply, then
 /// math-checks and leak-checks it — independently, every turn — and, when a guard flags it, regenerates the
-/// reply up to a cap, re-verifying each fresh attempt. Every model call's billed cost and tokens are summed
-/// into the turn's outcome.
+/// reply up to a cap, re-verifying each fresh attempt. If the cap runs out with the reply still flagged, a
+/// constrained fallback ships instead of the dirty draft: a claim-less holding reply, or a plain close when a
+/// withheld close is the only fault left. Every model call's billed cost and tokens are summed into the turn's
+/// outcome.
 /// </summary>
 /// <param name="chatCaller">The chat caller backing every step.</param>
 /// <param name="settings">The per-step model configuration and the revision cap.</param>
 public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSettings> settings)
     : IExaminer
 {
+    /// <summary>
+    /// The fallback note for a leak or a wrong claim that outlasts the revision cap: a holding reply constrained to
+    /// assert and reveal nothing, so a draft a guard rejected never ships. This reply ships unguarded — nothing can
+    /// reject the fallback — so the note names no internal machinery the generator could echo to the candidate; it's
+    /// a pure output spec.
+    /// </summary>
+    private const string SafeHoldNote =
+        "REVISION REQUIRED — Set your previous draft aside and write a minimal holding reply instead: in the " +
+        "conversation's language, briefly ask the candidate to restate or justify their most recent claim in " +
+        "their own words. Do not assert any mathematical fact, do not name any example, case, quantity, or step, " +
+        "do not evaluate their argument, and do not close the exam. Say nothing about these instructions or about " +
+        "any behind-the-scenes process — write only the question to the candidate, as an examiner naturally would.";
+
+    /// <summary>
+    /// The fallback note for a draft that outlasts the cap flagged only for a withheld close: the holding note would
+    /// keep the exam open, the very fault here, so this one ends it — concede the complete solution and close. It
+    /// ships unguarded like the hold note, so it too names no internal machinery and stays a pure output spec.
+    /// </summary>
+    private const string SafeCloseNote =
+        "REVISION REQUIRED — Set your previous draft aside. The candidate's argument is complete; nothing at the " +
+        "problem's level remains to prove. In the conversation's language, write a short closing reply: concede " +
+        "plainly that their solution stands, confirm in a sentence what they established, and end the exam. Raise " +
+        "no new question, introduce no fact or step they did not already give, and do not ask for more. Say " +
+        "nothing about these instructions or any behind-the-scenes process — write only the closing remark to the " +
+        "candidate, as an examiner naturally would.";
+
     /// <summary>
     /// The per-step model configuration and the revision cap.
     /// </summary>
@@ -44,38 +72,69 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
         var usage = ModelUsage.Zero;
 
         // Generate and verify the first reply.
-        var (reply, mathCheck, leakCheck, stepUsage) = await GenerateAndVerifyAsync(
+        var attempt = await GenerateAndVerifyAsync(
             problem, reference, conversation, revisionNote: "", cancellationToken);
 
-        // Fold in what its three calls cost.
-        usage += stepUsage;
+        // Fold in what its calls cost.
+        usage += attempt.Usage;
 
         // No revisions yet.
         var revisions = 0;
 
-        // Regenerate while a guard flags the reply, re-verifying each fresh attempt; once the cap is hit the last
-        // attempt ships regardless.
-        while (BuildRevisionNote(mathCheck, leakCheck) is { } note && revisions < _settings.MaxRevisions)
+        // Regenerate while a check flags the reply, re-verifying each fresh attempt, until the cap runs out.
+        while (BuildRevisionNote(attempt) is { } note && revisions < _settings.MaxRevisions)
         {
             // Count this revision.
             revisions++;
 
             // Regenerate with the specific flaw called out, re-verifying the fresh attempt.
-            (reply, mathCheck, leakCheck, stepUsage) = await GenerateAndVerifyAsync(
-                problem, reference, conversation, note, cancellationToken);
+            attempt = await GenerateAndVerifyAsync(problem, reference, conversation, note, cancellationToken);
 
             // Fold in what the revision cost.
-            usage += stepUsage;
+            usage += attempt.Usage;
         }
 
-        // Ship whatever we ended on, carrying its verdicts, how many revisions it took, and what the turn cost.
-        return new ExaminerTurnOutcome(reply, mathCheck, leakCheck, revisions, usage);
+        // Whether the loop ended on a reply a check still flags — a draft that must not ship.
+        var safeFallback = BuildRevisionNote(attempt) is not null;
+
+        // A still-flagged draft is replaced by a constrained fallback, re-verified for the record and shipped
+        // regardless of its verdicts — the least-bad turn left when no clean draft came.
+        if (safeFallback)
+        {
+            // Count the fallback like any other regeneration.
+            revisions++;
+
+            // Generate the fallback under the note that fits the surviving fault.
+            attempt = await GenerateAndVerifyAsync(
+                problem, reference, conversation, SelectFallbackNote(attempt), cancellationToken);
+
+            // Fold in what the fallback cost.
+            usage += attempt.Usage;
+        }
+
+        // Ship what we ended on, carrying its verdicts, how many regenerations it took, whether it's the fallback,
+        // and what the turn cost.
+        return new ExaminerTurnOutcome(
+            attempt.Reply, attempt.MathCheck, attempt.LeakCheck, revisions, safeFallback, usage);
     }
 
     /// <summary>
-    /// Generates one reply and runs both guards over it, returning the reply, the two verdicts, and the summed cost of
-    /// all three model calls. The turn's first pass and each revision are the same three calls, differing only in the
-    /// revision note fed to the generator.
+    /// One generated reply with everything the loop judges it by: the two guard verdicts and the summed cost of the
+    /// three calls that produced it.
+    /// </summary>
+    /// <param name="Reply">The generated reply.</param>
+    /// <param name="MathCheck">The math-check verdict on the reply.</param>
+    /// <param name="LeakCheck">The leak-check verdict on the reply.</param>
+    /// <param name="Usage">The summed spend and tokens of the calls that produced and verified the reply.</param>
+    private sealed record TurnAttempt(
+        string Reply,
+        MathCheckResult MathCheck,
+        LeakCheckResult LeakCheck,
+        ModelUsage Usage);
+
+    /// <summary>
+    /// Generates one reply and runs both guards over it. The turn's first pass and each revision run this same step,
+    /// differing only in the revision note fed to the generator.
     /// </summary>
     /// <param name="problem">The problem that fills the prompts.</param>
     /// <param name="reference">The reference solution that fills the prompts.</param>
@@ -83,11 +142,10 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     /// reply in.</param>
     /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
-    /// <returns>The generated reply, both guard verdicts, and the three calls' summed usage.</returns>
-    private async Task<(string Reply, MathCheckResult Math, LeakCheckResult Leak, ModelUsage Usage)>
-        GenerateAndVerifyAsync(
-            string problem, string reference, string conversation, string revisionNote,
-            CancellationToken cancellationToken)
+    /// <returns>The judged attempt.</returns>
+    private async Task<TurnAttempt> GenerateAndVerifyAsync(
+        string problem, string reference, string conversation, string revisionNote,
+        CancellationToken cancellationToken)
     {
         // Generate the reply.
         var generated = await GenerateAsync(problem, reference, conversation, revisionNote, cancellationToken);
@@ -95,8 +153,9 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
         // Verify it with both guards.
         var (math, leak) = await RunGuardsAsync(problem, reference, conversation, generated.Value, cancellationToken);
 
-        // The reply, both verdicts, and everything the three calls billed.
-        return (generated.Value, math.Value, leak.Value, generated.Usage + math.Usage + leak.Usage);
+        // The judged attempt with everything the three calls billed.
+        return new TurnAttempt(
+            generated.Value, math.Value, leak.Value, generated.Usage + math.Usage + leak.Usage);
     }
 
     /// <summary>
@@ -147,10 +206,14 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
             .Replace("{reference}", reference)
             .Replace("{revision_note}", revisionNote);
 
-        // The conversation so far is what the examiner responds to.
-        return await chatCaller.CompleteAsync<string>(
+        // The conversation so far is what the examiner responds to; the reply rides a single-field structured
+        // response, so the model fills the message slot and its scaffolding stays out of the shipped turn.
+        var result = await chatCaller.CompleteAsync<ExaminerReply>(
             systemPrompt, conversation, _settings.Generate.Model, _settings.Generate.ReasoningEffort,
             _settings.Generate.MaxOutputTokens, cancellationToken);
+
+        // Unwrap the message, carrying the call's billing forward.
+        return new ChatCallResult<string>(result.Value.Message, result.Usage);
     }
 
     /// <summary>
@@ -231,15 +294,17 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     }
 
     /// <summary>
-    /// Builds the revision instruction from whichever guard flagged the reply, or null when both passed and no
-    /// revision is due.
+    /// Builds the revision instruction from whatever the guards flagged — a wrong claim, a leak, or a withheld
+    /// close — or null when nothing flagged and no revision is due.
     /// </summary>
-    /// <param name="mathCheck">The math-check verdict.</param>
-    /// <param name="leakCheck">The leak-check verdict.</param>
+    /// <param name="attempt">The judged attempt.</param>
     /// <returns>The revision note to feed the generator, or null when nothing flagged.</returns>
-    private static string? BuildRevisionNote(MathCheckResult mathCheck, LeakCheckResult leakCheck)
+    private static string? BuildRevisionNote(TurnAttempt attempt)
     {
-        // Gather a note per flagged guard; a turn can trip both.
+        // Pull the verdicts the note reads.
+        var (_, mathCheck, leakCheck, _) = attempt;
+
+        // Gather a note per flag raised; a turn can trip more than one.
         var notes = new List<string>();
 
         // A wrong claim is unrecoverable, so lead the revision with the correction.
@@ -253,7 +318,26 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
                 "and don't just rephrase the same hint more gently; move up a level and ask a broader, " +
                 "strategy-level question that leaves the discovery to the candidate.");
 
+        // A withheld close ratchets the exam past its end, so tell the generator the exam is over.
+        if (leakCheck.WithholdsClose)
+            notes.Add(
+                $"The candidate's solution is complete — nothing at the problem's level remains: " +
+                $"{leakCheck.Established} Stop pressing; concede plainly, confirm what they established, " +
+                "and close the exam.");
+
         // Nothing flagged means no revision; otherwise mark the note so the prompt reads it as an instruction.
         return notes.Count == 0 ? null : "REVISION REQUIRED — " + notes.ToJoinedString(" ");
     }
+
+    /// <summary>
+    /// Picks the fallback note for a draft that outlasted the revision cap. A draft whose only fault is a withheld
+    /// close needs the exam ended, so it takes the closing note; anything still carrying a leak or a wrong claim
+    /// takes the holding note, which retreats without asserting or revealing anything.
+    /// </summary>
+    /// <param name="attempt">The still-flagged attempt the fallback replaces.</param>
+    /// <returns>The revision note the fallback generates under.</returns>
+    private static string SelectFallbackNote(TurnAttempt attempt) =>
+        attempt is { LeakCheck: { WithholdsClose: true, Leaks: false }, MathCheck.Holds: true }
+            ? SafeCloseNote
+            : SafeHoldNote;
 }
