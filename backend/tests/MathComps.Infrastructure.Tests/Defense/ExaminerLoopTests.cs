@@ -31,15 +31,15 @@ public class ExaminerLoopTests
     {
         // A reply cleared by both guards.
         var caller = new Mock<IOpenRouterChatCaller>();
-        SetupStep(caller, "a reply.");
+        SetupStep(caller, new ExaminerReply("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: ""));
+        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
         // Generate and both guards each ran once; nothing was revised.
-        VerifyStepCalled<string>(caller, Times.Once());
+        VerifyStepCalled<ExaminerReply>(caller, Times.Once());
         VerifyStepCalled<MathCheckResult>(caller, Times.Once());
         VerifyStepCalled<LeakCheckResult>(caller, Times.Once());
         Assert.True(outcome.MathCheck.Holds);
@@ -56,28 +56,31 @@ public class ExaminerLoopTests
     {
         // A first reply the math-check rejects, then a regenerated one the loop should emit.
         var caller = new Mock<IOpenRouterChatCaller>();
-        caller.SetupSequence(mock => mock.CompleteAsync<string>(
+        caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result("first reply."))
-            .ReturnsAsync(Result("revised reply."));
+            .ReturnsAsync(Result(new ExaminerReply("first reply.")))
+            .ReturnsAsync(Result(new ExaminerReply("revised reply.")));
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2, not strictly less")))
             .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: ""));
+        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
         // Generate and math-check each ran twice (the re-verify), the emitted reply is the regenerated one, and it
         // ships with one revision and a now-clean verdict.
-        VerifyStepCalled<string>(caller, Times.Exactly(2));
+        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(2));
         VerifyStepCalled<MathCheckResult>(caller, Times.Exactly(2));
         Assert.Equal(1, outcome.Revisions);
         Assert.Equal("revised reply.", outcome.Reply);
         Assert.True(outcome.MathCheck.Holds);
+
+        // A recovered revision is a normal ship, not the cap's fallback.
+        Assert.False(outcome.SafeFallback);
     }
 
     /// <summary>
@@ -89,19 +92,19 @@ public class ExaminerLoopTests
     {
         // A reply the leak-check catches leaking, then clears on the fresh attempt; the math-check stays clean.
         var caller = new Mock<IOpenRouterChatCaller>();
-        SetupStep(caller, "a reply.");
+        SetupStep(caller, new ExaminerReply("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample")))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "")));
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample", WithholdsClose: false, Established: "")))
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
         // Generate, leak-check, and math-check each ran twice; the reply ships clean after one revision.
-        VerifyStepCalled<string>(caller, Times.Exactly(2));
+        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(2));
         VerifyStepCalled<LeakCheckResult>(caller, Times.Exactly(2));
         VerifyStepCalled<MathCheckResult>(caller, Times.Exactly(2));
         Assert.Equal(1, outcome.Revisions);
@@ -109,25 +112,112 @@ public class ExaminerLoopTests
     }
 
     /// <summary>
-    /// A reply the leak-check keeps flagging is regenerated up to the cap, then ships regardless — carrying the still-
-    /// failing verdict and a revision count equal to the cap, so a stubborn leak can't loop forever.
+    /// A reply the leak-check keeps flagging burns through the revision cap, then ships the constrained fallback
+    /// generated under the safe note instead of the dirty draft — still carrying its flagged verdict, so the trace
+    /// shows what happened.
     /// </summary>
     [Fact]
-    public async Task A_persistent_leak_ships_after_the_revision_cap()
+    public async Task A_persistent_leak_ships_the_constrained_fallback_after_the_cap()
     {
-        // A reply that always leaks, no matter how many times it's regenerated; the math-check stays clean throughout.
+        // A reply that always leaks, no matter how many times it's regenerated; the math-check stays clean
+        // throughout. Each generate call's system prompt is captured as it lands.
+        var generatePrompts = new List<string>();
         var caller = new Mock<IOpenRouterChatCaller>();
-        SetupStep(caller, "a reply.");
+        caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
+                Capture.In(generatePrompts), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(new ExaminerReply("a reply.")));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(Leaks: true, WhatLeaked: "still gives away the counterexample"));
+        SetupStep(caller, new LeakCheckResult(Leaks: true, WhatLeaked: "still gives away the counterexample", WithholdsClose: false, Established: ""));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // Generate ran the initial attempt plus the capped revisions, then shipped the still-leaking reply.
-        VerifyStepCalled<string>(caller, Times.Exactly(RevisionCap + 1));
-        Assert.Equal(RevisionCap, outcome.Revisions);
+        // Generate ran the initial attempt, the capped revisions, and the fallback on top.
+        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(RevisionCap + 2));
+
+        // The fallback shipped, counted like a regeneration and still carrying the flagged verdict.
+        Assert.Equal(RevisionCap + 1, outcome.Revisions);
+        Assert.True(outcome.SafeFallback);
         Assert.True(outcome.LeakCheck.Leaks);
+
+        // The last generate ran under the safe note, not another correction.
+        Assert.Contains("minimal holding reply", generatePrompts[^1]);
+    }
+
+    /// <summary>
+    /// A reply that keeps pressing a candidate whose solution is already complete regenerates with the close
+    /// instruction — the note carries what the candidate established — and the loop stops once the fresh attempt
+    /// concedes.
+    /// </summary>
+    [Fact]
+    public async Task A_withheld_close_regenerates_until_the_reply_concedes()
+    {
+        // Capture each generate call's system prompt as it lands.
+        var generatePrompts = new List<string>();
+        var caller = new Mock<IOpenRouterChatCaller>();
+        caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
+                Capture.In(generatePrompts), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(new ExaminerReply("keeps pressing.")))
+            .ReturnsAsync(Result(new ExaminerReply("conceding reply.")));
+
+        // The math stays clean; the leak-check flags the first attempt as withholding an earned close, then clears.
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
+                It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(new LeakCheckResult(
+                Leaks: false, WhatLeaked: "", WithholdsClose: true, Established: "the full divisor-pairing chain")))
+            .ReturnsAsync(Result(new LeakCheckResult(
+                Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // It regenerated exactly once and shipped the conceding reply with a clean verdict.
+        Assert.Equal(1, outcome.Revisions);
+        Assert.Equal("conceding reply.", outcome.Reply);
+        Assert.False(outcome.LeakCheck.WithholdsClose);
+
+        // The regenerate's prompt carried what the candidate established, so the generator knows the exam is over.
+        Assert.Contains("the full divisor-pairing chain", generatePrompts[1]);
+    }
+
+    /// <summary>
+    /// A reply that keeps withholding an earned close burns through the revision cap, then ships the constrained
+    /// fallback generated under the closing note instead of the never-closing draft — still carrying its withheld-close
+    /// verdict, so the trace shows the exam never got to end.
+    /// </summary>
+    [Fact]
+    public async Task A_persistent_withheld_close_ships_the_constrained_fallback_after_the_cap()
+    {
+        // A reply that always withholds the close, no matter how many times it's regenerated; the math-check stays
+        // clean throughout. Each generate call's system prompt is captured as it lands.
+        var generatePrompts = new List<string>();
+        var caller = new Mock<IOpenRouterChatCaller>();
+        caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
+                Capture.In(generatePrompts), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(new ExaminerReply("keeps pressing.")));
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, new LeakCheckResult(
+            Leaks: false, WhatLeaked: "", WithholdsClose: true, Established: "the full divisor-pairing chain"));
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // Generate ran the initial attempt, the capped revisions, and the fallback on top.
+        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(RevisionCap + 2));
+
+        // The fallback shipped, counted like a regeneration and still carrying the withheld-close verdict.
+        Assert.Equal(RevisionCap + 1, outcome.Revisions);
+        Assert.True(outcome.SafeFallback);
+        Assert.True(outcome.LeakCheck.WithholdsClose);
+
+        // The last generate ran under the closing note — a withheld close is the surviving fault, so the fallback
+        // ends the exam instead of retreating to a holding question.
+        Assert.Contains("closing reply", generatePrompts[^1]);
     }
 
     /// <summary>
@@ -140,11 +230,11 @@ public class ExaminerLoopTests
         // Capture each generate call's system prompt as it lands.
         var generatePrompts = new List<string>();
         var caller = new Mock<IOpenRouterChatCaller>();
-        caller.SetupSequence(mock => mock.CompleteAsync<string>(
+        caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
                 Capture.In(generatePrompts), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result("first reply."))
-            .ReturnsAsync(Result("revised reply."));
+            .ReturnsAsync(Result(new ExaminerReply("first reply.")))
+            .ReturnsAsync(Result(new ExaminerReply("revised reply.")));
 
         // The first attempt fails the math-check and leaks; the regenerate clears both.
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
@@ -155,8 +245,8 @@ public class ExaminerLoopTests
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample")))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "")));
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample", WithholdsClose: false, Established: "")))
+            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -182,9 +272,9 @@ public class ExaminerLoopTests
     {
         // Each of the three calls a clean turn makes reports its own cost and token usage.
         var caller = new Mock<IOpenRouterChatCaller>();
-        SetupStep(caller, "a reply.", cost: 0.01m, promptTokens: 100, completionTokens: 20);
+        SetupStep(caller, new ExaminerReply("a reply."), cost: 0.01m, promptTokens: 100, completionTokens: 20);
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: ""), cost: 0.03m, promptTokens: 300, completionTokens: 40);
+        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""), cost: 0.03m, promptTokens: 300, completionTokens: 40);
 
         // Run the turn.
         var outcome = await RunAsync(caller);

@@ -53,6 +53,6 @@ public class FakeExaminer(ModelUsage usage = default)
 
         // A fake reply always holds and never leaks; report the configured usage.
         return Task.FromResult(new ExaminerTurnOutcome(
-            reply, new MathCheckResult(true, ""), new LeakCheckResult(false, ""), 0, usage));
+            reply, new MathCheckResult(true, ""), new LeakCheckResult(false, "", false, ""), 0, false, usage));
     }
 }
