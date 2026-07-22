@@ -305,7 +305,7 @@ public class ExaminerLoopTests
 
             // It throws instead of calling the model.
             await Assert.ThrowsAsync<InvalidOperationException>(
-                () => examiner.NextReplyAsync("problem", "reference", transcript));
+                () => examiner.NextReplyAsync("problem", "reference", transcript, new ModelUsageAccumulator()));
 
             // The bool is ignored — the assertion is the point.
             return true;
@@ -326,7 +326,7 @@ public class ExaminerLoopTests
         // Run the loop under throwaway prompt templates and hand back its outcome.
         return await WithTempSettingsAsync(settings =>
             new ExaminerEngine(caller.Object, MsOptions.Create(settings))
-                .NextReplyAsync("problem", "reference", transcript));
+                .NextReplyAsync("problem", "reference", transcript, new ModelUsageAccumulator()));
     }
 
     /// <summary>

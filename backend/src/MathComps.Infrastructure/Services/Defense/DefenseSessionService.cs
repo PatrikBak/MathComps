@@ -3,6 +3,7 @@ using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -218,11 +219,14 @@ public class DefenseSessionService(
     /// <summary>
     /// Runs the examiner over the session's current turns (which must end on a student turn), then stages its reply
     /// and the turn's spend row on the context. The caller's save writes them; this method does no database
-    /// round-trip itself, so a slow turn doesn't hold a connection.
+    /// round-trip itself on the success path, so a slow turn doesn't hold a connection. If the client cancels the
+    /// turn partway, it records what its model calls already cost to its own row, so aborting can't dodge the ceiling
+    /// that keeps the feature free. Other failures propagate unrecorded: they're our fault, not the user's, and the
+    /// process-wide spend tracker still sees their cost.
     /// </summary>
     /// <param name="dbContext">The operation's database context the spend row is staged on.</param>
     /// <param name="session">The session whose conversation to reply to.</param>
-    /// <param name="userId">The user the spend is charged to.</param>
+    /// <param name="userId">The user the spend is recorded against.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     private async Task RunExaminerAndStageAsync(
         MathCompsDbContext dbContext, DefenseSession session, Guid userId, CancellationToken cancellationToken)
@@ -233,30 +237,81 @@ public class DefenseSessionService(
         // Time the engine run, the turn's dominant latency.
         var stopwatch = Stopwatch.StartNew();
 
-        // Run the loop to produce the examiner's reply.
-        var outcome = await examiner.NextReplyAsync(
-            session.ProblemStatement, session.ProblemReference, transcript, cancellationToken);
+        // The turn's running spend, folded per model call so its partial total survives a cancel before the
+        // examiner returns.
+        var usage = new ModelUsageAccumulator();
 
-        // Stop the clock before the follow-up bookkeeping.
-        stopwatch.Stop();
+        // Produce and stage the reply; a client abort mid-turn is caught below.
+        try
+        {
+            // Run the loop to produce the examiner's reply.
+            var outcome = await examiner.NextReplyAsync(
+                session.ProblemStatement, session.ProblemReference, transcript, usage, cancellationToken);
 
-        // One timestamp for the reply turn and its spend row.
-        var repliedAt = DateTimeOffset.UtcNow;
+            // Stop the clock before the follow-up bookkeeping.
+            stopwatch.Stop();
 
-        // Append the examiner's reply as the next turn.
-        AppendTurn(session, TranscriptRole.Examiner, outcome.Reply, repliedAt);
+            // One timestamp for the reply turn and its spend row.
+            var repliedAt = DateTimeOffset.UtcNow;
 
-        // Record what the turn spent and how long it ran, independent of the session so it survives a delete.
+            // Append the examiner's reply as the next turn.
+            AppendTurn(session, TranscriptRole.Examiner, outcome.Reply, repliedAt);
+
+            // Record what the turn spent and how long it ran, independent of the session so it survives a delete.
+            dbContext.DefenseSpends.Add(new DefenseSpend
+            {
+                UserId = userId,
+                Cost = outcome.Usage.Cost,
+                PromptTokens = outcome.Usage.PromptTokens,
+                CompletionTokens = outcome.Usage.CompletionTokens,
+                DurationMs = (int)stopwatch.ElapsedMilliseconds,
+                Revisions = outcome.Revisions,
+                CreatedAt = repliedAt,
+            });
+        }
+        // Only our own token firing is a client abort. An upstream HTTP/LLM timeout also throws
+        // OperationCanceledException (as TaskCanceledException, off an internal token), but that's our fault, not the
+        // user's, so it falls through this catch and propagates unrecorded.
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The client aborted the turn, but its completed calls already cost us; record that against the user. A
+            // turn cancelled before any call ran accrued nothing, so there's nothing to write.
+            var accrued = usage.Accrued;
+            if (accrued != ModelUsage.Zero)
+                await WriteCancelledTurnSpendAsync(userId, accrued, (int)stopwatch.ElapsedMilliseconds);
+
+            // Re-throw so the endpoint maps the cancellation unchanged.
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Records a <see cref="DefenseSpend"/> for a turn the client cancelled, logging the cost its model calls already
+    /// ran up so it counts against the user's ceiling. Writes on a fresh context with an uncancellable token, since
+    /// the request's own context and token are already torn down by the abort.
+    /// </summary>
+    /// <param name="userId">The user the spend is recorded against.</param>
+    /// <param name="accrued">What the turn's completed model calls cost before it was cancelled.</param>
+    /// <param name="durationMs">How long the turn ran before it was cancelled, in milliseconds.</param>
+    private async Task WriteCancelledTurnSpendAsync(Guid userId, ModelUsage accrued, int durationMs)
+    {
+        // A fresh context so only the spend row lands, not the cancelled operation's half-built conversation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+
+        // The spend fact for the cancelled turn; the examiner's revision count is lost once it threw, so record none.
         dbContext.DefenseSpends.Add(new DefenseSpend
         {
             UserId = userId,
-            Cost = outcome.Usage.Cost,
-            PromptTokens = outcome.Usage.PromptTokens,
-            CompletionTokens = outcome.Usage.CompletionTokens,
-            DurationMs = (int)stopwatch.ElapsedMilliseconds,
-            Revisions = outcome.Revisions,
-            CreatedAt = repliedAt,
+            Cost = accrued.Cost,
+            PromptTokens = accrued.PromptTokens,
+            CompletionTokens = accrued.CompletionTokens,
+            DurationMs = durationMs,
+            Revisions = 0,
+            CreatedAt = DateTimeOffset.UtcNow,
         });
+
+        // Commit with an uncancellable token, since the request's token is already cancelled on the abort path.
+        await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 
     /// <summary>

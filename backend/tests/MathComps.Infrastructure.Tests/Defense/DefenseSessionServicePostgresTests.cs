@@ -13,13 +13,14 @@ namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Integration tests for <see cref="DefenseSessionService"/> against a real PostgreSQL database, with a fake examiner
-/// (fixed cost and tokens, no live LLM): the conversation flow (start, continue, list, delete), that each turn writes
-/// an independent spend row that outlives the session, ownership isolation, and the guardrails (message length, turn
-/// cap, per-user spend ceiling).
+/// (no live LLM): the conversation flow (start, continue, list, delete), that each turn writes an independent spend
+/// row that outlives the session, ownership isolation, the guardrails (message length, turn cap, per-user spend
+/// ceiling), and that a turn the client cancels still records the cost its calls billed so aborting can't dodge the
+/// ceiling.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture)
-    : PostgresTestBase<IDefenseSessionService>(fixture)
+    : PostgresTestBase<IDefenseSessionService>(fixture), IDisposable
 {
     /// <summary>
     /// The user who owns the sessions under test.
@@ -36,11 +37,34 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     private const decimal TurnCost = 0.02m;
 
+    /// <summary>
+    /// What each cancelled turn costs before it throws.
+    /// </summary>
+    private const decimal CancelCost = 0.40m;
+
+    /// <summary>
+    /// The usage — cost and tokens — each cancelled turn runs up before it throws.
+    /// </summary>
+    private static readonly ModelUsage _cancelUsage = new(CancelCost, PromptTokens: 80, CompletionTokens: 10);
+
+    /// <summary>
+    /// The examiner the service runs against: a scripted no-cost fake by default, or one a cancellation test swaps in
+    /// to run up cost and then throw mid-turn. Read by <see cref="ConfigureServices"/>, so a test sets it before the
+    /// run.
+    /// </summary>
+    private IExaminer _examiner = new FakeExaminer(new ModelUsage(TurnCost, PromptTokens: 150, CompletionTokens: 25));
+
+    /// <summary>
+    /// The source a cancellation test cancels mid-turn (through the examiner) to stand in for the client aborting; its
+    /// token is the one passed to the call, so the service sees a genuine cancellation of its own token.
+    /// </summary>
+    private CancellationTokenSource? _abort;
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
-        // A fake examiner so no LLM is called, reporting a fixed cost and tokens so a spend row is assertable.
-        services.AddScoped<IExaminer>(_ => new FakeExaminer(new ModelUsage(TurnCost, PromptTokens: 150, CompletionTokens: 25)));
+        // The examiner the service runs against — a fake, so no LLM is called and the turn's spend is deterministic.
+        services.AddScoped(_ => _examiner);
 
         // Tight caps so the guardrails are cheap to trip.
         services.Configure<DefenseLimits>(limits =>
@@ -71,6 +95,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Commit the seed.
         await context.SaveChangesAsync();
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        // Drop the last cancellation source a cancel test left behind.
+        _abort?.Dispose();
+
+        // Standard IDisposable: no finalizer needs to run now that cleanup is done.
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -434,6 +468,160 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// A turn aborted after its calls have cost us still records the accrued spend — on its own row, with no session
+    /// left behind — so the cost isn't lost to the cancel.
+    /// </summary>
+    [Fact]
+    public Task Cancelled_turn_records_the_accrued_spend()
+    {
+        // An examiner that runs up cost, then the client aborts before it can finish.
+        _examiner = CancellingAfterCost();
+
+        // Start the turn and assert the abort still recorded it.
+        return RunTestAsync(async service =>
+        {
+            // A token the examiner cancels mid-turn, as a client abort would.
+            _abort = new CancellationTokenSource();
+
+            // Starting runs the examiner, which runs up cost and then aborts.
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => service.StartAsync(_ownerId, Request("prob-1", "my defense"), _abort.Token));
+
+            // The abort still recorded the turn, and left no half-built conversation.
+            await QueryAsync(async context =>
+            {
+                // The user's single spend row for the cancelled turn.
+                var spend = Assert.Single(
+                    await context.DefenseSpends.Where(row => row.UserId == _ownerId).ToListAsync());
+
+                // It carries what the turn cost before it aborted, with no revision count to record.
+                Assert.Equal(_cancelUsage.Cost, spend.Cost);
+                Assert.Equal(_cancelUsage.PromptTokens, spend.PromptTokens);
+                Assert.Equal(_cancelUsage.CompletionTokens, spend.CompletionTokens);
+                Assert.Equal(0, spend.Revisions);
+
+                // The aborted start persisted no session or turns.
+                Assert.Equal(0, await context.DefenseSessions.CountAsync());
+                Assert.Equal(0, await context.DefenseTurns.CountAsync());
+            });
+        });
+    }
+
+    /// <summary>
+    /// A turn aborted before any call ran records nothing — the accrued-nothing guard keeps a junk row out.
+    /// </summary>
+    [Fact]
+    public Task Cancel_before_any_call_bills_records_nothing()
+    {
+        // An examiner that aborts having run up nothing.
+        _examiner = new CancellingExaminer(
+            ModelUsage.Zero, () => new OperationCanceledException(), () => _abort?.Cancel());
+
+        // Start the turn and assert no spend row lands.
+        return RunTestAsync(async service =>
+        {
+            // A token the examiner cancels mid-turn, as a client abort would.
+            _abort = new CancellationTokenSource();
+
+            // Starting aborts before running any call.
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => service.StartAsync(_ownerId, Request("prob-1", "my defense"), _abort.Token));
+
+            // No call ran, so nothing was recorded.
+            Assert.Equal(0, await QueryValueAsync(context =>
+                context.DefenseSpends.CountAsync(row => row.UserId == _ownerId)));
+        });
+    }
+
+    /// <summary>
+    /// Repeatedly cancelling turns accumulates their cost until the daily ceiling is reached, at which point the next
+    /// turn is refused — so a user can't dodge the ceiling by aborting every turn.
+    /// </summary>
+    [Fact]
+    public Task Repeated_cancels_accumulate_until_the_ceiling_refuses()
+    {
+        // An examiner that runs up cost, then aborts, on every turn.
+        _examiner = CancellingAfterCost();
+
+        // Cancel repeatedly and assert the accrued spend eventually trips the ceiling.
+        return RunTestAsync(async service =>
+        {
+            // Cancel enough turns to push the accrued spend over the ceiling; at 0.40 a turn, three reach 1.20 ≥ 1.00.
+            for (var attempt = 0; attempt < 3; attempt++)
+            {
+                // A fresh token each turn, cancelled mid-turn by the examiner.
+                _abort = new CancellationTokenSource();
+
+                // Starting runs the examiner, which runs up cost and then aborts.
+                await Assert.ThrowsAsync<OperationCanceledException>(
+                    () => service.StartAsync(_ownerId, Request("prob-1", "my defense"), _abort.Token));
+            }
+
+            // Each cancelled turn recorded its spend.
+            Assert.Equal(3, await QueryValueAsync(context =>
+                context.DefenseSpends.CountAsync(row => row.UserId == _ownerId)));
+
+            // With the accrued cancels over the ceiling, the next turn is refused before the examiner runs.
+            await Assert.ThrowsAsync<DefenseSpendLimitException>(
+                () => service.StartAsync(_ownerId, Request("prob-1", "one more")));
+        });
+    }
+
+    /// <summary>
+    /// An OperationCanceledException whose request token never fired — the shape an upstream HTTP/LLM timeout takes —
+    /// isn't recorded: it's our fault, not the user's, even though its calls cost us.
+    /// </summary>
+    [Fact]
+    public Task An_upstream_timeout_is_not_charged()
+    {
+        // The turn runs up cost, then throws a cancellation without the request token ever being cancelled.
+        _examiner = new CancellingExaminer(_cancelUsage, () => new OperationCanceledException());
+
+        // Start with an uncancelled token and assert nothing is recorded.
+        return RunTestAsync(async service =>
+        {
+            // The start surfaces the cancellation unchanged.
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => service.StartAsync(_ownerId, Request("prob-1", "my defense")));
+
+            // The token never fired, so it wasn't a client abort: nothing counts against the user's ceiling.
+            Assert.Equal(0, await QueryValueAsync(context =>
+                context.DefenseSpends.CountAsync(row => row.UserId == _ownerId)));
+        });
+    }
+
+    /// <summary>
+    /// A turn that fails for a reason other than a cancellation isn't recorded: the failure is our fault, not the
+    /// user's, so it stays off their ceiling even though its calls cost us.
+    /// </summary>
+    [Fact]
+    public Task A_non_cancellation_failure_is_not_charged()
+    {
+        // The turn runs up cost, then fails the way an exhausted-retry model error would.
+        _examiner = new CancellingExaminer(_cancelUsage, () => new InvalidOperationException("model unavailable"));
+
+        // Start the turn and assert nothing is recorded.
+        return RunTestAsync(async service =>
+        {
+            // The start surfaces the failure unchanged.
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => service.StartAsync(_ownerId, Request("prob-1", "my defense")));
+
+            // No spend row: our fault doesn't count against the user's ceiling.
+            Assert.Equal(0, await QueryValueAsync(context =>
+                context.DefenseSpends.CountAsync(row => row.UserId == _ownerId)));
+        });
+    }
+
+    /// <summary>
+    /// An examiner that runs up the standard cancel cost, cancels the request mid-turn, then throws the cancellation —
+    /// the shape a client abort takes once its calls have run.
+    /// </summary>
+    /// <returns>The cancelling examiner.</returns>
+    private CancellingExaminer CancellingAfterCost() =>
+        new(_cancelUsage, () => new OperationCanceledException(), () => _abort?.Cancel());
+
+    /// <summary>
     /// Starts a session, reporting whether it cleared the spend ceiling (true) or was refused by it (false); any other
     /// failure propagates.
     /// </summary>
@@ -466,4 +654,31 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// <returns>The start request.</returns>
     private static StartDefenseRequest Request(string problemKey, string content) =>
         new(problemKey, "the statement", "the reference", "the opener", content);
+
+    /// <summary>
+    /// An examiner that folds a fixed usage into the turn's accumulator, like a real call would, optionally cancels the
+    /// request, then throws — standing in for a turn that fails partway (a client abort, or another fault the test
+    /// picks).
+    /// </summary>
+    /// <param name="usage">The cost to run up before failing.</param>
+    /// <param name="failure">Builds the exception thrown after the cost is run up, fresh for each call.</param>
+    /// <param name="abort">Cancels the request token before throwing, to model a client abort; null for a fault that
+    /// isn't a cancellation of the caller's token.</param>
+    private sealed class CancellingExaminer(ModelUsage usage, Func<Exception> failure, Action? abort = null) : IExaminer
+    {
+        /// <inheritdoc/>
+        public Task<ExaminerTurnOutcome> NextReplyAsync(
+            string problem, string reference, Transcript transcript, ModelUsageAccumulator turnUsage,
+            CancellationToken cancellationToken)
+        {
+            // Run up the turn's cost the way the real engine folds each call as it lands.
+            turnUsage.Add(usage);
+
+            // Cancel the request mid-turn when the test wants a client abort, so the service sees its own token fire.
+            abort?.Invoke();
+
+            // Then fail before returning a reply, as a cancelled or erroring turn would.
+            throw failure();
+        }
+    }
 }
