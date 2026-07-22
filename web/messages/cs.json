@@ -583,13 +583,11 @@
     },
     "errors": {
       "connectionProblem": "Problém s připojením. Zkouším znovu...",
-      "invalidParameters": "Neplatné parametry požadavku",
       "listAccessDenied": "Tento seznam je soukromý. Pokud je to váš seznam, nejprve se přihlaste.",
       "listNotFound": "Seznam nebyl nalezen",
       "maxFiltersExceeded": "Můžete vybrat maximálně {max} filtrů",
       "problemNotFound": "Úloha \"{problemId}\" nebyla nalezena",
       "serverError": "Server vrátil chybu. Zkouším znovu...",
-      "unexpectedError": "Nastala neočekávaná chyba. Zkouším znovu...",
       "urlFiltersIgnored": "Některé parametry v URL byly ignorovány",
       "urlTooManyFilters": "URL obsahuje příliš mnoho filtrů (maximálně {max})"
     },

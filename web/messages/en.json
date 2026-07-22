@@ -583,13 +583,11 @@
     },
     "errors": {
       "connectionProblem": "Connection problem. Retrying...",
-      "invalidParameters": "Invalid request parameters",
       "listAccessDenied": "This list is private. If it is your list, log in first.",
       "listNotFound": "List not found",
       "maxFiltersExceeded": "You can select a maximum of {max} filters",
       "problemNotFound": "Problem \"{problemId}\" was not found",
       "serverError": "Server returned an error. Retrying...",
-      "unexpectedError": "An unexpected error occurred. Retrying...",
       "urlFiltersIgnored": "Some URL parameters were ignored",
       "urlTooManyFilters": "URL contains too many filters (maximum {max})"
     },

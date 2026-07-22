@@ -1,14 +1,8 @@
 import type { ApiCaller } from '@/hooks/use-api'
 import { wrapApi } from '@/lib/api-utils'
-import type { ApiCallError, ApiResult } from '@/types/api'
+import type { ApiResult } from '@/types/api'
 
 import type { FilterParameters } from '../types/problem-api-types'
-import type {
-  ListAccessDeniedError,
-  ListNotFoundError,
-  ProblemError,
-  ProblemNotFoundError,
-} from '../types/problem-errors'
 import type {
   ContestSelection,
   FilterResponse,
@@ -29,20 +23,18 @@ import {
  * @param apiCall - The API caller function.
  * @param slug - The slug of the problem to fetch.
  *
- * @returns An {@link ApiResult} containing the {@link SingleProblemResult}
- *          if the request is successful, or a {@link ProblemError} if the request fails.
+ * @returns A promise resolving to the single problem with its derived filters, or an error.
  */
 export async function getProblemBySlug(
   apiCall: ApiCaller,
   slug: string
-): Promise<ApiResult<SingleProblemResult, ProblemError>> {
+): Promise<ApiResult<SingleProblemResult>> {
   return wrapApi(
     apiCall<FilterResponse>(() => getProblemBySlugApiUrl(slug), {
       method: 'GET',
     }),
     (data) => {
-      // Backend returns a filter response with exactly one problem (pageSize: 1)
-      // The problem is guaranteed to exist because 404 is handled above
+      // On success the backend returns a filter response with exactly one problem (pageSize: 1)
       const problem = data.problems.items[0]
 
       // We will create filters based on the specific problem's metadata
@@ -104,20 +96,6 @@ export async function getProblemBySlug(
           authors: [],
         },
       }
-    },
-    // Error transformation
-    (error: ApiCallError) => {
-      // Handle special error where we're requesting a problem that doesn't exist
-      if (error.type === 'network' && error.statusCode === 404) {
-        return {
-          type: 'PROBLEM_NOT_FOUND',
-          slug,
-          message: 'Problem not found',
-        } as ProblemNotFoundError
-      }
-
-      // Default case
-      return error
     }
   )
 }
@@ -127,8 +105,7 @@ export async function getProblemBySlug(
  *
  * @param apiCall - The API caller function.
  *
- * @returns An {@link ApiResult} containing the {@link FilterResponse}
- *          if the request is successful, or a {@link ProblemError} if the request fails.
+ * @returns A promise resolving to the base filter options and first page of problems, or an error.
  */
 export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResult<FilterResponse>> {
   return wrapApi(
@@ -177,8 +154,7 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
  * @param pageNumber - The page number to return.
  * @param signal - The signal to abort the request.
  *
- * @returns An {@link ApiResult} containing the {@link FilterResponse}
- *          if the request is successful, or a {@link ProblemError} if the request fails.
+ * @returns A promise resolving to the matching page of problems and updated options, or an error.
  */
 export async function searchProblems(
   apiCall: ApiCaller,
@@ -186,7 +162,7 @@ export async function searchProblems(
   pageSize: number,
   pageNumber: number,
   signal: AbortSignal
-): Promise<ApiResult<FilterResponse, ProblemError>> {
+): Promise<ApiResult<FilterResponse>> {
   // Convert frontend filters to backend format
   const filterParameters = searchFiltersStateToFilterParameters(filters)
 
@@ -209,33 +185,7 @@ export async function searchProblems(
       problems: data.filterResult.problems,
       updatedOptions: data.filterResult.updatedOptions || null,
       listName: data.listName,
-    }),
-    // Error transformation — classify list access errors by HTTP status code
-    (error: ApiCallError): ProblemError => {
-      // Only transform errors when filtering by a specific list
-      if (filters.listContentId && error.type === 'network') {
-        // 404 — the list doesn't exist (bad ID or was deleted)
-        if (error.statusCode === 404) {
-          return {
-            type: 'LIST_NOT_FOUND',
-            listContentId: filters.listContentId,
-            message: 'List not found',
-          } as ListNotFoundError
-        }
-
-        // 403 — the list is private and the user doesn't have access
-        if (error.statusCode === 403) {
-          return {
-            type: 'LIST_ACCESS_DENIED',
-            listContentId: filters.listContentId,
-            message: 'List access denied',
-          } as ListAccessDeniedError
-        }
-      }
-
-      // Default: pass through the original error
-      return error
-    }
+    })
   )
 }
 
@@ -245,8 +195,7 @@ export async function searchProblems(
  * @param apiCall - The API caller function.
  * @param slug - The slug of the problem to toggle the like for.
  *
- * @returns An {@link ApiResult} containing the {@link void}
- *          if the request is successful, or a {@link ProblemError} if the request fails.
+ * @returns A promise resolving to success or an error.
  */
 export async function toggleProblemLike(
   apiCall: ApiCaller,
@@ -263,8 +212,7 @@ export async function toggleProblemLike(
  * @param apiCall - The API caller function.
  * @param slug - The slug of the problem to toggle the mark for.
  *
- * @returns An {@link ApiResult} containing the {@link void}
- *          if the request is successful, or a {@link ProblemError} if the request fails.
+ * @returns A promise resolving to success or an error.
  */
 export async function toggleProblemMark(
   apiCall: ApiCaller,

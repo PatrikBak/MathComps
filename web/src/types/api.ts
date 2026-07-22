@@ -29,24 +29,6 @@ type NetworkError = ApiErrorBase & {
 }
 
 /**
- * Represents an error where the server returned a 5xx status code.
- */
-type ServerError = ApiErrorBase & {
-  /** The discriminator */
-  type: 'server'
-}
-
-/**
- * Represents an error where request parameters are invalid (400 Bad Request).
- */
-type ValidationError = ApiErrorBase & {
-  /** The discriminator */
-  type: 'validation'
-  /** Optional field name that failed validation */
-  field?: string
-}
-
-/**
  * Represents an unexpected error.
  */
 type UnknownError = ApiErrorBase & {
@@ -57,12 +39,7 @@ type UnknownError = ApiErrorBase & {
 /**
  * Combined type for all standard API errors.
  */
-export type ApiCallError =
-  | UnauthenticatedError
-  | NetworkError
-  | ServerError
-  | ValidationError
-  | UnknownError
+export type ApiCallError = UnauthenticatedError | NetworkError | UnknownError
 
 /**
  * Represents a successful API call.
@@ -98,28 +75,4 @@ export type ApiResult<T, E = ApiCallError> = ApiSuccess<T> | ApiFailure<E>
  */
 export function isNetworkError(error: unknown): error is NetworkError {
   return typeof error === 'object' && error !== null && 'type' in error && error.type === 'network'
-}
-
-/**
- * Type guard for {@link ServerError}.
- *
- * @param error - The error to check.
- *
- * @returns True if the error is a {@link ServerError}, false otherwise.
- */
-export function isServerError(error: unknown): error is ServerError {
-  return typeof error === 'object' && error !== null && 'type' in error && error.type === 'server'
-}
-
-/**
- * Type guard for {@link ValidationError}.
- *
- * @param error - The error to check.
- *
- * @returns True if the error is a {@link ValidationError}, false otherwise.
- */
-export function isValidationError(error: unknown): error is ValidationError {
-  return (
-    typeof error === 'object' && error !== null && 'type' in error && error.type === 'validation'
-  )
 }
