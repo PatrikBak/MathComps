@@ -183,8 +183,8 @@
     "historyTitle": "This problem",
     "jumpToLatest": "Jump to latest",
     "newDefense": "New conversation",
-    "opener": "Happy to chat about your solution, or if you're stuck 😇",
-    "placeholder": "Type your reply…",
+    "opener": "Happy to chat about your solution, or to help if you're stuck. I take a moment over each reply, so I don't give too much away or say something wrong 😇",
+    "placeholder": "Explain your thinking…",
     "problemStrip": "Problem statement",
     "rewind": "Rewind to here",
     "rewindError": "The conversation couldn't be rewound.",
@@ -196,7 +196,6 @@
     },
     "sendError": "Your reply couldn't be sent.",
     "thinking": "Thinking",
-    "thinkingLong": "Thinking carefully",
     "title": "Defend your solution",
     "transcriptLabel": "Conversation"
   },
