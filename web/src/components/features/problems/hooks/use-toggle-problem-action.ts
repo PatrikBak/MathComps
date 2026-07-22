@@ -83,7 +83,7 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
   const queryClient = useQueryClient()
 
   // Local storage for pending action slugs
-  const [_, setPendingSlug] = useLocalStorage<string | null>({
+  const [, setPendingSlug] = useLocalStorage<string | null>({
     key: config.pendingStorageKey,
     defaultValue: null,
   })
@@ -110,7 +110,7 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
     },
 
     // After successful server call
-    onSuccess: (_, { problemSlug, isActive }) => {
+    onSuccess: (_data, { problemSlug, isActive }) => {
       // Invalidate in any filtered view to sync the result set with the server.
       // Covers both deactivation (item removed) and undo (item restored).
       if (config.isFilteredView()) {
@@ -134,7 +134,7 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
     },
 
     // Rollback on failure
-    onError: (_, { problemSlug }, context) => {
+    onError: (_error, { problemSlug }, context) => {
       // Rollback the state in the store
       if (context) {
         config.toggleInStore(problemSlug)

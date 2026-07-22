@@ -24,8 +24,8 @@ type UseContestBrowserModalReturn = {
  * - Reads from URL only once on mount (to support direct links with modal open)
  * - Writes to URL when opening/closing (for shareable links and browser history)
  *
- * This design prevents race conditions with debounced filter URL updates,
- * which previously could interfere with the modal's URL-derived state.
+ * Internal state (not URL-derived per render) keeps the modal isolated from debounced filter URL
+ * updates, so those can't race with the modal's own open/close writes.
  */
 export function useContestBrowserModal(): UseContestBrowserModalReturn {
   // The router needed to change the URL when opening/closing the contest browser modal

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api-error'
+import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import { getUserListsApiUrl } from '../services/user-list-api-urls'
@@ -25,6 +25,8 @@ type UseUserListsResult = {
   likedCount: number | undefined
   /** Whether the lists are currently loading */
   isLoading: boolean
+  /** Whether the query settled into an error after exhausting retries */
+  isError: boolean
   /** Whether the API client is ready (user is signed in) */
   isReady: boolean
 }
@@ -60,6 +62,7 @@ export function useUserLists(): UseUserListsResult {
     lists: query.data?.lists,
     likedCount: query.data?.likedCount,
     isLoading: query.isLoading,
+    isError: query.isError,
     isReady: api.state === 'ready',
   }
 }

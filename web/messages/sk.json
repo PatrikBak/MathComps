@@ -25,12 +25,31 @@
     }
   },
   "apiErrors": {
+    "CannotLikeOwnComment": "Nemôžeš dať páči sa mi vlastnému komentáru.",
+    "CommentNotFound": "Tento komentár už neexistuje.",
+    "CommentTargetNotFound": "Obsah, ku ktorému komentár patrí, už neexistuje.",
+    "DefenseMessageEmpty": "Tvoja správa je prázdna.",
+    "DefenseMessageTooLong": "Tvoja správa je príliš dlhá.",
+    "DefenseRewindTarget": "Tento bod na vrátenie už nie je platný.",
+    "DefenseSessionNotFound": "Táto konverzácia už neexistuje.",
+    "DefenseSpendLimit": "Dosiahol sa dnešný limit používania. Skús to znova zajtra.",
+    "DefenseTurnLimit": "Táto konverzácia dosiahla limit počtu správ.",
+    "FavoritesRequireAuthentication": "Ak chcete vidieť obľúbené, prihláste sa.",
     "FILE_TOO_LARGE": "Súbor je príliš veľký. Maximum: {max} MB",
+    "Forbidden": "Na túto akciu nemáte oprávnenie.",
     "INVALID_FILE_TYPE": "Nepovolený typ súboru",
-    "INVALID_REQUEST": "Neplatná požiadavka",
+    "ListAccessDenied": "Tento zoznam je súkromný. Ak je to váš zoznam, najprv sa prihláste.",
+    "ListNotFound": "Zoznam nebol nájdený.",
+    "ListReorderMismatch": "Zoznam sa medzičasom zmenil. Obnovte stránku a skúste to znova.",
+    "MarkStatusRequiresAuthentication": "Ak chcete filtrovať podľa svojho pokroku, prihláste sa.",
+    "NotCommentAuthor": "Upravovať alebo mazať môžeš len vlastné komentáre.",
+    "ProblemNotFound": "Úloha nebola nájdená.",
+    "RateLimited": "Príliš veľa požiadaviek. Chvíľu počkajte a skúste to znova.",
     "SERVER_ERROR": "Chyba servera",
+    "Unauthenticated": "Pre pokračovanie sa prihláste.",
     "UNAUTHORIZED": "Pre túto akciu musíte byť prihlásený",
     "UPLOAD_URL_FAILED": "Nepodarilo sa získať URL pre nahrávanie",
+    "UserNotResolved": "Nepodarilo sa načítať tvoj účet. Skús sa prihlásiť znova.",
     "VALIDATION_FAILED": "Neplatné údaje vo formulári"
   },
   "auth": {
@@ -172,12 +191,6 @@
     "deleteSession": "Odstrániť z histórie",
     "deleteSessionMessage": "Táto konverzácia sa natrvalo odstráni.",
     "deleteSessionTitle": "Odstrániť túto konverzáciu?",
-    "errors": {
-      "DefenseMessageTooLong": "Tvoja správa je príliš dlhá.",
-      "DefenseSessionNotFound": "Táto konverzácia už neexistuje.",
-      "DefenseSpendLimit": "Dosiahol sa dnešný limit používania. Skús to znova zajtra.",
-      "DefenseTurnLimit": "Táto konverzácia dosiahla limit počtu správ."
-    },
     "history": "História",
     "historyError": "Nepodarilo sa načítať tvoje predchádzajúce konverzácie.",
     "historyTitle": "Táto úloha",
@@ -588,6 +601,7 @@
       "maxFiltersExceeded": "Môžete vybrať maximálne {max} filtrov",
       "problemNotFound": "Úloha \"{problemId}\" nebola nájdená",
       "serverError": "Server vrátil chybu. Skúšam znova...",
+      "unexpectedError": "Vyskytla sa neočakávaná chyba.",
       "urlFiltersIgnored": "Niektoré parametre v URL boli ignorované",
       "urlTooManyFilters": "URL obsahuje príliš veľa filtrov (maximálne {max})"
     },
@@ -601,6 +615,9 @@
     "filters": {
       "activeFilters": "Aktívne filtre",
       "allProblems": "Všetky úlohy",
+      "authReasons": {
+        "manageLists": "spravovanie svojich zoznamov"
+      },
       "competitions": "Súťaže",
       "contestsOverview": "Prehľad súťaží",
       "copyListLink": "Kopírovať odkaz",
@@ -647,6 +664,7 @@
       "listLinkCopied": "Odkaz skopírovaný",
       "listNameInvalid": "Názov zoznamu musí mať 1–50 znakov",
       "listShared": "Zoznam zdieľaný a odkaz skopírovaný",
+      "listsLoadError": "Nepodarilo sa načítať tvoje zoznamy.",
       "manageLists": "Spravovať zoznamy",
       "markStatus": "Stav",
       "markStatusAll": "Všetky úlohy",
@@ -840,12 +858,7 @@
       "submit": "Odoslať",
       "submitShortcut": "Odoslať ({modifier} + Enter)",
       "unsupportedFileType": "Nepodporovaný typ súboru. Povolené: obrázky (PNG, JPEG, WebP, GIF) alebo prílohy (PDF, TXT, MD)",
-      "uploadAttachmentFailed": "Nepodarilo sa nahrať prílohu",
-      "uploadFailed": "Nepodarilo sa nahrať súbor",
-      "uploadImageFailed": "Nepodarilo sa nahrať obrázok",
-      "uploading": "Nahrávam {filename}...",
-      "uploadUrlFailed": "Nepodarilo sa získať URL pre nahrávanie",
-      "verificationFailed": "Nepodarilo sa overiť súbor"
+      "uploading": "Nahrávam {filename}..."
     },
     "filters": {
       "apply": "Použiť filtre",
@@ -879,6 +892,9 @@
     },
     "modal": {
       "close": "Zavrieť"
+    },
+    "network": {
+      "offline": "Ste offline. Niektoré akcie nebudú fungovať, kým sa znovu nepripojíte."
     },
     "userMenu": {
       "label": "Používateľské menu",

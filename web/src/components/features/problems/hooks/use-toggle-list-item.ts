@@ -71,7 +71,7 @@ export function useToggleListItem() {
     },
 
     // Handle successful server response
-    onSuccess: (_, { problemSlug, contentId, isInList }) => {
+    onSuccess: (_data, { problemSlug, contentId, isInList }) => {
       // Invalidate the lists cache (problem counts may have changed)
       queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
 
@@ -98,7 +98,7 @@ export function useToggleListItem() {
     },
 
     // Rollback optimistic update on error
-    onError: (_, { problemSlug, contentId }, context) => {
+    onError: (_error, { problemSlug, contentId }, context) => {
       // Rollback the list membership state
       if (context) {
         toggleListMembership(problemSlug, contentId)

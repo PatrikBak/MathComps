@@ -1,8 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
-import { useApi } from '@/hooks/use-api'
+import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import { getListApiUrl } from '../services/user-list-api-urls'
 import { userListQueryKeys } from './use-user-lists'
@@ -23,39 +22,28 @@ type UseDeleteUserListResult = {
  * @returns Mutation function and pending state
  */
 export function useDeleteUserList(): UseDeleteUserListResult {
-  // API client — requires auth
-  const api = useApi({ requireAuth: true })
-
   // Query client for cache invalidation
   const queryClient = useQueryClient()
 
-  // Translations for error messages
+  // Translations for error and auth-prompt messages
   const t = useTranslations('problems.filters')
 
   // Delete mutation
-  const mutation = useMutation({
-    mutationFn: async (contentId: string) => {
-      // Ensure the API client is ready (user is authenticated)
-      if (api.state !== 'ready') throw new Error('API not ready')
-
-      // Call the delete endpoint
-      const response = await api.apiCall(() => getListApiUrl(contentId), {
-        method: 'DELETE',
-      })
-
-      // Rethrow so React Query can handle retries
-      if (!response.success) throw response.error
-    },
+  const mutation = useOptimisticMutation<void, string>({
+    // Call the delete endpoint
+    apiFn: (apiCall, contentId) =>
+      apiCall<void>(() => getListApiUrl(contentId), { method: 'DELETE' }),
 
     // Refetch lists so the deleted list disappears
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
     },
 
-    // Show error toast on failure
-    onError: () => {
-      toast.error(t('deleteListError'))
-    },
+    // The reason shown in the auth prompt
+    authReason: t('authReasons.manageLists'),
+
+    // Fallback copy when the failure carried no recognized code
+    errorMessage: t('deleteListError'),
   })
 
   // Return the mutation

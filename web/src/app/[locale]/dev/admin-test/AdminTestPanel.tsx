@@ -91,7 +91,7 @@ export default function AdminTestPanel() {
           <pre className="mt-3 overflow-x-auto rounded bg-foreground/5 p-3 text-xs">
             {result.success
               ? JSON.stringify(result.data, null, 2)
-              : `${result.error.type} ${'statusCode' in result.error ? result.error.statusCode : ''} — ${result.error.message}`}
+              : `${result.error.statusCode ?? ''} ${result.error.errorCode ?? ''} — ${result.error.message}`}
           </pre>
         )}
       </Section>

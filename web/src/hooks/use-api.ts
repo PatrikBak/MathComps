@@ -2,32 +2,8 @@ import { useAuth } from '@clerk/nextjs'
 import { useLocale } from 'next-intl'
 import { useCallback } from 'react'
 
+import { readErrorCode } from '@/lib/api/api-error-codes'
 import type { ApiResult } from '@/types/api'
-import { BACKEND_ERROR_CODES, type BackendErrorCode } from '@/types/backend-error-codes'
-
-/**
- * Reads the backend's machine-readable failure code from a problem response body, if present.
- *
- * @param response - The non-OK fetch response.
- * @returns The failure code, or undefined when the body carries none or can't be parsed.
- */
-async function readErrorCode(response: Response): Promise<BackendErrorCode | undefined> {
-  try {
-    // Problem responses are JSON
-    const body = await response.json()
-
-    // The code rides as a top-level extension member
-    const errorCode = (body as { errorCode?: unknown }).errorCode
-
-    // Only a code the frontend knows counts; an unknown or non-string value means none
-    return (BACKEND_ERROR_CODES as readonly string[]).includes(errorCode as string)
-      ? (errorCode as BackendErrorCode)
-      : undefined
-  } catch {
-    // A missing or non-JSON body just means no code
-    return undefined
-  }
-}
 
 /**
  * The authenticated API caller. It owns the total error catch: every failure (not signed in, a non-OK
@@ -118,7 +94,6 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
         return {
           success: false,
           error: {
-            type: 'unauthenticated',
             message: 'User is not signed in. Please authenticate first.',
           },
         }
@@ -133,7 +108,6 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
           return {
             success: false,
             error: {
-              type: 'unauthenticated',
               message: 'Failed to retrieve authentication token.',
             },
           }
@@ -165,7 +139,6 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
           return {
             success: false,
             error: {
-              type: 'network',
               message: `API request failed: ${response.statusText}`,
               statusCode: response.status,
               errorCode,
@@ -173,25 +146,34 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
           }
         }
 
-        // Parse and return successful response
-
-        // Check if response has content before parsing JSON
+        // A JSON body is the expected success shape
         const contentType = response.headers.get('content-type')
-        if (contentType && contentType.indexOf('application/json') !== -1) {
-          // If JSON, parse and return
+        if (contentType && contentType.includes('application/json')) {
           const data = await response.json()
           return { success: true, data }
         }
-        // If not JSON (e.g. 204 No Content), return empty object cast as T
-        else {
+
+        // A non-JSON body: only an empty one is a legitimate void success (e.g. a 204 or a bodyless
+        // 200 from a delete). A non-empty non-JSON 2xx (a captive portal or proxy HTML page) is not
+        // real data, so surface it as a failure rather than poisoning the cache with an empty object.
+        const body = await response.text()
+        if (body.trim() === '') {
           return { success: true, data: {} as T }
+        }
+
+        // A 2xx that answered with an unexpected non-JSON body
+        return {
+          success: false,
+          error: {
+            message: `Unexpected non-JSON response (${response.status})`,
+            statusCode: response.status,
+          },
         }
       } catch (error) {
         // Handle network errors, JSON parsing errors, etc.
         return {
           success: false,
           error: {
-            type: 'unknown',
             message: error instanceof Error ? error.message : 'An unknown error occurred',
           },
         }

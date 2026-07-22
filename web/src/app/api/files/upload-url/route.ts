@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server'
 
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 import { FILE_UPLOAD_CONFIG, type FileType } from '@/constants/file-upload-constants'
-import { API_ERROR_CODES } from '@/lib/api/api-error-codes'
 import { ApiError, withAuth } from '@/lib/api/api-handler'
 
 /**
@@ -43,7 +42,7 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
 
   // Validate file type
   if (type !== 'image' && type !== 'attachment') {
-    throw new ApiError(400, { code: API_ERROR_CODES.INVALID_FILE_TYPE })
+    throw new ApiError(400, 'INVALID_FILE_TYPE')
   }
 
   // Get config for the current file type
@@ -51,12 +50,12 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
 
   // Validate content type
   if (!(typeConfig.allowedTypes as readonly string[]).includes(contentType)) {
-    throw new ApiError(400, { code: API_ERROR_CODES.INVALID_FILE_TYPE })
+    throw new ApiError(400, 'INVALID_FILE_TYPE')
   }
 
   // Validate file size (convert MB to bytes)
   if (fileSize > typeConfig.maxFileSizeMB * 1024 * 1024) {
-    throw new ApiError(400, { code: API_ERROR_CODES.FILE_TOO_LARGE, max: typeConfig.maxFileSizeMB })
+    throw new ApiError(400, 'FILE_TOO_LARGE', { max: typeConfig.maxFileSizeMB })
   }
 
   // Generate unique key for R2

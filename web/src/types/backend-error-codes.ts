@@ -20,6 +20,9 @@ export const BACKEND_ERROR_CODES = [
   'DefenseSpendLimit',
   'DefenseRewindTarget',
   'UserNotResolved',
+  'Unauthenticated',
+  'Forbidden',
+  'RateLimited',
 ] as const
 
 /** One of the backend's business-failure codes. */

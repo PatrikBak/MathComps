@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api-error'
+import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import type { CommentTargetType } from '../services/comment-api-types'

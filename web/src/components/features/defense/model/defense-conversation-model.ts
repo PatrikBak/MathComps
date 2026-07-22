@@ -1,5 +1,5 @@
-import { errorCodeOf } from '@/lib/api-error'
-import type { BackendErrorCode } from '@/types/backend-error-codes'
+import { errorCodeOf } from '@/lib/api/api-error'
+import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 import type {
   DefenseProblem,
@@ -40,7 +40,7 @@ type TurnFailed = {
   /** The discriminator. */
   kind: 'failed'
   /** The backend's failure code, or undefined when the failure carried none. */
-  errorCode: BackendErrorCode | undefined
+  errorCode: AppErrorCode | undefined
 }
 
 /**
@@ -63,7 +63,7 @@ type RewindFailed = {
   /** The discriminator. */
   kind: 'failed'
   /** The backend's failure code, or undefined when the failure carried none. */
-  errorCode: BackendErrorCode | undefined
+  errorCode: AppErrorCode | undefined
 }
 
 /**
@@ -86,7 +86,7 @@ type DeleteFailed = {
   /** The discriminator. */
   kind: 'failed'
   /** The backend's failure code, or undefined when the failure carried none. */
-  errorCode: BackendErrorCode | undefined
+  errorCode: AppErrorCode | undefined
 }
 
 /**

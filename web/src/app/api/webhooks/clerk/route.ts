@@ -6,6 +6,7 @@ import { Webhook } from 'svix'
 
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/i18n'
+import { ApiError, withApiHandler } from '@/lib/api/api-handler'
 import { sendEmail } from '@/lib/email/email-sender'
 import {
   generatePasswordResetEmail,
@@ -18,8 +19,11 @@ import { isEmailCreatedEvent } from '@/types/clerk-webhook'
  * Handles Clerk webhooks. We will handle handle email.created events which
  * send verification code for either registration or password reset. No
  * unnecessary spam 🥳
+ *
+ * Wrapped so a missing secret or a failing send returns a structured, logged error and svix can retry.
+ * It speaks the same JSON error contract every other route does.
  */
-export async function POST(request: NextRequest) {
+export const POST = withApiHandler(async (request: NextRequest) => {
   // Get webhook secret from environment
   const webhookSecret = getRequiredEnv('CLERK_WEBHOOK_SECRET')
 
@@ -32,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   // Ensure all required headers are present
   if (!svixId || !svixTimestamp || !svixSignature) {
-    return NextResponse.json({ error: 'Missing svix headers' }, { status: 400 })
+    throw new ApiError(400, 'VALIDATION_FAILED')
   }
 
   // We need to parse out the webhook event
@@ -47,7 +51,7 @@ export async function POST(request: NextRequest) {
     }) as ClerkWebhookEvent
   } catch {
     // Bad signature / event format
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+    throw new ApiError(400, 'VALIDATION_FAILED')
   }
 
   // Handle email.created events only
@@ -99,9 +103,9 @@ export async function POST(request: NextRequest) {
     html: emailHtml,
   })
 
-  // Handle errors
+  // A failed send is a server-side error; throwing lets svix retry and leaves a logged trace
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: result.statusCode })
+    throw new ApiError(502, 'SERVER_ERROR')
   }
 
   // If no error, we managed to send the email correctly
@@ -112,4 +116,4 @@ export async function POST(request: NextRequest) {
     },
     { status: 200 }
   )
-}
+})

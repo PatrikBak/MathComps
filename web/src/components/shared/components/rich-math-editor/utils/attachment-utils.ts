@@ -1,18 +1,25 @@
 import type { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { API_ERROR_CODES } from '@/lib/api/api-error-codes'
-import { type ApiErrorTranslator, translateApiError } from '@/lib/api/api-error-utils'
-import {
-  type FileType,
-  isAllowedMimeType,
-  isFileUploadError,
-  validateFile,
-} from '@/lib/file-upload-utils'
+import { errorCodeOf, errorDataOf } from '@/lib/api/api-error'
+import { type ApiErrorTranslator, resolveErrorMessage } from '@/lib/api/api-error-utils'
+import { type FileType, isAllowedMimeType, validateFile } from '@/lib/file-upload-utils'
 import { uploadAttachment, uploadImage } from '@/lib/file-upload-utils'
 
 /** Maximum number of attachments allowed per comment */
 export const MAX_ATTACHMENTS_PER_COMMENT = 3
+
+/**
+ * Toasts the localized copy for a failed upload, resolving the thrown error's code (with any
+ * interpolation values) through the central resolver.
+ *
+ * @param error - The error a validation or upload step threw.
+ * @param translate - The translator bound to the `apiErrors` namespace.
+ */
+function toastUploadError(error: unknown, translate: ApiErrorTranslator): void {
+  // Resolve the thrown code to copy, falling back to the generic server error
+  toast.error(resolveErrorMessage(errorCodeOf(error), translate, { data: errorDataOf(error) }))
+}
 
 /** Maximum number of images allowed per comment */
 export const MAX_IMAGES_PER_COMMENT = 5
@@ -156,7 +163,7 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
     config = ATTACHMENT_UPLOAD_CONFIG
   } else {
     // This shouldn't happen as caller should validate, but handle gracefully
-    toast.error(tApiErrors(API_ERROR_CODES.INVALID_FILE_TYPE))
+    toast.error(tApiErrors('INVALID_FILE_TYPE'))
     return { success: false }
   }
 
@@ -164,13 +171,8 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
     // Validate file type and size
     validateFile(file, config.fileType)
   } catch (error) {
-    // Show translated validation error
-    if (isFileUploadError(error)) {
-      toast.error(translateApiError(tApiErrors, error.errorResponse))
-    } else {
-      // Fallback for unexpected errors
-      toast.error(tApiErrors(API_ERROR_CODES.SERVER_ERROR))
-    }
+    // Show the validation error's localized copy
+    toastUploadError(error, tApiErrors)
 
     // Return validation failure
     return { success: false }
@@ -234,13 +236,8 @@ export function handleFileUpload(params: FileUploadParams): FileValid {
       // Clean up loading toast
       toast.dismiss(loadingToastId)
 
-      // Show translated error message
-      if (isFileUploadError(error)) {
-        toast.error(translateApiError(tApiErrors, error.errorResponse))
-      } else {
-        // Fallback for unexpected errors
-        toast.error(tApiErrors(API_ERROR_CODES.SERVER_ERROR))
-      }
+      // Show the upload error's localized copy
+      toastUploadError(error, tApiErrors)
     })
 
   // Return success to indicate upload started

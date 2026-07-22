@@ -370,7 +370,7 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
     }
 
     // Fetch user lists
-    const { lists, isLoading } = useUserLists()
+    const { lists, isLoading, isError } = useUserLists()
 
     // Mutation hooks
     const { renameList } = useRenameUserList()
@@ -467,6 +467,10 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
               <div className="col-span-full flex items-center justify-center py-8">
                 <LoadingSpinner className="h-5 w-5" />
               </div>
+            ) : isError ? (
+              <p className="col-span-full text-sm text-muted py-4 text-center">
+                {t('listsLoadError')}
+              </p>
             ) : lists && lists.length > 0 ? (
               <DndContext
                 sensors={sensors}

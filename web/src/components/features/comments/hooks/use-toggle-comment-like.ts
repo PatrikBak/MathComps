@@ -30,7 +30,7 @@ export function useToggleCommentLike() {
   const t = useTranslations('comments')
 
   // Local storage for pending comment like ID
-  const [_, setPendingLikeId] = useLocalStorage<string | null>({
+  const [, setPendingLikeId] = useLocalStorage<string | null>({
     key: PENDING_COMMENT_LIKE_STORAGE_KEY,
     defaultValue: null,
   })

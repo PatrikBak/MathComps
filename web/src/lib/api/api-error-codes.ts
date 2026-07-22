@@ -1,52 +1,73 @@
+import { BACKEND_ERROR_CODES, type BackendErrorCode } from '@/types/backend-error-codes'
+
 /**
- * API error codes for structured error responses.
+ * Error codes emitted by the app's own Next.js API routes (file upload, contact, webhooks). Distinct
+ * from the C# backend's {@link BackendErrorCode}s.
  */
-export const API_ERROR_CODES = {
-  // File upload errors
-  INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
-  FILE_TOO_LARGE: 'FILE_TOO_LARGE',
-  UPLOAD_URL_FAILED: 'UPLOAD_URL_FAILED',
+const NODE_ERROR_CODES = [
+  'INVALID_FILE_TYPE',
+  'FILE_TOO_LARGE',
+  'UPLOAD_URL_FAILED',
+  'VALIDATION_FAILED',
+  'SERVER_ERROR',
+  'UNAUTHORIZED',
+] as const
 
-  // Validation errors
-  INVALID_REQUEST: 'INVALID_REQUEST',
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-
-  // Auth errors
-  UNAUTHORIZED: 'UNAUTHORIZED',
-
-  // Generic errors
-  SERVER_ERROR: 'SERVER_ERROR',
-} as const
-
-/** Type for API error codes */
-type ApiErrorCode = (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES]
+/** One of the Next.js route error codes. */
+export type NodeErrorCode = (typeof NODE_ERROR_CODES)[number]
 
 /**
- * Structured error response from API routes.
+ * Every machine-readable error code the app can surface, from either the C# backend or a Next.js route.
+ * Both wire it as a top-level `errorCode` field, so one client parser and one copy resolver serve both.
+ */
+export type AppErrorCode = BackendErrorCode | NodeErrorCode
+
+/** Every recognized code. */
+const ALL_ERROR_CODES: readonly string[] = [...BACKEND_ERROR_CODES, ...NODE_ERROR_CODES]
+
+/**
+ * Narrows a value read off a response body to a code the app recognizes.
  *
- * Contains an error code for client-side translation and optional
- * additional data for message interpolation (e.g., max file size).
+ * @param value - The candidate `errorCode`.
+ *
+ * @returns Whether it is a known {@link AppErrorCode}.
  */
-export type ApiErrorResponse = {
-  /** The error code for client-side translation lookup */
-  code: ApiErrorCode
-  /** Optional additional data for message interpolation */
-  [key: string]: unknown
+function isAppErrorCode(value: unknown): value is AppErrorCode {
+  // Only a string that names one of the known codes counts
+  return typeof value === 'string' && ALL_ERROR_CODES.includes(value)
 }
 
 /**
- * Type guard to check if an error response has a valid API error code.
+ * Reads the machine-readable failure code off an already-parsed response body.
  *
- * @param error - The error response to check
+ * @param body - The parsed JSON body of a failed response.
  *
- * @returns True if the error response has a valid API error code, false otherwise
+ * @returns The recognized code, or undefined when the body carries none.
  */
-export function isApiErrorResponse(error: unknown): error is ApiErrorResponse {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof (error as ApiErrorResponse).code === 'string' &&
-    Object.values(API_ERROR_CODES).includes((error as ApiErrorResponse).code as ApiErrorCode)
-  )
+export function errorCodeFromBody(body: unknown): AppErrorCode | undefined {
+  // The code rides as a top-level field on both the C# problem body and our route bodies
+  const errorCode = (body as { errorCode?: unknown } | null)?.errorCode
+
+  // Only a code the frontend knows counts; anything else means none
+  return isAppErrorCode(errorCode) ? errorCode : undefined
+}
+
+/**
+ * Best-effort reads the failure code off a non-OK response.
+ *
+ * @param response - The non-OK fetch response.
+ *
+ * @returns The recognized code, or undefined when the body carries none or can't be parsed.
+ */
+export async function readErrorCode(response: Response): Promise<AppErrorCode | undefined> {
+  try {
+    // Both the C# backend and our routes answer a failure with a JSON body
+    const body = await response.json()
+
+    // Pull the code off the parsed body
+    return errorCodeFromBody(body)
+  } catch {
+    // A missing or non-JSON body just means no code
+    return undefined
+  }
 }
