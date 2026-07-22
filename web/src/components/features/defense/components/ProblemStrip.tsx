@@ -20,7 +20,7 @@ type ProblemStripProps = {
  */
 export function ProblemStrip({ label, statement }: ProblemStripProps) {
   return (
-    <details open className="group border-b border-foreground/10 bg-background/20">
+    <details open className="group border-b border-foreground/10">
       {/* The bar that toggles the statement */}
       <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground sm:px-5 [&::-webkit-details-marker]:hidden">
         {/* Chevron rotates as the strip opens */}

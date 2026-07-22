@@ -252,16 +252,16 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
       showCloseButton={false}
       padded={false}
       ariaLabel={t('title')}
-      className="flex h-[100dvh] w-full flex-col sm:h-[85vh] sm:max-w-3xl"
+      className="flex h-[100dvh] w-full flex-col sm:h-[92vh] sm:max-w-4xl"
     >
       {/* What's being defended + session controls + close */}
-      <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-3 sm:px-5">
+      <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
         {/* Title and problem name */}
-        <div className="min-w-0">
-          <div className="truncate text-base font-bold text-foreground sm:text-lg">
+        <div className="flex min-w-0 items-baseline gap-2">
+          <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
             {t('title')}
-          </div>
-          <div className="truncate text-xs text-muted">{problem.title}</div>
+          </span>
+          <span className="truncate text-xs text-muted">{problem.title}</span>
         </div>
 
         {/* Push the controls to the trailing edge */}
