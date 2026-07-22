@@ -168,10 +168,18 @@
     "SK": "Slovensko"
   },
   "defense": {
+    "deleteError": "Konverzaci se nepodařilo odstranit.",
     "deleteSession": "Odebrat z historie",
     "deleteSessionMessage": "Tato konverzace se trvale odstraní.",
     "deleteSessionTitle": "Odebrat tuto konverzaci?",
+    "errors": {
+      "DefenseMessageTooLong": "Tvoje zpráva je příliš dlouhá.",
+      "DefenseSessionNotFound": "Tato konverzace už neexistuje.",
+      "DefenseSpendLimit": "Byl dosažen dnešní limit využití. Zkus to znovu zítra.",
+      "DefenseTurnLimit": "Tato konverzace dosáhla limitu počtu zpráv."
+    },
     "history": "Historie",
+    "historyError": "Nepodařilo se načíst tvoje předchozí konverzace.",
     "historyTitle": "Tato úloha",
     "jumpToLatest": "Přejít na nejnovější",
     "newDefense": "Nová konverzace",

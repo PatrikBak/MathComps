@@ -1,3 +1,6 @@
+import { errorCodeOf } from '@/lib/api-error'
+import type { BackendErrorCode } from '@/types/backend-error-codes'
+
 import type {
   DefenseProblem,
   DefenseSession,
@@ -7,16 +10,89 @@ import type {
 } from './defense-types'
 
 /**
- * The outcome of sending a student turn: `sent` when the examiner replied, `failed` when the round-trip
- * errored, `stopped` when the student aborted it, `busy` when a turn was already in flight.
+ * A sent student turn: the examiner replied and the transcript advanced.
  */
-export type SendOutcome = 'sent' | 'failed' | 'stopped' | 'busy'
+type TurnSent = {
+  /** The discriminator. */
+  kind: 'sent'
+}
 
 /**
- * The outcome of a rewind: `done` when the conversation was truncated, `failed` when the round-trip
- * errored (leaving the conversation untouched).
+ * A stopped student turn: the student aborted the round-trip, or a session switch superseded it.
  */
-export type RewindOutcome = 'done' | 'failed'
+type TurnStopped = {
+  /** The discriminator. */
+  kind: 'stopped'
+}
+
+/**
+ * A refused student turn: a turn was already in flight, so the double-tap landed nothing new.
+ */
+type TurnBusy = {
+  /** The discriminator. */
+  kind: 'busy'
+}
+
+/**
+ * A failed student turn: the round-trip errored on the still-open conversation.
+ */
+type TurnFailed = {
+  /** The discriminator. */
+  kind: 'failed'
+  /** The backend's failure code, or undefined when the failure carried none. */
+  errorCode: BackendErrorCode | undefined
+}
+
+/**
+ * The outcome of sending a student turn.
+ */
+export type SendOutcome = TurnSent | TurnStopped | TurnBusy | TurnFailed
+
+/**
+ * A completed rewind: the conversation was truncated to the kept prefix.
+ */
+type RewindDone = {
+  /** The discriminator. */
+  kind: 'done'
+}
+
+/**
+ * A failed rewind: the round-trip errored, leaving the conversation untouched.
+ */
+type RewindFailed = {
+  /** The discriminator. */
+  kind: 'failed'
+  /** The backend's failure code, or undefined when the failure carried none. */
+  errorCode: BackendErrorCode | undefined
+}
+
+/**
+ * The outcome of a rewind.
+ */
+export type RewindOutcome = RewindDone | RewindFailed
+
+/**
+ * A completed delete: the session was removed from the store.
+ */
+type DeleteDone = {
+  /** The discriminator. */
+  kind: 'done'
+}
+
+/**
+ * A failed delete: the round-trip errored, so the session remains.
+ */
+type DeleteFailed = {
+  /** The discriminator. */
+  kind: 'failed'
+  /** The backend's failure code, or undefined when the failure carried none. */
+  errorCode: BackendErrorCode | undefined
+}
+
+/**
+ * The outcome of deleting a session.
+ */
+export type DeleteOutcome = DeleteDone | DeleteFailed
 
 /**
  * The observable state of a defense conversation.
@@ -33,8 +109,7 @@ export type DefenseConversationState = {
 }
 
 /**
- * The backend calls the model drives, passed to each action so the state machine can run against a
- * controllable fake.
+ * The backend calls the model drives, passed to each action.
  */
 export type DefenseConversationServices = {
   /** Advances the conversation by one turn: saves the student's turn and answers it in one round-trip. */
@@ -64,9 +139,9 @@ export type DefenseConversationModelOptions = {
 type InFlight = {
   /** Aborts the round-trip. */
   controller: AbortController
-  /** The student turn's markdown/math source, reclaimed on a stop. */
+  /** The student turn's markdown/math source. */
   content: string
-  /** The transcript before the student's turn, restored on a stop or failure. */
+  /** The transcript before the student's turn. */
   priorTurns: readonly Turn[]
 }
 
@@ -80,7 +155,7 @@ type InFlight = {
  * @returns The turn.
  */
 function draftTurn(role: TurnRole, content: string): Turn {
-  // A turn shown before persistence
+  // The unsaved draft turn
   return { role, content }
 }
 
@@ -174,10 +249,10 @@ export class DefenseConversationModel {
     content: string,
     services: Pick<DefenseConversationServices, 'submitTurn'>
   ): Promise<SendOutcome> => {
-    // Deterministic guard against a double-tap: a second send that outruns the composer's Send/Stop
-    // swap is refused here, so the double-tap lands a single turn
+    // Deterministic guard against a double-tap: a second send before the first settles is refused, so
+    // the double-tap lands a single turn
     if (this.currentRun !== null) {
-      return 'busy'
+      return { kind: 'busy' }
     }
 
     // Snapshot the transcript so a stop or failure can roll back to it
@@ -213,7 +288,7 @@ export class DefenseConversationModel {
 
       // A stop or switch superseded this run during the wait: drop the reply it no longer owns
       if (run.controller.signal.aborted || !this.ownsView(run)) {
-        return 'stopped'
+        return { kind: 'stopped' }
       }
 
       // Swap in the server-dated transcript, open the session, and drop the indicator
@@ -230,12 +305,12 @@ export class DefenseConversationModel {
       this.onSessionsChanged()
 
       // The reply landed
-      return 'sent'
-    } catch {
+      return { kind: 'sent' }
+    } catch (error) {
       // A stop or switch aborted this run, or it no longer owns the view: stay silent, its rollback
       // was handled by whoever took over
       if (run.controller.signal.aborted || !this.ownsView(run)) {
-        return 'stopped'
+        return { kind: 'stopped' }
       }
 
       // A real failure on the still-open conversation: drop the optimistic turn and the indicator
@@ -244,8 +319,8 @@ export class DefenseConversationModel {
       // The run is over
       this.currentRun = null
 
-      // The round-trip failed
-      return 'failed'
+      // The round-trip failed, carrying why it failed
+      return { kind: 'failed', errorCode: errorCodeOf(error) }
     }
   }
 
@@ -264,8 +339,10 @@ export class DefenseConversationModel {
     // Abort the in-flight round-trip
     inFlight.controller.abort()
 
-    // Drop the optimistic student turn and the indicator, and reopen the gate
+    // Drop the optimistic student turn and the indicator
     this.setState({ turns: inFlight.priorTurns, isThinking: false })
+
+    // Reopen the gate for the next send
     this.currentRun = null
 
     // Hand the reclaimed text back to the caller
@@ -314,23 +391,40 @@ export class DefenseConversationModel {
    *
    * @param sessionId - The id of the session to delete.
    * @param services - The backend call to remove the session.
+   *
+   * @returns How the delete resolved.
    */
   deleteSession = async (
     sessionId: string,
     services: Pick<DefenseConversationServices, 'deleteSession'>
-  ): Promise<void> => {
-    // Deleting the open session leaves nothing to show, so drop to a fresh conversation up front: this
-    // cancels its in-flight turn, and doing it before the await keeps a session switch during the
-    // delete from being clobbered by a stale re-check afterwards
-    if (sessionId === this.state.currentSessionId) {
-      this.startNew()
-    }
-
-    // Remove it from the store, refreshing the history either way: a failed delete leaves the session in
-    // place, so re-fetching restores it to the list rather than leaving a phantom removal on screen
+  ): Promise<DeleteOutcome> => {
+    // Refresh the history either way: a failed delete leaves the session in place, so re-fetching
+    // restores it to the list rather than leaving a phantom removal on screen
     try {
-      await services.deleteSession(sessionId)
+      // Remove it from the store; a missing session is already gone, so a not-found is a successful
+      // delete, not a failure
+      try {
+        await services.deleteSession(sessionId)
+      } catch (error) {
+        // The code the delete failed with
+        const errorCode = errorCodeOf(error)
+
+        // Only a real failure reports back; a missing session falls through as already-deleted
+        if (errorCode !== 'DefenseSessionNotFound') {
+          return { kind: 'failed', errorCode }
+        }
+      }
+
+      // The session is gone: drop to a fresh conversation when it was the open one (this also cancels
+      // any in-flight turn). Re-checking currentSessionId guards a session switch during the delete.
+      if (sessionId === this.state.currentSessionId) {
+        this.startNew()
+      }
+
+      // The session was removed
+      return { kind: 'done' }
     } finally {
+      // Re-sync the history either way: a failed delete restores the session, a success drops it
       this.onSessionsChanged()
     }
   }
@@ -353,15 +447,15 @@ export class DefenseConversationModel {
     // Only a saved conversation has turns on the server to drop
     const sessionId = this.state.currentSessionId
     if (sessionId === null) {
-      return 'failed'
+      return { kind: 'failed', errorCode: undefined }
     }
 
     try {
       // Truncate the persisted conversation before touching the view
       await services.rewindTurns(sessionId, keepThroughSequence)
-    } catch {
+    } catch (error) {
       // The server still holds the full conversation, so leave the transcript as it was
-      return 'failed'
+      return { kind: 'failed', errorCode: errorCodeOf(error) }
     }
 
     // Drop any turn still in flight so a trailing reply can't repaint the shortened transcript
@@ -374,7 +468,7 @@ export class DefenseConversationModel {
     this.onSessionsChanged()
 
     // The conversation was rewound
-    return 'done'
+    return { kind: 'done' }
   }
 
   /**
@@ -410,8 +504,10 @@ export class DefenseConversationModel {
     // Stop any in-flight round-trip
     this.currentRun?.controller.abort()
 
-    // Drop its record and the indicator so a trailing reply is ignored
+    // Drop its record so a trailing reply is ignored
     this.currentRun = null
+
+    // Clear the thinking indicator
     this.setState({ isThinking: false })
   }
 }
