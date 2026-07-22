@@ -10,10 +10,11 @@ import {
   DefenseConversationModel,
   type DefenseConversationServices,
   type DefenseConversationState,
+  type RewindOutcome,
   type SendOutcome,
 } from '../model/defense-conversation-model'
 import type { DefenseProblem, DefenseSession } from '../model/defense-types'
-import { deleteSession, listSessions, submitTurn } from '../services/session-service'
+import { deleteSession, listSessions, rewindTurns, submitTurn } from '../services/session-service'
 
 /**
  * Builds the query key for the sessions held about a problem.
@@ -40,6 +41,8 @@ type UseDefenseConversationResult = DefenseConversationState &
     send: (content: string) => Promise<SendOutcome>
     /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
     deleteSession: (sessionId: string) => Promise<void>
+    /** Rewinds the open conversation to a chosen point, dropping every later turn. */
+    rewind: (keepThroughSequence: number) => Promise<RewindOutcome>
   }
 
 /**
@@ -94,6 +97,15 @@ export function useDefenseConversation(
       deleteSession: async (sessionId) => {
         // Remove the session
         const result = await deleteSession(apiCall, sessionId)
+
+        // A failed call throws
+        if (!result.success) {
+          throw new Error(result.error.message)
+        }
+      },
+      rewindTurns: async (sessionId, keepThroughSequence) => {
+        // Truncate the session to the kept prefix
+        const result = await rewindTurns(apiCall, sessionId, keepThroughSequence)
 
         // A failed call throws
         if (!result.success) {
@@ -168,6 +180,15 @@ export function useDefenseConversation(
     [model, buildServices]
   )
 
+  // Rewinds the open conversation against the current caller. Stable across renders, like {@link send}.
+  const rewind = useCallback(
+    // buildServices() throws when the client isn't ready; that surfaces as a rejected promise, but rewind
+    // is only reachable on a saved, loaded conversation, so the client is always ready by then
+    async (keepThroughSequence: number): Promise<RewindOutcome> =>
+      model.rewind(keepThroughSequence, buildServices()),
+    [model, buildServices]
+  )
+
   // The conversation state, this problem's history, and the controls that drive it
   return {
     ...state,
@@ -177,5 +198,6 @@ export function useDefenseConversation(
     startNew: model.startNew,
     resume: model.resume,
     deleteSession: removeSession,
+    rewind,
   }
 }

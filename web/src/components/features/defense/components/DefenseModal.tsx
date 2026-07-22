@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/shared/components/Button'
+import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { Modal } from '@/components/shared/components/Modal'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
@@ -27,6 +28,17 @@ type DefenseModalProps = {
   isOpen: boolean
   /** Closes the modal. */
   onClose: () => void
+}
+
+/**
+ * A rewind awaiting confirmation: the cut point to keep through, and the composer draft to restore once
+ * it's confirmed (the rewound student turn's text, or empty when rewinding to an examiner turn).
+ */
+type RewindTarget = {
+  /** The sequence of the last turn to keep; every later turn is dropped. */
+  keepThroughSequence: number
+  /** The text to drop into the composer after the rewind. */
+  draft: string
 }
 
 /**
@@ -69,10 +81,18 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     startNew,
     resume,
     deleteSession,
+    rewind,
   } = useDefenseConversation(problem, t('opener'))
 
   // The in-progress composer text
   const [draft, setDraft] = useState('')
+
+  // The rewind awaiting confirmation, or null
+  const [rewindTarget, setRewindTarget] = useState<RewindTarget | null>(null)
+
+  // Rewind is offered only on a saved conversation and never mid-turn; the whole feature is admin-gated
+  // at the trigger
+  const canRewind = !isThinking && currentSessionId !== null
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
@@ -123,6 +143,54 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     // Restore the reclaimed turn, above anything typed while it was in flight
     if (reclaimed !== null) {
       setDraft((current) => (current.trim() ? `${reclaimed}\n\n${current}` : reclaimed))
+    }
+  }
+
+  // Arms the rewind confirmation for the turn at the given index, working out the cut point and the
+  // composer draft to restore: rewinding to an examiner turn keeps it and empties the composer, while
+  // rewinding to a student turn drops it and lifts its text back into the composer to redo. The
+  // transcript is the contiguous 0..N turns the server stores, so a turn's index is its server sequence.
+  const requestRewind = (index: number) => {
+    // The turn the rewind targets
+    const turn = turns[index]
+
+    // Decide the cut point and the draft per who authored the targeted turn
+    switch (turn.role) {
+      // Keep the examiner turn as the new last one; nothing to restore
+      case 'examiner':
+        setRewindTarget({ keepThroughSequence: index, draft: '' })
+        break
+      // Drop the student turn, keeping the examiner turn before it, and restore the dropped text
+      case 'student':
+        setRewindTarget({ keepThroughSequence: index - 1, draft: turn.content })
+        break
+      default:
+        assertNever(turn.role)
+    }
+  }
+
+  // Runs the armed rewind, restoring the composer draft on success
+  const confirmRewind = async () => {
+    // Nothing armed
+    if (rewindTarget === null) {
+      return
+    }
+
+    // Truncate the conversation
+    const outcome = await rewind(rewindTarget.keepThroughSequence)
+
+    // Recover per outcome
+    switch (outcome) {
+      // The tail is gone: restore the target's text, but never clobber a draft the student is mid-typing
+      case 'done':
+        setDraft((current) => (current.trim() ? current : rewindTarget.draft))
+        break
+      // The round-trip failed: tell the student, leaving the conversation untouched
+      case 'failed':
+        toast.error(t('rewindError'))
+        break
+      default:
+        assertNever(outcome)
     }
   }
 
@@ -191,6 +259,19 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
         isThinking={isThinking}
         thinkingLabel={t('thinking')}
         thinkingLongLabel={t('thinkingLong')}
+        canRewind={canRewind}
+        rewindLabel={t('rewind')}
+        onRewindTurn={requestRewind}
+      />
+
+      {/* Confirmation for a rewind, before the tail is permanently dropped */}
+      <ConfirmDialog
+        isOpen={rewindTarget !== null}
+        onClose={() => setRewindTarget(null)}
+        onConfirm={confirmRewind}
+        title={t('rewindTitle')}
+        message={t('rewindMessage')}
+        variant="danger"
       />
 
       {/* Composer */}

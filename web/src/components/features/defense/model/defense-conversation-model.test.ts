@@ -62,6 +62,9 @@ class FakeBackend implements DefenseConversationServices {
   /** When set, deleteSession waits on this before resolving. */
   deleteGate: PromiseWithResolvers<void> | null = null
 
+  /** When true, the next rewindTurns throws instead of truncating. */
+  failNextRewind = false
+
   /** Whether an abort rejects a held round-trip, as a real fetch does. */
   autoRejectOnAbort = true
 
@@ -145,6 +148,22 @@ class FakeBackend implements DefenseConversationServices {
 
     // Drop the session from the store
     this.store = this.store.filter((session) => session.id !== sessionId)
+  }
+
+  /** @inheritdoc */
+  rewindTurns = async (sessionId: string, keepThroughSequence: number): Promise<void> => {
+    // Fail once when armed
+    if (this.failNextRewind) {
+      this.failNextRewind = false
+      throw new Error('rewind failed')
+    }
+
+    // Truncate the stored session to the kept prefix
+    this.store = this.store.map((session) =>
+      session.id === sessionId
+        ? { ...session, turns: session.turns.slice(0, keepThroughSequence + 1) }
+        : session
+    )
   }
 }
 
@@ -523,7 +542,85 @@ describe('DefenseConversationModel', () => {
     expect(backend.store.map((session) => session.id)).toEqual([secondId])
   })
 
-  it('requests a history refresh after a turn lands and after a delete', async () => {
+  it('rewinds the open conversation to the kept prefix', async () => {
+    // A model grown to two exchanges: examiner, student, examiner, student, examiner
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    const second = model.send('second', backend)
+    await flush()
+    backend.submitCalls[1].gate.resolve()
+    await second
+    const sessionId = model.getSnapshot().currentSessionId ?? ''
+
+    // Rewind to the first examiner reply, dropping the second exchange
+    const outcome = await model.rewind(2, backend)
+
+    // The rewind reports it landed and the view keeps only the 0..2 prefix
+    expect(outcome).toBe('done')
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+
+    // The stored session was truncated to match
+    const stored = backend.store.find((session) => session.id === sessionId)
+    expect(roles(stored?.turns ?? [])).toEqual(['examiner', 'student', 'examiner'])
+  })
+
+  it('reports failed and leaves the transcript untouched when the rewind errors', async () => {
+    // A completed, open session
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+
+    // Arm a rewind failure
+    backend.failNextRewind = true
+
+    // Attempt the rewind
+    const outcome = await model.rewind(0, backend)
+
+    // The failure is reported and the full transcript stands
+    expect(outcome).toBe('failed')
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+  })
+
+  it('abandons an in-flight turn when the conversation is rewound', async () => {
+    // A model with one completed exchange and a second turn left in flight
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    const second = model.send('second', backend)
+    await flush()
+    expect(model.getSnapshot().isThinking).toBe(true)
+
+    // Rewind mid-flight to the first examiner reply
+    const outcome = await model.rewind(2, backend)
+
+    // The rewind lands, the abandoned turn resolves to stopped, and the idle view is the kept prefix
+    expect(outcome).toBe('done')
+    expect(await second).toBe('stopped')
+    const state = model.getSnapshot()
+    expect(roles(state.turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(state.isThinking).toBe(false)
+  })
+
+  it('reports failed without a round-trip on an unsaved conversation', async () => {
+    // A fresh, unsaved model
+    const { model, backend } = makeModel()
+
+    // A rewind has no saved conversation to truncate
+    const outcome = await model.rewind(0, backend)
+
+    // It fails up front, leaving the opener-only view in place
+    expect(outcome).toBe('failed')
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+  })
+
+  it('requests a history refresh after a turn lands, a rewind, and a delete', async () => {
     // A model with a completed, open session
     const { model, backend, changes } = makeModel()
     const sent = model.send('answer', backend)
@@ -534,12 +631,18 @@ describe('DefenseConversationModel', () => {
     // The landed turn asked the history to refresh once
     expect(changes()).toBe(1)
 
+    // Rewind to the examiner opener, dropping the rest
+    await model.rewind(0, backend)
+
+    // The rewind asked the history to refresh again, so a resume can't restore the dropped turns
+    expect(changes()).toBe(2)
+
     // Delete the open session
     const sessionId = model.getSnapshot().currentSessionId ?? ''
     await model.deleteSession(sessionId, backend)
 
-    // The delete asked the history to refresh again
-    expect(changes()).toBe(2)
+    // The delete asked the history to refresh a third time
+    expect(changes()).toBe(3)
   })
 
   it('bumps the conversation epoch on a switch but not within a conversation', async () => {

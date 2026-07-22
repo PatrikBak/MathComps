@@ -82,6 +82,11 @@ public enum ApiErrorCode
     DefenseSpendLimit,
 
     /// <summary>
+    /// A rewind's cut point is out of range or not an examiner turn.
+    /// </summary>
+    DefenseRewindTarget,
+
+    /// <summary>
     /// The request is authenticated but its caller could not be resolved to a user.
     /// </summary>
     UserNotResolved

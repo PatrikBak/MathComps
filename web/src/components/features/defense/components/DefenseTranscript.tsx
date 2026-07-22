@@ -7,13 +7,13 @@ import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
 
 import type { Turn, TurnRole } from '../model/defense-types'
-import { DefenseTurn } from './DefenseTurn'
+import { DefenseTurn, type RewindAffordance } from './DefenseTurn'
 import { ThinkingIndicator } from './ThinkingIndicator'
 
 /**
  * Props for the {@link DefenseTranscript}.
  */
-type DefenseTranscriptProps = {
+type DefenseTranscriptProps = RewindAffordance & {
   /** The conversation so far, oldest first. */
   turns: readonly Turn[]
   /** An id for the current conversation, distinct across conversations. */
@@ -30,6 +30,8 @@ type DefenseTranscriptProps = {
   thinkingLabel: string
   /** The line explaining a long wait while thinking. */
   thinkingLongLabel: string
+  /** Rewinds the conversation to the turn at the given index. */
+  onRewindTurn: (index: number) => void
 }
 
 /**
@@ -46,6 +48,9 @@ export function DefenseTranscript({
   isThinking,
   thinkingLabel,
   thinkingLongLabel,
+  canRewind,
+  rewindLabel,
+  onRewindTurn,
 }: DefenseTranscriptProps) {
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
   const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail()
@@ -110,6 +115,9 @@ export function DefenseTranscript({
               turn={turn}
               label={roleLabels[turn.role]}
               animate={index === justArrivedIndex}
+              canRewind={canRewind}
+              rewindLabel={rewindLabel}
+              onRewind={() => onRewindTurn(index)}
             />
           ))}
 

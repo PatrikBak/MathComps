@@ -48,6 +48,18 @@ public interface IDefenseSessionService
     /// <param name="sessionId">The session to delete.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     Task DeleteAsync(Guid userId, Guid sessionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Rewinds a session to a chosen point, deleting every turn after it so the conversation can be taken
+    /// from there again. The kept point must be an examiner turn, so the result awaits the student's next
+    /// message. The session must belong to the user.
+    /// </summary>
+    /// <param name="userId">The user the session must belong to.</param>
+    /// <param name="sessionId">The session to rewind.</param>
+    /// <param name="keepThroughSequence">The sequence of the last turn to keep; every later turn is deleted.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    Task RewindAsync(
+        Guid userId, Guid sessionId, int keepThroughSequence, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -74,3 +86,9 @@ public sealed class DefenseTurnLimitException() : Exception("This defense has re
 /// Thrown when the user has reached their configured daily spend ceiling.
 /// </summary>
 public sealed class DefenseSpendLimitException() : Exception("You have reached your usage limit — try again later");
+
+/// <summary>
+/// Thrown when a rewind's cut point is out of range or is not an examiner turn (so the result would not
+/// await the student's next message).
+/// </summary>
+public sealed class DefenseRewindTargetException() : Exception("The rewind point is not valid");
