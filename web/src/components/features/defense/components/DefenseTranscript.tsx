@@ -28,8 +28,6 @@ type DefenseTranscriptProps = RewindAffordance & {
   isThinking: boolean
   /** The examiner-voiced line shown while thinking. */
   thinkingLabel: string
-  /** The line explaining a long wait while thinking. */
-  thinkingLongLabel: string
   /** Rewinds the conversation to the turn at the given index. */
   onRewindTurn: (index: number) => void
 }
@@ -47,7 +45,6 @@ export function DefenseTranscript({
   jumpLabel,
   isThinking,
   thinkingLabel,
-  thinkingLongLabel,
   canRewind,
   rewindLabel,
   onRewindTurn,
@@ -125,7 +122,7 @@ export function DefenseTranscript({
           ))}
 
           {/* The examiner working on its next reply */}
-          {isThinking && <ThinkingIndicator label={thinkingLabel} longLabel={thinkingLongLabel} />}
+          {isThinking && <ThinkingIndicator label={thinkingLabel} />}
         </div>
       </div>
 

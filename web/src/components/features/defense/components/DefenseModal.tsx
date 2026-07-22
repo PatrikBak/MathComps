@@ -118,6 +118,11 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
   // at the trigger
   const canRewind = !isThinking && currentSessionId !== null
 
+  // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
+  // already started (a sent or in-flight turn past the examiner's opener). A pristine blank chat has
+  // nothing to start over.
+  const canStartNew = currentSessionId !== null || turns.length > 1
+
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
     examiner: t('roles.examiner'),
@@ -266,8 +271,8 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
 
         {/* Push the controls to the trailing edge */}
         <div className="ml-auto flex items-center gap-2">
-          {/* Start a fresh defense, offered only once the current one has real content */}
-          {currentSessionId !== null && (
+          {/* Start a fresh defense */}
+          {canStartNew && (
             <Button
               variant="secondary"
               size="sm"
@@ -309,7 +314,6 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
         jumpLabel={t('jumpToLatest')}
         isThinking={isThinking}
         thinkingLabel={t('thinking')}
-        thinkingLongLabel={t('thinkingLong')}
         canRewind={canRewind}
         rewindLabel={t('rewind')}
         onRewindTurn={requestRewind}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { useApi } from '@/hooks/use-api'
 import { unwrap } from '@/lib/api-error'
@@ -141,6 +141,35 @@ export function useDefenseConversation(
   // Track the model's state; a fresh model's snapshot is deterministic, so the same read doubles as
   // the server-render snapshot
   const state = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot)
+
+  // Whether the one-time auto-resume has already run
+  const didAutoResume = useRef(false)
+
+  // Auto-resume the newest saved defense the first time this problem's history loads, so opening a
+  // problem you have defended before continues that conversation rather than a blank one. Runs once:
+  // afterwards the persisted model keeps wherever the student navigated, whether a fresh chat or a
+  // different session.
+  useEffect(() => {
+    // Nothing to do until the first successful history load, and never more than once
+    if (didAutoResume.current || !sessionsQuery.isSuccess) {
+      return
+    }
+
+    // Latch before resuming so this never runs a second time
+    didAutoResume.current = true
+
+    // The live conversation state
+    const { currentSessionId, isThinking } = model.getSnapshot()
+
+    // The newest saved defense, if any
+    const latest = sessionsQuery.data.at(-1)
+
+    // Resume it only on an untouched fresh conversation: an open session or an in-flight turn means
+    // the student is mid-interaction and must not be pulled away
+    if (currentSessionId === null && !isThinking && latest !== undefined) {
+      model.resume(latest)
+    }
+  }, [sessionsQuery.isSuccess, sessionsQuery.data, model])
 
   // Runs a model action against the ready services, or reports the shared not-ready failure when the
   // client is still loading or signed out. Every action's not-ready path collapses here. Stable across

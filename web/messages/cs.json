@@ -183,8 +183,8 @@
     "historyTitle": "Tato úloha",
     "jumpToLatest": "Přejít na nejnovější",
     "newDefense": "Nová konverzace",
-    "opener": "Rád si s tebou popovídám o tvém řešení, nebo pokud potřebuješ poradit 😇",
-    "placeholder": "Napiš svou odpověď…",
+    "opener": "Rád si s tebou popovídám o tvém řešení, nebo pokud potřebuješ poradit. Nad odpověďmi chvíli přemýšlím, abych ti neprozradil příliš a neřekl něco špatně 😇",
+    "placeholder": "Rozepiš se…",
     "problemStrip": "Zadání úlohy",
     "rewind": "Vrátit sem",
     "rewindError": "Konverzaci se nepodařilo vrátit zpět.",
@@ -196,7 +196,6 @@
     },
     "sendError": "Tvou odpověď se nepodařilo odeslat.",
     "thinking": "Přemýšlím",
-    "thinkingLong": "Přemýšlím důkladně",
     "title": "Obhajoba řešení",
     "transcriptLabel": "Průběh konverzace"
   },
