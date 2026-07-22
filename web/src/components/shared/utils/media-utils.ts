@@ -1,4 +1,4 @@
-import { getProblemImageUrl } from '@/components/features/problems/services/problem-api-urls'
+import { getProblemImageUrl } from '@/components/shared/utils/asset-urls'
 
 import { getRequiredEnv } from './env-utils'
 

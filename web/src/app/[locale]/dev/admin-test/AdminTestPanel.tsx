@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs'
 import { useState } from 'react'
 
-import { buildApiUrl } from '@/components/shared/utils/url-utils'
+import { getAdminWhoamiUrl } from '@/components/features/admin/services/admin-api-urls'
 import { useApi } from '@/hooks/use-api'
 import { useIsAdmin } from '@/hooks/use-is-admin'
 import type { ApiResult } from '@/types/api'
@@ -54,7 +54,7 @@ export default function AdminTestPanel() {
     setIsCalling(true)
 
     // Hit the admin-gated backend probe
-    const response = await api.apiCall<AdminWhoamiResponse>(() => buildApiUrl('/admin/whoami'))
+    const response = await api.apiCall<AdminWhoamiResponse>(getAdminWhoamiUrl)
 
     // Store the outcome
     setResult(response)

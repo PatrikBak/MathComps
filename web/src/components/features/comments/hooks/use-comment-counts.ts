@@ -4,8 +4,8 @@ import { readyApiCall, useApi } from '@/hooks/use-api'
 import { unwrap } from '@/lib/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
-import type { CommentTargetType } from '../api/comment-api-types'
-import { getCommentCounts } from '../api/comment-service'
+import type { CommentTargetType } from '../services/comment-api-types'
+import { getCommentCounts } from '../services/comment-service'
 import { commentCountQueryKeys } from './comment-query-keys'
 
 /**

@@ -25,15 +25,22 @@ export function getR2BaseUrl(): string {
  * Production: Uses direct backend URL without /api prefix
  *
  * @param path - The endpoint path
+ * @param query - Optional query parameters, encoded and appended as a `?` string
  * @returns The full API URL for the endpoint
  */
-export function buildApiUrl(path: string): string {
+export function buildApiUrl(path: string, query?: Record<string, string>): string {
   // The backend API base URL
   const baseUrl = getRequiredEnv('NEXT_PUBLIC_API_URL')
 
+  // The encoded query string, or nothing when no params were given
+  const suffix = query ? `?${new URLSearchParams(query)}` : ''
+
+  // The path with its query string attached
+  const fullPath = `${path}${suffix}`
+
   // Production: hit the backend URL directly
   // Development: fall back to the /api prefix Next.js rewrites away
-  return baseUrl ? `${baseUrl}${path}` : `/api${path}`
+  return baseUrl ? `${baseUrl}${fullPath}` : `/api${fullPath}`
 }
 
 /**

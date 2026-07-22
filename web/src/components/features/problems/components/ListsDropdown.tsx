@@ -16,7 +16,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 
 import { useUserLists } from '../hooks/use-user-lists'
-import { getProblemsPageUrl } from '../services/problem-api-urls'
+import { getProblemsPageUrl } from '../services/problem-routes'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import type { UserListDto } from '../types/user-list-types'
 import { serializeFilters } from '../utils/search-url-serialization'

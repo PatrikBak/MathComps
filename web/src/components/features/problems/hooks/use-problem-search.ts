@@ -14,7 +14,7 @@ import { useProblemStore } from '@/stores/problem-store'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
-import { getProblemsPageUrl, hasProblemId } from '../services/problem-api-urls'
+import { getProblemsPageUrl, hasProblemId } from '../services/problem-routes'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'

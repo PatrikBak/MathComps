@@ -3,8 +3,8 @@ import { useAuth } from '@clerk/nextjs'
 import { PENDING_COMMENT_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { useRestorePendingAction } from '@/hooks/use-restore-pending-action'
 
-import type { CommentTarget } from '../api/comment-api-types'
 import type { CommentData } from '../components/CommentItem'
+import type { CommentTarget } from '../services/comment-api-types'
 import { findCommentInTree } from '../utils/comment-utils'
 import { useToggleCommentLike } from './use-toggle-comment-like'
 

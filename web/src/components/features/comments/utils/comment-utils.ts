@@ -1,5 +1,5 @@
-import type { CommentDto } from '../api/comment-api-types'
 import type { CommentData } from '../components/CommentItem'
+import type { CommentDto } from '../services/comment-api-types'
 
 /**
  * A recursive structure with optional nested replies.

@@ -2,8 +2,8 @@ import { useTranslations } from 'next-intl'
 
 import { useProblemStore } from '@/stores/problem-store'
 
-import type { CommentDto, CommentTarget } from '../api/comment-api-types'
-import { createComment } from '../api/comment-service'
+import type { CommentDto, CommentTarget } from '../services/comment-api-types'
+import { createComment } from '../services/comment-service'
 import { addReplyToComment } from '../utils/comment-utils'
 import { commentCountQueryKeys } from './comment-query-keys'
 import { useCommentMutation } from './use-comment-mutation'

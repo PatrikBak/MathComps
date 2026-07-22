@@ -5,7 +5,6 @@ import { Download, MoreVertical, Share2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { getHandoutPdfUrl } from '@/components/features/problems/services/problem-api-urls'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -14,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
+import { getHandoutPdfUrl } from '@/components/shared/utils/asset-urls'
 
 import { ActionPill } from './ActionPill'
 import { useWakeLockContext } from './WakeLockProvider'

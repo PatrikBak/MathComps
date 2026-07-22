@@ -1,4 +1,4 @@
-import type { CommentTarget, CommentTargetType } from '../api/comment-api-types'
+import type { CommentTarget, CommentTargetType } from '../services/comment-api-types'
 
 /**
  * Query keys for comment-related queries.

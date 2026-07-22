@@ -4,7 +4,7 @@ import { type QueryClient, type QueryKey, useQueryClient } from '@tanstack/react
 import type { OptimisticMutationConfig } from '@/hooks/use-optimistic-mutation'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
-import type { CommentDto, CommentTarget } from '../api/comment-api-types'
+import type { CommentDto, CommentTarget } from '../services/comment-api-types'
 import { commentQueryKeys } from './comment-query-keys'
 import { usePendingCommentTarget } from './use-pending-comment-target'
 

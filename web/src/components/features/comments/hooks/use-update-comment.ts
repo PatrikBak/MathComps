@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl'
 
-import type { CommentDto, CommentTarget, UpdateCommentResult } from '../api/comment-api-types'
-import { updateComment } from '../api/comment-service'
+import type { CommentDto, CommentTarget, UpdateCommentResult } from '../services/comment-api-types'
+import { updateComment } from '../services/comment-service'
 import { updateCommentInTree } from '../utils/comment-utils'
 import { useCommentMutation } from './use-comment-mutation'
 

@@ -1,44 +1,9 @@
-import { buildApiUrl, getR2BaseUrl } from '@/components/shared/utils/url-utils'
-import { ROUTES } from '@/i18n/i18n'
+import { buildApiUrl } from '@/components/shared/utils/url-utils'
 
 /**
- * The suffix for the URL endpoint for images for different types of content.
+ * The base path for the problems endpoints.
  */
-type ImageType = 'problems' | 'handouts'
-
-/**
- * Builds a public URL to a content image by its content id. Both problem and handout images
- * live on Cloudflare R2 under a per-type prefix that matches the image type.
- *
- * @param contentId - The unique identifier of the problem content/image
- * @param type - The type of the image (problems or handouts)
- * @returns The URL to the image
- */
-export function getProblemImageUrl(contentId: string, type: ImageType): string {
-  return `${getR2BaseUrl()}/${type}/${contentId}`
-}
-
-/**
- * Builds a public URL to a handout PDF by its filename. All handout PDFs live
- * together in the flat `handouts/pdfs/` folder on R2.
- *
- * @param filename - The PDF filename (e.g., "factorization.sk.pdf")
- * @returns The public URL to the PDF on R2
- */
-export function getHandoutPdfUrl(filename: string): string {
-  return `${getR2BaseUrl()}/handouts/pdfs/${filename}`
-}
-
-/**
- * Builds a public URL to a downloadable document by its identifier. Documents
- * (handout-linked PDFs) live on Cloudflare R2 under the flat `documents/` prefix.
- *
- * @param documentId - The unique identifier of the document asset
- * @returns The public URL to the document on R2
- */
-export function getDocumentUrl(documentId: string): string {
-  return `${getR2BaseUrl()}/documents/${documentId}`
-}
+const PROBLEMS_PATH = '/problems'
 
 /**
  * Builds the API URL for fetching a single problem by its slug.
@@ -48,7 +13,7 @@ export function getDocumentUrl(documentId: string): string {
  * @returns The API URL path to fetch the problem
  */
 export function getProblemBySlugApiUrl(slug: string): string {
-  return buildApiUrl(`/problems/${encodeURIComponent(slug)}`)
+  return buildApiUrl(`${PROBLEMS_PATH}/${encodeURIComponent(slug)}`)
 }
 
 /**
@@ -58,7 +23,7 @@ export function getProblemBySlugApiUrl(slug: string): string {
  * @returns The API URL path for the problems filter endpoint
  */
 export function getProblemsFilterApiUrl(): string {
-  return buildApiUrl('/problems/filter')
+  return buildApiUrl(`${PROBLEMS_PATH}/filter`)
 }
 
 /**
@@ -68,7 +33,7 @@ export function getProblemsFilterApiUrl(): string {
  * @returns The API URL path to toggle the like
  */
 export function getToggleProblemLikeApiUrl(slug: string): string {
-  return buildApiUrl(`/problems/${slug}/like`)
+  return buildApiUrl(`${PROBLEMS_PATH}/${encodeURIComponent(slug)}/like`)
 }
 
 /**
@@ -78,7 +43,7 @@ export function getToggleProblemLikeApiUrl(slug: string): string {
  * @returns The API URL path to toggle the mark
  */
 export function getToggleProblemMarkApiUrl(slug: string): string {
-  return buildApiUrl(`/problems/${slug}/mark`)
+  return buildApiUrl(`${PROBLEMS_PATH}/${encodeURIComponent(slug)}/mark`)
 }
 
 /**
@@ -87,26 +52,5 @@ export function getToggleProblemMarkApiUrl(slug: string): string {
  * @returns The API URL path for the contests-by-season endpoint
  */
 export function getContestsBySeasonApiUrl(): string {
-  return buildApiUrl('/problems/contests-by-season')
-}
-
-/**
- * Builds the frontend URL for the problems page with optional query parameters.
- * If queryString is empty, returns the base problems URL without a query string.
- *
- * @param queryString - Optional query string with filters (without leading '?')
- * @returns The frontend URL path to the problems page, with or without query parameters
- */
-export function getProblemsPageUrl(queryString?: string): string {
-  return queryString ? `${ROUTES.PROBLEMS}?${queryString}` : ROUTES.PROBLEMS
-}
-
-/**
- * Checks if the URL contains a problem ID parameter.
- *
- * @param searchParams - The URL search parameters to check
- * @returns True if the URL contains a problem ID parameter, false otherwise
- */
-export function hasProblemId(searchParams: URLSearchParams): boolean {
-  return searchParams.has('id') && searchParams.get('id') !== null && searchParams.get('id') !== ''
+  return buildApiUrl(`${PROBLEMS_PATH}/contests-by-season`)
 }

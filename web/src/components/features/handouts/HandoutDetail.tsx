@@ -11,11 +11,11 @@ import type {
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
 import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
-import { getProblemImageUrl } from '@/components/features/problems/services/problem-api-urls'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { getProblemImageUrl } from '@/components/shared/utils/asset-urls'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { CollapsibleCard, type DisclosurePanelProps } from './Cards'

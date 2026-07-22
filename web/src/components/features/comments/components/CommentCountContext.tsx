@@ -2,8 +2,8 @@
 
 import { createContext, type ReactNode, useContext } from 'react'
 
-import type { CommentTargetType } from '../api/comment-api-types'
 import { useCommentCounts } from '../hooks/use-comment-counts'
+import type { CommentTargetType } from '../services/comment-api-types'
 
 /**
  * The shape of the comment count context value.
