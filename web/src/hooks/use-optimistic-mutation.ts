@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 
 import { type ApiCaller, useApi } from '@/hooks/use-api'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
+import { BackendApiError } from '@/lib/api-error'
 import type { ApiResult } from '@/types/api'
 
 /**
@@ -132,9 +133,9 @@ export function useOptimisticMutation<TData = unknown, TVariables = void, TConte
           // Call the API function with the authenticated apiCall
           const result = await config.apiFn(api.apiCall, variables)
 
-          // If the API call fails, throw an error so that onError can handle it
+          // If the API call fails, throw so onError can handle it, preserving the backend failure code
           if (!result.success) {
-            throw new Error(result.error.message)
+            throw new BackendApiError(result.error)
           }
 
           // Otherwise the API call was successful

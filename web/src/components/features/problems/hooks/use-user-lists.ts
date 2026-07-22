@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { useApi } from '@/hooks/use-api'
+import { readyApiCall, useApi } from '@/hooks/use-api'
+import { unwrap } from '@/lib/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import { getUserListsApiUrl } from '../services/user-list-api-urls'
@@ -42,19 +43,11 @@ export function useUserLists(): UseUserListsResult {
   const query = useQuery({
     queryKey: userListQueryKeys.lists(),
     queryFn: async () => {
-      // Wait for API to be ready
-      if (api.state !== 'ready') throw new Error('API not ready')
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
-      // Fetch the user's lists from the API
-      const response = await api.apiCall<UserListsResponse>(() => getUserListsApiUrl(), {
-        method: 'GET',
-      })
-
-      // Rethrow an error that React Query knows to retry
-      if (!response.success) throw response.error
-
-      // Return the data if successful
-      return response.data
+      // The user's lists, or throwing the backend failure
+      return unwrap(await apiCall<UserListsResponse>(() => getUserListsApiUrl(), { method: 'GET' }))
     },
     // The user's own lists should reflect their edits quickly
     ...cachePolicy.userData,
