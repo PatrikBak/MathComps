@@ -139,18 +139,14 @@ public static class ProblemEndpoints
             IProblemLookupService problemLookupService,
             IUserProblemService userProblemService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // No user is very sus, let's say unauthorized
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Get the internal problem ID (throws if the problem doesn't exist)
             var problemId = await problemLookupService.GetRequiredProblemIdBySlugAsync(slug);
 
             // Toggle like
-            await userProblemService.ToggleLikeAsync(userId.Value, problemId);
+            await userProblemService.ToggleLikeAsync(userId, problemId);
 
             // No reason to return anything?
             return Results.NoContent();
@@ -166,18 +162,14 @@ public static class ProblemEndpoints
             IProblemLookupService problemLookupService,
             IUserProblemService userProblemService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // No user is very sus, let's say unauthorized
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Get the internal problem ID (throws if the problem doesn't exist)
             var problemId = await problemLookupService.GetRequiredProblemIdBySlugAsync(slug);
 
             // Toggle mark
-            await userProblemService.ToggleMarkAsync(userId.Value, problemId);
+            await userProblemService.ToggleMarkAsync(userId, problemId);
 
             // No reason to return anything?
             return Results.NoContent();

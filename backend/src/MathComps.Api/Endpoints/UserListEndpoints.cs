@@ -27,15 +27,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Get the user's lists
-            var lists = await userListService.GetListsAsync(userId.Value);
+            var lists = await userListService.GetListsAsync(userId);
 
             // Return the lists
             return Results.Ok(lists);
@@ -50,15 +46,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Create the list
-            var list = await userListService.CreateListAsync(userId.Value, request.Name);
+            var list = await userListService.CreateListAsync(userId, request.Name);
 
             // Return the created list
             return Results.Created($"{ListsPath}/{list.ContentId}", list);
@@ -74,15 +66,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Update the list
-            var list = await userListService.UpdateListAsync(userId.Value, contentId, request.Name);
+            var list = await userListService.UpdateListAsync(userId, contentId, request.Name);
 
             // Return the updated list
             return Results.Ok(list);
@@ -97,15 +85,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Delete the list
-            await userListService.DeleteListAsync(userId.Value, contentId);
+            await userListService.DeleteListAsync(userId, contentId);
 
             // No reason to return anything
             return Results.NoContent();
@@ -121,15 +105,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Add the problem to the list
-            await userListService.AddProblemAsync(userId.Value, contentId, problemSlug);
+            await userListService.AddProblemAsync(userId, contentId, problemSlug);
 
             // No reason to return anything
             return Results.NoContent();
@@ -145,15 +125,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Remove the problem from the list
-            await userListService.RemoveProblemAsync(userId.Value, contentId, problemSlug);
+            await userListService.RemoveProblemAsync(userId, contentId, problemSlug);
 
             // No reason to return anything
             return Results.NoContent();
@@ -168,15 +144,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Reorder the lists
-            await userListService.ReorderListsAsync(userId.Value, request.ContentIds);
+            await userListService.ReorderListsAsync(userId, request.ContentIds);
 
             // No reason to return anything
             return Results.NoContent();
@@ -191,15 +163,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Enable sharing
-            var list = await userListService.SetSharingAsync(userId.Value, contentId, enabled: true);
+            var list = await userListService.SetSharingAsync(userId, contentId, enabled: true);
 
             // Return the updated list
             return Results.Ok(list);
@@ -214,15 +182,11 @@ public static class UserListEndpoints
             IUserManager userManager,
             IUserListService userListService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Disable sharing
-            await userListService.SetSharingAsync(userId.Value, contentId, enabled: false);
+            await userListService.SetSharingAsync(userId, contentId, enabled: false);
 
             // No reason to return anything
             return Results.NoContent();

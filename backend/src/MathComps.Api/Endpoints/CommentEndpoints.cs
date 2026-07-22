@@ -64,17 +64,13 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Create comment
             var comment = await commentService.CreateCommentAsync(
                 request.Target,
-                userId.Value,
+                userId,
                 request.Content,
                 request.ParentCommentId);
 
@@ -92,18 +88,14 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Update comment
             var updatedCommentData = await commentService.UpdateCommentAsync(
                 request.Target,
                 id,
-                userId.Value,
+                userId,
                 request.Content);
 
             // Return the updated comment
@@ -119,15 +111,11 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Perform delete
-            await commentService.DeleteCommentAsync(id, userId.Value);
+            await commentService.DeleteCommentAsync(id, userId);
 
             // No reason to return anything
             return Results.NoContent();
@@ -142,15 +130,11 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
-            // Get user ID
-            var userId = await userManager.GetUserIdAsync(context);
-
-            // We must have a user
-            if (userId == null)
-                return Results.Unauthorized();
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
 
             // Perform toggle
-            await commentService.ToggleLikeAsync(id, userId.Value);
+            await commentService.ToggleLikeAsync(id, userId);
 
             // No reason to return anything
             return Results.NoContent();
