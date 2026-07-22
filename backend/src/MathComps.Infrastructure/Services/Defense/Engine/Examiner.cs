@@ -60,7 +60,8 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
 
     /// <inheritdoc/>
     public async Task<ExaminerTurnOutcome> NextReplyAsync(
-        string problem, string reference, Transcript transcript, CancellationToken cancellationToken = default)
+        string problem, string reference, Transcript transcript, ModelUsageAccumulator usage,
+        CancellationToken cancellationToken = default)
     {
         // The examiner replies to the candidate — refuse a transcript that isn't waiting on us.
         transcript.EnsureAwaitingExaminer();
@@ -68,15 +69,9 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
         // The conversation so far, the user message every step reads.
         var conversation = transcript.ToMarkdown();
 
-        // The turn's running usage, summed over every model call the loop makes.
-        var usage = ModelUsage.Zero;
-
         // Generate and verify the first reply.
         var attempt = await GenerateAndVerifyAsync(
-            problem, reference, conversation, revisionNote: "", cancellationToken);
-
-        // Fold in what its calls cost.
-        usage += attempt.Usage;
+            problem, reference, conversation, revisionNote: "", usage, cancellationToken);
 
         // No revisions yet.
         var revisions = 0;
@@ -88,10 +83,7 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
             revisions++;
 
             // Regenerate with the specific flaw called out, re-verifying the fresh attempt.
-            attempt = await GenerateAndVerifyAsync(problem, reference, conversation, note, cancellationToken);
-
-            // Fold in what the revision cost.
-            usage += attempt.Usage;
+            attempt = await GenerateAndVerifyAsync(problem, reference, conversation, note, usage, cancellationToken);
         }
 
         // Whether the loop ended on a reply a check still flags — a draft that must not ship.
@@ -106,31 +98,25 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
 
             // Generate the fallback under the note that fits the surviving fault.
             attempt = await GenerateAndVerifyAsync(
-                problem, reference, conversation, SelectFallbackNote(attempt), cancellationToken);
-
-            // Fold in what the fallback cost.
-            usage += attempt.Usage;
+                problem, reference, conversation, SelectFallbackNote(attempt), usage, cancellationToken);
         }
 
         // Ship what we ended on, carrying its verdicts, how many regenerations it took, whether it's the fallback,
-        // and what the turn cost.
+        // and the turn's accrued cost.
         return new ExaminerTurnOutcome(
-            attempt.Reply, attempt.MathCheck, attempt.LeakCheck, revisions, safeFallback, usage);
+            attempt.Reply, attempt.MathCheck, attempt.LeakCheck, revisions, safeFallback, usage.Accrued);
     }
 
     /// <summary>
-    /// One generated reply with everything the loop judges it by: the two guard verdicts and the summed cost of the
-    /// three calls that produced it.
+    /// One generated reply with the two guard verdicts the loop judges it by.
     /// </summary>
     /// <param name="Reply">The generated reply.</param>
     /// <param name="MathCheck">The math-check verdict on the reply.</param>
     /// <param name="LeakCheck">The leak-check verdict on the reply.</param>
-    /// <param name="Usage">The summed spend and tokens of the calls that produced and verified the reply.</param>
     private sealed record TurnAttempt(
         string Reply,
         MathCheckResult MathCheck,
-        LeakCheckResult LeakCheck,
-        ModelUsage Usage);
+        LeakCheckResult LeakCheck);
 
     /// <summary>
     /// Generates one reply and runs both guards over it. The turn's first pass and each revision run this same step,
@@ -141,21 +127,21 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     /// <param name="conversation">The conversation so far, the generator answers and the guards read the
     /// reply in.</param>
     /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
+    /// <param name="usage">The running spend each call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>The judged attempt.</returns>
     private async Task<TurnAttempt> GenerateAndVerifyAsync(
-        string problem, string reference, string conversation, string revisionNote,
+        string problem, string reference, string conversation, string revisionNote, ModelUsageAccumulator usage,
         CancellationToken cancellationToken)
     {
         // Generate the reply.
-        var generated = await GenerateAsync(problem, reference, conversation, revisionNote, cancellationToken);
+        var reply = await GenerateAsync(problem, reference, conversation, revisionNote, usage, cancellationToken);
 
         // Verify it with both guards.
-        var (math, leak) = await RunGuardsAsync(problem, reference, conversation, generated.Value, cancellationToken);
+        var (math, leak) = await RunGuardsAsync(problem, reference, conversation, reply, usage, cancellationToken);
 
-        // The judged attempt with everything the three calls billed.
-        return new TurnAttempt(
-            generated.Value, math.Value, leak.Value, generated.Usage + math.Usage + leak.Usage);
+        // The judged attempt carrying the reply and both verdicts.
+        return new TurnAttempt(reply, math, leak);
     }
 
     /// <summary>
@@ -166,23 +152,25 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     /// <param name="reference">The reference solution the guards judge against.</param>
     /// <param name="conversation">The conversation so far, the context both guards read the reply in.</param>
     /// <param name="reply">The proposed examiner reply under scrutiny.</param>
+    /// <param name="usage">The running spend each guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
-    /// <returns>The math-check and leak-check results, each carrying its verdict and what the call cost.</returns>
-    private async Task<(ChatCallResult<MathCheckResult> Math, ChatCallResult<LeakCheckResult> Leak)> RunGuardsAsync(
-        string problem, string reference, string conversation, string reply, CancellationToken cancellationToken)
+    /// <returns>The math-check and leak-check verdicts.</returns>
+    private async Task<(MathCheckResult Math, LeakCheckResult Leak)> RunGuardsAsync(
+        string problem, string reference, string conversation, string reply, ModelUsageAccumulator usage,
+        CancellationToken cancellationToken)
     {
         // Start the math-check, letting the checker find the reply's claims itself.
         var mathCheckTask = RunGuardAsync<MathCheckResult>(
-            _settings.MathCheck, problem, reference, conversation, reply, cancellationToken);
+            _settings.MathCheck, problem, reference, conversation, reply, usage, cancellationToken);
 
         // Start the leak-check against the whole transcript, concurrent with the math-check.
         var leakCheckTask = RunGuardAsync<LeakCheckResult>(
-            _settings.LeakCheck, problem, reference, conversation, reply, cancellationToken);
+            _settings.LeakCheck, problem, reference, conversation, reply, usage, cancellationToken);
 
         // Await both before reading their results.
         await Task.WhenAll(mathCheckTask, leakCheckTask);
 
-        // Hand back both results.
+        // Hand back both verdicts.
         return (mathCheckTask.Result, leakCheckTask.Result);
     }
 
@@ -194,10 +182,11 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     /// <param name="reference">The reference solution that fills the prompt.</param>
     /// <param name="conversation">The conversation so far, the examiner responds to.</param>
     /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
+    /// <param name="usage">The running spend this call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
-    /// <returns>The generated reply and what the call cost.</returns>
-    private async Task<ChatCallResult<string>> GenerateAsync(
-        string problem, string reference, string conversation, string revisionNote,
+    /// <returns>The generated reply.</returns>
+    private async Task<string> GenerateAsync(
+        string problem, string reference, string conversation, string revisionNote, ModelUsageAccumulator usage,
         CancellationToken cancellationToken)
     {
         // Fill the persona prompt with the problem, reference, and the revision note (empty most turns).
@@ -212,8 +201,11 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
             systemPrompt, conversation, _settings.Generate.Model, _settings.Generate.ReasoningEffort,
             _settings.Generate.MaxOutputTokens, cancellationToken);
 
-        // Unwrap the message, carrying the call's billing forward.
-        return new ChatCallResult<string>(result.Value.Message, result.Usage);
+        // Fold what this call cost into the turn's running total.
+        usage.Add(result.Usage);
+
+        // Hand back the model's message.
+        return result.Value.Message;
     }
 
     /// <summary>
@@ -227,19 +219,27 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     /// <param name="reference">The reference solution the guard judges against.</param>
     /// <param name="conversation">The conversation so far, the context the reply is judged in.</param>
     /// <param name="reply">The proposed examiner reply under scrutiny.</param>
+    /// <param name="usage">The running spend this guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
-    /// <returns>The guard's structured verdict and what the call cost.</returns>
-    private async Task<ChatCallResult<TResult>> RunGuardAsync<TResult>(
+    /// <returns>The guard's structured verdict.</returns>
+    private async Task<TResult> RunGuardAsync<TResult>(
         ChatStepSettings step, string problem, string reference, string conversation, string reply,
-        CancellationToken cancellationToken)
+        ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // The system and user messages for this guard.
         var (systemPrompt, userPrompt) = await BuildGuardPromptsAsync(
             step.Prompt, problem, reference, conversation, reply, cancellationToken);
 
         // Call the model for its structured verdict.
-        return await chatCaller.CompleteAsync<TResult>(
+        var result = await chatCaller.CompleteAsync<TResult>(
             systemPrompt, userPrompt, step.Model, step.ReasoningEffort, step.MaxOutputTokens, cancellationToken);
+
+        // Fold what this guard call cost into the turn's running total, so a guard that completed still counts
+        // even when its concurrent sibling's cancel unwinds the attempt.
+        usage.Add(result.Usage);
+
+        // Hand back the verdict.
+        return result.Value;
     }
 
     /// <summary>
@@ -302,7 +302,7 @@ public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSetting
     private static string? BuildRevisionNote(TurnAttempt attempt)
     {
         // Pull the verdicts the note reads.
-        var (_, mathCheck, leakCheck, _) = attempt;
+        var (_, mathCheck, leakCheck) = attempt;
 
         // Gather a note per flag raised; a turn can trip more than one.
         var notes = new List<string>();

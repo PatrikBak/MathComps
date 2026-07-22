@@ -40,7 +40,8 @@ public class FakeExaminer(ModelUsage usage = default)
 
     /// <inheritdoc/>
     public Task<ExaminerTurnOutcome> NextReplyAsync(
-        string problem, string reference, Transcript transcript, CancellationToken cancellationToken = default)
+        string problem, string reference, Transcript transcript, ModelUsageAccumulator turnUsage,
+        CancellationToken cancellationToken = default)
     {
         // The examiner replies to the candidate — hold to the same precondition as the real engine.
         transcript.EnsureAwaitingExaminer();
@@ -50,6 +51,9 @@ public class FakeExaminer(ModelUsage usage = default)
         var reply = candidateTurns >= 1 && candidateTurns <= _scriptedReplies.Length
             ? _scriptedReplies[candidateTurns - 1]
             : FallbackReply;
+
+        // Fold the configured usage in like a real call would, so the accumulator matches the reported outcome.
+        turnUsage.Add(usage);
 
         // A fake reply always holds and never leaks; report the configured usage.
         return Task.FromResult(new ExaminerTurnOutcome(

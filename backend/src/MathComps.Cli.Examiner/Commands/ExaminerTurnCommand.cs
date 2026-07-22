@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using MathComps.Cli.Examiner.Fixtures;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using Spectre.Console;
@@ -56,7 +57,8 @@ public class ExaminerTurnCommand(IExaminer examiner)
         var stopwatch = Stopwatch.StartNew();
 
         // Run the loop to produce the next reply.
-        var outcome = await examiner.NextReplyAsync(fixture.Problem, fixture.Reference, fixture.Transcript);
+        var outcome = await examiner.NextReplyAsync(
+            fixture.Problem, fixture.Reference, fixture.Transcript, new ModelUsageAccumulator());
 
         // Stop the clock before the follow-up I/O.
         stopwatch.Stop();
