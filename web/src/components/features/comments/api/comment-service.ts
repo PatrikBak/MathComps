@@ -1,5 +1,4 @@
 import type { ApiCaller } from '@/hooks/use-api'
-import { wrapApi } from '@/lib/api-utils'
 import type { ApiResult } from '@/types/api'
 
 import type {
@@ -29,11 +28,9 @@ export async function getComments(
   apiCall: ApiCaller,
   target: CommentTarget
 ): Promise<ApiResult<CommentDto[]>> {
-  return wrapApi(
-    apiCall<CommentDto[]>(() => getCommentsUrl(target), {
-      method: 'GET',
-    })
-  )
+  return apiCall<CommentDto[]>(() => getCommentsUrl(target), {
+    method: 'GET',
+  })
 }
 
 /**
@@ -50,15 +47,13 @@ export async function getCommentCounts(
   targetType: CommentTargetType,
   targetIds: string[]
 ): Promise<ApiResult<Record<string, number>>> {
-  return wrapApi(
-    apiCall<Record<string, number>>(() => getCommentCountsUrl(), {
-      method: 'POST',
-      body: JSON.stringify({
-        targetType,
-        targetIds: targetIds,
-      }),
-    })
-  )
+  return apiCall<Record<string, number>>(() => getCommentCountsUrl(), {
+    method: 'POST',
+    body: JSON.stringify({
+      targetType,
+      targetIds: targetIds,
+    }),
+  })
 }
 
 /**
@@ -77,16 +72,14 @@ export async function createComment(
   content: string,
   parentCommentId?: string | null
 ): Promise<ApiResult<CommentDto>> {
-  return wrapApi(
-    apiCall<CommentDto>(() => getCreateCommentUrl(), {
-      method: 'POST',
-      body: JSON.stringify({
-        target,
-        content,
-        parentCommentId: parentCommentId ?? null,
-      }),
-    })
-  )
+  return apiCall<CommentDto>(() => getCreateCommentUrl(), {
+    method: 'POST',
+    body: JSON.stringify({
+      target,
+      content,
+      parentCommentId: parentCommentId ?? null,
+    }),
+  })
 }
 
 /**
@@ -104,15 +97,13 @@ export async function updateComment(
   target: CommentTarget,
   content: string
 ): Promise<ApiResult<UpdateCommentResult>> {
-  return wrapApi(
-    apiCall<UpdateCommentResult>(() => getUpdateCommentUrl(commentId), {
-      method: 'PUT',
-      body: JSON.stringify({
-        target,
-        content,
-      }),
-    })
-  )
+  return apiCall<UpdateCommentResult>(() => getUpdateCommentUrl(commentId), {
+    method: 'PUT',
+    body: JSON.stringify({
+      target,
+      content,
+    }),
+  })
 }
 
 /**
@@ -126,11 +117,9 @@ export async function deleteComment(
   apiCall: ApiCaller,
   commentId: string
 ): Promise<ApiResult<void>> {
-  return wrapApi(
-    apiCall<void>(() => getDeleteCommentUrl(commentId), {
-      method: 'DELETE',
-    })
-  )
+  return apiCall<void>(() => getDeleteCommentUrl(commentId), {
+    method: 'DELETE',
+  })
 }
 
 /**
@@ -144,9 +133,7 @@ export async function toggleCommentLike(
   apiCall: ApiCaller,
   commentId: string
 ): Promise<ApiResult<void>> {
-  return wrapApi(
-    apiCall<void>(() => getToggleCommentLikeUrl(commentId), {
-      method: 'POST',
-    })
-  )
+  return apiCall<void>(() => getToggleCommentLikeUrl(commentId), {
+    method: 'POST',
+  })
 }

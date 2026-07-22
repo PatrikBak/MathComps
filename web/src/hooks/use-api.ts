@@ -30,7 +30,9 @@ async function readErrorCode(response: Response): Promise<BackendErrorCode | und
 }
 
 /**
- * Type definition for the apiCall function.
+ * The authenticated API caller. It owns the total error catch: every failure (not signed in, a non-OK
+ * response, a fetch or parse throw) resolves as an {@link ApiResult} failure. It never rejects, so a
+ * caller branches on `success` (or hands the result to `unwrap`), never a try/catch.
  *
  * @template T - The type of the data returned by the API.
  *

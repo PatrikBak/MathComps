@@ -1,6 +1,5 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
-import { wrapApi } from '@/lib/api-utils'
 import type { ApiResult } from '@/types/api'
 
 import type { DefenseSession, DefenseTurnRequest } from '../model/defense-types'
@@ -28,7 +27,7 @@ export function listSessions(
   apiCall: ApiCaller,
   problemKey: string
 ): Promise<ApiResult<DefenseSession[]>> {
-  return wrapApi(apiCall<DefenseSession[]>(() => getDefenseSessionsUrl(problemKey)))
+  return apiCall<DefenseSession[]>(() => getDefenseSessionsUrl(problemKey))
 }
 
 /**
@@ -47,28 +46,24 @@ export function submitTurn(
   switch (request.kind) {
     // Open a new session with the problem, its reference, the opener, and the student's first message
     case 'start':
-      return wrapApi(
-        apiCall<DefenseSession>(() => getStartDefenseUrl(), {
-          method: 'POST',
-          signal: request.signal,
-          body: JSON.stringify({
-            problemKey: request.problemKey,
-            statement: request.statement,
-            reference: request.reference,
-            opener: request.opener,
-            content: request.content,
-          }),
-        })
-      )
+      return apiCall<DefenseSession>(() => getStartDefenseUrl(), {
+        method: 'POST',
+        signal: request.signal,
+        body: JSON.stringify({
+          problemKey: request.problemKey,
+          statement: request.statement,
+          reference: request.reference,
+          opener: request.opener,
+          content: request.content,
+        }),
+      })
     // Append the student's message to the open session
     case 'continue':
-      return wrapApi(
-        apiCall<DefenseSession>(() => getContinueDefenseUrl(request.sessionId), {
-          method: 'POST',
-          signal: request.signal,
-          body: JSON.stringify({ content: request.content }),
-        })
-      )
+      return apiCall<DefenseSession>(() => getContinueDefenseUrl(request.sessionId), {
+        method: 'POST',
+        signal: request.signal,
+        body: JSON.stringify({ content: request.content }),
+      })
     // Every request kind is handled above
     default:
       return assertNever(request)
@@ -83,7 +78,7 @@ export function submitTurn(
  * @returns The outcome of the delete.
  */
 export function deleteSession(apiCall: ApiCaller, sessionId: string): Promise<ApiResult<void>> {
-  return wrapApi(apiCall<void>(() => getDeleteDefenseSessionUrl(sessionId), { method: 'DELETE' }))
+  return apiCall<void>(() => getDeleteDefenseSessionUrl(sessionId), { method: 'DELETE' })
 }
 
 /**
@@ -99,10 +94,8 @@ export function rewindTurns(
   sessionId: string,
   keepThroughSequence: number
 ): Promise<ApiResult<void>> {
-  return wrapApi(
-    apiCall<void>(() => getRewindDefenseUrl(sessionId), {
-      method: 'POST',
-      body: JSON.stringify({ keepThroughSequence }),
-    })
-  )
+  return apiCall<void>(() => getRewindDefenseUrl(sessionId), {
+    method: 'POST',
+    body: JSON.stringify({ keepThroughSequence }),
+  })
 }
