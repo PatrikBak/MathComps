@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 
 import { PENDING_COMMENT_TARGET_STORAGE_KEY } from '@/constants/local-storage-constants'
 
-import type { CommentTarget } from '../api/comment-api-types'
+import type { CommentTarget } from '../services/comment-api-types'
 
 /**
  * The return type of the {@link usePendingCommentTarget} hook.

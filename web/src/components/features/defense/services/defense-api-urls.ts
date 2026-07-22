@@ -1,6 +1,11 @@
 import { buildApiUrl } from '@/components/shared/utils/url-utils'
 
 /**
+ * The base path for the defense sessions endpoints.
+ */
+const SESSIONS_PATH = '/defense/sessions'
+
+/**
  * Builds the URL for listing a problem's defense sessions.
  *
  * @param problemKey - The stable key of the problem whose sessions to list.
@@ -8,7 +13,7 @@ import { buildApiUrl } from '@/components/shared/utils/url-utils'
  */
 export function getDefenseSessionsUrl(problemKey: string): string {
   // The list endpoint, filtered to the problem
-  return buildApiUrl(`/defense/sessions?problemKey=${encodeURIComponent(problemKey)}`)
+  return buildApiUrl(SESSIONS_PATH, { problemKey })
 }
 
 /**
@@ -18,7 +23,7 @@ export function getDefenseSessionsUrl(problemKey: string): string {
  */
 export function getStartDefenseUrl(): string {
   // The create endpoint
-  return buildApiUrl('/defense/sessions')
+  return buildApiUrl(SESSIONS_PATH)
 }
 
 /**
@@ -29,7 +34,7 @@ export function getStartDefenseUrl(): string {
  */
 export function getContinueDefenseUrl(sessionId: string): string {
   // The append-turn endpoint for the session
-  return buildApiUrl(`/defense/sessions/${sessionId}/turns`)
+  return buildApiUrl(`${SESSIONS_PATH}/${encodeURIComponent(sessionId)}/turns`)
 }
 
 /**
@@ -40,7 +45,7 @@ export function getContinueDefenseUrl(sessionId: string): string {
  */
 export function getDeleteDefenseSessionUrl(sessionId: string): string {
   // The session's own endpoint
-  return buildApiUrl(`/defense/sessions/${sessionId}`)
+  return buildApiUrl(`${SESSIONS_PATH}/${encodeURIComponent(sessionId)}`)
 }
 
 /**
@@ -51,5 +56,5 @@ export function getDeleteDefenseSessionUrl(sessionId: string): string {
  */
 export function getRewindDefenseUrl(sessionId: string): string {
   // The truncate-conversation endpoint for the session
-  return buildApiUrl(`/defense/sessions/${sessionId}/rewind`)
+  return buildApiUrl(`${SESSIONS_PATH}/${encodeURIComponent(sessionId)}/rewind`)
 }

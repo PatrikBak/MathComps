@@ -3,6 +3,11 @@ import { buildApiUrl } from '@/components/shared/utils/url-utils'
 import type { CommentTarget } from './comment-api-types'
 
 /**
+ * The base path for the comments endpoints.
+ */
+const COMMENTS_PATH = '/comments'
+
+/**
  * Builds the API URL for fetching comments.
  *
  * @param target - The target to fetch comments for.
@@ -10,11 +15,10 @@ import type { CommentTarget } from './comment-api-types'
  * @returns The API URL for fetching comments.
  */
 export function getCommentsUrl(target: CommentTarget): string {
-  const params = new URLSearchParams({
+  return buildApiUrl(COMMENTS_PATH, {
     targetType: target.targetType,
     targetId: target.targetId,
   })
-  return buildApiUrl(`/comments?${params.toString()}`)
 }
 
 /**
@@ -23,7 +27,7 @@ export function getCommentsUrl(target: CommentTarget): string {
  * @returns The API URL for creating a comment.
  */
 export function getCreateCommentUrl(): string {
-  return buildApiUrl('/comments')
+  return buildApiUrl(COMMENTS_PATH)
 }
 
 /**
@@ -34,7 +38,7 @@ export function getCreateCommentUrl(): string {
  * @returns The API URL for updating a comment.
  */
 export function getUpdateCommentUrl(commentId: string): string {
-  return buildApiUrl(`/comments/${commentId}`)
+  return buildApiUrl(`${COMMENTS_PATH}/${encodeURIComponent(commentId)}`)
 }
 
 /**
@@ -45,7 +49,7 @@ export function getUpdateCommentUrl(commentId: string): string {
  * @returns The API URL for deleting a comment.
  */
 export function getDeleteCommentUrl(commentId: string): string {
-  return buildApiUrl(`/comments/${commentId}`)
+  return buildApiUrl(`${COMMENTS_PATH}/${encodeURIComponent(commentId)}`)
 }
 
 /**
@@ -56,7 +60,7 @@ export function getDeleteCommentUrl(commentId: string): string {
  * @returns The API URL for toggling a comment like.
  */
 export function getToggleCommentLikeUrl(commentId: string): string {
-  return buildApiUrl(`/comments/${commentId}/like`)
+  return buildApiUrl(`${COMMENTS_PATH}/${encodeURIComponent(commentId)}/like`)
 }
 
 /**
@@ -65,5 +69,5 @@ export function getToggleCommentLikeUrl(commentId: string): string {
  * @returns The API URL for fetching comment counts.
  */
 export function getCommentCountsUrl(): string {
-  return buildApiUrl('/comments/counts')
+  return buildApiUrl(`${COMMENTS_PATH}/counts`)
 }

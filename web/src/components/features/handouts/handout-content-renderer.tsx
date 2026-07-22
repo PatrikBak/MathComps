@@ -6,16 +6,13 @@ import type {
   ListStyleType,
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
-import {
-  getDocumentUrl,
-  getProblemImageUrl,
-} from '@/components/features/problems/services/problem-api-urls'
 import FootnoteRef from '@/components/math/FootnoteRef'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { getDocumentUrl, getProblemImageUrl } from '@/components/shared/utils/asset-urls'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { HIGHLIGHTED_PARAGRAPH_CLASSES } from './handout-colors'

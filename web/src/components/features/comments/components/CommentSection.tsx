@@ -12,7 +12,6 @@ import { hasValidContent } from '@/components/shared/components/rich-math-editor
 import { toggleSetItem } from '@/components/shared/utils/collection-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
 
-import type { CommentTarget } from '../api/comment-api-types'
 import { useCreateComment } from '../hooks/use-create-comment'
 import { useDeleteComment } from '../hooks/use-delete-comment'
 import { useFetchComments } from '../hooks/use-fetch-comments'
@@ -20,6 +19,7 @@ import { usePendingCommentLike } from '../hooks/use-pending-comment-like'
 import { usePendingCommentTarget } from '../hooks/use-pending-comment-target'
 import { useToggleCommentLike } from '../hooks/use-toggle-comment-like'
 import { useUpdateComment } from '../hooks/use-update-comment'
+import type { CommentTarget } from '../services/comment-api-types'
 import { convertToCommentData, countAllComments, shouldHideComment } from '../utils/comment-utils'
 import { type CommentData, CommentItem } from './CommentItem'
 

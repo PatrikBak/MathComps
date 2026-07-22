@@ -1,7 +1,7 @@
 import { useUser } from '@clerk/nextjs'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { type CommentDto } from '../api/comment-api-types'
+import { type CommentDto } from '../services/comment-api-types'
 import { commentQueryKeys } from './comment-query-keys'
 
 /**

@@ -3,8 +3,8 @@ import { useTranslations } from 'next-intl'
 
 import { PENDING_COMMENT_LIKE_STORAGE_KEY } from '@/constants/local-storage-constants'
 
-import type { CommentTarget } from '../api/comment-api-types'
-import { toggleCommentLike } from '../api/comment-service'
+import type { CommentTarget } from '../services/comment-api-types'
+import { toggleCommentLike } from '../services/comment-service'
 import { updateCommentInTree } from '../utils/comment-utils'
 import { useCommentMutation } from './use-comment-mutation'
 

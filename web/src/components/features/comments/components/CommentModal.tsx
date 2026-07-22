@@ -5,8 +5,8 @@ import { MessageSquare } from 'lucide-react'
 import { CountBadge } from '@/components/shared/components/CountBadge'
 import { Modal } from '@/components/shared/components/Modal'
 
-import type { CommentTarget } from '../api/comment-api-types'
 import { useFetchComments } from '../hooks/use-fetch-comments'
+import type { CommentTarget } from '../services/comment-api-types'
 import { countAllComments } from '../utils/comment-utils'
 import { CommentSection } from './CommentSection'
 
