@@ -77,22 +77,25 @@ export function DefenseTranscript({
       ? lastIndex
       : -1
 
-  // Jump to the newest content when the reader sends their own turn, even from a scrolled-up
-  // position; growth while pinned and the initial landing are followed by the region itself. Runs
-  // after layout so the just-added turn is measured before the scroll
+  // Follow a just-arrived turn synchronously, after layout so it's measured before the scroll: the
+  // reader's own turn always pulls the view down, and the examiner's reply follows only while the
+  // reader sits at the bottom, so re-reading up the transcript is never yanked. Belt-and-suspenders
+  // with the region's own growth-follow, which can miss when a reply's math renders late
   useIsomorphicEffect(() => {
     // Whether a turn just arrived on the conversation already on screen
     const grew =
       !isConversationSwitch && previousLength !== undefined && turns.length > previousLength
 
-    // Whether the reader is the one who sent it
-    const sentByReader = grew && turns[lastIndex]?.role === 'student'
+    // Nothing landed, so there's nothing to follow
+    if (!grew) {
+      return
+    }
 
-    // Force the jump only for the reader's own turn
-    if (sentByReader) {
+    // The reader's own turn always jumps; the examiner's reply only when the reader is still pinned
+    if (turns[lastIndex]?.role === 'student' || !isScrolledUp) {
       scrollToBottom()
     }
-  }, [turns, isConversationSwitch, previousLength, lastIndex, scrollToBottom])
+  }, [turns, isConversationSwitch, previousLength, lastIndex, isScrolledUp, scrollToBottom])
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
@@ -104,7 +107,7 @@ export function DefenseTranscript({
         role="log"
         aria-live="polite"
         aria-label={regionLabel}
-        className="flex-1 overflow-y-auto overscroll-contain"
+        className="flex-1 overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,#000_1.5rem,#000_calc(100%-1.5rem),transparent)]"
       >
         {/* The growing content the region follows */}
         <div ref={contentRef} className="flex flex-col gap-5 px-5 py-5">

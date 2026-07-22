@@ -36,8 +36,8 @@ type DefenseTurnProps = RewindAffordance & {
 }
 
 /**
- * The per-role look of a turn: the examiner reads as a plain annotated block, the student as a tinted
- * card, distinguished by tint and alignment.
+ * The per-role look of a turn: both read as full-width blocks, the examiner as the bare ambient voice
+ * and the student as a brand-tinted card, distinguished by tint and font voice.
  */
 type TurnStyle = {
   /** Classes for the turn's outer container. */
@@ -51,12 +51,12 @@ type TurnStyle = {
 /** The container/label/body styling for each role. */
 const TURN_STYLES: Record<TurnRole, TurnStyle> = {
   examiner: {
-    container: 'border-l-2 border-foreground/15 pl-4 pr-3.5',
+    container: '',
     label: 'text-muted',
     body: 'math-typography',
   },
   student: {
-    container: 'max-w-[85%] self-end rounded-xl bg-brand/10 px-3.5 py-3',
+    container: 'rounded-lg bg-brand/10 px-4 py-3',
     label: 'text-brand-light',
     body: 'text-[15px] leading-relaxed',
   },
