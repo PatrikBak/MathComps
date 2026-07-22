@@ -1,7 +1,8 @@
 import { useAuth } from '@clerk/nextjs'
 import { useQuery } from '@tanstack/react-query'
 
-import { useApi } from '@/hooks/use-api'
+import { readyApiCall, useApi } from '@/hooks/use-api'
+import { unwrap } from '@/lib/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import type { CommentTarget } from '../api/comment-api-types'
@@ -29,21 +30,11 @@ export function useFetchComments(target: CommentTarget) {
   const query = useQuery({
     queryKey: commentQueryKeys.target(target, safeUserId),
     queryFn: async () => {
-      // Ensure API is ready
-      if (api.state !== 'ready') {
-        throw new Error('API not ready')
-      }
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
-      // Fetch comments from API
-      const result = await getComments(api.apiCall, target)
-
-      // Ensure API call was successful
-      if (!result.success) {
-        throw new Error(result.error.message)
-      }
-
-      // Happy path
-      return result.data
+      // The target's comments, or throwing the backend failure
+      return unwrap(await getComments(apiCall, target))
     },
     // Wait for both API and auth to be ready before fetching
     enabled: api.state === 'ready' && isUserLoaded,

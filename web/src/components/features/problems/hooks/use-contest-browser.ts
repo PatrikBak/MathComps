@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
-import { type ApiState, useApi } from '@/hooks/use-api'
+import { type ApiState, readyApiCall, useApi } from '@/hooks/use-api'
+import { unwrap } from '@/lib/api-error'
 
 import { getContestsBySeasonApiUrl } from '../services/problem-api-urls'
 import type { SeasonContestBrowserResult } from '../types/contest-browser-types'
@@ -22,20 +23,15 @@ function getQueryOptions(api: ApiState) {
   return {
     queryKey: contestBrowserQueryKey,
     queryFn: async () => {
-      // Wait for API to be ready
-      if (api.state !== 'ready') throw new Error('API not ready')
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
-      // Fetch the contest browser data from the API
-      const response = await api.apiCall<SeasonContestBrowserResult>(
-        () => getContestsBySeasonApiUrl(),
-        { method: 'GET' }
+      // The contest browser data, or throwing the backend failure
+      return unwrap(
+        await apiCall<SeasonContestBrowserResult>(() => getContestsBySeasonApiUrl(), {
+          method: 'GET',
+        })
       )
-
-      // Rethrow an error that React Query knows to retry
-      if (!response.success) throw response.error
-
-      // Return the data if successful
-      return response.data
     },
     // Only fetch when the API is ready
     enabled: api.state === 'ready',

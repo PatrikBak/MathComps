@@ -214,3 +214,22 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
     apiCall,
   }
 }
+
+/**
+ * Narrows the API client to its request caller, throwing when the client isn't ready to issue requests.
+ * A query's `enabled` flag should already gate on readiness; this is the safety net inside the query
+ * function that also lets the client narrow to a non-nullable {@link ApiCaller}.
+ *
+ * @param api - The current API client state.
+ *
+ * @returns The caller for issuing requests.
+ */
+export function readyApiCall(api: ApiState): ApiCaller {
+  // A ready client is required to issue a request
+  if (api.state !== 'ready') {
+    throw new Error('API not ready')
+  }
+
+  // The ready client's caller
+  return api.apiCall
+}

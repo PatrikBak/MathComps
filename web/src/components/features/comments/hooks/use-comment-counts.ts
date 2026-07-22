@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { useApi } from '@/hooks/use-api'
+import { readyApiCall, useApi } from '@/hooks/use-api'
+import { unwrap } from '@/lib/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import type { CommentTargetType } from '../api/comment-api-types'
@@ -23,26 +24,16 @@ export function useCommentCounts(targetType: CommentTargetType, targetIds: strin
   const query = useQuery({
     queryKey: commentCountQueryKeys.forTargetIds(targetType, targetIds),
     queryFn: async () => {
-      // Ensure API is ready
-      if (api.state !== 'ready') {
-        throw new Error('API not ready')
-      }
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
-      // Don't call API for empty targetId arrays
+      // No targets means no counts to fetch
       if (targetIds.length === 0) {
         return {} as Record<string, number>
       }
 
-      // Fetch comment counts from API
-      const result = await getCommentCounts(api.apiCall, targetType, targetIds)
-
-      // Ensure API call was successful
-      if (!result.success) {
-        throw new Error(result.error.message)
-      }
-
-      // Return the targetId -> count mapping
-      return result.data
+      // The targetId -> count mapping, or throwing the backend failure
+      return unwrap(await getCommentCounts(apiCall, targetType, targetIds))
     },
     // Only fetch if API is ready and there are targetIds
     enabled: api.state === 'ready' && targetIds.length > 0,
