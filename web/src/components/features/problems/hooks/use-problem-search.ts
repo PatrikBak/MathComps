@@ -9,17 +9,12 @@ import { toast } from 'sonner'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
+import { errorCodeOf } from '@/lib/api-error'
 import { useProblemStore } from '@/stores/problem-store'
-import { isNetworkError, isServerError, isValidationError } from '@/types/api'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import { getProblemsPageUrl, hasProblemId } from '../services/problem-api-urls'
-import {
-  isListAccessDeniedError,
-  isListNotFoundError,
-  isProblemNotFoundError,
-} from '../types/problem-errors'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
@@ -310,10 +305,8 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   }, [displayFilters])
 
   // Handle errors when fetching a single problem by ID.
-  // Different error types get different UX:
-  // - Not found: redirect to problem list + toast
-  // - Network/server error: toast only (React Query will retry)
-  // - Validation error: redirect to problem list + toast
+  // - Not found: toast + redirect to the problem list
+  // - Anything else: toast once while React Query keeps retrying
   useEffect(() => {
     // Only show if we're viewing a single problem by ID and we have an error
     if (!singleProblemQuery.error || !problemId) return
@@ -327,24 +320,14 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     const truncatedId =
       problemId.length > maxIdLength ? `${problemId.slice(0, maxIdLength)}...` : problemId
 
-    // Handle different error types
-    if (isProblemNotFoundError(error)) {
-      // Problem not found: redirect to problem list + toast
+    // A missing problem is permanent; every other failure is transient and keeps retrying
+    if (errorCodeOf(error) === 'ProblemNotFound') {
+      // The problem doesn't exist: tell the user and return to the list
       toast.error(tErrors('problemNotFound', { problemId: truncatedId }))
       router.replace(ROUTES.PROBLEMS, { scroll: false })
-    } else if (isNetworkError(error) && isFirstError) {
-      // Network error: toast only (React Query will retry)
-      toast.error(tErrors('connectionProblem'))
-    } else if (isServerError(error) && isFirstError) {
-      // Server error: toast only (React Query will retry)
-      toast.error(tErrors('serverError'))
-    } else if (isValidationError(error)) {
-      // Validation error: redirect to problem list + toast
-      toast.error(tErrors('invalidParameters'))
-      router.replace(ROUTES.PROBLEMS, { scroll: false })
     } else if (isFirstError) {
-      // Unexpected error: toast only
-      toast.error(tErrors('unexpectedError'))
+      // A transient failure: toast once while React Query retries in the background
+      toast.error(tErrors('connectionProblem'))
     }
   }, [
     problemId,
@@ -377,14 +360,15 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // Handle list access errors
   // Show a toast with a clear message and redirect to /problems to clear the invalid list= URL param
   useEffect(() => {
-    // Only handle when the search query has a typed error
+    // Only handle when the search query failed
     const error = searchQuery.rawError
     if (!error) return
 
-    // Show a descriptive toast based on the error type
-    if (isListNotFoundError(error)) {
+    // Show a descriptive toast for a bad or forbidden list
+    const errorCode = errorCodeOf(error)
+    if (errorCode === 'ListNotFound') {
       toast.error(tErrors('listNotFound'))
-    } else if (isListAccessDeniedError(error)) {
+    } else if (errorCode === 'ListAccessDenied') {
       toast.error(tErrors('listAccessDenied'))
     } else {
       // Not a list access error, nothing to handle here

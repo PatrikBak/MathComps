@@ -583,13 +583,11 @@
     },
     "errors": {
       "connectionProblem": "Problém s pripojením. Skúšam znova...",
-      "invalidParameters": "Neplatné parametre požiadavky",
       "listAccessDenied": "Tento zoznam je súkromný. Ak je to váš zoznam, najprv sa prihláste.",
       "listNotFound": "Zoznam nebol nájdený",
       "maxFiltersExceeded": "Môžete vybrať maximálne {max} filtrov",
       "problemNotFound": "Úloha \"{problemId}\" nebola nájdená",
       "serverError": "Server vrátil chybu. Skúšam znova...",
-      "unexpectedError": "Nastala neočakávaná chyba. Skúšam znova...",
       "urlFiltersIgnored": "Niektoré parametre v URL boli ignorované",
       "urlTooManyFilters": "URL obsahuje príliš veľa filtrov (maximálne {max})"
     },

@@ -2,16 +2,12 @@ import type { InfiniteData } from '@tanstack/react-query'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useApi } from '@/hooks/use-api'
+import { readyApiCall, useApi } from '@/hooks/use-api'
+import { errorCodeOf, unwrap } from '@/lib/api-error'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
 import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
-import {
-  isListAccessDeniedError,
-  isListNotFoundError,
-  isProblemNotFoundError,
-} from '../types/problem-errors'
 import type {
   FilterOptionsWithCounts,
   SearchFiltersState,
@@ -148,31 +144,26 @@ export function useInitialFilterData(
   const query = useQuery({
     queryKey: problemQueryKeys.initialData(locale, userId),
     queryFn: async () => {
-      // Guard against missing API caller (should be prevented by enabled flag)
-      if (api.state !== 'ready') throw new Error('API not ready')
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
       // Fetch the initial filter options from the server
-      const result = await getInitialFilterData(api.apiCall)
-
-      // Throw typed error if the server request failed so React Query can retry
-      if (!result.success) {
-        throw result.error
-      }
+      const data = unwrap(await getInitialFilterData(apiCall))
 
       // Ensure we received valid filter options before proceeding
-      if (!result.data.updatedOptions) {
+      if (!data.updatedOptions) {
         throw new Error('No filter options received from server')
       }
 
       // Sync problems to global store
-      upsertProblems(result.data.problems.items)
+      upsertProblems(data.problems.items)
 
       // Destructure to separate 'items' from the rest of the data
-      const { items, ...problemMetadata } = result.data.problems
+      const { items, ...problemMetadata } = data.problems
 
       // Return structure with 'slugs' instead of 'items'
       return {
-        ...result.data,
+        ...data,
         problems: {
           ...problemMetadata,
           slugs: items.map((problem) => problem.slug),
@@ -225,32 +216,27 @@ export function useSingleProblem(
         throw new Error('Problem slug is required')
       }
 
-      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
-      if (api.state !== 'ready') throw new Error('API not ready')
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
       // Fetch the problem details from the server
-      const result = await getProblemBySlug(api.apiCall, problemSlug)
-
-      // Throw typed error if the server request failed so React Query can handle it
-      if (!result.success) {
-        throw result.error
-      }
+      const data = unwrap(await getProblemBySlug(apiCall, problemSlug))
 
       // Sync to global store
-      upsertProblem(result.data.problem)
+      upsertProblem(data.problem)
 
       // Deconstruct the result to remove the problem
-      const { problem: _, ...rest } = result.data
+      const { problem: _, ...rest } = data
 
       // Return just the rest of the result (problem will be in the global store)
       return rest
     },
     // Only run the query when enabled and we have a valid slug
     enabled: enabled && problemSlug !== null && api.state === 'ready',
-    // Use global retry defaults (infinite retries) EXCEPT for 404 errors (permanent failures)
+    // Use global retry defaults (infinite retries) EXCEPT for a missing problem (a permanent failure)
     retry: (_failureCount, error) => {
-      // Don't retry if this is a "Problem not found" error (permanent failure)
-      if (isProblemNotFoundError(error)) {
+      // Don't retry a missing problem — it won't appear on a retry
+      if (errorCodeOf(error) === 'ProblemNotFound') {
         return false
       }
       // Use global default: infinite retries with exponential backoff for transient errors
@@ -300,33 +286,24 @@ function useProblemSearchInfinite(
         throw new Error('Filters are required for search')
       }
 
-      // Guard against missing API caller (should be prevented by enabled flag, but provides safety)
-      if (api.state !== 'ready') throw new Error('API not ready')
+      // Narrow to the ready caller
+      const apiCall = readyApiCall(api)
 
       // Fetch the page of problems from the server with abort support for request cancellation
-      const result = await searchProblems(
-        api.apiCall,
-        filters,
-        DEFAULT_PAGE_SIZE,
-        pageParam,
-        signal
+      const data = unwrap(
+        await searchProblems(apiCall, filters, DEFAULT_PAGE_SIZE, pageParam, signal)
       )
 
-      // Throw typed error if the server request failed so React Query can retry
-      if (!result.success) {
-        throw result.error
-      }
-
       // Sync to global store
-      upsertProblems(result.data.problems.items)
+      upsertProblems(data.problems.items)
 
       // Separate the problems from the rest of the data so we can
       // just return the slugs (problems have been added to the global store)
-      const { items: problems, ...rest } = result.data.problems
+      const { items: problems, ...rest } = data.problems
 
       // On the result, replace the problems with slugs
       return {
-        ...result.data,
+        ...data,
         problems: {
           ...rest,
           slugs: problems.map((problem) => problem.slug),
@@ -350,7 +327,9 @@ function useProblemSearchInfinite(
 
     // Stop retrying on permanent list access errors
     retry: (_failureCount, error) => {
-      if (isListNotFoundError(error) || isListAccessDeniedError(error)) {
+      // A missing or forbidden list won't resolve on a retry
+      const code = errorCodeOf(error)
+      if (code === 'ListNotFound' || code === 'ListAccessDenied') {
         return false
       }
       // If not a list error, use global default for retries
@@ -393,9 +372,7 @@ type UseProblemSearchQueryReturn = {
   isFetchingNextPage: boolean
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
-  /** The error message if the search failed. */
-  error: string | null
-  /** The raw typed error object for type guard inspection (e.g. list access errors). */
+  /** The error the search failed with, or null. */
   rawError: Error | null
   /** Whether the search is currently retrying after a failure. */
   isRetrying: boolean
@@ -565,9 +542,7 @@ export function useProblemSearchQuery(
     isFetching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
     isFetchingNextPage: infiniteQuery.isFetchingNextPage,
 
-    // Error state
-    error: infiniteQuery.error?.message ?? null,
-    // Raw typed error for type guard inspection (list access errors, etc.)
+    // Error
     rawError: infiniteQuery.error,
     // Retry state - failureCount > 0 means we're retrying or have failed (show toast even between retries)
     isRetrying: infiniteQuery.failureCount > 0,
