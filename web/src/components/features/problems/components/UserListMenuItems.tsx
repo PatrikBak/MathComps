@@ -6,11 +6,8 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/shared/components/DropdownMenu'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import { PopoverItem, PopoverSeparator } from '@/components/shared/components/Popover'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
@@ -27,7 +24,7 @@ import { listNameSchema } from '../schemas/user-list-schemas'
 const EMPTY_ARRAY: string[] = []
 
 /**
- * Filter mode — used in a dropdown where we can select a list to filter by.
+ * Filter mode — used in a popover where we can select a list to filter by.
  */
 type FilterModeProps = {
   /** The discriminator */
@@ -36,7 +33,7 @@ type FilterModeProps = {
   activeContentId: string | null
   /** Called when a list is selected */
   onSelectList: (contentId: string) => void
-  /** Called to close the parent dropdown */
+  /** Called to close the parent popover */
   onClose: () => void
   /** Called when 'Manage lists' is clicked */
   onManage?: () => void
@@ -64,7 +61,8 @@ type MembershipModeProps = {
 type UserListMenuItemsProps = FilterModeProps | MembershipModeProps
 
 /**
- * Shared menu items for user lists.
+ * Shared list rows for the lists popover — one row per user list plus inline list
+ * creation, rendered in either filter or membership mode.
  */
 export function UserListMenuItems(props: UserListMenuItemsProps) {
   // Translations
@@ -107,7 +105,8 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
       : EMPTY_ARRAY
   )
 
-  // Focus the input when entering creation mode (after Radix's own focus pass)
+  // Focus the input once creation mode has rendered it visible (it's always
+  // mounted but hidden, so defer a tick past the commit that reveals it)
   useEffect(() => {
     if (isCreating) {
       const timer = setTimeout(() => inputRef.current?.focus(), 0)
@@ -128,20 +127,20 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 : listContentIds.includes(list.contentId)
 
             return (
-              <DropdownMenuItem
+              <PopoverItem
                 key={list.contentId}
                 disabled={isCreating}
-                onSelect={(event) => {
+                onClick={() => {
+                  // Filter mode: filter by the selected list
                   if (props.mode === 'filter') {
-                    // Filter mode: select list and close
                     props.onSelectList(list.contentId)
-                  } else {
-                    // Membership mode: toggle and keep open
-                    event.preventDefault()
-                    toggleListItem(props.problemSlug, list.contentId)
+                    return
                   }
+
+                  // Membership mode: toggle this problem's membership in the list
+                  toggleListItem(props.problemSlug, list.contentId)
                 }}
-                className={cn('cursor-pointer', isActive && 'text-focus-light')}
+                className={cn(isActive && 'text-focus-light')}
               >
                 <div className="flex w-full items-center justify-between gap-2 overflow-hidden">
                   <div className="flex min-w-0 items-center gap-2 pr-6">
@@ -160,7 +159,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                     {list.problemCount}
                   </span>
                 </div>
-              </DropdownMenuItem>
+              </PopoverItem>
             )
           })}
         </>
@@ -169,7 +168,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
       {/* Loading indicator when fetching lists */}
       {isSignedIn && isListsLoading && (
         <>
-          <DropdownMenuSeparator />
+          <PopoverSeparator />
           <div className="flex items-center justify-center py-2">
             <LoadingSpinner className="h-4 w-4" />
           </div>
@@ -180,7 +179,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
       {!isListsLoading && (
         <>
           {/* Separator only when there are items above (lists or mode=filter has All/Liked) */}
-          {(props.mode === 'filter' || (lists && lists.length > 0)) && <DropdownMenuSeparator />}
+          {(props.mode === 'filter' || (lists && lists.length > 0)) && <PopoverSeparator />}
 
           {/* New list — grid overlay: both button and input occupy the same cell,
              so the wider one always defines the width (prevents horizontal shift) */}
@@ -199,12 +198,11 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 value={newListName}
                 onChange={(event) => setNewListName(event.target.value)}
                 onKeyDown={(event) => {
-                  // Stop propagation so Radix's typeahead doesn't intercept keystrokes
+                  // Keep keystrokes from reaching the popover (e.g. Escape closing it)
                   event.stopPropagation()
 
                   // Enter → create list
                   if (event.key === 'Enter') {
-                    // Prevent dropdown submission
                     event.preventDefault()
 
                     // Validate with shared schema
@@ -227,7 +225,6 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                   }
                   // Escape → cancel
                   if (event.key === 'Escape') {
-                    // Prevent dropdown submission
                     event.preventDefault()
 
                     // Reset the list state
@@ -243,17 +240,14 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
             </div>
 
             {/* Button to reveal the input (visible when not creating) */}
-            <DropdownMenuItem
+            <PopoverItem
               disabled={isCreating}
-              onSelect={(event) => {
-                // Prevent the dropdown from closing
-                event.preventDefault()
-
+              onClick={() => {
                 // Auth gate: show login prompt for unsigned users
                 if (!isSignedIn) {
                   showLoginPrompt({ reason: t('newListAuthReason') })
 
-                  // Close the parent dropdown if in filter mode
+                  // Close the parent popover if in filter mode
                   if (props.mode === 'filter') {
                     props.onClose()
                   }
@@ -263,30 +257,27 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 // Signed in: reveal the input
                 setIsCreating(true)
               }}
-              className={cn(
-                'cursor-pointer text-muted hover:text-foreground col-start-1 row-start-1',
-                isCreating && 'invisible'
-              )}
+              className={cn('col-start-1 row-start-1 text-muted', isCreating && 'invisible')}
             >
               <div className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 <span>{t('newList')}</span>
               </div>
-            </DropdownMenuItem>
+            </PopoverItem>
           </div>
 
           {/* Manage lists — only when signed in and lists exist */}
           {isSignedIn && props.onManage && lists && lists.length > 0 && (
-            <DropdownMenuItem
+            <PopoverItem
               disabled={isCreating}
-              onSelect={() => props.onManage?.()}
-              className="cursor-pointer text-muted hover:text-foreground"
+              onClick={() => props.onManage?.()}
+              className="text-muted"
             >
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <span>{t('manageLists')}</span>
               </div>
-            </DropdownMenuItem>
+            </PopoverItem>
           )}
         </>
       )}

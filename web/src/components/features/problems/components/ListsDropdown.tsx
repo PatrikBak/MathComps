@@ -5,13 +5,13 @@ import { ChevronDown, Heart, List, Share2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/shared/components/DropdownMenu'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import {
+  Popover,
+  PopoverContent,
+  PopoverItem,
+  PopoverTrigger,
+} from '@/components/shared/components/Popover'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 
@@ -122,9 +122,9 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
 
   return (
     <>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen}>
         {/* Trigger button */}
-        <DropdownMenuTrigger asChild>
+        <PopoverTrigger asChild>
           <button
             className={cn(
               'flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200',
@@ -150,31 +150,31 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
               )}
             />
           </button>
-        </DropdownMenuTrigger>
+        </PopoverTrigger>
 
-        {/* Dropdown content */}
-        <DropdownMenuContent
+        {/* Popover content */}
+        <PopoverContent
           align="start"
-          className="w-[var(--radix-dropdown-menu-trigger-width)]"
+          className="w-[var(--radix-popover-trigger-width)]"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
           {/* All Problems */}
-          <DropdownMenuItem
+          <PopoverItem
             disabled={isCreating}
-            onSelect={handleSelectAll}
-            className={cn('cursor-pointer', isAllActive && 'text-focus/80')}
+            onClick={handleSelectAll}
+            className={cn(isAllActive && 'text-focus/80')}
           >
             <div className="flex w-full items-center gap-2">
               <List className={cn('h-4 w-4', isAllActive ? 'text-focus' : 'text-muted')} />
               <span>{t('allProblems')}</span>
             </div>
-          </DropdownMenuItem>
+          </PopoverItem>
 
           {/* Liked */}
-          <DropdownMenuItem
+          <PopoverItem
             disabled={isCreating}
-            onSelect={handleSelectLiked}
-            className={cn('cursor-pointer', filters.favoritesOnly && 'text-focus/80')}
+            onClick={handleSelectLiked}
+            className={cn(filters.favoritesOnly && 'text-focus/80')}
           >
             <div className="flex w-full items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
                 <span className="text-xs text-muted">{likedCount}</span>
               )}
             </div>
-          </DropdownMenuItem>
+          </PopoverItem>
 
           {/* Custom lists + new list creation (shared component) */}
           <UserListMenuItems
@@ -196,8 +196,8 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
             onManage={handleManage}
             onCreatingChange={setIsCreating}
           />
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
 
       {/* Manage Lists Modal */}
       <ManageListsModal ref={manageRef} onSelectList={handleSelectList} />

@@ -5,11 +5,7 @@ import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/shared/components/DropdownMenu'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shared/components/Popover'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 
@@ -70,8 +66,8 @@ export function AddToListMenu({ problemSlug, onSelectList }: AddToListMenuProps)
 
   return (
     <div>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <button
             onClick={handleTriggerClick}
             className={cn(
@@ -82,16 +78,16 @@ export function AddToListMenu({ problemSlug, onSelectList }: AddToListMenuProps)
           >
             <Plus size={14} />
           </button>
-        </DropdownMenuTrigger>
+        </PopoverTrigger>
 
-        <DropdownMenuContent
+        <PopoverContent
           align="end"
           className="min-w-48 !animate-none"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
           <UserListMenuItems mode="membership" problemSlug={problemSlug} onManage={handleManage} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
 
       {/* Manage Lists Modal */}
       <ManageListsModal ref={manageRef} onSelectList={onSelectList} />
