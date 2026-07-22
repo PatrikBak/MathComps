@@ -181,11 +181,95 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // The owner opens a session
         var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
 
-        // The other user can neither continue nor delete it
+        // The other user can neither continue, rewind, nor delete it
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.ContinueAsync(_otherId, session.Id, "sneaking in"));
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
+            () => service.RewindAsync(_otherId, session.Id, 0));
+        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.DeleteAsync(_otherId, session.Id));
+    });
+
+    /// <summary>
+    /// Rewinding to an examiner turn drops every later turn, leaving a contiguous prefix; a following continue then
+    /// appends cleanly (no clash with the (session, sequence) unique index) and the freed turn budget lets it through.
+    /// </summary>
+    [Fact]
+    public Task Rewind_truncates_and_lets_the_conversation_continue() => RunTestAsync(async service =>
+    {
+        // Open a session with the student's first message
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "first"));
+
+        // Continue it to the two-student-turn cap: opener, student, examiner, student, examiner
+        await service.ContinueAsync(_ownerId, session.Id, "second");
+
+        // Rewind to the first examiner reply, dropping the second student turn and its reply
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 2);
+
+        // Only the contiguous 0..2 prefix survives
+        await QueryAsync(async context =>
+        {
+            // The session's turns in sequence order
+            var turns = await context.DefenseTurns
+                .Where(turn => turn.SessionId == session.Id)
+                .OrderBy(turn => turn.Sequence)
+                .ToListAsync();
+
+            // The tail is gone and the kept sequences stay contiguous
+            Assert.Equal([0, 1, 2], turns.Select(turn => turn.Sequence));
+            Assert.Equal(
+                [TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner],
+                turns.Select(turn => turn.Role));
+        });
+
+        // Continuing again lands the next student turn at sequence 3 without colliding, and the rewind freed the
+        // turn budget that the pre-rewind conversation had already exhausted
+        var continued = await service.ContinueAsync(_ownerId, session.Id, "redo");
+
+        // The redone turn is appended after the kept prefix
+        Assert.Equal(
+            ["examiner", "student", "examiner", "student", "examiner"],
+            continued.Turns.Select(turn => turn.Role));
+        Assert.Equal("redo", continued.Turns[3].Content);
+    });
+
+    /// <summary>
+    /// Rewinding to the conversation's already-last examiner turn is a harmless no-op — nothing is deleted.
+    /// </summary>
+    [Fact]
+    public Task Rewind_to_the_last_examiner_turn_deletes_nothing() => RunTestAsync(async service =>
+    {
+        // A fresh three-turn session, whose last turn (sequence 2) is the examiner's reply
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Rewind to that last examiner turn
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 2);
+
+        // All three turns remain
+        Assert.Equal(3, await QueryValueAsync(context =>
+            context.DefenseTurns.CountAsync(turn => turn.SessionId == session.Id)));
+    });
+
+    /// <summary>
+    /// A rewind whose cut point is out of range, or lands on a student turn, is refused and changes nothing.
+    /// </summary>
+    [Fact]
+    public Task Rewind_to_an_invalid_target_is_refused() => RunTestAsync(async service =>
+    {
+        // A three-turn session: examiner(0), student(1), examiner(2)
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // A sequence past the last turn has no row to keep
+        await Assert.ThrowsAsync<DefenseRewindTargetException>(
+            () => service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 99));
+
+        // Keeping through the student turn would leave the conversation awaiting the examiner, not the student
+        await Assert.ThrowsAsync<DefenseRewindTargetException>(
+            () => service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 1));
+
+        // Both refusals left the conversation intact
+        Assert.Equal(3, await QueryValueAsync(context =>
+            context.DefenseTurns.CountAsync(turn => turn.SessionId == session.Id)));
     });
 
     /// <summary>

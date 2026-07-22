@@ -18,6 +18,7 @@ export const BACKEND_ERROR_CODES = [
   'DefenseMessageEmpty',
   'DefenseTurnLimit',
   'DefenseSpendLimit',
+  'DefenseRewindTarget',
   'UserNotResolved',
 ] as const
 

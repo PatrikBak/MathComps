@@ -1,23 +1,38 @@
 'use client'
 
 import { useReducedMotion } from '@mantine/hooks'
+import { Undo2 } from 'lucide-react'
 import { useState } from 'react'
 
+import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { Turn, TurnRole } from '../model/defense-types'
 
 /**
+ * The rewind-to-here affordance on a turn: whether to offer it and its accessible label. Shared by the
+ * transcript, which offers it on every turn, and each turn, which renders it.
+ */
+export type RewindAffordance = {
+  /** Whether to offer the rewind-to-here control. */
+  canRewind: boolean
+  /** The accessible label for the rewind control. */
+  rewindLabel: string
+}
+
+/**
  * Props for a single {@link DefenseTurn}.
  */
-type DefenseTurnProps = {
+type DefenseTurnProps = RewindAffordance & {
   /** The message this turn renders. */
   turn: Turn
   /** The localized role label shown above the message. */
   label: string
   /** Whether this turn just arrived and should fade in. */
   animate: boolean
+  /** Rewinds the conversation to this turn. */
+  onRewind: () => void
 }
 
 /**
@@ -36,12 +51,12 @@ type TurnStyle = {
 /** The container/label/body styling for each role. */
 const TURN_STYLES: Record<TurnRole, TurnStyle> = {
   examiner: {
-    container: 'border-l-2 border-foreground/15 pl-4',
+    container: 'border-l-2 border-foreground/15 pl-4 pr-3.5',
     label: 'text-muted',
     body: 'math-typography',
   },
   student: {
-    container: 'self-end rounded-xl bg-brand/10 px-3.5 py-3',
+    container: 'max-w-[85%] self-end rounded-xl bg-brand/10 px-3.5 py-3',
     label: 'text-brand-light',
     body: 'text-[15px] leading-relaxed',
   },
@@ -51,7 +66,14 @@ const TURN_STYLES: Record<TurnRole, TurnStyle> = {
  * Renders one message of a defense conversation, styled by who authored it, with its body rendered as
  * read-only rich math.
  */
-export function DefenseTurn({ turn, label, animate }: DefenseTurnProps) {
+export function DefenseTurn({
+  turn,
+  label,
+  animate,
+  canRewind,
+  rewindLabel,
+  onRewind,
+}: DefenseTurnProps) {
   // The look for this turn's author
   const style = TURN_STYLES[turn.role]
 
@@ -64,16 +86,35 @@ export function DefenseTurn({ turn, label, animate }: DefenseTurnProps) {
   return (
     <div
       className={cn(
-        'max-w-[85%] space-y-1.5',
+        'space-y-1.5',
         style.container,
         entranceAnimation &&
           !reducedMotion &&
           'animate-in fade-in slide-in-from-bottom-2 duration-300'
       )}
     >
-      {/* Who authored the turn */}
-      <div className={cn('text-[11px] font-bold uppercase tracking-wide', style.label)}>
-        {label}
+      {/* The author label, with the rewind control at the row's trailing edge so it never covers the
+          message body */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Who authored the turn */}
+        <div className={cn('text-[11px] font-bold uppercase tracking-wide', style.label)}>
+          {label}
+        </div>
+
+        {/* Rewind the conversation to this turn. Always shown, kept low-emphasis: a hover- or
+            focus-toggled control fights a Safari bug where the modal's `backdrop-filter` panel leaves
+            hidden descendants painted as stale ghosts, and a persistent control sidesteps it entirely */}
+        {canRewind && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={rewindLabel}
+            onClick={onRewind}
+            className="size-7 shrink-0 text-muted/60 hover:text-foreground"
+          >
+            <Undo2 size={14} />
+          </Button>
+        )}
       </div>
 
       {/* The message body as read-only rich math */}

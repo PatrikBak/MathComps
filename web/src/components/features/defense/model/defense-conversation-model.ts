@@ -13,6 +13,12 @@ import type {
 export type SendOutcome = 'sent' | 'failed' | 'stopped' | 'busy'
 
 /**
+ * The outcome of a rewind: `done` when the conversation was truncated, `failed` when the round-trip
+ * errored (leaving the conversation untouched).
+ */
+export type RewindOutcome = 'done' | 'failed'
+
+/**
  * The observable state of a defense conversation.
  */
 export type DefenseConversationState = {
@@ -35,6 +41,8 @@ export type DefenseConversationServices = {
   submitTurn: (request: DefenseTurnRequest) => Promise<DefenseSession>
   /** Deletes a session. */
   deleteSession: (sessionId: string) => Promise<void>
+  /** Drops every turn after the kept one from the session. */
+  rewindTurns: (sessionId: string, keepThroughSequence: number) => Promise<void>
 }
 
 /**
@@ -325,6 +333,48 @@ export class DefenseConversationModel {
     } finally {
       this.onSessionsChanged()
     }
+  }
+
+  /**
+   * Rewinds the open conversation to a chosen point, dropping every turn after it. The server truncates
+   * first; only on success is the local transcript cut to the kept prefix. Draft handling is the
+   * caller's, not the model's.
+   *
+   * @param keepThroughSequence - The sequence of the last turn to keep; every later turn is dropped.
+   *   The transcript is the contiguous 0..N turns the server stores, so a turn's sequence is its index.
+   * @param services - The backend call to truncate the session.
+   *
+   * @returns How the rewind resolved.
+   */
+  rewind = async (
+    keepThroughSequence: number,
+    services: Pick<DefenseConversationServices, 'rewindTurns'>
+  ): Promise<RewindOutcome> => {
+    // Only a saved conversation has turns on the server to drop
+    const sessionId = this.state.currentSessionId
+    if (sessionId === null) {
+      return 'failed'
+    }
+
+    try {
+      // Truncate the persisted conversation before touching the view
+      await services.rewindTurns(sessionId, keepThroughSequence)
+    } catch {
+      // The server still holds the full conversation, so leave the transcript as it was
+      return 'failed'
+    }
+
+    // Drop any turn still in flight so a trailing reply can't repaint the shortened transcript
+    this.abandonInFlight()
+
+    // Show only the kept prefix
+    this.setState({ turns: this.state.turns.slice(0, keepThroughSequence + 1) })
+
+    // The stored session was truncated, so refresh the history to match
+    this.onSessionsChanged()
+
+    // The conversation was rewound
+    return 'done'
   }
 
   /**

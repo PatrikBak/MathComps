@@ -8,6 +8,7 @@ import {
   getContinueDefenseUrl,
   getDefenseSessionsUrl,
   getDeleteDefenseSessionUrl,
+  getRewindDefenseUrl,
   getStartDefenseUrl,
 } from './defense-api-urls'
 
@@ -83,4 +84,25 @@ export function submitTurn(
  */
 export function deleteSession(apiCall: ApiCaller, sessionId: string): Promise<ApiResult<void>> {
   return wrapApi(apiCall<void>(() => getDeleteDefenseSessionUrl(sessionId), { method: 'DELETE' }))
+}
+
+/**
+ * Rewinds a session to a chosen point, dropping every turn after it.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param sessionId - The id of the session to rewind.
+ * @param keepThroughSequence - The sequence of the last turn to keep; every later turn is deleted.
+ * @returns The outcome of the rewind.
+ */
+export function rewindTurns(
+  apiCall: ApiCaller,
+  sessionId: string,
+  keepThroughSequence: number
+): Promise<ApiResult<void>> {
+  return wrapApi(
+    apiCall<void>(() => getRewindDefenseUrl(sessionId), {
+      method: 'POST',
+      body: JSON.stringify({ keepThroughSequence }),
+    })
+  )
 }

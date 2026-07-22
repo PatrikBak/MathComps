@@ -7,8 +7,8 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the defense endpoints: listing a user's defense conversations for a problem, starting one, continuing it
-/// with the next turn, and deleting one. Admin-gated, though built per-user; the turn routes are tightly
-/// rate-limited because each turn is several LLM calls.
+/// with the next turn, rewinding one to an earlier point, and deleting one. Admin-gated, though built per-user;
+/// the turn routes are tightly rate-limited because each turn is several LLM calls.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -80,6 +80,26 @@ public static class DefenseEndpoints
         })
         .RequireAuthorization(AuthorizationPolicies.Admin)
         .RequireRateLimiting(RateLimiterPolicies.DefenseTurnRateLimit);
+
+        // Rewind a session to an earlier point, dropping every turn after it
+        app.MapPost($"{SessionsPath}/{{id:guid}}/rewind", async (
+            Guid id,
+            RewindDefenseRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseSessionService defenseService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Truncate the conversation to the chosen point
+            await defenseService.RewindAsync(userId, id, request.KeepThroughSequence, context.RequestAborted);
+
+            // Nothing to return; the client already knows the kept prefix
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Delete a session outright
         app.MapDelete($"{SessionsPath}/{{id:guid}}", async (

@@ -42,3 +42,14 @@ export function getDeleteDefenseSessionUrl(sessionId: string): string {
   // The session's own endpoint
   return buildApiUrl(`/defense/sessions/${sessionId}`)
 }
+
+/**
+ * Builds the URL for rewinding a defense session to an earlier point.
+ *
+ * @param sessionId - The session to rewind.
+ * @returns the rewind URL.
+ */
+export function getRewindDefenseUrl(sessionId: string): string {
+  // The truncate-conversation endpoint for the session
+  return buildApiUrl(`/defense/sessions/${sessionId}/rewind`)
+}

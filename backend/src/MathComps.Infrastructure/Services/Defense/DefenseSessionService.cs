@@ -179,6 +179,42 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    /// <inheritdoc/>
+    public async Task RewindAsync(
+        Guid userId, Guid sessionId, int keepThroughSequence, CancellationToken cancellationToken = default)
+    {
+        // Serialize against this user's turns: a continue builds its turn in memory and saves at the very end,
+        // so without the gate this delete could interleave and leave the sequence non-contiguous.
+        using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);
+
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Load the session for the ownership check.
+        var session = await dbContext.DefenseSessions
+            .FirstOrDefaultAsync(defenseSession => defenseSession.Id == sessionId, cancellationToken);
+
+        // Treat another user's session, or a missing one, as absent.
+        if (session is null || session.UserId != userId)
+            throw new DefenseSessionNotFoundException();
+
+        // The role of the turn to keep as the new last one, or null when the sequence is out of range.
+        var keptRole = await dbContext.DefenseTurns
+            .Where(turn => turn.SessionId == sessionId && turn.Sequence == keepThroughSequence)
+            .Select(turn => (TranscriptRole?)turn.Role)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // The cut point must land on an existing examiner turn, so the rewound conversation awaits the student.
+        if (keptRole != TranscriptRole.Examiner)
+            throw new DefenseRewindTargetException();
+
+        // Delete the tail in one statement: the doomed rows are never loaded, and the kept prefix stays a
+        // contiguous 0..keepThroughSequence, so a later append can't collide with the (session, sequence) index.
+        await dbContext.DefenseTurns
+            .Where(turn => turn.SessionId == sessionId && turn.Sequence > keepThroughSequence)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
     /// <summary>
     /// Runs the examiner over the session's current turns (which must end on a student turn), then stages its reply
     /// and the turn's spend row on the context. The caller's save writes them; this method does no database

@@ -178,6 +178,10 @@
     "opener": "Rád si s tebou popovídám o tvém řešení, nebo pokud potřebuješ poradit 😇",
     "placeholder": "Napiš svou odpověď…",
     "problemStrip": "Zadání úlohy",
+    "rewind": "Vrátit sem",
+    "rewindError": "Konverzaci se nepodařilo vrátit zpět.",
+    "rewindMessage": "Vše po tomto bodě se trvale odstraní.",
+    "rewindTitle": "Vrátit konverzaci sem?",
     "roles": {
       "examiner": "Zkoušející",
       "student": "Ty"

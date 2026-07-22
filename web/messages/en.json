@@ -178,6 +178,10 @@
     "opener": "Happy to chat about your solution, or if you're stuck 😇",
     "placeholder": "Type your reply…",
     "problemStrip": "Problem statement",
+    "rewind": "Rewind to here",
+    "rewindError": "The conversation couldn't be rewound.",
+    "rewindMessage": "Everything after this point will be permanently deleted.",
+    "rewindTitle": "Rewind to here?",
     "roles": {
       "examiner": "Examiner",
       "student": "You"
