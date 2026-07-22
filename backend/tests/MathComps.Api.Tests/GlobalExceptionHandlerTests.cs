@@ -19,10 +19,18 @@ public class GlobalExceptionHandlerTests
     [Fact]
     public async Task Every_business_exception_maps_to_a_client_status_and_code()
     {
-        // The business exceptions all live next to their service interfaces in the Infrastructure assembly
-        var exceptionTypes = typeof(MathCompsDbContext).Assembly.GetTypes()
+        // Most business exceptions live next to their service interfaces in the Infrastructure assembly
+        var infrastructureExceptions = typeof(MathCompsDbContext).Assembly.GetTypes()
             .Where(type => typeof(Exception).IsAssignableFrom(type)
                 && type.Namespace?.StartsWith("MathComps.Infrastructure.Services", StringComparison.Ordinal) == true);
+
+        // A few (like UserNotResolvedException) are thrown by the endpoint layer and live in the Api assembly
+        var apiExceptions = typeof(GlobalExceptionHandler).Assembly.GetTypes()
+            .Where(type => typeof(Exception).IsAssignableFrom(type)
+                && type.Namespace?.StartsWith("MathComps.Api", StringComparison.Ordinal) == true);
+
+        // Both assemblies' business exceptions must classify
+        var exceptionTypes = infrastructureExceptions.Concat(apiExceptions);
 
         // Drive each one through the real handler
         foreach (var exceptionType in exceptionTypes)
