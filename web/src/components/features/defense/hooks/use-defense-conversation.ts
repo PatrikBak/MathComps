@@ -4,12 +4,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState, useSyncExternalStore } from 'react'
 
 import { useApi } from '@/hooks/use-api'
+import { unwrap } from '@/lib/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import {
   DefenseConversationModel,
   type DefenseConversationServices,
   type DefenseConversationState,
+  type DeleteOutcome,
   type RewindOutcome,
   type SendOutcome,
 } from '../model/defense-conversation-model'
@@ -29,6 +31,13 @@ function sessionsQueryKey(problemKey: string) {
 }
 
 /**
+ * The failed outcome every action reports when the client isn't ready to run it (still loading or signed
+ * out). Structurally a member of each of {@link SendOutcome}, {@link DeleteOutcome}, and
+ * {@link RewindOutcome}, so one value serves all three.
+ */
+const NOT_READY_OUTCOME = { kind: 'failed' as const, errorCode: undefined }
+
+/**
  * The live defense conversation and the controls that drive it: the model's observable state and
  * actions, each documented at its home on {@link DefenseConversationState} and
  * {@link DefenseConversationModel}, plus this problem's session history.
@@ -37,10 +46,12 @@ type UseDefenseConversationResult = DefenseConversationState &
   Pick<DefenseConversationModel, 'stop' | 'startNew' | 'resume'> & {
     /** This problem's persisted sessions, oldest first. */
     sessions: DefenseSession[]
+    /** Whether loading this problem's session history failed. */
+    sessionsFailed: boolean
     /** Sends a student turn and folds in the examiner's reply. */
     send: (content: string) => Promise<SendOutcome>
     /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
-    deleteSession: (sessionId: string) => Promise<void>
+    deleteSession: (sessionId: string) => Promise<DeleteOutcome>
     /** Rewinds the open conversation to a chosen point, dropping every later turn. */
     rewind: (keepThroughSequence: number) => Promise<RewindOutcome>
   }
@@ -71,46 +82,28 @@ export function useDefenseConversation(
   const api = useApi({ requireAuth: true })
 
   // The ready caller, or null while the client is still loading or the user is signed out. Stable across
-  // renders (memoized inside useApi), so it anchors the memoized callbacks below.
+  // renders (memoized inside useApi).
   const apiCall = api.state === 'ready' ? api.apiCall : null
 
-  // The backend calls bound to the current caller, unwrapped to their data or a throw. Memoized on the
-  // caller so the send/delete callbacks keep a stable identity while the composer re-renders on keystrokes.
-  const buildServices = useCallback((): DefenseConversationServices => {
-    // The client must be ready (loaded and authenticated) to make a call
-    if (apiCall === null) throw new Error('API not ready')
+  // The backend calls bound to the current caller (unwrapped to data or a throw), or null when the caller
+  // isn't ready. Memoized on the caller so it keeps a stable identity across renders.
+  const buildServices = useCallback((): DefenseConversationServices | null => {
+    // No caller yet: the client is still loading or the user is signed out, so there are no services
+    if (apiCall === null) {
+      return null
+    }
 
-    // The two calls, each unwrapping its result
+    // The calls, each unwrapping its result to data or a throw
     return {
-      submitTurn: async (request) => {
-        // Send the turn
-        const result = await submitTurn(apiCall, request)
-
-        // A failed call throws
-        if (!result.success) {
-          throw new Error(result.error.message)
-        }
-
-        // The session grown with the turn and the reply
-        return result.data
-      },
+      // Send the turn, returning the session grown with it and the reply
+      submitTurn: async (request) => unwrap(await submitTurn(apiCall, request)),
+      // Remove the session
       deleteSession: async (sessionId) => {
-        // Remove the session
-        const result = await deleteSession(apiCall, sessionId)
-
-        // A failed call throws
-        if (!result.success) {
-          throw new Error(result.error.message)
-        }
+        unwrap(await deleteSession(apiCall, sessionId))
       },
+      // Truncate the session to the kept prefix
       rewindTurns: async (sessionId, keepThroughSequence) => {
-        // Truncate the session to the kept prefix
-        const result = await rewindTurns(apiCall, sessionId, keepThroughSequence)
-
-        // A failed call throws
-        if (!result.success) {
-          throw new Error(result.error.message)
-        }
+        unwrap(await rewindTurns(apiCall, sessionId, keepThroughSequence))
       },
     }
   }, [apiCall])
@@ -122,18 +115,13 @@ export function useDefenseConversation(
       // The client must be ready to fetch
       if (apiCall === null) throw new Error('API not ready')
 
-      // Fetch the sessions
-      const result = await listSessions(apiCall, problem.key)
-
-      // A failed call throws
-      if (!result.success) {
-        throw new Error(result.error.message)
-      }
-
-      // The sessions
-      return result.data
+      // Fetch the sessions, unwrapped to the list or a throw
+      return unwrap(await listSessions(apiCall, problem.key))
     },
     enabled: apiCall !== null,
+    // Give up after a few tries instead of the global infinite retry, so a persistent failure reaches the
+    // error state rather than leaving the history indefinitely empty
+    retry: 3,
     // Sessions are the user's own recent activity
     ...cachePolicy.userData,
   })
@@ -154,45 +142,51 @@ export function useDefenseConversation(
   // the server-render snapshot
   const state = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot)
 
-  // Sends a student turn against the current caller. A not-ready client reports a failed turn rather than
-  // throwing. Stable across renders so a memoized child isn't re-rendered on every keystroke.
-  const send = useCallback(
-    async (content: string): Promise<SendOutcome> => {
-      // A not-ready client can't run the turn; report it as a failed turn rather than throwing
-      let services: DefenseConversationServices
-      try {
-        services = buildServices()
-      } catch {
-        return 'failed'
+  // Runs a model action against the ready services, or reports the shared not-ready failure when the
+  // client is still loading or signed out. Every action's not-ready path collapses here. Stable across
+  // renders.
+  const runWithServices = useCallback(
+    <Outcome>(
+      run: (services: DefenseConversationServices) => Promise<Outcome>
+    ): Promise<Outcome | typeof NOT_READY_OUTCOME> => {
+      // A not-ready client has no services to run against
+      const services = buildServices()
+      if (services === null) {
+        return Promise.resolve(NOT_READY_OUTCOME)
       }
 
-      // Drive the turn against the ready services
-      return model.send(content, services)
+      // Drive the action against the ready services
+      return run(services)
     },
-    [model, buildServices]
+    [buildServices]
   )
 
-  // Deletes a session against the current caller. Stable across renders, like {@link send}.
+  // Sends a student turn and folds in the examiner's reply.
+  const send = useCallback(
+    (content: string): Promise<SendOutcome> =>
+      runWithServices((services) => model.send(content, services)),
+    [model, runWithServices]
+  )
+
+  // Deletes a session, dropping back to a fresh conversation when it was the open one.
   const removeSession = useCallback(
-    // buildServices() throws when the client isn't ready; inside an async callback that surfaces as a
-    // rejected promise the caller can handle, not a synchronous throw before the delete is even attempted
-    async (sessionId: string): Promise<void> => model.deleteSession(sessionId, buildServices()),
-    [model, buildServices]
+    (sessionId: string): Promise<DeleteOutcome> =>
+      runWithServices((services) => model.deleteSession(sessionId, services)),
+    [model, runWithServices]
   )
 
-  // Rewinds the open conversation against the current caller. Stable across renders, like {@link send}.
+  // Rewinds the open conversation to a chosen point, dropping every later turn.
   const rewind = useCallback(
-    // buildServices() throws when the client isn't ready; that surfaces as a rejected promise, but rewind
-    // is only reachable on a saved, loaded conversation, so the client is always ready by then
-    async (keepThroughSequence: number): Promise<RewindOutcome> =>
-      model.rewind(keepThroughSequence, buildServices()),
-    [model, buildServices]
+    (keepThroughSequence: number): Promise<RewindOutcome> =>
+      runWithServices((services) => model.rewind(keepThroughSequence, services)),
+    [model, runWithServices]
   )
 
   // The conversation state, this problem's history, and the controls that drive it
   return {
     ...state,
     sessions: sessionsQuery.data ?? [],
+    sessionsFailed: sessionsQuery.isError,
     send,
     stop: model.stop,
     startNew: model.startNew,

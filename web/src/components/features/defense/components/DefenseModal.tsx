@@ -2,7 +2,7 @@
 
 import { Plus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/shared/components/Button'
@@ -11,6 +11,8 @@ import { Modal } from '@/components/shared/components/Modal'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { backendErrorMessage } from '@/lib/backend-error-message'
+import type { BackendErrorCode } from '@/types/backend-error-codes'
 
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import type { DefenseProblem, TurnRole } from '../model/defense-types'
@@ -58,6 +60,19 @@ const DEFENSE_TOOLBAR: ToolbarConfig = {
 }
 
 /**
+ * The `defense` message key for each failure a real user can reach. The wrong-param codes
+ * (`DefenseMessageEmpty`, `DefenseRewindTarget`) are left out on purpose: the composer guards an empty
+ * message and the rewind target is computed from the real turns, so those fire only on a bug or a
+ * tampered request and fall through to each action's generic fallback.
+ */
+const DEFENSE_ERROR_KEYS = {
+  DefenseTurnLimit: 'errors.DefenseTurnLimit',
+  DefenseSpendLimit: 'errors.DefenseSpendLimit',
+  DefenseMessageTooLong: 'errors.DefenseMessageTooLong',
+  DefenseSessionNotFound: 'errors.DefenseSessionNotFound',
+} as const
+
+/**
  * The defense chat: a student argues their solution to a problem and the examiner probes it turn by
  * turn. Reuses the shared rich-math editor as the composer and renders the exchange as an annotated
  * transcript.
@@ -74,6 +89,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     turns,
     isThinking,
     sessions,
+    sessionsFailed,
     currentSessionId,
     conversationEpoch,
     send,
@@ -90,6 +106,14 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
   // The rewind awaiting confirmation, or null
   const [rewindTarget, setRewindTarget] = useState<RewindTarget | null>(null)
 
+  // Surface a failed history load, but only while the modal is open: an empty history and a load failure
+  // look identical otherwise, and the mounted-but-closed modal keeps the query running in the background
+  useEffect(() => {
+    if (isOpen && sessionsFailed) {
+      toast.error(t('historyError'))
+    }
+  }, [isOpen, sessionsFailed, t])
+
   // Rewind is offered only on a saved conversation and never mid-turn; the whole feature is admin-gated
   // at the trigger
   const canRewind = !isThinking && currentSessionId !== null
@@ -98,6 +122,14 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
   const roleLabels: Record<TurnRole, string> = {
     examiner: t('roles.examiner'),
     student: t('roles.student'),
+  }
+
+  // Toasts a failed action's message: the code's specific copy, else the action's generic fallback
+  const showActionError = (
+    errorCode: BackendErrorCode | undefined,
+    fallback: 'sendError' | 'rewindError' | 'deleteError'
+  ) => {
+    toast.error(backendErrorMessage(errorCode, DEFENSE_ERROR_KEYS, fallback, t))
   }
 
   // Sends the composed reply, unless it's empty or a turn is already in flight
@@ -117,18 +149,37 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     const outcome = await send(content)
 
     // Recover per outcome
-    switch (outcome) {
+    switch (outcome.kind) {
       // The reply landed, or a stop already reclaimed the draft: nothing to do
       case 'sent':
       case 'stopped':
         break
-      // The round-trip failed: tell the student and hand their draft back to resend
+      // The round-trip failed: tell the student why and hand their draft back to resend
       case 'failed':
-        toast.error(t('sendError'))
+        showActionError(outcome.errorCode, 'sendError')
         setDraft((current) => (current.trim() ? current : content))
         break
       // A double-tap: the in-flight turn already carries this content, so the composer stays cleared
       case 'busy':
+        break
+      default:
+        assertNever(outcome)
+    }
+  }
+
+  // Removes a session from history, telling the student why a failed delete left it in place
+  const handleDelete = async (sessionId: string) => {
+    // Drop the session
+    const outcome = await deleteSession(sessionId)
+
+    // Recover per outcome
+    switch (outcome.kind) {
+      // Gone: the history already refreshed to drop it
+      case 'done':
+        break
+      // Still there: tell the student why the delete didn't take
+      case 'failed':
+        showActionError(outcome.errorCode, 'deleteError')
         break
       default:
         assertNever(outcome)
@@ -180,14 +231,14 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     const outcome = await rewind(rewindTarget.keepThroughSequence)
 
     // Recover per outcome
-    switch (outcome) {
+    switch (outcome.kind) {
       // The tail is gone: restore the target's text, but never clobber a draft the student is mid-typing
       case 'done':
         setDraft((current) => (current.trim() ? current : rewindTarget.draft))
         break
-      // The round-trip failed: tell the student, leaving the conversation untouched
+      // The round-trip failed: tell the student why, leaving the conversation untouched
       case 'failed':
-        toast.error(t('rewindError'))
+        showActionError(outcome.errorCode, 'rewindError')
         break
       default:
         assertNever(outcome)
@@ -235,7 +286,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
               sessions={sessions}
               currentSessionId={currentSessionId}
               onSelect={resume}
-              onDelete={deleteSession}
+              onDelete={handleDelete}
             />
           )}
 

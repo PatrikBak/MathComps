@@ -168,10 +168,18 @@
     "SK": "Slovakia"
   },
   "defense": {
+    "deleteError": "The conversation couldn't be removed.",
     "deleteSession": "Remove from history",
     "deleteSessionMessage": "This conversation will be permanently removed.",
     "deleteSessionTitle": "Remove this conversation?",
+    "errors": {
+      "DefenseMessageTooLong": "Your message is too long.",
+      "DefenseSessionNotFound": "This conversation no longer exists.",
+      "DefenseSpendLimit": "You've reached today's usage limit. Try again tomorrow.",
+      "DefenseTurnLimit": "This conversation has reached its turn limit."
+    },
     "history": "History",
+    "historyError": "Couldn't load your past conversations.",
     "historyTitle": "This problem",
     "jumpToLatest": "Jump to latest",
     "newDefense": "New conversation",

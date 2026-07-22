@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { BackendApiError } from '@/lib/api-error'
+
 import {
   DefenseConversationModel,
   type DefenseConversationServices,
@@ -56,11 +58,14 @@ class FakeBackend implements DefenseConversationServices {
   /** The round-trips in flight, each held open until the test releases its gate. */
   submitCalls: Array<{ request: DefenseTurnRequest; gate: PromiseWithResolvers<void> }> = []
 
-  /** When true, the next submitTurn throws instead of saving. */
-  failNextSubmit = false
+  /** When set, the next submitTurn throws this instead of saving. */
+  nextSubmitError: Error | null = null
 
   /** When set, deleteSession waits on this before resolving. */
   deleteGate: PromiseWithResolvers<void> | null = null
+
+  /** When set, the next deleteSession throws this instead of dropping the session. */
+  nextDeleteError: Error | null = null
 
   /** When true, the next rewindTurns throws instead of truncating. */
   failNextRewind = false
@@ -90,10 +95,11 @@ class FakeBackend implements DefenseConversationServices {
     // Hold the round-trip open until the test releases the gate
     await gate.promise
 
-    // Fail once when armed
-    if (this.failNextSubmit) {
-      this.failNextSubmit = false
-      throw new Error('submit failed')
+    // Throw the armed error once, carrying whatever code the test set
+    if (this.nextSubmitError) {
+      const error = this.nextSubmitError
+      this.nextSubmitError = null
+      throw error
     }
 
     // The student's turn
@@ -144,6 +150,13 @@ class FakeBackend implements DefenseConversationServices {
     // Hold the delete open while the gate is set
     if (this.deleteGate) {
       await this.deleteGate.promise
+    }
+
+    // Throw the armed error once, carrying whatever code the test set
+    if (this.nextDeleteError) {
+      const error = this.nextDeleteError
+      this.nextDeleteError = null
+      throw error
     }
 
     // Drop the session from the store
@@ -248,7 +261,7 @@ describe('DefenseConversationModel', () => {
     backend.submitCalls[0].gate.resolve()
 
     // The send reports the reply landed
-    expect(await sent).toBe('sent')
+    expect(await sent).toEqual({ kind: 'sent' })
 
     // The reply is shown, the indicator is gone, and the session is open and stored
     const state = model.getSnapshot()
@@ -294,7 +307,7 @@ describe('DefenseConversationModel', () => {
 
     // A second send inside that window, as a double-tap would fire, is refused
     const second = await model.send('second', backend)
-    expect(second).toBe('busy')
+    expect(second).toEqual({ kind: 'busy' })
 
     // No second round-trip started
     expect(backend.submitCalls).toHaveLength(1)
@@ -322,7 +335,7 @@ describe('DefenseConversationModel', () => {
     expect(reclaimed).toBe('answer')
 
     // The send reports it was stopped
-    expect(await sent).toBe('stopped')
+    expect(await sent).toEqual({ kind: 'stopped' })
 
     // The view is back to the opener and nothing was saved
     const state = model.getSnapshot()
@@ -359,7 +372,7 @@ describe('DefenseConversationModel', () => {
 
     // The stop wins: the turn is reclaimed and the late reply never reaches the view
     expect(reclaimed).toBe('answer')
-    expect(await sent).toBe('stopped')
+    expect(await sent).toEqual({ kind: 'stopped' })
     const state = model.getSnapshot()
     expect(roles(state.turns)).toEqual(['examiner'])
     expect(state.currentSessionId).toBeNull()
@@ -373,7 +386,7 @@ describe('DefenseConversationModel', () => {
     await flush()
 
     // Arm a non-abort failure
-    backend.failNextSubmit = true
+    backend.nextSubmitError = new Error('submit failed')
 
     // Stop the turn before it resolves
     const reclaimed = model.stop()
@@ -383,7 +396,7 @@ describe('DefenseConversationModel', () => {
 
     // The stop still wins: the draft is reclaimed and the failure never surfaces as an error
     expect(reclaimed).toBe('answer')
-    expect(await sent).toBe('stopped')
+    expect(await sent).toEqual({ kind: 'stopped' })
     expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
   })
 
@@ -401,28 +414,47 @@ describe('DefenseConversationModel', () => {
     expect(model.getSnapshot().currentSessionId).toBeNull()
 
     // The abandoned round-trip resolves to stopped and never repaints the fresh view
-    expect(await sent).toBe('stopped')
+    expect(await sent).toEqual({ kind: 'stopped' })
     expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
   })
 
   it('reports failed and rolls back when the round-trip errors', async () => {
     // A model whose next round-trip fails
     const { model, backend } = makeModel()
-    backend.failNextSubmit = true
+    backend.nextSubmitError = new Error('submit failed')
 
     // Send into the failing round-trip
     const sent = model.send('answer', backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
 
-    // The send reports the failure
-    expect(await sent).toBe('failed')
+    // The send reports the failure, with no code since the fake threw a bare error
+    expect(await sent).toEqual({ kind: 'failed', errorCode: undefined })
 
     // The optimistic turn is rolled back and nothing was saved
     const state = model.getSnapshot()
     expect(roles(state.turns)).toEqual(['examiner'])
     expect(state.isThinking).toBe(false)
     expect(backend.store).toHaveLength(0)
+  })
+
+  it('carries the backend failure code out of a failed send', async () => {
+    // A model whose next round-trip throws a coded backend error
+    const { model, backend } = makeModel()
+    backend.nextSubmitError = new BackendApiError({
+      type: 'network',
+      message: 'too many turns',
+      statusCode: 422,
+      errorCode: 'DefenseTurnLimit',
+    })
+
+    // Send into the coded failure
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+
+    // The send reports the failure carrying the backend's code
+    expect(await sent).toEqual({ kind: 'failed', errorCode: 'DefenseTurnLimit' })
   })
 
   it('opens a stored session on resume', async () => {
@@ -449,7 +481,7 @@ describe('DefenseConversationModel', () => {
   })
 
   it('abandons an in-flight turn when another session is resumed', async () => {
-    // A model with a stored session and a second conversation whose turn is in flight
+    // A model with one completed, stored session
     const { model, backend } = makeModel()
     const first = model.send('first', backend)
     await flush()
@@ -469,7 +501,7 @@ describe('DefenseConversationModel', () => {
     expect(model.getSnapshot().currentSessionId).toBe(firstSession.id)
 
     // The abandoned turn resolves to stopped and never repaints the resumed session
-    expect(await second).toBe('stopped')
+    expect(await second).toEqual({ kind: 'stopped' })
     expect(model.getSnapshot().turns).toEqual(firstSession.turns)
   })
 
@@ -542,6 +574,53 @@ describe('DefenseConversationModel', () => {
     expect(backend.store.map((session) => session.id)).toEqual([secondId])
   })
 
+  it('keeps the open conversation on screen when deleting it fails', async () => {
+    // A model with one completed, open session
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const sessionId = model.getSnapshot().currentSessionId ?? ''
+
+    // Arm a delete failure
+    backend.nextDeleteError = new Error('delete failed')
+
+    // Delete the open session into the failure
+    const outcome = await model.deleteSession(sessionId, backend)
+
+    // The delete reports failure and the open transcript is left exactly as it was
+    expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
+    expect(model.getSnapshot().currentSessionId).toBe(sessionId)
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+  })
+
+  it('treats deleting an already-gone session as a successful delete', async () => {
+    // A model with one completed, open session
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const sessionId = model.getSnapshot().currentSessionId ?? ''
+
+    // Arm a not-found failure, as the backend raises for a session deleted elsewhere
+    backend.nextDeleteError = new BackendApiError({
+      type: 'network',
+      message: 'gone',
+      statusCode: 404,
+      errorCode: 'DefenseSessionNotFound',
+    })
+
+    // Delete the open session
+    const outcome = await model.deleteSession(sessionId, backend)
+
+    // The end state matches intent, so it resolves as done and drops back to a fresh conversation
+    expect(outcome).toEqual({ kind: 'done' })
+    expect(model.getSnapshot().currentSessionId).toBeNull()
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+  })
+
   it('rewinds the open conversation to the kept prefix', async () => {
     // A model grown to two exchanges: examiner, student, examiner, student, examiner
     const { model, backend } = makeModel()
@@ -559,7 +638,7 @@ describe('DefenseConversationModel', () => {
     const outcome = await model.rewind(2, backend)
 
     // The rewind reports it landed and the view keeps only the 0..2 prefix
-    expect(outcome).toBe('done')
+    expect(outcome).toEqual({ kind: 'done' })
     expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
 
     // The stored session was truncated to match
@@ -582,7 +661,7 @@ describe('DefenseConversationModel', () => {
     const outcome = await model.rewind(0, backend)
 
     // The failure is reported and the full transcript stands
-    expect(outcome).toBe('failed')
+    expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
     expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
   })
 
@@ -601,8 +680,8 @@ describe('DefenseConversationModel', () => {
     const outcome = await model.rewind(2, backend)
 
     // The rewind lands, the abandoned turn resolves to stopped, and the idle view is the kept prefix
-    expect(outcome).toBe('done')
-    expect(await second).toBe('stopped')
+    expect(outcome).toEqual({ kind: 'done' })
+    expect(await second).toEqual({ kind: 'stopped' })
     const state = model.getSnapshot()
     expect(roles(state.turns)).toEqual(['examiner', 'student', 'examiner'])
     expect(state.isThinking).toBe(false)
@@ -616,7 +695,7 @@ describe('DefenseConversationModel', () => {
     const outcome = await model.rewind(0, backend)
 
     // It fails up front, leaving the opener-only view in place
-    expect(outcome).toBe('failed')
+    expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
     expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
   })
 
