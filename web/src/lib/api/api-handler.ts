@@ -3,27 +3,42 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 
-import { API_ERROR_CODES, type ApiErrorResponse } from './api-error-codes'
+import { type NodeErrorCode } from './api-error-codes'
 
 /**
- * Custom error class for API responses with controlled status codes.
- * Uses structured error codes for client-side i18n translation.
+ * A controlled route failure carrying an HTTP status and a machine-readable code for client-side copy.
  */
 export class ApiError extends Error {
   /**
-   * Creates a new {@link ApiError} instance.
+   * Creates a new {@link ApiError}.
    *
-   * @param statusCode HTTP status code
-   * @param errorResponse Structured error response with code for i18n
+   * @param statusCode - The HTTP status to return.
+   * @param errorCode - The machine-readable failure code.
+   * @param data - Interpolation values a coded message needs (e.g. `FILE_TOO_LARGE`'s max).
    */
   constructor(
-    public statusCode: number,
-    public readonly errorResponse: ApiErrorResponse
+    public readonly statusCode: number,
+    public readonly errorCode: NodeErrorCode,
+    public readonly data?: Record<string, unknown>
   ) {
-    // Use the error code as the message for logging/debugging
-    super(errorResponse.code)
+    // Use the code as the base message for logging/debugging
+    super(errorCode)
     this.name = 'ApiError'
   }
+}
+
+/**
+ * Builds the JSON error body every route emits: a top-level `errorCode` plus any interpolation values,
+ * matching the shape the C# backend and the client parser already speak.
+ *
+ * @param errorCode - The machine-readable failure code.
+ * @param data - Interpolation values a coded message needs.
+ *
+ * @returns The response body.
+ */
+function errorBody(errorCode: NodeErrorCode, data?: Record<string, unknown>) {
+  // The code rides as a top-level field alongside any interpolation values
+  return { errorCode, ...data }
 }
 
 /**
@@ -37,16 +52,12 @@ type ApiHandler = (request: NextRequest) => Promise<NextResponse>
 type AuthenticatedApiHandler = (request: NextRequest, userId: string) => Promise<NextResponse>
 
 /**
- * Wraps an API route handler with centralized error handling.
- * Catches all errors and returns consistent JSON responses.
+ * Wraps an API route handler with centralized error handling, so every failure returns the same
+ * `{ errorCode, ...data }` JSON body.
  *
- * Error responses are structured for client-side i18n:
- * - `{ error: { code: 'ERROR_CODE', ...data } }` for structured errors
- * - `{ error: { code: 'SERVER_ERROR' } }` as fallback
+ * @param handler - The API route handler function.
  *
- * @param handler - The API route handler function
- *
- * @returns Wrapped handler with error handling
+ * @returns Wrapped handler with error handling.
  */
 export function withApiHandler(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest) => {
@@ -54,40 +65,34 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
       // Execute the handler and return the response
       return await handler(request)
     } catch (error) {
-      // Handle controlled API errors with structured response
+      // A controlled failure carries its own status and code
       if (error instanceof ApiError) {
-        return NextResponse.json({ error: error.errorResponse }, { status: error.statusCode })
+        return NextResponse.json(errorBody(error.errorCode, error.data), {
+          status: error.statusCode,
+        })
       }
 
-      // Handle Zod validation errors
+      // A validation failure is a bad request
       if (error instanceof ZodError) {
-        return NextResponse.json(
-          { error: { code: API_ERROR_CODES.VALIDATION_FAILED } satisfies ApiErrorResponse },
-          { status: 400 }
-        )
+        return NextResponse.json(errorBody('VALIDATION_FAILED'), { status: 400 })
       }
 
-      // Log unexpected errors in development
-      if (process.env.NODE_ENV === 'development') {
-        console.error('[API Error]', error)
-      }
+      // Log unexpected errors so a route failure leaves a trace
+      console.error('[API Error]', error)
 
-      // Generic error for unexpected issues
-      return NextResponse.json(
-        { error: { code: API_ERROR_CODES.SERVER_ERROR } satisfies ApiErrorResponse },
-        { status: 500 }
-      )
+      // Everything else is an unexpected server error
+      return NextResponse.json(errorBody('SERVER_ERROR'), { status: 500 })
     }
   }
 }
 
 /**
- * Wraps an API route handler with authentication and error handling.
- * Automatically validates Clerk authentication and passes userId to handler.
+ * Wraps an API route handler with authentication and error handling. Validates Clerk authentication and
+ * passes the userId to the handler.
  *
- * @param handler - The authenticated API route handler function
+ * @param handler - The authenticated API route handler function.
  *
- * @returns Wrapped handler with auth check and error handling
+ * @returns Wrapped handler with auth check and error handling.
  */
 export function withAuth(handler: AuthenticatedApiHandler): ApiHandler {
   return withApiHandler(async (request: NextRequest) => {
@@ -96,7 +101,7 @@ export function withAuth(handler: AuthenticatedApiHandler): ApiHandler {
 
     // If no user ID is found, throw an authentication error
     if (!userId) {
-      throw new ApiError(401, { code: API_ERROR_CODES.UNAUTHORIZED })
+      throw new ApiError(401, 'UNAUTHORIZED')
     }
 
     // Execute the handler with the user ID and return the response

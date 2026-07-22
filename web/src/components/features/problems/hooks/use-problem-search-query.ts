@@ -3,7 +3,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
-import { errorCodeOf, unwrap } from '@/lib/api-error'
+import { unwrap } from '@/lib/api/api-error'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
@@ -47,6 +47,8 @@ type UseInitialFilterDataReturn = {
   isSuccess: boolean
   /** Whether the query is currently retrying after a failure. */
   isRetrying: boolean
+  /** Whether the query settled into an error after exhausting retries. */
+  isError: boolean
 }
 
 /**
@@ -181,6 +183,7 @@ export function useInitialFilterData(
     isSuccess: query.isSuccess,
     // Expose retry state - failureCount > 0 means we're retrying after failure
     isRetrying: query.failureCount > 0,
+    isError: query.isError,
   }
 }
 
@@ -233,15 +236,6 @@ export function useSingleProblem(
     },
     // Only run the query when enabled and we have a valid slug
     enabled: enabled && problemSlug !== null && api.state === 'ready',
-    // Use global retry defaults (infinite retries) EXCEPT for a missing problem (a permanent failure)
-    retry: (_failureCount, error) => {
-      // Don't retry a missing problem — it won't appear on a retry
-      if (errorCodeOf(error) === 'ProblemNotFound') {
-        return false
-      }
-      // Use global default: infinite retries with exponential backoff for transient errors
-      return true
-    },
   })
 
   // Return just the data we need
@@ -324,17 +318,6 @@ function useProblemSearchInfinite(
 
     // Only run if filters are provided and enabled
     enabled: enabled && filters !== null && api.state === 'ready',
-
-    // Stop retrying on permanent list access errors
-    retry: (_failureCount, error) => {
-      // A missing or forbidden list won't resolve on a retry
-      const code = errorCodeOf(error)
-      if (code === 'ListNotFound' || code === 'ListAccessDenied') {
-        return false
-      }
-      // If not a list error, use global default for retries
-      return true
-    },
   })
 
   // Return just the data we need

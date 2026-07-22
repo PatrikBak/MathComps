@@ -1,30 +1,43 @@
 import type { useTranslations } from 'next-intl'
 
-import { type ApiErrorResponse } from '@/lib/api/api-error-codes'
+import { type AppErrorCode } from '@/lib/api/api-error-codes'
 
 /**
- * Type-safe translation function for API errors.
+ * The translator bound to the central `apiErrors` namespace, which holds copy for every
+ * {@link AppErrorCode}.
  */
 export type ApiErrorTranslator = ReturnType<typeof useTranslations<'apiErrors'>>
 
 /**
- * Translates an API error response to a localized message.
- *
- * Uses the error code to look up the translation, and passes any
- * additional data (like `max` for file size) for interpolation.
- *
- * @param t - The translation function from useTranslations('apiErrors')
- * @param error - The structured API error response
- *
- * @returns Translated error message
+ * Options for {@link resolveErrorMessage}.
  */
-export function translateApiError(t: ApiErrorTranslator, error: ApiErrorResponse): string {
-  // Extract the code and any additional data for interpolation
-  const { code, ...rest } = error
+type ResolveErrorMessageOptions = {
+  /** Message to show when the failure carried no code; defaults to the generic server-error copy. */
+  fallback?: string
+  /** Interpolation values for a code whose copy has placeholders (e.g. `FILE_TOO_LARGE`'s max). */
+  data?: Record<string, string | number>
+}
 
-  // Cast interpolation data to the format next-intl expects
-  const interpolationData = rest as Record<string, string | number | Date>
+/**
+ * Resolves the localized message for a failure code from the central `apiErrors` namespace: the code's
+ * copy when present, else the caller's fallback (or the generic server-error copy).
+ *
+ * @param errorCode - The failure code, or undefined when the failure carried none.
+ * @param translate - The translator bound to the `apiErrors` namespace.
+ * @param options - Fallback copy and interpolation values.
+ *
+ * @returns The localized message to show the user.
+ */
+export function resolveErrorMessage(
+  errorCode: AppErrorCode | undefined,
+  translate: ApiErrorTranslator,
+  options?: ResolveErrorMessageOptions
+): string {
+  // A known code resolves to its central copy, with any interpolation values
+  if (errorCode) {
+    return translate(errorCode, options?.data)
+  }
 
-  // Look up the translation - code is guaranteed to be a valid ApiErrorCode
-  return t(code, interpolationData)
+  // No code: the caller's fallback, or the generic server-error copy
+  return options?.fallback ?? translate('SERVER_ERROR')
 }

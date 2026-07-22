@@ -11,6 +11,7 @@ import { type ReactNode, Suspense } from 'react'
 import KatexSetup from '@/components/math/KatexSetup'
 import { AuthStoreSync } from '@/components/shared/auth/AuthStoreSync'
 import { JsonLd } from '@/components/shared/components/JsonLd'
+import { OfflineIndicator } from '@/components/shared/components/OfflineIndicator'
 import ProgressBarProvider from '@/components/shared/providers/ProgressBarProvider'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { ToastProvider } from '@/components/shared/providers/ToastProvider'
@@ -131,6 +132,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <NextIntlClientProvider locale={locale}>
                 <KatexSetup />
                 <ProgressBarProvider>{children}</ProgressBarProvider>
+                <OfflineIndicator />
               </NextIntlClientProvider>
             </QueryProvider>
             <ToastProvider />

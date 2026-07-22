@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 import { getReasonLabelForAdmin } from '@/components/features/contact/contact-reasons'
 import { baseContactFormSchema } from '@/components/features/contact/contact-schema'
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
-import { withApiHandler } from '@/lib/api/api-handler'
+import { ApiError, withApiHandler } from '@/lib/api/api-handler'
 import { sendEmail } from '@/lib/email/email-sender'
 import { generateContactEmail } from '@/lib/email/notification-emails'
 
@@ -59,9 +59,9 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     html: emailHtml,
   })
 
-  // Surface a send failure
+  // Surface a send failure as a coded server error; the provider's message never reaches the user
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: result.statusCode })
+    throw new ApiError(502, 'SERVER_ERROR')
   }
 
   // Return success response

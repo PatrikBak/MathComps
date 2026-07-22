@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api-error'
+import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import {
@@ -119,9 +119,6 @@ export function useDefenseConversation(
       return unwrap(await listSessions(apiCall, problem.key))
     },
     enabled: apiCall !== null,
-    // Give up after a few tries instead of the global infinite retry, so a persistent failure reaches the
-    // error state rather than leaving the history indefinitely empty
-    retry: 3,
     // Sessions are the user's own recent activity
     ...cachePolicy.userData,
   })

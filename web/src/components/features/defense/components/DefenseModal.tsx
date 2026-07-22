@@ -11,8 +11,8 @@ import { Modal } from '@/components/shared/components/Modal'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { backendErrorMessage } from '@/lib/backend-error-message'
-import type { BackendErrorCode } from '@/types/backend-error-codes'
+import type { AppErrorCode } from '@/lib/api/api-error-codes'
+import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import type { DefenseProblem, TurnRole } from '../model/defense-types'
@@ -60,19 +60,6 @@ const DEFENSE_TOOLBAR: ToolbarConfig = {
 }
 
 /**
- * The `defense` message key for each failure a real user can reach. The wrong-param codes
- * (`DefenseMessageEmpty`, `DefenseRewindTarget`) are left out on purpose: the composer guards an empty
- * message and the rewind target is computed from the real turns, so those fire only on a bug or a
- * tampered request and fall through to each action's generic fallback.
- */
-const DEFENSE_ERROR_KEYS = {
-  DefenseTurnLimit: 'errors.DefenseTurnLimit',
-  DefenseSpendLimit: 'errors.DefenseSpendLimit',
-  DefenseMessageTooLong: 'errors.DefenseMessageTooLong',
-  DefenseSessionNotFound: 'errors.DefenseSessionNotFound',
-} as const
-
-/**
  * The defense chat: a student argues their solution to a problem and the examiner probes it turn by
  * turn. Reuses the shared rich-math editor as the composer and renders the exchange as an annotated
  * transcript.
@@ -80,6 +67,9 @@ const DEFENSE_ERROR_KEYS = {
 export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
+
+  // Central failure-code copy
+  const tApiErrors = useTranslations('apiErrors')
 
   // Shared modal chrome copy
   const tModal = useTranslations('ui.modal')
@@ -129,12 +119,12 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     student: t('roles.student'),
   }
 
-  // Toasts a failed action's message: the code's specific copy, else the action's generic fallback
+  // Toasts a failed action's message: the code's central copy, else the action's generic fallback
   const showActionError = (
-    errorCode: BackendErrorCode | undefined,
+    errorCode: AppErrorCode | undefined,
     fallback: 'sendError' | 'rewindError' | 'deleteError'
   ) => {
-    toast.error(backendErrorMessage(errorCode, DEFENSE_ERROR_KEYS, fallback, t))
+    toast.error(resolveErrorMessage(errorCode, tApiErrors, { fallback: t(fallback) }))
   }
 
   // Sends the composed reply, unless it's empty or a turn is already in flight

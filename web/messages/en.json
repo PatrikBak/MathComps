@@ -25,12 +25,31 @@
     }
   },
   "apiErrors": {
+    "CannotLikeOwnComment": "You can't like your own comment.",
+    "CommentNotFound": "This comment no longer exists.",
+    "CommentTargetNotFound": "The item this comment belongs to no longer exists.",
+    "DefenseMessageEmpty": "Your message is empty.",
+    "DefenseMessageTooLong": "Your message is too long.",
+    "DefenseRewindTarget": "That rewind point is no longer valid.",
+    "DefenseSessionNotFound": "This conversation no longer exists.",
+    "DefenseSpendLimit": "You've reached today's usage limit. Try again tomorrow.",
+    "DefenseTurnLimit": "This conversation has reached its turn limit.",
+    "FavoritesRequireAuthentication": "Log in to see your favorites.",
     "FILE_TOO_LARGE": "File is too large. Maximum: {max} MB",
+    "Forbidden": "You don't have permission to do that.",
     "INVALID_FILE_TYPE": "Invalid file type",
-    "INVALID_REQUEST": "Invalid request",
+    "ListAccessDenied": "This list is private. If it is your list, log in first.",
+    "ListNotFound": "List not found.",
+    "ListReorderMismatch": "The list changed elsewhere. Refresh and try again.",
+    "MarkStatusRequiresAuthentication": "Log in to filter by your progress.",
+    "NotCommentAuthor": "You can only edit or delete your own comments.",
+    "ProblemNotFound": "Problem not found.",
+    "RateLimited": "You're doing that too fast. Please wait a moment and try again.",
     "SERVER_ERROR": "Server error",
+    "Unauthenticated": "Please sign in to continue.",
     "UNAUTHORIZED": "You must be logged in for this action",
     "UPLOAD_URL_FAILED": "Failed to get upload URL",
+    "UserNotResolved": "We couldn't load your account. Please try signing in again.",
     "VALIDATION_FAILED": "Invalid form data"
   },
   "auth": {
@@ -172,12 +191,6 @@
     "deleteSession": "Remove from history",
     "deleteSessionMessage": "This conversation will be permanently removed.",
     "deleteSessionTitle": "Remove this conversation?",
-    "errors": {
-      "DefenseMessageTooLong": "Your message is too long.",
-      "DefenseSessionNotFound": "This conversation no longer exists.",
-      "DefenseSpendLimit": "You've reached today's usage limit. Try again tomorrow.",
-      "DefenseTurnLimit": "This conversation has reached its turn limit."
-    },
     "history": "History",
     "historyError": "Couldn't load your past conversations.",
     "historyTitle": "This problem",
@@ -588,6 +601,7 @@
       "maxFiltersExceeded": "You can select a maximum of {max} filters",
       "problemNotFound": "Problem \"{problemId}\" was not found",
       "serverError": "Server returned an error. Retrying...",
+      "unexpectedError": "An unexpected error occurred.",
       "urlFiltersIgnored": "Some URL parameters were ignored",
       "urlTooManyFilters": "URL contains too many filters (maximum {max})"
     },
@@ -601,6 +615,9 @@
     "filters": {
       "activeFilters": "Active filters",
       "allProblems": "All problems",
+      "authReasons": {
+        "manageLists": "managing your lists"
+      },
       "competitions": "Competitions",
       "contestsOverview": "Contests overview",
       "copyListLink": "Copy link",
@@ -647,6 +664,7 @@
       "listLinkCopied": "Link copied",
       "listNameInvalid": "List name must be 1–50 characters",
       "listShared": "List shared and link copied",
+      "listsLoadError": "Couldn't load your lists.",
       "manageLists": "Manage lists",
       "markStatus": "Status",
       "markStatusAll": "All problems",
@@ -840,12 +858,7 @@
       "submit": "Submit",
       "submitShortcut": "Submit ({modifier} + Enter)",
       "unsupportedFileType": "Unsupported file type. Allowed: images (PNG, JPEG, WebP, GIF) or attachments (PDF, TXT, MD)",
-      "uploadAttachmentFailed": "Failed to upload attachment",
-      "uploadFailed": "Failed to upload file",
-      "uploadImageFailed": "Failed to upload image",
-      "uploading": "Uploading {filename}...",
-      "uploadUrlFailed": "Failed to get upload URL",
-      "verificationFailed": "Failed to verify file"
+      "uploading": "Uploading {filename}..."
     },
     "filters": {
       "apply": "Apply Filters",
@@ -879,6 +892,9 @@
     },
     "modal": {
       "close": "Close"
+    },
+    "network": {
+      "offline": "You're offline. Some actions won't work until you reconnect."
     },
     "userMenu": {
       "label": "User menu",

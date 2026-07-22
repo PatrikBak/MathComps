@@ -125,7 +125,7 @@ export function useCommentMutation<TData, TVariables extends { target: CommentTa
     },
 
     // A custom onError function which handles cache rollback
-    onError: (_, variables, context) => {
+    onError: (_error, variables, context) => {
       // If we have a previous state...
       if (context?.previousComments) {
         // Derive the query key from the target

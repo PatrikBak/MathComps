@@ -1,8 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
-import { useApi } from '@/hooks/use-api'
+import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import { getListOrderApiUrl } from '../services/user-list-api-urls'
 import type { UserListsResponse } from '../types/user-list-types'
@@ -19,39 +18,37 @@ type UseReorderUserListsResult = {
 }
 
 /**
+ * The cache snapshot kept for rollback if a reorder fails.
+ */
+type ReorderContext = {
+  /** The cached lists before the optimistic reorder. */
+  previous: UserListsResponse | undefined
+}
+
+/**
  * Hook to reorder user lists with optimistic cache update.
  *
  * @returns Mutation function and pending state
  */
 export function useReorderUserLists(): UseReorderUserListsResult {
-  // API client — requires auth
-  const api = useApi({ requireAuth: true })
-
   // Query client for cache invalidation
   const queryClient = useQueryClient()
 
-  // Translations for error messages
+  // Translations for error and auth-prompt messages
   const t = useTranslations('problems.filters')
 
   // Reorder mutation with optimistic update
-  const mutation = useMutation({
-    mutationFn: async (contentIds: string[]) => {
-      // Ensure the API client is ready (user is authenticated)
-      if (api.state !== 'ready') throw new Error('API not ready')
-
-      // Call the reorder endpoint
-      const response = await api.apiCall(() => getListOrderApiUrl(), {
+  const mutation = useOptimisticMutation<void, string[], ReorderContext>({
+    // Call the reorder endpoint
+    apiFn: (apiCall, contentIds) =>
+      apiCall<void>(() => getListOrderApiUrl(), {
         method: 'PUT',
         body: JSON.stringify({ contentIds }),
         headers: { 'Content-Type': 'application/json' },
-      })
-
-      // Rethrow so React Query can handle retries
-      if (!response.success) throw response.error
-    },
+      }),
 
     // Optimistic update — reorder the cached lists immediately
-    onMutate: async (contentIds: string[]) => {
+    onMutate: async (contentIds) => {
       // Cancel in-flight queries to prevent overwriting our optimistic data
       await queryClient.cancelQueries({ queryKey: userListQueryKeys.lists() })
 
@@ -77,18 +74,24 @@ export function useReorderUserLists(): UseReorderUserListsResult {
       return { previous }
     },
 
-    // Rollback on error
-    onError: (_error, _variables, context) => {
+    // Roll back to the snapshot on failure
+    onError: (_error, _contentIds, context) => {
+      // Restore the pre-reorder order
       if (context?.previous) {
         queryClient.setQueryData(userListQueryKeys.lists(), context.previous)
       }
-      toast.error(t('reorderListsError'))
     },
 
     // Refetch on settle to ensure consistency
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
     },
+
+    // The reason shown in the auth prompt
+    authReason: t('authReasons.manageLists'),
+
+    // Fallback copy when the failure carried no recognized code
+    errorMessage: t('reorderListsError'),
   })
 
   // Return the mutation

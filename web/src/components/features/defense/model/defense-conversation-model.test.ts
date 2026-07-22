@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { BackendApiError } from '@/lib/api-error'
+import { BackendApiError } from '@/lib/api/api-error'
 
 import {
   DefenseConversationModel,
@@ -442,7 +442,6 @@ describe('DefenseConversationModel', () => {
     // A model whose next round-trip throws a coded backend error
     const { model, backend } = makeModel()
     backend.nextSubmitError = new BackendApiError({
-      type: 'network',
       message: 'too many turns',
       statusCode: 422,
       errorCode: 'DefenseTurnLimit',
@@ -606,7 +605,6 @@ describe('DefenseConversationModel', () => {
 
     // Arm a not-found failure, as the backend raises for a session deleted elsewhere
     backend.nextDeleteError = new BackendApiError({
-      type: 'network',
       message: 'gone',
       statusCode: 404,
       errorCode: 'DefenseSessionNotFound',

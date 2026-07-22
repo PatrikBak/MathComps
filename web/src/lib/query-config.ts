@@ -1,5 +1,7 @@
 import { type DefaultOptions, QueryClient } from '@tanstack/react-query'
 
+import { BackendApiError } from '@/lib/api/api-error'
+
 /** Milliseconds in a second; the base unit for every duration below. */
 const SECOND = 1000
 /** Milliseconds in a minute. */
@@ -9,6 +11,29 @@ const MINUTE = 60 * SECOND
 const RETRY_BASE_MS = 500
 /** Ceiling the exponential backoff is capped at. */
 const RETRY_MAX_MS = 10 * SECOND
+/** How many times a transient failure is retried before the query settles into its error state. */
+const MAX_RETRIES = 3
+
+/**
+ * The shared retry policy: a permanent client failure (an HTTP 4xx) never heals on a retry, so stop and
+ * surface the error immediately; anything else (5xx, a network drop, an unclassified fault) is treated
+ * as transient and retried up to {@link MAX_RETRIES} times before the query settles into its error state.
+ *
+ * @param failureCount - How many times the query function has failed so far.
+ * @param error - The value the query function threw.
+ *
+ * @returns Whether React Query should retry.
+ */
+function shouldRetry(failureCount: number, error: unknown): boolean {
+  // A 4xx is a permanent business failure: retrying it just spins
+  const status = error instanceof BackendApiError ? error.statusCode : undefined
+  if (status !== undefined && status >= 400 && status < 500) {
+    return false
+  }
+
+  // Otherwise a transient fault: retry a bounded number of times, then let the error surface
+  return failureCount < MAX_RETRIES
+}
 
 /**
  * Cache-freshness tiers keyed by how the underlying data changes. Spread the matching tier into a
@@ -29,16 +54,15 @@ export const cachePolicy = {
  * The {@link DefaultOptions} for the app's {@link QueryClient}: the near-static freshness
  * baseline plus cross-cutting fetch behavior.
  *
- * Queries retry infinitely on network/server errors (resilient to transient failures); the backoff
- * doubles from {@link RETRY_BASE_MS}, capped at {@link RETRY_MAX_MS}. A query can still opt out per
- * error, e.g. stopping retries on a permanent 404.
+ * Queries retry only transient failures ({@link shouldRetry}) so a permanent 4xx surfaces its error
+ * state immediately; the backoff doubles from {@link RETRY_BASE_MS}, capped at {@link RETRY_MAX_MS}.
  */
 const defaultQueryOptions = {
   queries: {
     // Most data here is near-static, so default to the content tier.
     ...cachePolicy.content,
-    // Never give up on transient network/server errors.
-    retry: Infinity,
+    // Retry transient faults a bounded number of times; never retry a permanent 4xx.
+    retry: shouldRetry,
     // Exponential backoff, capped at the ceiling.
     retryDelay: (attemptIndex: number) => Math.min(RETRY_BASE_MS * 2 ** attemptIndex, RETRY_MAX_MS),
     // No refetch on window focus (opt in per query if a view needs it).

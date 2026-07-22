@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
-import { errorCodeOf } from '@/lib/api-error'
+import { errorCodeOf } from '@/lib/api/api-error'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
@@ -304,39 +304,28 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     useProblemStore.getState().setCurrentFilters(displayFilters)
   }, [displayFilters])
 
-  // Handle errors when fetching a single problem by ID.
+  // Handle a settled error when fetching a single problem by ID (the query has spent its retries).
   // - Not found: toast + redirect to the problem list
-  // - Anything else: toast once while React Query keeps retrying
+  // - Anything else: toast the failure plainly
   useEffect(() => {
-    // Only show if we're viewing a single problem by ID and we have an error
+    // Only handle once we're viewing a single problem by ID and the query settled into an error
     if (!singleProblemQuery.error || !problemId) return
-
-    // Get error details
-    const error = singleProblemQuery.error
-    const isFirstError = singleProblemQuery.failureCount === 1
 
     // Truncate ID for display (to prevent long strings in toast messages)
     const maxIdLength = 20
     const truncatedId =
       problemId.length > maxIdLength ? `${problemId.slice(0, maxIdLength)}...` : problemId
 
-    // A missing problem is permanent; every other failure is transient and keeps retrying
-    if (errorCodeOf(error) === 'ProblemNotFound') {
-      // The problem doesn't exist: tell the user and return to the list
+    // A missing problem is permanent: tell the user and return to the list
+    if (errorCodeOf(singleProblemQuery.error) === 'ProblemNotFound') {
       toast.error(tErrors('problemNotFound', { problemId: truncatedId }))
       router.replace(ROUTES.PROBLEMS, { scroll: false })
-    } else if (isFirstError) {
-      // A transient failure: toast once while React Query retries in the background
-      toast.error(tErrors('connectionProblem'))
+      return
     }
-  }, [
-    problemId,
-    singleProblemQuery.error,
-    singleProblemQuery.isFetching,
-    singleProblemQuery.failureCount,
-    router,
-    tErrors,
-  ])
+
+    // Any other settled failure: the retries are spent, so report it plainly
+    toast.error(tErrors('unexpectedError'))
+  }, [problemId, singleProblemQuery.error, router, tErrors])
 
   // Show a toast when search is retrying
   useEffect(() => {
@@ -357,27 +346,38 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     return undefined
   }, [problemId, initialDataQuery.isSuccess, searchQuery.isRetrying, tErrors])
 
-  // Handle list access errors
-  // Show a toast with a clear message and redirect to /problems to clear the invalid list= URL param
+  // Handle a settled search error: an auth-gated filter needs a login, a bad list clears its URL param.
   useEffect(() => {
     // Only handle when the search query failed
     const error = searchQuery.rawError
     if (!error) return
 
-    // Show a descriptive toast for a bad or forbidden list
+    // The failure code, if any
     const errorCode = errorCodeOf(error)
+
+    // An auth-gated filter (favorites, mark status) reached the backend without a signed-in user:
+    // send them to log in
+    if (
+      errorCode === 'FavoritesRequireAuthentication' ||
+      errorCode === 'MarkStatusRequiresAuthentication'
+    ) {
+      redirectToLogin()
+      return
+    }
+
+    // Show a descriptive toast for a bad or forbidden list
     if (errorCode === 'ListNotFound') {
       toast.error(tErrors('listNotFound'))
     } else if (errorCode === 'ListAccessDenied') {
       toast.error(tErrors('listAccessDenied'))
     } else {
-      // Not a list access error, nothing to handle here
+      // Not an error we redirect for, nothing to handle here
       return
     }
 
     // Redirect to /problems to clear the invalid list= URL param
     router.replace(ROUTES.PROBLEMS, { scroll: false })
-  }, [searchQuery.rawError, router, tErrors])
+  }, [searchQuery.rawError, router, redirectToLogin, tErrors])
 
   // Get the final filter options.
   // This is where we decide which options to show in the UI dropdowns.
@@ -410,8 +410,12 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   const totalCount = problemId ? 1 : searchQuery.totalCount
   const hasMore = problemId ? false : searchQuery.hasMore
 
-  // The error message
-  const error = initialDataQuery.isRetrying ? tErrors('serverError') : null
+  // The error message: the retrying notice while it retries, a plain failure once it settles
+  const error = initialDataQuery.isRetrying
+    ? tErrors('serverError')
+    : initialDataQuery.isError
+      ? tErrors('unexpectedError')
+      : null
 
   // State + actions to return
   return {

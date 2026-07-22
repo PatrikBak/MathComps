@@ -29,8 +29,9 @@ public sealed class GlobalExceptionHandler(
         // A recognized business failure maps to a client-facing status and code
         if (Classify(exception) is { } mapping)
         {
-            // Write the problem body carrying that status and code
-            await WriteProblemAsync(httpContext, exception, mapping.Status, mapping.Code);
+            // Write the problem body carrying that status, the exception's detail, and the code
+            await ProblemResponseWriter.WriteAsync(
+                problemDetailsService, httpContext, mapping.Status, mapping.Code, exception.Message, exception);
 
             // The fault is handled — the mapped status stands even if the writer declined the body
             return true;
@@ -60,36 +61,6 @@ public sealed class GlobalExceptionHandler(
 
         // The fault is handled — a declined body still leaves the 500 status in place
         return true;
-    }
-
-    /// <summary>
-    /// Writes a business failure as a problem response carrying its status, detail, and <c>errorCode</c>.
-    /// </summary>
-    /// <param name="httpContext">The current request.</param>
-    /// <param name="exception">The business failure.</param>
-    /// <param name="status">The HTTP status to return.</param>
-    /// <param name="code">The machine-readable failure code.</param>
-    private async ValueTask WriteProblemAsync(
-        HttpContext httpContext,
-        Exception exception,
-        int status,
-        ApiErrorCode code)
-    {
-        // Set the mapped status
-        httpContext.Response.StatusCode = status;
-
-        // Surface the detail and the machine-readable code for the client
-        await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            Exception = exception,
-            ProblemDetails =
-            {
-                Status = status,
-                Detail = exception.Message,
-                Extensions = { ["errorCode"] = code.ToString() }
-            }
-        });
     }
 
     /// <summary>

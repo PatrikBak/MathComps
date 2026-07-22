@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.RateLimiting;
 using MathComps.Api.Constants;
+using MathComps.Api.Errors;
 using System.Text.RegularExpressions;
 
 namespace MathComps.Api.Extensions;
@@ -23,6 +24,22 @@ public static class ServiceCollectionExtensions
         {
             // Reject over-limit requests with 429 (Too Many Requests)
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            // Give the rejection the same coded problem body an endpoint failure carries
+            options.OnRejected = async (rejectedContext, _) =>
+            {
+                // Resolve the problem writer for this request
+                var problemDetailsService = rejectedContext.HttpContext.RequestServices
+                    .GetRequiredService<IProblemDetailsService>();
+
+                // Write our coded 429
+                await ProblemResponseWriter.WriteAsync(
+                    problemDetailsService,
+                    rejectedContext.HttpContext,
+                    StatusCodes.Status429TooManyRequests,
+                    ApiErrorCode.RateLimited,
+                    "You have made too many requests. Please try again shortly.");
+            };
 
             // General API rate limiting, one bucket per caller
             options.AddPolicy(RateLimiterPolicies.ApiRateLimit, PartitionByCaller(permitLimit: 60, queueLimit: 10));

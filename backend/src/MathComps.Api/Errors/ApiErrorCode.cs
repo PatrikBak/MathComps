@@ -89,5 +89,21 @@ public enum ApiErrorCode
     /// <summary>
     /// The request is authenticated but its caller could not be resolved to a user.
     /// </summary>
-    UserNotResolved
+    UserNotResolved,
+
+    /// <summary>
+    /// The request reached an authenticated endpoint without a valid bearer token (missing, malformed,
+    /// or expired).
+    /// </summary>
+    Unauthenticated,
+
+    /// <summary>
+    /// The caller is authenticated but lacks the role or policy the endpoint requires.
+    /// </summary>
+    Forbidden,
+
+    /// <summary>
+    /// The caller exceeded a rate limit and should retry later.
+    /// </summary>
+    RateLimited
 }

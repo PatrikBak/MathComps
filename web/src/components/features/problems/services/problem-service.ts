@@ -37,7 +37,20 @@ export async function getProblemBySlug(
   if (!result.success) return result
 
   // On success the backend returns a filter response with exactly one problem (pageSize: 1)
-  const problem = result.data.problems.items[0]
+  const problem = result.data.problems?.items.at(0)
+
+  // A success with no problem (empty result, or a malformed/non-JSON success body) means the slug
+  // matched nothing: report it as not-found
+  if (!problem) {
+    return {
+      success: false,
+      error: {
+        message: 'Problem response contained no items',
+        statusCode: 404,
+        errorCode: 'ProblemNotFound',
+      },
+    }
+  }
 
   // We will create filters based on the specific problem's metadata
   let selection: ContestSelection | null = null

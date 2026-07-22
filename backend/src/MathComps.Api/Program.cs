@@ -1,4 +1,5 @@
 using MathComps.Api.Constants;
+using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
@@ -59,6 +60,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             // The flat Role claim Clerk shapes from public_metadata drives RequireRole
             RoleClaimType = ClerkClaims.RoleClaimType
+        };
+
+        // Give the middleware's own rejections the same coded problem body an endpoint failure carries
+        options.Events = new JwtBearerEvents
+        {
+            // A missing, malformed, or expired token challenges before any endpoint runs
+            OnChallenge = async challengeContext =>
+            {
+                // Take over the response so the default bare 401 doesn't get written
+                challengeContext.HandleResponse();
+
+                // Resolve the problem writer for this request
+                var problemDetailsService = challengeContext.HttpContext.RequestServices
+                    .GetRequiredService<IProblemDetailsService>();
+
+                // Write our coded 401
+                await ProblemResponseWriter.WriteAsync(
+                    problemDetailsService,
+                    challengeContext.HttpContext,
+                    StatusCodes.Status401Unauthorized,
+                    ApiErrorCode.Unauthenticated,
+                    "Authentication is required for this endpoint.");
+            },
+
+            // An authenticated caller who fails the role/policy check is forbidden
+            OnForbidden = async forbiddenContext =>
+            {
+                // Resolve the problem writer for this request
+                var problemDetailsService = forbiddenContext.HttpContext.RequestServices
+                    .GetRequiredService<IProblemDetailsService>();
+
+                // Write our coded 403
+                await ProblemResponseWriter.WriteAsync(
+                    problemDetailsService,
+                    forbiddenContext.HttpContext,
+                    StatusCodes.Status403Forbidden,
+                    ApiErrorCode.Forbidden,
+                    "You do not have permission to perform this action.");
+            }
         };
     });
 

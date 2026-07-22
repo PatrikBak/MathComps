@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
 import { type ApiState, readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api-error'
+import { unwrap } from '@/lib/api/api-error'
 
 import { getContestsBySeasonApiUrl } from '../services/problem-api-urls'
 import type { SeasonContestBrowserResult } from '../types/contest-browser-types'

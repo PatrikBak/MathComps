@@ -35,7 +35,8 @@ public class ProblemFilterService(
         // Convenient deconstruct
         var ((parameters, pageSize, pageNumber, favoritesOnly, listContentId, markStatus), userId, language) = options;
 
-        // Clamp paging into the allowed range rather than trusting the client — page numbers start at 1
+        // Clamp paging rather than trusting the client — a defensive backstop; no legitimate caller sends
+        // out-of-range values, so a tampered request stays harmless. Page numbers start at 1
         pageNumber = Math.Max(pageNumber, 1);
 
         // Page size stays within [1, configured max]

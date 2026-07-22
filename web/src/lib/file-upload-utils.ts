@@ -1,11 +1,8 @@
 export { type FileType, isAllowedMimeType } from '@/constants/file-upload-constants'
 
 import { type FileType, getAllowedTypes, getMaxFileSize } from '@/constants/file-upload-constants'
-import {
-  API_ERROR_CODES,
-  type ApiErrorResponse,
-  isApiErrorResponse,
-} from '@/lib/api/api-error-codes'
+import { BackendApiError } from '@/lib/api/api-error'
+import { errorCodeFromBody } from '@/lib/api/api-error-codes'
 
 /**
  * Response from the upload URL API.
@@ -18,35 +15,17 @@ type UploadUrlResponse = {
 }
 
 /**
- * Error thrown when file validation or upload fails.
- *
- * Contains an error code for client-side i18n translation.
- */
-class FileUploadError extends Error {
-  /** Structured error response for i18n */
-  public readonly errorResponse: ApiErrorResponse
-
-  /**
-   * Creates a new {@link FileUploadError}.
-   *
-   * @param errorResponse - Structured error with code and optional data
-   */
-  constructor(errorResponse: ApiErrorResponse) {
-    super(errorResponse.code)
-    this.name = 'FileUploadError'
-    this.errorResponse = errorResponse
-  }
-}
-
-/**
  * Validates a file before upload.
  *
- * @throws {@link FileUploadError} with error code if validation fails
+ * @param file - The file to validate.
+ * @param type - Whether the file is an image or an attachment.
+ *
+ * @throws {@link BackendApiError} with a coded failure if validation fails.
  */
 export function validateFile(file: File, type: FileType = 'image'): void {
   // Validate file type
   if (!getAllowedTypes(type).includes(file.type)) {
-    throw new FileUploadError({ code: API_ERROR_CODES.INVALID_FILE_TYPE })
+    throw new BackendApiError({ errorCode: 'INVALID_FILE_TYPE' })
   }
 
   // Get file sizes
@@ -55,7 +34,7 @@ export function validateFile(file: File, type: FileType = 'image'): void {
 
   // Validate file size
   if (file.size > maxSizeBytes) {
-    throw new FileUploadError({ code: API_ERROR_CODES.FILE_TOO_LARGE, max: maxSizeMB })
+    throw new BackendApiError({ errorCode: 'FILE_TOO_LARGE', data: { max: maxSizeMB } })
   }
 }
 
@@ -66,7 +45,7 @@ export function validateFile(file: File, type: FileType = 'image'): void {
  * @param type 'image' or 'attachment'
  * @returns The public URL of the uploaded file
  *
- * @throws {@link FileUploadError} with error code if upload fails
+ * @throws {@link BackendApiError} with a coded failure if validation or upload fails.
  */
 async function uploadFile(file: File, type: FileType = 'image'): Promise<string> {
   // Validate before uploading
@@ -89,13 +68,8 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
 
   // Handle bad API response
   if (!response.ok) {
-    // If API returned structured error, use it
-    if (responseData.error && isApiErrorResponse(responseData.error)) {
-      throw new FileUploadError(responseData.error)
-    }
-
-    // Fallback for unexpected error format
-    throw new FileUploadError({ code: API_ERROR_CODES.UPLOAD_URL_FAILED })
+    // Use the route's coded failure, or fall back to a generic upload-url failure
+    throw new BackendApiError({ errorCode: errorCodeFromBody(responseData) ?? 'UPLOAD_URL_FAILED' })
   }
 
   // Extract upload URL and key from response
@@ -112,7 +86,7 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
 
   // Handle bad upload response
   if (!uploadResponse.ok) {
-    throw new FileUploadError({ code: API_ERROR_CODES.SERVER_ERROR })
+    throw new BackendApiError({ errorCode: 'SERVER_ERROR' })
   }
 
   // Return the key (public URL can be derived from the key)
@@ -139,11 +113,4 @@ export async function uploadImage(file: File): Promise<string> {
  */
 export async function uploadAttachment(file: File): Promise<string> {
   return uploadFile(file, 'attachment')
-}
-
-/**
- * Type guard to check if an error is a FileUploadError.
- */
-export function isFileUploadError(error: unknown): error is FileUploadError {
-  return error instanceof FileUploadError
 }

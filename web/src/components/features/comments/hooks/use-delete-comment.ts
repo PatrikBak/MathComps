@@ -41,7 +41,7 @@ export function useDeleteComment() {
       updateCommentInTree(comments, commentId, { isDeleted: true, content: '' }),
 
     // When the API call is successful...
-    onSuccess: (_, { target }, context) => {
+    onSuccess: (_data, { target }, context) => {
       // If this is a problem comment, count it in the problem store
       if (target.targetType === 'Problem') {
         updateProblemCommentCount(target.targetId, -1)
