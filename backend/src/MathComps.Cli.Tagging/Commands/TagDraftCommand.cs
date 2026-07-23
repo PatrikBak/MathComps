@@ -34,7 +34,7 @@ namespace MathComps.Cli.Tagging.Commands;
 public class TagDraftCommand(
     IAiTaggingService taggingService,
     IOptions<TagDraftSettings> settings,
-    IOpenRouterSpendTracker spendTracker)
+    ILlmSpendTracker spendTracker)
     : AsyncCommand<TagDraftCommand.Settings>
 {
     /// <summary>

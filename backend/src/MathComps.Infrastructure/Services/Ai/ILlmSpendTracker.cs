@@ -1,10 +1,11 @@
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
-/// A tally of the process's own OpenRouter spend, accumulated one priced reply at a time. Summing the figures as they
-/// land keeps the total exact even when other processes spend on the same key concurrently.
+/// A tally of the process's own spend against the configured endpoint, accumulated one priced reply at a time.
+/// Summing the figures as they land keeps the total exact even when other processes spend on the same key
+/// concurrently.
 /// </summary>
-public interface IOpenRouterSpendTracker
+public interface ILlmSpendTracker
 {
     /// <summary>
     /// The credits this process has spent so far; one credit is one US dollar.

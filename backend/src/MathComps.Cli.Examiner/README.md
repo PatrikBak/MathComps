@@ -65,11 +65,11 @@ The loop: `generate-conversation` drives a fresh conversation (you play the stud
 
 ## Setup
 
-**OpenRouter API key** — set it in user secrets:
+**LLM API key** — set it in user secrets:
 
 ```bash
 cd backend/src/MathComps.Cli.Examiner
-dotnet user-secrets set "OpenRouter:ApiKey" "..."
+dotnet user-secrets set "Llm:ApiKey" "..."
 ```
 
 Each step's model lives in `appsettings.examiner.json`; swap any `Model` to another id OpenRouter exposes to change backends.

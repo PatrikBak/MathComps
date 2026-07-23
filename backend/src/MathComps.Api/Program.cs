@@ -14,8 +14,8 @@ using MathComps.Domain.Localization;
 // Standard ASP.NET Core app
 var builder = WebApplication.CreateBuilder(args);
 
-// Cross-service config shared with the examiner CLI, copied to output from Infrastructure: the OpenRouter
-// endpoint and the examiner engine's per-step models. Kept here so the API and CLI don't repeat them.
+// Cross-service config shared with the examiner CLI, copied to output from Infrastructure: the LLM endpoint
+// and the examiner engine's per-step models. Kept here so the API and CLI don't repeat them.
 // These files ship only in the build output (transitively from Infrastructure), not the project dir, so
 // resolve them from the output directory rather than the content root — otherwise `dotnet run`, whose
 // content root is the project dir, can't find them. Each file takes an optional per-environment overlay,
@@ -23,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 // otherwise sit on top of the whole default chain).
 builder.Configuration
     .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFileWithEnvironmentOverlay("appsettings.openrouter.json", builder.Environment)
+    .AddJsonFileWithEnvironmentOverlay("appsettings.llm.json", builder.Environment)
     .AddJsonFileWithEnvironmentOverlay("appsettings.examiner.json", builder.Environment)
     .AddEnvironmentVariables();
 
@@ -130,8 +130,8 @@ builder.Services.AddProblemServices();
 // User accounts and comments
 builder.Services.AddUserServices();
 
-// The OpenRouter chat stack and the AI-examiner defense feature
-builder.Services.AddOpenRouterChat(builder.Configuration);
+// The shared chat stack and the AI-examiner defense feature
+builder.Services.AddLlmChat(builder.Configuration);
 builder.Services.AddDefenseServices(builder.Configuration);
 
 // The Clerk webhook handler

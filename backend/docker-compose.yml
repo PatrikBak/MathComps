@@ -50,7 +50,7 @@ services:
       Authentication__Clerk__Authority: ${CLERK_AUTHORITY}
       Clerk__SecretKey: ${CLERK_SECRET_KEY}
       Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET}
-      OpenRouter__ApiKey: ${OPENROUTER_API_KEY}
+      Llm__ApiKey: ${LLM_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy

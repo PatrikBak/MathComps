@@ -32,7 +32,7 @@ public class AiTaggingServiceTests
     public async Task SuggestTags_returns_empty_without_calling_the_model_when_there_are_no_candidates()
     {
         // A caller that fails the test if it is ever invoked.
-        var chatCaller = new Mock<IOpenRouterChatCaller>(MockBehavior.Strict);
+        var chatCaller = new Mock<ILlmChatCaller>(MockBehavior.Strict);
         var service = new AiTaggingService(chatCaller.Object);
 
         // Suggest with an empty candidate set.
@@ -60,7 +60,7 @@ public class AiTaggingServiceTests
             // Capture the prompts the service sends, answering with one known tag so the call completes.
             var capturedSystem = string.Empty;
             var capturedUser = string.Empty;
-            var chatCaller = new Mock<IOpenRouterChatCaller>();
+            var chatCaller = new Mock<ILlmChatCaller>();
             chatCaller
                 .Setup(caller => caller.CompleteAsync<GeneratePassResponse>(
                     It.IsAny<string>(), It.IsAny<string>(),
@@ -158,7 +158,7 @@ public class AiTaggingServiceTests
         try
         {
             // A caller that always answers with the canned response.
-            var chatCaller = new Mock<IOpenRouterChatCaller>();
+            var chatCaller = new Mock<ILlmChatCaller>();
             chatCaller
                 .Setup(caller => caller.CompleteAsync<TResponse>(
                     It.IsAny<string>(), It.IsAny<string>(),

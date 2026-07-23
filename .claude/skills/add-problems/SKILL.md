@@ -109,7 +109,7 @@ Tag the problems before validating, so the preflight checks the slugs:
 dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-draft
 ```
 
-This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo one, delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `OpenRouter:ApiKey` in that project's user secrets.
+This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo one, delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Llm:ApiKey` in that project's user secrets.
 
 ## Step 6 — Validate (the goal)
 

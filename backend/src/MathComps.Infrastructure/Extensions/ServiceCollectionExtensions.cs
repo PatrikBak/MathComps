@@ -250,39 +250,39 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the OpenRouter chat stack: the connection settings, one shared chat client, the retrying
+    /// Registers the shared chat stack: the connection settings, one shared chat client, the retrying
     /// structured-completion caller, and the process's spend tally. The API key is required (from user secrets); the
     /// base URL comes from configuration. Each call names its own model.
     /// </summary>
     /// <param name="services">The service collection to add the chat stack to.</param>
-    /// <param name="configuration">The application configuration carrying the <c>OpenRouter</c> section.</param>
+    /// <param name="configuration">The application configuration carrying the <c>Llm</c> section.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddOpenRouterChat(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddLlmChat(this IServiceCollection services, IConfiguration configuration)
     {
         // The connection: base URL from appsettings, API key from user secrets.
-        services.AddOptions<OpenRouterSettings>()
-            .Bind(configuration.GetSection(OpenRouterSettings.SectionName))
+        services.AddOptions<LlmSettings>()
+            .Bind(configuration.GetSection(LlmSettings.SectionName))
             .Validate(settings => !string.IsNullOrWhiteSpace(settings.ApiKey),
-                $"{OpenRouterSettings.SectionName}:{nameof(OpenRouterSettings.ApiKey)} is not configured. Set it in user secrets.")
+                $"{LlmSettings.SectionName}:{nameof(LlmSettings.ApiKey)} is not configured. Set it in user secrets.")
             .ValidateDataAnnotations();
 
-        // One connection for the whole run, pointed at OpenRouter's OpenAI-compatible endpoint.
+        // One connection for the whole run, pointed at the configured OpenAI-compatible endpoint.
         services.TryAddSingleton(serviceProvider =>
         {
             // Pull the connection settings.
-            var settings = serviceProvider.GetRequiredService<IOptions<OpenRouterSettings>>().Value;
+            var settings = serviceProvider.GetRequiredService<IOptions<LlmSettings>>().Value;
 
-            // Build the OpenAI client against OpenRouter's endpoint.
+            // Build the OpenAI client against the configured endpoint.
             return new OpenAIClient(
                 new ApiKeyCredential(settings.ApiKey),
                 new OpenAIClientOptions { Endpoint = new Uri(settings.BaseUrl) });
         });
 
         // The retrying structured-completion caller every chat consumer drives.
-        services.TryAddSingleton<IOpenRouterChatCaller, OpenRouterChatCaller>();
+        services.TryAddSingleton<ILlmChatCaller, LlmChatCaller>();
 
         // Tallies the process's own spend so a run can report exactly what it cost.
-        services.TryAddSingleton<IOpenRouterSpendTracker, OpenRouterSpendTracker>();
+        services.TryAddSingleton<ILlmSpendTracker, LlmSpendTracker>();
 
         // Builder pattern
         return services;
@@ -291,8 +291,8 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers the examiner: its per-step model configuration plus the engine that runs the generate → verify →
     /// revise loop. When <c>Examiner:UseFake</c> is set, the zero-cost <see cref="FakeExaminer"/> is registered
-    /// instead of the real one, so the whole path can run without spending tokens. Assumes the OpenRouter chat stack
-    /// is registered (see <see cref="AddOpenRouterChat"/>).
+    /// instead of the real one, so the whole path can run without spending tokens. Assumes the chat stack is
+    /// registered (see <see cref="AddLlmChat"/>).
     /// </summary>
     /// <param name="services">The service collection to add the examiner to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c> section.</param>
@@ -323,8 +323,7 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the defense feature: the examiner engine, the input/turn/spend caps, and the service that runs and
-    /// persists defense conversations. Assumes the OpenRouter chat stack is registered (see
-    /// <see cref="AddOpenRouterChat"/>).
+    /// persists defense conversations. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>).
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c> and

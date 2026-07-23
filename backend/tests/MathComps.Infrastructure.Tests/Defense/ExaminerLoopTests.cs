@@ -30,7 +30,7 @@ public class ExaminerLoopTests
     public async Task Both_guards_run_on_every_turn()
     {
         // A reply cleared by both guards.
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         SetupStep(caller, new ExaminerReply("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
@@ -55,7 +55,7 @@ public class ExaminerLoopTests
     public async Task A_failed_math_check_regenerates_and_re_verifies_until_it_holds()
     {
         // A first reply the math-check rejects, then a regenerated one the loop should emit.
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
@@ -91,7 +91,7 @@ public class ExaminerLoopTests
     public async Task A_detected_leak_regenerates_and_re_verifies_until_clean()
     {
         // A reply the leak-check catches leaking, then clears on the fresh attempt; the math-check stays clean.
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         SetupStep(caller, new ExaminerReply("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
@@ -122,7 +122,7 @@ public class ExaminerLoopTests
         // A reply that always leaks, no matter how many times it's regenerated; the math-check stays clean
         // throughout. Each generate call's system prompt is captured as it lands.
         var generatePrompts = new List<string>();
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
                 Capture.In(generatePrompts), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
@@ -155,7 +155,7 @@ public class ExaminerLoopTests
     {
         // Capture each generate call's system prompt as it lands.
         var generatePrompts = new List<string>();
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
                 Capture.In(generatePrompts), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
@@ -195,7 +195,7 @@ public class ExaminerLoopTests
         // A reply that always withholds the close, no matter how many times it's regenerated; the math-check stays
         // clean throughout. Each generate call's system prompt is captured as it lands.
         var generatePrompts = new List<string>();
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
                 Capture.In(generatePrompts), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
@@ -229,7 +229,7 @@ public class ExaminerLoopTests
     {
         // Capture each generate call's system prompt as it lands.
         var generatePrompts = new List<string>();
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
                 Capture.In(generatePrompts), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
@@ -271,7 +271,7 @@ public class ExaminerLoopTests
     public async Task Turn_sums_cost_and_tokens_across_all_calls()
     {
         // Each of the three calls a clean turn makes reports its own cost and token usage.
-        var caller = new Mock<IOpenRouterChatCaller>();
+        var caller = new Mock<ILlmChatCaller>();
         SetupStep(caller, new ExaminerReply("a reply."), cost: 0.01m, promptTokens: 100, completionTokens: 20);
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""), cost: 0.03m, promptTokens: 300, completionTokens: 40);
@@ -292,7 +292,7 @@ public class ExaminerLoopTests
     public async Task Loop_refuses_a_transcript_not_awaiting_the_examiner()
     {
         // A strict caller — the loop must reject the transcript before any model call.
-        var caller = new Mock<IOpenRouterChatCaller>(MockBehavior.Strict);
+        var caller = new Mock<ILlmChatCaller>(MockBehavior.Strict);
 
         // A transcript that ends on an examiner turn.
         var transcript = Transcript.Parse("## Candidate\n\ndefense\n\n## Examiner\n\nquestion");
@@ -318,7 +318,7 @@ public class ExaminerLoopTests
     /// </summary>
     /// <param name="caller">The fake chat caller with its steps set up.</param>
     /// <returns>The turn's outcome.</returns>
-    private static async Task<ExaminerTurnOutcome> RunAsync(Mock<IOpenRouterChatCaller> caller)
+    private static async Task<ExaminerTurnOutcome> RunAsync(Mock<ILlmChatCaller> caller)
     {
         // A minimal transcript ending on a candidate turn.
         var transcript = Transcript.Parse("## Candidate\n\nmy defense");
@@ -395,7 +395,7 @@ public class ExaminerLoopTests
     /// <param name="promptTokens">The prompt tokens the call reports.</param>
     /// <param name="completionTokens">The completion tokens the call reports.</param>
     private static void SetupStep<TResponse>(
-        Mock<IOpenRouterChatCaller> caller, TResponse response,
+        Mock<ILlmChatCaller> caller, TResponse response,
         decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
         caller.Setup(mock => mock.CompleteAsync<TResponse>(
                 It.IsAny<string>(), It.IsAny<string>(),
@@ -408,7 +408,7 @@ public class ExaminerLoopTests
     /// <typeparam name="TResponse">The response type the step binds into.</typeparam>
     /// <param name="caller">The fake caller to check.</param>
     /// <param name="times">The expected number of calls.</param>
-    private static void VerifyStepCalled<TResponse>(Mock<IOpenRouterChatCaller> caller, Times times) =>
+    private static void VerifyStepCalled<TResponse>(Mock<ILlmChatCaller> caller, Times times) =>
         caller.Verify(mock => mock.CompleteAsync<TResponse>(
                 It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), times);

@@ -2,7 +2,7 @@
 
 Tags a bulk-import draft in place with a frontier model, writing the chosen tag slugs into each problem's `pN.yaml` sidecar. A single-command tool: pass it the draft folder, no subcommand.
 
-The model is reached through [OpenRouter](https://openrouter.ai) (an OpenAI-compatible aggregator) via `Microsoft.Extensions.AI`, so the backend model is a one-line config change — it's set under `OpenRouter:Model` in `appsettings.json`.
+The model is reached through [OpenRouter](https://openrouter.ai) (an OpenAI-compatible aggregator) via `Microsoft.Extensions.AI`, so each pass's backend model is a one-line config change — it's set per pass under `TagDraftSettings` in `appsettings.json`.
 
 Tags live **in the draft**, not the database. `apply` runs twice — once against local/staging, once against prod — and the model is non-deterministic, so generating tags during the import would land different tags in each environment. Writing them into the draft means `apply` replays the exact same tags everywhere.
 
@@ -62,14 +62,14 @@ author draft → tag → validate → apply (local) → eyeball on site → fix 
 
 ## Setup
 
-- **OpenRouter API key** — set it in user secrets:
+- **LLM API key** — set it in user secrets:
 
   ```bash
   cd backend/src/MathComps.Cli.Tagging
-  dotnet user-secrets set "OpenRouter:ApiKey" "..."
+  dotnet user-secrets set "Llm:ApiKey" "..."
   ```
 
-  The base URL and model live in `appsettings.json` under `OpenRouter`; swap `Model` to any model OpenRouter exposes (e.g. an Anthropic or OpenAI id) to change backends.
+  The base URL lives in `appsettings.json` under `Llm`; each pass's `Model` lives under `TagDraftSettings` — swap any to a model OpenRouter exposes (e.g. an Anthropic or OpenAI id) to change backends.
 
 - **Vocabulary** — the approved tags come from [`approved-tags.json`](../MathComps.Infrastructure/Resources/approved-tags.json), bundled into the build. No database connection is needed.
 

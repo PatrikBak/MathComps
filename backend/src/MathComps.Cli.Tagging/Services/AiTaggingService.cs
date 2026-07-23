@@ -9,12 +9,12 @@ using MathComps.Shared.Serialization;
 namespace MathComps.Cli.Tagging.Services;
 
 /// <summary>
-/// Implements <see cref="IAiTaggingService"/> over an <see cref="IOpenRouterChatCaller"/>: puts the per-pass
+/// Implements <see cref="IAiTaggingService"/> over an <see cref="ILlmChatCaller"/>: puts the per-pass
 /// instructions plus candidate vocabulary in the system message and the problem in the user message, then maps the
 /// model's response back to slugs.
 /// </summary>
 /// <param name="chatCaller">The retrying chat caller backing every pass.</param>
-public class AiTaggingService(IOpenRouterChatCaller chatCaller)
+public class AiTaggingService(ILlmChatCaller chatCaller)
     : IAiTaggingService
 {
     /// <summary>

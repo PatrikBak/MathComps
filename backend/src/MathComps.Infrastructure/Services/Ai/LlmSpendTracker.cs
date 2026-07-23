@@ -1,10 +1,10 @@
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
-/// Implements <see cref="IOpenRouterSpendTracker"/> with a lock-guarded running total, so replies landing concurrently
+/// Implements <see cref="ILlmSpendTracker"/> with a lock-guarded running total, so replies landing concurrently
 /// fold in without tearing.
 /// </summary>
-public class OpenRouterSpendTracker : IOpenRouterSpendTracker
+public class LlmSpendTracker : ILlmSpendTracker
 {
     /// <summary>
     /// Guards the running total — replies land concurrently.
