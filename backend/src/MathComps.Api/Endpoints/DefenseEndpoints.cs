@@ -52,8 +52,13 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
+            // Map the request onto the service's own input shape
+            var start = new DefenseSessionStart(
+                request.ProblemKey, request.Statement, request.Reference, request.Opener, request.Content,
+                request.Hints);
+
             // Run the opening turn
-            var session = await defenseService.StartAsync(userId, request, context.RequestAborted);
+            var session = await defenseService.StartAsync(userId, start, context.RequestAborted);
 
             // Return the created session at its location
             return Results.Created($"{SessionsPath}/{session.Id}", session);

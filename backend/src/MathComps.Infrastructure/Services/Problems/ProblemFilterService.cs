@@ -322,7 +322,7 @@ public class ProblemFilterService(
     /// <param name="markStatus">Optional mark status filter</param>
     /// <param name="userId">The ID of the current user (nullable)</param>
     /// <returns>Filtered queryable with all applicable conditions applied</returns>
-    private static IQueryable<Problem> ApplyFilters(IQueryable<Problem> problems, FilterParameters parameters, bool favoritesOnly, string? listContentId, MarkStatusFilter? markStatus, Guid? userId)
+    private static IQueryable<Problem> ApplyFilters(IQueryable<Problem> problems, ProblemFilterCriteria parameters, bool favoritesOnly, string? listContentId, MarkStatusFilter? markStatus, Guid? userId)
     {
         // If favorites only is requested...
         if (favoritesOnly)
@@ -539,7 +539,7 @@ public class ProblemFilterService(
     /// <returns>Complete search bar options with facet counts and metadata</returns>
     private async Task<SearchBarOptions> BuildSearchOptionsAsync(
         IQueryable<Problem> baseQuery,
-        FilterParameters parameters,
+        ProblemFilterCriteria parameters,
         bool favoritesOnly,
         string? listContentId,
         MarkStatusFilter? markStatus,
