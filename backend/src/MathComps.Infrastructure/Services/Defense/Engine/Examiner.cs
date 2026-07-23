@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense.Engine;
 
 /// <summary>
-/// Implements <see cref="IExaminer"/> over an <see cref="IOpenRouterChatCaller"/>. Each turn generates a reply, then
+/// Implements <see cref="IExaminer"/> over an <see cref="ILlmChatCaller"/>. Each turn generates a reply, then
 /// math-checks and leak-checks it — independently, every turn — and, when a guard flags it, regenerates the
 /// reply up to a cap, re-verifying each fresh attempt. If the cap runs out with the reply still flagged, a
 /// constrained fallback ships instead of the dirty draft: a claim-less holding reply, or a plain close when a
@@ -18,7 +18,7 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// </summary>
 /// <param name="chatCaller">The chat caller backing every step.</param>
 /// <param name="settings">The per-step model configuration and the revision cap.</param>
-public class Examiner(IOpenRouterChatCaller chatCaller, IOptions<ExaminerSettings> settings)
+public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> settings)
     : IExaminer
 {
     /// <summary>

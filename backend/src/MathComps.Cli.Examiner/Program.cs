@@ -4,12 +4,12 @@ using MathComps.Shared.Cli.Commands;
 
 // Bootstrap the tool and run it — the examiner turn as the default command, plus the transcript rewind.
 return await CliApp.Create<Program>("Examiner")
-    .RequireConfigFile("appsettings.openrouter.json")
+    .RequireConfigFile("appsettings.llm.json")
     .RequireConfigFile("appsettings.examiner.json")
     .ConfigureServices((services, configuration) =>
     {
-        // The OpenRouter chat stack: settings, chat client, retrying caller, and spend tracker.
-        services.AddOpenRouterChat(configuration);
+        // The shared chat stack: settings, chat client, retrying caller, and spend tracker.
+        services.AddLlmChat(configuration);
 
         // The examiner loop: its per-step model config plus the engine that runs generate → verify → revise.
         services.AddExaminer(configuration);

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run its sole command — tag a bulk-import draft in place.
 return await CliApp.Create<Program>("Tagging")
-    .RequireConfigFile("appsettings.openrouter.json")
+    .RequireConfigFile("appsettings.llm.json")
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {
@@ -16,8 +16,8 @@ return await CliApp.Create<Program>("Tagging")
             .Bind(configuration.GetSection(TagDraftSettings.SectionName))
             .ValidateDataAnnotations();
 
-        // The OpenRouter chat stack: settings, chat client, retrying caller, and spend tracker.
-        services.AddOpenRouterChat(configuration);
+        // The shared chat stack: settings, chat client, retrying caller, and spend tracker.
+        services.AddLlmChat(configuration);
 
         // Register the draft-tagging core that wraps the model with the generate/veto passes.
         services.AddScoped<IAiTaggingService, AiTaggingService>();

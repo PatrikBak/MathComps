@@ -160,11 +160,11 @@ cd backend
 dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/MathComps.Api
 
 # Tagging CLI — reaches its model through OpenRouter
-dotnet user-secrets set "OpenRouter:ApiKey" "your-openrouter-api-key" --project src/MathComps.Cli.Tagging
+dotnet user-secrets set "Llm:ApiKey" "your-llm-api-key" --project src/MathComps.Cli.Tagging
 
 # Defense feature (AI examiner) in the API — reaches its models through OpenRouter.
 # Optional: with "Examiner:UseFake": true the API serves defenses cost-free without a key.
-dotnet user-secrets set "OpenRouter:ApiKey" "your-openrouter-api-key" --project src/MathComps.Api
+dotnet user-secrets set "Llm:ApiKey" "your-llm-api-key" --project src/MathComps.Api
 ```
 
 Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).

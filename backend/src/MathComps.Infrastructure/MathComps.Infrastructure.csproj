@@ -9,7 +9,7 @@
     <None Update="Resources\**\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="appsettings.openrouter.json">
+    <None Update="appsettings.llm.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.examiner.json">

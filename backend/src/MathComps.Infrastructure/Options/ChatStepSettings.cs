@@ -12,7 +12,7 @@ public class ChatStepSettings
     public required string Prompt { get; set; }
 
     /// <summary>
-    /// The model this step runs on, in OpenRouter's <c>vendor/model</c> form (e.g. <c>google/gemini-3.1-flash</c>).
+    /// The model this step runs on, in <c>vendor/model</c> form (e.g. <c>google/gemini-3.1-flash</c>).
     /// </summary>
     public required string Model { get; set; }
 

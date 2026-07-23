@@ -11,18 +11,19 @@ using ChatCompletionOptions = OpenAI.Chat.ChatCompletionOptions;
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
-/// Implements <see cref="IOpenRouterChatCaller"/> over an <see cref="OpenAIClient"/> pointed at OpenRouter. Derives a
-/// model-bound client per call, patches the reasoning level onto the raw request body, and retries a configured
-/// number of times because OpenRouter occasionally hands back an unparseable response and re-routes on the next try.
-/// A reply that hit the output-token cap is retried the same way. Each reply's billed cost is folded into the spend
-/// tally as it lands, retries included.
+/// Implements <see cref="ILlmChatCaller"/> over an <see cref="OpenAIClient"/> pointed at the configured endpoint
+/// (OpenRouter today). Derives a model-bound client per call, patches the reasoning level onto the raw request body,
+/// and retries a configured number of times because OpenRouter occasionally hands back an unparseable response and
+/// re-routes on the next try. A reply that hit the output-token cap is retried the same way. Each reply's billed
+/// cost is folded into the spend tally as it lands, retries included.
 /// </summary>
-/// <param name="openAIClient">The OpenRouter connection; each call derives its model-bound client from it.</param>
+/// <param name="openAIClient">The connection to the configured endpoint; each call derives its model-bound client
+/// from it.</param>
 /// <param name="spendTracker">The tally every reply's billed cost is folded into.</param>
 /// <param name="settings">The connection settings, carrying the retry count and delay the pipeline is built from.</param>
-public class OpenRouterChatCaller(
-    OpenAIClient openAIClient, IOpenRouterSpendTracker spendTracker, IOptions<OpenRouterSettings> settings)
-    : IOpenRouterChatCaller
+public class LlmChatCaller(
+    OpenAIClient openAIClient, ILlmSpendTracker spendTracker, IOptions<LlmSettings> settings)
+    : ILlmChatCaller
 {
     /// <summary>
     /// The resilience pipeline every call runs through, re-issuing a failed call on any non-cancellation fault. A retry
