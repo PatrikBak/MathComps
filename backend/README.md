@@ -266,7 +266,20 @@ Migrations are applied automatically on every deploy: a migration bundle (`efbun
 
 4. Edit the override files with environment-specific values (`DOMAIN`)
 
-5. Create `appsettings.{Production|Staging}.json` with CORS origins (gitignored)
+### Config Overrides (no container rebuild needed)
+
+Per-environment `appsettings.{Production|Staging}.json` files, gitignored and bind-mounted over the
+baked-in config, so you can change a value without rebuilding the image. Each sits next to the base file it
+overrides and only needs the keys it changes:
+
+- `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …)
+- `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models)
+- `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
+
+- **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`.
+- **First rollout:** create the files (`echo '{}' > …`) **before** the `up -d` that adds the mounts, else
+  Docker turns each missing source into an empty directory. They're gitignored, so `git pull` won't bring them.
+- **Locally:** `ASPNETCORE_ENVIRONMENT=Production dotnet run` picks them up too.
 
 ## Development
 

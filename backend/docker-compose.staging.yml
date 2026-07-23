@@ -16,6 +16,12 @@ services:
 
   api:
     image: mathcomps-api:staging
+    # Gitignored staging config overrides, layered on the baked-in appsettings*.json: change a value with a
+    # restart, no rebuild. See backend/README.md's "Config Overrides".
+    volumes:
+      - ./src/MathComps.Api/appsettings.Staging.json:/app/appsettings.Staging.json:ro
+      - ./src/MathComps.Infrastructure/appsettings.examiner.Staging.json:/app/appsettings.examiner.Staging.json:ro
+      - ./src/MathComps.Infrastructure/appsettings.llm.Staging.json:/app/appsettings.llm.Staging.json:ro
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
     labels:

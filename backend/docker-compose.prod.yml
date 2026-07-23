@@ -15,6 +15,12 @@ services:
 
   api:
     image: mathcomps-api:prod
+    # Gitignored prod config overrides, layered on the baked-in appsettings*.json: change a value with a
+    # restart, no rebuild. See backend/README.md's "Config Overrides".
+    volumes:
+      - ./src/MathComps.Api/appsettings.Production.json:/app/appsettings.Production.json:ro
+      - ./src/MathComps.Infrastructure/appsettings.examiner.Production.json:/app/appsettings.examiner.Production.json:ro
+      - ./src/MathComps.Infrastructure/appsettings.llm.Production.json:/app/appsettings.llm.Production.json:ro
     environment:
       ASPNETCORE_ENVIRONMENT: Production
     labels:

@@ -9,10 +9,9 @@
     <None Update="Resources\**\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="appsettings.llm.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="appsettings.examiner.json">
+    <!-- Wildcard covers the base files plus the gitignored per-environment overlays
+         (appsettings.{llm,examiner}.{Production,Staging}.json); a missing overlay is a harmless no-op. -->
+    <None Update="appsettings.*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <!-- Examiner prompt templates: Content (not None) so they flow to referencing projects' output (API + CLI). -->
