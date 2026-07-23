@@ -20,6 +20,7 @@ const SAMPLE_PROBLEM: DefenseProblem = {
   title: 'Sample',
   statement: 'Prove it.',
   reference: 'Because.',
+  hints: [],
 }
 
 /** The examiner's opening line. */

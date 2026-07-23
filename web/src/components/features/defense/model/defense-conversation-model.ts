@@ -276,6 +276,7 @@ export class DefenseConversationModel {
             problemKey: this.problem.key,
             statement: this.problem.statement,
             reference: this.problem.reference,
+            hints: this.problem.hints,
             opener: this.opener,
             content,
             signal: run.controller.signal,

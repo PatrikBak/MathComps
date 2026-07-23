@@ -186,6 +186,8 @@ function renderDocumentSections(
             // The hidden reasoning a defense is argued against: the worked solution for a problem, exercise,
             // or example. Theorems and definitions yield none.
             let defenseReference: RawContentBlock[]
+            // The author's step-by-step hints: only a problem has them, so the other types yield none.
+            let defenseHints: RawContentBlock[][] = []
             switch (contentBlock.type) {
               case 'exercise':
               case 'example':
@@ -195,6 +197,8 @@ function renderDocumentSections(
               case 'problem':
                 // A problem is defended against its solution.
                 defenseReference = contentBlock.solution
+                // It also carries the author's hints.
+                defenseHints = contentBlock.hints
                 break
               case 'theorem':
                 // Excluded: a proof-defense is a different examiner frame than the prompt targets
@@ -222,6 +226,7 @@ function renderDocumentSections(
                     title: `${environmentBaseTitle} ${environmentNumber}`,
                     statement: blockSequenceToMarkdown(contentBlock.body),
                     reference: blockSequenceToMarkdown(defenseReference),
+                    hints: defenseHints.map(blockSequenceToMarkdown),
                   }}
                 />
               ) : undefined
