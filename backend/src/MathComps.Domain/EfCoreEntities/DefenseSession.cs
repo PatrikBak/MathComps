@@ -46,6 +46,15 @@ public class DefenseSession
     public required string ProblemReference { get; set; }
 
     /// <summary>
+    /// A snapshot of the examiner settings the conversation ran under (models, reasoning efforts, token caps,
+    /// revision cap), as JSON. Makes each conversation self-describing so a later config change can't silently
+    /// re-interpret what an old session's spend meant. Deliberately a decoupled archival blob, not a typed
+    /// converter: it is write-once and never deserialized, so typing it would only add read-time fragility as the
+    /// settings shape drifts.
+    /// </summary>
+    public required string ExaminerConfig { get; set; }
+
+    /// <summary>
     /// When the session was started.
     /// </summary>
     public required DateTimeOffset CreatedAt { get; set; }

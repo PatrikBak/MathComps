@@ -45,14 +45,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// <summary>
     /// The usage — cost and tokens — each cancelled turn runs up before it throws.
     /// </summary>
-    private static readonly ModelUsage _cancelUsage = new(CancelCost, PromptTokens: 80, CompletionTokens: 10);
+    private static readonly ModelUsage _cancelUsage = new(
+        CancelCost, PromptTokens: 80, CompletionTokens: 10, ReasoningTokens: 0, CachedPromptTokens: 0);
 
     /// <summary>
     /// The examiner the service runs against: a scripted no-cost fake by default, or one a cancellation test swaps in
     /// to run up cost and then throw mid-turn. Read by <see cref="ConfigureServices"/>, so a test sets it before the
     /// run.
     /// </summary>
-    private IExaminer _examiner = new FakeExaminer(new ModelUsage(TurnCost, PromptTokens: 150, CompletionTokens: 25));
+    private IExaminer _examiner = new FakeExaminer(
+        new ModelUsage(TurnCost, PromptTokens: 150, CompletionTokens: 25, ReasoningTokens: 0, CachedPromptTokens: 0));
 
     /// <summary>
     /// The source a cancellation test cancels mid-turn (through the examiner) to stand in for the client aborting; its
@@ -76,6 +78,15 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             limits.MaxProblemKeyChars = 200;
             limits.MaxTurnsPerSession = 2;
             limits.DailySpendCeilingPerUser = 1.00m;
+        });
+
+        // A minimal examiner config so the session's snapshot is a real settings object, not null members.
+        services.Configure<ExaminerSettings>(examiner =>
+        {
+            examiner.Generate = new ChatStepSettings { Prompt = "generate", Model = "fake/model" };
+            examiner.MathCheck = new ChatStepSettings { Prompt = "math-check", Model = "fake/model" };
+            examiner.LeakCheck = new ChatStepSettings { Prompt = "leak-check", Model = "fake/model" };
+            examiner.MaxRevisions = 3;
         });
 
         // Serializes a user's concurrent turns.
@@ -378,6 +389,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 Cost = 1.00m,
                 PromptTokens = 0,
                 CompletionTokens = 0,
+                ReasoningTokens = 0,
+                CachedPromptTokens = 0,
                 DurationMs = 0,
                 Revisions = 0,
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -410,6 +423,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 Cost = 1.00m,
                 PromptTokens = 0,
                 CompletionTokens = 0,
+                ReasoningTokens = 0,
+                CachedPromptTokens = 0,
                 DurationMs = 0,
                 Revisions = 0,
                 CreatedAt = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero) - TimeSpan.FromSeconds(1),
@@ -442,6 +457,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 Cost = 0.99m,
                 PromptTokens = 0,
                 CompletionTokens = 0,
+                ReasoningTokens = 0,
+                CachedPromptTokens = 0,
                 DurationMs = 0,
                 Revisions = 0,
                 CreatedAt = DateTimeOffset.UtcNow,

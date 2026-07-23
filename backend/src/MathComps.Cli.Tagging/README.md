@@ -2,7 +2,7 @@
 
 Tags a bulk-import draft in place with a frontier model, writing the chosen tag slugs into each problem's `pN.yaml` sidecar. A single-command tool: pass it the draft folder, no subcommand.
 
-The model is reached through [OpenRouter](https://openrouter.ai) (an OpenAI-compatible aggregator) via `Microsoft.Extensions.AI`, so each pass's backend model is a one-line config change — it's set per pass under `TagDraftSettings` in `appsettings.json`.
+The model is reached through an OpenAI-compatible provider via `Microsoft.Extensions.AI`, so each pass's backend model is a one-line config change — it's set per pass under `TagDraftSettings` in `appsettings.json`.
 
 Tags live **in the draft**, not the database. `apply` runs twice — once against local/staging, once against prod — and the model is non-deterministic, so generating tags during the import would land different tags in each environment. Writing them into the draft means `apply` replays the exact same tags everywhere.
 
@@ -34,7 +34,7 @@ tags:
 
 The run streams a timestamped line as each problem enters a pass (`p3 → veto statement…`), so a pass sitting with no follow-up shows exactly where a problem is waiting. When a problem finishes it logs a one-line summary with the per-pass timing and tag count, and the run ends with the total.
 
-The run also prices itself: it samples the key's spend from OpenRouter's `/key` endpoint before and after, and the difference is what the round cost (`This round cost ≈$0.0123`). The figure is approximate — OpenRouter settles a request's cost shortly after the response — and a failed reading just drops the line, never the run.
+The run also prices itself: it samples the key's spend from the provider's `/key` endpoint before and after, and the difference is what the round cost (`This round cost ≈$0.0123`). The figure is approximate — the provider settles a request's cost shortly after the response — and a failed reading just drops the line, never the run.
 
 ### Review and re-runs
 
@@ -69,7 +69,7 @@ author draft → tag → validate → apply (local) → eyeball on site → fix 
   dotnet user-secrets set "Llm:ApiKey" "..."
   ```
 
-  The base URL lives in `appsettings.json` under `Llm`; each pass's `Model` lives under `TagDraftSettings` — swap any to a model OpenRouter exposes (e.g. an Anthropic or OpenAI id) to change backends.
+  The base URL lives in `appsettings.json` under `Llm`; each pass's `Model` lives under `TagDraftSettings` — swap any to a model the provider exposes (e.g. an Anthropic or OpenAI id) to change backends.
 
 - **Vocabulary** — the approved tags come from [`approved-tags.json`](../MathComps.Infrastructure/Resources/approved-tags.json), bundled into the build. No database connection is needed.
 

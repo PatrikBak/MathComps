@@ -11,11 +11,11 @@ using ChatCompletionOptions = OpenAI.Chat.ChatCompletionOptions;
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
-/// Implements <see cref="ILlmChatCaller"/> over an <see cref="OpenAIClient"/> pointed at the configured endpoint
-/// (OpenRouter today). Derives a model-bound client per call, patches the reasoning level onto the raw request body,
-/// and retries a configured number of times because OpenRouter occasionally hands back an unparseable response and
-/// re-routes on the next try. A reply that hit the output-token cap is retried the same way. Each reply's billed
-/// cost is folded into the spend tally as it lands, retries included.
+/// Implements <see cref="ILlmChatCaller"/> over an <see cref="OpenAIClient"/> pointed at the configured
+/// OpenAI-compatible endpoint. Derives a model-bound client per call, patches the reasoning level onto the raw
+/// request body, and retries a configured number of times because the endpoint occasionally hands back an unparseable
+/// response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the same way. Each reply's
+/// billed cost is folded into the spend tally as it lands, retries included.
 /// </summary>
 /// <param name="openAIClient">The connection to the configured endpoint; each call derives its model-bound client
 /// from it.</param>
@@ -94,9 +94,11 @@ public class LlmChatCaller(
                 // What this call billed, left at zero unless the raw body exposes it below.
                 decimal cost = 0;
                 var promptTokens = 0;
+                var cachedPromptTokens = 0;
                 var completionTokens = 0;
+                var reasoningTokens = 0;
 
-                // OpenRouter's cost is read through Patch, the SDK's sanctioned hook for fields it doesn't model;
+                // The endpoint's cost is read through Patch, the SDK's sanctioned hook for fields it doesn't model;
                 // SCME0001 marks Patch experimental (its shape may change in a later SDK), so the suppression is
                 // scoped to this block.
 #pragma warning disable SCME0001
@@ -107,19 +109,32 @@ public class LlmChatCaller(
                 // let the SDK hand back null, and it's a different type with no usage to read, so cost/tokens stay zero.
                 if (response.RawRepresentation is ChatCompletion completion)
                 {
-                    // OpenRouter prices the reply in its raw body's usage.
+                    // The endpoint prices the reply in its raw body's usage.
                     if (completion.Patch.TryGetValue("$.usage.cost"u8, out decimal billed))
                         cost = billed;
 
-                    // The token counts come straight off the completion's usage.
+                    // The prompt (input) token count comes straight off the completion's usage.
                     promptTokens = completion.Usage?.InputTokenCount ?? 0;
+
+                    // The cache-served prompt tokens ride in the prompt detail, a discounted subset of that count;
+                    // missing when caching isn't active, leaving it zero.
+                    if (completion.Patch.TryGetValue("$.usage.prompt_tokens_details.cached_tokens"u8, out int cached))
+                        cachedPromptTokens = cached;
+
+                    // The completion (output) token count comes straight off the completion's usage.
                     completionTokens = completion.Usage?.OutputTokenCount ?? 0;
+
+                    // The reasoning tokens ride in the completion detail, the thinking portion already counted within
+                    // that count; missing when the model reports none, leaving it zero.
+                    if (completion.Patch.TryGetValue("$.usage.completion_tokens_details.reasoning_tokens"u8, out int reasoning))
+                        reasoningTokens = reasoning;
                 }
 #pragma warning restore SCME0001
 
                 // Fold this attempt's billing into the running total before any verdict on the reply, so a rejected
                 // attempt still counts — in both the process-wide tally and the usage this call ultimately returns.
-                accumulatedUsage += new ModelUsage(cost, promptTokens, completionTokens);
+                accumulatedUsage += new ModelUsage(
+                    cost, promptTokens, completionTokens, reasoningTokens, cachedPromptTokens);
                 spendTracker.Add(cost);
 
                 // A Length finish means the reply hit the token cap before finishing; throw so the retry draws a
@@ -142,7 +157,7 @@ public class LlmChatCaller(
     }
 
     /// <summary>
-    /// Builds the OpenAI request options carrying OpenRouter's reasoning control. The OpenAI SDK has no native field for
+    /// Builds the OpenAI request options carrying the endpoint's reasoning control. The OpenAI SDK has no native field for
     /// it, so we patch a top-level <c>reasoning</c> object straight into the outgoing JSON body via the options' JSON
     /// patch.
     /// </summary>

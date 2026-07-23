@@ -5,6 +5,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Shared.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -19,16 +20,22 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="limits">The input, turn, and spend caps.</param>
+/// <param name="examinerSettings">The examiner engine's settings, snapshotted onto each new session.</param>
 /// <param name="turnGate">Serializes a single user's turns.</param>
 public class DefenseSessionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IExaminer examiner, IOptions<DefenseLimits> limits,
-    IDefenseUserTurnGate turnGate)
+    IOptions<ExaminerSettings> examinerSettings, IDefenseUserTurnGate turnGate)
     : IDefenseSessionService
 {
     /// <summary>
     /// The input, turn, and spend caps.
     /// </summary>
     private readonly DefenseLimits _limits = limits.Value;
+
+    /// <summary>
+    /// The examiner settings serialized once to their JSON config snapshot.
+    /// </summary>
+    private readonly string _examinerConfigJson = examinerSettings.Value.ToJson(writeIndented: false);
 
     /// <inheritdoc/>
     public async Task<DefenseSessionDto> StartAsync(
@@ -68,6 +75,7 @@ public class DefenseSessionService(
             ProblemKey = request.ProblemKey,
             ProblemStatement = request.Statement,
             ProblemReference = request.Reference,
+            ExaminerConfig = _examinerConfigJson,
             CreatedAt = seededAt,
         };
 
@@ -264,6 +272,8 @@ public class DefenseSessionService(
                 Cost = outcome.Usage.Cost,
                 PromptTokens = outcome.Usage.PromptTokens,
                 CompletionTokens = outcome.Usage.CompletionTokens,
+                ReasoningTokens = outcome.Usage.ReasoningTokens,
+                CachedPromptTokens = outcome.Usage.CachedPromptTokens,
                 DurationMs = (int)stopwatch.ElapsedMilliseconds,
                 Revisions = outcome.Revisions,
                 CreatedAt = repliedAt,
@@ -305,6 +315,8 @@ public class DefenseSessionService(
             Cost = accrued.Cost,
             PromptTokens = accrued.PromptTokens,
             CompletionTokens = accrued.CompletionTokens,
+            ReasoningTokens = accrued.ReasoningTokens,
+            CachedPromptTokens = accrued.CachedPromptTokens,
             DurationMs = durationMs,
             Revisions = 0,
             CreatedAt = DateTimeOffset.UtcNow,
