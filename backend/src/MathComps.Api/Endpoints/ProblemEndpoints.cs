@@ -61,8 +61,16 @@ public static class ProblemEndpoints
             // Detect language from Accept-Language header
             var language = EndpointHelpers.GetRequestLanguage();
 
+            // Map the request onto the service's own query shape
+            var serviceQuery = new ProblemFilterQuery(
+                new ProblemFilterCriteria(
+                    query.Parameters.SearchText, query.Parameters.SearchInSolution, query.Parameters.OlympiadYears,
+                    query.Parameters.Contests, query.Parameters.ProblemNumbers, query.Parameters.TagSlugs,
+                    query.Parameters.TagLogic, query.Parameters.AuthorSlugs, query.Parameters.AuthorLogic),
+                query.PageSize, query.PageNumber, query.FavoritesOnly, query.ListContentId, query.MarkStatus);
+
             // Create service options
-            var options = new ProblemFilterOptions(query, userId, language);
+            var options = new ProblemFilterOptions(serviceQuery, userId, language);
 
             // Delegate to service
             var filterResult = await problemService.FilterAsync(options);
@@ -98,7 +106,7 @@ public static class ProblemEndpoints
             var userId = await userManager.GetUserIdAsync(context);
 
             // Get the filters state
-            var filters = new FilterParameters(
+            var filters = new ProblemFilterCriteria(
                 SearchText: string.Empty,
                 SearchInSolution: false,
                 OlympiadYears: [lookupResult.Season],
@@ -115,7 +123,7 @@ public static class ProblemEndpoints
 
             // Create service options
             var filterOptions = new ProblemFilterOptions(
-                new FilterQuery(
+                new ProblemFilterQuery(
                     filters,
                     PageSize: 1,
                     PageNumber: 1,

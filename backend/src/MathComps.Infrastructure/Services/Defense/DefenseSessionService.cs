@@ -40,25 +40,25 @@ public class DefenseSessionService(
 
     /// <inheritdoc/>
     public async Task<DefenseSessionDto> StartAsync(
-        Guid userId, StartDefenseRequest request, CancellationToken cancellationToken = default)
+        Guid userId, DefenseSessionStart start, CancellationToken cancellationToken = default)
     {
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
-        EnsureNotBlank(request.ProblemKey);
-        EnsureNotBlank(request.Statement);
-        EnsureNotBlank(request.Reference);
-        EnsureNotBlank(request.Opener);
-        EnsureNotBlank(request.Content);
+        EnsureNotBlank(start.ProblemKey);
+        EnsureNotBlank(start.Statement);
+        EnsureNotBlank(start.Reference);
+        EnsureNotBlank(start.Opener);
+        EnsureNotBlank(start.Content);
 
         // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
-        var reference = BuildReferenceWithHints(request.Reference, request.Hints);
+        var reference = BuildReferenceWithHints(start.Reference, start.Hints);
 
         // Bound each input before doing anything with it; the reference is bounded with its hints folded in.
-        EnsureWithinLength(request.ProblemKey, _limits.MaxProblemKeyChars);
-        EnsureWithinLength(request.Statement, _limits.MaxStatementChars);
+        EnsureWithinLength(start.ProblemKey, _limits.MaxProblemKeyChars);
+        EnsureWithinLength(start.Statement, _limits.MaxStatementChars);
         EnsureWithinLength(reference, _limits.MaxReferenceChars);
-        EnsureWithinLength(request.Opener, _limits.MaxOpenerChars);
-        EnsureWithinLength(request.Content, _limits.MaxCandidateChars);
+        EnsureWithinLength(start.Opener, _limits.MaxOpenerChars);
+        EnsureWithinLength(start.Content, _limits.MaxCandidateChars);
 
         // Serialize this user's turns for the rest of the operation, so concurrent starts each see the other's spend.
         using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);
@@ -76,18 +76,18 @@ public class DefenseSessionService(
         var session = new DefenseSession
         {
             UserId = userId,
-            ProblemKey = request.ProblemKey,
-            ProblemStatement = request.Statement,
+            ProblemKey = start.ProblemKey,
+            ProblemStatement = start.Statement,
             ProblemReference = reference,
             ExaminerConfig = _examinerConfigJson,
             CreatedAt = seededAt,
         };
 
         // Seed the examiner's opener, a canned greeting rather than an LLM turn.
-        AppendTurn(session, TranscriptRole.Examiner, request.Opener, seededAt);
+        AppendTurn(session, TranscriptRole.Examiner, start.Opener, seededAt);
 
         // Seed the student's first message.
-        AppendTurn(session, TranscriptRole.Candidate, request.Content, seededAt);
+        AppendTurn(session, TranscriptRole.Candidate, start.Content, seededAt);
 
         // Run the engine over the seed and stage its reply and spend row.
         await RunExaminerAndStageAsync(dbContext, session, userId, cancellationToken);

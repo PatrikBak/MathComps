@@ -14,11 +14,11 @@ public interface IDefenseSessionService
     /// and returns the full three-turn conversation.
     /// </summary>
     /// <param name="userId">The user opening the session.</param>
-    /// <param name="request">The problem being defended and the student's first message.</param>
+    /// <param name="start">The problem being defended and the student's first message.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The created session with its opener, the student turn, and the examiner's reply.</returns>
     Task<DefenseSessionDto> StartAsync(
-        Guid userId, StartDefenseRequest request, CancellationToken cancellationToken = default);
+        Guid userId, DefenseSessionStart start, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Continues a session with the student's next message and the examiner's reply to it.

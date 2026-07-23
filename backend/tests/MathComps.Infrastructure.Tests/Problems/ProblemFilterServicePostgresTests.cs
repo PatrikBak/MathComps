@@ -34,8 +34,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - create a query with no filters to test the baseline behavior
         var initialQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -76,8 +76,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - search for "štvorstena" (tetrahedron in Slovak) which appears in problem 75-b-i-1
         var textSearchQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "štvorstena",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -119,8 +119,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Arrange - test various text normalization scenarios that users might encounter
         // Test 1: lowercase without accents should match "štvorstena" (with accents)
         var lowercaseQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "stvorstena",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -140,8 +140,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Test 2: UPPERCASE without accents should match "štvorstena" (lowercase with accents)
         var uppercaseQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "STVORSTENA",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -161,8 +161,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Test 3: UPPERCASE without accents should match "Prirodzené" (different case with accents)
         var mixedCaseQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "PRIRODZENE",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -182,8 +182,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Test 4: lowercase without accents should match "Prirodzené" (different case with accents)
         var lowerToTitleQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "prirodzene",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -235,8 +235,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by Patrik Bak, who authored 5 problems in our test data
         var authorQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -272,8 +272,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by algebra OR number-theory tags (should return 2 problems)
         var tagsOrQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -308,8 +308,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by algebra AND number-theory tags (no problems have both in our test data)
         var tagsAndQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -344,8 +344,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by season 75 AND geometry tag (should return 2 problems)
         var complexQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
@@ -385,8 +385,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - create queries for page 1 (4 items) and page 2 (remaining items)
         var page1Query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -404,8 +404,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Language: Language.SK
         );
         var page2Query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -444,8 +444,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - search for text that doesn't exist in any problem statement
         var noResultsQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "non_existent_text_gibrish",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -487,8 +487,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Act 1: Query as User 1
         var baseQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -564,8 +564,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Create base query with FavoritesOnly = true
         var favoritesQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -623,8 +623,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange
         var baseQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -666,8 +666,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - create a query with no filters to get all season options
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -846,8 +846,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - query for Slovak (original language for most CSMO problems)
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: "Ostrov",  // Unique text in 75-a-i-1
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -884,8 +884,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - query for English (translation exists for 75-a-i-1)
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
@@ -924,8 +924,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - query for English (no translation exists for 75-b-i-1)
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
@@ -967,8 +967,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1006,8 +1006,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1045,8 +1045,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1090,8 +1090,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1138,8 +1138,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange — no user ID
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1176,8 +1176,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1222,8 +1222,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
         var baseQuery = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1276,8 +1276,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1316,8 +1316,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1883,8 +1883,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - ask for a wildly oversized page and a non-positive page number
         var query = new ProblemFilterOptions(
-            new FilterQuery(
-                new FilterParameters(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],

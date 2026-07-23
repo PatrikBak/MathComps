@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
@@ -664,12 +663,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
-    /// Builds a start request for a problem and student message, with throwaway statement, reference, and opener.
+    /// Builds a session start for a problem and student message, with throwaway statement, reference, and opener.
     /// </summary>
     /// <param name="problemKey">The problem key.</param>
     /// <param name="content">The student's first message.</param>
-    /// <returns>The start request.</returns>
-    private static StartDefenseRequest Request(string problemKey, string content) =>
+    /// <returns>The session start.</returns>
+    private static DefenseSessionStart Request(string problemKey, string content) =>
         new(problemKey, "the statement", "the reference", "the opener", content);
 
     /// <summary>
