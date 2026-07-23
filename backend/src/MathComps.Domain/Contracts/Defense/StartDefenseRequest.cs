@@ -9,5 +9,9 @@ namespace MathComps.Domain.Contracts.Defense;
 /// <param name="Reference">The reference solution the examiner reasons from.</param>
 /// <param name="Opener">The examiner's opening greeting, shown as the conversation's first turn.</param>
 /// <param name="Content">The student's first message.</param>
+/// <param name="Hints">
+/// The author's step-by-step hints, each a markdown string; empty or absent when the problem has none.
+/// </param>
 public record StartDefenseRequest(
-    string ProblemKey, string Statement, string Reference, string Opener, string Content);
+    string ProblemKey, string Statement, string Reference, string Opener, string Content,
+    IReadOnlyList<string>? Hints = null);

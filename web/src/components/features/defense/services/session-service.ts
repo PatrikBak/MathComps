@@ -53,6 +53,7 @@ export function submitTurn(
           problemKey: request.problemKey,
           statement: request.statement,
           reference: request.reference,
+          hints: request.hints,
           opener: request.opener,
           content: request.content,
         }),

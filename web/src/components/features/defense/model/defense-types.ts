@@ -47,6 +47,8 @@ export type DefenseProblem = {
   statement: string
   /** The reference solution the examiner reasons from, as markdown/math source. */
   reference: string
+  /** The author's step-by-step hints, each as markdown/math source; empty when the problem has none. */
+  hints: string[]
 }
 
 /**
@@ -63,6 +65,8 @@ type StartDefenseTurnRequest = {
   statement: string
   /** The reference solution the examiner reasons from. */
   reference: string
+  /** The author's step-by-step hints, each as markdown/math source; empty when the problem has none. */
+  hints: string[]
   /** The examiner's opening line, saved as the new session's first turn. */
   opener: string
   /** The student's turn as markdown/math source. */
