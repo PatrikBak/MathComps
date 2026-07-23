@@ -6,6 +6,7 @@ import HeroSection from '@/components/features/home/HeroSection'
 import LatestNewsSection from '@/components/features/home/LatestNewsSection'
 import UpcomingSection from '@/components/features/home/UpcomingSection'
 import Layout from '@/components/layout/Layout'
+import { SITE_TITLE } from '@/constants/og-metadata'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
 import { type PageProps, withLocale } from '@/i18n/with-locale'
@@ -22,12 +23,15 @@ export async function generateMetadata({
   // Resolve the locale from the path
   const { locale } = await params
 
-  // Generate locale-specific metadata
-  return createPageMetadata({
+  // Generate locale-specific metadata, keeping the full tagline for SEO and social previews
+  const metadata = await createPageMetadata({
     locale: locale as Locale,
     namespace: 'metadata.home',
     path: ROUTES.HOME,
   })
+
+  // The browser tab shows the site name alone, bypassing the "%s | MathComps" template
+  return { ...metadata, title: { absolute: SITE_TITLE } }
 }
 
 /**
