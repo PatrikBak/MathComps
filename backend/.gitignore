@@ -103,6 +103,7 @@ venv.bak/
 .env.staging
 
 # Environment-specific settings overrides — may carry secrets. Other appsettings.*.json (shared defaults) are committed.
-**/appsettings.Development.json
-**/appsettings.Staging.json
-**/appsettings.Production.json
+# The `*` before the env name also catches family overlays: appsettings.examiner.<Env>.json, appsettings.llm.<Env>.json.
+**/appsettings.*Development.json
+**/appsettings.*Staging.json
+**/appsettings.*Production.json
