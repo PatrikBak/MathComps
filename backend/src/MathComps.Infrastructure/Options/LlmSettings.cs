@@ -1,8 +1,8 @@
 namespace MathComps.Infrastructure.Options;
 
 /// <summary>
-/// Connection settings for the shared chat callers run against — an OpenAI-compatible endpoint, currently
-/// OpenRouter. The base URL lives in appsettings; the API key is a secret and must come from user secrets. The model
+/// Connection settings for the shared chat callers run against — an OpenAI-compatible endpoint. The base URL lives
+/// in appsettings; the API key is a secret and must come from user secrets. The model
 /// and reasoning level are per-call, not connection-wide, so they live on each call's <see cref="ChatStepSettings"/>.
 /// </summary>
 public class LlmSettings

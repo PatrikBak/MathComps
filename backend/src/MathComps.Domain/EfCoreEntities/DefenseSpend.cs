@@ -29,9 +29,21 @@ public class DefenseSpend
     public required int PromptTokens { get; set; }
 
     /// <summary>
-    /// The turn's total completion (output) tokens.
+    /// The turn's total completion (output) tokens, the reasoning ones counted among them.
     /// </summary>
     public required int CompletionTokens { get; set; }
+
+    /// <summary>
+    /// The turn's reasoning (thinking) tokens, already counted within <see cref="CompletionTokens"/> and billed at
+    /// the output rate; 0 when the model reports none.
+    /// </summary>
+    public required int ReasoningTokens { get; set; }
+
+    /// <summary>
+    /// The turn's prompt tokens served from the provider's cache at a reduced rate, a subset of
+    /// <see cref="PromptTokens"/>; 0 when the model reports none.
+    /// </summary>
+    public required int CachedPromptTokens { get; set; }
 
     /// <summary>
     /// How long the turn's engine run took, in milliseconds.

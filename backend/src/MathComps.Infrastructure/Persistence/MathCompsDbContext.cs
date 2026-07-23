@@ -747,6 +747,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<DefenseSession>(e =>
         {
+            // The examiner-settings snapshot is a freeform reference blob, stored as jsonb so it stays queryable.
+            e.Property(session => session.ExaminerConfig)
+             .HasColumnType("jsonb");
+
             // Owner of the conversation, cascading so deleting a user drops their sessions.
             e.HasOne(session => session.User)
              .WithMany()

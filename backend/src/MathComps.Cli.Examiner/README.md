@@ -2,7 +2,7 @@
 
 Runs the AI **examiner**: an oral-exam examiner that probes a student's defense of a flawed olympiad solution, one turn at a time. Given a conversation so far, it produces the next examiner reply — a sharp Socratic challenge that presses the weak point without handing over the answer.
 
-The engine itself lives in `MathComps.Infrastructure` (`Services/Defense`) and is shared by two drivers: this CLI, which runs it over fixture folders, and the API, which runs and persists it as per-user defense conversations. The model is reached through [OpenRouter](https://openrouter.ai) (an OpenAI-compatible aggregator) via `Microsoft.Extensions.AI`, using the shared chat plumbing in `MathComps.Infrastructure`. Each step of the loop routes to its own model and reasoning level, set in `appsettings.examiner.json` — so a step is tuned independently of the others.
+The engine itself lives in `MathComps.Infrastructure` (`Services/Defense`) and is shared by two drivers: this CLI, which runs it over fixture folders, and the API, which runs and persists it as per-user defense conversations. The model is reached through an OpenAI-compatible provider via `Microsoft.Extensions.AI`, using the shared chat plumbing in `MathComps.Infrastructure`. Each step of the loop routes to its own model and reasoning level, set in `appsettings.examiner.json` — so a step is tuned independently of the others.
 
 This CLI has no database of its own — it works entirely from fixture files. (Persistence is the API's concern, not the engine's.)
 
@@ -25,7 +25,7 @@ Each step sets its own `Model`, `ReasoningEffort`, and `MaxOutputTokens` in `app
 
 ### Progress and cost
 
-Each run prints the reply, each guard's verdict, and how many times it revised. It prices itself from the cost OpenRouter attaches to every reply, summed over the turn's calls (`This turn cost $0.0042`) — retried attempts included.
+Each run prints the reply, each guard's verdict, and how many times it revised. It prices itself from the cost the provider attaches to every reply, summed over the turn's calls (`This turn cost $0.0042`) — retried attempts included.
 
 ## Command Reference
 
@@ -72,7 +72,7 @@ cd backend/src/MathComps.Cli.Examiner
 dotnet user-secrets set "Llm:ApiKey" "..."
 ```
 
-Each step's model lives in `appsettings.examiner.json`; swap any `Model` to another id OpenRouter exposes to change backends.
+Each step's model lives in `appsettings.examiner.json`; swap any `Model` to another id the provider exposes to change backends.
 
 ## AI prompts
 

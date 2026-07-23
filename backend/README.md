@@ -159,10 +159,10 @@ cd backend
 # Embeddings CLI (and anything else using the Gemini embedding API)
 dotnet user-secrets set "Gemini:ApiKey" "your-gemini-api-key" --project src/MathComps.Api
 
-# Tagging CLI — reaches its model through OpenRouter
+# Tagging CLI — reaches its model through the configured LLM provider
 dotnet user-secrets set "Llm:ApiKey" "your-llm-api-key" --project src/MathComps.Cli.Tagging
 
-# Defense feature (AI examiner) in the API — reaches its models through OpenRouter.
+# Defense feature (AI examiner) in the API — reaches its models through the configured LLM provider.
 # Optional: with "Examiner:UseFake": true the API serves defenses cost-free without a key.
 dotnet user-secrets set "Llm:ApiKey" "your-llm-api-key" --project src/MathComps.Api
 ```
@@ -211,10 +211,10 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 ### AI-Powered Tools
 
-- **[Tagging Assistant](src/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization via OpenRouter
+- **[Tagging Assistant](src/MathComps.Cli.Tagging/README.md)** – AI-powered problem categorization via the configured LLM provider
 - **[Embeddings CLI](src/MathComps.Cli.Embeddings/README.md)** – Gemini-based vector embedding generator
 - **[Similarity System](src/MathComps.Cli.Similarity/README.md)** – Problem similarity calculation using embeddings + tags and other things
-- **[Examiner CLI](src/MathComps.Cli.Examiner/README.md)** – AI oral-exam examiner that probes a student's defense of a solution, via OpenRouter
+- **[Examiner CLI](src/MathComps.Cli.Examiner/README.md)** – AI oral-exam examiner that probes a student's defense of a solution, via the configured LLM provider
 
 ### Content Tools
 

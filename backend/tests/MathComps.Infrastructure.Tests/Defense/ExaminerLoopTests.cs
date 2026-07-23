@@ -382,7 +382,7 @@ public class ExaminerLoopTests
     /// <returns>The wrapped result.</returns>
     private static ChatCallResult<TResponse> Result<TResponse>(
         TResponse value, decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
-        new(value, new ModelUsage(cost, promptTokens, completionTokens));
+        new(value, new ModelUsage(cost, promptTokens, completionTokens, ReasoningTokens: 0, CachedPromptTokens: 0));
 
     /// <summary>
     /// Sets the fake caller to answer any call binding to <typeparamref name="TResponse"/> with the given response,
