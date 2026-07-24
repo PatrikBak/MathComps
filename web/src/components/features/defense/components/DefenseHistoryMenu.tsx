@@ -113,11 +113,6 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-72">
-          {/* Heading over the list */}
-          <div className="px-2 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-muted">
-            {t('historyTitle')}
-          </div>
-
           {/* One row per session: resume by selecting it, delete by the overlaid control or the
               Delete key on the focused row */}
           {ordered.map((session) => (
