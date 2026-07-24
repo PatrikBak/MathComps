@@ -195,21 +195,22 @@
     "historyError": "Nepodařilo se načíst tvoje předchozí konverzace.",
     "historyTitle": "Tato úloha",
     "jumpToLatest": "Přejít na nejnovější",
+    "name": "Mathilda",
     "newDefense": "Nová konverzace",
-    "opener": "Rád si s tebou popovídám o tvém řešení, nebo pokud potřebuješ poradit. Nad odpověďmi chvíli přemýšlím, abych ti neprozradil příliš a neřekl něco špatně 😇",
+    "opener": "Ahoj, jsem Mathilda. Můžeme si projít tvoje řešení, podívat se na rozpracovaný nápad, nebo ti poradím, když se zasekneš. Nad odpověďmi chvíli přemýšlím, abych ti neprozradila příliš a neřekla něco špatně 😇",
     "placeholder": "Rozepiš se…",
     "problemStrip": "Zadání úlohy",
     "rewind": "Vrátit sem",
     "rewindError": "Konverzaci se nepodařilo vrátit zpět.",
     "rewindMessage": "Vše po tomto bodě se trvale odstraní.",
     "rewindTitle": "Vrátit konverzaci sem?",
+    "role": "AI tutorka",
     "roles": {
-      "examiner": "Zkoušející",
       "student": "Ty"
     },
     "sendError": "Tvou odpověď se nepodařilo odeslat.",
     "thinking": "Přemýšlím",
-    "title": "Obhajoba řešení",
+    "title": "Mathilda, AI tutorka",
     "transcriptLabel": "Průběh konverzace"
   },
   "email": {

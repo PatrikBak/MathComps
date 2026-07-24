@@ -128,8 +128,8 @@ export function CollapsibleCard({
               </span>
             )}
             {id && <CopyLinkButton slug={id} iconSize={16} className="ml-0" />}
-            {/* Trailing control */}
-            {headerAction && <div className="ml-auto">{headerAction}</div>}
+            {/* Trailing control, held in the UI typeface so it doesn't inherit the card's prose serif */}
+            {headerAction && <div className="ml-auto ui-text">{headerAction}</div>}
           </div>
         )}
         {/* Card body content */}

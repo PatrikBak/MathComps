@@ -115,7 +115,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
-    examiner: t('roles.examiner'),
+    examiner: t('name'),
     student: t('roles.student'),
   }
 
@@ -251,12 +251,12 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     >
       {/* What's being defended + session controls + close */}
       <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
-        {/* Title and problem name */}
+        {/* Who the student is talking to, and what she is */}
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
-            {t('title')}
+            {t('name')}
           </span>
-          <span className="truncate text-xs text-muted">{problem.title}</span>
+          <span className="truncate text-xs text-muted">{t('role')}</span>
         </div>
 
         {/* Push the controls to the trailing edge */}
@@ -268,9 +268,9 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
               size="sm"
               onClick={startNew}
               aria-label={t('newDefense')}
-              className="gap-1.5"
+              className="gap-1.5 px-2.5 text-xs"
             >
-              <Plus size={15} />
+              <Plus size={14} />
               <span className="hidden sm:inline">{t('newDefense')}</span>
             </Button>
           )}

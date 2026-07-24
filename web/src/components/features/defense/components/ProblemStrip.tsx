@@ -28,8 +28,9 @@ export function ProblemStrip({ label, statement }: ProblemStripProps) {
         {label}
       </summary>
 
-      {/* The statement, revealed when the strip is open */}
-      <div className="px-4 pb-4 sm:px-5">
+      {/* The statement, revealed when the strip is open. The bottom padding mirrors the summary bar's,
+          so the statement's own paragraph margins sit it evenly between label and edge */}
+      <div className="px-4 pb-2.5 sm:px-5">
         <div className="math-typography">
           <RichMathEditorRenderer content={statement} lightImageBackground={false} />
         </div>
