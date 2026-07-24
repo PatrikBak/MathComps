@@ -47,6 +47,8 @@ type TurnStyle = {
   label: string
   /** Classes for the message body: the examiner speaks in the serif math voice, the student in sans. */
   body: string
+  /** Classes cancelling the container's own inset, so every turn's rewind control shares one axis. */
+  rewindInset: string
 }
 
 /** The container/label/body styling for each role. */
@@ -55,11 +57,13 @@ const TURN_STYLES: Record<TurnRole, TurnStyle> = {
     container: '',
     label: 'text-brand-light',
     body: 'math-typography',
+    rewindInset: '',
   },
   student: {
     container: 'rounded-lg bg-brand/10 px-4 py-3',
     label: 'text-muted',
     body: 'text-[15px] leading-relaxed',
+    rewindInset: '-mr-4',
   },
 }
 
@@ -111,7 +115,7 @@ export function DefenseTurn({
             size="icon"
             aria-label={rewindLabel}
             onClick={onRewind}
-            className="size-7 shrink-0 text-muted/60 hover:text-foreground"
+            className={cn('size-7 shrink-0 text-muted/60 hover:text-foreground', style.rewindInset)}
           >
             <Undo2 size={14} />
           </Button>
