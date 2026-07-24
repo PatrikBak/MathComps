@@ -370,13 +370,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             e.HasIndex(pt => pt.ProblemId)
              .HasDatabaseName("ix_problem_text_problem_id");
 
-            // GIN trigram index on unaccented raw_text for efficient accent-insensitive search
-            // This is an expression index: immutable_unaccent(raw_text)
-            // The actual SQL is created in migration 20251027182303_AddMultiLanguageSupport
-            e.HasIndex(pt => pt.RawText)
-             .HasDatabaseName("ix_problem_text_raw_text_unaccent_trgm")
-             .HasFilter("raw_text IS NOT NULL")
-             .HasAnnotation("Npgsql:IndexExpression", "immutable_unaccent(raw_text)")
+            // GIN trigram index backing the accent-insensitive free-text search. The search matches
+            // markdown text with a fallback to legacy TeX raw text, so the index expression is over the
+            // same coalesce. The actual SQL is created in migration SwitchSearchIndexToCoalesce.
+            e.HasIndex(pt => pt.MarkdownText)
+             .HasDatabaseName("ix_problem_text_search_trgm")
+             .HasAnnotation("Npgsql:IndexExpression", "immutable_unaccent(coalesce(markdown_text, raw_text))")
              .HasMethod("gin")
              .HasOperators("gin_trgm_ops");
 
