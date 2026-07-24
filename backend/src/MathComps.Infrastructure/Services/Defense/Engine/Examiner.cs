@@ -175,8 +175,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     }
 
     /// <summary>
-    /// Runs the generate step: the persona prompt (problem, reference, and any revision note) becomes the system
-    /// message, and the conversation so far becomes the user message.
+    /// Runs the generate step: the persona prompt (problem, reference, the author's-hints guidance when the reference
+    /// carries that section, and any revision note) becomes the system message, and the conversation so far becomes
+    /// the user message.
     /// </summary>
     /// <param name="problem">The problem that fills the prompt.</param>
     /// <param name="reference">The reference solution that fills the prompt.</param>
@@ -189,10 +190,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         string problem, string reference, string conversation, string revisionNote, ModelUsageAccumulator usage,
         CancellationToken cancellationToken)
     {
-        // Fill the persona prompt with the problem, reference, and the revision note (empty most turns).
+        // Fill the persona prompt with the problem, the reference, the hints guidance when the reference carries the
+        // author's-hints section, and the revision note (empty most turns).
         var systemPrompt = (await ReadPromptAsync(_settings.Generate.Prompt, cancellationToken))
             .Replace("{problem}", problem)
             .Replace("{reference}", reference)
+            .Replace("{hints_note}", reference.Contains(AuthorHintsSection.Heading) ? AuthorHintsSection.UsageNote : "")
             .Replace("{revision_note}", revisionNote);
 
         // The conversation so far is what the examiner responds to; the reply rides a single-field structured
