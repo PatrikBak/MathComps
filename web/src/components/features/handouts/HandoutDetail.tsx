@@ -184,7 +184,7 @@ function renderDocumentSections(
                 : null
 
             // The hidden reasoning a defense is argued against: the worked solution for a problem, exercise,
-            // or example. Theorems and definitions yield none.
+            // or example, and the proof for a theorem. Definitions yield none.
             let defenseReference: RawContentBlock[]
             // The author's step-by-step hints: only a problem has them, so the other types yield none.
             let defenseHints: RawContentBlock[][] = []
@@ -201,8 +201,8 @@ function renderDocumentSections(
                 defenseHints = contentBlock.hints
                 break
               case 'theorem':
-                // Excluded: a proof-defense is a different examiner frame than the prompt targets
-                defenseReference = []
+                // A theorem is defended against its proof.
+                defenseReference = contentBlock.proof
                 break
               case 'definition':
                 // Definitions have nothing hidden to defend.
