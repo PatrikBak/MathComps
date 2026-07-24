@@ -5,7 +5,6 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Engine;
-using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -51,7 +50,7 @@ public class DefenseSessionService(
         EnsureNotBlank(start.Content);
 
         // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
-        var reference = BuildReferenceWithHints(start.Reference, start.Hints);
+        var reference = AuthorHintsSection.BuildReference(start.Reference, start.Hints);
 
         // Bound each input before doing anything with it; the reference is bounded with its hints folded in.
         EnsureWithinLength(start.ProblemKey, _limits.MaxProblemKeyChars);
@@ -354,36 +353,6 @@ public class DefenseSessionService(
     /// <returns>The conversation as the engine reads it.</returns>
     private static Transcript BuildTranscript(IEnumerable<DefenseTurn> turns) =>
         new([.. turns.OrderBy(turn => turn.Sequence).Select(turn => new TranscriptTurn(turn.Role, turn.Content))]);
-
-    /// <summary>
-    /// Appends the author's hints to the reference as an "AUTHOR'S HINTS" section, so the examiner reads them as the
-    /// problem's staged solution and can pitch earned help at the author's granularity. Returns the reference
-    /// unchanged when there are no hints.
-    /// </summary>
-    /// <param name="reference">The reference solution.</param>
-    /// <param name="hints">The author's step-by-step hints, each a markdown string; may be null.</param>
-    /// <returns>The reference, with the hints section appended when any were given.</returns>
-    private static string BuildReferenceWithHints(string reference, IReadOnlyList<string>? hints)
-    {
-        // No hints: the reference stands as the examiner's only source material.
-        if (hints is null || hints.Count == 0)
-            return reference;
-
-        // Each hint under its own "Hint N" heading.
-        var numberedHints = hints
-            .Select((hint, index) => $"### Hint {index + 1}\n{hint}")
-            .ToJoinedString("\n\n");
-
-        // The reference followed by the hints, framed as ordered stages of the solution.
-        return $"""
-            {reference}
-
-            ## AUTHOR'S HINTS
-            (The author's step-by-step hints for this problem — ordered stages of the solution, reference material for the help you give a stuck candidate.)
-
-            {numberedHints}
-            """;
-    }
 
     /// <summary>
     /// Throws when the user's spend so far today has reached the per-user daily ceiling.
