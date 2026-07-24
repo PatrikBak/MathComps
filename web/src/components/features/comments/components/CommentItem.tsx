@@ -59,7 +59,7 @@ type CommentItemProps = Omit<CommentData, 'id' | 'replies'> & {
   /** Called when edit is submitted (only provided for own comments) */
   onEdit?: (newContent: string) => void | Promise<void>
   /** Called when delete is clicked (only provided for own comments) */
-  onDelete?: () => void | Promise<void>
+  onDelete?: () => void
   /** The component handling reply input (only provided for not-deleted comments) */
   replyInputNode?: React.ReactNode
   /** The recursively rendered replies (should they exist) */
@@ -132,6 +132,8 @@ export function CommentItem({
 
       // Quit edit mode after saved
       setIsEditing(false)
+    } catch {
+      // Stay in edit mode so the text can be resubmitted; reporting the failure is the handler's
     } finally {
       // Reset the saving state regardless of success or failure
       setIsSaving(false)

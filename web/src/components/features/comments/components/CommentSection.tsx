@@ -65,7 +65,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   const { mutateAsync: createRootComment, isPending: isCreatingRootComment } = useCreateComment()
   const { mutateAsync: createReply, isPending: isCreatingReplyComment } = useCreateComment()
   const { mutateAsync: updateComment } = useUpdateComment()
-  const { mutateAsync: deleteComment } = useDeleteComment()
+  const { mutate: deleteComment } = useDeleteComment()
   const toggleLike = useToggleCommentLike().mutate
 
   // Handle pending like restoration (if user liked a comment while not logged in)
@@ -164,8 +164,8 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
    * Handles soft-deleting a comment.
    */
   const handleDeleteComment = useCallback(
-    async (commentId: string) => {
-      await deleteComment({
+    (commentId: string) => {
+      deleteComment({
         commentId,
         target,
       })
