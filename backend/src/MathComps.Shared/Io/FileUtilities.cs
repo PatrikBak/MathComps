@@ -25,6 +25,23 @@ public static class FileUtilities
     }
 
     /// <summary>
+    /// Reads the whole text of a file at <paramref name="relativePath"/>, resolved against the app's base directory
+    /// like <see cref="ReadAppFileAsync"/>. For one-off reads outside the async request path, such as building a
+    /// snapshot once at startup, where threading a token through DI construction isn't worth it.
+    /// </summary>
+    /// <param name="relativePath">Path to the file relative to the app's base directory (an absolute path is used
+    /// as-is).</param>
+    /// <returns>The file's contents.</returns>
+    public static string ReadAppFile(string relativePath)
+    {
+        // Anchor on the base directory; an absolute relativePath wins, matching Path.Combine's rule.
+        var resolvedPath = Path.Combine(AppContext.BaseDirectory, relativePath);
+
+        // Read the whole file back.
+        return File.ReadAllText(resolvedPath);
+    }
+
+    /// <summary>
     /// Reads the whole text of a required file within a folder, naming the file in the error when it isn't there.
     /// </summary>
     /// <param name="folder">The folder the file must be in.</param>

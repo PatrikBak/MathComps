@@ -307,6 +307,9 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        // The examiner's config snapshot for a new session, read from disk and serialized once per process.
+        services.TryAddSingleton<IExaminerConfigSnapshotProvider, ExaminerConfigSnapshotProvider>();
+
         // The fake engine short-circuits the model calls for cost-free runs; the real one runs the loop.
         var useFake = configuration.GetValue<bool>($"{ExaminerSettings.SectionName}:UseFake");
 
