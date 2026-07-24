@@ -13,7 +13,7 @@ public class LlmSettings
     public const string SectionName = "Llm";
 
     /// <summary>
-    /// Base URL of the OpenAI-compatible endpoint, e.g. <c>https://openrouter.ai/api/v1</c>.
+    /// Base URL of the OpenAI-compatible endpoint the shared chat stack calls.
     /// </summary>
     public required string BaseUrl { get; set; }
 
