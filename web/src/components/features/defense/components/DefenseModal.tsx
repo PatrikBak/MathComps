@@ -275,8 +275,8 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
             </Button>
           )}
 
-          {/* Browse past defenses, offered when there's a saved one other than the current */}
-          {sessions.some((session) => session.id !== currentSessionId) && (
+          {/* Browse this problem's defenses, offered once one is saved */}
+          {sessions.length > 0 && (
             <DefenseHistoryMenu
               sessions={sessions}
               currentSessionId={currentSessionId}
