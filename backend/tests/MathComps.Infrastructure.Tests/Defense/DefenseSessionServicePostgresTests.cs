@@ -79,14 +79,19 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             limits.DailySpendCeilingPerUser = 1.00m;
         });
 
-        // A minimal examiner config so the session's snapshot is a real settings object, not null members.
+        // A minimal examiner config so the session's snapshot is a real settings object, not null members. The
+        // prompt paths point at the real templates, since the snapshot provider below actually reads them.
         services.Configure<ExaminerSettings>(examiner =>
         {
-            examiner.Generate = new ChatStepSettings { Prompt = "generate", Model = "fake/model" };
-            examiner.MathCheck = new ChatStepSettings { Prompt = "math-check", Model = "fake/model" };
-            examiner.LeakCheck = new ChatStepSettings { Prompt = "leak-check", Model = "fake/model" };
+            examiner.Generate = new ChatStepSettings { Prompt = "Prompts/generate.txt", Model = "fake/model" };
+            examiner.MathCheck = new ChatStepSettings { Prompt = "Prompts/math-check.txt", Model = "fake/model" };
+            examiner.LeakCheck = new ChatStepSettings { Prompt = "Prompts/leak-check.txt", Model = "fake/model" };
             examiner.MaxRevisions = 3;
         });
+
+        // Builds the session snapshot from the config above; this test bypasses AddExaminer, so it's registered
+        // directly.
+        services.AddSingleton<IExaminerConfigSnapshotProvider, ExaminerConfigSnapshotProvider>();
 
         // Serializes a user's concurrent turns.
         services.AddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();

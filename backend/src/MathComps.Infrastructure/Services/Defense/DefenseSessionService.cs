@@ -6,7 +6,6 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Shared.Extensions;
-using MathComps.Shared.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -21,11 +20,12 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="limits">The input, turn, and spend caps.</param>
-/// <param name="examinerSettings">The examiner engine's settings, snapshotted onto each new session.</param>
+/// <param name="examinerConfigSnapshotProvider">The examiner engine's config snapshot, stamped onto each new
+/// session.</param>
 /// <param name="turnGate">Serializes a single user's turns.</param>
 public class DefenseSessionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IExaminer examiner, IOptions<DefenseLimits> limits,
-    IOptions<ExaminerSettings> examinerSettings, IDefenseUserTurnGate turnGate)
+    IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider, IDefenseUserTurnGate turnGate)
     : IDefenseSessionService
 {
     /// <summary>
@@ -34,9 +34,9 @@ public class DefenseSessionService(
     private readonly DefenseLimits _limits = limits.Value;
 
     /// <summary>
-    /// The examiner settings serialized once to their JSON config snapshot.
+    /// The examiner's config snapshot, ready to stamp onto each new session.
     /// </summary>
-    private readonly string _examinerConfigJson = examinerSettings.Value.ToJson(writeIndented: false);
+    private readonly string _examinerConfigJson = examinerConfigSnapshotProvider.Json;
 
     /// <inheritdoc/>
     public async Task<DefenseSessionDto> StartAsync(
