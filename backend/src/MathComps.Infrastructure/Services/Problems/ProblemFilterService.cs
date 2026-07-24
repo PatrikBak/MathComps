@@ -827,12 +827,14 @@ public class ProblemFilterService(
         // Extract and normalize the search term for accent-insensitive matching
         var normalizedSearchTerm = $"%{searchText.RemoveAccents()}%";
 
-        // Start with statement text search (always included)
+        // Start with statement text search (always included). We match the markdown-native text, falling
+        // back to the legacy TeX raw text: markdown-only imports have no raw text, TeX-only rows have no
+        // markdown, so the coalesce covers both. The ?? becomes SQL COALESCE, matching the index expression.
         var textSearchQuery = dbContext.ProblemTexts
             .Where(text =>
                 text.DocumentType == DocumentType.Statement &&
-                text.RawText != null &&
-                EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm));
+                EF.Functions.ILike(
+                    PostgresDbFunctions.Unaccent((text.MarkdownText ?? text.RawText)!), normalizedSearchTerm));
 
         // If solution search is enabled...
         if (searchInSolution)
@@ -842,8 +844,8 @@ public class ProblemFilterService(
                 dbContext.ProblemTexts
                     .Where(text =>
                         text.DocumentType == DocumentType.Solution &&
-                        text.RawText != null &&
-                        EF.Functions.ILike(PostgresDbFunctions.Unaccent(text.RawText), normalizedSearchTerm))
+                        EF.Functions.ILike(
+                            PostgresDbFunctions.Unaccent((text.MarkdownText ?? text.RawText)!), normalizedSearchTerm))
             );
         }
 

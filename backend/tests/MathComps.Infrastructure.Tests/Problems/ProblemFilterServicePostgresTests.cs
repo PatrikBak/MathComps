@@ -6,6 +6,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Tagging;
@@ -224,6 +225,113 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Single(lowerToTitleResult.Problems.Items);
         Assert.Equal("75-c-i-1", lowerToTitleResult.Problems.Items[0].Slug);
     });
+
+    /// <summary>
+    /// Guards the coalesce search against the half-populated text columns. Bulk-imported problems store only
+    /// <see cref="ProblemText.MarkdownText"/> (legacy <see cref="ProblemText.RawText"/> is null), while the
+    /// legacy TeX solutions are the reverse. Search must find both, so it matches
+    /// <c>coalesce(markdown_text, raw_text)</c>, not either column alone.
+    /// </summary>
+    [Fact]
+    public async Task FilterBySearchTextFindsMarkdownOnlyAndRawOnlyTexts()
+    {
+        // Arrange - add a problem whose statement is markdown-only and whose solution is raw-only
+        await QueryAsync(async context =>
+        {
+            // Any seeded round instance satisfies the foreign key
+            var roundInstanceId = (await context.RoundInstances.FirstAsync()).Id;
+
+            // The problem carrying the two half-populated texts
+            var problem = new Problem
+            {
+                Id = Guid.NewGuid(),
+                Slug = "coalesce-search-1",
+                RoundInstanceId = roundInstanceId,
+                Number = 9
+            };
+
+            // Statement stored only as markdown, as the bulk-import pipeline produces
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Statement,
+                RawText = null,
+                MarkdownText = "Zadanie o markdaunovom mnohouholníku.",
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // Solution stored only as legacy TeX raw text, as the old import pipeline produced
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Solution,
+                RawText = "Riešenie využíva rawtextovú indukciu.",
+                MarkdownText = null,
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // Commit the problem so the service under test sees it
+            context.Problems.Add(problem);
+            await context.SaveChangesAsync();
+        });
+
+        await RunTestAsync(async service =>
+        {
+            // A term living only in the markdown statement, spelled without accents
+            var statementQuery = new ProblemFilterOptions(
+                new ProblemFilterQuery(
+                    new ProblemFilterCriteria(
+                        SearchText: "markdaunovom",
+                        SearchInSolution: false,
+                        OlympiadYears: [],
+                        Contests: [],
+                        ProblemNumbers: [],
+                        TagSlugs: [],
+                        TagLogic: LogicToggle.Or,
+                        AuthorSlugs: [],
+                        AuthorLogic: LogicToggle.Or),
+                    PageSize: 10,
+                    PageNumber: 1,
+                    FavoritesOnly: false),
+                UserId: null,
+                Language: Language.SK);
+
+            // A term living only in the raw-text solution, with solution search enabled
+            var solutionQuery = new ProblemFilterOptions(
+                new ProblemFilterQuery(
+                    new ProblemFilterCriteria(
+                        SearchText: "rawtextovu",
+                        SearchInSolution: true,
+                        OlympiadYears: [],
+                        Contests: [],
+                        ProblemNumbers: [],
+                        TagSlugs: [],
+                        TagLogic: LogicToggle.Or,
+                        AuthorSlugs: [],
+                        AuthorLogic: LogicToggle.Or),
+                    PageSize: 10,
+                    PageNumber: 1,
+                    FavoritesOnly: false),
+                UserId: null,
+                Language: Language.SK);
+
+            // Act - run both searches
+            var statementResult = await service.FilterAsync(statementQuery);
+            var solutionResult = await service.FilterAsync(solutionQuery);
+
+            // Assert - the markdown-only statement is found
+            Assert.Contains(statementResult.Problems.Items, problem => problem.Slug == "coalesce-search-1");
+
+            // Assert - the raw-only solution is found
+            Assert.Contains(solutionResult.Problems.Items, problem => problem.Slug == "coalesce-search-1");
+        });
+    }
 
     /// <summary>
     /// Verifies that filtering by a single author returns all problems authored by that person.
