@@ -109,8 +109,8 @@ public class LlmChatCaller(
                 // let the SDK hand back null, and it's a different type with no usage to read, so cost/tokens stay zero.
                 if (response.RawRepresentation is ChatCompletion completion)
                 {
-                    // The endpoint prices the reply in its raw body's usage.
-                    if (completion.Patch.TryGetValue("$.usage.cost"u8, out decimal billed))
+                    // The endpoint prices the reply at the raw body's top level.
+                    if (completion.Patch.TryGetValue("$.cost"u8, out decimal billed))
                         cost = billed;
 
                     // The prompt (input) token count comes straight off the completion's usage.
