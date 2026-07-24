@@ -1,9 +1,37 @@
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
+
+/** How grave the confirmed action is. */
+type ConfirmVariant = 'danger' | 'warning' | 'default'
+
+/**
+ * The variant-dependent styling of one dialog.
+ */
+type ConfirmVariantStyle = {
+  /** Classes for the disc behind the icon. */
+  icon: string
+  /** Classes for the confirm button. */
+  confirmButton: string
+}
+
+/** The icon and confirm-button styling for each variant. */
+const VARIANT_STYLES: Record<ConfirmVariant, ConfirmVariantStyle> = {
+  danger: {
+    icon: 'bg-error/20 text-error',
+    confirmButton: 'bg-error hover:bg-error/90 text-error-foreground',
+  },
+  warning: {
+    icon: 'bg-warning/20 text-warning',
+    confirmButton: 'bg-warning hover:bg-warning/90 text-warning-foreground',
+  },
+  default: {
+    icon: 'bg-focus/20 text-focus',
+    confirmButton: 'bg-brand hover:bg-brand-hover text-brand-foreground',
+  },
+}
 
 /**
  * Props for the {@link ConfirmDialog} component.
@@ -13,7 +41,7 @@ type ConfirmDialogProps = {
   isOpen: boolean
   /** Called when dialog should close (cancel or backdrop click) */
   onClose: () => void
-  /** Called when user confirms the action */
+  /** Called when user confirms the action; it reports its own failure */
   onConfirm: () => void | Promise<void>
   /** Dialog title */
   title: string
@@ -23,8 +51,8 @@ type ConfirmDialogProps = {
   confirmText?: string
   /** Text for cancel button */
   cancelText?: string
-  /** Variant affects confirm button color */
-  variant?: 'danger' | 'warning' | 'default'
+  /** How grave the confirmed action is, which the icon and confirm button take their colour from */
+  variant: ConfirmVariant
 }
 
 /**
@@ -38,61 +66,32 @@ export function ConfirmDialog({
   message,
   confirmText,
   cancelText,
-  variant = 'danger',
+  variant,
 }: ConfirmDialogProps) {
   // Get translations
   const tActions = useTranslations('ui.actions')
 
-  // Whether the confirm action is currently loading
-  const [isLoading, setIsLoading] = useState(false)
+  // The icon and confirm-button styling this dialog wears
+  const style = VARIANT_STYLES[variant]
 
   // Use translated defaults if not provided
   const resolvedConfirmText = confirmText ?? tActions('confirm')
   const resolvedCancelText = cancelText ?? tActions('cancel')
 
   /** Called when we are confirming the action with the main button */
-  const handleConfirm = async () => {
-    try {
-      // Call the confirm action
-      const result = onConfirm()
+  const handleConfirm = () => {
+    // Dismiss on the answer, not on the action landing
+    onClose()
 
-      // If it returns a promise, wait for it to resolve
-      if (result instanceof Promise) {
-        // Set that we're waiting
-        setIsLoading(true)
-
-        // And wait for the promise to resolve
-        await result
-      }
-
-      // After the action is done, close the dialog
-      onClose()
-    } finally {
-      // Regardless of success or failure, reset the loading state
-      setIsLoading(false)
-    }
-  }
-
-  /** Called when we are closing the dialog */
-  const handleClose = () => {
-    // Prevent the dialog from closing if we're loading
-    if (!isLoading) {
-      onClose()
-    }
+    // Run the confirmed action
+    void onConfirm()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className="max-w-sm" showCloseButton={false}>
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-sm" showCloseButton={false}>
       {/* Icon + Title */}
       <div className="flex items-center gap-3 mb-3">
-        <div
-          className={cn(
-            'flex items-center justify-center w-10 h-10 rounded-full',
-            variant === 'danger' && 'bg-error/20 text-error',
-            variant === 'warning' && 'bg-warning/20 text-warning',
-            variant === 'default' && 'bg-focus/20 text-focus'
-          )}
-        >
+        <div className={cn('flex items-center justify-center w-10 h-10 rounded-full', style.icon)}>
           <AlertTriangle size={20} />
         </div>
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
@@ -105,29 +104,20 @@ export function ConfirmDialog({
       <div className="flex justify-end gap-3">
         <button
           type="button"
-          onClick={handleClose}
-          disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-muted-foreground bg-foreground/5 hover:bg-foreground/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={onClose}
+          className="px-4 py-2 text-sm font-medium text-muted-foreground bg-foreground/5 hover:bg-foreground/10 rounded-lg transition-colors"
         >
           {resolvedCancelText}
         </button>
         <button
           type="button"
           onClick={handleConfirm}
-          disabled={isLoading}
           className={cn(
-            'relative px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed',
-            variant === 'danger' && 'bg-error hover:bg-error/90 text-error-foreground',
-            variant === 'warning' && 'bg-warning hover:bg-warning/90 text-warning-foreground',
-            variant === 'default' && 'bg-brand hover:bg-brand-hover text-brand-foreground'
+            'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+            style.confirmButton
           )}
         >
-          <span className={cn(isLoading ? 'invisible' : '')}>{resolvedConfirmText}</span>
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 size={16} className="animate-spin" />
-            </div>
-          )}
+          {resolvedConfirmText}
         </button>
       </div>
     </Modal>
