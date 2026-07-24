@@ -1,7 +1,7 @@
 'use client'
 
 import { useDisclosure } from '@mantine/hooks'
-import { MessagesSquare } from 'lucide-react'
+import { Bot } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -20,7 +20,7 @@ type DefenseChatTriggerProps = {
 }
 
 /**
- * The per-problem entry point to the defense chat: a small icon on the problem card that opens the
+ * The per-problem entry point to the defense chat: a named button on the problem card that opens the
  * {@link DefenseModal}. Admin-gated on the client (a visibility gate, not a real access boundary; the
  * endpoint enforces the admin policy itself).
  */
@@ -54,8 +54,11 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   return (
     <>
       {/* Opens the defense for this problem */}
-      <Button variant="ghost" size="icon" onClick={handleOpen} aria-label={t('title')}>
-        <MessagesSquare size={16} />
+      <Button variant="subtle" size="sm" shape="pill" onClick={handleOpen} aria-label={t('name')}>
+        <Bot size={16} strokeWidth={1.75} />
+        <span>
+          <span className="text-brand-light">Math</span>ilda
+        </span>
       </Button>
 
       {/* The defense chat itself */}
