@@ -6,6 +6,17 @@ import { Fragment } from 'react'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
+ * A surface's arrival: an exponential ease-out, which spends most of its travel in the first frames
+ * rather than spreading it evenly across the duration.
+ */
+const ENTER_TRANSITION = 'ease-[cubic-bezier(0.16,1,0.3,1)] duration-200 motion-reduce:duration-0'
+
+/**
+ * A surface's exit, shorter than its arrival: leaving has less to follow than arriving does.
+ */
+const LEAVE_TRANSITION = 'ease-in duration-150 motion-reduce:duration-0'
+
+/**
  * Props for the {@link Modal} component.
  */
 type ModalProps = {
@@ -52,14 +63,14 @@ export function Modal({
         {/* Backdrop with blur */}
         <TransitionChild
           as={Fragment}
-          enter="ease-out duration-300"
+          enter={ENTER_TRANSITION}
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-200"
+          leave={LEAVE_TRANSITION}
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-background/50 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-background/50 backdrop-blur-sm transition-opacity" />
         </TransitionChild>
 
         {/* Modal container */}
@@ -72,16 +83,16 @@ export function Modal({
           >
             <TransitionChild
               as={Fragment}
-              enter="ease-out duration-300"
+              enter={ENTER_TRANSITION}
               enterFrom="opacity-0 scale-95"
               enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
+              leave={LEAVE_TRANSITION}
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
               <DialogPanel
                 className={cn(
-                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl transition-all',
+                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl transition-[opacity,transform]',
                   padded && 'p-3 sm:p-6',
                   className
                 )}
