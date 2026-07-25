@@ -31,11 +31,11 @@ public interface IIdentifiedEnvironment
 {
     /// <summary>
     /// The environment's permanent identity, written above it as <c>\EnvId</c> and shared by every language
-    /// variant of the handout. Null for an environment that has not been given one.
+    /// variant of the handout.
     /// </summary>
     // ReSharper disable once UnusedMember.Global — kept: the one documented home for an environment's id, pulled
     // into each record below by <inheritdoc/>.
-    string? Id { get; }
+    string Id { get; }
 }
 
 /// <summary>
@@ -47,7 +47,7 @@ public interface IIdentifiedEnvironment
 /// <param name="Body">The content that constitutes the statement of the theorem.</param>
 /// <param name="Proof">The content that constitutes the proof of the theorem.</param>
 public record Theorem(
-    string? Id,
+    string Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock> Proof
@@ -63,7 +63,7 @@ public record Theorem(
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content that provides the solution to the exercise.</param>
 public record Exercise(
-    string? Id,
+    string Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock>? Answer,
@@ -82,7 +82,7 @@ public record Exercise(
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing the solution to the problem.</param>
 public record Problem(
-    string? Id,
+    string Id,
     int Difficulty,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
@@ -101,7 +101,7 @@ public record Problem(
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing a solution or further explanation.</param>
 public record Example(
-    string? Id,
+    string Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock>? Answer,
@@ -116,7 +116,7 @@ public record Example(
 /// <param name="Title">The optional name of the concept being defined.</param>
 /// <param name="Body">The content of the definition.</param>
 public record Definition(
-    string? Id,
+    string Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body
 ) : ContentBlock, IIdentifiedEnvironment;
