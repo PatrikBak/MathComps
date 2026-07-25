@@ -108,8 +108,10 @@ function MathildaDefenseRow({
   const environmentLabel =
     ref === null ? null : `${environmentLabels[ref.environmentType]} ${ref.environmentNumber}`
 
-  // A glimpse of the conversation: the student's first message, stripped to plain text
-  const preview = toPlainTextPreview(defense.firstStudentMessage ?? '')
+  // A glimpse of the conversation: the student's first message, stripped to plain text. Null while
+  // nothing has been said in it yet.
+  const preview =
+    defense.firstStudentMessage === null ? null : toPlainTextPreview(defense.firstStudentMessage)
 
   // When the defense was started, to the minute so same-day defenses stay apart
   const startedAt = format.dateTime(new Date(defense.createdAt), {
@@ -139,8 +141,10 @@ function MathildaDefenseRow({
           )}
         </span>
 
-        {/* A glimpse of the conversation */}
-        <span className="w-full truncate text-sm text-muted">{preview}</span>
+        {/* A glimpse of the conversation, or that nothing has been said in it yet */}
+        <span className={cn('w-full truncate text-sm text-muted', preview === null && 'italic')}>
+          {preview ?? t('noReplyYet')}
+        </span>
       </button>
 
       {/* The stamp and its controls: a footer under the text until the row is wide enough to hold them beside it */}
