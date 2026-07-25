@@ -55,7 +55,7 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   return (
     <>
       {/* Opens the defense for this problem */}
-      <Button variant="subtle" size="sm" shape="pill" onClick={handleOpen} aria-label={t('name')}>
+      <Button variant="outline" size="sm" shape="pill" onClick={handleOpen} aria-label={t('name')}>
         <Bot size={16} strokeWidth={1.75} />
         <span>
           <span className="text-brand-light">Math</span>ilda
