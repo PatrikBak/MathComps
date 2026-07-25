@@ -156,6 +156,27 @@
     cursor: not-allowed;
   }
 
+  /* Keeps a scroll region's bar on screen, since macOS hides overlay scrollbars at rest */
+  .scrollbar-visible {
+    /* The pseudo-elements below are honoured only while these are left at auto */
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+    /* A scrollbar takes no padding, but sits inside the border, so a transparent one insets it */
+    border-right: 6px solid transparent;
+  }
+  .scrollbar-visible::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-visible::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: var(--color-surface-hover);
+  }
+  .scrollbar-visible::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
   /* Override cursor for non-interactive content areas */
   .problem-content,
   .problem-content

@@ -13,7 +13,8 @@ export const FOCUS_RING_CLASS =
 /**
  * The app's button styles.
  *
- * `primary` fills with the brand (violet); the focus ring stays on `focus` (indigo).
+ * `primary` fills with the brand (violet); the focus ring stays on `focus` (indigo). `outline` is
+ * `subtle` minus the fill, for a surface that already carries a tint.
  */
 export const buttonVariants = cva(
   [
@@ -32,6 +33,8 @@ export const buttonVariants = cva(
         ghost: 'text-muted hover:text-foreground hover:bg-foreground/5',
         subtle:
           'bg-foreground/5 border border-foreground/10 text-foreground hover:bg-foreground/10 hover:border-muted/60',
+        outline:
+          'border border-foreground/10 text-foreground hover:bg-foreground/5 hover:border-muted/60',
         link: 'text-link hover:text-link-hover hover:underline',
       },
       size: {
