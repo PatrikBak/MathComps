@@ -4,7 +4,16 @@
  */
 
 /** The five mathematical environment types used in handouts. */
-export type HandoutEnvironmentType = 'theorem' | 'exercise' | 'example' | 'problem' | 'definition'
+export const HANDOUT_ENVIRONMENT_TYPES = [
+  'theorem',
+  'exercise',
+  'example',
+  'problem',
+  'definition',
+] as const
+
+/** One of the {@link HANDOUT_ENVIRONMENT_TYPES}. */
+export type HandoutEnvironmentType = (typeof HANDOUT_ENVIRONMENT_TYPES)[number]
 
 /** A sequence of raw content blocks, used for inline or nested content. */
 type RawContentSequence = RawContentBlock[]

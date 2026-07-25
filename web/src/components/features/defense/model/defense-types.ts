@@ -36,13 +36,28 @@ export type DefenseSession = {
 }
 
 /**
+ * One of a user's defenses as it appears in their cross-problem list: a summary of what it was about and how it
+ * opened. It carries no turns.
+ */
+export type DefenseSessionListItem = {
+  /** Stable identifier. */
+  id: string
+  /** The problem this defense is about (the problem's stable key). */
+  problemKey: string
+  /** The problem statement, seen by both sides. */
+  statement: string
+  /** When the session was started, as an ISO-8601 string. */
+  createdAt: string
+  /** The student's first message; null when the session has none. */
+  firstStudentMessage: string | null
+}
+
+/**
  * The problem a defense is held against, including the reference solution the examiner reasons from.
  */
 export type DefenseProblem = {
   /** The problem's stable key. */
   key: string
-  /** The problem's display title. */
-  title: string
   /** The problem statement as markdown/math source. */
   statement: string
   /** The reference solution the examiner reasons from, as markdown/math source. */

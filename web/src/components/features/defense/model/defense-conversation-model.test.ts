@@ -17,7 +17,6 @@ import type {
 /** The problem every test defends. */
 const SAMPLE_PROBLEM: DefenseProblem = {
   key: 'p1',
-  title: 'Sample',
   statement: 'Prove it.',
   reference: 'Because.',
   hints: [],

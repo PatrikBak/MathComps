@@ -17,6 +17,16 @@ export function getDefenseSessionsUrl(problemKey: string): string {
 }
 
 /**
+ * Builds the URL for listing all of the user's defense sessions across every problem.
+ *
+ * @returns The list URL.
+ */
+export function getMyDefenseSessionsUrl(): string {
+  // The cross-problem list endpoint
+  return buildApiUrl(`${SESSIONS_PATH}/mine`)
+}
+
+/**
  * Builds the URL for opening a new defense session.
  *
  * @returns The start URL.

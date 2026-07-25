@@ -13,6 +13,7 @@ import { UserMenuItem } from '@/components/layout/UserMenuItem'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
+import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
@@ -26,14 +27,32 @@ type MobileNavigationDrawerProps = {
   isOpen: boolean
   /** Callback function to close the drawer */
   onClose: () => void
+  /** Opens the user's defenses. */
+  onOpenDefenses: () => void
 }
 
 /**
  * Mobile-friendly navigation drawer using Headless UI Dialog.
  */
-export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDrawerProps) => {
+export const MobileNavigationDrawer = ({
+  isOpen,
+  onClose,
+  onOpenDefenses,
+}: MobileNavigationDrawerProps) => {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
+
+  // Whether the viewer is an admin
+  const isAdmin = useIsAdmin()
+
+  // Closes the drawer and opens the defenses
+  const handleOpenDefenses = () => {
+    // Get the drawer out of the way
+    onClose()
+
+    // Show the defenses
+    onOpenDefenses()
+  }
 
   // Get the current pathname for active state detection
   const pathname = usePathname()
@@ -128,6 +147,14 @@ export const MobileNavigationDrawer = ({ isOpen, onClose }: MobileNavigationDraw
                   <div>
                     {user ? (
                       <div className="flex flex-col -my-2">
+                        {/* The user's defenses, admin-gated */}
+                        {isAdmin && (
+                          <UserMenuItem
+                            type="mathilda"
+                            variant="mobile"
+                            onClick={handleOpenDefenses}
+                          />
+                        )}
                         <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
                         <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
                       </div>

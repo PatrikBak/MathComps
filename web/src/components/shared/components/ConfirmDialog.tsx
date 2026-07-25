@@ -88,7 +88,13 @@ export function ConfirmDialog({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-sm" showCloseButton={false}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-sm"
+      showCloseButton={false}
+      ariaLabel={title}
+    >
       {/* Icon + Title */}
       <div className="flex items-center gap-3 mb-3">
         <div className={cn('flex items-center justify-center w-10 h-10 rounded-full', style.icon)}>
