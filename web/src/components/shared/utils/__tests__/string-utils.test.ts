@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { shortenYouTubeUrls } from '../string-utils'
+import { shortenYouTubeUrls, toPlainTextPreview } from '../string-utils'
 
 describe('shortenYouTubeUrls', () => {
   describe('YouTube.com URLs', () => {
@@ -119,5 +119,23 @@ describe('shortenYouTubeUrls', () => {
         shortenYouTubeUrls('youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr')
       ).toBe('PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr')
     })
+  })
+})
+
+describe('toPlainTextPreview', () => {
+  it('strips math markup so a formula reads as plain text', () => {
+    // A message whose content is mostly LaTeX
+    const preview = toPlainTextPreview('Take $\\frac{a}{b} \\leq 1$ and square it.')
+
+    // Delimiters, commands and braces are gone, the words survive
+    expect(preview).toBe('Take ab 1 and square it.')
+  })
+
+  it('collapses whitespace and trims', () => {
+    // A message broken over lines
+    const preview = toPlainTextPreview('  first line\n\n  second   line  ')
+
+    // One line, single-spaced
+    expect(preview).toBe('first line second line')
   })
 })

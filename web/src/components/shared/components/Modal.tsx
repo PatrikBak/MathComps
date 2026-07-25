@@ -36,6 +36,11 @@ type ModalProps = {
   align?: 'center' | 'top'
   /** Whether the panel carries its own inner padding; false lets content own its layout edge-to-edge */
   padded?: boolean
+  /**
+   * Whether the panel fills the screen's height rather than hugging its content, laying its children out as a
+   * column.
+   */
+  tall?: boolean
   /** Accessible name for the dialog when it renders its own header rather than a `title` */
   ariaLabel?: string
 }
@@ -52,6 +57,7 @@ export function Modal({
   className,
   align = 'center',
   padded = true,
+  tall = false,
   ariaLabel,
 }: ModalProps) {
   // Get translations for modal
@@ -94,6 +100,7 @@ export function Modal({
                 className={cn(
                   'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl transition-[opacity,transform]',
                   padded && 'p-3 sm:p-6',
+                  tall && 'flex h-[100dvh] flex-col sm:h-[92vh] sm:max-w-4xl',
                   className
                 )}
               >

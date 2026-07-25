@@ -73,6 +73,11 @@ type RichMathEditorProps = {
   placeholder?: string
   /** Whether to auto-focus (default: false) */
   autoFocus?: boolean
+  /**
+   * A token whose every change puts the cursor back in the editor, for a composer that outlives what it writes
+   * into: mounting once means {@link autoFocus} fires only the first time.
+   */
+  focusKey?: string | number
   /** Additional className for the wrapper */
   className?: string
   /** Callback when the content validity changes */
@@ -99,6 +104,7 @@ export function RichMathEditor({
   onChange,
   placeholder = '',
   autoFocus = false,
+  focusKey,
   className,
   onValidChange,
   onSend,
@@ -111,6 +117,7 @@ export function RichMathEditor({
   const viewModel = useEditorModel({ value, onChange, onSend, onCancel })
   const {
     state,
+    textareaRef,
     inputAreaRef,
     applyTransform,
     insertAtCursor,
@@ -119,6 +126,17 @@ export function RichMathEditor({
     handleChange,
     handleKeyDown,
   } = viewModel
+
+  // Take the cursor back whenever the caller says what the editor writes into has changed
+  useEffect(() => {
+    // No token means the caller never asks for it
+    if (focusKey === undefined) {
+      return
+    }
+
+    // Put the cursor in the text area
+    textareaRef.current?.focus()
+  }, [focusKey, textareaRef])
 
   // Track modal state
   const [isModalOpen, setIsModalOpen] = useState(false)

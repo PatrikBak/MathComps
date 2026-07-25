@@ -6,10 +6,11 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
+import { Modal } from '@/components/shared/components/Modal'
 import { useIsAdmin } from '@/hooks/use-is-admin'
 
 import type { DefenseProblem } from '../model/defense-types'
-import { DefenseModal } from './DefenseModal'
+import { DefenseConversation } from './DefenseConversation'
 
 /**
  * Props for the {@link DefenseChatTrigger}.
@@ -21,8 +22,8 @@ type DefenseChatTriggerProps = {
 
 /**
  * The per-problem entry point to the defense chat: a named button on the problem card that opens the
- * {@link DefenseModal}. Admin-gated on the client (a visibility gate, not a real access boundary; the
- * endpoint enforces the admin policy itself).
+ * {@link DefenseConversation} in a modal. Admin-gated on the client (a visibility gate, not a real access boundary;
+ * the endpoint enforces the admin policy itself).
  */
 export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   // Defense-surface copy
@@ -62,7 +63,23 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
       </Button>
 
       {/* The defense chat itself */}
-      {hasOpened && <DefenseModal problem={problem} isOpen={isOpen} onClose={close} />}
+      {hasOpened && (
+        <Modal
+          isOpen={isOpen}
+          onClose={close}
+          showCloseButton={false}
+          padded={false}
+          ariaLabel={t('title')}
+          tall
+        >
+          <DefenseConversation
+            problem={problem}
+            isOpen={isOpen}
+            onClose={close}
+            mode={{ kind: 'fromProblem' }}
+          />
+        </Modal>
+      )}
     </>
   )
 }

@@ -1,17 +1,51 @@
 'use client'
 
-import { useToggle } from '@mantine/hooks'
+import { useDisclosure, useToggle } from '@mantine/hooks'
 import { Menu } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
 import UserMenu from '@/components/layout/UserMenu'
 import { Button } from '@/components/shared/components/Button'
+import { Modal } from '@/components/shared/components/Modal'
 import { NavLink } from '@/components/shared/components/NavLink'
 import { ROUTES } from '@/i18n/i18n'
 
 import { MobileNavigationDrawer } from './MobileNavigationDrawer'
+
+/**
+ * The user's defenses, loaded on demand: the chat is heavy and most visits never open it.
+ */
+const MathildaLibraryModal = dynamic(
+  () =>
+    import('@/components/features/defense/components/MathildaLibraryModal').then(
+      (module) => module.MathildaLibraryModal
+    ),
+  { loading: () => <MathildaLibraryPlaceholder /> }
+)
+
+/**
+ * Stands in for the defenses while their chunk downloads, so the tap that opened them lands on something.
+ */
+function MathildaLibraryPlaceholder() {
+  // Defense-surface copy
+  const t = useTranslations('defense')
+
+  return (
+    <Modal
+      isOpen
+      onClose={() => {}}
+      title={t('name')}
+      showCloseButton={false}
+      className="max-w-2xl"
+    >
+      <p className="py-8 text-center text-sm text-muted">{t('libraryLoading')}</p>
+    </Modal>
+  )
+}
 
 /**
  * Props for the {@link HeaderClient} component.
@@ -36,6 +70,21 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
   // Keep track of whether the mobile menu is open
   const [isMobileNavigationOpen, toggleMobileNavigationOpen] = useToggle()
 
+  // The defenses list's open state
+  const [isDefensesOpen, { open: openDefenses, close: closeDefenses }] = useDisclosure(false)
+
+  // Whether the list has ever been opened
+  const [hasOpenedDefenses, setHasOpenedDefenses] = useState(false)
+
+  // Opens the defenses list, mounting it on the first open
+  const handleOpenDefenses = () => {
+    // Mount the list
+    setHasOpenedDefenses(true)
+
+    // Show it
+    openDefenses()
+  }
+
   // Translations for navigation
   const tNav = useTranslations('navigation')
 
@@ -59,7 +108,7 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-1">
               <LanguageSwitcher />
-              <UserMenu isAuthenticated={isAuthenticated} />
+              <UserMenu isAuthenticated={isAuthenticated} onOpenDefenses={handleOpenDefenses} />
             </div>
 
             {/* Mobile Navigation Button */}
@@ -81,7 +130,13 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
       <MobileNavigationDrawer
         isOpen={isMobileNavigationOpen}
         onClose={toggleMobileNavigationOpen}
+        onOpenDefenses={handleOpenDefenses}
       />
+
+      {/* The user's defenses, over whichever menu opened them */}
+      {hasOpenedDefenses && (
+        <MathildaLibraryModal isOpen={isDefensesOpen} onClose={closeDefenses} />
+      )}
     </>
   )
 }

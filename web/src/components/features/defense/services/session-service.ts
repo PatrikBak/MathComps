@@ -2,11 +2,16 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import type { DefenseSession, DefenseTurnRequest } from '../model/defense-types'
+import type {
+  DefenseSession,
+  DefenseSessionListItem,
+  DefenseTurnRequest,
+} from '../model/defense-types'
 import {
   getContinueDefenseUrl,
   getDefenseSessionsUrl,
   getDeleteDefenseSessionUrl,
+  getMyDefenseSessionsUrl,
   getRewindDefenseUrl,
   getStartDefenseUrl,
 } from './defense-api-urls'
@@ -28,6 +33,16 @@ export function listSessions(
   problemKey: string
 ): Promise<ApiResult<DefenseSession[]>> {
   return apiCall<DefenseSession[]>(() => getDefenseSessionsUrl(problemKey))
+}
+
+/**
+ * Lists all of the user's defense sessions across every problem, newest first.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @returns The user's sessions across every problem.
+ */
+export function listMyDefenses(apiCall: ApiCaller): Promise<ApiResult<DefenseSessionListItem[]>> {
+  return apiCall<DefenseSessionListItem[]>(() => getMyDefenseSessionsUrl())
 }
 
 /**

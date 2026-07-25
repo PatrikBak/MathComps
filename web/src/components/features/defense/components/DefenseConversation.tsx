@@ -7,7 +7,6 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
-import { Modal } from '@/components/shared/components/Modal'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -21,15 +20,45 @@ import { DefenseTranscript } from './DefenseTranscript'
 import { ProblemStrip } from './ProblemStrip'
 
 /**
- * Props for the {@link DefenseModal}.
+ * A conversation opened from the problem itself, with the reference solution in scope: it resumes the newest saved
+ * defense and can always open a fresh one.
  */
-type DefenseModalProps = {
+type FromProblemMode = {
+  /** The discriminator. */
+  kind: 'fromProblem'
+}
+
+/**
+ * A conversation reopened from the user's list of defenses, away from the problem it was held on. Only the named
+ * session continues: the reference solution a fresh defense is argued against lives with the problem, not the
+ * session, so there's nothing to open one with.
+ */
+type ContinueSavedMode = {
+  /** The discriminator. */
+  kind: 'continueSaved'
+  /** The saved session to reopen. */
+  sessionId: string
+  /** Called once that session is gone, leaving nothing to continue. */
+  onSessionGone: () => void
+}
+
+/**
+ * How a defense conversation was reached, which decides whether a fresh defense can be started from it.
+ */
+export type DefenseConversationMode = FromProblemMode | ContinueSavedMode
+
+/**
+ * Props for the {@link DefenseConversation}.
+ */
+type DefenseConversationProps = {
   /** The problem being defended. */
   problem: DefenseProblem
-  /** Whether the modal is open. */
+  /** Whether the hosting modal is open. */
   isOpen: boolean
-  /** Closes the modal. */
+  /** Closes the conversation. */
   onClose: () => void
+  /** How the conversation was reached. */
+  mode: DefenseConversationMode
 }
 
 /**
@@ -41,6 +70,26 @@ type RewindTarget = {
   keepThroughSequence: number
   /** The text to drop into the composer after the rewind. */
   draft: string
+}
+
+/**
+ * The id of the saved session a mode reopens on, or undefined when it opens on the problem's newest defense.
+ *
+ * @param mode - How the conversation was reached.
+ *
+ * @returns The id of the session to reopen, or undefined.
+ */
+function initialSessionIdOf(mode: DefenseConversationMode): string | undefined {
+  switch (mode.kind) {
+    // A reopened conversation names the one session it exists for
+    case 'continueSaved':
+      return mode.sessionId
+    // Opened on the problem, the newest saved defense is resumed instead
+    case 'fromProblem':
+      return undefined
+    default:
+      return assertNever(mode)
+  }
 }
 
 /**
@@ -60,11 +109,12 @@ const DEFENSE_TOOLBAR: ToolbarConfig = {
 }
 
 /**
- * The defense chat: a student argues their solution to a problem and the examiner probes it turn by
- * turn. Reuses the shared rich-math editor as the composer and renders the exchange as an annotated
- * transcript.
+ * The defense chat body: a student argues their solution to a problem and the examiner probes it turn by turn.
+ * Reuses the shared rich-math editor as the composer and renders the exchange as an annotated transcript. Rendered
+ * into a full-height modal panel its caller owns, so a surface already showing a modal can swap it in without
+ * stacking dialogs.
  */
-export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
+export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseConversationProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
 
@@ -79,6 +129,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     turns,
     isThinking,
     sessions,
+    initialResumeSettled,
     sessionsFailed,
     currentSessionId,
     conversationEpoch,
@@ -88,7 +139,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
     resume,
     deleteSession,
     rewind,
-  } = useDefenseConversation(problem, t('opener'))
+  } = useDefenseConversation(problem, t('opener'), initialSessionIdOf(mode))
 
   // The in-progress composer text
   const [draft, setDraft] = useState('')
@@ -108,10 +159,33 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
   // at the trigger
   const canRewind = !isThinking && currentSessionId !== null
 
+  // Whether a fresh defense can be opened at all: only the problem carries the reference one is argued against
+  const canOpenFresh = mode.kind === 'fromProblem'
+
+  // Whether a turn has somewhere to go: an open session to append to, or the standing to open one. A reopened
+  // conversation has neither until its session resumes, so it composes nothing in the meantime.
+  const canCompose = canOpenFresh || currentSessionId !== null
+
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
   // already started (a sent or in-flight turn past the examiner's opener). A pristine blank chat has
   // nothing to start over.
-  const canStartNew = currentSessionId !== null || turns.length > 1
+  const canStartNew = canOpenFresh && (currentSessionId !== null || turns.length > 1)
+
+  // A reopened conversation lives off whichever saved session is open. Once none is (the named one was already
+  // gone, or the open one was deleted from the history menu here) there is nothing left to continue and no
+  // reference to argue a fresh defense against, so hand back to whoever opened it rather than show a composer
+  // whose turns have nowhere to go. Switching to another of this problem's sessions keeps one open, so it stays.
+  useEffect(() => {
+    // Only a reopened conversation can outlive its session, and only a settled resume can say that it has
+    if (mode.kind !== 'continueSaved' || !initialResumeSettled) {
+      return
+    }
+
+    // Report it gone once nothing is open
+    if (currentSessionId === null) {
+      mode.onSessionGone()
+    }
+  }, [mode, initialResumeSettled, currentSessionId])
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
@@ -241,14 +315,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      showCloseButton={false}
-      padded={false}
-      ariaLabel={t('title')}
-      className="flex h-[100dvh] w-full flex-col sm:h-[92vh] sm:max-w-4xl"
-    >
+    <>
       {/* What's being defended + session controls + close */}
       <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
         {/* Who the student is talking to, and what she is */}
@@ -285,7 +352,7 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
             />
           )}
 
-          {/* Close the modal */}
+          {/* Close the conversation */}
           <Button variant="ghost" size="icon" onClick={onClose} aria-label={tModal('close')}>
             <X size={20} />
           </Button>
@@ -319,20 +386,25 @@ export function DefenseModal({ problem, isOpen, onClose }: DefenseModalProps) {
         variant="danger"
       />
 
-      {/* Composer */}
+      {/* Composer, once there is a conversation for it to write into */}
       <div className="border-t border-foreground/10 px-4 py-3 sm:px-5">
-        <RichMathEditor
-          variant="card"
-          toolbar={DEFENSE_TOOLBAR}
-          value={draft}
-          onChange={setDraft}
-          onSend={() => void handleSend()}
-          onStop={handleStop}
-          autoFocus
-          isLoading={isThinking}
-          placeholder={t('placeholder')}
-        />
+        {canCompose ? (
+          <RichMathEditor
+            variant="card"
+            toolbar={DEFENSE_TOOLBAR}
+            value={draft}
+            onChange={setDraft}
+            onSend={() => void handleSend()}
+            onStop={handleStop}
+            autoFocus
+            focusKey={conversationEpoch}
+            isLoading={isThinking}
+            placeholder={t('placeholder')}
+          />
+        ) : (
+          <p className="py-3 text-center text-sm text-muted">{t('libraryLoading')}</p>
+        )}
       </div>
-    </Modal>
+    </>
   )
 }

@@ -1,8 +1,9 @@
 import { useClerk } from '@clerk/nextjs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { LogOut, User } from 'lucide-react'
+import { Bot, LogOut, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useCurrentUrl } from '@/hooks/use-current-url'
 import { ROUTES } from '@/i18n/i18n'
@@ -12,7 +13,7 @@ import { AppLink } from '../shared/components/AppLink'
 /**
  * Type of user menu item to render.
  */
-type UserMenuItemType = 'profile' | 'signOut'
+type UserMenuItemType = 'mathilda' | 'profile' | 'signOut'
 
 /**
  * Props for the {@link UserMenuItem} component.
@@ -36,6 +37,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
   // Translations for section
   const tCommon = useTranslations('common')
   const tAuth = useTranslations('auth')
+  const tDefense = useTranslations('defense')
 
   // Get the current URL for logout redirect
   const { signOut } = useClerk()
@@ -53,11 +55,17 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
 
   // Get the styles for the type
   const config = {
+    mathilda: {
+      icon: Bot,
+      label: tDefense('name'),
+      bgColor: 'bg-brand/10',
+      iconColor: 'text-brand-light',
+    },
     profile: {
       icon: User,
       label: tCommon('profile'),
-      bgColor: 'bg-brand/10',
-      iconColor: 'text-brand-light',
+      bgColor: 'bg-foreground/10',
+      iconColor: 'text-muted-foreground',
     },
     signOut: {
       icon: LogOut,
@@ -94,6 +102,14 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
       )
 
       switch (type) {
+        case 'mathilda':
+          return (
+            <DropdownMenu.Item asChild>
+              <button onClick={onClick} className={cn('w-full', baseClasses)}>
+                {content}
+              </button>
+            </DropdownMenu.Item>
+          )
         case 'signOut':
           return (
             <DropdownMenu.Item asChild>
@@ -107,11 +123,8 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
             <DropdownMenu.Item asChild disabled={disabled}>
               <AppLink
                 href={ROUTES.PROFILE}
-                className={cn(
-                  baseClasses,
-                  'text-popover-foreground/70 font-normal',
-                  disabled && 'opacity-50 cursor-default'
-                )}
+                plain
+                className={cn(baseClasses, disabled && 'opacity-50 cursor-default')}
                 aria-disabled={disabled}
                 tabIndex={disabled ? -1 : undefined}
               >
@@ -119,6 +132,8 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
               </AppLink>
             </DropdownMenu.Item>
           )
+        default:
+          return assertNever(type)
       }
 
     case 'mobile':
@@ -129,6 +144,12 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
       )
 
       switch (type) {
+        case 'mathilda':
+          return (
+            <button onClick={onClick} className={mobileClasses}>
+              {content}
+            </button>
+          )
         case 'signOut':
           return (
             <button onClick={handleSignOut} className={mobileClasses}>
@@ -139,6 +160,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
           return (
             <AppLink
               href={ROUTES.PROFILE}
+              plain
               onClick={disabled ? undefined : onClick}
               className={mobileClasses}
               aria-disabled={disabled}
@@ -147,6 +169,10 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
               {content}
             </AppLink>
           )
+        default:
+          return assertNever(type)
       }
+    default:
+      return assertNever(variant)
   }
 }

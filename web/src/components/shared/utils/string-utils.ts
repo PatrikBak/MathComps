@@ -113,3 +113,21 @@ export const isUrl = (text: string): boolean => {
   const trimmed = text.trim()
   return /^https?:\/\//.test(trimmed) || /^www\./.test(trimmed)
 }
+
+/**
+ * Strips math markup down to a rough plain-text preview: math delimiters, LaTeX commands, and braces go, so
+ * `$\frac{a}{b}$` reads as `ab`.
+ *
+ * @param content - The math source.
+ *
+ * @returns The plain-text preview.
+ */
+export function toPlainTextPreview(content: string): string {
+  // Strip the markup and collapse what's left to one line
+  return content
+    .replace(/\$+/g, '')
+    .replace(/\\[a-zA-Z]+/g, '')
+    .replace(/[{}]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}

@@ -198,6 +198,56 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// Listing all of a user's sessions returns every problem's sessions, newest first, each carrying its statement
+    /// and the student's first message, and excludes other users' sessions.
+    /// </summary>
+    [Fact]
+    public Task ListAll_returns_every_problem_newest_first_with_statement_and_preview() =>
+        RunTestAsync(async service =>
+    {
+        // Three sessions for the owner across two problems, and one for another user
+        var first = await service.StartAsync(_ownerId, Request("prob-1", "first"));
+        var second = await service.StartAsync(_ownerId, Request("prob-2", "second"));
+        var third = await service.StartAsync(_ownerId, Request("prob-1", "third"));
+        await service.StartAsync(_otherId, Request("prob-1", "someone else"));
+
+        // List every session the owner holds
+        var sessions = await service.ListAllAsync(_ownerId);
+
+        // Only the owner's three come back, across both problems, newest first
+        Assert.Equal([third.Id, second.Id, first.Id], sessions.Select(session => session.Id));
+
+        // The newest of them
+        var newest = sessions[0];
+
+        // It carries its problem key, snapshotted statement, and the student's first message
+        Assert.Equal("prob-1", newest.ProblemKey);
+        Assert.Equal("the statement", newest.Statement);
+        Assert.Equal("third", newest.FirstStudentMessage);
+    });
+
+    /// <summary>
+    /// A session rewound to the examiner's opener has no student message left, which the listing reports as none.
+    /// </summary>
+    [Fact]
+    public Task ListAll_reports_no_first_message_when_the_student_has_none() =>
+        RunTestAsync(async service =>
+    {
+        // A session the student has spoken in
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Rewind it to the opener, dropping the student's only message
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
+
+        // List every session the owner holds
+        var sessions = await service.ListAllAsync(_ownerId);
+
+        // The session is still there, with nothing the student said to preview
+        var listed = Assert.Single(sessions);
+        Assert.Null(listed.FirstStudentMessage);
+    });
+
+    /// <summary>
     /// Deleting a session removes it and its turns, but the independent spend rows remain.
     /// </summary>
     [Fact]

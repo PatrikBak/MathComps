@@ -171,6 +171,34 @@ public class DefenseSessionService(
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<DefenseSessionListItemDto>> ListAllAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The user's sessions across every problem, newest first, each with its problem, statement, start time,
+        // and the message the student opened with.
+        return await dbContext.DefenseSessions
+            .AsNoTracking()
+            .Where(session => session.UserId == userId)
+            .OrderByDescending(session => session.CreatedAt)
+            // Ids are time-ordered v7 Guids, so they break a tie in the same direction the timestamps would.
+            .ThenByDescending(session => session.Id)
+            .Select(session => new DefenseSessionListItemDto(
+                session.Id,
+                session.ProblemKey,
+                session.ProblemStatement,
+                session.CreatedAt,
+                session.Turns
+                    .Where(turn => turn.Role == TranscriptRole.Candidate)
+                    .OrderBy(turn => turn.Sequence)
+                    .Select(turn => turn.Content)
+                    .FirstOrDefault()))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task DeleteAsync(Guid userId, Guid sessionId, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.

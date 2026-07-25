@@ -6,9 +6,9 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the defense endpoints: listing a user's defense conversations for a problem, starting one, continuing it
-/// with the next turn, rewinding one to an earlier point, and deleting one. Admin-gated, though built per-user;
-/// the turn routes are tightly rate-limited because each turn is several LLM calls.
+/// Maps the defense endpoints: listing a user's defense conversations, for one problem or across every problem,
+/// starting one, continuing it with the next turn, rewinding one to an earlier point, and deleting one. Admin-gated,
+/// though built per-user; the turn routes are tightly rate-limited because each turn is several LLM calls.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -35,6 +35,24 @@ public static class DefenseEndpoints
 
             // Fetch the user's sessions for the problem
             var sessions = await defenseService.ListAsync(userId, problemKey, context.RequestAborted);
+
+            // Return them
+            return Results.Ok(sessions);
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // List all of the user's sessions across every problem
+        app.MapGet($"{SessionsPath}/mine", async (
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseSessionService defenseService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Fetch every session the user holds, newest first
+            var sessions = await defenseService.ListAllAsync(userId, context.RequestAborted);
 
             // Return them
             return Results.Ok(sessions);

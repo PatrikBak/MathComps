@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
@@ -17,18 +18,7 @@ import {
 } from '../model/defense-conversation-model'
 import type { DefenseProblem, DefenseSession } from '../model/defense-types'
 import { deleteSession, listSessions, rewindTurns, submitTurn } from '../services/session-service'
-
-/**
- * Builds the query key for the sessions held about a problem.
- *
- * @param problemKey - The stable key of the problem whose sessions these are.
- *
- * @returns The query key.
- */
-function sessionsQueryKey(problemKey: string) {
-  // One key per problem's session list
-  return ['defenseSessions', problemKey] as const
-}
+import { defenseSessionsQueryKey, invalidateDefenseLists } from './defense-cache'
 
 /**
  * The failed outcome every action reports when the client isn't ready to run it (still loading or signed
@@ -46,6 +36,11 @@ type UseDefenseConversationResult = DefenseConversationState &
   Pick<DefenseConversationModel, 'stop' | 'startNew' | 'resume'> & {
     /** This problem's persisted sessions, oldest first. */
     sessions: DefenseSession[]
+    /**
+     * Whether the conversation asked for on open has had its chance to be resumed: the history has loaded and the
+     * resume either happened or found nothing to resume.
+     */
+    initialResumeSettled: boolean
     /** Whether loading this problem's session history failed. */
     sessionsFailed: boolean
     /** Sends a student turn and folds in the examiner's reply. */
@@ -68,18 +63,24 @@ type UseDefenseConversationResult = DefenseConversationState &
  *
  * @param problem - The problem being defended.
  * @param opener - The examiner's opening line, seeded as the first turn of a fresh conversation.
+ * @param initialSessionId - The id of a specific saved session to resume on open rather than the newest; when it
+ *   isn't among this problem's sessions, none is resumed.
  *
  * @returns The live conversation, its send flow, and this problem's session history.
  */
 export function useDefenseConversation(
   problem: DefenseProblem,
-  opener: string
+  opener: string,
+  initialSessionId: string | undefined
 ): UseDefenseConversationResult {
   // Cache handle for the session history
   const queryClient = useQueryClient()
 
   // The authenticated API client
   const api = useApi({ requireAuth: true })
+
+  // Whose sessions these are, once Clerk knows
+  const { userId, isLoaded: isUserLoaded } = useAuth()
 
   // The ready caller, or null while the client is still loading or the user is signed out. Stable across
   // renders (memoized inside useApi).
@@ -110,7 +111,7 @@ export function useDefenseConversation(
 
   // This problem's persisted sessions, oldest first
   const sessionsQuery = useQuery({
-    queryKey: sessionsQueryKey(problem.key),
+    queryKey: defenseSessionsQueryKey(problem.key, isUserLoaded ? (userId ?? null) : null),
     queryFn: async () => {
       // The client must be ready to fetch
       if (apiCall === null) throw new Error('API not ready')
@@ -118,7 +119,8 @@ export function useDefenseConversation(
       // Fetch the sessions, unwrapped to the list or a throw
       return unwrap(await listSessions(apiCall, problem.key))
     },
-    enabled: apiCall !== null,
+    // Only fetch once the client is ready and the key's user is settled
+    enabled: apiCall !== null && isUserLoaded,
     // Sessions are the user's own recent activity
     ...cachePolicy.userData,
   })
@@ -129,9 +131,8 @@ export function useDefenseConversation(
       new DefenseConversationModel({
         problem,
         opener,
-        // Refresh the session history after any write
-        onSessionsChanged: () =>
-          queryClient.invalidateQueries({ queryKey: sessionsQueryKey(problem.key) }),
+        // Refresh every list the written session appears in
+        onSessionsChanged: () => invalidateDefenseLists(queryClient),
       })
   )
 
@@ -142,13 +143,28 @@ export function useDefenseConversation(
   // Whether the one-time auto-resume has already run
   const didAutoResume = useRef(false)
 
-  // Auto-resume the newest saved defense the first time this problem's history loads, so opening a
-  // problem you have defended before continues that conversation rather than a blank one. Runs once:
-  // afterwards the persisted model keeps wherever the student navigated, whether a fresh chat or a
+  // Whether that resume has settled: the asked-for conversation is open, or known not to be coming
+  const [initialResumeSettled, setInitialResumeSettled] = useState(false)
+
+  // Auto-resume a saved defense the first time this problem's history loads: the one the caller named, else the
+  // newest, so opening a problem you have defended before continues that conversation rather than a blank one.
+  // Runs once: afterwards the persisted model keeps wherever the student navigated, whether a fresh chat or a
   // different session.
   useEffect(() => {
     // Nothing to do until the first successful history load, and never more than once
     if (didAutoResume.current || !sessionsQuery.isSuccess) {
+      return
+    }
+
+    // The chosen saved defense to open, or the newest when none was named
+    const target =
+      initialSessionId !== undefined
+        ? sessionsQuery.data.find((session) => session.id === initialSessionId)
+        : sessionsQuery.data.at(-1)
+
+    // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
+    // refreshed list rather than settling on a stale one
+    if (initialSessionId !== undefined && target === undefined && sessionsQuery.isFetching) {
       return
     }
 
@@ -158,15 +174,21 @@ export function useDefenseConversation(
     // The live conversation state
     const { currentSessionId, isThinking } = model.getSnapshot()
 
-    // The newest saved defense, if any
-    const latest = sessionsQuery.data.at(-1)
-
     // Resume it only on an untouched fresh conversation: an open session or an in-flight turn means
     // the student is mid-interaction and must not be pulled away
-    if (currentSessionId === null && !isThinking && latest !== undefined) {
-      model.resume(latest)
+    if (currentSessionId === null && !isThinking && target !== undefined) {
+      model.resume(target)
     }
-  }, [sessionsQuery.isSuccess, sessionsQuery.data, model])
+
+    // Whatever the outcome, the conversation the caller asked for has had its chance to open
+    setInitialResumeSettled(true)
+  }, [
+    sessionsQuery.isSuccess,
+    sessionsQuery.isFetching,
+    sessionsQuery.data,
+    model,
+    initialSessionId,
+  ])
 
   // Runs a model action against the ready services, or reports the shared not-ready failure when the
   // client is still loading or signed out. Every action's not-ready path collapses here. Stable across
@@ -212,6 +234,7 @@ export function useDefenseConversation(
   return {
     ...state,
     sessions: sessionsQuery.data ?? [],
+    initialResumeSettled,
     sessionsFailed: sessionsQuery.isError,
     send,
     stop: model.stop,

@@ -9,6 +9,7 @@ import { forwardRef, useEffect, useState } from 'react'
 
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
@@ -46,6 +47,8 @@ type UserMenuProps = {
    * state is true, we will show the user menu skeleton to prevent layout shift.
    */
   isAuthenticated: boolean
+  /** Opens the user's defenses. */
+  onOpenDefenses: () => void
 }
 
 /**
@@ -53,7 +56,7 @@ type UserMenuProps = {
  * Handles all auth states: loading, logged out (shows login), and logged in (shows dropdown).
  * Built with Radix UI Dropdown for better accessibility.
  */
-export default function UserMenu({ isAuthenticated }: UserMenuProps) {
+export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuProps) {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
 
@@ -67,6 +70,9 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
 
   // Disable profile menu item if already on profile page
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
+
+  // Whether the viewer is an admin
+  const isAdmin = useIsAdmin()
 
   // Get translations
   const tUserMenu = useTranslations('ui.userMenu')
@@ -143,6 +149,10 @@ export default function UserMenu({ isAuthenticated }: UserMenuProps) {
 
           {/* Menu Items */}
           <div className="py-1.5">
+            {/* The user's defenses, admin-gated */}
+            {isAdmin && (
+              <UserMenuItem type="mathilda" variant="dropdown" onClick={onOpenDefenses} />
+            )}
             <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />
             <UserMenuItem type="signOut" variant="dropdown" />
           </div>

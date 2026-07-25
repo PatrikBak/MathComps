@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
+import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
 
 import type { DefenseSession } from '../model/defense-types'
 
@@ -28,23 +29,6 @@ type DefenseHistoryMenuProps = {
   onSelect: (session: DefenseSession) => void
   /** Deletes a session. */
   onDelete: (sessionId: string) => Promise<void>
-}
-
-/**
- * Strips markdown/math markup to a rough plain-text preview of a turn.
- *
- * @param content - The turn's markdown/math source.
- *
- * @returns The plain-text preview.
- */
-function toPreview(content: string): string {
-  // Drop math delimiters, LaTeX commands, and braces so the line reads as plain text
-  return content
-    .replace(/\$+/g, '')
-    .replace(/\\[a-zA-Z]+/g, '')
-    .replace(/[{}]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
 }
 
 /**
@@ -142,7 +126,9 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                 </span>
                 {/* A glimpse of the conversation */}
                 <span className="w-full truncate text-foreground">
-                  {toPreview(session.turns.find((turn) => turn.role === 'student')?.content ?? '')}
+                  {toPlainTextPreview(
+                    session.turns.find((turn) => turn.role === 'student')?.content ?? ''
+                  )}
                 </span>
               </DropdownMenuItem>
 

@@ -10,7 +10,13 @@ import type {
   HandoutImage,
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
-import type { SectionMetadata } from '@/components/features/handouts/handout-utils'
+import { buildHandoutProblemKey } from '@/components/features/handouts/handout-problem-ref'
+import {
+  buildEnvAnchorId,
+  buildEnvironmentLabels,
+  type HandoutsTranslator,
+  type SectionMetadata,
+} from '@/components/features/handouts/handout-utils'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
@@ -31,11 +37,6 @@ import {
 import { renderBlocks, renderRawContentBlock } from './handout-content-renderer'
 import { blockSequenceToMarkdown } from './handout-content-source'
 import { HandoutActions } from './HandoutActions'
-
-/**
- * Translation function bound to the {@link 'handouts'} message namespace.
- */
-type HandoutsTranslator = ReturnType<typeof useTranslations<'handouts'>>
 
 /**
  * Props for the {@link HandoutDetail} component.
@@ -115,13 +116,7 @@ function renderDocumentSections(
   contentId: string
 ): React.ReactNode {
   // Translate the environment labels
-  const localizedEnvironmentLabelByType: Record<HandoutEnvironmentType, string> = {
-    theorem: t('environments.theorem'),
-    exercise: t('environments.exercise'),
-    example: t('environments.example'),
-    problem: t('environments.problem'),
-    definition: t('environments.definition'),
-  }
+  const localizedEnvironmentLabelByType = buildEnvironmentLabels(t)
 
   // Translate the environment slugs
   const environmentTypeSlugMap: Record<HandoutEnvironmentType, string> = {
@@ -219,11 +214,7 @@ function renderDocumentSections(
               defenseReference.length > 0 ? (
                 <DefenseChatTrigger
                   problem={{
-                    // Keyed by the environment's stable identity (type + document-wide number), so
-                    // sessions survive locale switches and title edits; the `handout:` prefix namespaces
-                    // it against other problem sources that share the correlation key
-                    key: `handout:${contentId}-${contentBlock.type}-${environmentNumber}`,
-                    title: `${environmentBaseTitle} ${environmentNumber}`,
+                    key: buildHandoutProblemKey(contentId, contentBlock.type, environmentNumber),
                     statement: blockSequenceToMarkdown(contentBlock.body),
                     reference: blockSequenceToMarkdown(defenseReference),
                     hints: defenseHints.map(blockSequenceToMarkdown),
@@ -316,7 +307,10 @@ function renderDocumentSections(
             }
 
             return (
-              <div key={`${metadata.label}-env-${contentBlockIndex}`}>
+              <div
+                key={`${metadata.label}-env-${contentBlockIndex}`}
+                id={buildEnvAnchorId(contentBlock.type, environmentNumber)}
+              >
                 <CollapsibleCard
                   type={contentBlock.type}
                   title={mainTitle}

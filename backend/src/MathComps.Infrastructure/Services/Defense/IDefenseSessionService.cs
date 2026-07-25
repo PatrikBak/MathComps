@@ -4,7 +4,8 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// Runs and persists a user's AI-examiner defense conversations: opening a session, continuing it turn by turn (each
-/// turn runs the examiner engine and records its spend), listing a user's sessions for a problem, and deleting one.
+/// turn runs the examiner engine and records its spend), listing a user's sessions for one problem or across every
+/// problem, rewinding one to an earlier point, and deleting one.
 /// Guardrails (input sizes, turn count, per-user spend) are enforced before any model call.
 /// </summary>
 public interface IDefenseSessionService
@@ -40,6 +41,16 @@ public interface IDefenseSessionService
     /// <returns>The user's sessions for that problem.</returns>
     Task<IReadOnlyList<DefenseSessionDto>> ListAsync(
         Guid userId, string problemKey, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Lists all of a user's sessions across every problem, newest first, each summarized to its problem, statement,
+    /// start time, and opening student message.
+    /// </summary>
+    /// <param name="userId">The user whose sessions to list.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The user's sessions across every problem, newest first.</returns>
+    Task<IReadOnlyList<DefenseSessionListItemDto>> ListAllAsync(
+        Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a session and its turns outright. The session must belong to the user.
