@@ -2,19 +2,21 @@
 
 import { ArrowUpRight, Bot, Trash2 } from 'lucide-react'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
-import type { RefObject } from 'react'
+import type { MouseEvent, RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { ENVIRONMENT_TEXT_COLOR } from '@/components/features/handouts/handout-colors'
 import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
 import { buildEnvironmentLabels } from '@/components/features/handouts/handout-utils'
+import { useIsCurrentHandout } from '@/components/features/handouts/use-is-current-handout'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
+import { useDeferredAnchorJump } from '@/hooks/use-deferred-anchor-jump'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 
 import { useMyDefenses } from '../hooks/use-my-defenses'
@@ -45,6 +47,8 @@ type MathildaDefenseRowProps = {
   onDelete: (defense: DefenseSessionListItem) => void
   /** Closes the list. */
   onClose: () => void
+  /** Closes the list and takes the reader to an anchor on the page they are already on. */
+  onJumpInPage: (anchorId: string) => void
 }
 
 /**
@@ -59,6 +63,7 @@ function MathildaDefenseRow({
   onOpen,
   onDelete,
   onClose,
+  onJumpInPage,
 }: MathildaDefenseRowProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
@@ -74,6 +79,24 @@ function MathildaDefenseRow({
 
   // The handout location this defense was about, or null when its handout is unknown in this locale
   const ref = resolveHandoutProblemRef(defense.target, locale)
+
+  // Whether the reader is already reading the handout this defense was about
+  const isOnThisHandout = useIsCurrentHandout(ref?.handoutSlug ?? null)
+
+  // Sends a jump that stays on this page to the scroll, and lets every other one navigate
+  const handleJumpClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    // Another handout, so the link is the one to carry the reader there
+    if (!isOnThisHandout || ref === null) {
+      onClose()
+      return
+    }
+
+    // There is nowhere to navigate to, so keep the page as it is
+    event.preventDefault()
+
+    // Hand the jump over to be made once the list has left
+    onJumpInPage(ref.anchorId)
+  }
 
   // The localized environment word per type, e.g. "Úloha" / "Theorem"
   const environmentLabels = buildEnvironmentLabels(tHandouts)
@@ -134,7 +157,7 @@ function MathildaDefenseRow({
               href={`${ROUTES.HANDOUTS}/${ref.handoutSlug}#${ref.anchorId}`}
               plain
               aria-label={t('goToHandout')}
-              onClick={onClose}
+              onClick={handleJumpClick}
               className={cn(
                 'flex size-11 items-center justify-center rounded-md transition-colors hover:bg-foreground/10 hover:text-foreground',
                 FOCUS_RING_CLASS
@@ -187,6 +210,9 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   // The defense awaiting delete confirmation, or null
   const [toDelete, setToDelete] = useState<DefenseSessionListItem | null>(null)
 
+  // A jump to a problem on the page behind the modal, made once the modal is out of its way
+  const { armJump, runArmedJump } = useDeferredAnchorJump()
+
   // Whether the conversation view is showing instead of the list
   const inConversation = selected !== null
 
@@ -217,6 +243,15 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
 
     // Close the feature
     onClose()
+  }
+
+  // Arms a jump to a problem on the page behind the modal, closing to get out of its way
+  const handleJumpInPage = (anchorId: string) => {
+    // Note where the reader is headed
+    armJump(anchorId)
+
+    // Close the feature
+    handleClose()
   }
 
   // Deletes the armed defense
@@ -268,6 +303,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
         padded={!inConversation}
         tall={inConversation}
         className={inConversation ? undefined : 'max-w-2xl'}
+        afterLeave={runArmedJump}
       >
         {selected !== null && conversationProblem !== null ? (
           // The real conversation, reopened to the chosen session and continue-only
@@ -323,6 +359,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
                 onOpen={handleOpen}
                 onDelete={setToDelete}
                 onClose={handleClose}
+                onJumpInPage={handleJumpInPage}
               />
             ))}
           </div>

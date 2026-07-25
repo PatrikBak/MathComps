@@ -43,6 +43,8 @@ type ModalProps = {
   tall?: boolean
   /** Accessible name for the dialog when it renders its own header rather than a `title` */
   ariaLabel?: string
+  /** Called once the modal has finished leaving and no longer holds the page */
+  afterLeave?: () => void
 }
 
 /**
@@ -59,12 +61,13 @@ export function Modal({
   padded = true,
   tall = false,
   ariaLabel,
+  afterLeave,
 }: ModalProps) {
   // Get translations for modal
   const tModal = useTranslations('ui.modal')
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
+    <Transition appear show={isOpen} as={Fragment} afterLeave={afterLeave}>
       <Dialog as="div" aria-label={ariaLabel} className="relative z-50" onClose={onClose}>
         {/* Backdrop with blur */}
         <TransitionChild
