@@ -99,51 +99,63 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
         <DropdownMenuContent align="end" className="w-72">
           {/* One row per session: resume by selecting it, delete by the overlaid control or the
               Delete key on the focused row */}
-          {ordered.map((session) => (
-            <div key={session.id} className="relative">
-              {/* Resume the session by selecting the row */}
-              <DropdownMenuItem
-                onSelect={() => onSelect(session)}
-                onKeyDown={(event) => {
-                  // Delete on the focused row arms the confirmation, the keyboard path to the
-                  // pointer-only overlay control
-                  if (event.key === 'Delete') {
-                    event.preventDefault()
-                    askToDelete(session)
-                  }
-                }}
-                className={cn(
-                  'flex-col items-start gap-0.5 pr-12',
-                  session.id === currentSessionId && 'bg-brand/10'
-                )}
-              >
-                {/* When the session was started: its first turn's stamp */}
-                <span className="text-[11px] text-muted">
-                  {format.dateTime(new Date(session.turns[0].createdAt), {
-                    dateStyle: 'short',
-                    timeStyle: 'short',
-                  })}
-                </span>
-                {/* A glimpse of the conversation */}
-                <span className="w-full truncate text-foreground">
-                  {toPlainTextPreview(
-                    session.turns.find((turn) => turn.role === 'student')?.content ?? ''
-                  )}
-                </span>
-              </DropdownMenuItem>
+          {ordered.map((session) => {
+            // The student's first message, absent while nothing has been said in the conversation yet
+            const firstStudentMessage = session.turns.find(
+              (turn) => turn.role === 'student'
+            )?.content
 
-              {/* Delete the session, overlaid so its click never reaches the row's resume */}
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('deleteSession')}
-                onClick={() => askToDelete(session)}
-                className="absolute inset-y-0 right-0 h-auto w-11 rounded-md hover:bg-error/10 hover:text-error"
-              >
-                <Trash2 size={15} />
-              </Button>
-            </div>
-          ))}
+            return (
+              <div key={session.id} className="relative">
+                {/* Resume the session by selecting the row */}
+                <DropdownMenuItem
+                  onSelect={() => onSelect(session)}
+                  onKeyDown={(event) => {
+                    // Delete on the focused row arms the confirmation, the keyboard path to the
+                    // pointer-only overlay control
+                    if (event.key === 'Delete') {
+                      event.preventDefault()
+                      askToDelete(session)
+                    }
+                  }}
+                  className={cn(
+                    'flex-col items-start gap-0.5 pr-12',
+                    session.id === currentSessionId && 'bg-brand/10'
+                  )}
+                >
+                  {/* When the session was started: its first turn's stamp */}
+                  <span className="text-[11px] text-muted">
+                    {format.dateTime(new Date(session.turns[0].createdAt), {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                  {/* A glimpse of the conversation, or that nothing has been said in it yet */}
+                  <span
+                    className={cn(
+                      'w-full truncate',
+                      firstStudentMessage === undefined ? 'italic text-muted' : 'text-foreground'
+                    )}
+                  >
+                    {firstStudentMessage === undefined
+                      ? t('noReplyYet')
+                      : toPlainTextPreview(firstStudentMessage)}
+                  </span>
+                </DropdownMenuItem>
+
+                {/* Delete the session, overlaid so its click never reaches the row's resume */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t('deleteSession')}
+                  onClick={() => askToDelete(session)}
+                  className="absolute inset-y-0 right-0 h-auto w-11 rounded-md hover:bg-error/10 hover:text-error"
+                >
+                  <Trash2 size={15} />
+                </Button>
+              </div>
+            )
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
 
