@@ -36,7 +36,8 @@ function isAtBottom(region: HTMLDivElement): boolean {
  * per-item dependency is needed.
  *
  * Pinned-ness is recorded as the reader scrolls, BEFORE any growth, so a new block taller than the
- * threshold cannot read as "scrolled up" and break the follow.
+ * threshold cannot read as "scrolled up" and break the follow. Content dropping away re-pins on its
+ * own, since the reader can end up back at the bottom without ever scrolling there.
  *
  * @returns The region and content refs, whether the reader has scrolled up, and a jump-to-bottom control.
  */
@@ -49,6 +50,15 @@ export function useFollowTail(): UseFollowTailResult {
   // Whether the reader sat at the bottom after their last scroll; starts pinned so the first content
   // lands scrolled into view
   const pinnedRef = useRef(true)
+
+  // The store's change notifier
+  const notifyRef = useRef<() => void>(() => {})
+
+  // Records pinned-ness and announces it
+  const setPinned = useCallback((pinned: boolean) => {
+    pinnedRef.current = pinned
+    notifyRef.current()
+  }, [])
 
   // Binds the region, re-pinning first: a freshly mounted region starts at its tail
   const scrollRef = useCallback((element: HTMLDivElement | null) => {
@@ -72,23 +82,23 @@ export function useFollowTail(): UseFollowTailResult {
     region.scrollTop = region.scrollHeight
 
     // A programmatic jump re-pins even before its scroll event lands
-    pinnedRef.current = true
-  }, [region])
+    setPinned(true)
+  }, [region, setPinned])
 
   // Track the reader's position on every scroll. Hand-rolled listener rather than a @mantine/hooks
   // one: useSyncExternalStore needs the add/remove pair returned as a single subscribe function
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
+      // Route every recorded pin to the current subscriber
+      notifyRef.current = onStoreChange
+
       // Nothing to watch until the region mounts
       if (!region) {
         return () => {}
       }
 
       // Record pinned-ness at scroll time, so growth is judged against the pre-growth position
-      const onScroll = () => {
-        pinnedRef.current = isAtBottom(region)
-        onStoreChange()
-      }
+      const onScroll = () => setPinned(isAtBottom(region))
 
       // Listen for scrolls, passively since we never block them
       region.addEventListener('scroll', onScroll, { passive: true })
@@ -96,7 +106,7 @@ export function useFollowTail(): UseFollowTailResult {
       // Drop the listener on teardown
       return () => region.removeEventListener('scroll', onScroll)
     },
-    [region]
+    [region, setPinned]
   )
 
   // Whether the reader has left the bottom, per their last recorded scroll position
@@ -112,11 +122,19 @@ export function useFollowTail(): UseFollowTailResult {
       return
     }
 
-    // Re-pin to the bottom whenever the content grows, unless the reader had scrolled up before the
-    // growth; the observer also fires once on observe, which lands the initial content in view
+    // Follow the bottom whenever the content resizes, unless the reader had scrolled up before it
+    // grew; the observer also fires once on observe, which lands the initial content in view
     const observer = new ResizeObserver(() => {
-      // Reading back up the region is not interrupted by new content
+      // Reading back up the region is not interrupted by new content. Content dropping away is the
+      // exception: it can put the bottom back within reach without moving the scroll position, so no
+      // scroll event records it. Re-pinning only, so growth still can't pull the reader down.
       if (!pinnedRef.current) {
+        // The bottom came back to the reader
+        if (isAtBottom(region)) {
+          setPinned(true)
+        }
+
+        // A reader still up the region stays there
         return
       }
 
@@ -129,7 +147,7 @@ export function useFollowTail(): UseFollowTailResult {
 
     // Stop observing on unmount
     return () => observer.disconnect()
-  }, [region, content])
+  }, [region, content, setPinned])
 
   // The region and content refs plus the reader-aware scroll state
   return { scrollRef, contentRef: setContent, isScrolledUp, scrollToBottom }

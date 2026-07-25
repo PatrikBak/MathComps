@@ -1,7 +1,7 @@
 'use client'
 
 import { Resizable } from 're-resizable'
-import { useEffect, useState } from 'react'
+import { useEffect, useImperativeHandle, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
@@ -58,6 +58,14 @@ export function showsToolbarItem(config: ToolbarConfig | undefined, item: Toolba
 }
 
 /**
+ * Handle exposed by the {@link RichMathEditor} component.
+ */
+export type RichMathEditorRef = {
+  /** Puts the cursor in the editor. */
+  focus: () => void
+}
+
+/**
  * Props for the {@link RichMathEditor} component.
  */
 type RichMathEditorProps = {
@@ -73,11 +81,6 @@ type RichMathEditorProps = {
   placeholder?: string
   /** Whether to auto-focus (default: false) */
   autoFocus?: boolean
-  /**
-   * A token whose every change puts the cursor back in the editor, for a composer that outlives what it writes
-   * into: mounting once means {@link autoFocus} fires only the first time.
-   */
-  focusKey?: string | number
   /** Additional className for the wrapper */
   className?: string
   /** Callback when the content validity changes */
@@ -92,6 +95,8 @@ type RichMathEditorProps = {
   autoExpandOnMobile?: boolean
   /** Whether the editor is in a loading state (e.g. sending) */
   isLoading?: boolean
+  /** Handle onto the editor's imperative controls */
+  ref?: React.Ref<RichMathEditorRef>
 }
 
 /**
@@ -104,7 +109,6 @@ export function RichMathEditor({
   onChange,
   placeholder = '',
   autoFocus = false,
-  focusKey,
   className,
   onValidChange,
   onSend,
@@ -112,6 +116,7 @@ export function RichMathEditor({
   onStop,
   autoExpandOnMobile,
   isLoading = false,
+  ref,
 }: RichMathEditorProps) {
   // All the logic is in the view-model and provided to the view
   const viewModel = useEditorModel({ value, onChange, onSend, onCancel })
@@ -127,16 +132,8 @@ export function RichMathEditor({
     handleKeyDown,
   } = viewModel
 
-  // Take the cursor back whenever the caller says what the editor writes into has changed
-  useEffect(() => {
-    // No token means the caller never asks for it
-    if (focusKey === undefined) {
-      return
-    }
-
-    // Put the cursor in the text area
-    textareaRef.current?.focus()
-  }, [focusKey, textareaRef])
+  // Hand the caller the cursor on demand; autoFocus only offers it at mount
+  useImperativeHandle(ref, () => ({ focus: () => textareaRef.current?.focus() }), [textareaRef])
 
   // Track modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
