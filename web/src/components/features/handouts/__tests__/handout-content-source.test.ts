@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { blockSequenceToMarkdown } from './handout-content-source'
-import type { RawContentBlock } from './handout-content-types'
+import { blockSequenceToMarkdown } from '../handout-content-source'
+import type { RawContentBlock } from '../handout-content-types'
 
 describe('blockSequenceToMarkdown', () => {
   it('passes plain text through', () => {

@@ -1,3 +1,4 @@
+import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 import { buildApiUrl } from '@/components/shared/utils/url-utils'
 
 /**
@@ -6,14 +7,17 @@ import { buildApiUrl } from '@/components/shared/utils/url-utils'
 const SESSIONS_PATH = '/defense/sessions'
 
 /**
- * Builds the URL for listing a problem's defense sessions.
+ * Builds the URL for listing a handout environment's defense sessions.
  *
- * @param problemKey - The stable key of the problem whose sessions to list.
+ * @param target - The handout environment whose sessions to list.
  * @returns The list URL.
  */
-export function getDefenseSessionsUrl(problemKey: string): string {
-  // The list endpoint, filtered to the problem
-  return buildApiUrl(SESSIONS_PATH, { problemKey })
+export function getDefenseSessionsUrl(target: HandoutEnvironmentTarget): string {
+  // The list endpoint, filtered to the environment
+  return buildApiUrl(SESSIONS_PATH, {
+    handoutContentId: target.handoutContentId,
+    environmentId: target.environmentId,
+  })
 }
 
 /**

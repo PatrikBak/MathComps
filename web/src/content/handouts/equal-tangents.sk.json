@@ -104,6 +104,7 @@
             },
             {
               "type": "theorem",
+              "id": "two-tangents-from-point",
               "body": [
                 {
                   "type": "paragraph",
@@ -168,6 +169,7 @@
             },
             {
               "type": "theorem",
+              "id": "external-tangent-two-circles",
               "body": [
                 {
                   "type": "paragraph",
@@ -313,6 +315,7 @@
             },
             {
               "type": "theorem",
+              "id": "internal-tangent-two-circles",
               "body": [
                 {
                   "type": "paragraph",
@@ -431,6 +434,7 @@
             },
             {
               "type": "theorem",
+              "id": "incircle-touch-points-triangle",
               "body": [
                 {
                   "type": "paragraph",
@@ -531,6 +535,7 @@
             },
             {
               "type": "theorem",
+              "id": "right-triangle-inradius-formula",
               "body": [
                 {
                   "type": "paragraph",
@@ -591,6 +596,7 @@
             },
             {
               "type": "theorem",
+              "id": "excircle-opposite-vertex-tangent-length",
               "body": [
                 {
                   "type": "paragraph",
@@ -700,6 +706,7 @@
             },
             {
               "type": "theorem",
+              "id": "excircle-remaining-vertices-tangent-lengths",
               "body": [
                 {
                   "type": "paragraph",
@@ -746,6 +753,7 @@
             },
             {
               "type": "theorem",
+              "id": "incircle-excircle-midpoint-symmetry",
               "body": [
                 {
                   "type": "paragraph",
@@ -801,6 +809,7 @@
             },
             {
               "type": "definition",
+              "id": "tangential-quadrilateral-definition",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -851,6 +860,7 @@
             },
             {
               "type": "theorem",
+              "id": "quadrilateral-opposite-side-sums",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -903,6 +913,7 @@
           "content": [
             {
               "type": "problem",
+              "id": "altitude-foot-incircle-diameters",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1109,6 +1120,7 @@
             },
             {
               "type": "problem",
+              "id": "parallelogram-midpoint-tangential-quadrilateral",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1366,6 +1378,7 @@
             },
             {
               "type": "problem",
+              "id": "moving-tangent-point-on-arc",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1656,6 +1669,7 @@
             },
             {
               "type": "problem",
+              "id": "diagonal-common-touch-point",
               "difficulty": 0,
               "body": [
                 {
@@ -1825,6 +1839,7 @@
             },
             {
               "type": "problem",
+              "id": "three-excircle-points-on-line",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2022,6 +2037,7 @@
             },
             {
               "type": "problem",
+              "id": "corner-triangles-incircle-tangents",
               "difficulty": 0,
               "body": [
                 {
@@ -2260,6 +2276,7 @@
             },
             {
               "type": "problem",
+              "id": "parallelogram-diagonal-touch-points",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2544,6 +2561,7 @@
             },
             {
               "type": "problem",
+              "id": "split-triangle-incircle-touch-points",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2978,6 +2996,7 @@
             },
             {
               "type": "problem",
+              "id": "excircle-quadrilateral-side-relation",
               "difficulty": 0,
               "body": [
                 {
@@ -3243,6 +3262,7 @@
             },
             {
               "type": "problem",
+              "id": "cevian-points-tangent-incircles",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3583,6 +3603,7 @@
             },
             {
               "type": "problem",
+              "id": "checkerboard-quadrilateral-grid",
               "difficulty": 0,
               "body": [
                 {
@@ -3929,6 +3950,7 @@
             },
             {
               "type": "problem",
+              "id": "inscribed-angle-circle-tangent-point",
               "difficulty": 0,
               "body": [
                 {
@@ -4395,6 +4417,7 @@
             },
             {
               "type": "problem",
+              "id": "common-tangent-locus-point",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4865,6 +4888,7 @@
             },
             {
               "type": "problem",
+              "id": "tangential-quadrilateral-incenter-circle",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -5238,6 +5262,7 @@
             },
             {
               "type": "problem",
+              "id": "touch-points-reflected-through-incenter",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -5615,6 +5640,7 @@
             },
             {
               "type": "problem",
+              "id": "unit-length-points-perimeter-split",
               "difficulty": 2,
               "body": [
                 {
@@ -6000,6 +6026,7 @@
             },
             {
               "type": "problem",
+              "id": "circumscribed-hexagon-diagonals-concurrent",
               "difficulty": 2,
               "title": {
                 "type": "paragraph",

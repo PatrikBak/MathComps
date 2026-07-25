@@ -4,7 +4,7 @@ namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
 /// Anchor entity for file-based handouts. Created on-demand when first
-/// referenced (e.g., when first comment is posted).
+/// referenced (e.g., when a comment or a defense is first posted/opened against it).
 /// </summary>
 public class Handout
 {
@@ -23,4 +23,9 @@ public class Handout
     /// Comments on this handout.
     /// </summary>
     public ICollection<HandoutComment> Comments { get; } = [];
+
+    /// <summary>
+    /// The handout's environments referenced by a defense.
+    /// </summary>
+    public ICollection<HandoutEnvironment> Environments { get; } = [];
 }

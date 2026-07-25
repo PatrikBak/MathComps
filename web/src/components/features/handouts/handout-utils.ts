@@ -1,10 +1,13 @@
 import type { useTranslations } from 'next-intl'
 
-import type { Document } from '@/components/features/handouts/handout-content-types'
+import {
+  type Document,
+  type EnvironmentBlock,
+  type HandoutEnvironmentType,
+  isEnvironmentBlock,
+} from '@/components/features/handouts/handout-content-types'
 import { SectionNumberingGenerator } from '@/components/shared/utils/section-numbering-utils'
 import { slugify } from '@/components/shared/utils/string-utils'
-
-import type { HandoutEnvironmentType } from './handout-content-types'
 
 /**
  * A translator bound to the handouts namespace.
@@ -32,20 +35,66 @@ export function buildEnvironmentLabels(
 }
 
 /**
- * Builds the DOM anchor id for a handout environment (a problem, theorem, ...), from its type and its document-wide
- * per-type number. Both are language-independent, so a deep link to an environment holds in every locale.
+ * Builds the DOM anchor id for a handout environment (a problem, theorem, ...) from its permanent id: unlike a
+ * position-derived anchor, it survives reordering, retyping, and locale switches.
  *
- * @param type - The environment's type.
- * @param environmentNumber - The environment's document-wide, per-type number.
+ * @param environmentId - The environment's permanent id.
  *
- * @returns The anchor id, e.g. `env-problem-4`.
+ * @returns The anchor id, e.g. `env-tower-of-hanoi`.
  */
-export function buildEnvAnchorId(
-  type: HandoutEnvironmentType,
-  environmentNumber: number | string
-): string {
-  // Namespaced by `env-` so it never collides with the section-slug anchors already on the page
-  return `env-${type}-${environmentNumber}`
+export function buildEnvironmentAnchorId(environmentId: string): string {
+  // The `env-` prefix namespaces it against the section-slug anchors on the same page, and guarantees a
+  // leading letter so the anchor is a valid CSS selector whatever the id's first character is
+  return `env-${environmentId}`
+}
+
+/**
+ * One environment of a document in reading order, paired with the document-wide per-type number the page
+ * displays for it. The number is display only — identity is the block's id — but the counter rule lives here so
+ * every caller computes the same number for a given environment. The block travels along rather than just its
+ * id, so a caller rendering the document can look its number up by identity and never depend on ids being
+ * distinct (a duplicate is the content validator's business, not the renderer's).
+ */
+export type DocumentEnvironment = {
+  /** The environment block itself, as it sits in the document. */
+  block: EnvironmentBlock
+  /** The document-wide, per-type number the page displays for it. */
+  number: number
+}
+
+/**
+ * Lists every environment of a document in reading order, each carrying the number the page displays for it: a
+ * per-type counter running across the whole document (not reset per section), pre-incremented at each environment.
+ *
+ * @param documentContent - The document to walk.
+ *
+ * @returns One entry per environment, in document order.
+ */
+export function listDocumentEnvironments(documentContent: Document): DocumentEnvironment[] {
+  // Running counters per environment type — shared across the whole document, not reset per section
+  const counters: Record<HandoutEnvironmentType, number> = {
+    theorem: 0,
+    exercise: 0,
+    example: 0,
+    problem: 0,
+    definition: 0,
+  }
+
+  // Walk every section's blocks in order, keeping only the environments
+  return documentContent.sections.flatMap((section) =>
+    section.text.content.flatMap((block) => {
+      // Skip anything that isn't a numbered environment
+      if (!isEnvironmentBlock(block)) {
+        return []
+      }
+
+      // Pre-increment claims the next number for this environment type
+      const number = ++counters[block.type]
+
+      // This environment, with the number just claimed
+      return [{ block, number }]
+    })
+  )
 }
 
 /**

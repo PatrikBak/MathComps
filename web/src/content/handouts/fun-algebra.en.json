@@ -37,6 +37,7 @@
             },
             {
               "type": "problem",
+              "id": "nested-binary-operation",
               "difficulty": 0,
               "body": [
                 {
@@ -301,6 +302,7 @@
             },
             {
               "type": "problem",
+              "id": "zero-sum-fraction-identity",
               "difficulty": 0,
               "body": [
                 {
@@ -555,6 +557,7 @@
             },
             {
               "type": "problem",
+              "id": "constrained-fraction-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -779,6 +782,7 @@
             },
             {
               "type": "problem",
+              "id": "unit-product-fraction-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -981,6 +985,7 @@
             },
             {
               "type": "problem",
+              "id": "sum-one-triple-product",
               "difficulty": 0,
               "body": [
                 {
@@ -1134,6 +1139,7 @@
             },
             {
               "type": "problem",
+              "id": "reciprocal-sum-odd-powers",
               "difficulty": 0,
               "body": [
                 {
@@ -1337,6 +1343,7 @@
             },
             {
               "type": "problem",
+              "id": "cyclic-reciprocal-equalities",
               "difficulty": 0,
               "body": [
                 {
@@ -1574,6 +1581,7 @@
             },
             {
               "type": "problem",
+              "id": "cyclic-square-difference-system",
               "difficulty": 0,
               "body": [
                 {
@@ -1778,6 +1786,7 @@
             },
             {
               "type": "problem",
+              "id": "sum-of-eighth-powers",
               "difficulty": 1,
               "body": [
                 {
@@ -2109,6 +2118,7 @@
             },
             {
               "type": "problem",
+              "id": "real-quartic-equation",
               "difficulty": 1,
               "body": [
                 {
@@ -2224,6 +2234,7 @@
             },
             {
               "type": "problem",
+              "id": "triple-quadratic-product-equation",
               "difficulty": 2,
               "body": [
                 {
@@ -2548,6 +2559,7 @@
             },
             {
               "type": "problem",
+              "id": "square-differences-divisibility",
               "difficulty": 2,
               "body": [
                 {

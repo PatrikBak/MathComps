@@ -25,6 +25,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 
 \sec Úlohy
 
+\EnvId{digit-product-sum-70}
 \Problem{0}{}{
 	Určete všechna přirozená čísla $n$, pro která platí
 	$$
@@ -45,6 +46,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Postupně pro $a=1,2,\ldots,7$ dostaneme $b=30,\ 50/3,\ 10,\ 6,\ 20/6,\ 10/7,\ 0$. Číslicí je $b$ pouze při $a=4$ (což dává $n=46$) a~při $a=7$ (což dává $n=70$). Zkouškou ověříme $46+4\cdot 6=70$ a~$70+7\cdot 0=70$, takže řešením jsou $n=46$ a~$n=70$.
 }
 
+\EnvId{inflatable-number-axxb}
 \Problem{0}{}{
 	Dvojciferné číslo $\overline{ab}$ nazveme \textit{nafukovatelné}, pokud z něj po přičtení 990-násobku vhodného jednociferného čísla získáme čtyřciferné číslo tvaru $\overline{axxb}$ s~nenulovou číslicí~$x$. Kolik nafukovatelných čísel existuje?
 }{
@@ -65,6 +67,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Jelikož $x$ je nenulová číslice, levá strana musí být kladným násobkem devítky nepřevyšujícím~$9$, takže nutně $y-a=1$ a~$x=9$. Pro $a$ máme možnosti $1,2,\ldots,8$ ($a=9$ by dávalo dvojciferné $y$), za~$b$ pak můžeme volit libovolnou číslici. Nafukovatelných čísel je proto $8\cdot 10=80$.
 }
 
+\EnvId{four-digit-halves-difference-one}
 \Problem{0}{}{
 	Najděte všechna čtyřciferná čísla $\overline{abcd}$ s~ciferným součtem~12 taková, že $\overline{ab}-\overline{cd}=1$.
 }{
@@ -91,6 +94,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Jediným řešením je $\overline{abcd}=2019$ a~skutečně $20-19=1$ a~$2+0+1+9=12$.
 }
 
+\EnvId{insert-between-20-and-16}
 \Problem{0}{}{
 	Zjistěte, jaké nejmenší kladné celé číslo lze vložit mezi dvojčíslí $20$ a $16$ tak, aby výsledné číslo bylo násobkem čísla $2016$.
 }{
@@ -107,6 +111,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Toto zkoušení si můžeme zjednodušit pomocí kritéria dělitelnosti~16, jelikož $16 \mid 2016$. Čísla $20916$, $201816$, $202716$ totiž podle svého posledního čtyřčíslí nejsou dělitelná 16.
 }
 
+\EnvId{digit-factorial-sum}
 \Problem{0}{}{
 	Najděte všechna trojciferná čísla, která jsou součtem faktoriálů svých číslic.
 }{
@@ -139,6 +144,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Zkouškou $1!+4!+5!=1+24+120=145$ ověříme, že vyhovuje. Hledaným číslem je jedině $145$.
 }
 
+\EnvId{perfect-square-repeated-digit-pairs}
 \Problem{0}{}{
 	Najděte všechna čtyřciferná čísla taková, že jsou druhou mocninou celého čísla, a~zároveň jejich první číslice je stejná jako druhá a~třetí je stejná jako čtvrtá.
 }{
@@ -165,6 +171,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Potřebujeme, aby $9a+1$ byla druhou mocninou celého čísla. Postupně ověříme, že to pro nenulové číslice nastává jen pro $a=7$, čemuž odpovídá $b=4$. Jediné vyhovující číslo je $7744=88^2$.
 }
 
+\EnvId{pandigital-prime-ten-digits}
 \Problem{0}{}{
 	Najděte největší prvočíslo složené z~10 různých číslic.
 }{
@@ -179,6 +186,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	což je dělitelné~$9$. Každé takové číslo je tedy dělitelné~$9$, a~jelikož je zjevně větší než~$9$, nemůže být prvočíslem. Žádné prvočíslo složené z~10 různých číslic tedy neexistuje.
 }
 
+\EnvId{even-length-palindrome-divisible-11}
 \Problem{0}{}{
 	Zdůvodněte, že každý palindrom se sudým počtem číslic je dělitelný~11.
 }{
@@ -191,6 +199,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	což je dělitelné~$11$.
 }
 
+\EnvId{digit-sum-of-concatenation}
 \Problem{0}{}{
 	Číslo $123456789101112\dots 100$ postupně nahrazujeme ciferným součtem, dokud nezískáme jednociferné číslo. Jaké číslo nám zbyde?
 }{
@@ -205,6 +214,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Stačí tedy určit zbytek čísla $N=123456789101112\dots 100$ po~dělení devíti. Číslo $N$ vzniklo zřetězením čísel od~$1$ po~$100$. Pokud vynecháme~100, tak každá číslice byla použita 20-krát: 10-krát na místě desítek a~10-krát na místě jednotek -- ciferný součet takového čísla je $20(1+\cdots+9)=20 \cdot 45$, takže je dělitelný~9. My však máme ještě~100, takže celkový zbytek po dělení~9 našeho součtu je~1.
 }
 
+\EnvId{digits-1-6-divisible-11}
 \Problem{0}{}{
 	Existuje číslo dělitelné~11 složené z~číslic 1, 2, 3, 4, 5 a~6 tak, že každou použijeme právě jednou?
 }{
@@ -223,6 +233,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Součet je lichý, takže i rozdíl $s_l-s_s$ musí být lichý, a~tedy $s_l-s_s\neq 0$. Navíc každý ze součtů $s_s$, $s_l$ je součtem tří různých číslic z~$\{1,2,3,4,5,6\}$, takže i $s_s$ i $s_l$ jsou alespoň $1+2+3$ a~nejvýše $4+5+6$. Z~toho $|s_l-s_s|\le 15-6=9<11$, takže $11\nmid s_l-s_s$. Hledané číslo tedy neexistuje.
 }
 
+\EnvId{reverse-subtract-reverse-add}
 \Problem{0}{}{
 	Mysli si trojciferné číslo, které neobsahuje nulu a má první a poslední číslici různou. Napiš ho pozpátku a odečti menší číslo od většího. Vzniklé číslo případně doplň zleva nulou na trojciferné, znovu přepiš pozpátku a tato dvě čísla sečti. Jaké nejmenší a~jaké největší číslo jsme mohli dostat?
 }{
@@ -256,6 +267,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Ve všech případech tedy vyjde stejné číslo, takže nejmenší i největší možné číslo, které jsme mohli dostat, je $1089$.
 }
 
+\EnvId{remove-leading-six-25x-smaller}
 \Problem{0}{}{
 	Najděte všechna čísla s~první číslicí~6 taková, že po jejím odstranění vznikne 25-krát menší číslo.
 }{
@@ -280,6 +292,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Vyhovuje tedy nekonečně mnoho čísel: $625, 6250, 62500, \ldots$
 }
 
+\EnvId{fours-eights-nine-perfect-square}
 \Problem{0}{}{
 	Dokažte, že číslo $\underbrace{44\dots4}_{n+1}\underbrace{88\dots8}_{n}9$ je pro každé celé nezáporné číslo~$n$ čtvercem přirozeného čísla.
 }{
@@ -313,6 +326,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	$$
 }
 
+\EnvId{last-digit-given-predecessor-seven}
 \Problem{0}{}{
 	Je dáno přirozené číslo $n$. Určete poslední číslici čísla $n^2$, pokud víte, že~7 je jeho předposlední číslice.
 }{
@@ -347,6 +361,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Lichou desítkovou číslici dávají pouze $y=4$ a~$y=6$, přičemž v~obou případech je poslední číslice $y^2$ rovna $6$. Poslední číslice čísla $n^2$ je tedy~$6$.
 }
 
+\EnvId{powers-of-two-digit-rearrangement}
 \Problem{1}{}{
 	Existují dvě různé mocniny dvojky se stejným počtem číslic, z nichž by se jedna dala získat pouze přeuspořádáním číslic té druhé?
 }{
@@ -373,6 +388,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Taková dvojice mocnin dvou tedy neexistuje.
 }
 
+\EnvId{odd-digit-number-divisible-5n}
 \Problem{1}{}{
 	Pro která přirozená $n$ existuje $n$-ciferné číslo dělitelné $5^n$, které má všechny číslice liché?
 }{
@@ -389,6 +405,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	takže potřebujeme $5\mid d\cdot 2^n+m$. Jelikož $\{1,3,5,7,9\}\equiv\{1,3,0,2,4\}\pmod 5$ tvoří úplnou soustavu zbytků a~$\gcd(2^n,5)=1$, hodnoty $d\cdot 2^n\pmod 5$ při $d\in\{1,3,5,7,9\}$ proběhnou taktéž všechny zbytky modulo~$5$. Právě jedno $d$ tedy splňuje žádanou dělitelnost; číslice $d$ je lichá a~nenulová, takže $N_{n+1}$ je $(n+1)$-ciferné s~lichými číslicemi a~dělitelné $5^{n+1}$. Indukce tím končí a~vyhovující číslo existuje pro každé přirozené~$n$.
 }
 
+\EnvId{digit-appending-sequence-composites}
 \Problem{1}{}{
 	Uvažujme následující proces: Začneme s~libovolným přirozeným číslem $a_1$ a~vygenerujeme posloupnost $a_1,a_2,\dots$ tak, že $a_{n+1}$ dostaneme z~$a_n$ přilepením číslice různé od~9. Dokažte, že v~této posloupnosti bude nevyhnutelně existovat nekonečně mnoho složených čísel.
 }{
@@ -416,6 +433,7 @@ Ukážeme si základní tipy a~triky používané v~úlohách s~číslicemi.
 	Stačí nyní najít takové $n\ge 1$, pro~které $3a\mid 10^n-1$. Jelikož $\gcd(10,3a)=1$, podle Eulerovy věty stačí zvolit $n=\varphi(3a)$. Pro takové $n$ platí $a\mid\frac{10^n-1}{3}$, a~zároveň $a\mid a\cdot 10^n$, takže celé číslo je dělitelné~$a$ a~zjevně je od~$a$ větší. Je tedy složené, což je spor.
 }
 
+\EnvId{base-four-square-ones-twos}
 \Problem{2}{}{
 	Dokažte, že existuje nekonečně mnoho kladných celých čísel $n$ takových, že $n^2$ zapsané ve~čtyřkové soustavě obsahuje pouze číslice $1$ a~$2$.
 }{

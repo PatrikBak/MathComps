@@ -83,6 +83,16 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         public bool ForceAsy { get; set; }
 
         /// <summary>
+        /// Whether to skip regenerating the committed environment-id index. For CI, where the
+        /// frontend's generator script needs <c>web/</c> dependencies that job never installs —
+        /// the index's own freshness is instead verified independently by the frontend job's
+        /// <c>handouts:validate</c> check.
+        /// </summary>
+        [CommandOption("--skip-index")]
+        [Description("Skip regenerating handout-env-index.json")]
+        public bool SkipIndex { get; set; }
+
+        /// <summary>
         /// Path to the error log file for compiler output on failure.
         /// </summary>
         [CommandOption("--error-log")]
@@ -328,6 +338,15 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
 
         // All handout files processed. The upload ledger persists itself when the uploader is disposed at exit.
 
+        // Keep the generated environment-id index in sync with whatever content JSONs this run just wrote. Always
+        // a full rebuild rather than one scoped to this run's handouts — it's cheap (274 environments, ~20 KB
+        // today), and a scoped update would risk leaving some other handout's numbers stale.
+        var indexRegenerationFailed = false;
+        if (!settings.SkipIndex)
+            indexRegenerationFailed = !await RegenerateEnvironmentIndexAsync();
+        else
+            AnsiConsole.MarkupLine("[yellow]⚠ Environment index regeneration skipped (--skip-index)[/]");
+
         // Report unknown commands if any were found.
         if (allUnknownCommands.Count != 0)
         {
@@ -352,7 +371,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         }
 
         // Determine if there were any failures
-        var hasErrors = failedFiles.Count > 0 || allUnknownCommands.Count > 0;
+        var hasErrors = failedFiles.Count > 0 || allUnknownCommands.Count > 0 || indexRegenerationFailed;
 
         // Final success message if no errors or unknown commands were found.
         if (!hasErrors)
@@ -511,6 +530,36 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
 
         // Success message
         AnsiConsole.MarkupLine($"  [green]✓ Compiled:[/] {Markup.Escape(Path.ChangeExtension(texFile.Name, ".pdf"))}");
+    }
+
+    /// <summary>
+    /// Regenerates the committed <c>handout-env-index.json</c> by running the frontend's own generator script.
+    /// Shelling out (rather than reimplementing the walk in C#) keeps the environment's display number defined in
+    /// exactly one place: <c>listDocumentEnvironments</c>, the same TypeScript function <c>HandoutDetail</c> renders
+    /// with, so the index can never drift from what the page actually shows.
+    /// </summary>
+    /// <returns>True when the index was regenerated; false when the script failed, in which case its output has
+    /// already been printed.</returns>
+    private static async Task<bool> RegenerateEnvironmentIndexAsync()
+    {
+        // Status message
+        AnsiConsole.MarkupLine("[aqua]━━━ Environment index ━━━[/]");
+
+        // Run the frontend's generator from its own project directory
+        var webDirectory = RepoPaths.Resolve("web");
+        var result = await ProcessRunner.RunAsync("npm", ["run", "handouts:index"], webDirectory);
+
+        // A non-zero exit means the generator itself failed; surface its output for debugging
+        if (result.ExitCode != 0)
+        {
+            AnsiConsole.MarkupLine($"[red]✗ Failed to regenerate handout-env-index.json (exit {result.ExitCode}).[/]");
+            AnsiConsole.WriteLine($"{result.Stdout}\n{result.Stderr}");
+            return false;
+        }
+
+        // Success message
+        AnsiConsole.MarkupLine("[green]✓ Regenerated handout-env-index.json[/]");
+        return true;
     }
 
     /// <summary>

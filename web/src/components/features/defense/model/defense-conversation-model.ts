@@ -273,7 +273,7 @@ export class DefenseConversationModel {
       sessionId === null
         ? {
             kind: 'start',
-            problemKey: this.problem.key,
+            target: this.problem.target,
             statement: this.problem.statement,
             reference: this.problem.reference,
             hints: this.problem.hints,

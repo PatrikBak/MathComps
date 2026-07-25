@@ -305,6 +305,7 @@
             },
             {
               "type": "example",
+              "id": "odd-squares-mod-8",
               "body": [
                 {
                   "type": "paragraph",
@@ -726,6 +727,7 @@
             },
             {
               "type": "exercise",
+              "id": "prime-squared-minus-one",
               "body": [
                 {
                   "type": "paragraph",
@@ -950,6 +952,7 @@
             },
             {
               "type": "example",
+              "id": "perfect-square-divisor-count",
               "body": [
                 {
                   "type": "paragraph",
@@ -1138,6 +1141,7 @@
             },
             {
               "type": "theorem",
+              "id": "divisor-count-formula",
               "body": [
                 {
                   "type": "paragraph",
@@ -1465,6 +1469,7 @@
             },
             {
               "type": "exercise",
+              "id": "divisor-count-square-converse",
               "body": [
                 {
                   "type": "paragraph",
@@ -1537,6 +1542,7 @@
             },
             {
               "type": "problem",
+              "id": "small-prime-divisor-bound",
               "difficulty": 0,
               "body": [
                 {
@@ -1798,6 +1804,7 @@
             },
             {
               "type": "problem",
+              "id": "product-of-all-divisors",
               "difficulty": 1,
               "body": [
                 {
@@ -2173,6 +2180,7 @@
             },
             {
               "type": "example",
+              "id": "mutual-divisibility",
               "body": [
                 {
                   "type": "paragraph",
@@ -2720,6 +2728,7 @@
             },
             {
               "type": "example",
+              "id": "sqrt-two-irrational",
               "body": [
                 {
                   "type": "paragraph",
@@ -2874,6 +2883,7 @@
             },
             {
               "type": "exercise",
+              "id": "why-sqrt-four-differs",
               "body": [
                 {
                   "type": "paragraph",
@@ -2982,6 +2992,7 @@
             },
             {
               "type": "exercise",
+              "id": "sqrt-n-irrationality-criterion",
               "body": [
                 {
                   "type": "paragraph",
@@ -3153,6 +3164,7 @@
             },
             {
               "type": "problem",
+              "id": "rational-plus-irrational-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -3276,6 +3288,7 @@
             },
             {
               "type": "problem",
+              "id": "sqrt-two-plus-sqrt-three",
               "difficulty": 0,
               "body": [
                 {
@@ -3457,6 +3470,7 @@
             },
             {
               "type": "problem",
+              "id": "sum-of-three-odd-squares",
               "difficulty": 0,
               "body": [
                 {
@@ -3511,6 +3525,7 @@
             },
             {
               "type": "problem",
+              "id": "alternating-cards-on-circle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4288,6 +4303,7 @@
             },
             {
               "type": "theorem",
+              "id": "infinitude-of-primes",
               "body": [
                 {
                   "type": "paragraph",
@@ -4397,6 +4413,7 @@
             },
             {
               "type": "problem",
+              "id": "n-squared-plus-one-primes",
               "difficulty": 1,
               "body": [
                 {
@@ -4610,6 +4627,7 @@
             },
             {
               "type": "problem",
+              "id": "primes-form-3n-plus-2",
               "difficulty": 2,
               "body": [
                 {

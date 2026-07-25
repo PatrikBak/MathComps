@@ -158,18 +158,8 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
         switch (target.TargetType)
         {
             case CommentTargetType.Handout:
-                // Upsert (if row exists, this does nothing)
-                await dbContext.Handouts
-                    .Upsert(new Handout { ContentId = target.TargetId })
-                    .On(handout => handout.ContentId)
-                    .NoUpdate()
-                    .RunAsync();
-
-                // Fetch the actual ID from the database
-                var handoutId = await dbContext.Handouts
-                    .Where(handout => handout.ContentId == target.TargetId)
-                    .Select(handout => handout.Id)
-                    .FirstAsync();
+                // The row standing in for the handout, minted now if nothing has hung off it yet
+                var handoutId = await ContentAnchors.EnsureHandoutAsync(dbContext, target.TargetId);
 
                 // Add a comment
                 dbContext.HandoutComments.Add(new HandoutComment
@@ -181,18 +171,8 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
                 break;
 
             case CommentTargetType.News:
-                // Upsert (if row exists, this does nothing)
-                await dbContext.NewsArticles
-                    .Upsert(new NewsArticle { ContentId = target.TargetId })
-                    .On(newsArticle => newsArticle.ContentId)
-                    .NoUpdate()
-                    .RunAsync();
-
-                // Fetch the actual ID from the database
-                var newsArticleId = await dbContext.NewsArticles
-                    .Where(newsArticle => newsArticle.ContentId == target.TargetId)
-                    .Select(newsArticle => newsArticle.Id)
-                    .FirstAsync();
+                // The row standing in for the article, minted now if nothing has hung off it yet
+                var newsArticleId = await ContentAnchors.EnsureNewsArticleAsync(dbContext, target.TargetId);
 
                 // Add a comment
                 dbContext.NewsArticleComments.Add(new NewsArticleComment

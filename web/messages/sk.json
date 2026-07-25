@@ -401,13 +401,6 @@
       "example": "Príklad",
       "exercise": "Cvičenie",
       "problem": "Úloha",
-      "slugs": {
-        "definition": "definicia",
-        "example": "priklad",
-        "exercise": "cvicenie",
-        "problem": "uloha",
-        "theorem": "tvrdenie"
-      },
       "theorem": "Tvrdenie"
     },
     "hero": {

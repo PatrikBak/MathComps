@@ -221,6 +221,7 @@
           "content": [
             {
               "type": "problem",
+              "id": "digit-product-sum-70",
               "difficulty": 0,
               "body": [
                 {
@@ -574,6 +575,7 @@
             },
             {
               "type": "problem",
+              "id": "inflatable-number-axxb",
               "difficulty": 0,
               "body": [
                 {
@@ -850,6 +852,7 @@
             },
             {
               "type": "problem",
+              "id": "four-digit-halves-difference-one",
               "difficulty": 0,
               "body": [
                 {
@@ -1242,6 +1245,7 @@
             },
             {
               "type": "problem",
+              "id": "insert-between-20-and-16",
               "difficulty": 0,
               "body": [
                 {
@@ -1488,6 +1492,7 @@
             },
             {
               "type": "problem",
+              "id": "digit-factorial-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -2053,6 +2058,7 @@
             },
             {
               "type": "problem",
+              "id": "perfect-square-repeated-digit-pairs",
               "difficulty": 0,
               "body": [
                 {
@@ -2343,6 +2349,7 @@
             },
             {
               "type": "problem",
+              "id": "pandigital-prime-ten-digits",
               "difficulty": 0,
               "body": [
                 {
@@ -2448,6 +2455,7 @@
             },
             {
               "type": "problem",
+              "id": "even-length-palindrome-divisible-11",
               "difficulty": 0,
               "body": [
                 {
@@ -2559,6 +2567,7 @@
             },
             {
               "type": "problem",
+              "id": "digit-sum-of-concatenation",
               "difficulty": 0,
               "body": [
                 {
@@ -2712,6 +2721,7 @@
             },
             {
               "type": "problem",
+              "id": "digits-1-6-divisible-11",
               "difficulty": 0,
               "body": [
                 {
@@ -3010,6 +3020,7 @@
             },
             {
               "type": "problem",
+              "id": "reverse-subtract-reverse-add",
               "difficulty": 0,
               "body": [
                 {
@@ -3229,6 +3240,7 @@
             },
             {
               "type": "problem",
+              "id": "remove-leading-six-25x-smaller",
               "difficulty": 0,
               "body": [
                 {
@@ -3485,6 +3497,7 @@
             },
             {
               "type": "problem",
+              "id": "fours-eights-nine-perfect-square",
               "difficulty": 0,
               "body": [
                 {
@@ -3770,6 +3783,7 @@
             },
             {
               "type": "problem",
+              "id": "last-digit-given-predecessor-seven",
               "difficulty": 0,
               "body": [
                 {
@@ -4157,6 +4171,7 @@
             },
             {
               "type": "problem",
+              "id": "powers-of-two-digit-rearrangement",
               "difficulty": 1,
               "body": [
                 {
@@ -4436,6 +4451,7 @@
             },
             {
               "type": "problem",
+              "id": "odd-digit-number-divisible-5n",
               "difficulty": 1,
               "body": [
                 {
@@ -4778,6 +4794,7 @@
             },
             {
               "type": "problem",
+              "id": "digit-appending-sequence-composites",
               "difficulty": 1,
               "body": [
                 {
@@ -5302,6 +5319,7 @@
             },
             {
               "type": "problem",
+              "id": "base-four-square-ones-twos",
               "difficulty": 2,
               "body": [
                 {

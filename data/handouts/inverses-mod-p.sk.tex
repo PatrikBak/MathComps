@@ -31,18 +31,21 @@ Voľne používame nasledujúce štandardné fakty o kongruenciách modulo~$p$:
 
 \secc Inverzy
 
+\EnvId{unique-reciprocal-mod-p}
 \Theorem{Existencia a jednoznačnosť inverzu}{
     Nech $a \not\equiv 0 \pmod{p}$. Potom existuje jednoznačný zvyšok $a^{-1} \pmod{p}$ s
     $$a \cdot a^{-1} \equiv 1 \pmod{p}.$$
     Namiesto $a^{-1}$ píšeme $\frac{1}{a}$ a namiesto $b \cdot a^{-1}$ píšeme $\frac{b}{a}$.
 }{}
 
+\EnvId{sum-of-fractions-mod-p}
 \Theorem{Inverzy sa sčítavajú ako zlomky}{
     Nech $b, d \not\equiv 0 \pmod{p}$. Potom pre ľubovoľné $a, c$ platí
     $$\frac{a}{b} + \frac{c}{d} \equiv a \cdot b^{-1} + c \cdot d^{-1} \equiv (ad + bc) \cdot (bd)^{-1} \equiv \frac{ad + bc}{bd} \pmod{p},$$
     presne ako obyčajné zlomky.
 }{}
 
+\EnvId{product-of-fractions-mod-p}
 \Theorem{Inverzy sa násobia ako zlomky}{
     Nech $b, d \not\equiv 0 \pmod{p}$. Potom pre ľubovoľné $a, c$ platí
     $$\frac{a}{b} \cdot \frac{c}{d} \equiv (a \cdot b^{-1}) \cdot (c \cdot d^{-1}) \equiv (ac) \cdot (bd)^{-1} \equiv \frac{ac}{bd} \pmod{p},$$
@@ -53,6 +56,7 @@ Voľne používame nasledujúce štandardné fakty o kongruenciách modulo~$p$:
 
 Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlomkami modulo~$p$, akoby to boli obyčajné čísla. Sú zhruba zoradené podľa obtiažnosti.
 
+\EnvId{p-minus-1-factorial}
 \Problem{0}{Wilson}{
     Nech $p$ je prvočíslo. Dokážte, že
     $$(p-1)! \equiv -1 \pmod{p}.$$
@@ -62,6 +66,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Čísla bez páru sú tie, ktoré spĺňajú $k \equiv 1/k \mod p$. Nájdite ich všetky.
 }{}
 
+\EnvId{sum-two-squares-mod-p}
 \Problem{0}{}{
     Nech $p$ je prvočíslo. Dokážte, že existujú celé čísla $a, b$, žiadne z nich deliteľné $p$, s $p \mid a^2 + b^2$ práve vtedy, keď $p = 2$ alebo $p \equiv 1 \pmod{4}$.
 }{
@@ -76,6 +81,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     V súčine $(p-1)!$ spárujte $k$ s $p - k \equiv -k$. Ako vyzerá výsledok pre $p \equiv 1 \pmod{4}$?
 }{}
 
+\EnvId{a2-ab-b2-mod-p}
 \Problem{0}{}{
     Nech $p \equiv 2 \pmod{3}$ je prvočíslo. Ukážte, že ak $p \mid a^2 + ab + b^2$, tak $p \mid a$ a $p \mid b$.
 }{
@@ -86,6 +92,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Vynásobte obe strany $a/b$ a dostanete $(a/b)^{p-1} \equiv a/b \pmod{p}$. Aplikujte Malú Fermatovu vetu a dostanete $a \equiv b \pmod{p}$. Dosaďte to späť.
 }{}
 
+\EnvId{binomial-p-1-choose-k}
 \Problem{0}{}{
     Nech $p$ je prvočíslo a nech $0 \leq k \leq p-1$ je celé číslo. Dokážte, že
     $$\binom{p-1}{k} \equiv (-1)^k \pmod{p}.$$
@@ -95,6 +102,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Zredukujte každý činiteľ v čitateli modulo $p$: $p - j \equiv -j \pmod{p}$. Nezostáva nám niečo známe?
 }{}
 
+\EnvId{harmonic-sum-mod-p}
 \Problem{0}{}{
     Nech $p \geq 3$ je prvočíslo. Ukážte, že ak
     $$\frac{1}{1} + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{p-1} = \frac{m}{n},$$
@@ -105,6 +113,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Uvedomte si, že tento súčet je vlastne súčtom všetkých hodnôt od $1$ po $p-1$, nie nutne v tomto poradí.
 }{}
 
+\EnvId{2m-3m-6m-minus-1}
 \Problem{0}{IMO 2005}{
     Určte všetky kladné celé čísla $n$, ktoré sú nesúdeliteľné s každým členom postupnosti
     $$a_m = 2^m + 3^m + 6^m - 1, \quad m \geq 1.$$
@@ -116,6 +125,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Pre $p \geq 5$ vezmite $m = p - 2$. Potom $2^m \equiv 1/2$, $3^m \equiv 1/3$, $6^m \equiv 1/6 \pmod{p}$. Vypočítajte $a_{p-2} \pmod{p}$.
 }{}
 
+\EnvId{product-k2-k-1}
 \Problem{0}{Poland}{
     Nech $p > 3$ je prvočíslo s $p \equiv 2 \pmod{3}$ a nech $a_k = k^2 + k + 1$ pre $k = 1, 2, \ldots, p-1$. Dokážte, že
     $$a_1 a_2 \cdots a_{p-1} \equiv 3 \pmod{p}.$$
@@ -127,6 +137,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Bolo by skvelé, keby súčin všetkých čísel $k^3-1$ bol vlastne niečo, čo vieme vypočítať.
 }{}
 
+\EnvId{half-range-power-sum}
 \Problem{0}{Singapore 2012}{
     Nech $p$ je nepárne prvočíslo. Dokážte, že
     $$\sum_{i=1}^{(p-1)/2} i^{p-2} \equiv \frac{2 - 2^p}{p} \pmod{p}.$$
@@ -142,6 +153,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Pravá strana sa zredukuje na $-\sum_{k=1}^{p-1} (-1)^{k-1}/k \pmod{p}$. Rozdeľte to na párne a nepárne $k$ a použite $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$ z~predošlej úlohy.
 }{}
 
+\EnvId{binomial-2p-choose-p}
 \Problem{0}{}{
     Ukážte, že pre každé prvočíslo $p$ platí
     $$\binom{2p}{p} \equiv 2 \pmod{p^2}.$$
@@ -155,6 +167,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Podľa úlohy 4 platí $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$, takže $p \sum 1/k \equiv 0 \pmod{p^2}$.
 }{}
 
+\EnvId{power-e-reciprocal-sum}
 \Problem{0}{}{
     Nech $p \geq 5$ je prvočíslo a nech $e$ je kladné celé číslo s $(p-1) \nmid e$. Ukážte, že ak
     $$\frac{1}{1^e} + \frac{1}{2^e} + \frac{1}{3^e} + \cdots + \frac{1}{(p-1)^e} = \frac{m}{n},$$
@@ -165,6 +178,7 @@ Všetky úlohy nižšie využívajú vyššie uvedenú teóriu --- prácu so zlo
     Použite predpoklad $(p-1) \nmid e$ na nájdenie $a$ s $a^e \not\equiv 1 \pmod{p}$. Trik je uvažovať primitívny koreň.
 }{}
 
+\EnvId{harmonic-sum-mod-p-squared}
 \Problem{0}{Wolstenholme}{
     Nech $p \geq 5$ je prvočíslo. Ukážte, že ak
     $$\frac{1}{1} + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{p-1} = \frac{m}{n},$$

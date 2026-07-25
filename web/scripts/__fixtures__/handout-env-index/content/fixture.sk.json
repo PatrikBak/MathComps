@@ -1,0 +1,57 @@
+{
+  "document": {
+    "title": "Fixture",
+    "sections": [
+      {
+        "title": "First",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "id": "first-problem",
+              "difficulty": 1,
+              "body": [],
+              "hints": [],
+              "solution": []
+            },
+            {
+              "type": "theorem",
+              "id": "only-theorem",
+              "body": [],
+              "proof": []
+            },
+            {
+              "type": "paragraph",
+              "content": [],
+              "highligted": false
+            }
+          ]
+        }
+      },
+      {
+        "title": "Second",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "id": "second-problem",
+              "difficulty": 2,
+              "body": [],
+              "hints": [],
+              "solution": []
+            },
+            {
+              "type": "exercise",
+              "id": "only-exercise",
+              "body": [],
+              "solution": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

@@ -23,9 +23,10 @@ public static class DefenseEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapDefenseEndpoints(this IEndpointRouteBuilder app)
     {
-        // List the user's sessions for one problem
+        // List the user's sessions against one handout environment
         app.MapGet(SessionsPath, async (
-            string problemKey,
+            string handoutContentId,
+            string environmentId,
             HttpContext context,
             IUserManager userManager,
             IDefenseSessionService defenseService) =>
@@ -33,8 +34,11 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
-            // Fetch the user's sessions for the problem
-            var sessions = await defenseService.ListAsync(userId, problemKey, context.RequestAborted);
+            // The environment the sessions are held against
+            var target = new HandoutEnvironmentTarget(handoutContentId, environmentId);
+
+            // Fetch the user's sessions against it
+            var sessions = await defenseService.ListAsync(userId, target, context.RequestAborted);
 
             // Return them
             return Results.Ok(sessions);
@@ -72,7 +76,7 @@ public static class DefenseEndpoints
 
             // Map the request onto the service's own input shape
             var start = new DefenseSessionStart(
-                request.ProblemKey, request.Statement, request.Reference, request.Opener, request.Content,
+                request.Target, request.Statement, request.Reference, request.Opener, request.Content,
                 request.Hints);
 
             // Run the opening turn

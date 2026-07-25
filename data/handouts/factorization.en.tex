@@ -24,6 +24,7 @@ In this section, we will gradually introduce four key factorization techniques. 
 
 \secc Difference and sum of powers formulas
 
+\EnvId{verifying-power-difference-pattern}
 \Exercise{}{
     Verify by expanding that the following holds
     \begitems \style i
@@ -36,6 +37,7 @@ In this section, we will gradually introduce four key factorization techniques. 
     The answer to the question is Proposition 1.
 }
 
+\EnvId{guessing-odd-power-sum-pattern}
 \Exercise{}{
     Verify by expanding that the following holds
     \begitems \style i
@@ -49,6 +51,7 @@ In this section, we will gradually introduce four key factorization techniques. 
 
 After a while of investigation, we will surely come up with general formulas:
 
+\EnvId{general-power-difference-formula}
 \Theorem{}{
     For all real numbers $a,b$ and natural $n$, it holds
     $$
@@ -67,6 +70,7 @@ After a while of investigation, we will surely come up with general formulas:
 
 The situation with $a^n+b^n$ is more curious in that such a factorization works only for odd~$n$. From the proof, it is visible why:
 
+\EnvId{general-odd-power-sum-formula}
 \Theorem{}{
     For all real numbers $a,b$ and odd natural $n$, it holds
     $$
@@ -78,6 +82,7 @@ The situation with $a^n+b^n$ is more curious in that such a factorization works 
 
 How is it for even $n$? For the expression $a^2+b^2$, it can be proven that it really cannot be factored (in the domain of real numbers). However, all other $a^n+b^n$ can be factored, which we will gradually work towards. 
 
+\EnvId{practice-factoring-power-expressions}
 \Exercise{}{
     Factor into a product of two expressions without roots ($n,k$ are natural numbers).
     \begitems \style i
@@ -100,6 +105,7 @@ How is it for even $n$? For the expression $a^2+b^2$, it can be proven that it r
 
 In more complex problems, factorization is typically just one of several steps. We can try:
 
+\EnvId{n5-minus-n-divisible-30}
 \Problem{0}{}{
     Prove that for every natural number~$n$, the number $n^5-n$ is divisible by 30.
 }{
@@ -116,6 +122,7 @@ In more complex problems, factorization is typically just one of several steps. 
     \enditems
 }
 
+\EnvId{power-sum-divisible-by-seven}
 \Problem{0}{}{
     Find three distinct pairs of natural numbers $(a,b)$ such that the number $a^{37} + b^{37}$ is divisible by~$7$ and~$0<a<b<7$.
 }{
@@ -128,6 +135,7 @@ In more complex problems, factorization is typically just one of several steps. 
     It holds that $a^{37}+b^{37}=(a+b)(a^{36}+\cdots+b^{36})$, so $a+b \mid a^{37}+b^{37}$, thus it suffices that $7 \mid a+b$. We can easily achieve this with pairs $(a,b)$ equal to $(1,6), (2,5), (3,4)$.
 }
 
+\EnvId{sixth-power-minus-one-three-primes}
 \Problem{1}{}{
     Find all natural numbers $n$ greater than 1 such that $n^6-1$ is a product of three not necessarily distinct primes.
 }{
@@ -148,6 +156,7 @@ In more complex problems, factorization is typically just one of several steps. 
 
 The common school procedure of successive factorization works even in harder problems. The idea is: notice that something can be factored out; factor it out; and see what happens next. For this procedure, there exists a very important trick usable even in harder problems: \textit{watch when the expression is zero}.
 
+\EnvId{quartic-linear-difference-factoring}
 \Example{}{
     Factor the expression $a^4-a-b^4+b$. 
 }{
@@ -161,6 +170,7 @@ The common school procedure of successive factorization works even in harder pro
 
 This view explains why in the formulas $a^n-b^n$ and $a^n+b^n$ from the previous section we have $a-b$ and $a+b$; and also why the second one requires odd $n$ -- for $a=b$ or $a=-b$, $a^n-b^n$ or $a^n + b^n$ are zero.
 
+\EnvId{three-variable-polynomial-factoring}
 \Exercise{}{Factor: 
 \begitems \style i
 \i [2 factors] $2ab+a+2b+1$
@@ -222,6 +232,7 @@ This view explains why in the formulas $a^n-b^n$ and $a^n+b^n$ from the previous
 
 This view is not universal, because the factored factors do not have to be linear at all or can be more complex and it is harder to see the root. Then we have no choice but to play with rearranging terms and successive factoring. 
 
+\EnvId{sum-of-squares-factor-pattern}
 \Exercise{}{
     Factor into a product of two expressions: 
     \begitems \style i
@@ -256,6 +267,7 @@ This view is not universal, because the factored factors do not have to be linea
 
 Hidden factorization and other algebraic modifications can be successfully used in this example:
 
+\EnvId{symmetric-sums-divisibility}
 \Problem{1}{CPSJ\fnote{Czech-Polish-Slovak Junior Match} 2018}{For natural numbers $a,b,c$ it holds 
 $$
 (a + b + c)^2 \mid ab(a + b) + bc(b + c) + ca(c + a) + 3abc.
@@ -311,6 +323,7 @@ From this, we can easily derive the formula for the solutions of a quadratic equ
 
 In general, we actually used $a^2+2ab = (a+b)^2 - b^2$. However, we can also complete to a square by 'manufacturing' the middle coefficient, i.e., using the formula $a^2+b^2=(a+b)^2-2ab$. We will demonstrate this on the following example:
 
+\EnvId{quartic-with-square-middle-term}
 \Example{}{
     Factor $m^4+m^2n^2+n^4$.
 }{
@@ -330,6 +343,7 @@ In general, we actually used $a^2+2ab = (a+b)^2 - b^2$. However, we can also com
 
 Practice this by deriving a known identity:
 
+\EnvId{sophie-germain-identity}
 \Exercise{Sophie-Germain identity\fnote{Named after Sophie Germain, one of the most significant female mathematicians at the turn of the 18th and 19th centuries. At a time when women did not have access to universities, she studied mathematics herself and corresponded with the greatest mathematicians of her time, like Gauss, initially under a male pseudonym.}
 }{
     Factor $a^4+4b^4$.
@@ -344,6 +358,7 @@ Practice this by deriving a known identity:
 
 Try an example from the national round of MO:
 
+\EnvId{quartic-expression-prime-values}
 \Problem{0}{CKMO 2012}{
     Determine all natural numbers $n$ for which $n^4 - 3n^2 + 9$ is a prime number.
 }{
@@ -372,6 +387,7 @@ Try an example from the national round of MO:
 
 Learned techniques can be nicely put together in this observation:
 
+\EnvId{factoring-sum-of-nth-powers}
 \Problem{1}{}{
     Justify that the expression $a^n+b^n$ can be factored into a product of non-constant expressions with real coefficients for every $n>2$.
     
@@ -405,6 +421,7 @@ Learned techniques can be nicely put together in this observation:
 
 A few more harder problems for practice:
 
+\EnvId{heron-formula-factorization}
 \Problem{1}{}{
     Factor $2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4$ into a product of four non-constant parentheses.
 }{
@@ -452,6 +469,7 @@ A few more harder problems for practice:
     $$
 }
 
+\EnvId{quartic-plus-power-of-four}
 \Problem{1}{}{
     For which natural numbers $n$ is the number $n^4 + 4^n$ a prime number?
 }{
@@ -495,6 +513,7 @@ a^3 + b^3 = (a+b)^3 - 3ab(a+b).
 $$
 We will demonstrate this on an example:
 
+\EnvId{sum-of-cubes-identity}
 \Example{}{
     Factor $a^3+b^3+c^3-3abc$.
 }{
@@ -516,6 +535,7 @@ We will demonstrate this on an example:
 
 This factorization is very interesting in itself, as it allows us to easily prove an inequality:
 
+\EnvId{sum-of-cubes-inequality}
 \Theorem{}{
     Let $a,b,c$ be real numbers for which $a+b+c \ge 0$. Then 
     $$

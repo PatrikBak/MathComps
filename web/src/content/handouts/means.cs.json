@@ -59,6 +59,7 @@
             },
             {
               "type": "example",
+              "id": "two-test-scores",
               "body": [
                 {
                   "type": "paragraph",
@@ -108,6 +109,7 @@
             },
             {
               "type": "example",
+              "id": "rectangle-to-square-area",
               "body": [
                 {
                   "type": "paragraph",
@@ -209,6 +211,7 @@
             },
             {
               "type": "example",
+              "id": "cyclist-average-speed",
               "body": [
                 {
                   "type": "paragraph",
@@ -405,6 +408,7 @@
             },
             {
               "type": "definition",
+              "id": "arithmetic-mean-two-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -481,6 +485,7 @@
             },
             {
               "type": "definition",
+              "id": "geometric-mean-two-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -561,6 +566,7 @@
             },
             {
               "type": "definition",
+              "id": "harmonic-mean-two-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -613,6 +619,7 @@
             },
             {
               "type": "exercise",
+              "id": "cyclist-speed-harmonic-mean",
               "body": [
                 {
                   "type": "paragraph",
@@ -673,6 +680,7 @@
             },
             {
               "type": "exercise",
+              "id": "compare-means-number-pairs",
               "body": [
                 {
                   "type": "paragraph",
@@ -1018,6 +1026,7 @@
             },
             {
               "type": "exercise",
+              "id": "means-equal-pair",
               "body": [
                 {
                   "type": "paragraph",
@@ -1117,6 +1126,7 @@
           "content": [
             {
               "type": "problem",
+              "id": "am-gm-two-numbers",
               "difficulty": 0,
               "body": [
                 {
@@ -1301,6 +1311,7 @@
             },
             {
               "type": "problem",
+              "id": "gm-hm-two-numbers",
               "difficulty": 0,
               "body": [
                 {
@@ -1526,6 +1537,7 @@
             },
             {
               "type": "definition",
+              "id": "arithmetic-mean-n-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1587,6 +1599,7 @@
             },
             {
               "type": "definition",
+              "id": "geometric-mean-n-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1648,6 +1661,7 @@
             },
             {
               "type": "definition",
+              "id": "harmonic-mean-n-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1717,6 +1731,7 @@
           "content": [
             {
               "type": "example",
+              "id": "school-grades-means",
               "body": [
                 {
                   "type": "paragraph",

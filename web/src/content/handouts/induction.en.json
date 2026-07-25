@@ -81,6 +81,7 @@
             },
             {
               "type": "example",
+              "id": "sum-of-first-n-naturals",
               "body": [
                 {
                   "type": "paragraph",
@@ -263,6 +264,7 @@
             },
             {
               "type": "exercise",
+              "id": "classic-summation-identities",
               "body": [
                 {
                   "type": "paragraph",
@@ -687,6 +689,7 @@
             },
             {
               "type": "exercise",
+              "id": "progression-sum-formulas",
               "body": [
                 {
                   "type": "paragraph",
@@ -1019,6 +1022,7 @@
             },
             {
               "type": "exercise",
+              "id": "fibonacci-partial-sums",
               "body": [
                 {
                   "type": "paragraph",
@@ -1348,6 +1352,7 @@
             },
             {
               "type": "example",
+              "id": "power-of-two-vs-square",
               "body": [
                 {
                   "type": "paragraph",
@@ -1704,6 +1709,7 @@
             },
             {
               "type": "exercise",
+              "id": "power-of-two-at-least-n",
               "body": [
                 {
                   "type": "paragraph",
@@ -1818,6 +1824,7 @@
             },
             {
               "type": "exercise",
+              "id": "factorial-beats-power-of-two",
               "body": [
                 {
                   "type": "paragraph",
@@ -1928,6 +1935,7 @@
             },
             {
               "type": "exercise",
+              "id": "harmonic-tail-sum-bound",
               "body": [
                 {
                   "type": "paragraph",
@@ -2050,6 +2058,7 @@
             },
             {
               "type": "exercise",
+              "id": "bernoulli-inequality",
               "body": [
                 {
                   "type": "paragraph",
@@ -2203,6 +2212,7 @@
             },
             {
               "type": "example",
+              "id": "divisibility-n-cubed-minus-n",
               "body": [
                 {
                   "type": "paragraph",
@@ -2317,6 +2327,7 @@
             },
             {
               "type": "example",
+              "id": "divisibility-four-power-minus-one",
               "body": [
                 {
                   "type": "paragraph",
@@ -2431,6 +2442,7 @@
             },
             {
               "type": "exercise",
+              "id": "divisibility-four-power-plus-six-n",
               "body": [
                 {
                   "type": "paragraph",
@@ -2536,6 +2548,7 @@
             },
             {
               "type": "exercise",
+              "id": "five-and-six-power-divisibility",
               "body": [
                 {
                   "type": "paragraph",
@@ -2765,6 +2778,7 @@
             },
             {
               "type": "problem",
+              "id": "lines-through-common-point-fallacy",
               "difficulty": 0,
               "body": [
                 {
@@ -3224,6 +3238,7 @@
             },
             {
               "type": "theorem",
+              "id": "prime-factorization-existence",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -3448,6 +3463,7 @@
             },
             {
               "type": "example",
+              "id": "binary-representation-existence",
               "body": [
                 {
                   "type": "paragraph",
@@ -3593,6 +3609,7 @@
             },
             {
               "type": "problem",
+              "id": "zeckendorf-representation",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3921,6 +3938,7 @@
             },
             {
               "type": "problem",
+              "id": "factorial-number-system",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4414,6 +4432,7 @@
             },
             {
               "type": "example",
+              "id": "linear-recurrence-2n-minus-1",
               "body": [
                 {
                   "type": "paragraph",
@@ -4596,6 +4615,7 @@
             },
             {
               "type": "exercise",
+              "id": "linear-recurrence-3n-minus-2n",
               "body": [
                 {
                   "type": "paragraph",
@@ -4778,6 +4798,7 @@
             },
             {
               "type": "problem",
+              "id": "fibonacci-golden-ratio-bound",
               "difficulty": 0,
               "body": [
                 {
@@ -5061,6 +5082,7 @@
             },
             {
               "type": "problem",
+              "id": "power-sum-reciprocal-rational",
               "difficulty": 0,
               "body": [
                 {
@@ -5371,6 +5393,7 @@
             },
             {
               "type": "example",
+              "id": "sum-of-twos-and-threes",
               "body": [
                 {
                   "type": "paragraph",
@@ -5581,6 +5604,7 @@
             },
             {
               "type": "theorem",
+              "id": "am-gm-inequality",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -6283,6 +6307,7 @@
             },
             {
               "type": "problem",
+              "id": "power-of-one-plus-sqrt-two",
               "difficulty": 0,
               "body": [
                 {
@@ -6466,6 +6491,7 @@
             },
             {
               "type": "problem",
+              "id": "visiting-all-lightbulb-configurations",
               "difficulty": 0,
               "body": [
                 {
@@ -6813,6 +6839,7 @@
             },
             {
               "type": "problem",
+              "id": "chocolate-bar-breaking",
               "difficulty": 0,
               "body": [
                 {
@@ -7220,6 +7247,7 @@
             },
             {
               "type": "problem",
+              "id": "path-through-all-cities-oneway",
               "difficulty": 1,
               "body": [
                 {
@@ -7817,6 +7845,7 @@
             },
             {
               "type": "problem",
+              "id": "factorial-divides-consecutive-product",
               "difficulty": 1,
               "body": [
                 {

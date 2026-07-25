@@ -5,18 +5,18 @@ import { BackendApiError } from '@/lib/api/api-error'
 import {
   DefenseConversationModel,
   type DefenseConversationServices,
-} from './defense-conversation-model'
+} from '../defense-conversation-model'
 import type {
   DefenseProblem,
   DefenseSession,
   DefenseTurnRequest,
   StoredTurn,
   Turn,
-} from './defense-types'
+} from '../defense-types'
 
 /** The problem every test defends. */
 const SAMPLE_PROBLEM: DefenseProblem = {
-  key: 'p1',
+  target: { handoutContentId: 'handout-1', environmentId: 'p1' },
   statement: 'Prove it.',
   reference: 'Because.',
   hints: [],
@@ -116,7 +116,7 @@ class FakeBackend implements DefenseConversationServices {
       // Assemble the new session under a server-minted id
       const session: DefenseSession = {
         id: `session-${(this.sessionCount += 1)}`,
-        problemKey: request.problemKey,
+        target: request.target,
         turns: [...stampTurns([{ role: 'examiner', content: request.opener }]), ...newTurns],
       }
 

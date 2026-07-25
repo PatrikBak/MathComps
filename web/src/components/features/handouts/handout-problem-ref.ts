@@ -1,29 +1,22 @@
+import envIndexData from '@/content/handout-env-index.json'
 import handoutIndex from '@/content/handouts.json'
 import type { Locale, PartialLocalizedString } from '@/i18n/i18n'
 import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import type { HandoutEnvironmentType } from './handout-content-types'
-import { HANDOUT_ENVIRONMENT_TYPES } from './handout-content-types'
-import type { HandoutIndex } from './handout-metadata-types'
+import type {
+  HandoutEnvIndex,
+  HandoutEnvironmentTarget,
+  HandoutIndex,
+} from './handout-metadata-types'
 import { supportsLocale } from './handout-metadata-types'
-import { buildEnvAnchorId } from './handout-utils'
+import { buildEnvironmentAnchorId } from './handout-utils'
 
 /** The site's handout index. */
 const index = handoutIndex as unknown as HandoutIndex
 
-/**
- * A handout problem key broken into its parts. The `handout:` namespace and the closing
- * `-{type}-{number}` are fixed, so the content id (a nanoid that may itself contain hyphens) is whatever remains
- * between them.
- */
-export type ParsedHandoutProblemKey = {
-  /** The handout's permanent content id. */
-  contentId: string
-  /** The environment's type. */
-  environmentType: HandoutEnvironmentType
-  /** The environment's document-wide, per-type number. */
-  environmentNumber: number
-}
+/** The generated environment index — see {@link HandoutEnvIndex}. */
+const envIndex = envIndexData as unknown as HandoutEnvIndex
 
 /**
  * Where a handout problem lives: the handout that holds it, and which environment within that handout it is.
@@ -42,88 +35,33 @@ export type HandoutProblemRef = {
 }
 
 /**
- * The pattern a handout problem key must match, anchored so the content id claims everything between the fixed
- * prefix and the trailing `-{type}-{number}`. The type alternation is read off the environment types themselves,
- * so it can't drift from them.
- */
-const PROBLEM_KEY_PATTERN = new RegExp(
-  `^handout:(.+)-(${HANDOUT_ENVIRONMENT_TYPES.join('|')})-(\\d+)$`
-)
-
-/**
- * Builds the stable key identifying one problem of a handout, namespaced so keys from different sources can't
- * collide. Keyed by the environment's identity (type plus document-wide number) rather than anything localized
- * or authored, so the key survives locale switches and title edits.
+ * Resolves a defense target to its handout location, naming the handout in the given language and anchoring the
+ * exact environment within it.
  *
- * @param contentId - The handout's permanent content id.
- * @param environmentType - The environment's type.
- * @param environmentNumber - The environment's document-wide, per-type number.
- *
- * @returns The problem key, e.g. `handout:AbC-123-problem-4`.
- */
-export function buildHandoutProblemKey(
-  contentId: string,
-  environmentType: HandoutEnvironmentType,
-  environmentNumber: number | string
-): string {
-  // The namespaced key, closing on the environment's identity
-  return `handout:${contentId}-${environmentType}-${environmentNumber}`
-}
-
-/**
- * Parses a problem key back into its handout parts.
- *
- * @param problemKey - The stable, source-namespaced problem key.
- *
- * @returns The parsed parts, or null when the key is not a handout key.
- */
-export function parseHandoutProblemKey(problemKey: string): ParsedHandoutProblemKey | null {
-  // Match the fixed shape
-  const match = PROBLEM_KEY_PATTERN.exec(problemKey)
-
-  // A non-handout source or a malformed key matches nothing
-  if (match === null) {
-    return null
-  }
-
-  // The captured content id, environment type, and number
-  const [, contentId, environmentType, environmentNumber] = match
-
-  // The key's parts, the type narrowed by the alternation that matched it
-  return {
-    contentId,
-    environmentType: environmentType as HandoutEnvironmentType,
-    environmentNumber: Number(environmentNumber),
-  }
-}
-
-/**
- * Resolves a problem key to its handout location, naming the handout in the given language and anchoring the exact
- * problem within it.
- *
- * @param problemKey - The stable, source-namespaced problem key.
+ * @param target - The handout environment the defense is held against.
  * @param locale - The locale to resolve the title and slug in.
  *
- * @returns The resolved location, or null when the key isn't a handout key or its handout is gone from the site.
+ * @returns The resolved location, or null when the environment or its handout is gone from the site — a defense
+ *   outlives the content it was about.
  */
 export function resolveHandoutProblemRef(
-  problemKey: string,
+  target: HandoutEnvironmentTarget,
   locale: Locale
 ): HandoutProblemRef | null {
-  // Break the key into its handout parts
-  const parsed = parseHandoutProblemKey(problemKey)
+  // Where this environment sits in its handout
+  const placement = envIndex[target.handoutContentId]?.[target.environmentId]
 
-  // A key from another source names no handout
-  if (parsed === null) {
+  // No such environment recorded for this handout
+  if (placement === undefined) {
     return null
   }
 
-  // The handout the key points at, by its permanent content id
+  // The handout itself, by its permanent content id
   const handout = index.sections
     .flatMap((section) => section.handouts)
-    .find((candidate) => candidate.id === parsed.contentId)
+    .find((candidate) => candidate.id === target.handoutContentId)
 
-  // A key can outlive the handout it points at
+  // A target can outlive the handout it points at
   if (handout === undefined) {
     return null
   }
@@ -141,13 +79,12 @@ export function resolveHandoutProblemRef(
     return null
   }
 
-  // The handout, and the exact problem within it as a locale-stable anchor. Only a handout published in this
-  // language has a page to point at.
+  // Everything the caller needs to name and link to this environment
   return {
     handoutTitle,
-    environmentType: parsed.environmentType,
-    environmentNumber: parsed.environmentNumber,
+    environmentType: placement.type,
+    environmentNumber: placement.number,
     handoutSlug: supportsLocale(handout, locale) ? handout.slug[locale] : null,
-    anchorId: buildEnvAnchorId(parsed.environmentType, parsed.environmentNumber),
+    anchorId: buildEnvironmentAnchorId(target.environmentId),
   }
 }

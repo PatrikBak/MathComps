@@ -25,37 +25,56 @@ namespace MathComps.TexParser.Types;
 public abstract record ContentBlock;
 
 /// <summary>
+/// A content block that carries a permanent identity of its own.
+/// </summary>
+public interface IIdentifiedEnvironment
+{
+    /// <summary>
+    /// The environment's permanent identity, written above it as <c>\EnvId</c> and shared by every language
+    /// variant of the handout. Null for an environment that has not been given one.
+    /// </summary>
+    // ReSharper disable once UnusedMember.Global — kept: the one documented home for an environment's id, pulled
+    // into each record below by <inheritdoc/>.
+    string? Id { get; }
+}
+
+/// <summary>
 /// Represents a theorem block, containing a title, a body, and a proof.
 /// Corresponds to the \Theorem{title}{body}{proof} command.
 /// </summary>
+/// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
 /// <param name="Title">The optional title or name of the theorem.</param>
 /// <param name="Body">The content that constitutes the statement of the theorem.</param>
 /// <param name="Proof">The content that constitutes the proof of the theorem.</param>
 public record Theorem(
+    string? Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock> Proof
-) : ContentBlock;
+) : ContentBlock, IIdentifiedEnvironment;
 
 /// <summary>
 /// Represents an exercise block, containing a title, the exercise body, and a solution.
 /// Corresponds to the \Exercise{title}{body}{solution} command.
 /// </summary>
+/// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
 /// <param name="Title">The optional title or number of the exercise.</param>
 /// <param name="Body">The content that forms the question or problem statement.</param>
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content that provides the solution to the exercise.</param>
 public record Exercise(
+    string? Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock>? Answer,
     ImmutableList<RawContentBlock> Solution
-) : ContentBlock;
+) : ContentBlock, IIdentifiedEnvironment;
 
 /// <summary>
 /// Represents a problem block with extended metadata, including difficulty, hints, and a solution.
 /// Corresponds to the \Problem{difficulty}{title}{body}{hint1}{hint2}...{hintn}{solution} command.
 /// </summary>
+/// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
 /// <param name="Difficulty">A numerical value indicating the problem's difficulty.</param>
 /// <param name="Title">The optional title of the problem.</param>
 /// <param name="Body">The main content of the problem statement.</param>
@@ -63,39 +82,44 @@ public record Exercise(
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing the solution to the problem.</param>
 public record Problem(
+    string? Id,
     int Difficulty,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<ImmutableList<RawContentBlock>> Hints,
     ImmutableList<RawContentBlock>? Answer,
     ImmutableList<RawContentBlock> Solution
-) : ContentBlock;
+) : ContentBlock, IIdentifiedEnvironment;
 
 /// <summary>
 /// Represents an example block, with a title, body, and a solution or explanation.
 /// Corresponds to the \Example{title}{body}{solution} command.
 /// </summary>
+/// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
 /// <param name="Title">The optional title of the example.</param>
 /// <param name="Body">The main content demonstrating the example.</param>
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing a solution or further explanation.</param>
 public record Example(
+    string? Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock>? Answer,
     ImmutableList<RawContentBlock> Solution
-) : ContentBlock;
+) : ContentBlock, IIdentifiedEnvironment;
 
 /// <summary>
 /// Represents a definition block, containing an optional title and a body.
 /// Corresponds to the \Definition{title}{body} command.
 /// </summary>
+/// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
 /// <param name="Title">The optional name of the concept being defined.</param>
 /// <param name="Body">The content of the definition.</param>
 public record Definition(
+    string? Id,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body
-) : ContentBlock;
+) : ContentBlock, IIdentifiedEnvironment;
 
 /// <summary>
 /// A type of content block that cannot contain <see cref="Problem"/>, <see cref="Exercise"/>,

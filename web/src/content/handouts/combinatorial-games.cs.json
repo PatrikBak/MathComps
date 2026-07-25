@@ -128,6 +128,7 @@
           "content": [
             {
               "type": "problem",
+              "id": "matchstick-removal-game",
               "difficulty": 0,
               "body": [
                 {
@@ -283,6 +284,7 @@
             },
             {
               "type": "problem",
+              "id": "date-naming-race",
               "difficulty": 0,
               "body": [
                 {
@@ -422,6 +424,7 @@
             },
             {
               "type": "problem",
+              "id": "chessboard-king-tour",
               "difficulty": 0,
               "body": [
                 {
@@ -516,6 +519,7 @@
             },
             {
               "type": "problem",
+              "id": "coins-on-round-table",
               "difficulty": 0,
               "body": [
                 {
@@ -592,6 +596,7 @@
             },
             {
               "type": "problem",
+              "id": "digit-fraction-game",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -928,6 +933,7 @@
             },
             {
               "type": "problem",
+              "id": "polygon-diagonal-drawing",
               "difficulty": 0,
               "body": [
                 {
@@ -1071,6 +1077,7 @@
             },
             {
               "type": "problem",
+              "id": "chomp-poisoned-chocolate",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -1191,6 +1198,7 @@
             },
             {
               "type": "problem",
+              "id": "chess-double-move-variant",
               "difficulty": 1,
               "body": [
                 {
@@ -1336,6 +1344,7 @@
             },
             {
               "type": "problem",
+              "id": "divisor-addition-race",
               "difficulty": 1,
               "body": [
                 {
@@ -1596,6 +1605,7 @@
             },
             {
               "type": "problem",
+              "id": "fraction-slot-filling-game",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",

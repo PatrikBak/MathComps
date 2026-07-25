@@ -101,6 +101,7 @@
           "content": [
             {
               "type": "exercise",
+              "id": "verifying-power-difference-pattern",
               "body": [
                 {
                   "type": "paragraph",
@@ -201,6 +202,7 @@
             },
             {
               "type": "exercise",
+              "id": "guessing-odd-power-sum-pattern",
               "body": [
                 {
                   "type": "paragraph",
@@ -298,6 +300,7 @@
             },
             {
               "type": "theorem",
+              "id": "general-power-difference-formula",
               "body": [
                 {
                   "type": "paragraph",
@@ -391,6 +394,7 @@
             },
             {
               "type": "theorem",
+              "id": "general-odd-power-sum-formula",
               "body": [
                 {
                   "type": "paragraph",
@@ -550,6 +554,7 @@
             },
             {
               "type": "exercise",
+              "id": "practice-factoring-power-expressions",
               "body": [
                 {
                   "type": "paragraph",
@@ -738,6 +743,7 @@
             },
             {
               "type": "problem",
+              "id": "n5-minus-n-divisible-30",
               "difficulty": 0,
               "body": [
                 {
@@ -1068,6 +1074,7 @@
             },
             {
               "type": "problem",
+              "id": "power-sum-divisible-by-seven",
               "difficulty": 0,
               "body": [
                 {
@@ -1269,6 +1276,7 @@
             },
             {
               "type": "problem",
+              "id": "sixth-power-minus-one-three-primes",
               "difficulty": 1,
               "body": [
                 {
@@ -1458,6 +1466,7 @@
             },
             {
               "type": "example",
+              "id": "quartic-linear-difference-factoring",
               "body": [
                 {
                   "type": "paragraph",
@@ -1643,6 +1652,7 @@
             },
             {
               "type": "exercise",
+              "id": "three-variable-polynomial-factoring",
               "body": [
                 {
                   "type": "paragraph",
@@ -1989,6 +1999,7 @@
             },
             {
               "type": "exercise",
+              "id": "sum-of-squares-factor-pattern",
               "body": [
                 {
                   "type": "paragraph",
@@ -2108,6 +2119,7 @@
             },
             {
               "type": "problem",
+              "id": "symmetric-sums-divisibility",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -2523,6 +2535,7 @@
             },
             {
               "type": "example",
+              "id": "quartic-with-square-middle-term",
               "body": [
                 {
                   "type": "paragraph",
@@ -2624,6 +2637,7 @@
             },
             {
               "type": "exercise",
+              "id": "sophie-germain-identity",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -2711,6 +2725,7 @@
             },
             {
               "type": "problem",
+              "id": "quartic-expression-prime-values",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2928,6 +2943,7 @@
             },
             {
               "type": "problem",
+              "id": "factoring-sum-of-nth-powers",
               "difficulty": 1,
               "body": [
                 {
@@ -3197,6 +3213,7 @@
             },
             {
               "type": "problem",
+              "id": "heron-formula-factorization",
               "difficulty": 1,
               "body": [
                 {
@@ -3517,6 +3534,7 @@
             },
             {
               "type": "problem",
+              "id": "quartic-plus-power-of-four",
               "difficulty": 1,
               "body": [
                 {
@@ -3905,6 +3923,7 @@
             },
             {
               "type": "example",
+              "id": "sum-of-cubes-identity",
               "body": [
                 {
                   "type": "paragraph",
@@ -3973,6 +3992,7 @@
             },
             {
               "type": "theorem",
+              "id": "sum-of-cubes-inequality",
               "body": [
                 {
                   "type": "paragraph",

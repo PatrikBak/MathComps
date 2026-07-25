@@ -4,17 +4,18 @@ import { preload } from 'react-dom'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import { DefenseChatTrigger } from '@/components/features/defense/components/DefenseChatTrigger'
-import type {
-  Document,
-  HandoutData,
-  HandoutImage,
-  RawContentBlock,
-} from '@/components/features/handouts/handout-content-types'
-import { buildHandoutProblemKey } from '@/components/features/handouts/handout-problem-ref'
 import {
-  buildEnvAnchorId,
+  type Document,
+  type HandoutData,
+  type HandoutImage,
+  isEnvironmentBlock,
+  type RawContentBlock,
+} from '@/components/features/handouts/handout-content-types'
+import {
+  buildEnvironmentAnchorId,
   buildEnvironmentLabels,
   type HandoutsTranslator,
+  listDocumentEnvironments,
   type SectionMetadata,
 } from '@/components/features/handouts/handout-utils'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
@@ -30,7 +31,6 @@ import {
   ANSWER_TEXT_COLOR,
   ENVIRONMENT_BADGE,
   ENVIRONMENT_TEXT_COLOR,
-  type HandoutEnvironmentType,
   HINT_BADGE,
   HINT_TEXT_COLOR,
 } from './handout-colors'
@@ -118,25 +118,15 @@ function renderDocumentSections(
   // Translate the environment labels
   const localizedEnvironmentLabelByType = buildEnvironmentLabels(t)
 
-  // Translate the environment slugs
-  const environmentTypeSlugMap: Record<HandoutEnvironmentType, string> = {
-    theorem: t('environments.slugs.theorem'),
-    exercise: t('environments.slugs.exercise'),
-    example: t('environments.slugs.example'),
-    problem: t('environments.slugs.problem'),
-    definition: t('environments.slugs.definition'),
-  }
-
-  // Running counters per environment type — shared across the whole document,
-  // not reset per section. Pre-incremented at each environment site to claim
-  // the next number (e.g. "Theorem 3", "Definition 2").
-  const environmentCounters: Record<HandoutEnvironmentType, number> = {
-    theorem: 0,
-    exercise: 0,
-    example: 0,
-    problem: 0,
-    definition: 0,
-  }
+  // The document-wide display number for every environment, computed once so the numbering rule lives in
+  // exactly one place shared with the generated environment index. Keyed by the block itself rather than by its
+  // id: the blocks come from this very document, so every one of them is in here, whatever its id says.
+  const environmentNumbers = new Map(
+    listDocumentEnvironments(documentContent).map((environment) => [
+      environment.block,
+      environment.number,
+    ])
+  )
 
   // Render each section
   const renderedSections = documentContent.sections.map((section, index) => {
@@ -152,19 +142,17 @@ function renderDocumentSections(
         titleContent={<MathRendererClient content={section.title} />}
       >
         {section.text.content.map((contentBlock, contentBlockIndex) => {
-          if (
-            contentBlock.type === 'theorem' ||
-            contentBlock.type === 'exercise' ||
-            contentBlock.type === 'example' ||
-            contentBlock.type === 'problem' ||
-            contentBlock.type === 'definition'
-          ) {
-            // Pre-increment claims the next number for this environment type.
-            const environmentNumber = `${++environmentCounters[contentBlock.type]}`
+          if (isEnvironmentBlock(contentBlock)) {
+            // The document-wide display number claimed for this environment.
+            const environmentNumber = environmentNumbers.get(contentBlock)
 
-            // Hierarchical anchor ID, e.g. `"zakladne-vety-uloha-2"`. Format:
-            // `{section-slug}-{type-slug}-{number}`.
-            const environmentId = `${metadata.id}-${environmentTypeSlugMap[contentBlock.type]}-${environmentNumber}`
+            // The map holds every block of this document, so a miss means the walk stopped handing back the
+            // document's own blocks — a broken invariant, and one worth failing on rather than numbering from zero.
+            if (environmentNumber === undefined) {
+              throw new Error(
+                `[HandoutDetail] Environment block in "${section.title}" is absent from the document's environment list.`
+              )
+            }
 
             // Localized environment label, e.g. "Theorem" / "Definice" / "Úloha".
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
@@ -214,7 +202,7 @@ function renderDocumentSections(
               defenseReference.length > 0 ? (
                 <DefenseChatTrigger
                   problem={{
-                    key: buildHandoutProblemKey(contentId, contentBlock.type, environmentNumber),
+                    target: { handoutContentId: contentId, environmentId: contentBlock.id },
                     statement: blockSequenceToMarkdown(contentBlock.body),
                     reference: blockSequenceToMarkdown(defenseReference),
                     hints: defenseHints.map(blockSequenceToMarkdown),
@@ -306,22 +294,19 @@ function renderDocumentSections(
                 assertNever(contentBlock)
             }
 
+            // The environment as a collapsible card, anchored and keyed by its permanent id.
             return (
-              <div
-                key={`${metadata.label}-env-${contentBlockIndex}`}
-                id={buildEnvAnchorId(contentBlock.type, environmentNumber)}
+              <CollapsibleCard
+                key={contentBlock.id}
+                type={contentBlock.type}
+                title={mainTitle}
+                subtitle={subtitleBadge}
+                id={buildEnvironmentAnchorId(contentBlock.id)}
+                disclosures={disclosures}
+                headerAction={defenseTrigger}
               >
-                <CollapsibleCard
-                  type={contentBlock.type}
-                  title={mainTitle}
-                  subtitle={subtitleBadge}
-                  id={environmentId}
-                  disclosures={disclosures}
-                  headerAction={defenseTrigger}
-                >
-                  {renderBlocks(contentBlock.body, imagesById, imageMissingText)}
-                </CollapsibleCard>
-              </div>
+                {renderBlocks(contentBlock.body, imagesById, imageMissingText)}
+              </CollapsibleCard>
             )
           }
 

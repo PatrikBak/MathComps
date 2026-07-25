@@ -212,11 +212,6 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("examiner_config");
 
-                    b.Property<string>("ProblemKey")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("problem_key");
-
                     b.Property<string>("ProblemReference")
                         .IsRequired()
                         .HasColumnType("text")
@@ -234,8 +229,8 @@ namespace MathComps.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_defense_sessions");
 
-                    b.HasIndex("UserId", "ProblemKey")
-                        .HasDatabaseName("ix_defense_session_user_id_problem_key");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_defense_session_user_id");
 
                     b.ToTable("defense_sessions", (string)null);
                 });
@@ -368,6 +363,51 @@ namespace MathComps.Infrastructure.Migrations
                         .HasDatabaseName("ux_handout_comment_comment_id");
 
                     b.ToTable("handout_comments", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("content_id");
+
+                    b.Property<Guid>("HandoutId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handout_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_handout_environments");
+
+                    b.HasIndex("HandoutId", "ContentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_handout_environment_handout_id_content_id");
+
+                    b.ToTable("handout_environments", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironmentDefense", b =>
+                {
+                    b.Property<Guid>("DefenseSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("defense_session_id");
+
+                    b.Property<Guid>("HandoutEnvironmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handout_environment_id");
+
+                    b.HasKey("DefenseSessionId")
+                        .HasName("pk_handout_environment_defenses");
+
+                    b.HasIndex("HandoutEnvironmentId")
+                        .HasDatabaseName("ix_handout_environment_defense_handout_environment_id");
+
+                    b.ToTable("handout_environment_defenses", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>
@@ -1114,6 +1154,39 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Handout");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironment", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Handout", "Handout")
+                        .WithMany("Environments")
+                        .HasForeignKey("HandoutId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_handout_environments_handouts_handout_id");
+
+                    b.Navigation("Handout");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironmentDefense", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseSession", "DefenseSession")
+                        .WithOne("EnvironmentTarget")
+                        .HasForeignKey("MathComps.Domain.EfCoreEntities.HandoutEnvironmentDefense", "DefenseSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_handout_environment_defenses_defense_sessions_defense_sessi");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.HandoutEnvironment", "HandoutEnvironment")
+                        .WithMany("Defenses")
+                        .HasForeignKey("HandoutEnvironmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_handout_environment_defenses_handout_environments_handout_e");
+
+                    b.Navigation("DefenseSession");
+
+                    b.Navigation("HandoutEnvironment");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticleComment", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
@@ -1430,12 +1503,21 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseSession", b =>
                 {
+                    b.Navigation("EnvironmentTarget");
+
                     b.Navigation("Turns");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Handout", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Environments");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironment", b =>
+                {
+                    b.Navigation("Defenses");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>

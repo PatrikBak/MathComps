@@ -1,0 +1,24 @@
+{
+  "document": {
+    "title": "English only",
+    "sections": [
+      {
+        "title": "Only",
+        "level": 1,
+        "text": {
+          "content": [
+            {
+              "type": "problem",
+              "id": "only-en-problem",
+              "difficulty": 1,
+              "body": [],
+              "hints": [],
+              "solution": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "images": []
+}

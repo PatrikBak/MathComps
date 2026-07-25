@@ -401,13 +401,6 @@
       "example": "Example",
       "exercise": "Exercise",
       "problem": "Problem",
-      "slugs": {
-        "definition": "definition",
-        "example": "example",
-        "exercise": "exercise",
-        "problem": "problem",
-        "theorem": "theorem"
-      },
       "theorem": "Theorem"
     },
     "hero": {

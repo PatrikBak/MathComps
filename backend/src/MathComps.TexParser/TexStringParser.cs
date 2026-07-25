@@ -21,6 +21,7 @@ namespace MathComps.TexParser;
 /// <item><c>\\Problem{difficulty}{title}{body}{hint1}...{hintn}{solution}</c> (0+ hints)</item>
 /// <item><c>\\Highlight{paragraph}</c> (a paragraph that should stand out)</item>
 /// <item><c>\\Example{title}{body}{solution}</c></item>
+/// <item><c>\\EnvId{id}</c> gives the environment written beneath it a permanent identity.</item>
 /// <item><c>\\begitems ... \\enditems</c> for lists, with <c>\\i</c> for items. Optional style via <c>\\style code</c>.
 /// See <see cref="ListItemStyle"/> for the information about style codes.</item>
 /// <item><c>$$...$$</c> for display math and <c>$...$</c> for inline math.</item>
@@ -47,6 +48,55 @@ public static class TexStringParser
         { "N", ListItemStyle.NumberParens },
         { "I", ListItemStyle.UpperRoman },
     };
+
+    /// <summary>
+    /// The command name of the <c>\EnvId{...}</c> marker.
+    /// </summary>
+    private const string EnvIdCommand = "EnvId";
+
+    /// <summary>
+    /// The command name of the <c>\Theorem{title}{body}{proof}</c> environment.
+    /// </summary>
+    private const string TheoremCommand = "Theorem";
+
+    /// <summary>
+    /// The command name of the <c>\Exercise{title}{body}{solution}</c> environment.
+    /// </summary>
+    private const string ExerciseCommand = "Exercise";
+
+    /// <summary>
+    /// The command name of the <c>\Problem{difficulty}{title}{body}{hint1}...{hintn}{solution}</c> environment.
+    /// </summary>
+    private const string ProblemCommand = "Problem";
+
+    /// <summary>
+    /// The command name of the <c>\Example{title}{body}{solution}</c> environment.
+    /// </summary>
+    private const string ExampleCommand = "Example";
+
+    /// <summary>
+    /// The command name of the <c>\Definition{title}{body}</c> environment.
+    /// </summary>
+    private const string DefinitionCommand = "Definition";
+
+    /// <summary>
+    /// The command name of the <c>\Highlight{paragraph}</c> command, a paragraph that stands out rather than an
+    /// environment with an identity of its own.
+    /// </summary>
+    private const string HighlightCommand = "Highlight";
+
+    /// <summary>
+    /// The shape an <c>\EnvId</c> must have: lowercase alphanumeric words joined by single hyphens. An id travels
+    /// verbatim into a page anchor and a URL fragment, so an alphabet wider than this would ship a link that
+    /// resolves nowhere.
+    /// </summary>
+    private static readonly Regex _envIdPattern = new("^[a-z0-9]+(-[a-z0-9]+)*$");
+
+    /// <summary>
+    /// The longest an <c>\EnvId</c> may be, in characters. A slug naming what an environment is about needs a small
+    /// fraction of this; the cap is there so an id can't outgrow what an anchor and a URL fragment carry.
+    /// </summary>
+    private const int MaxEnvIdLength = 200;
 
     #endregion
 
@@ -168,11 +218,16 @@ public static class TexStringParser
         // A text is just a bunch of blocks
         var blocks = new List<ContentBlock>();
 
-        // Define a regex to find the start of any major block-level command.
-        var commandRegex = new Regex(@"\\(Theorem|Exercise|Problem|Example|Highlight|Definition)");
+        // Define a regex to find the start of any major block-level command. \EnvId is in there so the scan
+        // stops on it, even though it yields no block of its own.
+        var commandRegex = new Regex(
+            $@"\\({EnvIdCommand}|{TheoremCommand}|{ExerciseCommand}|{ProblemCommand}|{ExampleCommand}|{HighlightCommand}|{DefinitionCommand})");
 
         // Initialize the cursor for scanning the content string.
         var currentIndex = 0;
+
+        // The id read from the last \EnvId marker, waiting for the environment right under it to claim it.
+        string? pendingEnvId = null;
 
         // Loop through the content as long as there are characters to process.
         while (currentIndex < rawContent.Length)
@@ -192,12 +247,30 @@ public static class TexStringParser
                     // Extract the plain text segment.
                     var textSegment = rawContent[currentIndex..textEndIndex];
 
+                    // A marker labels the environment directly beneath it, so anything wedged in between
+                    // would hand its id to the wrong block.
+                    if (pendingEnvId is not null && !string.IsNullOrWhiteSpace(textSegment))
+                        throw new TexParserException($"\\{EnvIdCommand}{{{pendingEnvId}}} is separated from its environment by content at: {rawContent.PreviewAt(currentIndex)}");
+
                     // Process this text segment into paragraphs
                     blocks.AddRange(ParseRawContent(textSegment));
                 }
 
+                // Get the name of the command we stopped on.
+                var commandName = match.Groups[1].Value;
+
+                // A marker describes what comes after it, so bank its id and keep scanning.
+                if (commandName == EnvIdCommand)
+                {
+                    (pendingEnvId, currentIndex) = ParseEnvIdMarker(rawContent, match.Index, pendingEnvId);
+                    continue;
+                }
+
                 // Parse the command and its braced arguments.
-                var (commandBlock, newIndex) = ParseHighLevelCommandBlock(rawContent, match.Groups[1].Value, match.Index);
+                var (commandBlock, newIndex) = ParseHighLevelCommandBlock(rawContent, commandName, match.Index, pendingEnvId);
+
+                // The environment has taken the id; the next one needs a marker of its own.
+                pendingEnvId = null;
 
                 // Remember it
                 blocks.Add(commandBlock);
@@ -219,8 +292,49 @@ public static class TexStringParser
             }
         }
 
+        // A marker with no environment beneath it has drifted away from whatever it was written for.
+        if (pendingEnvId is not null)
+            throw new TexParserException($"\\{EnvIdCommand}{{{pendingEnvId}}} is not followed by an environment.");
+
         // Return the complete list of parsed blocks.
         return blocks;
+    }
+
+    /// <summary>
+    /// Reads an <c>\EnvId{...}</c> marker, which carries the permanent identity of the environment written
+    /// beneath it.
+    /// </summary>
+    /// <param name="sourceText">The TeX content to parse from.</param>
+    /// <param name="startIndex">The index of the marker's backslash.</param>
+    /// <param name="pendingEnvId">The id an earlier marker banked and no environment has claimed yet.</param>
+    /// <returns>A tuple containing the id and the index after the marker.</returns>
+    private static (string id, int endIndex) ParseEnvIdMarker(string sourceText, int startIndex, string? pendingEnvId)
+    {
+        // Two markers in a row means one of them lost its environment, and adopting either would label a
+        // block with an identity that belongs elsewhere.
+        if (pendingEnvId is not null)
+            throw new TexParserException($"\\{EnvIdCommand}{{{pendingEnvId}}} is followed by another \\{EnvIdCommand} at: {sourceText.PreviewAt(startIndex)}");
+
+        // The id is a single braced group right after the command name (+1 for the backslash).
+        if (!TryGetBracedContent(sourceText, startIndex + EnvIdCommand.Length + 1, out var id, out var endIndex))
+            throw new TexParserException($"\\{EnvIdCommand} is missing its braced id at: {sourceText.PreviewAt(startIndex)}");
+
+        // An empty marker names nothing.
+        if (id.Length == 0)
+            throw new TexParserException($"\\{EnvIdCommand} is empty at: {sourceText.PreviewAt(startIndex)}");
+
+        // An id the page can't turn into an anchor is worse than no id, so reject it where it's written.
+        if (!_envIdPattern.IsMatch(id))
+            throw new TexParserException(
+                $"\\{EnvIdCommand}{{{id}}} must be lowercase alphanumeric words joined by single hyphens at: {sourceText.PreviewAt(startIndex)}");
+
+        // A slug this long has stopped naming anything.
+        if (id.Length > MaxEnvIdLength)
+            throw new TexParserException(
+                $"\\{EnvIdCommand}{{{id}}} is longer than {MaxEnvIdLength} characters at: {sourceText.PreviewAt(startIndex)}");
+
+        // Hand back the id for the next environment to claim.
+        return (id, endIndex);
     }
 
     /// <summary>
@@ -229,9 +343,15 @@ public static class TexStringParser
     /// <param name="sourceText">The TeX content to parse from.</param>
     /// <param name="commandName">Already parsed name of the command (e.g. Theorem, Exercise)</param>
     /// <param name="startIndex">The starting index of the command.</param>
+    /// <param name="envId">The identity a preceding <c>\EnvId</c> marker gave this environment, if any.</param>
     /// <returns>A tuple containing the parsed block and the index after the block.</returns>
-    private static (ContentBlock block, int endIndex) ParseHighLevelCommandBlock(string sourceText, string commandName, int startIndex)
+    private static (ContentBlock block, int endIndex) ParseHighLevelCommandBlock(string sourceText, string commandName, int startIndex, string? envId)
     {
+        // \Highlight renders as a paragraph that stands out rather than as an environment, so it has no
+        // identity to carry and no field to put one in.
+        if (commandName == HighlightCommand && envId is not null)
+            throw new TexParserException($"\\{EnvIdCommand}{{{envId}}} sits above a \\{HighlightCommand}, which is a paragraph rather than an environment, at: {sourceText.PreviewAt(startIndex)}");
+
         // Calculate the starting position for parsing arguments (+1 for the backslash not in commandName).
         var argumentsStartIndex = startIndex + commandName.Length + 1;
 
@@ -239,13 +359,13 @@ public static class TexStringParser
         var (minimalArguments, maximalArguments) = commandName switch
         {
             // Highlight has 1 argument (it's just a special paragraph)
-            "Highlight" => (1, 1),
+            HighlightCommand => (1, 1),
 
             // Definition has 2 arguments (title + body)
-            "Definition" => (2, 2),
+            DefinitionCommand => (2, 2),
 
             // Problem has variable arguments
-            "Problem" => (4, (int?)null),
+            ProblemCommand => (4, (int?)null),
 
             // All others have 3 arguments.
             _ => (3, 3),
@@ -265,24 +385,26 @@ public static class TexStringParser
         // Create the specific content block based on the command type.
         ContentBlock newBlock = commandName switch
         {
-            "Theorem" => new Theorem(
+            TheoremCommand => new Theorem(
+                Id: envId,
                 Title: ParseAtMostSingleRawBlock(arguments[0]),
                 Body: [.. ParseRawContent(arguments[1])],
                 Proof: [.. ParseRawContent(arguments[2])]
             ),
 
-            "Exercise" => BuildExercise(arguments),
+            ExerciseCommand => BuildExercise(arguments, envId),
 
-            "Problem" => BuildProblem(arguments),
+            ProblemCommand => BuildProblem(arguments, envId),
 
-            "Example" => BuildExample(arguments),
+            ExampleCommand => BuildExample(arguments, envId),
 
-            "Highlight" => new Paragraph(
+            HighlightCommand => new Paragraph(
                 Content: [.. ParseRawContent(arguments[0])],
                 Highligted: true
             ),
 
-            "Definition" => new Definition(
+            DefinitionCommand => new Definition(
+                Id: envId,
                 Title: ParseAtMostSingleRawBlock(arguments[0]),
                 Body: [.. ParseRawContent(arguments[1])]
             ),
@@ -300,14 +422,16 @@ public static class TexStringParser
     /// <c>\Answer{...}</c> off the solution into the structured answer field.
     /// </summary>
     /// <param name="arguments">The raw braced arguments of the <c>\Problem</c> command.</param>
+    /// <param name="envId"><inheritdoc cref="ParseHighLevelCommandBlock" path="/param[@name='envId']"/></param>
     /// <returns>The parsed problem block.</returns>
-    private static Problem BuildProblem(List<string> arguments)
+    private static Problem BuildProblem(List<string> arguments, string? envId)
     {
         // Pull the optional final answer off the front of the solution argument.
         var (answer, solution) = SplitLeadingAnswer(arguments[^1]);
 
         // Assemble the problem; hints are everything between body and solution.
         return new Problem(
+            Id: envId,
             Difficulty: int.Parse(arguments[0]),
             Title: ParseAtMostSingleRawBlock(arguments[1]),
             Body: [.. ParseRawContent(arguments[2])],
@@ -322,14 +446,16 @@ public static class TexStringParser
     /// <c>\Answer{...}</c> off the solution into the structured answer field.
     /// </summary>
     /// <param name="arguments">The raw braced arguments of the <c>\Exercise</c> command.</param>
+    /// <param name="envId"><inheritdoc cref="ParseHighLevelCommandBlock" path="/param[@name='envId']"/></param>
     /// <returns>The parsed exercise block.</returns>
-    private static Exercise BuildExercise(List<string> arguments)
+    private static Exercise BuildExercise(List<string> arguments, string? envId)
     {
         // Pull the optional final answer off the front of the solution argument.
         var (answer, solution) = SplitLeadingAnswer(arguments[2]);
 
         // Assemble the exercise.
         return new Exercise(
+            Id: envId,
             Title: ParseAtMostSingleRawBlock(arguments[0]),
             Body: [.. ParseRawContent(arguments[1])],
             Answer: answer is null ? null : [.. ParseRawContent(answer)],
@@ -342,14 +468,16 @@ public static class TexStringParser
     /// <c>\Answer{...}</c> off the solution into the structured answer field.
     /// </summary>
     /// <param name="arguments">The raw braced arguments of the <c>\Example</c> command.</param>
+    /// <param name="envId"><inheritdoc cref="ParseHighLevelCommandBlock" path="/param[@name='envId']"/></param>
     /// <returns>The parsed example block.</returns>
-    private static Example BuildExample(List<string> arguments)
+    private static Example BuildExample(List<string> arguments, string? envId)
     {
         // Pull the optional final answer off the front of the solution argument.
         var (answer, solution) = SplitLeadingAnswer(arguments[2]);
 
         // Assemble the example.
         return new Example(
+            Id: envId,
             Title: ParseAtMostSingleRawBlock(arguments[0]),
             Body: [.. ParseRawContent(arguments[1])],
             Answer: answer is null ? null : [.. ParseRawContent(answer)],
