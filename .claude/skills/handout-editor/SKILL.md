@@ -76,6 +76,8 @@ Ignore all warnings — do not investigate, fix, or mention them — with one ex
 \Problem{#1 stars}{#2 source}{#3 statement}{#4 hint1}{#5 hint2}...{#n solution}
 ```
 
+**`\EnvId{id}`** — a permanent identity marker on the line directly above one of the five environment macros above. Every existing environment already carries one; when adding a brand-new environment, mint an id yourself: a readable slug (`[a-z0-9-]`) describing what the environment is visibly about, never its competition source and never its solution technique (the id lands in the page URL). **Never invent, drop, or rewrite an existing `\EnvId`** — it is permanent identity, not a display artifact, and a saved AI-examiner defense conversation is keyed on it. When translating or propagating a change to another language variant, copy the id verbatim (see `handout-translate`).
+
 **`\Problem` stars argument** must be a non-negative integer (`0`, `1`, `2`, …). Never leave it empty (`{}`). Use `{0}` when the difficulty is unspecified.
 
 **`\Answer{result}`** — an optional final answer (a number, expression, yes/no) for a `\Problem`, `\Exercise`, or `\Example`. Place it at the START of the solution argument, with the worked solution on the next line; it renders as an italic `Výsledok:` / `Výsledek:` / `Answer:` line above the solution and feeds a separate collapsible answer on the web. Omit it for proof-style problems with no short result — never write `\Answer{}`. Example:
@@ -93,6 +95,7 @@ When the user asks to **reformat or transcribe** (e.g. "convert this old format"
 ### Canonical `\Problem` example
 
 ```tex
+\EnvId{orthocenter-triangle-reflection}
 \Problem{1}{IMO 2013, G1}{
     Let $ABC$ be an acute triangle with orthocenter $H$ \dots
 }{

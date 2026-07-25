@@ -1,0 +1,21 @@
+{
+  "sections": [
+    {
+      "categoryKey": "fixture",
+      "category": { "en": "Fixture", "sk": "Fixture", "cs": "Fixture" },
+      "handouts": [
+        {
+          "id": "fixture-handout-1",
+          "fileSlug": "fixture",
+          "slug": { "en": "fixture", "sk": "fixture", "cs": "fixture" },
+          "title": { "en": "Fixture", "sk": "Fixture", "cs": "Fixture" },
+          "description": { "en": "A fixture.", "sk": "Fixture.", "cs": "Fixture." },
+          "difficulty": 1,
+          "authors": ["Test"],
+          "publishedAt": "2026-01-01",
+          "updatedAt": "2026-01-01"
+        }
+      ]
+    }
+  ]
+}

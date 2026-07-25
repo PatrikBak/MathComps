@@ -230,6 +230,7 @@
             },
             {
               "type": "exercise",
+              "id": "vertical-corresponding-alternate-supplementary",
               "body": [
                 {
                   "type": "paragraph",
@@ -661,6 +662,7 @@
             },
             {
               "type": "theorem",
+              "id": "triangle-angle-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -868,6 +870,7 @@
             },
             {
               "type": "theorem",
+              "id": "convex-polygon-angle-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -1569,6 +1572,7 @@
             },
             {
               "type": "exercise",
+              "id": "parallel-lines-segment-angle-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -1724,6 +1728,7 @@
             },
             {
               "type": "exercise",
+              "id": "triangle-exterior-remote-angles",
               "body": [
                 {
                   "type": "paragraph",
@@ -2088,6 +2093,7 @@
             },
             {
               "type": "example",
+              "id": "triangle-from-three-sides",
               "body": [
                 {
                   "type": "paragraph",
@@ -2364,6 +2370,7 @@
             },
             {
               "type": "exercise",
+              "id": "triangle-from-two-sides-angle",
               "body": [
                 {
                   "type": "paragraph",
@@ -2619,6 +2626,7 @@
             },
             {
               "type": "exercise",
+              "id": "triangle-from-side-two-angles",
               "body": [
                 {
                   "type": "paragraph",
@@ -2885,6 +2893,7 @@
             },
             {
               "type": "problem",
+              "id": "triangle-two-sides-opposite-angle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3466,6 +3475,7 @@
             },
             {
               "type": "theorem",
+              "id": "isosceles-triangle-base-angles",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4103,6 +4113,7 @@
             },
             {
               "type": "exercise",
+              "id": "equilateral-triangle-angles",
               "body": [
                 {
                   "type": "paragraph",
@@ -4223,6 +4234,7 @@
             },
             {
               "type": "exercise",
+              "id": "isosceles-right-triangle-angles",
               "body": [
                 {
                   "type": "paragraph",
@@ -4377,6 +4389,7 @@
             },
             {
               "type": "problem",
+              "id": "right-triangle-double-hypotenuse",
               "difficulty": 0,
               "body": [
                 {
@@ -4909,6 +4922,7 @@
             },
             {
               "type": "theorem",
+              "id": "segment-perpendicular-bisector-locus",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -5466,6 +5480,7 @@
             },
             {
               "type": "theorem",
+              "id": "triangle-circumcenter-existence",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -5930,6 +5945,7 @@
             },
             {
               "type": "theorem",
+              "id": "angle-bisector-locus-points",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -6502,6 +6518,7 @@
             },
             {
               "type": "exercise",
+              "id": "internal-external-bisector-perpendicular",
               "body": [
                 {
                   "type": "paragraph",
@@ -6677,6 +6694,7 @@
             },
             {
               "type": "theorem",
+              "id": "triangle-incenter-existence",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -7021,6 +7039,7 @@
             },
             {
               "type": "theorem",
+              "id": "triangle-excenter-existence",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -7683,6 +7702,7 @@
             },
             {
               "type": "problem",
+              "id": "isosceles-chain-configuration",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8442,6 +8462,7 @@
             },
             {
               "type": "problem",
+              "id": "square-inscribed-equilateral-triangles",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8705,6 +8726,7 @@
             },
             {
               "type": "problem",
+              "id": "trapezoid-angle-bisectors-meet",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -9028,6 +9050,7 @@
             },
             {
               "type": "problem",
+              "id": "pentagon-equal-sides-angles",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -9411,6 +9434,7 @@
             },
             {
               "type": "problem",
+              "id": "quadrilateral-diagonal-angles-30-45",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

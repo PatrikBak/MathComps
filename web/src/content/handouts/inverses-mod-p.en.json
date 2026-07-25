@@ -375,6 +375,7 @@
           "content": [
             {
               "type": "theorem",
+              "id": "unique-reciprocal-mod-p",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -470,6 +471,7 @@
             },
             {
               "type": "theorem",
+              "id": "sum-of-fractions-mod-p",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -529,6 +531,7 @@
             },
             {
               "type": "theorem",
+              "id": "product-of-fractions-mod-p",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -615,6 +618,7 @@
             },
             {
               "type": "problem",
+              "id": "p-minus-1-factorial",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -700,6 +704,7 @@
             },
             {
               "type": "problem",
+              "id": "sum-two-squares-mod-p",
               "difficulty": 0,
               "body": [
                 {
@@ -977,6 +982,7 @@
             },
             {
               "type": "problem",
+              "id": "a2-ab-b2-mod-p",
               "difficulty": 0,
               "body": [
                 {
@@ -1149,6 +1155,7 @@
             },
             {
               "type": "problem",
+              "id": "binomial-p-1-choose-k",
               "difficulty": 0,
               "body": [
                 {
@@ -1242,6 +1249,7 @@
             },
             {
               "type": "problem",
+              "id": "harmonic-sum-mod-p",
               "difficulty": 0,
               "body": [
                 {
@@ -1354,6 +1362,7 @@
             },
             {
               "type": "problem",
+              "id": "2m-3m-6m-minus-1",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1595,6 +1604,7 @@
             },
             {
               "type": "problem",
+              "id": "product-k2-k-1",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1764,6 +1774,7 @@
             },
             {
               "type": "problem",
+              "id": "half-range-power-sum",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1957,6 +1968,7 @@
             },
             {
               "type": "problem",
+              "id": "binomial-2p-choose-p",
               "difficulty": 0,
               "body": [
                 {
@@ -2155,6 +2167,7 @@
             },
             {
               "type": "problem",
+              "id": "power-e-reciprocal-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -2312,6 +2325,7 @@
             },
             {
               "type": "problem",
+              "id": "harmonic-sum-mod-p-squared",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

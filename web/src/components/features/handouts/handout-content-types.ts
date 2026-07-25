@@ -144,6 +144,8 @@ export type RawContentBlock =
 type TheoremBlock = {
   /** Discriminator */
   type: 'theorem'
+  /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
+  id: string
   /** Optional inline title (can contain math/formatting, e.g., "Pythagorean Theorem") */
   title?: RawContentBlock | null
   /** The main statement of the theorem */
@@ -156,6 +158,8 @@ type TheoremBlock = {
 type ExerciseBlock = {
   /** Discriminator */
   type: 'exercise'
+  /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
+  id: string
   /** Optional inline title (can contain math/formatting) */
   title?: RawContentBlock | null
   /** The exercise statement/question */
@@ -170,6 +174,8 @@ type ExerciseBlock = {
 type ProblemBlock = {
   /** Discriminator */
   type: 'problem'
+  /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
+  id: string
   /** Difficulty rating (typically 1-5 or similar scale) */
   difficulty: number
   /** Optional inline title (can contain math/formatting) */
@@ -188,6 +194,8 @@ type ProblemBlock = {
 type ExampleBlock = {
   /** Discriminator */
   type: 'example'
+  /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
+  id: string
   /** Optional inline title (can contain math/formatting) */
   title?: RawContentBlock | null
   /** The example setup/problem */
@@ -202,23 +210,38 @@ type ExampleBlock = {
 type DefinitionBlock = {
   /** Discriminator */
   type: 'definition'
+  /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
+  id: string
   /** Optional inline title naming the concept being defined */
   title?: RawContentBlock | null
   /** The definition statement */
   body: RawContentSequence
 }
 
-/**
- * Union type representing any possible content block.
- * Includes both raw inline types and structured environment blocks.
- */
-type ContentBlock =
-  | RawContentBlock
+/** One of the five numbered environments: theorem, exercise, problem, example, or definition. */
+export type EnvironmentBlock =
   | TheoremBlock
   | ExerciseBlock
   | ProblemBlock
   | ExampleBlock
   | DefinitionBlock
+
+/**
+ * Union type representing any possible content block.
+ * Includes both raw inline types and structured environment blocks.
+ */
+type ContentBlock = RawContentBlock | EnvironmentBlock
+
+/**
+ * Whether a content block is one of the five numbered environments, each carrying a permanent id.
+ *
+ * @param block - The content block to test.
+ *
+ * @returns Whether the block is an {@link EnvironmentBlock}.
+ */
+export function isEnvironmentBlock(block: ContentBlock): block is EnvironmentBlock {
+  return (HANDOUT_ENVIRONMENT_TYPES as readonly string[]).includes(block.type)
+}
 
 /** A container for a sequence of content blocks. */
 type Text = {

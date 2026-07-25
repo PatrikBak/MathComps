@@ -13,6 +13,8 @@ For each matched `.tex` file, the tool runs these steps in order:
 5. **Upload images** — pushes SVGs to R2 under `handouts/<slug>/<image>.svg`, where `<slug>` is the language-stripped handout id (so all language variants share one image set). Only SVGs whose on-disk mtime differs from the value recorded in `data/handouts/.r2-uploads.json` are pushed — unchanged figures are skipped.
 6. **Upload PDFs** — uploads compiled main + skeleton PDFs to R2 under `handouts/pdfs/<file>.pdf` (flat layout; every handout's PDFs share one folder)
 
+Once every matched file is processed, the tool regenerates `web/src/content/handout-env-index.json` once for the whole run (see [Validation](#validation) below), unless run with `--skip-index`.
+
 ## Prerequisites
 
 ### R2 Credentials
@@ -93,6 +95,7 @@ dotnet run -- --compiler pdfcsplain *.sk.tex
 | `--skip-upload`  | `false`                                              | Skip uploading PDFs and images to R2                                                              |
 | `--skip-asy`     | `false`                                              | Skip the Asymptote staleness check + recompilation entirely                                       |
 | `--force-asy`    | `false`                                              | Recompile every `.asy`-backed figure regardless of staleness (used after a semantic `_common.asy` edit) |
+| `--skip-index`   | `false`                                              | Skip regenerating `handout-env-index.json` (used in CI, which never installs `web/`'s dependencies) |
 | `--error-log`    | `errors.log`                                         | Path to the error log appended to on compiler failure                                             |
 
 ## Image pipeline (Asymptote)
@@ -146,14 +149,18 @@ The tool preserves the original filename structure:
 
 ## Adding New Handouts
 
-1. Create `.tex` files in `data/handouts/` for each locale (e.g. `my-handout.sk.tex`, `my-handout.en.tex`, `my-handout.cs.tex`)
-2. Run the build (it automatically discovers and processes new files)
-3. Update `web/src/content/handouts.json` with localized `slug`, `title`, and `description`
+1. Create `.tex` files in `data/handouts/` for each locale (e.g. `my-handout.sk.tex`, `my-handout.en.tex`, `my-handout.cs.tex`) — write an `\EnvId{...}` above every `\Problem`/`\Theorem`/`\Exercise`/`\Example`/`\Definition` as you go (see `_template.tex` and the `handout-editor` skill for the authoring rules)
+2. Update `web/src/content/handouts.json` with localized `slug`, `title`, and `description`
+3. Run the build (it automatically discovers and processes new files)
+
+Note: `TexEmitter` (used only for skeleton generation) does not carry `\EnvId`s forward — skeletons are PDF-only build artifacts, excluded from JSON parsing.
 
 ## Validation
 
-The frontend includes a validation script to ensure all ready handouts have content files for all locales:
+The frontend includes a validation script to ensure all ready handouts have content files for all locales, every environment has an id unique within its handout, and every language variant agrees on the id sequence:
 
 ```bash
 cd web && npm run handouts:validate
 ```
+
+It also checks that the generated `web/src/content/handout-env-index.json` — the `envId → {type, number}` lookup the site's defense library uses to label a saved conversation — is up to date. A local build regenerates it automatically; CI runs the build with `--skip-index` (its generator needs `web/`'s dependencies, which the backend CI job never installs) and relies on this check to catch drift instead.

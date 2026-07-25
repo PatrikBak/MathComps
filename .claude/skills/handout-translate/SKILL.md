@@ -22,6 +22,7 @@ Scope:
 - One source `.tex` file → one target `.tex` file in `data/handouts/`. Keep the source filename stem; change only the language suffix (e.g., `factorization.en.tex` → `factorization.sk.tex`).
 - Translate **all prose**: statements, solutions, `\Answer` results, section headings, footnotes, intro text.
 - Keep all math, macro names, and structure identical.
+- **Copy every `\EnvId{...}` verbatim, in the same position.** It is the environment's permanent identity, shared across every language variant on purpose — a saved AI-examiner defense conversation is keyed on it. Never invent a new id, never drop one, never translate or reorder it.
 - Set the correct `\setlanguage{...}` and `\MathcompsLink{...}` slug.
 - Match the target language's label conventions used in existing handouts.
 
@@ -48,5 +49,7 @@ Steps:
 1. **Identify the change.** Pin down what changed on the source side via `git diff`, the user's pointer ("the solution to problem 3"), or recent in-session edits. List each changed passage as a discrete item.
 2. **Identify the targets.** List the other-language variants that exist (`<stem>.<lang>.tex` siblings of the source).
 3. **For each target file, for each changed item:** locate the parallel passage (by problem number, exercise number, or section heading), translate the delta applying that language's conventions (CS/SK `|\angle XYZ|` / `|AB|` vs EN bare `\angle XYZ` / `AB`, American spellings for EN, etc.), apply with `Edit`. When the source uses a construction without a clean target-language analogue (compact noun forms like SK `n-číslie`, idiomatic particles, telegraphic nominalizations), rephrase rather than transliterate — a parsable sentence isn't the same as one a native would write. For substantial additions (a whole new `\Problem` block, a multi-paragraph proof rewrite), switch to Workflow A's glossary-aware translation pattern for that region.
+   - **A brand-new environment** (one the target doesn't have yet) already carries its `\EnvId` on the source side — it was written directly when the environment was authored. Copy that exact id into the target; never mint a fresh one here. A new environment on the source with no `\EnvId` above it is a bug in the source, not something to work around: stop and flag it (or add the id to the source yourself) rather than inventing an id for the target that the source doesn't share — that silently creates two different ids for what should be one environment.
+   - **An existing environment's `\EnvId`** never changes — copy it exactly, never re-mint or drop it, even when reformatting the block around it.
 4. **Compile each modified target.** From `data/handouts/`: `pdfcsplain -interaction=nonstopmode -halt-on-error "<file>"`. Fix and recompile on error.
 5. **Report** one sentence per target file (e.g. "Propagated 2 fixes to .sk and .en.").

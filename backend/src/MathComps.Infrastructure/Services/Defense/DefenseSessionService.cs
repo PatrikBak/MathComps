@@ -43,7 +43,7 @@ public class DefenseSessionService(
     {
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
-        EnsureNotBlank(start.ProblemKey);
+        EnsureTargetPresent(start.Target);
         EnsureNotBlank(start.Statement);
         EnsureNotBlank(start.Reference);
         EnsureNotBlank(start.Opener);
@@ -53,7 +53,8 @@ public class DefenseSessionService(
         var reference = AuthorHintsSection.BuildReference(start.Reference, start.Hints);
 
         // Bound each input before doing anything with it; the reference is bounded with its hints folded in.
-        EnsureWithinLength(start.ProblemKey, _limits.MaxProblemKeyChars);
+        EnsureWithinLength(start.Target.HandoutContentId, _limits.MaxHandoutContentIdChars);
+        EnsureWithinLength(start.Target.EnvironmentId, _limits.MaxEnvironmentIdChars);
         EnsureWithinLength(start.Statement, _limits.MaxStatementChars);
         EnsureWithinLength(reference, _limits.MaxReferenceChars);
         EnsureWithinLength(start.Opener, _limits.MaxOpenerChars);
@@ -68,6 +69,9 @@ public class DefenseSessionService(
         // Refuse the turn if the user is already over their spend ceiling.
         await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
 
+        // The anchor row for the environment being defended, upserted on demand.
+        var handoutEnvironmentId = await UpsertHandoutEnvironmentAsync(dbContext, start.Target, cancellationToken);
+
         // One timestamp for the session and its seed turns.
         var seededAt = DateTimeOffset.UtcNow;
 
@@ -75,7 +79,6 @@ public class DefenseSessionService(
         var session = new DefenseSession
         {
             UserId = userId,
-            ProblemKey = start.ProblemKey,
             ProblemStatement = start.Statement,
             ProblemReference = reference,
             ExaminerConfig = _examinerConfigJson,
@@ -94,11 +97,18 @@ public class DefenseSessionService(
         // Track the new session.
         dbContext.DefenseSessions.Add(session);
 
-        // Persist the session, its turns, and the spend row in one write.
+        // And the environment it defends.
+        dbContext.HandoutEnvironmentDefenses.Add(new HandoutEnvironmentDefense
+        {
+            DefenseSessionId = session.Id,
+            HandoutEnvironmentId = handoutEnvironmentId,
+        });
+
+        // Persist the session, its turns, its target, and the spend row in one write.
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the full conversation.
-        return ToDto(session);
+        return ToDto(session, start.Target);
     }
 
     /// <inheritdoc/>
@@ -118,14 +128,26 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Load the session with its turns.
-        var session = await dbContext.DefenseSessions
+        // The session with its turns (tracked, for the append below), and the two content ids of the environment
+        // it defends.
+        var loaded = await dbContext.DefenseSessions
             .Include(defenseSession => defenseSession.Turns)
-            .FirstOrDefaultAsync(defenseSession => defenseSession.Id == sessionId, cancellationToken);
+            .Where(defenseSession => defenseSession.Id == sessionId)
+            .Select(defenseSession => new
+            {
+                Session = defenseSession,
+                Target = new HandoutEnvironmentTarget(
+                    defenseSession.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
+                    defenseSession.EnvironmentTarget.HandoutEnvironment.ContentId),
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
         // Treat another user's session, or a missing one, as absent.
-        if (session is null || session.UserId != userId)
+        if (loaded is null || loaded.Session.UserId != userId)
             throw new DefenseSessionNotFoundException();
+
+        // The tracked session the rest of this method appends to and saves.
+        var session = loaded.Session;
 
         // Count the student's turns so far.
         var studentTurns = session.Turns.Count(turn => turn.Role == TranscriptRole.Candidate);
@@ -147,27 +169,30 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the grown conversation.
-        return ToDto(session);
+        return ToDto(session, loaded.Target);
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<DefenseSessionDto>> ListAsync(
-        Guid userId, string problemKey, CancellationToken cancellationToken = default)
+        Guid userId, HandoutEnvironmentTarget target, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions for this problem, oldest first, each with its turns.
+        // The user's sessions against this environment, oldest first, each with its turns.
         var sessions = await dbContext.DefenseSessions
             .AsNoTracking()
-            .Where(session => session.UserId == userId && session.ProblemKey == problemKey)
+            .Where(session => session.UserId == userId
+                && session.EnvironmentTarget != null
+                && session.EnvironmentTarget.HandoutEnvironment.ContentId == target.EnvironmentId
+                && session.EnvironmentTarget.HandoutEnvironment.Handout.ContentId == target.HandoutContentId)
             .OrderBy(session => session.CreatedAt)
-            .Select(session => new { session.Id, session.ProblemKey, Turns = session.Turns.ToList() })
+            .Select(session => new { session.Id, Turns = session.Turns.ToList() })
             .ToListAsync(cancellationToken);
 
-        // Project each to its client shape.
+        // Project each to its client shape; every session in this list defends the same target.
         return [.. sessions.Select(session => new DefenseSessionDto(
-            session.Id, session.ProblemKey, ToTurnDtos(session.Turns)))];
+            session.Id, target, ToTurnDtos(session.Turns)))];
     }
 
     /// <inheritdoc/>
@@ -177,17 +202,19 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions across every problem, newest first, each with its problem, statement, start time,
-        // and the message the student opened with.
+        // The user's sessions across every problem, newest first, each with its target, statement, start time,
+        // and the message the student opened with. A session with no linked environment is excluded.
         return await dbContext.DefenseSessions
             .AsNoTracking()
-            .Where(session => session.UserId == userId)
+            .Where(session => session.UserId == userId && session.EnvironmentTarget != null)
             .OrderByDescending(session => session.CreatedAt)
             // Ids are time-ordered v7 Guids, so they break a tie in the same direction the timestamps would.
             .ThenByDescending(session => session.Id)
             .Select(session => new DefenseSessionListItemDto(
                 session.Id,
-                session.ProblemKey,
+                new HandoutEnvironmentTarget(
+                    session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
+                    session.EnvironmentTarget.HandoutEnvironment.ContentId),
                 session.ProblemStatement,
                 session.CreatedAt,
                 session.Turns
@@ -201,22 +228,22 @@ public class DefenseSessionService(
     /// <inheritdoc/>
     public async Task DeleteAsync(Guid userId, Guid sessionId, CancellationToken cancellationToken = default)
     {
+        // Serialize against this user's turns: an in-flight continue or rewind saves at the very end, so without
+        // the gate a delete could remove the session first and turn that save into a foreign-key failure.
+        using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);
+
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Load the session.
-        var session = await dbContext.DefenseSessions
-            .FirstOrDefaultAsync(defenseSession => defenseSession.Id == sessionId, cancellationToken);
+        // Delete the session, filtering on the owner so another user's id can't reach it. The cascade drops the
+        // session's turns; the spend rows are independent and stay.
+        var deleted = await dbContext.DefenseSessions
+            .Where(session => session.Id == sessionId && session.UserId == userId)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        // Treat another user's session, or a missing one, as absent.
-        if (session is null || session.UserId != userId)
+        // Nothing deleted means the session is missing or someone else's, which read the same from here.
+        if (deleted == 0)
             throw new DefenseSessionNotFoundException();
-
-        // Mark the session for removal; the cascade drops its turns, the spend rows are independent and stay.
-        dbContext.DefenseSessions.Remove(session);
-
-        // Commit the delete.
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -230,12 +257,14 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Load the session for the ownership check.
-        var session = await dbContext.DefenseSessions
-            .FirstOrDefaultAsync(defenseSession => defenseSession.Id == sessionId, cancellationToken);
+        // The session's owner. Null when no session with this id exists.
+        var ownerId = await dbContext.DefenseSessions
+            .Where(session => session.Id == sessionId)
+            .Select(session => (Guid?)session.UserId)
+            .FirstOrDefaultAsync(cancellationToken);
 
         // Treat another user's session, or a missing one, as absent.
-        if (session is null || session.UserId != userId)
+        if (ownerId != userId)
             throw new DefenseSessionNotFoundException();
 
         // The role of the turn to keep as the new last one, or null when the sequence is out of range.
@@ -416,6 +445,21 @@ public class DefenseSessionService(
     }
 
     /// <summary>
+    /// Throws when the environment being defended is missing or either half of it is blank.
+    /// </summary>
+    /// <param name="target">The environment to check, null when the request omitted it entirely.</param>
+    private static void EnsureTargetPresent(HandoutEnvironmentTarget? target)
+    {
+        // A request that omits the target names nothing to defend, which is a bad request like any blank field.
+        if (target is null)
+            throw new DefenseMessageEmptyException();
+
+        // Both halves are needed to locate the environment, so neither may be blank.
+        EnsureNotBlank(target.HandoutContentId);
+        EnsureNotBlank(target.EnvironmentId);
+    }
+
+    /// <summary>
     /// Throws when a value exceeds its length cap.
     /// </summary>
     /// <param name="value">The text to bound.</param>
@@ -431,9 +475,30 @@ public class DefenseSessionService(
     /// Projects a session to its client shape, turns in order and roles as wire strings.
     /// </summary>
     /// <param name="session">The session to project.</param>
+    /// <param name="target">The environment the session defends.</param>
     /// <returns>The session's client shape.</returns>
-    private static DefenseSessionDto ToDto(DefenseSession session) =>
-        new(session.Id, session.ProblemKey, ToTurnDtos(session.Turns));
+    private static DefenseSessionDto ToDto(DefenseSession session, HandoutEnvironmentTarget target) =>
+        new(session.Id, target, ToTurnDtos(session.Turns));
+
+    /// <summary>
+    /// Finds the anchor row for the environment being defended, creating the handout's and the environment's anchor
+    /// rows on demand when either is seen for the first time.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="target">The environment to anchor.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The environment anchor row's id.</returns>
+    private static async Task<Guid> UpsertHandoutEnvironmentAsync(
+        MathCompsDbContext dbContext, HandoutEnvironmentTarget target, CancellationToken cancellationToken)
+    {
+        // The handout the environment hangs off.
+        var handoutId = await ContentAnchors.EnsureHandoutAsync(
+            dbContext, target.HandoutContentId, cancellationToken);
+
+        // The environment itself, scoped to that handout.
+        return await ContentAnchors.EnsureHandoutEnvironmentAsync(
+            dbContext, handoutId, target.EnvironmentId, cancellationToken);
+    }
 
     /// <summary>
     /// Projects a session's turns to their client shape, in sequence order and roles as wire strings.

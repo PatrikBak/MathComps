@@ -59,7 +59,7 @@ type UseDefenseConversationResult = DefenseConversationState &
  * A thin React binding over {@link DefenseConversationModel}: the model owns the state machine and its
  * concurrency, this hook wires it to React and to the session-history query. The problem's identity
  * must be stable for the life of the mount: the model is created once and keeps writing under the
- * first problem's key.
+ * first problem's target.
  *
  * @param problem - The problem being defended.
  * @param opener - The examiner's opening line, seeded as the first turn of a fresh conversation.
@@ -111,13 +111,13 @@ export function useDefenseConversation(
 
   // This problem's persisted sessions, oldest first
   const sessionsQuery = useQuery({
-    queryKey: defenseSessionsQueryKey(problem.key, isUserLoaded ? (userId ?? null) : null),
+    queryKey: defenseSessionsQueryKey(problem.target, isUserLoaded ? (userId ?? null) : null),
     queryFn: async () => {
       // The client must be ready to fetch
       if (apiCall === null) throw new Error('API not ready')
 
       // Fetch the sessions, unwrapped to the list or a throw
-      return unwrap(await listSessions(apiCall, problem.key))
+      return unwrap(await listSessions(apiCall, problem.target))
     },
     // Only fetch once the client is ready and the key's user is settled
     enabled: apiCall !== null && isUserLoaded,

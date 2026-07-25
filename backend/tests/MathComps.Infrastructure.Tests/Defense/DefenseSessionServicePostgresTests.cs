@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
@@ -74,7 +75,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             limits.MaxStatementChars = 1000;
             limits.MaxReferenceChars = 1000;
             limits.MaxOpenerChars = 1000;
-            limits.MaxProblemKeyChars = 200;
+            limits.MaxHandoutContentIdChars = 30;
+            limits.MaxEnvironmentIdChars = 200;
             limits.MaxTurnsPerSession = 2;
             limits.DailySpendCeilingPerUser = 1.00m;
         });
@@ -170,6 +172,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             continued.Turns.Select(turn => turn.Role));
         Assert.Equal("my next point", continued.Turns[3].Content);
 
+        // Continue rebuilds the target from the stored rows rather than echoing a caller's copy, and its two
+        // halves are same-typed strings, so nothing but this pins them the right way round
+        Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), continued.Target);
+
         // Count the user's spend rows
         var spendCount = await QueryValueAsync(context =>
             context.DefenseSpends.CountAsync(spend => spend.UserId == _ownerId));
@@ -190,11 +196,34 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.StartAsync(_otherId, Request("prob-1", "someone else"));
 
         // List the owner's sessions for problem 1
-        var sessions = await service.ListAsync(_ownerId, "prob-1");
+        var sessions = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
 
         // Only the owner's single prob-1 session comes back
         var listed = Assert.Single(sessions);
         Assert.Equal(first.Id, listed.Id);
+    });
+
+    /// <summary>
+    /// An environment id is unique only within its handout, not site-wide, so listing must scope by both: the same
+    /// id string in a different handout is a different environment entirely.
+    /// </summary>
+    [Fact]
+    public Task List_scopes_by_handout_not_just_environment_id() => RunTestAsync(async service =>
+    {
+        // The same environment id, "prob-1", in two different handouts
+        var inFirstHandout = await service.StartAsync(_ownerId, Request("prob-1", "first handout"));
+        await service.StartAsync(_ownerId, Request("prob-1", "second handout", "handout-2"));
+
+        // List against handout-1's prob-1
+        var sessions = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+
+        // Only that handout's session comes back
+        var listed = Assert.Single(sessions);
+        Assert.Equal(inFirstHandout.Id, listed.Id);
+
+        // And it names the environment the right way round. The two halves are same-typed strings, so a swapped
+        // projection would otherwise sail past every filter assertion above.
+        Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), listed.Target);
     });
 
     /// <summary>
@@ -220,8 +249,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // The newest of them
         var newest = sessions[0];
 
-        // It carries its problem key, snapshotted statement, and the student's first message
-        Assert.Equal("prob-1", newest.ProblemKey);
+        // It carries its target, snapshotted statement, and the student's first message
+        Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), newest.Target);
         Assert.Equal("the statement", newest.Statement);
         Assert.Equal("third", newest.FirstStudentMessage);
     });
@@ -287,6 +316,44 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             () => service.RewindAsync(_otherId, session.Id, 0));
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.DeleteAsync(_otherId, session.Id));
+    });
+
+    /// <summary>
+    /// An id matching no session at all reads as absent on continue, rewind, and delete — a different branch from
+    /// the wrong-owner case, since delete distinguishes the two only by how many rows its statement removed.
+    /// </summary>
+    [Fact]
+    public Task A_session_that_never_existed_is_not_found() => RunTestAsync(async service =>
+    {
+        // An id no session was ever minted under
+        var missingId = Guid.CreateVersion7();
+
+        // Every operation that names a session treats it as absent
+        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
+            () => service.ContinueAsync(_ownerId, missingId, "into the void"));
+        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
+            () => service.RewindAsync(_ownerId, missingId, 0));
+        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
+            () => service.DeleteAsync(_ownerId, missingId));
+    });
+
+    /// <summary>
+    /// Anchor rows are minted once and reused. Defending the same environment twice must not mint a second row for
+    /// it, and a second environment must hang off the handout row already there rather than a duplicate of it.
+    /// </summary>
+    [Fact]
+    public Task Repeated_starts_reuse_the_handout_and_environment_anchors() => RunTestAsync(async service =>
+    {
+        // Two defenses of the same environment, then one of a second environment in the same handout
+        await service.StartAsync(_ownerId, Request("prob-1", "first go"));
+        await service.StartAsync(_ownerId, Request("prob-1", "second go"));
+        await service.StartAsync(_ownerId, Request("prob-2", "a different problem"));
+
+        // The handout was anchored once and reused by all three
+        Assert.Equal(1, await QueryValueAsync(context => context.Handouts.CountAsync()));
+
+        // And each distinct environment exactly once
+        Assert.Equal(2, await QueryValueAsync(context => context.HandoutEnvironments.CountAsync()));
     });
 
     /// <summary>
@@ -386,6 +453,42 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Nothing was written
         Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// A start that omits the target entirely is a bad request, not a server fault: the field arrives null through
+    /// JSON, and dereferencing it would surface as a 500 instead of the refusal every other missing field gets.
+    /// </summary>
+    [Fact]
+    public Task Missing_target_is_refused() => RunTestAsync(async service =>
+    {
+        // A start whose target never made it through the wire
+        var start = new DefenseSessionStart(null!, "the statement", "the reference", "the opener", "my defense");
+
+        // Starting with it is refused the same way a blank field is
+        await Assert.ThrowsAsync<DefenseMessageEmptyException>(
+            () => service.StartAsync(_ownerId, start));
+
+        // Nothing was written
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// A handout content id longer than its anchor column is refused up front. The two ids have different caps, so
+    /// a length that clears the environment half would still be too long to store as a handout id.
+    /// </summary>
+    [Fact]
+    public Task Over_length_handout_content_id_is_refused() => RunTestAsync(async service =>
+    {
+        // Past the 30-char handout cap, but well inside the 200-char environment one
+        var tooLong = new string('x', 31);
+
+        // Starting against it is refused rather than failing the write
+        await Assert.ThrowsAsync<DefenseMessageTooLongException>(
+            () => service.StartAsync(_ownerId, Request("prob-1", "my defense", tooLong)));
+
+        // No anchor row was minted for it either
+        Assert.Equal(0, await QueryValueAsync(context => context.Handouts.CountAsync()));
     });
 
     /// <summary>
@@ -718,13 +821,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
-    /// Builds a session start for a problem and student message, with throwaway statement, reference, and opener.
+    /// Builds a session start for an environment and student message, with throwaway statement, reference, and
+    /// opener. Every call shares one throwaway handout unless <paramref name="handoutContentId"/> is overridden, so
+    /// <paramref name="environmentId"/> alone is enough to tell targets apart across most of these tests.
     /// </summary>
-    /// <param name="problemKey">The problem key.</param>
+    /// <param name="environmentId">The environment's id within its handout.</param>
     /// <param name="content">The student's first message.</param>
+    /// <param name="handoutContentId">The handout the environment belongs to.</param>
     /// <returns>The session start.</returns>
-    private static DefenseSessionStart Request(string problemKey, string content) =>
-        new(problemKey, "the statement", "the reference", "the opener", content);
+    private static DefenseSessionStart Request(string environmentId, string content, string handoutContentId = "handout-1") =>
+        new(new HandoutEnvironmentTarget(handoutContentId, environmentId), "the statement", "the reference", "the opener", content);
 
     /// <summary>
     /// An examiner that folds a fixed usage into the turn's accumulator, like a real call would, optionally cancels the

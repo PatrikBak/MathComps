@@ -73,7 +73,7 @@ function MathildaDefenseRow({
   const format = useFormatter()
 
   // The handout location this defense was about, or null when its handout is unknown in this locale
-  const ref = resolveHandoutProblemRef(defense.problemKey, locale)
+  const ref = resolveHandoutProblemRef(defense.target, locale)
 
   // The localized environment word per type, e.g. "Úloha" / "Theorem"
   const environmentLabels = buildEnvironmentLabels(tHandouts)
@@ -244,14 +244,14 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
     refresh()
   }
 
-  // The problem to hand the conversation when a defense is open: only its key and the statement snapshotted onto
-  // the session. The reference solution stays with the problem, which is why the conversation may only continue
-  // this session and never open a fresh one.
+  // The problem to hand the conversation when a defense is open: only its target and the statement snapshotted
+  // onto the session. The reference solution stays with the problem, which is why the conversation may only
+  // continue this session and never open a fresh one.
   const conversationProblem: DefenseProblem | null =
     selected === null
       ? null
       : {
-          key: selected.problemKey,
+          target: selected.target,
           statement: selected.statement,
           reference: '',
           hints: [],

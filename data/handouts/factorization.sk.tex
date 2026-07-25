@@ -24,6 +24,7 @@ V tejto časti si postupne predstavíme štyri kľúčové techniky rozkladu na 
 
 \secc Vzorce pre rozdiel a súčet mocnín
 
+\EnvId{verifying-power-difference-pattern}
 \Exercise{}{
 	Presvedčte sa roznásobením, že platí 
 	\begitems \style i
@@ -36,6 +37,7 @@ V tejto časti si postupne predstavíme štyri kľúčové techniky rozkladu na 
 	Odpoveďou na otázku je Tvrdenie 1.
 }
 
+\EnvId{guessing-odd-power-sum-pattern}
 \Exercise{}{
 	Presvedčte sa roznásobením, že platí 
 	\begitems \style i
@@ -49,6 +51,7 @@ V tejto časti si postupne predstavíme štyri kľúčové techniky rozkladu na 
 
 Po chvíli skúmania iste vymyslíme všeobecné vzorce:
 
+\EnvId{general-power-difference-formula}
 \Theorem{}{
 	Pre všetky reálne čísla $a,b$ a~prirodzené $n$ platí
 	$$
@@ -67,6 +70,7 @@ Po chvíli skúmania iste vymyslíme všeobecné vzorce:
 
 Situácia s~$a^n+b^n$ je kurioznejšia v~tom, že takýto rozklad funguje iba pre nepárne~$n$. Z~dôkazu vidieť prečo:
 
+\EnvId{general-odd-power-sum-formula}
 \Theorem{}{
 	Pre všetky reálne čísla $a,b$ a~nepárne prirodzené $n$ platí
 	$$
@@ -78,6 +82,7 @@ Situácia s~$a^n+b^n$ je kurioznejšia v~tom, že takýto rozklad funguje iba pr
 
 Ako je to pre párne $n$? O~výraze $a^2+b^2$ sa dá dokázať, že sa naozaj nedá rozložiť na súčin (v obore reálnych čísel). Všetky ďalšie $a^n+b^n$ sa však rozložiť dajú, k~čomu sa postupne dopracujeme. 
 
+\EnvId{practice-factoring-power-expressions}
 \Exercise{}{
 	Rozložte na súčin dvoch výrazov bez odmocnín ($n,k$ sú prirodzené čísla).
 	\begitems \style i
@@ -100,6 +105,7 @@ Ako je to pre párne $n$? O~výraze $a^2+b^2$ sa dá dokázať, že sa naozaj ne
 
 V~zložitejších úlohách je rozklad typicky len jeden z~viacerých krokov. Môžeme si vyskúšať:
 
+\EnvId{n5-minus-n-divisible-30}
 \Problem{0}{}{
 	Dokážte, že pre každé prirodzené~$n$ platí, že číslo $n^5-n$ je deliteľné 30.
 }{
@@ -116,6 +122,7 @@ V~zložitejších úlohách je rozklad typicky len jeden z~viacerých krokov. M�
 	\enditems
 }
 
+\EnvId{power-sum-divisible-by-seven}
 \Problem{0}{}{
 	Nájdite tri rôzne dvojice prirodzených čísel $(a,b)$ také, že číslo $a^{37} + b^{37}$ je deliteľné~$7$ a~$0<a<b<7$.
 }{
@@ -128,6 +135,7 @@ V~zložitejších úlohách je rozklad typicky len jeden z~viacerých krokov. M�
 	Platí $a^{37}+b^{37}=(a+b)(a^{36}+\cdots+b^{36})$, takže $a+b \mid a^{37}+b^{37}$, takže stačí, aby $7 \mid a+b$. To už ľahko docielime dvojicami $(a,b)$ rovnými $(1,6), (2,5), (3,4)$.
 }
 
+\EnvId{sixth-power-minus-one-three-primes}
 \Problem{1}{}{
 	Nájdite všetky prirodzené čísla $n$ väčšie ako 1 také, že $n^6-1$ je súčinom troch nie nutne rôznych prvočísel.
 }{
@@ -148,6 +156,7 @@ V~zložitejších úlohách je rozklad typicky len jeden z~viacerých krokov. M�
 
 Bežný školský postup postupného rozkladu funguje aj v~ťažších úlohách. Idea je: všimnime si, že sa niečo dá vybrať pred zátvorku; vyberme to; a~uvidíme, čo sa stane ďalej. K~tomuto postupu existuje veľmi dôležitý trik použiteľný aj v~ťažších úloh: \textit{sledujme, kedy je výraz nulový}.
 
+\EnvId{quartic-linear-difference-factoring}
 \Example{}{
 	Rozložte výraz $a^4-a-b^4+b$ na súčin. 
 }{
@@ -161,6 +170,7 @@ Bežný školský postup postupného rozkladu funguje aj v~ťažších úlohách
 
 Tento pohľad vysvetľuje, prečo vo vzorcoch $a^n-b^n$ a~$a^n+b^n$ z~predošlej sekcie máme $a-b$ a~$a+b$; a~tiež prečo druhý vyžaduje nepárne $n$ -- pre $a=b$ resp. $a=-b$ sú $a^n-b^n$ resp. $a^n + b^n$ nulové.
 
+\EnvId{three-variable-polynomial-factoring}
 \Exercise{}{Rozložte na súčin: 
 \begitems \style i
 \i [2 činitele] $2ab+a+2b+1$
@@ -222,6 +232,7 @@ Tento pohľad vysvetľuje, prečo vo vzorcoch $a^n-b^n$ a~$a^n+b^n$ z~predošlej
 
 Tento pohľad nie je univerzálny, lebo rozložené činitele vôbec nemusia byť lineárne alebo môžu byť zložitejšie a~je ťažšie vidieť koreň. Vtedy nám neostáva nič iné, len sa hrať s~preusporiadaním členov a~postupným vynímaním. 
 
+\EnvId{sum-of-squares-factor-pattern}
 \Exercise{}{
 	Rozložte na súčin dvoch výrazov: 
 	\begitems \style i
@@ -256,6 +267,7 @@ Tento pohľad nie je univerzálny, lebo rozložené činitele vôbec nemusia by�
 
 Skrytý rozklad a~ďalšie algebraické úpravy ide úspešne využiť v~tomto príklade:
 
+\EnvId{symmetric-sums-divisibility}
 \Problem{1}{CPSJ\fnote{Česko-Poľsko-Slovensko stretnutie Juniorov} 2018}{Pre prirodzené čísla $a,b,c$ platí 
 $$
 (a + b + c)^2 \mid ab(a + b) + bc(b + c) + ca(c + a) + 3abc.
@@ -311,6 +323,7 @@ Z~toho už ľahko odvodíme vzorec pre riešenia kvadratickej rovnice.
 
 Vo všeobecnosti sme vlastne použili $a^2+2ab = (a+b)^2 - b^2$. Dopĺňať na štvorec však môžeme aj tak, že \uv{vyrobíme} prostredný koeficient, teda použijeme vzorec $a^2+b^2=(a+b)^2-2ab$. Toto si demonštrujeme na nasledovnom príklade:
 
+\EnvId{quartic-with-square-middle-term}
 \Example{}{
     Rozložte $m^4+m^2n^2+n^4$ na súčin.
 }{
@@ -330,6 +343,7 @@ Vo všeobecnosti sme vlastne použili $a^2+2ab = (a+b)^2 - b^2$. Dopĺňať na �
 
 Precvičte si to na odvodení známej identity:
 
+\EnvId{sophie-germain-identity}
 \Exercise{Sophie-Germain identita\fnote{Volá sa po Sophie Germainovej, jednej z~najvýznamnejších matematičiek na prelome 18. a~19. storočia. V~dobe, keď ženy nemali prístup na univerzity, si sama študovala matematiku a~korešpondovala s~najväčšími matematikmi svojej doby, ako bol Gauss, spočiatku pod mužským pseudonymom.}
 }{
 	Rozložte $a^4+4b^4$ na súčin.
@@ -344,6 +358,7 @@ Precvičte si to na odvodení známej identity:
 
 Skúste si príklad z~celoštátneho kola MO:
 
+\EnvId{quartic-expression-prime-values}
 \Problem{0}{CKMO 2012}{
 	Určte všetky prirodzené čísla $n$, pre ktoré je $n^4 - 3n^2 + 9$ prvočíslo.
 }{
@@ -372,6 +387,7 @@ Skúste si príklad z~celoštátneho kola MO:
 
 Naučené techniky sa pekne dajú dať dokopy v~tomto pozorovaní:
 
+\EnvId{factoring-sum-of-nth-powers}
 \Problem{1}{}{
 	Zdôvodnite, že výraz $a^n+b^n$ ide pre každé $n>2$ rozložiť na súčin nekonštantných výrazov s~reálnymi koeficientami.
 	
@@ -405,6 +421,7 @@ Naučené techniky sa pekne dajú dať dokopy v~tomto pozorovaní:
 
 Ešte pár ťažších úloh na precvičenie:
 
+\EnvId{heron-formula-factorization}
 \Problem{1}{}{
     Rozložte $2a^2b^2+2b^2c^2+2c^2a^2-a^4-b^4-c^4$ na súčin štyroch nekonštantných zátvoriek.
 }{
@@ -452,6 +469,7 @@ Ešte pár ťažších úloh na precvičenie:
 	$$
 }
 
+\EnvId{quartic-plus-power-of-four}
 \Problem{1}{}{
 	Pre ktoré prirodzené čísla $n$ je číslo $n^4 + 4^n$ prvočíslo?
 }{
@@ -495,6 +513,7 @@ a^3 + b^3 = (a+b)^3 - 3ab(a+b).
 $$
 Ukážeme si to na príklade:
 
+\EnvId{sum-of-cubes-identity}
 \Example{}{
 	Rozložte $a^3+b^3+c^3-3abc$ na súčin.
 }{
@@ -516,6 +535,7 @@ Ukážeme si to na príklade:
 
 Tento rozklad je sám osebe veľmi zaujímavý, umožňuje nám totiž ľahko dokázať nerovnosť:
 
+\EnvId{sum-of-cubes-inequality}
 \Theorem{}{
 	Nech $a,b,c$ sú reálne čísla, pre ktoré platí $a+b+c \ge 0$. Potom 
 	$$

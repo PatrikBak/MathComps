@@ -1,5 +1,7 @@
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
+import type { HandoutEnvironmentType } from './handout-content-types'
+
 /**
  * Type definitions for handout documents loaded from the handout index JSON file.
  * Do not modify the structure without coordinating with the handout index JSON schema.
@@ -104,3 +106,26 @@ export function getContentFileBasename(handout: HandoutMetadata): string {
   // Use the explicit fileSlug when provided (required for handouts without an English slug)
   return handout.fileSlug ?? handout.slug.en
 }
+
+/**
+ * One handout environment's address: which handout, and which environment within it. The environment's identity
+ * is only unique within its own handout, so both parts are needed to locate it. Mirrors the backend's own
+ * `HandoutEnvironmentTarget` — the wire shape is this object directly.
+ */
+export type HandoutEnvironmentTarget = {
+  /** The handout's permanent content id. */
+  handoutContentId: string
+  /** The environment's permanent id, unique within its handout. */
+  environmentId: string
+}
+
+/** Where one environment sits in its handout. */
+type HandoutEnvPlacement = {
+  /** The environment's type. */
+  type: HandoutEnvironmentType
+  /** The document-wide, per-type number the page displays for it. */
+  number: number
+}
+
+/** Every handout environment on the site, keyed by handout content id, then by environment id. */
+export type HandoutEnvIndex = Record<string, Record<string, HandoutEnvPlacement>>

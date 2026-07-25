@@ -304,6 +304,12 @@
   \fi%
 }
 
+% The permanent identity of the environment on the next line, written once and never changed.
+% Every language variant of a handout gives the same environment the same id. TeX has no use for
+% it -- the web build reads it out of the source -- so it expands to nothing, and \ignorespaces
+% keeps it invisible even if somebody writes it in the middle of a paragraph.
+\def\EnvId#1{\ignorespaces}
+
 % Counters for already defined exercises, theorems etc
 \newcount\exercises
 \newcount\theorems

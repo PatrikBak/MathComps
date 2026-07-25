@@ -79,6 +79,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Anchor entity for file-based handouts.</summary>
     public DbSet<Handout> Handouts => Set<Handout>();
 
+    /// <summary>Anchor entity for one environment within a file-based handout.</summary>
+    public DbSet<HandoutEnvironment> HandoutEnvironments => Set<HandoutEnvironment>();
+
+    /// <summary>Which environment a defense session defends.</summary>
+    public DbSet<HandoutEnvironmentDefense> HandoutEnvironmentDefenses => Set<HandoutEnvironmentDefense>();
+
     /// <summary>Anchor entity for news articles.</summary>
     public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
 
@@ -680,6 +686,50 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion Handout
 
+        #region HandoutEnvironment
+
+        modelBuilder.Entity<HandoutEnvironment>(e =>
+        {
+            // Environments belong to their handout, cascading so deleting it drops them.
+            e.HasOne(env => env.Handout)
+             .WithMany(h => h.Environments)
+             .HasForeignKey(env => env.HandoutId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // An environment's id is only unique within its own handout, not site-wide.
+            e.HasIndex(env => new { env.HandoutId, env.ContentId })
+             .IsUnique()
+             .HasDatabaseName("ux_handout_environment_handout_id_content_id");
+        });
+
+        #endregion HandoutEnvironment
+
+        #region HandoutEnvironmentDefense
+
+        modelBuilder.Entity<HandoutEnvironmentDefense>(e =>
+        {
+            // A session defends exactly one environment, so its own id doubles as this row's key.
+            e.HasKey(defense => defense.DefenseSessionId);
+
+            // The session this row extends, sharing its id as this table's own key.
+            e.HasOne(defense => defense.DefenseSession)
+             .WithOne(session => session.EnvironmentTarget)
+             .HasForeignKey<HandoutEnvironmentDefense>(defense => defense.DefenseSessionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Defenses belong to their environment, cascading so deleting it drops them.
+            e.HasOne(defense => defense.HandoutEnvironment)
+             .WithMany(env => env.Defenses)
+             .HasForeignKey(defense => defense.HandoutEnvironmentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // A user's history for one environment is the list query.
+            e.HasIndex(defense => defense.HandoutEnvironmentId)
+             .HasDatabaseName("ix_handout_environment_defense_handout_environment_id");
+        });
+
+        #endregion HandoutEnvironmentDefense
+
         #region NewsArticle
 
         modelBuilder.Entity<NewsArticle>(e =>
@@ -762,9 +812,8 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasForeignKey(turn => turn.SessionId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // A user's history for one problem is the list query, in creation order.
-            e.HasIndex(session => new { session.UserId, session.ProblemKey })
-             .HasDatabaseName("ix_defense_session_user_id_problem_key");
+            // Every list query starts from the owner.
+            e.HasIndex(session => session.UserId).HasDatabaseName("ix_defense_session_user_id");
         });
 
         #endregion DefenseSession

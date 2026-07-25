@@ -630,6 +630,7 @@
             },
             {
               "type": "theorem",
+              "id": "triangle-centers-basic-angles",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -800,6 +801,7 @@
             },
             {
               "type": "theorem",
+              "id": "incenter-excenter-midpoint",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -916,6 +918,7 @@
             },
             {
               "type": "theorem",
+              "id": "two-excenters-midpoint",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1050,6 +1053,7 @@
             },
             {
               "type": "theorem",
+              "id": "spiral-similarity-pairs",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1112,6 +1116,7 @@
             },
             {
               "type": "theorem",
+              "id": "orthocenter-reflections",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1522,6 +1527,7 @@
             },
             {
               "type": "problem",
+              "id": "equiangular-pentagon-bisectors",
               "difficulty": 0,
               "body": [
                 {
@@ -1601,6 +1607,7 @@
             },
             {
               "type": "problem",
+              "id": "median-cevian-equal-lengths",
               "difficulty": 0,
               "body": [
                 {
@@ -1797,6 +1804,7 @@
             },
             {
               "type": "problem",
+              "id": "orthocenter-line-through-midpoint",
               "difficulty": 0,
               "body": [
                 {
@@ -2029,6 +2037,7 @@
             },
             {
               "type": "problem",
+              "id": "quadrilateral-midpoints-diagonals",
               "difficulty": 0,
               "body": [
                 {
@@ -2117,6 +2126,7 @@
             },
             {
               "type": "problem",
+              "id": "cyclic-quadrilateral-orthocenters",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2215,6 +2225,7 @@
             },
             {
               "type": "problem",
+              "id": "isosceles-trapezoid-orthocenter",
               "difficulty": 0,
               "body": [
                 {
@@ -2375,6 +2386,7 @@
             },
             {
               "type": "problem",
+              "id": "midpoint-right-angle-cyclic-quad",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2581,6 +2593,7 @@
             },
             {
               "type": "problem",
+              "id": "diagonal-intersection-feet-midpoint",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2769,6 +2782,7 @@
             },
             {
               "type": "problem",
+              "id": "parallelogram-point-angle-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -2902,6 +2916,7 @@
             },
             {
               "type": "problem",
+              "id": "hexagon-equal-sides-angle-sum",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3054,6 +3069,7 @@
             },
             {
               "type": "problem",
+              "id": "quadrilateral-equal-angles-circumcenter",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3203,6 +3219,7 @@
             },
             {
               "type": "problem",
+              "id": "triangle-altitude-circumcenter-midpoint",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3436,6 +3453,7 @@
             },
             {
               "type": "problem",
+              "id": "tangent-line-midpoint-circle",
               "difficulty": 0,
               "body": [
                 {
@@ -3632,6 +3650,7 @@
             },
             {
               "type": "problem",
+              "id": "trapezoid-ratio-points-concyclic",
               "difficulty": 0,
               "body": [
                 {
@@ -3936,6 +3955,7 @@
             },
             {
               "type": "problem",
+              "id": "cyclic-quadrilateral-four-points-perpendicular",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4187,6 +4207,7 @@
             },
             {
               "type": "problem",
+              "id": "quadrilateral-equal-sides-midpoints-concyclic",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4420,6 +4441,7 @@
             },
             {
               "type": "problem",
+              "id": "trapezoid-diagonal-point-angles",
               "difficulty": 0,
               "body": [
                 {
@@ -4580,6 +4602,7 @@
             },
             {
               "type": "problem",
+              "id": "equal-segments-perpendicular-bisectors-arcs",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4840,6 +4863,7 @@
             },
             {
               "type": "problem",
+              "id": "incircle-tangent-points-midpoints",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5175,6 +5199,7 @@
             },
             {
               "type": "problem",
+              "id": "triangle-arc-midpoints-concyclic",
               "difficulty": 0,
               "body": [
                 {
@@ -5371,6 +5396,7 @@
             },
             {
               "type": "problem",
+              "id": "circle-tangent-reflection-point",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5694,6 +5720,7 @@
             },
             {
               "type": "problem",
+              "id": "orthocenter-two-circles-collinear",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6062,6 +6089,7 @@
             },
             {
               "type": "problem",
+              "id": "triangle-angle-points-circumcircle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6385,6 +6413,7 @@
             },
             {
               "type": "problem",
+              "id": "orthic-triangle-incenters-circumcenters",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6654,6 +6683,7 @@
             },
             {
               "type": "problem",
+              "id": "angle-bisector-quadrilateral-circle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7004,6 +7034,7 @@
             },
             {
               "type": "problem",
+              "id": "circumcenter-concyclic-point-angles",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7246,6 +7277,7 @@
             },
             {
               "type": "problem",
+              "id": "pentagon-circumcenters-line",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7434,6 +7466,7 @@
             },
             {
               "type": "problem",
+              "id": "parallel-cevian-points-concyclic",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7847,6 +7880,7 @@
             },
             {
               "type": "problem",
+              "id": "right-triangle-altitude-equal-lengths",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8197,6 +8231,7 @@
             },
             {
               "type": "problem",
+              "id": "altitude-points-orthocenter-circle",
               "difficulty": 0,
               "body": [
                 {
@@ -8454,6 +8489,7 @@
             },
             {
               "type": "problem",
+              "id": "unit-segments-perimeter-split",
               "difficulty": 0,
               "body": [
                 {
@@ -8767,6 +8803,7 @@
             },
             {
               "type": "problem",
+              "id": "thales-circles-common-tangent",
               "difficulty": 0,
               "body": [
                 {
@@ -8849,6 +8886,7 @@
             },
             {
               "type": "problem",
+              "id": "hexagon-inscribed-circle-diagonals",
               "difficulty": 0,
               "body": [
                 {

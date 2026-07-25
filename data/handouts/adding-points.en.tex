@@ -91,6 +91,7 @@ We can also form hypotheses. A good hypothesis is the key to solving hard proble
 
 In today's problems we will need several statements that are generally very useful and worth being able to apply directly in a complex diagram. Here is a short list of some of the most important ones that could also aid us in solving the handout's problems:
 
+\EnvId{triangle-centers-basic-angles}
 \Theorem{Basic angles}{Let $ABC$ be an acute triangle. Then:
 
 \begitems
@@ -101,12 +102,16 @@ In today's problems we will need several statements that are generally very usef
 \enditems
 }{}
 
+\EnvId{incenter-excenter-midpoint}
 \Theorem{Švrček point}{Let $ABC$ be a triangle with incenter~$I$ and $AB\neq AC$. Let~$I_a$ be the $A$-excenter. Then the angle bisector of~$\angle BAC$ and the perpendicular bisector of~$BC$ meet on the circumcircle of~$ABC$ at a point which is the midpoint of segment~$II_a$ and also the circumcenter of quadrilateral $BICI_a$.}{}
 
+\EnvId{two-excenters-midpoint}
 \Theorem{Anti-Švrček point}{Let $ABC$ be a triangle with $AB\neq AC$. Let $I_b$ and~$I_c$ be the $B$-excenter and $C$-excenter respectively. Then the external bisector of~$\angle BAC$ and the perpendicular bisector of~$BC$ meet on the circumcircle of~$ABC$ at a point~$M$ which is the midpoint of segment~$I_bI_c$ and also the circumcenter of quadrilateral $BCI_bI_c$.}{}
 
+\EnvId{spiral-similarity-pairs}
 \Theorem{Spiral similarity comes in pairs}{If triangles~$OBC$ and~$OB_0C_0$ are similar and equally oriented, then triangles $OBB_0$ and $OCC_0$ are also similar.}{}
 
+\EnvId{orthocenter-reflections}
 \Theorem{Reflecting the orthocenter}{Let $ABC$ be a triangle with orthocenter~$H$. Then:
 \begitems
 \i the reflection of~$H$ over line~$BC$ lies on the circumcircle of~$ABC$,
@@ -154,6 +159,7 @@ The following problems are of roughly four types:
 
 The following problems are roughly ordered by difficulty and use roughly speaking \uv{standard} tricks.
 
+\EnvId{equiangular-pentagon-bisectors}
 \Problem{0}{}{
     A pentagon~$ABCDE$ has all interior angles equal. Prove that the perpendicular bisector of~$AB$, the perpendicular bisector of~$CD$, and the bisector of angle~$DEA$ meet at a single point.
 }{
@@ -162,6 +168,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The equal angles can be used by intersecting suitable pairs of extended sides, producing isosceles triangles. The perpendicular bisectors of sides suddenly have a completely different meaning.
 }{}
 
+\EnvId{median-cevian-equal-lengths}
 \Problem{0}{}{
     Inside triangle~$ABC$, on its median~$AM$, there is a point~$K$ such that $CK=AB$. Let~$L$ be the intersection of lines~$CK$ and~$AB$. Prove that triangle~$AKL$ is isosceles.
 }{
@@ -170,6 +177,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is to reflect~$A$ through~$M$ to~$A'$, which gives strong meaning to~$M$ since the equality~$AB=CK$ suddenly becomes~$A'C=CK$.
 }{}
 
+\EnvId{orthocenter-line-through-midpoint}
 \Problem{0}{}{
     Let $ABC$ be an acute triangle with orthocenter~$H$, and let~$M$ be the midpoint of~$BC$. Points~$P$ and~$Q$ lie on sides~$AB$ and~$AC$ respectively such that $P$, $H$, $Q$ are collinear on a line perpendicular to~$MH$. Prove that $HP = HQ$.
 }{
@@ -178,6 +186,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     If~$H'$ is the image of~$H$ under the point reflection through~$M$, then we know it lands on the circumcircle of~$ABC$ at the point opposite~$A$. Have some cyclic quadrilaterals appeared?
 }{}
 
+\EnvId{quadrilateral-midpoints-diagonals}
 \Problem{0}{}{
     In a quadrilateral~$ABCD$, the line connecting the midpoints of sides~$BC$ and~$AD$ makes equal angles with both diagonals. Prove that the diagonals are equal in length.
 }{
@@ -186,6 +195,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     A good midpoint to add is the midpoint of~$AB$ or~$CD$. Thanks to the parallelism coming from the midlines we can neatly rephrase the condition from the statement. Then we finish it off.
 }{}
 
+\EnvId{cyclic-quadrilateral-orthocenters}
 \Problem{0}{Czech-Slovak Olympiad 2009}{
     Let $ABCD$ be a cyclic quadrilateral. Prove that the line connecting the orthocenter of triangle~$ABC$ with the orthocenter of triangle~$ABD$ is parallel to line~$CD$.
 }{
@@ -194,6 +204,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     First, it suffices to show that the segment connecting the orthocenters has the same length as~$CD$ (then we have a parallelogram). This realization gives us confidence that when we reflect these orthocenters over an axis, we still have a good statement to prove, namely the equality of two chords of the circle.
 }{}
 
+\EnvId{isosceles-trapezoid-orthocenter}
 \Problem{0}{}{
     Let $ABCD$ be an isosceles trapezoid with $AB \parallel CD$ inscribed in a circle with center~$O$. Let~$H$ be the orthocenter of triangle $ABD$ and let~$P$ be the intersection of~$DH$ and~$AB$. Prove that $CH \parallel OP$.
 }{
@@ -202,6 +213,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Let~$H'$ be the image of~$H$ under reflection over~$AB$. It lands on the circumcircle of~$ABCD$. Now the diagram contains everything we need and it only remains to connect a few facts.
 }{}
 
+\EnvId{midpoint-right-angle-cyclic-quad}
 \Problem{0}{Poland 2002}{
     Let $ABCD$ be a convex quadrilateral with $AB<BC$ and $AD<CD$. Points $P$ and~$Q$ lie on~$BC$ and~$CD$ respectively such that $BP=BA$ and $DQ=DA$. Let~$M$ be the midpoint of~$PQ$. Prove that if $\angle BMD=90^\circ$, then $ABCD$ is a cyclic quadrilateral.
 }{
@@ -210,6 +222,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is to reflect, say,~$D$ through~$M$. After marking all the equal segments arising from the resulting parallelogram and the isosceles triangle, something should catch your eye.
 }{}
 
+\EnvId{diagonal-intersection-feet-midpoint}
 \Problem{0}{USA TST 2000}{
     Let $ABCD$ be a cyclic quadrilateral whose diagonals meet at~$P$. Let~$K$ and~$L$ be the feet of the perpendiculars from~$P$ to~$AB$ and~$CD$ respectively, and let~$M$ be the midpoint of side~$AD$. Prove that $MK=ML$.
 }{
@@ -218,6 +231,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is the remaining midpoints of the sides of triangle~$ABP$. Then magic happens and we are just a few easy arguments from the solution.
 }{}
 
+\EnvId{parallelogram-point-angle-sum}
 \Problem{0}{}{
     Inside a parallelogram $ABCD$ there is a point~$P$ such that $\angle APB + \angle CPD = 180^\circ$. Prove that $\angle PBC=\angle PDC$.
 }{
@@ -226,6 +240,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key point is the image~$P'$ of point~$P$ under the translation in the direction of~$AC$ (or~$BC$). Then we have a cyclic quadrilateral $CP'DP$ as well as plenty of parallelograms.
 }{}
 
+\EnvId{hexagon-equal-sides-angle-sum}
 \Problem{0}{Czech-Slovak Olympiad 2026}{
     We are given a convex hexagon $ABCDEF$ such that $AB = BC$, $CD = DE \neq AD$, $EF = FA$, $\angle BDC + \angle EDF = \angle FDB$. Prove that $\angle CBA + \angle EDC + \angle AFE = 360^\circ$.
 }{
@@ -234,6 +249,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key point is the reflection of $C$ in $BD$, or analogously the reflection of $E$ in $DF$. It is the same point. And it is all we need.  Do not forget to use the inequality part of the condition $CD=DE \neq AD$. Without that, the problem does not hold.
 }{}
 
+\EnvId{quadrilateral-equal-angles-circumcenter}
 \Problem{0}{Czech-Slovak Olympiad 2024}{
     A~point $P$ located inside a convex quadrilateral $ABCD$ satisfies the equalities
     $$\angle PAD = \angle ADP = \angle CBP = \angle PCB = \angle CPD.$$
@@ -244,6 +260,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The point to introduce is the intersection point $X$ of $BC$ and $AD$, as $PCXD$ is now a parallelogram. The problem can now be solved with the right view on what we have.
 }{}
 
+\EnvId{triangle-altitude-circumcenter-midpoint}
 \Problem{0}{Czech-Slovak Olympiad 2011}{
     In an acute triangle~$ABC$ that is not equilateral, let~$P$ be the foot of the altitude from~$A$ to side~$BC$, $H$ the orthocenter, $O$ the circumcenter, $D$ the intersection of ray~$AO$ with side~$BC$, and~$E$ the midpoint of segment~$AD$. Prove that line~$EP$ passes through the midpoint of segment~$OH$.
 }{
@@ -252,6 +269,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Reflect~$H$ over~$BC$ to obtain~$H'$ lying on the circumcircle of~$ABC$. This means $OA = OH'$. The midpoint of~$OH$ also becomes more tractable.
 }{}
 
+\EnvId{tangent-line-midpoint-circle}
 \Problem{0}{}{
     Let $ABC$ be an acute triangle inscribed in circle~$k$. The tangent to~$k$ at~$A$ meets line~$BC$ at~$P$. Let~$M$ be the midpoint of~$AP$ and let~$Q$ be the second intersection of line~$MB$ with~$k$. Prove that $\angle PQA = \angle AQC$.
 }{
@@ -260,6 +278,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     It makes sense to reflect~$Q$ through~$M$ to transfer angle~$PQA$; it suddenly equals~$PQ'A$. The statement to be proved will then, after a brief angle chase, tell us what it suffices to show.
 }{}
 
+\EnvId{trapezoid-ratio-points-concyclic}
 \Problem{0}{}{
     Let $ABCD$ be a trapezoid with $AB \parallel CD$. Points $K$ and~$L$ lie on~$AB$ and~$CD$ respectively such that $AK \cdot CL = BK \cdot DL$. Points $P$ and~$Q$ lie on~$KL$ such that $\angle APB = \angle DCB$ and $\angle CQD=\angle CBA$. Prove that $B$, $C$, $P$, $Q$ lie on a circle.
 }{
@@ -268,6 +287,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Consider the homothety mapping~$AB$ to $DC$; under it, $K$ maps to~$L$. If we map~$P$ to~$P'$ under it, then points $K$, $L$, $P$, $Q$, $P'$ all lie on a line. The problem turns into a nice angle-chasing exercise.
 }{}
 
+\EnvId{cyclic-quadrilateral-four-points-perpendicular}
 \Problem{0}{CPSJ 2019, Team Contest}{
     Let $ABCD$ be a cyclic quadrilateral. Points $K$, $L$, $M$, $N$ lie on sides~$AB$, $BC$, $CD$, $DA$ respectively, such that $\angle ADK = \angle BCK$, $\angle BAL = \angle CDL$, $\angle CBM = \angle DAM$ and $\angle DCN=\angle ABN$. Prove that $KM \perp LN$.
 }{
@@ -276,6 +296,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     In the diagram with only point~$K$ one can angle-chase $\angle BKC=\angle KDC$. Line~$AB$ is therefore tangent to the circumcircle of~$KCD$. This is reminiscent of the power of a point --- one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points~$L$, $M$, $N$.
 }{}
 
+\EnvId{quadrilateral-equal-sides-midpoints-concyclic}
 \Problem{0}{CAPS 2024, P4}{
     Let $ABCD$ be a quadrilateral such that $AB = BC = CD$. There are points $X$, $Y$ on rays $CA$, $BD$ respectively such that $BX = CY$. Let $P$, $Q$, $R$, $S$ be the midpoints of segments $BX$, $CY$, $XD$, $YA$ respectively. Prove that points $P$, $Q$, $R$, $S$ lie on a circle.
 }{
@@ -284,6 +305,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key point to introduce is the midpoint of~$XY$, as it will create many midlines. And they will give a~clear path of what to use to prove the concyclicity.
 }{}
 
+\EnvId{trapezoid-diagonal-point-angles}
 \Problem{0}{}{
     The diagonals of trapezoid~$ABCD$ with $AB \parallel CD$ meet at~$P$. Point~$Q$ lies inside triangle~$BCP$ such that $\angle AQB= \angle CQD$. Prove that $\angle DQP = \angle BAQ$.
 }{
@@ -292,6 +314,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Reflect~$Q$ under the homothety centred at~$P$ that maps~$AB$ to~$CD$. Suddenly the definition of~$Q$ changes into something meaningful and out of nowhere we have everything we need --- we just put it together.
 }{}
 
+\EnvId{equal-segments-perpendicular-bisectors-arcs}
 \Problem{0}{IMO 2018, P1}{
     Let $ABC$ be an acute triangle with circumscribed circle $\Gamma$. Points $D$ and $E$ lie in the interiors of sides $AB$ and $AC$ respectively, with $AD = AE$. The perpendicular bisectors of $BD$ and $CE$ intersect the shorter arcs $AB$ and $AC$ of $\Gamma$ at points $F$ and $G$ respectively. Prove that lines $DE$ and $FG$ are parallel (or coincide).
 }{
@@ -300,6 +323,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is to extend segment $FD$ to a chord of $\Gamma$, and similarly extend $GE$ on the other side. Suddenly we obtain isosceles triangles that interact well with the condition $AD = AE$. No further points are needed --- it becomes an angle-chasing exercise.
 }{}
 
+\EnvId{incircle-tangent-points-midpoints}
 \Problem{0}{IMO 2024, P1}{
     Let $ABC$ be a triangle such that $AB < AC < BC$. Let $\omega$ be the inscribed circle of triangle $ABC$ and $I$ its center. Let $X$ be a point on line $BC$ different from $C$ such that the line passing through $X$ parallel to $AC$ touches $\omega$. Similarly, let $Y$ be a point on line $BC$ different from $B$ such that the line passing through $Y$ parallel to $AB$ touches $\omega$. Line $AI$ intersects the circumcircle of triangle $ABC$ a second time at point $P \neq A$. Let $K$ and $L$ be the midpoints of sides $AC$ and $AB$ respectively. Prove that $\angle KIL + \angle YPX = 180^\circ$.
 }{
@@ -310,6 +334,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key to finish the problem is to find cyclic quadrilaterals. But at least we do not need to introduce more points.
 }{}
 
+\EnvId{triangle-arc-midpoints-concyclic}
 \Problem{0}{}{
     Let $ABC$ be an acute triangle with midpoint~$M$ of side~$BC$. Let~$P \neq M$ be a point on side~$BC$. Denote by~$Q$ the midpoint of the arc~$AC$ not containing~$P$ of the circumcircle of~$APC$. Similarly, $R$ is the midpoint of the arc~$AB$ not containing~$P$ of the circumcircle of~$APB$. Prove that $Q, M, P, R$ are concyclic.
 }{
@@ -318,6 +343,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is to reflect, say,~$R$ through~$M$. Then it pays to color equal-length segments; the goal is to color another pair. We are not far from the desired end.
 }{}
 
+\EnvId{circle-tangent-reflection-point}
 \Problem{0}{IMO 2017, P4}{
     Let~$R$ and~$S$ be distinct points on circle~$k$ and let~$t$ denote the tangent to~$k$ at~$R$. Let~$R_0$ be the reflection of~$R$ through~$S$. Point~$I$ is chosen on the shorter arc~$RS$ of~$k$ such that the circumcircle~$k_0$ of triangle~$ISR_0$ meets~$t$ at two distinct points. Let~$A$ be the common point of~$k_0$ and~$t$ closer to~$R$. Line~$AI$ meets~$k$ again at~$J$. Prove that $JR_0$ is tangent to~$k_0$.
 }{
@@ -326,6 +352,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is to discover $AR_0 \parallel RJ$. This gives a fairly clear hint: the image of~$J$ under the point reflection through~$S$ lands on~$AR_0$. We wrap it up from here --- we have everything needed for angle chasing.
 }{}
 
+\EnvId{orthocenter-two-circles-collinear}
 \Problem{0}{IMO 2013, P1}{
     Let~$ABC$ be an acute triangle with orthocenter~$H$ and let~$W$ be a point on side~$BC$. Denote by~$M$ and~$N$ the feet of the altitudes from~$B$ and~$C$ in triangle~$ABC$. Let~$k_1$ be the circumcircle of~$BWN$ and let~$X$ be the point on~$k_1$ such that~$XW$ is a diameter of~$k_1$. Analogously let~$k_2$ be the circumcircle of~$CWM$ and let~$Y$ be the point on~$k_2$ such that~$YW$ is a diameter of~$k_2$. Prove that $X$, $Y$, $H$ are collinear.
 }{
@@ -334,6 +361,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     If~$T$ is the second intersection of~$k_1$ and~$k_2$, then the diameters give us right angles, from which~$T$, $X$, $Y$ are collinear. The proof that~$H$ also lies on this line can be rephrased as a perpendicularity. Have we accidentally eliminated~$X$ and~$Y$?
 }{}
 
+\EnvId{triangle-angle-points-circumcircle}
 \Problem{0}{IMO 2014, P1}{
     Points~$P$ and~$Q$ are chosen on side~$BC$ of an acute triangle $ABC$ such that $\angle PAB = \angle ACB$ and $\angle QAC = \angle CBA$. Points~$M$ and~$N$ lie on rays~$AP$ and~$AQ$ respectively such that $AP = PM$ and $AQ = QN$. Prove that lines~$BM$ and~$CN$ meet on the circumcircle of triangle~$ABC$.
 }{
@@ -342,6 +370,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Define midpoints~$J$ and~$K$ of~$AC$ and~$AB$ respectively. Midlines give us $BM \parallel KP$ and $CN \parallel QJ$. So what is required is to show that the angle between segments~$QJ$ and~$KP$ is $180^\circ - \alpha$. We seem to have made no progress, as angles at medians are generally ugly. However, there are many similar triangles in the configuration.
 }{}
 
+\EnvId{orthic-triangle-incenters-circumcenters}
 \Problem{0}{ISL 2012, G3}{
     Let $ABC$ be an acute triangle. Denote by $D$, $E$, $F$ the feet of the altitudes from~$A$, $B$, $C$ respectively. Let~$I_1$ and~$I_2$ be the incenters of triangles~$BFD$ and~$CED$ respectively, and let~$O_1$ and~$O_2$ be the circumcenters of triangles~$AI_1B$ and~$AI_2C$ respectively. Prove that $I_1I_2 \parallel O_1O_2$.
 }{
@@ -350,6 +379,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Let~$T$ be the second intersection of our two circles with centres~$O_1$ and~$O_2$. We want to show that~$AT$ is perpendicular to~$I_1I_2$. This is still not free. It helps to guess and prove that $BCI_2I_1$ is a cyclic quadrilateral.
 }{}
 
+\EnvId{angle-bisector-quadrilateral-circle}
 \Problem{0}{MEMO 2012, T6}{
     Let~$ABCD$ be a convex quadrilateral with no two sides parallel and $\angle ABC = \angle CDA$. Suppose that the pairwise intersections of the angle bisectors at adjacent vertices of~$ABCD$ form a quadrilateral~$EFGH$. Let~$K$ be the intersection of the diagonals of~$EFGH$. Prove that the intersection of lines~$AB$ and~$CD$ lies on the circumcircle of triangle~$BKD$.
 }{
@@ -358,6 +388,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Let~$E$ lie on the bisectors at~$A$ and~$B$, $F$ on the bisectors at~$B$ and~$C$, $G$ on the bisectors at~$C$ and~$D$, and~$H$ on the bisectors at~$D$ and~$A$. All points~$E$, $F$, $G$, $H$ are incenters or excenters of some triangles thanks to the angle bisectors. In any case, points~$P$, $F$, $H$ and $Q$, $E$, $G$ are collinear, and these lines are the angle bisectors of~$\angle CPB$ and~$\angle CQD$. We are now very close.
 }{}
 
+\EnvId{circumcenter-concyclic-point-angles}
 \Problem{0}{MEMO 2016, I3}{
     Let~$ABC$ be an acute triangle with circumcenter~$O$ and $\angle BAC > 45^\circ$. Point~$P$ lies in its interior such that $A$, $P$, $O$, $B$ are concyclic and line~$BP$ is perpendicular to~$CP$. Point~$Q$ lies on segment~$BP$ such that~$AQ$ and~$PO$ are parallel. Prove that $\angle QCB = \angle PCO$.
 }{
@@ -366,6 +397,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The statement is equivalent to $\angle PCQ=\angle OCB$, which is equivalent to $\angle BAC=\angle CQP$. So if we reflect~$Q$ through~$P$ to~$Q'$, it suffices to prove concyclicity. That too is not obvious, but it can be finished at this point.
 }{}
 
+\EnvId{pentagon-circumcenters-line}
 \Problem{0}{MEMO 2017, I3}{
     Let~$ABCDE$ be a convex pentagon. Denote by~$P$ the intersection of lines~$CE$ and~$BD$. Prove that if $\angle PAD = \angle ACB$ and $\angle CAP = \angle EDA$, then~$P$ lies on the line determined by the circumcenters of triangles~$ABC$ and~$ADE$.
 }{
@@ -374,6 +406,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key is to discover $BC \parallel DE$. The diagram contains the intersection of~$CE$ and~$BD$. This may inspire adding the image of~$A$ under the homothety mapping~$BC$ to~$DE$. Suddenly everything becomes beautiful.
 }{}
 
+\EnvId{parallel-cevian-points-concyclic}
 \Problem{0}{IMO 2019, P2}{
     In triangle~$ABC$, let~$B_1$ be a point on side~$AC$ and~$C_1$ a point on side~$AB$. Let $P$ and~$Q$ be points on segments~$BB_1$ and~$CC_1$ respectively such that line~$PQ$ is parallel to~$BC$. Let~$P_1$ be a point on line~$PC_1$ such that~$C_1$ lies strictly between~$P$ and~$P_1$ and $\angle PP_1A=\angle CBA$. Let~$Q_1$ be a point on line~$QB_1$ such that~$B_1$ lies strictly between~$Q$ and~$Q_1$ and $\angle AQ_1Q=\angle ACB$. Prove that $P$, $Q$, $P_1$, $Q_1$ lie on a common circle.
 }{
@@ -382,6 +415,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The key magic point is the second intersection of line~$BB_1$ with the circumcircle of~$ABC$, call it~$C_2$. Thanks to it we get $\angle CBA=\angle CC_2A$, which magically gives the cyclic quadrilateral~$C_1C_2P_1A$. Analogously we define~$B_2$. And believe it or not, it is now only a moderately hard angle-chasing problem.
 }{}
 
+\EnvId{right-triangle-altitude-equal-lengths}
 \Problem{0}{IMO 2012, P5}{
     In a right triangle~$ABC$ with the right angle at vertex~$A$, let~$D$ be the foot of the altitude from~$A$. Let~$X$ be an arbitrary interior point of segment~$AD$. Let~$K$ be the point on segment~$BX$ such that $CK = CA$. Similarly, let~$L$ be the point on segment~$CX$ such that $BL = BA$. Denote by~$M$ the intersection of lines~$BL$ and~$CK$. Prove that $MK = ML$.
 }{
@@ -394,6 +428,7 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 
 A few constructions I particularly find very adorable. Not necessarily the hardest problems here \SlightSmile{}
 
+\EnvId{altitude-points-orthocenter-circle}
 \Problem{0}{}{
     Let $ABC$ be an acute triangle. Points $X$, $Y$, $Z$ lie on the altitudes from $A$, $B$, $C$ respectively, inside the triangle, such that $A_{BCX} + A_{CAY} + A_{ABZ} = S_{ABC}$, where $A_{PQR}$ denotes the area of triangle $PQR$. Prove that the circumcircle of triangle $XYZ$ passes through the orthocenter of triangle $ABC$.
 }{
@@ -404,6 +439,7 @@ A few constructions I particularly find very adorable. Not necessarily the harde
     Apparently it makes sense to consider the lines parallel to sides, passing through our points, and intersect them, let us choose the line through $Y$ parallel to $AC$ and the line through $Z$ parallel to $AB$ and let them intersect at $T$. What is the area condition saying now? We are practically there.
 }{}
 
+\EnvId{unit-segments-perimeter-split}
 \Problem{0}{}{
     Let $ABC$ be a triangle with perimeter $4$. Points $P$ and $Q$ lie on rays $AB$ and $AC$ respectively such that $AP = AQ = 1$ and segments $BC$ and $PQ$ intersect at a point $X$. Prove that one of the two triangles into which $AX$ divides triangle $ABC$ has perimeter $2$.
 }{
@@ -418,6 +454,7 @@ A few constructions I particularly find very adorable. Not necessarily the harde
     The final point to draw is the tangency point of the excircle and $BC$. Using the fact that $F$ lies on this radical axis, we get some nice equal lengths. 
 }{}
 
+\EnvId{thales-circles-common-tangent}
 \Problem{0}{}{
     A quadrilateral $ABCD$ satisfies $a + b = c + d$, where $a, b, c, d$ are its side lengths. Circles are constructed over each of its sides as diameters. Prove that there exists a circle tangent to all four of them.
 }{
@@ -428,6 +465,7 @@ A few constructions I particularly find very adorable. Not necessarily the harde
     The distances from this center to the centers of the Thales circles follow from the midpoint theorem. It remains to compute the desired radius and verify that our magic condition guarantees it.
 }{}
 
+\EnvId{hexagon-inscribed-circle-diagonals}
 \Problem{0}{}{
     If a circle is inscribed in a hexagon~$ABCDEF$, then the diagonals~$AD$, $BE$, $CF$ are concurrent.
 }{

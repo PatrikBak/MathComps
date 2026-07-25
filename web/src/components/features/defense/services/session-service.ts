@@ -1,3 +1,4 @@
+import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
@@ -22,17 +23,17 @@ import {
  */
 
 /**
- * Lists a problem's defense sessions, oldest first.
+ * Lists a handout environment's defense sessions, oldest first.
  *
  * @param apiCall - The authenticated API caller.
- * @param problemKey - The stable key of the problem whose sessions these are.
- * @returns The sessions held about the given problem.
+ * @param target - The handout environment whose sessions these are.
+ * @returns The sessions held against the given environment.
  */
 export function listSessions(
   apiCall: ApiCaller,
-  problemKey: string
+  target: HandoutEnvironmentTarget
 ): Promise<ApiResult<DefenseSession[]>> {
-  return apiCall<DefenseSession[]>(() => getDefenseSessionsUrl(problemKey))
+  return apiCall<DefenseSession[]>(() => getDefenseSessionsUrl(target))
 }
 
 /**
@@ -65,7 +66,7 @@ export function submitTurn(
         method: 'POST',
         signal: request.signal,
         body: JSON.stringify({
-          problemKey: request.problemKey,
+          target: request.target,
           statement: request.statement,
           reference: request.reference,
           hints: request.hints,

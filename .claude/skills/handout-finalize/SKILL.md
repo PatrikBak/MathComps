@@ -93,17 +93,21 @@ Rule of thumb: the macro genuinely bridges source→web and other handouts will 
 
 Re-run the CLI on the same scoped glob until exit 0.
 
-### 5. Validate
+### 5. Confirm every environment has an `\EnvId`
+
+Every `\Problem`, `\Theorem`, `\Exercise`, `\Example`, and `\Definition` needs a permanent `\EnvId` above it before this handout validates — the source you're finalizing should already carry one on each, written directly while authoring. If any is missing, it's a bug in the source, not something this skill backfills: stop and add it yourself (readable slug, describing what the environment is visibly about, never its competition source, never its solution technique), matching the same id across every language variant, then re-run the CLI (step 3), which also regenerates the environment index.
+
+### 6. Validate
 
 ```bash
 cd web && npm run handouts:validate
 ```
 
-Must exit 0. Typical failures: missing content file (CLI didn't run for that locale), duplicate slug, orphan file, missing field for a declared language.
+Must exit 0. Typical failures: missing content file (CLI didn't run for that locale), duplicate slug, orphan file, missing field for a declared language, a missing/duplicate `\EnvId`, or a stale `handout-env-index.json`.
 
-### 6. Report
+### 7. Report
 
-One short summary: entry added/promoted, chosen category, generated JSONs in `web/src/content/handouts/`, uploaded PDFs/images, cleaner-rules changes. Use clickable paths.
+One short summary: entry added/promoted, chosen category, generated JSONs in `web/src/content/handouts/`, uploaded PDFs/images, cleaner-rules changes, environment ids named. Use clickable paths.
 
 ---
 
@@ -111,6 +115,7 @@ One short summary: entry added/promoted, chosen category, generated JSONs in `we
 
 - **Never invent an `id`.** Always `npx nanoid`.
 - **Never declare a locale without a `<base>.{locale}.tex` file.**
+- **Never invent, drop, or rewrite an existing `\EnvId`.** A missing one on an environment the author is actively writing is theirs to add directly; never paper over it here.
 - **Never touch other handout entries** in `handouts.json` beyond the one being finalized.
 - **Never run the CLI with an unscoped glob** unless the user explicitly asks for a full rebuild.
 - **Never edit `.tex` content** except to fix a typo/non-canonical command surfaced as unknown.

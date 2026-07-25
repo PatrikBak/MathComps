@@ -1,3 +1,5 @@
+import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+
 /**
  * Who authored a turn in a defense conversation: the AI examiner probing the solution, or the student
  * defending it.
@@ -29,8 +31,8 @@ export type StoredTurn = Turn & {
 export type DefenseSession = {
   /** Stable identifier. */
   id: string
-  /** The problem this defense is about (the problem's stable key). */
-  problemKey: string
+  /** The handout environment this defense is about. */
+  target: HandoutEnvironmentTarget
   /** The conversation so far, oldest first. */
   turns: StoredTurn[]
 }
@@ -42,8 +44,8 @@ export type DefenseSession = {
 export type DefenseSessionListItem = {
   /** Stable identifier. */
   id: string
-  /** The problem this defense is about (the problem's stable key). */
-  problemKey: string
+  /** The handout environment this defense is about. */
+  target: HandoutEnvironmentTarget
   /** The problem statement, seen by both sides. */
   statement: string
   /** When the session was started, as an ISO-8601 string. */
@@ -56,8 +58,8 @@ export type DefenseSessionListItem = {
  * The problem a defense is held against, including the reference solution the examiner reasons from.
  */
 export type DefenseProblem = {
-  /** The problem's stable key. */
-  key: string
+  /** The handout environment this problem is. */
+  target: HandoutEnvironmentTarget
   /** The problem statement as markdown/math source. */
   statement: string
   /** The reference solution the examiner reasons from, as markdown/math source. */
@@ -74,8 +76,8 @@ export type DefenseProblem = {
 type StartDefenseTurnRequest = {
   /** Marks the request that opens a new session. */
   kind: 'start'
-  /** The problem's stable key the new session is about. */
-  problemKey: string
+  /** The handout environment the new session is about. */
+  target: HandoutEnvironmentTarget
   /** The problem statement, seen by both sides. */
   statement: string
   /** The reference solution the examiner reasons from. */

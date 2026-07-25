@@ -24,11 +24,9 @@ public class DefenseSession
     public User User { get; set; } = null!;
 
     /// <summary>
-    /// Stable, source-namespaced key of the problem being defended (e.g. <c>handout:...</c>), grouping a
-    /// user's sessions on it. A correlation token, not a foreign key: some sources (handout problems) live
-    /// outside the database, so identity can't be a problem-row reference.
+    /// Which handout environment this session defends. Null when no environment is linked to this session.
     /// </summary>
-    public required string ProblemKey { get; set; }
+    public HandoutEnvironmentDefense? EnvironmentTarget { get; set; }
 
     /// <summary>
     /// The problem statement, seen by both sides.

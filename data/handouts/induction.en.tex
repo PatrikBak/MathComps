@@ -16,6 +16,7 @@ The word \textit{induction} generally means \uv{a mental process from the specif
 
 We illustrate the idea of mathematical induction using dominoes. They have a property: if the $k$-th one falls, the $(k+1)$-th one will also fall. Thanks to this, if we knock over the first one, the second one falls as well, and therefore the third one, etc. The conclusion is that they all fall. 
 
+\EnvId{sum-of-first-n-naturals}
 \Example{}{
     Prove that the sum of the first $n$ natural numbers is equal to $\frac{n(n+1)}2$.
 }{
@@ -34,6 +35,7 @@ In general, a proof by induction consists of two steps:
 
 Try this approach on these memorable identities.
 
+\EnvId{classic-summation-identities}
 \Exercise{}{
     Prove the following identities for all natural numbers~$n$:
     \begitems \style a
@@ -97,6 +99,7 @@ Try this approach on these memorable identities.
 }
 
 
+\EnvId{progression-sum-formulas}
 \Exercise{}{
     Prove by induction the following formulas for the sums of the first $n$ terms of known sequences.
     \begitems \style a
@@ -139,6 +142,7 @@ Try this approach on these memorable identities.
     \enditems
 }
 
+\EnvId{fibonacci-partial-sums}
 \Exercise{}{
     Prove the following identities for Fibonacci numbers, defined recursively as $F_1=1$, $F_2=1$ and~$F_{n+2}=F_{n+1}+F_n$:
     \begitems \style a
@@ -180,6 +184,7 @@ Try this approach on these memorable identities.
 
 So far, we have proved statements for all natural numbers~$n$. In the following example, we will show that this is not necessary and induction can sometimes start later. This example also opens up another type of problems where induction is useful -- inequalities.
 
+\EnvId{power-of-two-vs-square}
 \Example{}{
     For which natural numbers $n$ does $2^n \ge n^2$ hold?
 }{
@@ -202,6 +207,7 @@ So far, we have proved statements for all natural numbers~$n$. In the following 
 
 Try a few inequalities for practice.
 
+\EnvId{power-of-two-at-least-n}
 \Exercise{}{
     Prove that for all natural numbers $n$ it holds that $2^n \ge n$. 
 }{
@@ -212,6 +218,7 @@ Try a few inequalities for practice.
     since $2n \ge n+1$ for $n \ge 1$.
 }
 
+\EnvId{factorial-beats-power-of-two}
 \Exercise{}{
     Prove that for all natural numbers $n \ge 4$ it holds that $n! > 2^n$.
 }{
@@ -225,6 +232,7 @@ Try a few inequalities for practice.
     $$
 }
 
+\EnvId{harmonic-tail-sum-bound}
 \Exercise{}{
     Prove that for all natural numbers $n$ it holds that
     $$
@@ -249,6 +257,7 @@ Try a few inequalities for practice.
     which obviously holds.
 }
 
+\EnvId{bernoulli-inequality}
 \Exercise{}{
     Prove Bernoulli's inequality: for real $x \ge -1$ and natural $n$ it holds that
     $$
@@ -268,6 +277,7 @@ Try a few inequalities for practice.
 
 We can also use induction to prove divisibility.
 
+\EnvId{divisibility-n-cubed-minus-n}
 \Example{}{
     Prove that for all natural numbers~$n$ it holds that $6 \mid n^3-n$.
 }{
@@ -281,6 +291,7 @@ We can also use induction to prove divisibility.
     The first term is divisible by 6 by the induction hypothesis. In the second term, the number $n(n+1)$ is the product of two consecutive numbers, hence even, and after multiplying by~3 we get a multiple of~6.
 }
 
+\EnvId{divisibility-four-power-minus-one}
 \Example{}{
     Prove that for all natural numbers~$n$ it holds that $3 \mid 4^n-1$.
 }{
@@ -291,6 +302,7 @@ We can also use induction to prove divisibility.
     The first addend is divisible by 3 by the induction hypothesis, and~$3$ is obviously divisible by 3, therefore their sum is as well.
 }
 
+\EnvId{divisibility-four-power-plus-six-n}
 \Exercise{}{
     Prove that for all natural numbers~$n$ it holds that $9 \mid 4^n+6n-1$.
 }{
@@ -305,6 +317,7 @@ We can also use induction to prove divisibility.
     The first addend is divisible by 9 by the induction hypothesis and the second is obviously a multiple of 9.
 }
 
+\EnvId{five-and-six-power-divisibility}
 \Exercise{}{
     Prove that for all natural numbers~$n$ it holds that $31 \mid 5^{n+1}+6^{2n-1}$.
 }{
@@ -325,6 +338,7 @@ The problem is that if we now plug in any $n$, we get an odd number. Where is th
 
 This problem presents another potential pitfall.
 
+\EnvId{lines-through-common-point-fallacy}
 \Problem{0}{}{
     Find the mistake in the \uv{proof} of this statement:
     
@@ -345,6 +359,7 @@ This problem presents another potential pitfall.
 
 In previous problems, we always said in the induction step that the statement holds for some~$n$ and subsequently proved it for $n+1$. In fact, however, we can assume something stronger. For example, let's have a statement for all natural numbers $n$ that we are proving by induction. First, of course, we prove it for $n=1$. Subsequently, we assume that it holds for all $1,2,\dots,n$ and prove it for $n+1$ -- instead of just assuming that it holds for some $n$. This turn is very common in more complex proofs and is called \textit{strong induction}. We illustrate it with an example:
 
+\EnvId{prime-factorization-existence}
 \Theorem{Prime factorization theorem}{
     Every integer $n>1$ can be factored into a product of several, not necessarily distinct, primes.
 }{
@@ -357,6 +372,7 @@ Furthermore, realize that regular induction is a special case of strong inductio
 
 Another traditional result is the existence of a unique representation in the binary system.
 
+\EnvId{binary-representation-existence}
 \Example{}{
     Prove that every natural number can be written as a sum of mutually distinct powers of two.
 }{
@@ -365,6 +381,7 @@ Another traditional result is the existence of a unique representation in the bi
 
 Try a similar proof on harder examples:
 
+\EnvId{zeckendorf-representation}
 \Problem{0}{Zeckendorf's theorem, existence}{
     Prove that every positive integer can be written as a sum of mutually non-consecutive Fibonacci numbers.
 }{
@@ -381,6 +398,7 @@ Try a similar proof on harder examples:
 
 Another numeral system is the factorial base: 
 
+\EnvId{factorial-number-system}
 \Problem{0}{Factorial number system}{
     Prove that every positive integer~$n$ can be written in the form
     $$
@@ -409,6 +427,7 @@ Let us add that uniqueness can be proved for both the Fibonacci and the factoria
 
 Technically, one of the forms of strong induction is also when we use the induction hypothesis for only two smaller numbers, e.g., $n-2$ and $n-1$. This is often seen in problems about recurrence sequences.
 
+\EnvId{linear-recurrence-2n-minus-1}
 \Example{}{
     A sequence is defined by the rule $a_1 = 0$, $a_2 = 1$ and
     $$
@@ -429,6 +448,7 @@ Technically, one of the forms of strong induction is also when we use the induct
     $$
 }
 
+\EnvId{linear-recurrence-3n-minus-2n}
 \Exercise{}{
     A sequence is defined by the rule $a_1 = 1$, $a_2 = 5$ and
     $$
@@ -450,6 +470,7 @@ Technically, one of the forms of strong induction is also when we use the induct
     $$
 }
 
+\EnvId{fibonacci-golden-ratio-bound}
 \Problem{0}{}{
     Prove that for all natural numbers~$n$ it holds that $F_n \le \varphi^{n-1}$, where $F_n$ are the Fibonacci numbers and~$\varphi = \frac{1+\sqrt{5}}{2}$ is the golden ratio.
 }{
@@ -470,6 +491,7 @@ Technically, one of the forms of strong induction is also when we use the induct
     Thus the induction step is proved.
 }
 
+\EnvId{power-sum-reciprocal-rational}
 \Problem{0}{}{
     Let $x$ be a real number such that $x+\frac{1}{x}$ is rational. Prove that then $x^n+\frac{1}{x^n}$ is also rational for every natural~$n$.
 }{
@@ -494,6 +516,7 @@ Technically, one of the forms of strong induction is also when we use the induct
 
 In the tasks so far, we have encountered two types of induction hypotheses: that the statement holds for $n$ or that it holds for suitable numbers not exceeding~$n$. Consequently, we proved from this that the statement holds for $n+1$. However, imagination has no limits, and an induction can easily occur where we prove $n+2$ from~$n$; therefore, we need to prove the statement for consecutive base cases. 
 
+\EnvId{sum-of-twos-and-threes}
 \Example{}{
     Prove that every integer $n \ge 2$ can be written in the form $n = 2a + 3b$, where $a,b$ are non-negative integers.
 }{
@@ -506,6 +529,7 @@ In the tasks so far, we have encountered two types of induction hypotheses: that
 
 Another fascinating form of induction can be seen in Cauchy's proof of the AM-GM inequality, where we first go up and then down.
 
+\EnvId{am-gm-inequality}
 \Theorem{AM-GM inequality}{
     For positive real numbers $a_1,a_2,\dots,a_n$ it holds that
     $$
@@ -577,6 +601,7 @@ What to watch out for:
 
 There are truly many examples of induction and, as we have seen, it can be used in~virtually all areas of mathematics to prove many interesting ideas. You can try the following ones, ordered roughly by difficulty.
 
+\EnvId{power-of-one-plus-sqrt-two}
 \Problem{0}{}{
 	Prove that for every natural number~$n$ there exist natural numbers $a,b$ such that $(1+\sqrt{2})^n = a\sqrt{2}+b$.
 }{
@@ -592,6 +617,7 @@ There are truly many examples of induction and, as we have seen, it can be used 
 	Since $a,b$ are natural, so are $2a+b$ and~$a+b$, which is the statement for $n+1$.
 }
 
+\EnvId{visiting-all-lightbulb-configurations}
 \Problem{0}{}{
 	We have $n$~light bulbs in a~row. Initially, all are off. Each minute we either switch on exactly one bulb that is off, or switch off exactly one bulb that is on. Prove that we can choose the moves so that we pass through every one of all possible configurations exactly once.
 }{
@@ -614,6 +640,7 @@ There are truly many examples of induction and, as we have seen, it can be used 
 	Altogether, we pass through $2^n+2^n=2^{n+1}$ configurations, and since we first passed through all those with the last bulb off and then all those with the last bulb on, no configuration was repeated. We have therefore visited every configuration exactly once, completing the induction step. 
 }
 
+\EnvId{chocolate-bar-breaking}
 \Problem{0}{}{
 	We have a~chocolate bar of size $8 \times 3$. We break it along gridlines into individual $1 \times 1$ squares (along gridlines means we cannot break off e.g.\  a~corner). What is the smallest number of breaks we need so that all pieces are $1 \times 1$?
 }{
@@ -638,6 +665,7 @@ There are truly many examples of induction and, as we have seen, it can be used 
 	The induction step is complete. Every way of breaking up an $m \times n$ bar requires exactly $mn-1$ steps, so the minimum number is also $mn-1$.
 }
 
+\EnvId{path-through-all-cities-oneway}
 \Problem{1}{}{
 	We have 42 cities such that between every two there is a~one-way street. Prove that there exists a~city from which we can depart and pass through all other cities.	
 }{
@@ -665,6 +693,7 @@ There are truly many examples of induction and, as we have seen, it can be used 
 	In every case we have constructed a~path passing through all $n$ cities, completing the induction step. The statement therefore holds for all natural $n$, in particular for $n=42$.
 }
 
+\EnvId{factorial-divides-consecutive-product}
 \Problem{1}{}{
 	Prove that for all natural numbers $n$ and~$k$ it holds that 
 	$$

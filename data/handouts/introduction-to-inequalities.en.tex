@@ -28,6 +28,7 @@ In this post, we will focus on the most basic methods. The absolute foundation o
 
 Many examples can be solved simply by using common manipulations such as expanding, factorizing, and the like. We will start with such problems and add more methods in the following sections.
 
+\EnvId{ordering-paired-sums-products}
 \Example{}{
     Given real numbers $a$, $b$, $c$, $d$ satisfying $a<b<c<d$. Order the numbers
     $$
@@ -58,6 +59,7 @@ Many examples can be solved simply by using common manipulations such as expandi
 
 Try it out on a problem from the school round A:
 
+\EnvId{product-inequality-chain-smallest}
 \Exercise{69-CSMO-A-S-1}{
     Suppose that distinct real numbers $a$, $b$, $c$, $d$ satisfy the inequalities
     $$
@@ -94,6 +96,7 @@ Try it out on a problem from the school round A:
 
 The next example shows that it pays to know the formulas we presented in the first part.
 
+\EnvId{cubes-sum-vs-mixed-terms}
 \Example{}{
     Prove that for real numbers $a,b$ with a non-negative sum, the following holds:
     $$
@@ -121,6 +124,7 @@ The next example shows that it pays to know the formulas we presented in the fir
 
 Try these exercises to practice basic factorizations. Notice that the following exercise is a generalization of the previous example. Repeating the procedure from it will not be possible, but it is not difficult to come up with something else \SlightSmile{}
 
+\EnvId{power-sum-vs-mixed-powers}
 \Exercise{}{
     Given positive real numbers $a$, $b$ and natural numbers $m$, $n$. Prove that the inequality holds
     $$
@@ -147,6 +151,7 @@ Try these exercises to practice basic factorizations. Notice that the following 
     Equality occurs precisely when $a^m - b^m = 0$ or $a^n - b^n = 0$, which for positive $a, b$ and natural $m, n$ means $a=b$. Since the manipulations were equivalent, we are done.
 }
 
+\EnvId{ordered-triple-square-difference}
 \Exercise{61-CSMO-B-II-2}{
     For all real numbers $x$, $y$, $z$ such that $x<y<z$, prove the inequality
     $$
@@ -187,6 +192,7 @@ Try these exercises to practice basic factorizations. Notice that the following 
 
 A slightly harder but still manageable example is this one. Note that we have \textit{integers} here:
 
+\EnvId{shifted-integer-product-inequality}
 \Problem{0}{71-CSMO-C-II-1}{
     Prove that for any integers $a$, $b$, the inequality holds
     $$
@@ -226,6 +232,7 @@ A slightly harder but still manageable example is this one. Note that we have \t
 
 Another very common group of problems are those that use the obvious fact that for every real number $x$, $x^2 \ge 0$ holds, with equality occurring only for $x=0$. By substituting $x=a-b$, we can derive the inequality $(a-b)^2\ge 0$ from this, which can be equivalently rewritten as $a^2+b^2 \ge 2ab$. This may not be immediately obvious at first glance. We can derive more and more inequalities with similar games. Let's first review this very famous example:
 
+\EnvId{three-var-squares-vs-products}
 \Example{}{
     Prove that for all real numbers $a$, $b$, $c$, the following holds
     $$
@@ -277,6 +284,7 @@ Another very common group of problems are those that use the obvious fact that f
 
 Now it's your turn:
 
+\EnvId{two-var-squares-plus-constant}
 \Exercise{}{
     For real numbers $x$, $y$, prove the inequality
     $$
@@ -301,6 +309,7 @@ Now it's your turn:
     We thus have a sum of squares, which are non-negative. Equality occurs precisely for $x=y=1$.
 }
 
+\EnvId{quartic-terms-vs-product-sum}
 \Exercise{}{
     For real numbers $a$, $b$, prove the inequality
     $$
@@ -326,6 +335,7 @@ Now it's your turn:
 
 Such basic things are sufficient to solve a problem from the regional round of category~A:
 
+\EnvId{equal-cubic-shift-product-bounds}
 \Problem{1}{74-CSMO-A-II-1}{
     Given two distinct real numbers $a$, $b$ such that the expressions $a^3 + b$ and $a + b^3$ have the same value. Prove that $-1\le ab<\frac13$.
 }{
@@ -365,6 +375,7 @@ which is a consequence of $(a-b)^2 \ge 0$. We will show that this simple inequal
 
 The arithmetic mean concerns the sum, the geometric mean the product. Before we reveal the exact statement of AM-GM and its proof, the preparation is the following example:
 
+\EnvId{closer-numbers-larger-product}
 \Example{}{
     Think through and formally prove that if we have two positive numbers whose sum is given, then the closer these numbers are to each other, the larger their product is.
 }{
@@ -375,6 +386,7 @@ The arithmetic mean concerns the sum, the geometric mean the product. Before we 
 
 This will help us in the proof of the general AM-GM inequality:
 
+\EnvId{n-term-mean-inequality}
 \Theorem{AM-GM Inequality}{
     Given an integer $n \ge 2$. Prove that for any non-negative real numbers $a_1,a_2,\ldots,a_n$, the following holds
     $$
@@ -409,6 +421,7 @@ $$
 \enditems
 These perspectives help us not to worry about averages -- we don't need an explicitly written average of $a$ and $b$ to use the AM-GM inequality on $a$ and $b$.
 
+\EnvId{three-pairwise-sums-product}
 \Example{}{
     Prove that for positive real numbers $a$, $b$, $c$, the inequality holds
     $$
@@ -428,6 +441,7 @@ These perspectives help us not to worry about averages -- we don't need an expli
 
 Finally, it is time to reveal the solution to the motivational problem from the introduction:
 
+\EnvId{open-box-max-volume}
 \Example{The Box Problem}{
     We have a square piece of paper with a side length of 12 cm. We want to create an open box by cutting identical squares from each of the four corners and folding up the sides. What is the largest possible volume of the box?
 
@@ -451,6 +465,7 @@ Finally, it is time to reveal the solution to the motivational problem from the 
 
 Several problems for practice:
 
+\EnvId{power-plus-n-vs-linear}
 \Exercise{}{
     Prove that for a positive real number $a$ and a natural number $n$, the following holds
     $$
@@ -465,6 +480,7 @@ Several problems for practice:
     which is an inequality equivalent to ours. Equality occurs precisely when $a^n = 1$, which for positive $a$ means $a=1$.
 }
 
+\EnvId{unit-product-shifted-factors}
 \Exercise{}{
     Prove that for positive real numbers $a_1,\dots,a_n$ with a product of~1, the following holds
     $$
@@ -494,6 +510,7 @@ a+\frac 1a \ge 2,
 $$
 i.e., the sum of a positive number and its reciprocal is at least 2.
 
+\EnvId{cyclic-fraction-sum-six}
 \Exercise{}{
     Prove that for positive real numbers $a$, $b$, $c$, the inequality holds
     $$
@@ -514,6 +531,7 @@ i.e., the sum of a positive number and its reciprocal is at least 2.
     Thus the inequality is proven. Equality occurs precisely when $a=c$, $b=c$ and $a=b$, i.e., $a=b=c$.
 }
 
+\EnvId{reciprocal-sum-pair-product-bound}
 \Exercise{65-CSMO-A-S-2}{
     Positive real numbers $a$, $b$, $c$, $d$ satisfy the equalities
     $$
@@ -554,6 +572,7 @@ i.e., the sum of a positive number and its reciprocal is at least 2.
 
 Finally, let's discuss a very general concept: Inequalities are often difficult because solving them requires combining many different conditions and estimates. These estimates can be quite simple, but seeing them is challenging -- such problems are very popular precisely because, instead of knowledge of difficult inequalities, they test algebraic imagination. A good way to train is to see and try as much as possible. In this section, we will have a small demonstration of problems with non-traditional conditions.
 
+\EnvId{implied-cubic-inequality}
 \Example{}{
     Positive real numbers $x$ and $y$ satisfy $x^2>x+y$. Prove that $x^3>x^2+y$ also holds.
 }{
@@ -566,6 +585,7 @@ Finally, let's discuss a very general concept: Inequalities are often difficult 
 
 We see that we actually used only very clear considerations and combined them in various ways with the condition from the problem statement. Similar fun can be performed in these problems as well; you can try.
 
+\EnvId{middle-value-square-condition}
 \Problem{0}{63-CSMO-C-II-3}{
     For positive real numbers $a$, $b$, $c$, $c^2 + ab = a^2 + b^2$ holds.
     Prove that then $c^2 + ab \le ac + bc$ also holds.
@@ -595,6 +615,7 @@ We see that we actually used only very clear considerations and combined them in
     Since both possibilities lead to a contradiction, the original assumption is incorrect, and the proof is complete.
 }
 
+\EnvId{bounded-vars-sum-vs-squares}
 \Problem{0}{68-CSMO-C-II-4}{
     Real numbers $a$, $b$, $c$, all greater than $\frac12$, satisfy the condition $ab+bc+ca=\frac54$.
 Prove that the following holds
@@ -666,6 +687,7 @@ For those interested in further study, I recommend the \Link[https://prase.cz/]{
 
 Diverse problems where the covered concepts are sufficient for all of them, although as is usual with inequalities, the solution can be arbitrarily hard to see. Good luck \SlightSmile{}
 
+\EnvId{sqrt-product-quadratic-bound}
 \Problem{0}{}{
     Given non-negative real numbers $x$ and $y$.
 Prove the inequality
@@ -708,6 +730,7 @@ $$
     \textit{Note.} The substitution $x=a^2$, $y=b^2$ was not necessary, but it makes the solution more \uv{discoverable}, since powers are nicer than roots.
 }
 
+\EnvId{shifted-squares-product-bound}
 \Problem{0}{66-CPSJ-I-3}{
     Prove that for all real numbers $x$, $y$, the following holds
     $$
@@ -762,6 +785,7 @@ $$
     which is in turn a special case of the \uv{Lagrange identity}.
 }
 
+\EnvId{last-term-product-bound}
 \Problem{0}{}{
     Find all integers $n \ge 2$ for which the inequality
     $$
@@ -794,6 +818,7 @@ $$
     Since we know from the problem statement that $n \ge 2$, all integers $n \in \{2, 3, 4, 5\}$ satisfy the condition. For these values of $n$, the coefficient $\frac{5-n}{4}$ is non-negative, and therefore the entire right side is a sum of non-negative expressions, so the inequality holds.
 }
 
+\EnvId{quartic-minus-mixed-cubic-min}
 \Problem{0}{70-CPSJ-I-4}{
     Find the smallest possible value that the expression
     $$
@@ -823,6 +848,7 @@ $$
     We must verify if this value $xy=1/4$ is attainable under the condition $x+y \le 1$. But for this, it suffices to set $x=y=1/2$.
 }
 
+\EnvId{sixth-power-condition-bound}
 \Problem{0}{57-CSMO-A-II-4}{
     Prove that for non-negative real numbers $x$, $y$ satisfying the relationship $x^2+y^6=2$, the following holds
     $$

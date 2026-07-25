@@ -206,6 +206,7 @@
             },
             {
               "type": "example",
+              "id": "square-plus-one-pair",
               "body": [
                 {
                   "type": "paragraph",
@@ -419,6 +420,7 @@
             },
             {
               "type": "example",
+              "id": "square-minus-one-cyclic-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -882,6 +884,7 @@
             },
             {
               "type": "exercise",
+              "id": "mixed-quadratic-pair",
               "body": [
                 {
                   "type": "paragraph",
@@ -1116,6 +1119,7 @@
             },
             {
               "type": "exercise",
+              "id": "product-plus-sum-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -1333,6 +1337,7 @@
             },
             {
               "type": "exercise",
+              "id": "three-variable-square-mix",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1691,6 +1696,7 @@
             },
             {
               "type": "example",
+              "id": "square-plus-one-revisited",
               "body": [
                 {
                   "type": "paragraph",
@@ -1807,6 +1813,7 @@
             },
             {
               "type": "example",
+              "id": "homogeneous-quadratic-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -1987,6 +1994,7 @@
             },
             {
               "type": "exercise",
+              "id": "square-plus-shift-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -2121,6 +2129,7 @@
             },
             {
               "type": "exercise",
+              "id": "square-equals-four-shift",
               "body": [
                 {
                   "type": "paragraph",
@@ -2236,6 +2245,7 @@
             },
             {
               "type": "exercise",
+              "id": "common-sum-factor-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -2496,6 +2506,7 @@
             },
             {
               "type": "example",
+              "id": "square-plus-one-once-more",
               "body": [
                 {
                   "type": "paragraph",
@@ -2834,6 +2845,7 @@
             },
             {
               "type": "example",
+              "id": "absolute-difference-and-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -3076,6 +3088,7 @@
             },
             {
               "type": "example",
+              "id": "cubic-plus-one-cyclic",
               "body": [
                 {
                   "type": "paragraph",
@@ -3501,6 +3514,7 @@
             },
             {
               "type": "exercise",
+              "id": "square-root-swap-pair",
               "body": [
                 {
                   "type": "paragraph",
@@ -3711,6 +3725,7 @@
             },
             {
               "type": "exercise",
+              "id": "fifth-power-sum-cyclic",
               "body": [
                 {
                   "type": "paragraph",
@@ -3981,6 +3996,7 @@
             },
             {
               "type": "exercise",
+              "id": "quintic-cubic-cyclic-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -4645,6 +4661,7 @@
             },
             {
               "type": "problem",
+              "id": "quadratic-cross-term-triple",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5025,6 +5042,7 @@
             },
             {
               "type": "problem",
+              "id": "cubic-quadratic-swap-pair",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5427,6 +5445,7 @@
             },
             {
               "type": "problem",
+              "id": "absolute-value-cyclic-sum",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5902,6 +5921,7 @@
             },
             {
               "type": "problem",
+              "id": "weighted-quadratic-cyclic-triple",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6237,6 +6257,7 @@
             },
             {
               "type": "problem",
+              "id": "four-variable-cubic-cycle",
               "difficulty": 0,
               "body": [
                 {
@@ -6692,6 +6713,7 @@
             },
             {
               "type": "problem",
+              "id": "four-digit-cube-system",
               "difficulty": 0,
               "body": [
                 {
@@ -7319,6 +7341,7 @@
             },
             {
               "type": "problem",
+              "id": "cyclic-product-triple",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

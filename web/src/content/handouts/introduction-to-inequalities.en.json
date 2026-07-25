@@ -93,6 +93,7 @@
             },
             {
               "type": "example",
+              "id": "ordering-paired-sums-products",
               "body": [
                 {
                   "type": "paragraph",
@@ -318,6 +319,7 @@
             },
             {
               "type": "exercise",
+              "id": "product-inequality-chain-smallest",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -705,6 +707,7 @@
             },
             {
               "type": "example",
+              "id": "cubes-sum-vs-mixed-terms",
               "body": [
                 {
                   "type": "paragraph",
@@ -893,6 +896,7 @@
             },
             {
               "type": "exercise",
+              "id": "power-sum-vs-mixed-powers",
               "body": [
                 {
                   "type": "paragraph",
@@ -1164,6 +1168,7 @@
             },
             {
               "type": "exercise",
+              "id": "ordered-triple-square-difference",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1434,6 +1439,7 @@
             },
             {
               "type": "problem",
+              "id": "shifted-integer-product-inequality",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1980,6 +1986,7 @@
             },
             {
               "type": "example",
+              "id": "three-var-squares-vs-products",
               "body": [
                 {
                   "type": "paragraph",
@@ -2272,6 +2279,7 @@
             },
             {
               "type": "exercise",
+              "id": "two-var-squares-plus-constant",
               "body": [
                 {
                   "type": "paragraph",
@@ -2425,6 +2433,7 @@
             },
             {
               "type": "exercise",
+              "id": "quartic-terms-vs-product-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -2658,6 +2667,7 @@
             },
             {
               "type": "problem",
+              "id": "equal-cubic-shift-product-bounds",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -3059,6 +3069,7 @@
             },
             {
               "type": "example",
+              "id": "closer-numbers-larger-product",
               "body": [
                 {
                   "type": "paragraph",
@@ -3187,6 +3198,7 @@
             },
             {
               "type": "theorem",
+              "id": "n-term-mean-inequality",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -3621,6 +3633,7 @@
             },
             {
               "type": "example",
+              "id": "three-pairwise-sums-product",
               "body": [
                 {
                   "type": "paragraph",
@@ -3732,6 +3745,7 @@
             },
             {
               "type": "example",
+              "id": "open-box-max-volume",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4008,6 +4022,7 @@
             },
             {
               "type": "exercise",
+              "id": "power-plus-n-vs-linear",
               "body": [
                 {
                   "type": "paragraph",
@@ -4136,6 +4151,7 @@
             },
             {
               "type": "exercise",
+              "id": "unit-product-shifted-factors",
               "body": [
                 {
                   "type": "paragraph",
@@ -4310,6 +4326,7 @@
             },
             {
               "type": "exercise",
+              "id": "cyclic-fraction-sum-six",
               "body": [
                 {
                   "type": "paragraph",
@@ -4444,6 +4461,7 @@
             },
             {
               "type": "exercise",
+              "id": "reciprocal-sum-pair-product-bound",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4809,6 +4827,7 @@
             },
             {
               "type": "example",
+              "id": "implied-cubic-inequality",
               "body": [
                 {
                   "type": "paragraph",
@@ -5091,6 +5110,7 @@
             },
             {
               "type": "problem",
+              "id": "middle-value-square-condition",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5460,6 +5480,7 @@
             },
             {
               "type": "problem",
+              "id": "bounded-vars-sum-vs-squares",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6035,6 +6056,7 @@
             },
             {
               "type": "problem",
+              "id": "sqrt-product-quadratic-bound",
               "difficulty": 0,
               "body": [
                 {
@@ -6322,6 +6344,7 @@
             },
             {
               "type": "problem",
+              "id": "shifted-squares-product-bound",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6801,6 +6824,7 @@
             },
             {
               "type": "problem",
+              "id": "last-term-product-bound",
               "difficulty": 0,
               "body": [
                 {
@@ -7120,6 +7144,7 @@
             },
             {
               "type": "problem",
+              "id": "quartic-minus-mixed-cubic-min",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7463,6 +7488,7 @@
             },
             {
               "type": "problem",
+              "id": "sixth-power-condition-bound",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

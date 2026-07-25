@@ -16,30 +16,35 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 
 \textit{Konvence.} V~celém tomto materiálu, kdykoli je $ABC$ trojúhelník, píšeme $a = |BC|$, $b = |CA|$, $c = |AB|$ pro délky jeho stran a~$s = \frac{a + b + c}{2}$ pro polovinu jeho obvodu.
 
+\EnvId{two-tangents-from-point}
 \Theorem{}{
     Je dána kružnice a~z~bodu $A$ jsou k~ní vedeny dvě tečny. Body dotyku označme $X$, $Y$. Pak $|AX| = |AY|$.
 
     \Image{equal-tangents-two-from-point.pdf}
 }{}
 
+\EnvId{external-tangent-two-circles}
 \Theorem{}{
     Nechť $p$ a~$q$ jsou společné vnější tečny dvou kružnic $k_1$ a~$k_2$. Předpokládejme, že $p$ se dotýká $k_1$ v~$A$ a~$k_2$ v~$B$ a~$q$ se jich dotýká v~$C$ a~$D$. Pak $|AB| = |CD|$.
 
     \Image{equal-tangents-external-equal.pdf}
 }{}
 
+\EnvId{internal-tangent-two-circles}
 \Theorem{}{
     V~předchozím nastavení navíc předpokládejme, že $k_1$ a~$k_2$ jsou disjunktní, a~nechť $r$ je společná vnitřní tečna kružnic $k_1$ a~$k_2$ protínající $p$ v~$X$ a~$q$ v~$Y$. Pak $|XY| = |AB|$.
 
     \Image{equal-tangents-internal-equals-external.pdf}
 }{}
 
+\EnvId{incircle-touch-points-triangle}
 \Theorem{}{
     Vepsaná kružnice trojúhelníku $ABC$ se dotýká stran $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$. Pak $|AE| = |AF| = s - a = \frac{b + c - a}{2}$ a~podobně pro zbylé dva vrcholy.
 
     \Image{equal-tangents-incircle.pdf}
 }{}
 
+\EnvId{right-triangle-inradius-formula}
 \Theorem{}{
     Nechť $ABC$ je pravoúhlý trojúhelník s~pravým úhlem při vrcholu $C$ a~nechť $r$ je poloměr jeho vepsané kružnice. Pak
     $$
@@ -49,36 +54,42 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     \Image{equal-tangents-right-inradius.pdf}
 }{}
 
+\EnvId{excircle-opposite-vertex-tangent-length}
 \Theorem{}{
     Nechť se kružnice připsaná trojúhelníku $ABC$ proti vrcholu $A$ dotýká přímek $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$. Pak $|AE| = |AF| = s = \frac{a + b + c}{2}$.
 
     \Image{equal-tangents-excircle-from-a.pdf}
 }{}
 
+\EnvId{excircle-remaining-vertices-tangent-lengths}
 \Theorem{}{
     V~předchozím nastavení platí $|BD| = |BF| = s - c = \frac{a + b - c}{2}$ a~$|CD| = |CE| = s - b = \frac{a + c - b}{2}$.
 
     \Image{equal-tangents-excircle-from-b-c.pdf}
 }{}
 
+\EnvId{incircle-excircle-midpoint-symmetry}
 \Theorem{}{
     V~předchozím nastavení jsou body, ve kterých se vepsaná kružnice trojúhelníku $ABC$ a~tato připsaná kružnice dotýkají přímky $BC$, symetrické vzhledem ke~středu $BC$.
 
     \Image{equal-tangents-excircle-symmetry.pdf}
 }{}
 
+\EnvId{tangential-quadrilateral-definition}
 \Definition{Tečnový čtyřúhelník}{
     Čtyřúhelník nazýváme \textit{tečnový}, pokud má vepsanou kružnici, tj. kružnici dotýkající se všech jeho čtyř stran.
 
     \Image{equal-tangents-pitot.pdf}
 }
 
+\EnvId{quadrilateral-opposite-side-sums}
 \Theorem{Pitotova věta}{
     Konvexní čtyřúhelník $ABCD$ je tečnový právě tehdy, když $|AB| + |CD| = |BC| + |AD|$.
 }{}
 
 \sec Úlohy
 
+\EnvId{altitude-foot-incircle-diameters}
 \Problem{0}{DuoGeo 2025}{
     V~trojúhelníku $ABC$ nechť $D$ je pata výšky z~bodu $C$, přičemž $D$ leží na úsečce $AB$. Předpokládejme, že $|AC| + |BC|$ spolu s~průměry vepsaných kružnic trojúhelníků $ADC$ a~$BDC$ dávají v~součtu $26$ a~že $|CD| = 6$. Najděte obsah trojúhelníku $ABC$.
 }{
@@ -87,6 +98,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Je-li poloměr vepsané kružnice $ACD$ roven $r_1$ a~poloměr vepsané kružnice $BCD$ roven $r_2$, pak $2r_1=(|AD|+|CD|-|AC|)$ a~$2r_2=(|BD|+|CD|-|BC|)$. Sečtení a~trocha úprav by nám měly dát poslední chybějící kousek k~výpočtu obsahu.
 }{}
 
+\EnvId{parallelogram-midpoint-tangential-quadrilateral}
 \Problem{0}{MO 61-C-II-3}{
     Nechť $E$ je střed strany $CD$ rovnoběžníku $ABCD$ splňujícího $2 \cdot |AB| = 3 \cdot |BC|$. Dokažte, že pokud má čtyřúhelník $ABCE$ vepsanou kružnici, pak se tato kružnice dotýká strany $BC$ v~jejím středu.
 }{
@@ -99,6 +111,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Měli bychom dostat, že $|AD|=4x$, $|DE|=3x$ a~$|AE|=5x$, skrytý pravoúhlý trojúhelník se stranami 3-4-5. Takže náš rovnoběžník je v~podstatě obdélník. Teď by už mělo být snadné úlohu dokončit.
 }{}
 
+\EnvId{moving-tangent-point-on-arc}
 \Problem{0}{Náboj 2008}{
     Nechť $k$ je kružnice se středem $S$ a~poloměrem $1$ a~nechť $P$ je bod s~$|PS| = 3$. Z~bodu $P$ veďme dvě tečny ke~$k$, dotýkající se jí v~bodech $A$ a~$B$. Zvolme libovolný bod $T$ na kratším oblouku $AB$ kružnice $k$ a~veďme tečnu ke~$k$ v~$T$. Tato tečna protne úsečky $AP$ a~$BP$ v~bodech $X$ a~$Y$. Najděte obvod trojúhelníku $PXY$.
 }{
@@ -109,6 +122,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Připomeňme, že v~našich obvyklých konfiguracích platí $|PA|=|PB|$, což je polovina obvodu $PXY$. Stačí nám tedy spočítat $|PA|$.
 }{}
 
+\EnvId{diagonal-common-touch-point}
 \Problem{0}{}{
     Nechť $ABCD$ je tečnový čtyřúhelník. Dokažte, že vepsané kružnice trojúhelníků $ABC$ a~$ADC$ se dotýkají úhlopříčky $AC$ ve stejném bodě.
 }{
@@ -117,6 +131,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Jediný trik je použít vzorce typu $s-a$ v~trojúhelnících $ABC$ a~$ADC$. Mělo by nám zůstat něco, kde můžeme využít tečnovost.
 }{}
 
+\EnvId{three-excircle-points-on-line}
 \Problem{0}{MO 63-B-I-3}{
     Na přímce $BC$ jsou vyznačeny tři body, ve kterých se připsané kružnice trojúhelníku $ABC$ dotýkají této přímky; polohy samotných $B$ a~$C$ nejsou dány. Najděte bod, ve kterém se vepsaná kružnice $ABC$ dotýká přímky $BC$.
 }{
@@ -125,6 +140,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Trik je uvědomit si, že $|DB|=|CE|=s-a$. Co to znamená? A~co víme o~$F$ a~bodu dotyku vepsané kružnice?
 }{}
 
+\EnvId{corner-triangles-incircle-tangents}
 \Problem{0}{}{
     K~vepsané kružnici trojúhelníku jsou vedeny tři tečny, z~nichž každá odřízne u~jednoho z~vrcholů menší trojúhelník. Předpokládejme, že tyto menší trojúhelníky mají obvody $1$, $2$ a~$3$. Dokažte, že původní trojúhelník je pravoúhlý.
 }{
@@ -137,6 +153,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Poslední krok je vyřešit $s-a=1/2$, $s-b=1$, $s-c=3/2$ pro $a, b, c$.
 }{}
 
+\EnvId{parallelogram-diagonal-touch-points}
 \Problem{0}{MO 54-A-S-2}{
     Nechť $ABCD$ je rovnoběžník s~$|AB| > |BC|$. Nechť $K$ a~$M$ jsou body, ve kterých se vepsané kružnice trojúhelníků $ACD$ a~$ABC$ dotýkají úhlopříčky $AC$, a~nechť $L$ a~$N$ jsou definovány analogicky pro trojúhelníky $BCD$ a~$ABD$ dotýkající se úhlopříčky $BD$. Dokažte, že $KLMN$ je obdélník.
 }{
@@ -149,6 +166,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Podívejme se na $KM$. Rovná se $|AC|-|AK|-|CM|$. Kvůli symetrii je to $|AC|-2|AK|$. Ale $|AK|$ lze vyjádřit pomocí našich vzorců typu $s-a$.
 }{}
 
+\EnvId{split-triangle-incircle-touch-points}
 \Problem{0}{MO 64-A-I-5}{
     V~trojúhelníku $ABC$ nechť $D$ je bod, ve kterém se vepsaná kružnice dotýká strany $BC$. Vepsaná kružnice trojúhelníku $ABD$ se dotýká stran $AB$ a~$BD$ po řadě v~bodech $K$ a~$L$ a~vepsaná kružnice trojúhelníku $ADC$ se dotýká stran $DC$ a~$AC$ po řadě v~bodech $M$ a~$N$. Dokažte, že body $K$, $L$, $M$, $N$ leží na jedné kružnici.
 }{
@@ -165,6 +183,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Stačí ukázat $(|BD|+|AD|-|AB|)/2=(|CD|+|AD|-|AC|)/2$. Ale $|BD|,|CD|$ umíme snadno spočítat pomocí $a,b,c$.
 }{}
 
+\EnvId{excircle-quadrilateral-side-relation}
 \Problem{0}{}{
     Řekneme, že čtyřúhelník $ABCD$ má připsanou kružnici proti vrcholu $A$, pokud je vepsána do úhlu $BAD$, dotýká se přímek $BC$ a~$CD$ a~leží vně čtyřúhelníku. Dokažte, že pro takový čtyřúhelník platí $|AB| + |CB| = |AD| + |CD|$.
 }{
@@ -177,6 +196,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Další krok je $|BA'|=|BB'|=|BC|+|CB'|$. To dává $|AB|+|BC|=|AA'|-|CB'|$. Nyní by $|AD|+|CD|$ mělo dát něco podobného.
 }{}
 
+\EnvId{cevian-points-tangent-incircles}
 \Problem{0}{MO 49-A-I-2}{
     Nechť $K$, $L$, $M$ jsou vnitřní body stran $BC$, $CA$, $AB$ po řadě trojúhelníku $ABC$, zvolené tak, že vepsané kružnice trojúhelníků $ABK$ a~$CAK$ se dotýkají zvenku, vepsané kružnice $BCL$ a~$ABL$ se dotýkají zvenku a~vepsané kružnice $CAM$ a~$BCM$ se dotýkají zvenku. Dokažte, že
     $$
@@ -190,6 +210,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Po porovnání bychom měli dostat $|AD|=(c+|AK|-|BK|)/2$ z~$ABK$ a~$|AD|=(b+|AK|-|CK|)/2$ z~toho druhého. Položte je sobě rovny a~využijte také $|BK|+|CK|$. Co to řeší pro $|BK|$?
 }{}
 
+\EnvId{checkerboard-quadrilateral-grid}
 \Problem{0}{}{
     Na každé straně konvexního čtyřúhelníku jsou zvoleny dva body a~dvojice protilehlých bodů jsou spojeny úsečkami tak, že se spojnice nekříží. Původní čtyřúhelník je tím rozdělen na devět menších čtyřúhelníků. Ukažte, že pokud každý ze čtyř rohových čtyřúhelníků a~středový čtyřúhelník má vepsanou kružnici, pak ji má i~původní čtyřúhelník.
 
@@ -208,6 +229,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Na každé vnitřní úsečce nyní přenesená tečna prochází dvěma vrcholy středové buňky, kde se $\omega$ také dotýká. Stejné tečny z~těchto vrcholů rozdělí každý přenesený kousek na dvě poloviny, které se shodují s~polovinami na sousedních vnitřních úsečkách, přesně jako se rohové tečny shodovaly v~$A, B, C, D$ na vnější hranici. Tyto čtyři kousky se pak po dvojicích vyruší a~jsme hotovi.
 }{}
 
+\EnvId{inscribed-angle-circle-tangent-point}
 \Problem{0}{}{
     Nechť $ABC$ je trojúhelník s~poloměrem vepsané kružnice $r$ a~nechť $\omega$ je kružnice o~poloměru $\rho < r$ vepsaná do úhlu $BAC$. Druhé tečny z~$B$ a~$C$ ke~$\omega$ (jiné než $AB$ a~$AC$) se protnou v~bodě $X$. Dokažte, že vepsaná kružnice trojúhelníku $BCX$ se dotýká vepsané kružnice trojúhelníku $ABC$.
 }{
@@ -222,6 +244,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Vezměte $|BW|=|AB|-|AW|$, $|CV|=|AC|-|AV|$, $|CP|=|BC|-|BP|$. Jeden jednoduchý krok od dokončení.
 }{}
 
+\EnvId{common-tangent-locus-point}
 \Problem{0}{USAMO 1991}{
     Nechť $D$ je bod na straně $BC$ trojúhelníku $ABC$. Do trojúhelníků $BDA$ a~$DCA$ vepišme kružnice. Jejich společná vnější tečna jiná než $BC$ protne $AD$ v~bodě $X$. Určete množinu bodů $X$, když se $D$ pohybuje po straně $BC$.
 }{
@@ -238,6 +261,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Délku $|DP|$ lze vyjádřit pomocí vzorce typu $s-a$ v~$ABD$, podobně $|QD|$.
 }{}
 
+\EnvId{tangential-quadrilateral-incenter-circle}
 \Problem{1}{IMO 2021, P4}{
     Nechť $ABCD$ je tečnový čtyřúhelník s~vepsanou kružnicí se středem $I$ a~nechť $\Omega$ je opsaná kružnice trojúhelníku $AIC$. Prodloužení $BA$ a~$BC$ za body $A$ a~$C$ protnou $\Omega$ po řadě v~$X$ a~$Z$ a~prodloužení $AD$ a~$CD$ za bod $D$ protnou $\Omega$ po řadě v~$Y$ a~$T$. Dokažte, že
     $$
@@ -255,6 +279,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Ve skutečnosti jsou shodné i~$IPX$ a~$ISY$. Tyto dvě shodnosti dohromady dávají rovnosti úseček potřebné k~závěrečnému výpočtu.
 }{}
 
+\EnvId{touch-points-reflected-through-incenter}
 \Problem{1}{IMO Shortlist 2005, G1}{
     Nechť $ABC$ je trojúhelník se středem vepsané kružnice $I$ splňující $|AC| + |BC| = 3|AB|$ a~nechť $D$, $E$ jsou body, ve kterých se vepsaná kružnice dotýká stran $BC$ a~$CA$ po řadě. Nechť $K$ a~$L$ jsou obrazy $D$ a~$E$ v~souměrnosti podle $I$. Dokažte, že body $A$, $B$, $K$, $L$ leží na jedné kružnici.
 }{
@@ -269,6 +294,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Zdůvodněte, že $|I_aD'| = 2|ID|$. To konečně dává vodítko, co dělat s~$K$. Teď jsme blízko dokončení.
 }{}
 
+\EnvId{unit-length-points-perimeter-split}
 \Problem{2}{}{
     Nechť $ABC$ je trojúhelník s~obvodem $4$. Body $X$ a~$Y$ leží po řadě na polopřímkách $AB$ a~$AC$ tak, že $|AX| = |AY| = 1$ a~úsečky $BC$ a~$XY$ se protínají v~bodě $F$. Dokažte, že jeden ze dvou trojúhelníků, na které $AF$ rozdělí trojúhelník $ABC$, má obvod $2$.
 }{
@@ -283,6 +309,7 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Poslední bod, který nakreslíme, je bod dotyku připsané kružnice a~$BC$. Využitím faktu, že $F$ leží na této chordále, dostaneme nějaké pěkné stejné délky.
 }{}
 
+\EnvId{circumscribed-hexagon-diagonals-concurrent}
 \Problem{2}{Brianchonova věta}{
     Je-li šestiúhelník $ABCDEF$ opsaný kružnici (tj. každá z~jeho šesti stran se dotýká kružnice), pak jeho tři hlavní úhlopříčky $AD$, $BE$, $CF$ procházejí jedním bodem.
 }{

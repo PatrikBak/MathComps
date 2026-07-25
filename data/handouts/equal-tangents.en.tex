@@ -16,30 +16,35 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
 
 \textit{Convention.} Throughout this handout, when $ABC$ is a triangle, we write $a = BC$, $b = CA$, $c = AB$ for its side lengths and $s = \frac{a + b + c}{2}$ for its semiperimeter.
 
+\EnvId{two-tangents-from-point}
 \Theorem{}{
     Let a circle be given, and let two tangents to it be drawn from a point $A$. Denote the points of tangency by $X$, $Y$. Then $AX = AY$.
 
     \Image{equal-tangents-two-from-point.pdf}
 }{}
 
+\EnvId{external-tangent-two-circles}
 \Theorem{}{
     Let $p$ and $q$ be common external tangents of two circles $k_1$ and $k_2$. Suppose $p$ touches $k_1$ at $A$ and $k_2$ at $B$, and $q$ touches them at $C$ and $D$. Then $AB = CD$.
 
     \Image{equal-tangents-external-equal.pdf}
 }{}
 
+\EnvId{internal-tangent-two-circles}
 \Theorem{}{
     In the setting above, suppose further that $k_1$ and $k_2$ are disjoint, and let $r$ be a common internal tangent of $k_1$ and $k_2$ meeting $p$ at $X$ and $q$ at $Y$. Then $XY = AB$.
 
     \Image{equal-tangents-internal-equals-external.pdf}
 }{}
 
+\EnvId{incircle-touch-points-triangle}
 \Theorem{}{
     The incircle of triangle $ABC$ touches sides $BC$, $CA$, $AB$ at points $D$, $E$, $F$ respectively. Then $AE = AF = s - a = \frac{b + c - a}{2}$, and similarly for the other two vertices.
 
     \Image{equal-tangents-incircle.pdf}
 }{}
 
+\EnvId{right-triangle-inradius-formula}
 \Theorem{}{
     Let $ABC$ be a right triangle with the right angle at $C$, and let $r$ be its inradius. Then
     $$
@@ -49,36 +54,42 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     \Image{equal-tangents-right-inradius.pdf}
 }{}
 
+\EnvId{excircle-opposite-vertex-tangent-length}
 \Theorem{}{
     Let the excircle of triangle $ABC$ opposite vertex $A$ touch lines $BC$, $CA$, $AB$ at points $D$, $E$, $F$ respectively. Then $AE = AF = s = \frac{a + b + c}{2}$.
 
     \Image{equal-tangents-excircle-from-a.pdf}
 }{}
 
+\EnvId{excircle-remaining-vertices-tangent-lengths}
 \Theorem{}{
     In the setting above, $BD = BF = s - c = \frac{a + b - c}{2}$ and $CD = CE = s - b = \frac{a + c - b}{2}$.
 
     \Image{equal-tangents-excircle-from-b-c.pdf}
 }{}
 
+\EnvId{incircle-excircle-midpoint-symmetry}
 \Theorem{}{
     In the setting above, the points at which the incircle of $ABC$ and this excircle touch line $BC$ are symmetric about the midpoint of $BC$.
 
     \Image{equal-tangents-excircle-symmetry.pdf}
 }{}
 
+\EnvId{tangential-quadrilateral-definition}
 \Definition{Tangential quadrilateral}{
     A quadrilateral is called \textit{tangential} if it has an inscribed circle, that is, a circle tangent to all four of its sides.
 
     \Image{equal-tangents-pitot.pdf}
 }
 
+\EnvId{quadrilateral-opposite-side-sums}
 \Theorem{Pitot's theorem}{
     A convex quadrilateral $ABCD$ is tangential if and only if $AB + CD = BC + AD$.
 }{}
 
 \sec Problems
 
+\EnvId{altitude-foot-incircle-diameters}
 \Problem{0}{DuoGeo 2025}{
     In triangle $ABC$, let $D$ be the foot of the altitude from $C$, with $D$ lying on segment $AB$. Suppose that $AC + BC$ together with the diameters of the incircles of triangles $ADC$ and $BDC$ sum to $26$, and that $CD = 6$. Find the area of triangle $ABC$.
 }{
@@ -87,6 +98,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     If the inradius of $ACD$ is $r_1$ and the inradius of $BCD$ is $r_2$, then $2r_1=(AD+CD-AC)$ and $2r_2=(BD+CD-BC)$. Summing them up and a bit of manipulation should give us one last missing piece of the area calculation.
 }{}
 
+\EnvId{parallelogram-midpoint-tangential-quadrilateral}
 \Problem{0}{MO 61-C-II-3}{
     Let $E$ be the midpoint of side $CD$ of a parallelogram $ABCD$ satisfying $2 \cdot AB = 3 \cdot BC$. Prove that if the quadrilateral $ABCE$ has an inscribed circle, then this circle touches side $BC$ at its midpoint.
 }{
@@ -99,6 +111,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     We should get that $AD=4x$, $DE=3x$ and $AE=5x$, a hidden 3-4-5 right triangle. So our parallelogram is basically a rectangle. Now it should be easy to finish the problem.
 }{}
 
+\EnvId{moving-tangent-point-on-arc}
 \Problem{0}{Náboj 2008}{
     Let $k$ be a circle with center $S$ and radius $1$, and let $P$ be a point with $PS = 3$. From $P$ draw the two tangents to $k$, touching it at points $A$ and $B$. Choose any point $T$ on the shorter arc $AB$ of $k$, and draw the tangent to $k$ at $T$. This tangent meets segments $AP$ and $BP$ at points $X$ and $Y$. Find the perimeter of triangle $PXY$.
 }{
@@ -109,6 +122,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Recall in our common configurations we have that $PA=PB$, which is half the perimeter of $PXY$. So we only need to calculate $PA$.
 }{}
 
+\EnvId{diagonal-common-touch-point}
 \Problem{0}{}{
     Let $ABCD$ be a tangential quadrilateral. Prove that the incircles of triangles $ABC$ and $ADC$ touch diagonal $AC$ at the same point.
 }{
@@ -117,6 +131,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     The only trick is to use $s-a$-type formulas in triangles $ABC$ and $ADC$. We should be left with something where we can use tangentiality.
 }{}
 
+\EnvId{three-excircle-points-on-line}
 \Problem{0}{MO 63-B-I-3}{
     On line $BC$ are marked the three points at which the excircles of triangle $ABC$ touch this line; the positions of $B$ and $C$ themselves are not given. Find the point at which the incircle of $ABC$ touches line $BC$.
 }{
@@ -125,6 +140,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     The trick is to realize $DB=CE=s-a$. What does this mean? And what do we know about $F$ and the incircle tangency point?
 }{}
 
+\EnvId{corner-triangles-incircle-tangents}
 \Problem{0}{}{
     Three tangent lines are drawn to the incircle of a triangle, each cutting off a smaller triangle at one of the vertices. Suppose these smaller triangles have perimeters $1$, $2$, and $3$. Prove that the original triangle is right-angled.
 }{
@@ -137,6 +153,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     The last step is to solve $s-a=1/2$, $s-b=1$, $s-c=3/2$ for $a, b, c$.
 }{}
 
+\EnvId{parallelogram-diagonal-touch-points}
 \Problem{0}{MO 54-A-S-2}{
     Let $ABCD$ be a parallelogram with $AB > BC$. Let $K$ and $M$ be the points at which the incircles of triangles $ACD$ and $ABC$ touch diagonal $AC$, and let $L$ and $N$ be defined analogously for triangles $BCD$ and $ABD$ touching diagonal $BD$. Prove that $KLMN$ is a rectangle.
 }{
@@ -149,6 +166,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Let us look at $KM$. It is equal to $AC-AK-CM$. Due to symmetry, it is $AC-2AK$. But $AK$ can be expressed using our $s-a$-type formulae.
 }{}
 
+\EnvId{split-triangle-incircle-touch-points}
 \Problem{0}{MO 64-A-I-5}{
     In a triangle $ABC$, let $D$ be the point at which the incircle touches side $BC$. The incircle of triangle $ABD$ touches sides $AB$ and $BD$ at points $K$ and $L$ respectively, and the incircle of triangle $ADC$ touches sides $DC$ and $AC$ at points $M$ and $N$ respectively. Prove that the points $K$, $L$, $M$, $N$ are concyclic.
 }{
@@ -165,6 +183,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     It's enough to show $(BD+AD-AB)/2=(CD+AD-AC)/2$. But we can compute $BD,CD$ in terms of $a,b,c$ easily.
 }{}
 
+\EnvId{excircle-quadrilateral-side-relation}
 \Problem{0}{}{
     We say that a quadrilateral $ABCD$ has an excircle opposite vertex $A$ if it is inscribed in angle $BAD$, tangent to lines $BC$ and $CD$, and lies outside the quadrilateral. Prove that for such a quadrilateral, $AB + CB = AD + CD$.
 }{
@@ -177,6 +196,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Next step is $BA'=BB'=BC+CB'$. This gives $AB+BC=AA'-CB'$. Now $AD+CD$ should give something similar.
 }{}
 
+\EnvId{cevian-points-tangent-incircles}
 \Problem{0}{MO 49-A-I-2}{
     Let $K$, $L$, $M$ be interior points of sides $BC$, $CA$, $AB$ respectively of a triangle $ABC$, chosen so that the incircles of triangles $ABK$ and $CAK$ are externally tangent, the incircles of $BCL$ and $ABL$ are externally tangent, and the incircles of $CAM$ and $BCM$ are externally tangent. Prove that
     $$
@@ -190,6 +210,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     After comparing them we should get $AD=(c+AK-BK)/2$ from $ABK$ and $AD=(b+AK-CK)/2$ from the other. Equate them and also use $BK+CK$. What does it solve for $BK$?
 }{}
 
+\EnvId{checkerboard-quadrilateral-grid}
 \Problem{0}{}{
     On each side of a convex quadrilateral, two points are chosen, and pairs of opposite points are joined by segments in such a way that the joining segments do not cross. The original quadrilateral is thereby divided into nine smaller quadrilaterals. Show that if each of the four corner quadrilaterals and the central quadrilateral has an inscribed circle, then so does the original quadrilateral.
 
@@ -208,6 +229,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     On each inner segment, the transferred tangent now passes through two vertices of the central cell, where $\omega$ is also tangent. Equal tangents from those vertices split each transferred piece into two halves that match halves on neighbouring inner segments, just like the corner tangents matched at $A, B, C, D$ on the outer boundary. The four pieces then cancel pairwise and we are done.
 }{}
 
+\EnvId{inscribed-angle-circle-tangent-point}
 \Problem{0}{}{
     Let $ABC$ be a triangle with inradius $r$, and let $\omega$ be a circle of radius $\rho < r$ inscribed in angle $BAC$. The second tangents from $B$ and $C$ to $\omega$ (other than $AB$ and $AC$) meet at a point $X$. Prove that the incircle of triangle $BCX$ is tangent to the incircle of triangle $ABC$.
 }{
@@ -222,6 +244,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Take $BW=AB-AW$, $CV=AC-AV$, $CP=BC-BP$. One simple step from finishing.
 }{}
 
+\EnvId{common-tangent-locus-point}
 \Problem{0}{USAMO 1991}{
     Let $D$ be a point on side $BC$ of triangle $ABC$. Inscribe circles in triangles $BDA$ and $DCA$. Their common external tangent other than $BC$ meets $AD$ at a point $X$. Determine the locus of $X$ as $D$ varies along side $BC$.
 }{
@@ -238,6 +261,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Length $DP$ can be expressed using the $s-a$-type formula in $ABD$, similarly $QD$.
 }{}
 
+\EnvId{tangential-quadrilateral-incenter-circle}
 \Problem{1}{IMO 2021, P4}{
     Let $ABCD$ be a tangential quadrilateral with incircle centered at $I$, and let $\Omega$ be the circumcircle of triangle $AIC$. The extensions of $BA$ and $BC$ beyond $A$ and $C$ meet $\Omega$ at $X$ and $Z$ respectively, and the extensions of $AD$ and $CD$ beyond $D$ meet $\Omega$ at $Y$ and $T$ respectively. Prove that
     $$
@@ -255,6 +279,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     In fact also $IPX$ and $ISY$ are congruent. These two congruences together give segment equalities needed to do the final computation.
 }{}
 
+\EnvId{touch-points-reflected-through-incenter}
 \Problem{1}{IMO Shortlist 2005, G1}{
     Let $ABC$ be a triangle with incenter $I$ satisfying $AC + BC = 3 AB$, and let $D$, $E$ be the points at which the incircle touches sides $BC$ and $CA$ respectively. Let $K$ and $L$ be the reflections of $D$ and $E$ across $I$. Prove that the points $A$, $B$, $K$, $L$ are concyclic.
 }{
@@ -269,6 +294,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Justify that $I_aD' = 2ID$. This finally gives a clue what to do with $K$. Now we are close to finishing.
 }{}
 
+\EnvId{unit-length-points-perimeter-split}
 \Problem{2}{}{
     Let $ABC$ be a triangle with perimeter $4$. Points $X$ and $Y$ lie on rays $AB$ and $AC$ respectively such that $AX = AY = 1$ and segments $BC$ and $XY$ intersect at a point $F$. Prove that one of the two triangles into which $AF$ divides triangle $ABC$ has perimeter $2$.
 }{
@@ -283,6 +309,7 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     The final point to draw is the tangency point of the excircle and $BC$. Using the fact that $F$ lies on this radical axis, we get some nice equal lengths. 
 }{}
 
+\EnvId{circumscribed-hexagon-diagonals-concurrent}
 \Problem{2}{Brianchon's theorem}{
     If a hexagon $ABCDEF$ is circumscribed about a circle (i.e., each of its six sides is tangent to the circle), then its three main diagonals $AD$, $BE$, $CF$ are concurrent.
 }{

@@ -40,10 +40,18 @@ public class DefenseLimits
     public required int MaxOpenerChars { get; set; }
 
     /// <summary>
-    /// The longest a problem key may be, in characters.
+    /// The longest a handout's content id may be, in characters. Kept in step with the anchor column it is
+    /// stored in, so an over-long id is refused as a bad request rather than failing the write.
     /// </summary>
     [Range(1, int.MaxValue)]
-    public required int MaxProblemKeyChars { get; set; }
+    public required int MaxHandoutContentIdChars { get; set; }
+
+    /// <summary>
+    /// The longest an environment's id may be, in characters. Bounded the same way as
+    /// <see cref="MaxHandoutContentIdChars"/>.
+    /// </summary>
+    [Range(1, int.MaxValue)]
+    public required int MaxEnvironmentIdChars { get; set; }
 
     /// <summary>
     /// The most student turns one conversation may hold.

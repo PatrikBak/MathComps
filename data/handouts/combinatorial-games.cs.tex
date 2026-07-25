@@ -23,6 +23,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
 
 \sec Úlohy
 
+\EnvId{matchstick-removal-game}
 \Problem{0}{}{
     Na stole je 1000 zápalek a~dva hráči se střídají v~tazích. V~každém tahu hráč odebere 1~nebo 2~zápalky. Vyhraje ten, kdo udělal poslední tah. Kdo má vyhrávající strategii?
 }{
@@ -43,6 +44,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Jelikož $1000 = 3\cdot 333 + 1$ není dělitelné třemi, vyhrává začínající hráč. Prvním tahem odebere jednu zápalku a~zanechá 999, a~potom na každé soupeřovo odebrání $k$ zápalek odpoví odebráním $3-k$. Tím soupeři vždy zanechá násobek tří, až nakonec~0.
 }
 
+\EnvId{date-naming-race}
 \Problem{0}{}{
     Dva hráči střídavě jmenují data v~rámci jednoho roku, přičemž začínají 1.~lednem. V~každém tahu hráč zvětší buď měsíc, nebo den, ale ne obojí najednou (například z~10.~ledna může přejít třeba na 10.~března nebo třeba na 15.~ledna). Vyhrává ten, kdo jako první řekne 31.~prosinec. Který hráč má vyhrávající strategii?
 }{
@@ -63,6 +65,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Výchozí pozice 1. ledna má rozdíl 0, je tedy výherní a~vyhrává začínající hráč. Prvním tahem přejde na 20. ledna (rozdíl 19) a~potom po každém soupeřově tahu vrátí rozdíl na~19. Soupeř tak nikdy neřekne 31. prosinec jako první -- to nakonec udělá začínající hráč.
 }
 
+\EnvId{chessboard-king-tour}
 \Problem{0}{}{
     V~levém horním rohu šachovnice $8 \times 8$ stojí figurka krále. Dva hráči se střídají v~tazích, přičemž každý svým tahem (legálním šachovým tahem) posune figurku na místo, na kterém ještě nestála. Kdo nemá kam udělat tah, prohrál. Který hráč má vyhrávající strategii?
 }{
@@ -77,6 +80,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Takový tah je vždy možný: po každém tahu začínajícího hráče tvoří navštívená políčka úplné kostičky, takže když soupeř vstoupí na nové políčko, jeho partner v~kostičce je ještě volný a~sousedí s~ním (král tam umí potáhnout). Soupeři tak dříve či později dojdou tahy, a~tím prohraje.
 }
 
+\EnvId{coins-on-round-table}
 \Problem{0}{}{
     Dva hráči střídavě pokládají na kulatý stůl stejné mince, přičemž každá musí celá ležet na stole a~nesmí se překrývat s~dříve položenými (dotyk je dovolen). Prohrává ten, kdo už nemá kam položit další minci. Který z~hráčů má vyhrávající strategii?
 }{
@@ -91,6 +95,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Tato souměrná pozice je vždy volná a~celá leží na stole: stůl je středově souměrný, takže obraz soupeřovy korektně položené mince je opět korektní pozice. Se soupeřovou mincí se přitom krýt nemůže: její střed je od~středu stolu vzdálen alespoň o~průměr mince (jinak by se překrývala se středovou mincí), takže od~svého obrazu, který je právě dvakrát tak daleko, je vzdálen alespoň o~dva průměry -- na překrytí by přitom stačil menší odstup než jeden průměr. Začínající hráč má tedy po každém soupeřově tahu kam táhnout, a~tak prohraje soupeř.
 }
 
+\EnvId{digit-fraction-game}
 \Problem{0}{65-CSMO-C-II-4}{
     Adam s~Barborou hrají se zlomkem
     $$
@@ -113,6 +118,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     \textit{Pokud začíná Barbora.} Zlomek má konečný rozvoj právě tehdy, když se dá zkrátit na jmenovatel složený jen ze~dvojek a~pětek. Adam to pokazí, pokud do jmenovatele dostane jiný prvočíselný dělitel, který se nedá zkrátit -- nejjednodušeji trojku. Poradíme mu tedy zařídit, aby jmenovatel $10c+d$ byl dělitelný třemi, ale čitatel $10a+b$ ne; takový zlomek má pak nekonečný periodický rozvoj a~Adam vyhraje. Protože $10a+b$ a~jeho ciferný součet $a+b$ dávají stejný zbytek po dělení třemi (a~podobně $10c+d$ a~$c+d$), stačí Adamovi zařídit, aby $c+d$ bylo dělitelné třemi a~$a+b$ ne. Toho dosáhne tak, že po každém z~obou Barbořiných tahů vhodně doplní čitatel či jmenovatel -- například zařídí $a+b=10$ (nedělitelné třemi) a~$c+d=9$ nebo~$12$ (dělitelné třemi).
 }
 
+\EnvId{polygon-diagonal-drawing}
 \Problem{0}{}{
     Hráči $A$ a~$B$ střídavě kreslí úhlopříčky v~pravidelném 2026úhelníku. Úhlopříčku smějí nakreslit jen tehdy, když neprotíná žádnou z~dříve nakreslených (společný koncový vrchol se za protnutí nepovažuje). Prohrává ten, kdo nemůže táhnout. Který z~hráčů vyhrává?
 }{
@@ -127,6 +133,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Strategie je korektní: soupeř nemůže nakreslit úhlopříčku protínající hlavní, protože ta je už nakreslena, takže každá jeho úhlopříčka leží celá v~jedné z~polovin. Zvláště žádná není souměrná sama se sebou -- taková by totiž spojovala dvojici zrcadlově sdružených vrcholů, ležela by tedy v~obou polovinách a~protínala hlavní úhlopříčku. Zrcadlový obraz soupeřovy úhlopříčky proto leží v~druhé polovině, je různý od~ní samé i~od~všech dosud nakreslených a~žádnou z~nich neprotíná (jinak by se protínaly i~jejich obrazy, tedy předchozí soupeřovy tahy). $A$ má tedy po každém soupeřově tahu odpověď, a~tak prohraje soupeř.
 }
 
+\EnvId{chomp-poisoned-chocolate}
 \Problem{1}{Chomp}{
     Představme si obdélníkovou čokoládu rozdělenou na alespoň dva čtvercové dílky, přičemž levý horní dílek je otrávený. Dva hráči se střídají v~tazích. V~každém tahu si hráč vybere některý dílek a~sní ho spolu se všemi dílky, které leží od něj doprava a~dolů -- tedy celý obdélník, jehož levým horním rohem je zvolený dílek. Prohrává ten, kdo je nucen sníst otrávený levý horní dílek. Který hráč má vyhrávající strategii?
 }{
@@ -143,6 +150,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Jenže tutéž výslednou pozici umí navodit i~začínající hráč hned svým prvním tahem -- vždyť každé ukousnutí zahrnuje i~pravý dolní roh, takže libovolná odpověď druhého hráče je zároveň legálním prvním tahem. Začínající hráč si ji tedy mohl přivlastnit a~vyhrát sám, což je spor. Vítěznou strategii má proto začínající hráč.
 }
 
+\EnvId{chess-double-move-variant}
 \Problem{1}{}{
     Dva hráči hrají hru podle pravidel klasického šachu, s~jediným rozdílem: hráč, který je na tahu, udělá vždy dva tahy po sobě. Dokažte, že začínající hráč má neprohrávající strategii, tedy si umí zaručit alespoň remízu.
 }{
@@ -155,6 +163,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Hráč $A$ se nyní vžije do role druhého hráče a~od této chvíle hraje podle strategie $S$. Tou by ale vyhrál on sám, což je spor s~tím, že vyhrávající strategii měl mít $B$. Soupeř tedy vyhrávající strategii nemá; a~jelikož šachy jsou konečná hra bez náhody, $A$ si umí zaručit alespoň remízu.
 }
 
+\EnvId{divisor-addition-race}
 \Problem{1}{}{
     Dva hráči hrají hru, ve které se střídají v~tazích. Na začátku máme číslo 2. V~každém kroku k~němu přičteme nějaký jeho nevlastní dělitel (dělitel menší než ono samo). Cílem je získat číslo $\ge 2026$. Kdo má vyhrávající strategii?
 }{
@@ -173,6 +182,7 @@ V~kombinatorických hrách obvykle rozhodujeme, který ze~dvou hráčů má vít
     Zbývá ověřit, že $B$ mezitím nevyhraje. $A$ totiž soupeři zanechává jen lichá čísla menší než 1352, tedy nejvýše 1351. K~lichému $y$ může $B$ přičíst nanejvýš jeho třetinu (nevlastní dělitel lichého čísla je $\le y/3$), takže se dostane nejvýše na $\frac43\cdot1351 = 1801 < 2026$. K~cíli se tedy nikdy nedostane.
 }
 
+\EnvId{fraction-slot-filling-game}
 \Problem{1}{70-CSMO-A-III-1}{
     Zlomek s~1010 políčky v~čitateli a~1011 políčky ve jmenovateli slouží jako hrací plán pro hru dvou hráčů.
     $$
