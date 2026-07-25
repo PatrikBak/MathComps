@@ -2,12 +2,15 @@
 
 import { Plus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
-import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import type {
+  RichMathEditorRef,
+  ToolbarConfig,
+} from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
@@ -147,6 +150,15 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // The rewind awaiting confirmation, or null
   const [rewindTarget, setRewindTarget] = useState<RewindTarget | null>(null)
 
+  // The composer's handle
+  const editorRef = useRef<RichMathEditorRef>(null)
+
+  // The composer outlives the conversation it writes into, so hand it the cursor whenever another
+  // one takes over
+  useEffect(() => {
+    editorRef.current?.focus()
+  }, [conversationEpoch])
+
   // Surface a failed history load, but only while the modal is open: an empty history and a load failure
   // look identical otherwise, and the mounted-but-closed modal keeps the query running in the background
   useEffect(() => {
@@ -271,6 +283,10 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // rewinding to a student turn drops it and lifts its text back into the composer to redo. The
   // transcript is the contiguous 0..N turns the server stores, so a turn's index is its server sequence.
   const requestRewind = (index: number) => {
+    // The confirmation hands the cursor back to whatever held it when it opened, and the rewind can
+    // drop the very button that did, so send the cursor to the composer before arming it
+    editorRef.current?.focus()
+
     // The turn the rewind targets
     const turn = turns[index]
 
@@ -397,7 +413,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
             onSend={() => void handleSend()}
             onStop={handleStop}
             autoFocus
-            focusKey={conversationEpoch}
+            ref={editorRef}
             isLoading={isThinking}
             placeholder={t('placeholder')}
           />
