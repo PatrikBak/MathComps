@@ -15,7 +15,7 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// after the cap — a revision carries the specific correction back to the generator, and the turn sums the cost and
 /// tokens of every call it made.
 /// </summary>
-public class ExaminerLoopTests
+public class ExaminerTests
 {
     /// <summary>
     /// The revision cap every test runs the loop under.
@@ -261,6 +261,50 @@ public class ExaminerLoopTests
         // The regenerate carried both the math correction and the leak, so the generator knows every flaw to fix.
         Assert.Contains("the bound is at most 1/2", generatePrompts[1]);
         Assert.Contains("named the two-corners counterexample", generatePrompts[1]);
+    }
+
+    /// <summary>
+    /// A literal placeholder token embedded in the problem's own text (e.g. a candidate quoting <c>{reference}</c>
+    /// verbatim) survives prompt-filling untouched — it must not be re-expanded into the actual reference solution.
+    /// </summary>
+    [Fact]
+    public async Task A_literal_placeholder_token_in_the_problem_is_not_re_expanded()
+    {
+        // The problem statement literally quotes "{reference}" — filling must not expand it.
+        var problem = "Show that the token {reference} appears verbatim in this statement.";
+        var reference = "SECRET-REFERENCE-TEXT";
+
+        // Capture the generate call's system prompt as it lands.
+        var generatePrompts = new List<string>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
+                Capture.In(generatePrompts), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(new ExaminerReply("a reply.")));
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
+
+        // A minimal transcript ending on a candidate turn.
+        var transcript = Transcript.Parse("## Candidate\n\nmy defense");
+
+        // Run one turn under throwaway prompt templates against the custom problem and reference.
+        await WithTempSettingsAsync(async settings =>
+        {
+            // Build the examiner over the fake caller.
+            var examiner = new ExaminerEngine(caller.Object, MsOptions.Create(settings));
+
+            // Run the turn.
+            await examiner.NextReplyAsync(problem, reference, transcript, new ModelUsageAccumulator());
+
+            // The bool is ignored — the captured prompt is what the assertions inspect.
+            return true;
+        });
+
+        // The literal token inside the problem's own text survives untouched...
+        Assert.Contains("the token {reference} appears verbatim", generatePrompts[0]);
+
+        // ...while the template's real {reference} placeholder still got filled with the reference solution.
+        Assert.Contains(reference, generatePrompts[0]);
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Dtos;
@@ -57,6 +58,11 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// the read's result, not its task, so a transient read failure isn't cached and permanently reused.
     /// </summary>
     private readonly ConcurrentDictionary<string, string> _prompts = new();
+
+    /// <summary>
+    /// Matches a <c>{token}</c> placeholder in a prompt template.
+    /// </summary>
+    private static readonly Regex _placeholderPattern = new(@"\{(\w+)\}", RegexOptions.Compiled);
 
     /// <inheritdoc/>
     public async Task<ExaminerTurnOutcome> NextReplyAsync(
@@ -190,13 +196,19 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         string problem, string reference, string conversation, string revisionNote, ModelUsageAccumulator usage,
         CancellationToken cancellationToken)
     {
-        // Fill the persona prompt with the problem, the reference, the hints guidance when the reference carries the
-        // author's-hints section, and the revision note (empty most turns).
-        var systemPrompt = (await ReadPromptAsync(_settings.Generate.Prompt, cancellationToken))
-            .Replace("{problem}", problem)
-            .Replace("{reference}", reference)
-            .Replace("{hints_note}", reference.Contains(AuthorHintsSection.Heading) ? AuthorHintsSection.UsageNote : "")
-            .Replace("{revision_note}", revisionNote);
+        // The hints guidance applies only when the reference carries the author's-hints section.
+        var hintsNote = reference.Contains(AuthorHintsSection.Heading) ? AuthorHintsSection.UsageNote : "";
+
+        // Fill the persona prompt with the problem, the reference, the hints guidance, and the revision note
+        // (empty most turns).
+        var systemPrompt = FillTemplate(await ReadPromptAsync(_settings.Generate.Prompt, cancellationToken),
+            new Dictionary<string, string>
+            {
+                ["problem"] = problem,
+                ["reference"] = reference,
+                ["hints_note"] = hintsNote,
+                ["revision_note"] = revisionNote,
+            });
 
         // The conversation so far is what the examiner responds to; the reply rides a single-field structured
         // response, so the model fills the message slot and its scaffolding stays out of the shipped turn.
@@ -262,9 +274,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         CancellationToken cancellationToken)
     {
         // The guard judges against the problem and its reference solution.
-        var systemPrompt = (await ReadPromptAsync(promptPath, cancellationToken))
-            .Replace("{problem}", problem)
-            .Replace("{reference}", reference);
+        var systemPrompt = FillTemplate(await ReadPromptAsync(promptPath, cancellationToken),
+            new Dictionary<string, string>
+            {
+                ["problem"] = problem,
+                ["reference"] = reference,
+            });
 
         // The whole conversation followed by the proposed reply under scrutiny.
         var userPrompt = $"{conversation}\n\n## Examiner (proposed)\n\n{reply}";
@@ -272,6 +287,18 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Both messages for the guard call.
         return (systemPrompt, userPrompt);
     }
+
+    /// <summary>
+    /// Fills a prompt template's <c>{token}</c> placeholders from a value map in a single pass, so a filled-in
+    /// value that itself contains a literal token (e.g. a reference solution mentioning <c>{reference}</c>) is
+    /// never re-scanned and expanded. A token absent from the map is left untouched.
+    /// </summary>
+    /// <param name="template">The template text to fill.</param>
+    /// <param name="values">The replacement value per token name.</param>
+    /// <returns>The template with every known token substituted.</returns>
+    private static string FillTemplate(string template, IReadOnlyDictionary<string, string> values) =>
+        _placeholderPattern.Replace(
+            template, match => values.GetValueOrDefault(match.Groups[1].Value, match.Value));
 
     /// <summary>
     /// Reads a prompt template, caching its contents so a run reads each file once rather than on every step and
