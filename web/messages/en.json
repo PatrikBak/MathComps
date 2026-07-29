@@ -632,10 +632,10 @@
         "authors": "Authors",
         "competition": "Competition",
         "grouping": {
-          "Area": "Area",
-          "Goal": "Goal",
-          "Technique": "Technique",
-          "Type": "Occurrence"
+          "area": "Area",
+          "goal": "Goal",
+          "technique": "Technique",
+          "type": "Occurrence"
         },
         "logic": {
           "and": "All",

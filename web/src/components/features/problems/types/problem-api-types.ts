@@ -15,7 +15,7 @@ export type FacetOption = {
   tagType?: TagType
 }
 
-export type TagType = 'Area' | 'Type' | 'Goal' | 'Technique'
+export type TagType = 'area' | 'type' | 'goal' | 'technique'
 
 export type TagDto = {
   slug: string

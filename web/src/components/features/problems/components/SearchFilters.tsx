@@ -288,12 +288,12 @@ export const SearchFilters = ({
                 },
               }}
               grouping={{
-                keys: ['Area', 'Type', 'Goal', 'Technique'],
+                keys: ['area', 'type', 'goal', 'technique'],
                 labels: {
-                  Area: t('facets.grouping.Area'),
-                  Type: t('facets.grouping.Type'),
-                  Goal: t('facets.grouping.Goal'),
-                  Technique: t('facets.grouping.Technique'),
+                  area: t('facets.grouping.area'),
+                  type: t('facets.grouping.type'),
+                  goal: t('facets.grouping.goal'),
+                  technique: t('facets.grouping.technique'),
                 },
               }}
             />
