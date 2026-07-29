@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using MathComps.Domain.Localization;
@@ -117,8 +118,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 // Configure JSON serialization for controllers/minimal APIs
 builder.Services.Configure<JsonOptions>(options =>
 {
-    // Nice enums, the frontend likes them
-    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    // Enums travel as camelCase strings, the single shape every client reads them in
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 });
 
 // Make sure we have DB

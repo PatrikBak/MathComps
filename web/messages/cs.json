@@ -632,10 +632,10 @@
         "authors": "Autoři",
         "competition": "Soutěž",
         "grouping": {
-          "Area": "Oblast",
-          "Goal": "Cíl",
-          "Technique": "Technika",
-          "Type": "Výskyt"
+          "area": "Oblast",
+          "goal": "Cíl",
+          "technique": "Technika",
+          "type": "Výskyt"
         },
         "logic": {
           "and": "Všechny",

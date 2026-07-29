@@ -13,10 +13,10 @@ import type { TagDto, TagType } from '../types/problem-api-types'
 export const sortTagsByCategory = (tags: TagDto[], locale: string): TagDto[] => {
   // Define the sorting priority for tag types
   const tagTypePriority: Record<TagType, number> = {
-    Area: 1,
-    Type: 2,
-    Goal: 3,
-    Technique: 4,
+    area: 1,
+    type: 2,
+    goal: 3,
+    technique: 4,
   }
 
   // Sort tags first by category priority, then alphabetically by data within each category

@@ -198,7 +198,7 @@ export function ProblemCard({
     }
 
     // Get all technique tags
-    const allTechniqueTags = problem.tags.filter((tag) => tag.tagType === 'Technique')
+    const allTechniqueTags = problem.tags.filter((tag) => tag.tagType === 'technique')
 
     // Get technique tags that are part of an active filter
     const visibleDueToFilter = allTechniqueTags.filter((tag) =>
@@ -375,7 +375,7 @@ export function ProblemCard({
               {/* Render tags sorted by category with technique visibility logic */}
               {sortTagsByCategory(problem.tags, locale)
                 .filter((tag) => {
-                  if (tag.tagType !== 'Technique') {
+                  if (tag.tagType !== 'technique') {
                     return true // Always show non-technique tags
                   }
                   // Show technique tags if globally visible, locally revealed, or part of an active filter
