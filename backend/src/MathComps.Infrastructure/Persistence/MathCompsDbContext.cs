@@ -103,6 +103,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Per-turn examiner spend.</summary>
     public DbSet<DefenseSpend> DefenseSpends => Set<DefenseSpend>();
 
+    /// <summary>Student reports on individual examiner replies.</summary>
+    public DbSet<DefenseTurnReport> DefenseTurnReports => Set<DefenseTurnReport>();
+
+    /// <summary>What students said about their defense conversations.</summary>
+    public DbSet<DefenseSessionFeedback> DefenseSessionFeedbacks => Set<DefenseSessionFeedback>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -128,6 +134,13 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     #endregion OnConfiguring
 
     #region OnModelCreating
+
+    /// <summary>
+    /// The condition holding a <c>comment</c> column to text a reader could act on. It names every whitespace
+    /// character it strips, since the one-argument <c>btrim</c> strips only spaces and would take a tab for an
+    /// account, and coalesces because a check constraint lets a null through on its own.
+    /// </summary>
+    private const string CommentCarriesText = @"coalesce(btrim(comment, E' \t\n\r\f'), '') <> ''";
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -840,6 +853,72 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion DefenseSpend
+
+        #region DefenseTurnReport
+
+        modelBuilder.Entity<DefenseTurnReport>(e =>
+        {
+            // The reported conversation, cascading so deleting a session drops what was said about it.
+            e.HasOne(report => report.Session)
+             .WithMany(session => session.Reports)
+             .HasForeignKey(report => report.SessionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The reported reply itself, one report to a reply, cascading because a report is only worth anything
+            // beside the reply it is against: rewinding past that reply takes what was said about it too. The
+            // conversation rides in the key so the reply has to be one of that conversation's own, which is what
+            // stops a row claiming a reply another conversation holds.
+            e.HasOne(report => report.Turn)
+             .WithOne()
+             .HasPrincipalKey<DefenseTurn>(turn => new { turn.SessionId, turn.Id })
+             .HasForeignKey<DefenseTurnReport>(report => new { report.SessionId, report.TurnId })
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The pair the reply is held to, which reading a session's reports starts from as well.
+            e.HasIndex(report => new { report.SessionId, report.TurnId })
+             .IsUnique()
+             .HasDatabaseName("ux_defense_turn_report_session_id_turn_id");
+
+            // The house name for the constraint holding a reply to one report, which the revising write
+            // conflicts on.
+            e.HasIndex(report => report.TurnId)
+             .IsUnique()
+             .HasDatabaseName("ux_defense_turn_report_turn_id");
+
+            // A report holding nothing against the reply is an empty row, not a quiet one.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_defense_turn_report_categories_not_empty", "cardinality(categories) > 0"));
+
+            // Blaming something off the list says nothing on its own, so it comes with the student's account
+            // of what happened.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_defense_turn_report_other_needs_comment",
+                $"NOT ('other' = ANY(categories)) OR {CommentCarriesText}"));
+        });
+
+        #endregion DefenseTurnReport
+
+        #region DefenseSessionFeedback
+
+        modelBuilder.Entity<DefenseSessionFeedback>(e =>
+        {
+            // A session is answered for at most once, so its own id doubles as this row's key.
+            e.HasKey(feedback => feedback.SessionId);
+
+            // The session this answers for, cascading so deleting it drops the answer with it.
+            e.HasOne(feedback => feedback.Session)
+             .WithOne(session => session.Feedback)
+             .HasForeignKey<DefenseSessionFeedback>(feedback => feedback.SessionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Landing off the list says nothing on its own, so it comes with the student's account of where the
+            // conversation went instead.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_defense_session_feedback_something_else_needs_comment",
+                $"outcome <> 'something_else' OR {CommentCarriesText}"));
+        });
+
+        #endregion DefenseSessionFeedback
     }
 
     #endregion OnModelCreating

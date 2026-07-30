@@ -36,18 +36,6 @@ function flush(): Promise<void> {
 }
 
 /**
- * Stamps turns with a fixed timestamp, standing in for the backend's persist-time dating.
- *
- * @param turns - The turns to stamp.
- *
- * @returns The stored turns.
- */
-function stampTurns(turns: Turn[]): StoredTurn[] {
-  // Every turn gets the same placeholder date
-  return turns.map((turn) => ({ ...turn, createdAt: 'ts' }))
-}
-
-/**
  * A controllable fake of the backend: an in-memory session store, plus gates and a fail-flag that let a
  * test hold a round-trip open or fail it by hand.
  */
@@ -79,6 +67,9 @@ class FakeBackend implements DefenseConversationServices {
   /** How many sessions have been minted, for distinct server-side ids. */
   private sessionCount = 0
 
+  /** How many turns have been stored, for distinct server-minted turn ids. */
+  private turnCount = 0
+
   /** @inheritdoc */
   submitTurn = async (request: DefenseTurnRequest): Promise<DefenseSession> => {
     // Register the call, held open until the test releases it
@@ -103,13 +94,17 @@ class FakeBackend implements DefenseConversationServices {
     }
 
     // The student's turn
-    const studentTurn: Turn = { role: 'student', content: request.content }
+    const studentTurn: Turn = { id: null, role: 'candidate', content: request.content }
 
     // A distinct examiner reply
-    const replyTurn: Turn = { role: 'examiner', content: `probe ${(this.replyCount += 1)}` }
+    const replyTurn: Turn = {
+      id: null,
+      role: 'examiner',
+      content: `probe ${(this.replyCount += 1)}`,
+    }
 
     // Both new turns, stamped as the backend would
-    const newTurns = stampTurns([studentTurn, replyTurn])
+    const newTurns = this.stampTurns([studentTurn, replyTurn])
 
     // A first turn creates the session, opening on the examiner's greeting
     if (request.kind === 'start') {
@@ -117,7 +112,12 @@ class FakeBackend implements DefenseConversationServices {
       const session: DefenseSession = {
         id: `session-${(this.sessionCount += 1)}`,
         target: request.target,
-        turns: [...stampTurns([{ role: 'examiner', content: request.opener }]), ...newTurns],
+        turns: [
+          ...this.stampTurns([{ id: null, role: 'examiner', content: request.opener }]),
+          ...newTurns,
+        ],
+        feedback: null,
+        reports: [],
       }
 
       // Store it
@@ -178,6 +178,18 @@ class FakeBackend implements DefenseConversationServices {
         : session
     )
   }
+
+  /**
+   * Stamps turns with an identity and a fixed timestamp, standing in for what the backend assigns on save.
+   *
+   * @param turns - The turns to stamp.
+   *
+   * @returns The stored turns.
+   */
+  private stampTurns(turns: Turn[]): StoredTurn[] {
+    // Every turn gets its own id and the same placeholder date
+    return turns.map((turn) => ({ ...turn, id: `turn-${(this.turnCount += 1)}`, createdAt: 'ts' }))
+  }
 }
 
 /**
@@ -232,7 +244,7 @@ describe('DefenseConversationModel', () => {
     const state = model.getSnapshot()
 
     // Only the opener, idle and unsaved
-    expect(state.turns).toEqual([{ role: 'examiner', content: OPENER }])
+    expect(state.turns).toEqual([{ id: null, role: 'examiner', content: OPENER }])
     expect(state.isThinking).toBe(false)
     expect(state.currentSessionId).toBeNull()
   })
@@ -246,7 +258,7 @@ describe('DefenseConversationModel', () => {
 
     // The student turn and the indicator are already on screen
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner', 'student'])
+    expect(roles(state.turns)).toEqual(['examiner', 'candidate'])
     expect(state.turns[1].content).toBe('my answer')
     expect(state.isThinking).toBe(true)
   })
@@ -265,7 +277,7 @@ describe('DefenseConversationModel', () => {
 
     // The reply is shown, the indicator is gone, and the session is open and stored
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(state.turns)).toEqual(['examiner', 'candidate', 'examiner'])
     expect(state.isThinking).toBe(false)
     expect(state.currentSessionId).not.toBeNull()
     expect(backend.store).toHaveLength(1)
@@ -293,9 +305,9 @@ describe('DefenseConversationModel', () => {
     expect(backend.store).toHaveLength(1)
     expect(roles(model.getSnapshot().turns)).toEqual([
       'examiner',
-      'student',
+      'candidate',
       'examiner',
-      'student',
+      'candidate',
       'examiner',
     ])
   })
@@ -318,8 +330,8 @@ describe('DefenseConversationModel', () => {
 
     // Exactly one session, holding only the first student turn
     expect(backend.store).toHaveLength(1)
-    expect(roles(model.getSnapshot().turns).filter((role) => role === 'student')).toEqual([
-      'student',
+    expect(roles(model.getSnapshot().turns).filter((role) => role === 'candidate')).toEqual([
+      'candidate',
     ])
   })
 
@@ -356,7 +368,7 @@ describe('DefenseConversationModel', () => {
     expect(model.stop()).toBeNull()
 
     // The reply stands
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'candidate', 'examiner'])
   })
 
   it('discards a reply that resolves in the instant it is stopped', async () => {
@@ -536,7 +548,7 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
-    const sessionId = model.getSnapshot().currentSessionId ?? ''
+    const sessionId = backend.store[0].id
 
     // Delete the open session
     await model.deleteSession(sessionId, backend)
@@ -555,7 +567,7 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
-    const firstId = model.getSnapshot().currentSessionId ?? ''
+    const firstId = backend.store[0].id
 
     // A second completed session after a fresh start
     model.startNew()
@@ -563,7 +575,7 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
-    const secondId = model.getSnapshot().currentSessionId ?? ''
+    const secondId = backend.store[1].id
 
     // Delete the older, non-open session
     await model.deleteSession(firstId, backend)
@@ -580,7 +592,7 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
-    const sessionId = model.getSnapshot().currentSessionId ?? ''
+    const sessionId = backend.store[0].id
 
     // Arm a delete failure
     backend.nextDeleteError = new Error('delete failed')
@@ -591,7 +603,7 @@ describe('DefenseConversationModel', () => {
     // The delete reports failure and the open transcript is left exactly as it was
     expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
     expect(model.getSnapshot().currentSessionId).toBe(sessionId)
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'candidate', 'examiner'])
   })
 
   it('treats deleting an already-gone session as a successful delete', async () => {
@@ -601,7 +613,7 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
-    const sessionId = model.getSnapshot().currentSessionId ?? ''
+    const sessionId = backend.store[0].id
 
     // Arm a not-found failure, as the backend raises for a session deleted elsewhere
     backend.nextDeleteError = new BackendApiError({
@@ -630,18 +642,15 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
-    const sessionId = model.getSnapshot().currentSessionId ?? ''
-
     // Rewind to the first examiner reply, dropping the second exchange
     const outcome = await model.rewind(2, backend)
 
     // The rewind reports it landed and the view keeps only the 0..2 prefix
     expect(outcome).toEqual({ kind: 'done' })
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'candidate', 'examiner'])
 
     // The stored session was truncated to match
-    const stored = backend.store.find((session) => session.id === sessionId)
-    expect(roles(stored?.turns ?? [])).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(backend.store[0].turns)).toEqual(['examiner', 'candidate', 'examiner'])
   })
 
   it('reports failed and leaves the transcript untouched when the rewind errors', async () => {
@@ -660,7 +669,7 @@ describe('DefenseConversationModel', () => {
 
     // The failure is reported and the full transcript stands
     expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(model.getSnapshot().turns)).toEqual(['examiner', 'candidate', 'examiner'])
   })
 
   it('abandons an in-flight turn when the conversation is rewound', async () => {
@@ -681,7 +690,7 @@ describe('DefenseConversationModel', () => {
     expect(outcome).toEqual({ kind: 'done' })
     expect(await second).toEqual({ kind: 'stopped' })
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner', 'student', 'examiner'])
+    expect(roles(state.turns)).toEqual(['examiner', 'candidate', 'examiner'])
     expect(state.isThinking).toBe(false)
   })
 
@@ -695,6 +704,279 @@ describe('DefenseConversationModel', () => {
     // It fails up front, leaving the opener-only view in place
     expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
     expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+  })
+
+  it('shows a resumed conversation answer and asks again on a fresh one', async () => {
+    // A model with one completed, stored session
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+
+    // That session as the history hands it back once the student has summed it up
+    const answered: DefenseSession = {
+      ...backend.store[0],
+      feedback: { outcome: 'foundTheMistake', comment: null },
+    }
+
+    // Step away, so reopening it is a real switch rather than a no-op re-resume
+    model.startNew()
+
+    // Reopen it
+    model.resume(answered)
+
+    // Its answer comes with it, so the conversation stops asking
+    expect(model.getSnapshot().currentFeedback).toEqual({
+      outcome: 'foundTheMistake',
+      comment: null,
+    })
+
+    // Step away to a fresh conversation
+    model.startNew()
+
+    // Which carries no answer of its own, so it asks
+    expect(model.getSnapshot().currentFeedback).toBeNull()
+  })
+
+  it('ignores an answer that lands after the conversation has moved on', async () => {
+    // A model with one completed, open session
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const answeredSessionId = backend.store[0].id
+
+    // Step away before the answer's round-trip lands
+    model.startNew()
+
+    // The answer lands, naming the session it was given for
+    model.setFeedback(answeredSessionId, { outcome: 'confirmedTheSolution', comment: null })
+
+    // The conversation on screen is a different one, so it is left asking
+    expect(model.getSnapshot().currentFeedback).toBeNull()
+  })
+
+  it('ignores a report that lands after the conversation has moved on', async () => {
+    // A model with one completed, open session
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const reportedSessionId = backend.store[0].id
+    const reportedTurnId = backend.store[0].turns[2].id
+
+    // Step away before the report's round-trip lands
+    model.startNew()
+
+    // The report lands, naming the session its reply was given in
+    model.setReport(reportedSessionId, {
+      turnId: reportedTurnId,
+      categories: ['saidSomethingWrong'],
+      comment: null,
+    })
+
+    // The conversation on screen holds none of that conversation's replies, so nothing is marked
+    expect(model.getSnapshot().reports.size).toBe(0)
+  })
+
+  it('keeps a conversation answered through the turns that follow it', async () => {
+    // A model with one completed, open session
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    const sessionId = backend.store[0].id
+
+    // Answer for the conversation, then carry on with it. The reply the next turn is answered from was
+    // composed before the answer landed, so folding its view of the conversation in would undo it
+    model.setFeedback(sessionId, { outcome: 'notEnoughHelp', comment: null })
+    const second = model.send('second', backend)
+    await flush()
+    backend.submitCalls[1].gate.resolve()
+    await second
+
+    // The conversation still says what the student said it came to
+    expect(model.getSnapshot().currentFeedback?.outcome).toBe('notEnoughHelp')
+  })
+
+  it('keeps a reply reported through the turns that follow it', async () => {
+    // A model with one completed, open session
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    const sessionId = backend.store[0].id
+    const replyId = backend.store[0].turns[2].id
+
+    // Report the reply, then carry on with the conversation. The reply the turn is answered from was
+    // composed before the report landed, so folding its view of the conversation in would undo it
+    model.setReport(sessionId, {
+      turnId: replyId,
+      categories: ['saidSomethingWrong'],
+      comment: 'which case?',
+    })
+    const second = model.send('second', backend)
+    await flush()
+    backend.submitCalls[1].gate.resolve()
+    await second
+
+    // The reply is still reported
+    expect(model.getSnapshot().reports.get(replyId)?.categories).toEqual(['saidSomethingWrong'])
+  })
+
+  it('keeps a surviving reply reported through a rewind', async () => {
+    // A model grown to two exchanges: examiner, student, examiner, student, examiner
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    const second = model.send('second', backend)
+    await flush()
+    backend.submitCalls[1].gate.resolve()
+    await second
+    const sessionId = backend.store[0].id
+    const keptReplyId = backend.store[0].turns[2].id
+
+    // Report the first of the examiner's replies
+    model.setReport(sessionId, { turnId: keptReplyId, categories: ['gaveAway'], comment: null })
+
+    // Rewind to it, dropping the second exchange
+    await model.rewind(2, backend)
+
+    // The reply survived the cut, so what the student holds against it survives with it
+    expect(model.getSnapshot().reports.get(keptReplyId)?.categories).toEqual(['gaveAway'])
+  })
+
+  it('reopens a conversation already showing what was reported in it', async () => {
+    // A model with one completed session, whose reply the student reported in an earlier sitting
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const stored = backend.store[0]
+    const replyId = stored.turns[2].id
+    stored.reports = [
+      { turnId: replyId, categories: ['misunderstood'], comment: 'the bound is wrong' },
+    ]
+
+    // Step away and come back to it
+    model.startNew()
+    model.resume(stored)
+
+    // The reply is marked again, carrying what was said about it
+    expect(model.getSnapshot().reports.get(replyId)?.categories).toEqual(['misunderstood'])
+  })
+
+  it('keeps every reported reply marked as another one is reported', async () => {
+    // A model grown to two exchanges, so it holds two of the examiner's replies
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    const second = model.send('second', backend)
+    await flush()
+    backend.submitCalls[1].gate.resolve()
+    await second
+    const sessionId = backend.store[0].id
+    const firstReplyId = backend.store[0].turns[2].id
+    const secondReplyId = backend.store[0].turns[4].id
+
+    // Report the first of the replies
+    model.setReport(sessionId, { turnId: firstReplyId, categories: ['gaveAway'], comment: null })
+
+    // Then the second
+    model.setReport(sessionId, { turnId: secondReplyId, categories: ['tone'], comment: null })
+
+    // Each reply carries its own, so reporting one didn't take the other with it
+    const { reports } = model.getSnapshot()
+    expect(reports.get(firstReplyId)?.categories).toEqual(['gaveAway'])
+    expect(reports.get(secondReplyId)?.categories).toEqual(['tone'])
+  })
+
+  it('replaces what is held against a reply when the student revises it', async () => {
+    // A model with one completed, open session whose reply is already reported
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const sessionId = backend.store[0].id
+    const replyId = backend.store[0].turns[2].id
+    model.setReport(sessionId, { turnId: replyId, categories: ['gaveAway'], comment: null })
+
+    // Revise what is held against it
+    model.setReport(sessionId, { turnId: replyId, categories: ['tone'], comment: 'she was rude' })
+
+    // The reply carries the revision, and carries it in place of the first complaint rather than beside it
+    const { reports } = model.getSnapshot()
+    expect(reports.size).toBe(1)
+    expect(reports.get(replyId)).toEqual({
+      turnId: replyId,
+      categories: ['tone'],
+      comment: 'she was rude',
+    })
+  })
+
+  it('stops holding anything against a reply once it is taken back', async () => {
+    // A model with one completed, open session whose reply is reported
+    const { model, backend } = makeModel()
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+    const sessionId = backend.store[0].id
+    const replyId = backend.store[0].turns[2].id
+    model.setReport(sessionId, { turnId: replyId, categories: ['tone'], comment: null })
+    const before = model.getSnapshot().reports
+
+    // Take it back
+    model.clearReport(sessionId, replyId)
+
+    // The reply carries nothing again
+    expect(model.getSnapshot().reports.has(replyId)).toBe(false)
+
+    // Under a map of its own, since subscribers are handed the state itself and compare it by identity
+    expect(model.getSnapshot().reports).not.toBe(before)
+  })
+
+  it('leaves what was said about one conversation behind when another is resumed', async () => {
+    // A model with two completed, stored conversations
+    const { model, backend } = makeModel()
+    const first = model.send('first', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await first
+    model.startNew()
+    const second = model.send('second', backend)
+    await flush()
+    backend.submitCalls[1].gate.resolve()
+    await second
+
+    // The first one as the history hands it back, summed up and with a reported reply
+    const answered: DefenseSession = {
+      ...backend.store[0],
+      feedback: { outcome: 'wasOff', comment: null },
+      reports: [{ turnId: backend.store[0].turns[2].id, categories: ['tone'], comment: null }],
+    }
+
+    // Reopen it
+    model.resume(answered)
+
+    // Then move on to the one the student never said anything about
+    model.resume(backend.store[1])
+
+    // Which is left asking, with none of the first conversation's replies marked
+    const state = model.getSnapshot()
+    expect(state.currentFeedback).toBeNull()
+    expect(state.reports.size).toBe(0)
   })
 
   it('requests a history refresh after a turn lands, a rewind, and a delete', async () => {
@@ -715,8 +997,7 @@ describe('DefenseConversationModel', () => {
     expect(changes()).toBe(2)
 
     // Delete the open session
-    const sessionId = model.getSnapshot().currentSessionId ?? ''
-    await model.deleteSession(sessionId, backend)
+    await model.deleteSession(backend.store[0].id, backend)
 
     // The delete asked the history to refresh a third time
     expect(changes()).toBe(3)

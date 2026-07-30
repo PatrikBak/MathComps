@@ -2,22 +2,26 @@
 
 import { Plus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
-import type {
-  RichMathEditorRef,
-  ToolbarConfig,
-} from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import { FeedbackDialog, toFeedbackOptions } from '@/components/shared/components/FeedbackDialog'
+import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
-import type { AppErrorCode } from '@/lib/api/api-error-codes'
-import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
-import type { DefenseProblem, TurnRole } from '../model/defense-types'
+import { useDefenseFeedback } from '../hooks/use-defense-feedback'
+import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
+import {
+  FEEDBACK_COMMENT_MAX_LENGTH,
+  OUTCOME_KEYS,
+  REPORT_CATEGORY_KEYS,
+} from '../model/defense-feedback-options'
+import { type DefenseProblem, type TurnRole } from '../model/defense-types'
+import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
 import { ProblemStrip } from './ProblemStrip'
@@ -65,17 +69,6 @@ type DefenseConversationProps = {
 }
 
 /**
- * A rewind awaiting confirmation: the cut point to keep through, and the composer draft to restore once
- * it's confirmed (the rewound student turn's text, or empty when rewinding to an examiner turn).
- */
-type RewindTarget = {
-  /** The sequence of the last turn to keep; every later turn is dropped. */
-  keepThroughSequence: number
-  /** The text to drop into the composer after the rewind. */
-  draft: string
-}
-
-/**
  * The id of the saved session a mode reopens on, or undefined when it opens on the problem's newest defense.
  *
  * @param mode - How the conversation was reached.
@@ -94,6 +87,12 @@ function initialSessionIdOf(mode: DefenseConversationMode): string | undefined {
       return assertNever(mode)
   }
 }
+
+/**
+ * The shortest conversation there is an outcome to report on: the examiner's opener, the student arguing
+ * something, and the reply to it. Anything shorter has not been a defense yet.
+ */
+const TURNS_WORTH_ANSWERING_FOR = 3
 
 /**
  * The composer's toolbar for a defense turn: only the math tools are kept, so a turn stays plain text
@@ -121,9 +120,6 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // Defense-surface copy
   const t = useTranslations('defense')
 
-  // Central failure-code copy
-  const tApiErrors = useTranslations('apiErrors')
-
   // Shared modal chrome copy
   const tModal = useTranslations('ui.modal')
 
@@ -135,29 +131,41 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
     initialResumeSettled,
     sessionsFailed,
     currentSessionId,
+    currentFeedback,
+    reports,
     conversationEpoch,
     send,
     stop,
     startNew,
     resume,
+    setFeedback,
+    setReport,
+    clearReport,
     deleteSession,
     rewind,
   } = useDefenseConversation(problem, t('opener'), initialSessionIdOf(mode))
 
-  // The in-progress composer text
-  const [draft, setDraft] = useState('')
+  // Reporting one of the examiner's replies and answering for the conversation as a whole, either of which
+  // can be taken back again
+  const { report, answer } = useDefenseFeedback({
+    currentSessionId,
+    currentFeedback,
+    reports,
+    setReport,
+    clearReport,
+    setFeedback,
+  })
 
-  // The rewind awaiting confirmation, or null
-  const [rewindTarget, setRewindTarget] = useState<RewindTarget | null>(null)
-
-  // The composer's handle
-  const editorRef = useRef<RichMathEditorRef>(null)
-
-  // The composer outlives the conversation it writes into, so hand it the cursor whenever another
-  // one takes over
-  useEffect(() => {
-    editorRef.current?.focus()
-  }, [conversationEpoch])
+  // The composer, and the controls that act on the conversation around it
+  const turn = useDefenseTurnControls({
+    turns,
+    isThinking,
+    conversationEpoch,
+    send,
+    stop,
+    rewind,
+    deleteSession,
+  })
 
   // Surface a failed history load, but only while the modal is open: an empty history and a load failure
   // look identical otherwise, and the mounted-but-closed modal keeps the query running in the background
@@ -167,9 +175,15 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
     }
   }, [isOpen, sessionsFailed, t])
 
-  // Rewind is offered only on a saved conversation and never mid-turn; the whole feature is admin-gated
-  // at the trigger
-  const canRewind = !isThinking && currentSessionId !== null
+  // A turn's own controls are offered only on a saved conversation and never mid-turn; the whole feature is
+  // admin-gated at the trigger
+  const canAct = !isThinking && currentSessionId !== null
+
+  // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
+  // keeps a standing answer reachable to revise however short a rewind has left the conversation. Held back
+  // mid-turn, like every other control here.
+  const canAnswer =
+    canAct && (turns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
   // Whether a fresh defense can be opened at all: only the problem carries the reference one is argued against
   const canOpenFresh = mode.kind === 'fromProblem'
@@ -202,132 +216,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
     examiner: t('name'),
-    student: t('roles.student'),
-  }
-
-  // Toasts a failed action's message: the code's central copy, else the action's generic fallback
-  const showActionError = (
-    errorCode: AppErrorCode | undefined,
-    fallback: 'sendError' | 'rewindError' | 'deleteError'
-  ) => {
-    toast.error(resolveErrorMessage(errorCode, tApiErrors, { fallback: t(fallback) }))
-  }
-
-  // Sends the composed reply, unless it's empty or a turn is already in flight
-  const handleSend = async () => {
-    // The trimmed reply
-    const content = draft.trim()
-
-    // Bail when there's nothing to send or the examiner is still working
-    if (!content || isThinking) {
-      return
-    }
-
-    // Clear the composer optimistically
-    setDraft('')
-
-    // Drive the turn
-    const outcome = await send(content)
-
-    // Recover per outcome
-    switch (outcome.kind) {
-      // The reply landed, or a stop already reclaimed the draft: nothing to do
-      case 'sent':
-      case 'stopped':
-        break
-      // The round-trip failed: tell the student why and hand their draft back to resend
-      case 'failed':
-        showActionError(outcome.errorCode, 'sendError')
-        setDraft((current) => (current.trim() ? current : content))
-        break
-      // A double-tap: the in-flight turn already carries this content, so the composer stays cleared
-      case 'busy':
-        break
-      default:
-        assertNever(outcome)
-    }
-  }
-
-  // Removes a session from history, telling the student why a failed delete left it in place
-  const handleDelete = async (sessionId: string) => {
-    // Drop the session
-    const outcome = await deleteSession(sessionId)
-
-    // Recover per outcome
-    switch (outcome.kind) {
-      // Gone: the history already refreshed to drop it
-      case 'done':
-        break
-      // Still there: tell the student why the delete didn't take
-      case 'failed':
-        showActionError(outcome.errorCode, 'deleteError')
-        break
-      default:
-        assertNever(outcome)
-    }
-  }
-
-  // Stops the in-flight reply and drops the reclaimed turn back into the composer
-  const handleStop = () => {
-    // Abort the reply and take back the student turn that triggered it
-    const reclaimed = stop()
-
-    // Restore the reclaimed turn, above anything typed while it was in flight
-    if (reclaimed !== null) {
-      setDraft((current) => (current.trim() ? `${reclaimed}\n\n${current}` : reclaimed))
-    }
-  }
-
-  // Arms the rewind confirmation for the turn at the given index, working out the cut point and the
-  // composer draft to restore: rewinding to an examiner turn keeps it and empties the composer, while
-  // rewinding to a student turn drops it and lifts its text back into the composer to redo. The
-  // transcript is the contiguous 0..N turns the server stores, so a turn's index is its server sequence.
-  const requestRewind = (index: number) => {
-    // The confirmation hands the cursor back to whatever held it when it opened, and the rewind can
-    // drop the very button that did, so send the cursor to the composer before arming it
-    editorRef.current?.focus()
-
-    // The turn the rewind targets
-    const turn = turns[index]
-
-    // Decide the cut point and the draft per who authored the targeted turn
-    switch (turn.role) {
-      // Keep the examiner turn as the new last one; nothing to restore
-      case 'examiner':
-        setRewindTarget({ keepThroughSequence: index, draft: '' })
-        break
-      // Drop the student turn, keeping the examiner turn before it, and restore the dropped text
-      case 'student':
-        setRewindTarget({ keepThroughSequence: index - 1, draft: turn.content })
-        break
-      default:
-        assertNever(turn.role)
-    }
-  }
-
-  // Runs the armed rewind, restoring the composer draft on success
-  const confirmRewind = async () => {
-    // Nothing armed
-    if (rewindTarget === null) {
-      return
-    }
-
-    // Truncate the conversation
-    const outcome = await rewind(rewindTarget.keepThroughSequence)
-
-    // Recover per outcome
-    switch (outcome.kind) {
-      // The tail is gone: restore the target's text, but never clobber a draft the student is mid-typing
-      case 'done':
-        setDraft((current) => (current.trim() ? current : rewindTarget.draft))
-        break
-      // The round-trip failed: tell the student why, leaving the conversation untouched
-      case 'failed':
-        showActionError(outcome.errorCode, 'rewindError')
-        break
-      default:
-        assertNever(outcome)
-    }
+    candidate: t('roles.student'),
   }
 
   return (
@@ -364,7 +253,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
               sessions={sessions}
               currentSessionId={currentSessionId}
               onSelect={resume}
-              onDelete={handleDelete}
+              onDelete={turn.removeSession}
             />
           )}
 
@@ -387,18 +276,94 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         jumpLabel={t('jumpToLatest')}
         isThinking={isThinking}
         thinkingLabel={t('thinking')}
-        canRewind={canRewind}
+        reports={reports}
+        canAct={canAct}
         rewindLabel={t('rewind')}
-        onRewindTurn={requestRewind}
+        reportLabel={t('report')}
+        reportedLabel={t('reported')}
+        onRewindTurn={turn.requestRewind}
+        onReportTurn={report.open}
+        footer={
+          canAnswer && (
+            <DefenseFeedbackPrompt
+              isAnswered={currentFeedback !== null}
+              answeredLabel={t('feedbackGiven')}
+              questionLabel={t('feedbackTitle')}
+              onOpen={answer.open}
+            />
+          )
+        }
       />
 
       {/* Confirmation for a rewind, before the tail is permanently dropped */}
       <ConfirmDialog
-        isOpen={rewindTarget !== null}
-        onClose={() => setRewindTarget(null)}
-        onConfirm={confirmRewind}
+        isOpen={turn.rewindTarget !== null}
+        onClose={turn.cancelRewind}
+        onConfirm={turn.confirmRewind}
         title={t('rewindTitle')}
         message={t('rewindMessage')}
+        variant="danger"
+      />
+
+      {/* Every way one of the examiner's replies went wrong */}
+      <FeedbackDialog
+        isOpen={report.isOpen}
+        onClose={report.close}
+        onRemove={report.standing === undefined ? null : report.requestRemoval}
+        choice={{
+          selection: 'multiple',
+          initialValues: report.standing?.categories ?? [],
+          onSubmit: report.submit,
+        }}
+        requiresComment="other"
+        requiresCommentHint={t('requiresCommentHint')}
+        title={t('reportTitle')}
+        options={toFeedbackOptions(REPORT_CATEGORY_KEYS, t)}
+        initialComment={report.standing?.comment ?? ''}
+        commentLabel={t('reportCommentLabel')}
+        commentMaxLength={FEEDBACK_COMMENT_MAX_LENGTH}
+        isPending={report.isSubmitting}
+      />
+
+      {/* Taking a report off a reply is the student dropping something they said, so it is asked about first.
+          It sits beside the question rather than within it: a confirmation over an open modal is how the rest
+          of the app asks, and keeping it a sibling stops the chat carrying three of them at once */}
+      <ConfirmDialog
+        isOpen={report.isRemoving}
+        onClose={report.cancelRemoval}
+        onConfirm={report.confirmRemoval}
+        title={t('removeReportTitle')}
+        message={t('removeReportMessage')}
+        variant="danger"
+      />
+
+      {/* What the student makes of the conversation as a whole */}
+      <FeedbackDialog
+        isOpen={answer.isOpen}
+        onClose={answer.close}
+        onRemove={currentFeedback === null ? null : answer.requestRemoval}
+        choice={{
+          selection: 'single',
+          initialValue: currentFeedback?.outcome ?? null,
+          onSubmit: answer.submit,
+        }}
+        requiresComment="somethingElse"
+        requiresCommentHint={t('requiresCommentHint')}
+        title={t('feedbackTitle')}
+        options={toFeedbackOptions(OUTCOME_KEYS, t)}
+        initialComment={currentFeedback?.comment ?? ''}
+        commentLabel={t('feedbackCommentLabel')}
+        commentMaxLength={FEEDBACK_COMMENT_MAX_LENGTH}
+        isPending={answer.isSubmitting}
+      />
+
+      {/* And the same for the answer the conversation as a whole carries */}
+      <ConfirmDialog
+        isOpen={answer.isRemoving}
+        onClose={answer.cancelRemoval}
+        onConfirm={answer.confirmRemoval}
+        title={t('removeFeedbackTitle')}
+        message={t('removeFeedbackMessage')}
         variant="danger"
       />
 
@@ -408,12 +373,12 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
           <RichMathEditor
             variant="card"
             toolbar={DEFENSE_TOOLBAR}
-            value={draft}
-            onChange={setDraft}
-            onSend={() => void handleSend()}
-            onStop={handleStop}
+            value={turn.draft}
+            onChange={turn.setDraft}
+            onSend={() => void turn.sendDraft()}
+            onStop={turn.stopReply}
             autoFocus
-            ref={editorRef}
+            ref={turn.editorRef}
             isLoading={isThinking}
             placeholder={t('placeholder')}
           />

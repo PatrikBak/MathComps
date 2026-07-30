@@ -108,7 +108,7 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the full conversation.
-        return ToDto(session, start.Target);
+        return ToSessionDto(session, start.Target);
     }
 
     /// <inheritdoc/>
@@ -128,11 +128,18 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The session with its turns (tracked, for the append below), and the two content ids of the environment
-        // it defends.
+        // The session with its turns (tracked, for the append below), the student's answer for it and what they
+        // hold against its replies, plus the two content ids of the environment it defends. The feedback rides
+        // along so a grown conversation still reports what the student already said about it. Split, because
+        // turns and reports are two collections off one row: joined in a single query the database would return
+        // every pairing of them, each repeating the session's statement, reference, and settings snapshot.
+        // Another user's session never comes back from it, and a missing one reads the same.
         var loaded = await dbContext.DefenseSessions
             .Include(defenseSession => defenseSession.Turns)
-            .Where(defenseSession => defenseSession.Id == sessionId)
+            .Include(defenseSession => defenseSession.Feedback)
+            .Include(defenseSession => defenseSession.Reports)
+            .AsSplitQuery()
+            .Where(DefenseSessionWrites.IsOwnedBy(userId, sessionId))
             .Select(defenseSession => new
             {
                 Session = defenseSession,
@@ -140,11 +147,8 @@ public class DefenseSessionService(
                     defenseSession.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     defenseSession.EnvironmentTarget.HandoutEnvironment.ContentId),
             })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        // Treat another user's session, or a missing one, as absent.
-        if (loaded is null || loaded.Session.UserId != userId)
-            throw new DefenseSessionNotFoundException();
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new DefenseSessionNotFoundException();
 
         // The tracked session the rest of this method appends to and saves.
         var session = loaded.Session;
@@ -169,7 +173,7 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the grown conversation.
-        return ToDto(session, loaded.Target);
+        return ToSessionDto(session, loaded.Target);
     }
 
     /// <inheritdoc/>
@@ -179,20 +183,33 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions against this environment, oldest first, each with its turns.
-        var sessions = await dbContext.DefenseSessions
+        // The user's sessions against this environment, oldest first: each conversation in order, the student's
+        // answer for it, and what they hold against its replies. Every session in this list defends the target
+        // the caller named, so it rides into each one. Split, because turns and reports are two collections off
+        // one row: joined in a single query the database would return every pairing of them.
+        return await dbContext.DefenseSessions
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(session => session.UserId == userId
                 && session.EnvironmentTarget != null
                 && session.EnvironmentTarget.HandoutEnvironment.ContentId == target.EnvironmentId
                 && session.EnvironmentTarget.HandoutEnvironment.Handout.ContentId == target.HandoutContentId)
             .OrderBy(session => session.CreatedAt)
-            .Select(session => new { session.Id, Turns = session.Turns.ToList() })
+            .Select(session => new DefenseSessionDto(
+                session.Id,
+                target,
+                session.Turns
+                    .OrderBy(turn => turn.Sequence)
+                    .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
+                    .ToList(),
+                session.Feedback == null
+                    ? null
+                    : new DefenseFeedbackDto(session.Feedback.Outcome, session.Feedback.Comment),
+                session.Reports
+                    .Select(report => new DefenseTurnReportDto(
+                        report.TurnId, report.Categories, report.Comment))
+                    .ToList()))
             .ToListAsync(cancellationToken);
-
-        // Project each to its client shape; every session in this list defends the same target.
-        return [.. sessions.Select(session => new DefenseSessionDto(
-            session.Id, target, ToTurnDtos(session.Turns)))];
     }
 
     /// <inheritdoc/>
@@ -235,10 +252,10 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Delete the session, filtering on the owner so another user's id can't reach it. The cascade drops the
-        // session's turns; the spend rows are independent and stay.
+        // Delete the session, filtering on the owner so another user's id can't reach it. The cascade drops its
+        // turns and everything the student said about the conversation; the spend rows are independent and stay.
         var deleted = await dbContext.DefenseSessions
-            .Where(session => session.Id == sessionId && session.UserId == userId)
+            .Where(DefenseSessionWrites.IsOwnedBy(userId, sessionId))
             .ExecuteDeleteAsync(cancellationToken);
 
         // Nothing deleted means the session is missing or someone else's, which read the same from here.
@@ -250,38 +267,29 @@ public class DefenseSessionService(
     public async Task RewindAsync(
         Guid userId, Guid sessionId, int keepThroughSequence, CancellationToken cancellationToken = default)
     {
-        // Serialize against this user's turns: a continue builds its turn in memory and saves at the very end,
-        // so without the gate this delete could interleave and leave the sequence non-contiguous.
-        using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);
+        // Truncate the conversation, once it is settled that it is the caller's. The gate matters doubly here:
+        // a continue builds its turn in memory and saves at the very end, so without it this delete could
+        // interleave and leave the sequence non-contiguous.
+        await DefenseSessionWrites.ToOwnedSessionAsync(
+            dbContextFactory, turnGate, userId, sessionId, async dbContext =>
+            {
+                // Who authored the turn to keep as the new last one.
+                var keptRole =
+                    await GetTurnRoleAsync(dbContext, sessionId, keepThroughSequence, cancellationToken);
 
-        // A fresh context for this operation.
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+                // The cut point must land on an existing examiner turn, so the rewound conversation awaits
+                // the student.
+                if (keptRole != TranscriptRole.Examiner)
+                    throw new DefenseRewindTargetException();
 
-        // The session's owner. Null when no session with this id exists.
-        var ownerId = await dbContext.DefenseSessions
-            .Where(session => session.Id == sessionId)
-            .Select(session => (Guid?)session.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        // Treat another user's session, or a missing one, as absent.
-        if (ownerId != userId)
-            throw new DefenseSessionNotFoundException();
-
-        // The role of the turn to keep as the new last one, or null when the sequence is out of range.
-        var keptRole = await dbContext.DefenseTurns
-            .Where(turn => turn.SessionId == sessionId && turn.Sequence == keepThroughSequence)
-            .Select(turn => (TranscriptRole?)turn.Role)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        // The cut point must land on an existing examiner turn, so the rewound conversation awaits the student.
-        if (keptRole != TranscriptRole.Examiner)
-            throw new DefenseRewindTargetException();
-
-        // Delete the tail in one statement: the doomed rows are never loaded, and the kept prefix stays a
-        // contiguous 0..keepThroughSequence, so a later append can't collide with the (session, sequence) index.
-        await dbContext.DefenseTurns
-            .Where(turn => turn.SessionId == sessionId && turn.Sequence > keepThroughSequence)
-            .ExecuteDeleteAsync(cancellationToken);
+                // Delete the tail in one statement: the doomed rows are never loaded, and the kept prefix stays
+                // a contiguous 0..keepThroughSequence, so a later append can't collide with the
+                // (session, sequence) index. Whatever the student held against the dropped replies goes with
+                // them, by cascade.
+                await dbContext.DefenseTurns
+                    .Where(turn => turn.SessionId == sessionId && turn.Sequence > keepThroughSequence)
+                    .ExecuteDeleteAsync(cancellationToken);
+            }, cancellationToken);
     }
 
     /// <summary>
@@ -472,13 +480,45 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Projects a session to its client shape, turns in order and roles as wire strings.
+    /// Reads who authored the turn at one sequence of a session.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="sessionId">The session the turn belongs to.</param>
+    /// <param name="sequence">The turn's position in the conversation.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The turn's role, or null when the session holds no turn at that sequence.</returns>
+    private static async Task<TranscriptRole?> GetTurnRoleAsync(
+        MathCompsDbContext dbContext, Guid sessionId, int sequence, CancellationToken cancellationToken)
+    {
+        // The role of the turn at that point in the conversation, absent when nothing sits there.
+        return await dbContext.DefenseTurns
+            .Where(turn => turn.SessionId == sessionId && turn.Sequence == sequence)
+            .Select(turn => (TranscriptRole?)turn.Role)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Projects a session to its client shape, turns in order.
     /// </summary>
     /// <param name="session">The session to project.</param>
     /// <param name="target">The environment the session defends.</param>
     /// <returns>The session's client shape.</returns>
-    private static DefenseSessionDto ToDto(DefenseSession session, HandoutEnvironmentTarget target) =>
-        new(session.Id, target, ToTurnDtos(session.Turns));
+    private static DefenseSessionDto ToSessionDto(DefenseSession session, HandoutEnvironmentTarget target) =>
+        new(session.Id,
+            target,
+            ToTurnDtos(session.Turns),
+            ToFeedbackDto(session.Feedback),
+            ToReportDtos(session.Reports));
+
+    /// <summary>
+    /// Projects a session's feedback to its client shape.
+    /// </summary>
+    /// <param name="feedback">The student's answer, null until they give one.</param>
+    /// <returns>The answer's client shape, or null when there is none.</returns>
+    private static DefenseFeedbackDto? ToFeedbackDto(DefenseSessionFeedback? feedback) =>
+        feedback is null
+            ? null
+            : new DefenseFeedbackDto(feedback.Outcome, feedback.Comment);
 
     /// <summary>
     /// Finds the anchor row for the environment being defended, creating the handout's and the environment's anchor
@@ -501,24 +541,21 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Projects a session's turns to their client shape, in sequence order and roles as wire strings.
+    /// Projects a session's turns to their client shape, in sequence order.
     /// </summary>
     /// <param name="turns">The turns to project.</param>
     /// <returns>The turns' client shapes.</returns>
     private static IReadOnlyList<DefenseTurnDto> ToTurnDtos(IEnumerable<DefenseTurn> turns) =>
         [.. turns
             .OrderBy(turn => turn.Sequence)
-            .Select(turn => new DefenseTurnDto(ToWireRole(turn.Role), turn.Content, turn.CreatedAt))];
+            .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))];
 
     /// <summary>
-    /// Maps a transcript role to its wire string.
+    /// Projects a session's reports to their client shape.
     /// </summary>
-    /// <param name="role">The role to map.</param>
-    /// <returns>The client's role string.</returns>
-    private static string ToWireRole(TranscriptRole role) => role switch
-    {
-        TranscriptRole.Candidate => "student",
-        TranscriptRole.Examiner => "examiner",
-        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown transcript role."),
-    };
+    /// <param name="reports">The reports to project.</param>
+    /// <returns>The reports' client shapes.</returns>
+    private static IReadOnlyList<DefenseTurnReportDto> ToReportDtos(IEnumerable<DefenseTurnReport> reports) =>
+        [.. reports.Select(report => new DefenseTurnReportDto(
+            report.TurnId, report.Categories, report.Comment))];
 }

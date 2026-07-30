@@ -72,3 +72,28 @@ export function getRewindDefenseUrl(sessionId: string): string {
   // The truncate-conversation endpoint for the session
   return buildApiUrl(`${SESSIONS_PATH}/${encodeURIComponent(sessionId)}/rewind`)
 }
+
+/**
+ * Builds the URL for recording what the student holds against one examiner reply.
+ *
+ * @param sessionId - The session the reported reply was given in.
+ * @param turnId - The reported reply.
+ * @returns The report URL.
+ */
+export function getReportDefenseTurnUrl(sessionId: string, turnId: string): string {
+  // The reply's own report endpoint
+  return buildApiUrl(
+    `${SESSIONS_PATH}/${encodeURIComponent(sessionId)}/turns/${encodeURIComponent(turnId)}/report`
+  )
+}
+
+/**
+ * Builds the URL for recording what a student says about a defense conversation.
+ *
+ * @param sessionId - The session being answered for.
+ * @returns The feedback URL.
+ */
+export function getDefenseFeedbackUrl(sessionId: string): string {
+  // The session's own feedback endpoint
+  return buildApiUrl(`${SESSIONS_PATH}/${encodeURIComponent(sessionId)}/feedback`)
+}

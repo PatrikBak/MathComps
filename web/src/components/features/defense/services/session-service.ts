@@ -4,15 +4,19 @@ import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
 import type {
+  DefenseOutcome,
+  DefenseReportCategory,
   DefenseSession,
   DefenseSessionListItem,
   DefenseTurnRequest,
 } from '../model/defense-types'
 import {
   getContinueDefenseUrl,
+  getDefenseFeedbackUrl,
   getDefenseSessionsUrl,
   getDeleteDefenseSessionUrl,
   getMyDefenseSessionsUrl,
+  getReportDefenseTurnUrl,
   getRewindDefenseUrl,
   getStartDefenseUrl,
 } from './defense-api-urls'
@@ -115,4 +119,75 @@ export function rewindTurns(
     method: 'POST',
     body: JSON.stringify({ keepThroughSequence }),
   })
+}
+
+/**
+ * Records what the student holds against one examiner reply, replacing anything they said before.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param sessionId - The id of the session the reported reply was given in.
+ * @param turnId - The id of the reported reply.
+ * @param categories - Every way the reply went wrong.
+ * @param comment - The student's own account of what went wrong; empty when they gave none.
+ * @returns The outcome of the report.
+ */
+export function reportTurn(
+  apiCall: ApiCaller,
+  sessionId: string,
+  turnId: string,
+  categories: readonly DefenseReportCategory[],
+  comment: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getReportDefenseTurnUrl(sessionId, turnId), {
+    method: 'PUT',
+    body: JSON.stringify({ categories, comment }),
+  })
+}
+
+/**
+ * Records what a student says about a whole defense conversation, replacing anything they said before.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param sessionId - The id of the session being answered for.
+ * @param outcome - What the examiner did for them.
+ * @param comment - What they say in their own words; empty when they let the outcome stand alone.
+ * @returns The outcome of the submission.
+ */
+export function submitFeedback(
+  apiCall: ApiCaller,
+  sessionId: string,
+  outcome: DefenseOutcome,
+  comment: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getDefenseFeedbackUrl(sessionId), {
+    method: 'PUT',
+    body: JSON.stringify({ outcome, comment }),
+  })
+}
+
+/**
+ * Takes back what a student holds against one examiner reply, leaving it carrying nothing.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param sessionId - The id of the session the reply was given in.
+ * @param turnId - The id of the reply to stop holding anything against.
+ * @returns The outcome of the withdrawal.
+ */
+export function withdrawTurnReport(
+  apiCall: ApiCaller,
+  sessionId: string,
+  turnId: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getReportDefenseTurnUrl(sessionId, turnId), { method: 'DELETE' })
+}
+
+/**
+ * Takes back what a student said a whole defense conversation came to, leaving it unanswered.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param sessionId - The id of the session to leave unanswered.
+ * @returns The outcome of the withdrawal.
+ */
+export function withdrawFeedback(apiCall: ApiCaller, sessionId: string): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getDefenseFeedbackUrl(sessionId), { method: 'DELETE' })
 }
