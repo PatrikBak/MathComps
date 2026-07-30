@@ -216,10 +216,9 @@ function hasChanged<TValue extends string>(
 }
 
 /**
- * One asking of the question: the answers, the free-text line, and the buttons. Lives below the modal's
- * transition, which mounts it on open and drops it once the dialog has finished leaving, so each asking starts
- * from the answers it was handed and there is no state to reset by hand. A dialog reopened before that leave
- * finishes is never dropped in between, which is what the opening it is keyed by covers.
+ * One asking of the question: the answers, the free-text line, and the buttons. Lives below the modal, which
+ * mounts it on open and drops it on close, so each asking starts from the answers it was handed and there is
+ * no state to reset by hand.
  *
  * @template TValue - The set of answers the question reports.
  */
@@ -438,30 +437,11 @@ export function FeedbackDialog<TValue extends string>({
   isPending,
   ...question
 }: FeedbackDialogProps<TValue>) {
-  // How many times the dialog has been opened. The question below is dropped only once the dialog has finished
-  // leaving, so reopening inside that fade would otherwise bring the last asking back, answers and all;
-  // counting the openings is what tells it to start over.
-  const [openings, setOpenings] = useState(0)
-
-  // Whether the dialog stood open as of the last render, which is what a fresh opening is measured against
-  const [wasOpen, setWasOpen] = useState(isOpen)
-
   // Whether the question still counts as being sent. An answer that lands clears the caller's pending flag and
-  // closes the dialog in the same breath, and the dialog then takes a moment to fade; going by the flag alone
-  // would drop the send button out of its spinner for the whole of that fade, so it stands until the dialog is
-  // gone.
+  // closes the dialog in the same breath, and the two need not land together; going by the flag alone would
+  // drop the send button out of its spinner while the question is still up, so it stands until the dialog
+  // is gone.
   const [isSending, setIsSending] = useState(false)
-
-  // Take up the change the moment it happens
-  if (isOpen !== wasOpen) {
-    // Whichever way it went, that is what stands now
-    setWasOpen(isOpen)
-
-    // Opening starts a new asking; closing just leaves the last one to fade
-    if (isOpen) {
-      setOpenings((opened) => opened + 1)
-    }
-  }
 
   // An answer that has just gone out stands as being sent
   if (isPending && !isSending) {
@@ -489,7 +469,7 @@ export function FeedbackDialog<TValue extends string>({
       showCloseButton={false}
       ariaLabel={question.title}
     >
-      <FeedbackQuestion key={openings} onClose={handleClose} isPending={isSending} {...question} />
+      <FeedbackQuestion onClose={handleClose} isPending={isSending} {...question} />
     </Modal>
   )
 }
