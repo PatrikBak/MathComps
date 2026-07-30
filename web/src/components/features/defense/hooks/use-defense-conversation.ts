@@ -113,7 +113,7 @@ export function useDefenseConversation(
     }
   }, [apiCall])
 
-  // This problem's persisted sessions, oldest first
+  // This problem's persisted sessions
   const sessionsQuery = useQuery({
     queryKey: defenseSessionsQueryKey(problem.target, isUserLoaded ? (userId ?? null) : null),
     queryFn: async () => {
@@ -151,7 +151,8 @@ export function useDefenseConversation(
   const [initialResumeSettled, setInitialResumeSettled] = useState(false)
 
   // Auto-resume a saved defense the first time this problem's history loads: the one the caller named, else the
-  // newest, so opening a problem you have defended before continues that conversation rather than a blank one.
+  // most recently active, so opening a problem you have defended before continues that conversation rather than
+  // a blank one.
   // Runs once: afterwards the persisted model keeps wherever the student navigated, whether a fresh chat or a
   // different session.
   useEffect(() => {
@@ -160,11 +161,11 @@ export function useDefenseConversation(
       return
     }
 
-    // The chosen saved defense to open, or the newest when none was named
+    // The chosen saved defense to open, or the most recently active when none was named
     const target =
       initialSessionId !== undefined
         ? sessionsQuery.data.find((session) => session.id === initialSessionId)
-        : sessionsQuery.data.at(-1)
+        : sessionsQuery.data[0]
 
     // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
     // refreshed list rather than settling on a stale one

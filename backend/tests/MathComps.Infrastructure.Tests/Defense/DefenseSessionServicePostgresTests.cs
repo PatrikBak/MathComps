@@ -233,7 +233,28 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Listing returns only the user's sessions for the given problem, in creation order.
+    /// A problem's sessions come back ordered by when they were last spoken in and not by when they were started,
+    /// so the leading one is the conversation the student was last in.
+    /// </summary>
+    [Fact]
+    public Task List_puts_the_session_spoken_in_most_recently_first() => RunTestAsync(async service =>
+    {
+        // Two sessions against the same problem
+        var older = await service.StartAsync(_ownerId, Request("prob-1", "older"));
+        var newer = await service.StartAsync(_ownerId, Request("prob-1", "newer"));
+
+        // Take the one started first further
+        await service.ContinueAsync(_ownerId, older.Id, "back to this one");
+
+        // List the problem's sessions
+        var sessions = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+
+        // The continued one leads, ahead of the one started after it
+        Assert.Equal([older.Id, newer.Id], sessions.Select(session => session.Id));
+    });
+
+    /// <summary>
+    /// Listing returns only the user's sessions for the given problem.
     /// </summary>
     [Fact]
     public Task List_filters_by_user_and_problem() => RunTestAsync(async service =>
@@ -337,11 +358,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Listing all of a user's sessions returns every problem's sessions, newest first, each carrying its statement
-    /// and the student's first message, and excludes other users' sessions.
+    /// Listing all of a user's sessions returns every problem's sessions ordered by when they were last spoken in
+    /// rather than when they were started, each carrying its statement and the student's first message, and excludes
+    /// other users' sessions.
     /// </summary>
     [Fact]
-    public Task ListAll_returns_every_problem_newest_first_with_statement_and_preview() =>
+    public Task ListAll_returns_every_problem_last_spoken_in_first_with_statement_and_preview() =>
         RunTestAsync(async service =>
     {
         // Three sessions for the owner across two problems, and one for another user
@@ -350,19 +372,25 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var third = await service.StartAsync(_ownerId, Request("prob-1", "third"));
         await service.StartAsync(_otherId, Request("prob-1", "someone else"));
 
+        // Take the oldest one further, so activity order and creation order disagree
+        await service.ContinueAsync(_ownerId, first.Id, "one more thing");
+
         // List every session the owner holds
         var sessions = await service.ListAllAsync(_ownerId);
 
-        // Only the owner's three come back, across both problems, newest first
-        Assert.Equal([third.Id, second.Id, first.Id], sessions.Select(session => session.Id));
+        // Only the owner's three come back, across both problems, most recently active first
+        Assert.Equal([first.Id, third.Id, second.Id], sessions.Select(session => session.Id));
 
-        // The newest of them
-        var newest = sessions[0];
+        // The one that was just continued
+        var continued = sessions[0];
 
         // It carries its target, snapshotted statement, and the student's first message
-        Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), newest.Target);
-        Assert.Equal("the statement", newest.Statement);
-        Assert.Equal("third", newest.FirstStudentMessage);
+        Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), continued.Target);
+        Assert.Equal("the statement", continued.Statement);
+        Assert.Equal("first", continued.FirstStudentMessage);
+
+        // And its stamp came from that appended turn, later than every other session's
+        Assert.True(continued.LastActivityAt > sessions[1].LastActivityAt);
     });
 
     /// <summary>

@@ -56,7 +56,7 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
-            // Fetch every session the user holds, newest first
+            // Fetch every session the user holds
             var sessions = await defenseService.ListAllAsync(userId, context.RequestAborted);
 
             // Return them

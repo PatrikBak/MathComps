@@ -182,9 +182,10 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions against this environment, oldest first: each conversation in order, the student's
-        // answer for it, and what they hold against its replies. Every session in this list defends the target
-        // the caller named, so it rides into each one. Split, so the turns and the reports don't multiply out.
+        // The user's sessions against this environment, most recently active first: each conversation in order,
+        // the student's answer for it, and what they hold against its replies. Every session in this list defends
+        // the target the caller named, so it rides into each one. Split, so the turns and the reports don't
+        // multiply out.
         return await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
@@ -192,7 +193,9 @@ public class DefenseSessionService(
                 && session.EnvironmentTarget != null
                 && session.EnvironmentTarget.HandoutEnvironment.ContentId == target.EnvironmentId
                 && session.EnvironmentTarget.HandoutEnvironment.Handout.ContentId == target.HandoutContentId)
-            .OrderBy(session => session.CreatedAt)
+            .OrderByDescending(session => session.Turns.Max(turn => turn.CreatedAt))
+            // A tie goes to the session started later: ids are time-ordered v7 Guids.
+            .ThenByDescending(session => session.Id)
             .Select(session => new DefenseSessionDto(
                 session.Id,
                 target,
@@ -217,13 +220,13 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions across every problem, newest first, each with its target, statement, start time,
-        // and the message the student opened with. A session with no linked environment is excluded.
+        // The user's sessions across every problem, most recently active first, each with its target, statement,
+        // last activity, and the message the student opened with. A session with no linked environment is excluded.
         return await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.UserId == userId && session.EnvironmentTarget != null)
-            .OrderByDescending(session => session.CreatedAt)
-            // Ids are time-ordered v7 Guids, so they break a tie in the same direction the timestamps would.
+            .OrderByDescending(session => session.Turns.Max(turn => turn.CreatedAt))
+            // A tie goes to the session started later: ids are time-ordered v7 Guids.
             .ThenByDescending(session => session.Id)
             .Select(session => new DefenseSessionListItemDto(
                 session.Id,
@@ -231,7 +234,7 @@ public class DefenseSessionService(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     session.EnvironmentTarget.HandoutEnvironment.ContentId),
                 session.ProblemStatement,
-                session.CreatedAt,
+                session.Turns.Max(turn => turn.CreatedAt),
                 session.Turns
                     .Where(turn => turn.Role == TranscriptRole.Candidate)
                     .OrderBy(turn => turn.Sequence)

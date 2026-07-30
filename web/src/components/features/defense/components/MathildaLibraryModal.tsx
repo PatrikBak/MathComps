@@ -113,8 +113,8 @@ function MathildaDefenseRow({
   const preview =
     defense.firstStudentMessage === null ? null : toPlainTextPreview(defense.firstStudentMessage)
 
-  // When the defense was started, to the minute so same-day defenses stay apart
-  const startedAt = format.dateTime(new Date(defense.createdAt), {
+  // When the conversation last moved, to the minute so same-day defenses stay apart
+  const lastActivityAt = format.dateTime(new Date(defense.lastActivityAt), {
     dateStyle: 'short',
     timeStyle: 'short',
   })
@@ -149,8 +149,8 @@ function MathildaDefenseRow({
 
       {/* The stamp and its controls: a footer under the text until the row is wide enough to hold them beside it */}
       <div className="flex shrink-0 items-center justify-between gap-2 min-[400px]:flex-col min-[400px]:items-end min-[400px]:gap-1">
-        <time dateTime={defense.createdAt} className="text-[11px] leading-none text-muted">
-          {startedAt}
+        <time dateTime={defense.lastActivityAt} className="text-[11px] leading-none text-muted">
+          {lastActivityAt}
         </time>
 
         {/* Jump and delete */}
@@ -188,9 +188,9 @@ function MathildaDefenseRow({
 }
 
 /**
- * The student's cross-problem list of defenses ("Mathilda"): every defense they've held, newest first, each
- * reopening its conversation to continue. A selected defense swaps the same modal to the conversation view, so
- * one dialog serves both and neither stacks over the other, and closing it returns to the list.
+ * The student's cross-problem list of defenses ("Mathilda"): every defense they've held, most recently active
+ * first, each reopening its conversation to continue. A selected defense swaps the same modal to the conversation
+ * view, so one dialog serves both and neither stacks over the other, and closing it returns to the list.
  */
 export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalProps) {
   // Defense-surface copy
@@ -353,7 +353,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
             </p>
           </div>
         ) : (
-          // The defenses, newest first
+          // The defenses
           <div className="flex flex-col gap-2">
             {defenses.map((defense) => (
               <MathildaDefenseRow

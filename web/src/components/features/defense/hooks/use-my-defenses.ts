@@ -15,7 +15,7 @@ import { invalidateDefenseLists, myDefensesQueryKey } from './defense-cache'
  * The user's cross-problem list of defenses, its load state, and the controls over it.
  */
 type UseMyDefensesResult = {
-  /** The user's sessions across every problem, newest first. */
+  /** The user's sessions across every problem, most recently active first. */
   defenses: DefenseSessionListItem[]
   /** Whether the list is still loading. */
   isLoading: boolean

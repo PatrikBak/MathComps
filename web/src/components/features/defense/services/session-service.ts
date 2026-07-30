@@ -27,7 +27,7 @@ import {
  */
 
 /**
- * Lists a handout environment's defense sessions, oldest first.
+ * Lists a handout environment's defense sessions, most recently active first.
  *
  * @param apiCall - The authenticated API caller.
  * @param target - The handout environment whose sessions these are.
@@ -41,7 +41,7 @@ export function listSessions(
 }
 
 /**
- * Lists all of the user's defense sessions across every problem, newest first.
+ * Lists all of the user's defense sessions across every problem, most recently active first.
  *
  * @param apiCall - The authenticated API caller.
  * @returns The user's sessions across every problem.
